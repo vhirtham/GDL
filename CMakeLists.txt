@@ -8,7 +8,7 @@ aux_source_directory(. SRC_LIST)
 
 # COMPILER SETUP
 # --------------
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++14 -Wall  -Wno-long-long -pedantic")
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++17 -Wall  -Wno-long-long -pedantic")
 
 
 
