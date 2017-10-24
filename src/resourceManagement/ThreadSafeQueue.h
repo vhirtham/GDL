@@ -19,7 +19,11 @@ class ThreadSafeQueue
 
 public:
     //! @brief Constructor
-    ThreadSafeQueue() = default;
+    ThreadSafeQueue()
+        : mValid(true)
+        , mCondition()
+        , mMutex()
+        , mQueue(){};
 
     //! @brief Copy constructor
     ThreadSafeQueue(const ThreadSafeQueue& other) = delete;
