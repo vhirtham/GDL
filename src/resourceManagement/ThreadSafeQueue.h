@@ -11,19 +11,15 @@ namespace GDL
 template <typename T>
 class ThreadSafeQueue
 {
-    std::atomic_bool mValid = true;
-    std::condition_variable mCondition;
-    mutable std::mutex mMutex; //!< Mutex
-    std::queue<T> mQueue; //!< data container
+    std::atomic_bool mValid = true; //!< If set to FALSE, no more threads can pick tasks
+    std::condition_variable mCondition; //! Needed to activate threads waiting to pick up a task
+    mutable std::mutex mMutex; //!< Mutex to protect internal data from data races
+    std::queue<T> mQueue; //!< Queue filled with tasks
 
 
 public:
     //! @brief Constructor
-    ThreadSafeQueue()
-        : mValid(true)
-        , mCondition()
-        , mMutex()
-        , mQueue(){};
+    ThreadSafeQueue();
 
     //! @brief Copy constructor
     ThreadSafeQueue(const ThreadSafeQueue& other) = delete;
@@ -38,94 +34,44 @@ public:
     ThreadSafeQueue& operator=(ThreadSafeQueue&& other) = delete;
 
     //! @brief Destructor
-    ~ThreadSafeQueue()
-    {
-        invalidate();
-    }
+    ~ThreadSafeQueue();
 
 
 
     //! @brief Tries to get the next value of the queue
     //! @param out: reference to a variable that stores fetched value
     //! @return TRUE if the operation was successful, FALSE if not
-    bool tryPop(T& out)
-    {
-        std::lock_guard<std::mutex> lock(mMutex);
-        if (mQueue.empty() || !mValid)
-        {
-            return false;
-        }
-        out = std::move(mQueue.front());
-        mQueue.pop();
-        return true;
-    }
-
+    bool tryPop(T& out);
 
 
     //! @brief Waits until the queue contains values to fetch and then tries to get the next one
     //! @param out: reference to a variable that stores fetched value
     //! @return TRUE if the operation was successful, FALSE if not
-    bool tryWaitPop(T& out)
-    {
-        std::unique_lock<std::mutex> lock(mMutex);
-        mCondition.wait(lock, [this]() { return !mQueue.empty() || !mValid; });
-        if (!mValid)
-        {
-            return false;
-        }
-        out = std::move(mQueue.front());
-        mQueue.pop();
-        return true;
-    }
-
+    bool tryWaitPop(T& out);
 
 
     //! @brief Pushes a new value into the queue and informs a waiting thread
     //! @param value New value
-    void push(T value)
-    {
-        std::lock_guard<std::mutex> lock(mMutex);
-        mQueue.push(std::move(value));
-        mCondition.notify_one();
-    }
-
+    void push(T value);
 
 
     //! @brief Returns if the queue is empty or not
     //! @return TRUE if the queue is empty, FALSE if not
-    bool empty() const
-    {
-        std::lock_guard<std::mutex> lock(mMutex);
-        return mQueue.empty();
-    }
-
+    bool empty() const;
 
 
     //! @brief Deletes all elements and informs all waiting threads
-    void clear()
-    {
-        std::lock_guard<std::mutex> lock(mMutex);
-        while (!mQueue.empty())
-            mQueue.pop();
-        mCondition.notify_all();
-    }
+    void clear();
+
 
     //! @brief Invalidates the queue and informs all threads
     //! @remark This is used to free all waiting threads, when the queue should not be used any more
-    void invalidate()
-    {
-        std::lock_guard<std::mutex> lock(mMutex);
-        mValid = false;
-        mCondition.notify_all();
-    }
+    void invalidate();
+
 
     //! @brief Returns if the queue is valid or not
     //! @return TRUE if the queue is valid, FALSE if not
-    bool isValid()
-    {
-        std::lock_guard<std::mutex> lock(mMutex);
-        return mValid;
-    }
+    bool isValid();
 };
 
 

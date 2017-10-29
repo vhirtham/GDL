@@ -1,180 +1,92 @@
 #pragma once
 
+#include "src/GDLTypedefs.h"
+#include "src/resourceManagement/TaskFuture.h"
 #include "src/resourceManagement/ThreadSafeQueue.h"
+#include "src/resourceManagement/ThreadTask.h"
 
 #include <atomic>
-#include <future>
 #include <thread>
 #include <utility>
 #include <vector>
 
-#include <iostream>
 
 namespace GDL
 {
 //! @brief Threadpool class manages a specified number of threads.
-//! @remark Original implemention can be found here:
+//! @remark Original implemention and documentation can be found here:
 //! http://roar11.com/2016/01/a-platform-independent-thread-pool-using-c14/
 class ThreadPool
 {
 
-    class IThreadTask
-    {
-    public:
-        IThreadTask() = default;
-        IThreadTask(const IThreadTask& other) = delete;
-        IThreadTask(IThreadTask&& other) = default;
-        IThreadTask& operator=(const IThreadTask& other) = delete;
-        IThreadTask& operator=(IThreadTask&& other) = default;
-        ~IThreadTask() = default;
-
-        virtual void execute() = 0;
-    };
-
-    template <typename F>
-    class ThreadTask : public IThreadTask
-    {
-        F mFunction;
-
-    public:
-        ThreadTask() = delete;
-        ThreadTask(const ThreadTask& other) = delete;
-        ThreadTask(ThreadTask&& other) = default;
-        ThreadTask& operator=(const ThreadTask& other) = delete;
-        ThreadTask& operator=(ThreadTask&& other) = default;
-        ~ThreadTask() = default;
-
-        ThreadTask(F&& function)
-            : mFunction(std::move(function))
-        {
-        }
-
-        virtual void execute() override
-        {
-            mFunction();
-        }
-    };
-
-    template <typename T>
-    class TaskFuture
-    {
-        std::future<T> mFuture;
-
-    public:
-        TaskFuture() = delete;
-        TaskFuture(const TaskFuture& rhs) = delete;
-        TaskFuture(TaskFuture&& other) = default;
-        TaskFuture& operator=(const TaskFuture& rhs) = delete;
-        TaskFuture& operator=(TaskFuture&& other) = default;
-        ~TaskFuture(void)
-        {
-            if (mFuture.valid())
-            {
-                mFuture.get();
-            }
-        }
-
-
-        TaskFuture(std::future<T>&& future)
-            : mFuture{std::move(future)}
-        {
-        }
-
-
-
-        auto get(void)
-        {
-            return mFuture.get();
-        }
-    };
-
-    std::atomic_bool mDone;
-    ThreadSafeQueue<std::unique_ptr<IThreadTask>> mWorkQueue;
-    std::vector<std::thread> mThreads;
+    std::atomic_bool mClose; //!< If TRUE all threads leave their endless loop after finishing their current task
+    ThreadSafeQueue<std::unique_ptr<ThreadTaskBase>> mWorkQueue; //!< Queue of tasks
+    std::vector<std::thread> mThreads; //!< vector of all managed threads
 
 
 public:
     //! @brief Constructor
     ThreadPool() = delete;
+
     //! @brief Copy constructor
+    //! @param other: Object that should be copied
     ThreadPool(const ThreadPool& other) = delete;
+
     //! @brief Move constructor
+    //! @param other: Object that should be moved
     ThreadPool(ThreadPool&& other) = delete;
+
     //! @brief Copy assignment operator
+    //! @param other: Object that should be copied
     ThreadPool& operator=(const ThreadPool& other) = delete;
+
     //! @brief Move assignment operator
+    //! @param other: Object that should be moved
     ThreadPool& operator=(ThreadPool&& other) = delete;
+
     //! @brief Destructor
-    ~ThreadPool()
-    {
-        destroy();
-    }
+    ~ThreadPool();
+
+    //! @brief Constructor wich spawns the specified number of threads
+    //! @param numThreads: Number of threads that should be spawned
+    explicit ThreadPool(const U32 numThreads);
 
 
-    explicit ThreadPool(const std::uint32_t numThreads)
-        : mDone(false)
-        , mWorkQueue()
-        , mThreads()
-    {
-        try
-        {
-            for (std::uint32_t i = 0u; i < numThreads; ++i)
-            {
-                mThreads.emplace_back(&ThreadPool::worker, this, i);
-            }
-        }
-        catch (...)
-        {
-            destroy();
-            throw;
-        }
-    }
-
+    //! @brief Submits a function of any signature and the arguments for the function call to the thread pool.
+    //! After submission the function is wrapped to match the function signature used by the tasks e.g void F().
+    //! The results are returned after the tasks execution
+    //! @tparam F: Function signature
+    //! @tparam Args: Argument list that matches the function signature
+    //! @param func: Function that should be enqueued
+    //! @param args: Arguments that should be passed to the function
+    //! @return The value/object which is returned by the submitted function
     template <typename F, typename... Args>
-    auto submit(F&& func, Args&&... args)
-    {
-        auto boundTask = std::bind(std::forward<F>(func), std::forward<Args>(args)...);
-        using ResultType = std::result_of_t<decltype(boundTask)()>;
-        using PackagedTask = std::packaged_task<ResultType()>;
-        using TaskType = ThreadTask<PackagedTask>;
-
-        PackagedTask task{std::move(boundTask)};
-        TaskFuture<ResultType> result{task.get_future()};
-        mWorkQueue.push(std::make_unique<TaskType>(std::move(task)));
-        return result;
-    }
+    auto submit(F&& func, Args&&... args);
 
 private:
-    void destroy()
-    {
-        mDone = true;
-        mWorkQueue.invalidate();
-        for (auto& thread : mThreads)
-        {
-            if (thread.joinable())
-            {
-                thread.join();
-            }
-        }
-    }
+    //! @brief Deinitializes the threadpool
+    void deinitialize();
 
-    void blabla()
-    {
-    }
 
-    void worker(std::uint32_t threadNumber)
-    {
-        while (!mDone)
-        {
-            std::unique_ptr<IThreadTask> pTask{nullptr};
-            if (mWorkQueue.tryWaitPop(pTask))
-            {
-                pTask->execute();
-                std::cout << " - work done by thread " << threadNumber << std::endl;
-            }
-        }
-    }
+    //! @brief Worker function that are used by the threads. This is probably exchanged by a thread class
+    void worker();
 };
+
+
+
+template <typename F, typename... Args>
+auto ThreadPool::submit(F&& func, Args&&... args)
+{
+    auto boundTask = std::bind(std::forward<F>(func), std::forward<Args>(args)...);
+    using ResultType = std::result_of_t<decltype(boundTask)()>;
+    using PackagedTask = std::packaged_task<ResultType()>;
+    using TaskType = ThreadTask<PackagedTask>;
+
+    PackagedTask task{std::move(boundTask)};
+    TaskFuture<ResultType> result{task.get_future()};
+    mWorkQueue.push(std::make_unique<TaskType>(std::move(task)));
+    return result;
+}
 
 
 } // namespace GDL
