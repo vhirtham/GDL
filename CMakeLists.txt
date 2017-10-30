@@ -2,6 +2,8 @@ project(GDL)
 cmake_minimum_required(VERSION 3.1)
 aux_source_directory(. SRC_LIST)
 
+enable_testing()
+
 # ADD CUSTOM SCRIPTS
 # ------------------
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake ${CMAKE_MODULE_PATH})
@@ -13,7 +15,7 @@ FIND_PACKAGE(Boost REQUIRED unit_test_framework)
 
 # COMPILER SETUP
 # --------------
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++17 -Wall  -Wno-long-long -pedantic -pthread")
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++14 -Wall  -Wno-long-long -pedantic -pthread")
 
 
 
@@ -32,7 +34,7 @@ LINK_DIRECTORIES(${Boost_LIBRARY_DIRS})
 add_subdirectory(applications)
 add_subdirectory(src)
 add_subdirectory(tests)
-add_subdirectory(tutorials)
+#add_subdirectory(tutorials)
 
 # This makes qtcreator show header-only classes...
 file(GLOB_RECURSE HeaderFiles "*.h")
