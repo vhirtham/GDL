@@ -4,7 +4,6 @@
 
 
 #include "src/resourceManagement/ThreadPool.h"
-#include <chrono>
 #include <thread>
 #include <unistd.h>
 #include <set>
@@ -13,31 +12,49 @@
 
 
 using namespace GDL;
-using namespace std::chrono_literals;
 
-void test()
+
+
+//! @brief Calculates the sum of all numbers up to N using the gaussian sum formula
+constexpr U32 GaussianSumFormula(U32 n)
 {
-    std::cout << "start thread " << std::this_thread::get_id() << std::endl;
-    std::this_thread::sleep_for(std::chrono::seconds(2));
-    std::cout << "thread wake up " << std::this_thread::get_id() << std::endl;
+    return (n * n + n) / 2;
 }
 
 
+//! @brief Adds 100 tasks to the thread pool which should calculate the sum of all numbers up to 10.000
 BOOST_AUTO_TEST_CASE(General)
 {
     using namespace GDL;
-
+    constexpr U32 numNumbers = 10000;
+    constexpr U32 numTasks = 100;
 
     ThreadPool TP(std::thread::hardware_concurrency());
-    std::vector<TaskFuture<void>> v;
-    for (std::uint32_t i = 0; i < 21; ++i)
+
+    // add some tasks
+    std::vector<TaskFuture<U32>> v;
+    for (U32 i = 0; i < numTasks; ++i)
     {
-        v.push_back(TP.submit([]() { std::this_thread::sleep_for(std::chrono::seconds(1)); }));
+        v.push_back(TP.submit(
+                [](U32 n) {
+                    U32 sum = 0;
+                    for (U32 i = 1; i <= n; ++i)
+                    {
+                        sum += i;
+                    }
+                    return sum;
+                },
+                numNumbers));
     }
-    for (auto& item : v)
+
+    // get the results and check them
+    std::vector<U32> results(numTasks);
+    for (U32 i = 0; i < numTasks; ++i)
     {
-        item.get();
+        results[i] = v[i].get();
     }
+    std::vector<U32> expectedValues(numTasks, GaussianSumFormula(numNumbers));
+    BOOST_CHECK_EQUAL_COLLECTIONS(results.begin(), results.end(), expectedValues.begin(), expectedValues.end());
 }
 
 
