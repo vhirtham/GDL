@@ -2,11 +2,15 @@ project(GDL)
 cmake_minimum_required(VERSION 3.1)
 aux_source_directory(. SRC_LIST)
 
-enable_testing()
+
+# OPTIONS
+# -------
+OPTION(ENABLE_CUSTOM_APPS "Enables applications that are located in the applications/custom directory" FALSE)
+OPTION(ENABLE_TESTS "Enables the testfiles" TRUE)
 
 # ADD CUSTOM SCRIPTS
 # ------------------
-set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake ${CMAKE_MODULE_PATH})
+set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/scripts/cmake ${CMAKE_MODULE_PATH})
 include(IncludeScripts)
 
 # EXTERNAL LIBRARIES
@@ -33,8 +37,10 @@ LINK_DIRECTORIES(${Boost_LIBRARY_DIRS})
 # --------------
 add_subdirectory(applications)
 add_subdirectory(src)
-add_subdirectory(tests)
-#add_subdirectory(tutorials)
+if(ENABLE_TESTS)
+    add_subdirectory(tests)
+endif()
+
 
 # This makes qtcreator show header-only classes...
 file(GLOB_RECURSE HeaderFiles "*.h")

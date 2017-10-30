@@ -1,1 +1,2 @@
-add_subdirectory(resourceManagement)
+enable_testing()
+ADD_SUBDIRECTORY(unit)
