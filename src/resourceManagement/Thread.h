@@ -1,0 +1,66 @@
+#pragma once
+
+#include <atomic>
+#include <thread>
+
+
+namespace GDL
+{
+class ThreadPool;
+
+//! @brief Class that manages a single std::thread of a thread pool.
+class Thread
+{
+    std::atomic_bool mClose; //!< If TRUE, the treads endless loop funtion is left
+    std::thread mThread; //!< The managed Thread of the class
+    ThreadPool& mThreadPool; //!< Reference to parent Threadpool
+
+
+public:
+    //! @brief Constructor
+    Thread() = delete;
+
+    //! @brief Copy constructor
+    //! @param other: Object that should be copied
+    //! @remark This class should not be copyable since each copy spawns another thread, which might cause problems. For
+    //! example if a std::vector<Thread> needs to reallocate on a push_back, it copies all members to the new memory,
+    //! effectively doubling the number of threads.
+    Thread(const Thread& other) = delete;
+
+    //! @brief Move constructor
+    //! @param other: Object that should be moved
+    //! @remark This class should not be moveable because the atomic_bool mClose can not be moved, only copied. If we
+    //! move a std::thread from A to B, the run() function of the thread will still depend on mClose of A, which will be
+    //! set to true during the destruction of A. Therefore the thread will stop working after the move.
+    Thread(Thread&& other) = delete;
+
+    //! @brief Copy assignment operator
+    //! @param other: Object that should be copied
+    Thread& operator=(const Thread& other) = delete;
+
+    //! @brief Move assignment operator
+    //! @param other: Object that should be moved
+    Thread& operator=(Thread&& other) = delete;
+
+    //! @brief Destructor
+    ~Thread();
+
+    //! @brief Constructor
+    //! @param threadPool: Reference to the parent thread pool
+    //! @remark At the current status it would be enough to pass only the queue where the thread should pick its tasks
+    //! from. However, if it might be necessary to have multiple queues for physics, rendering, loading of assets etc.
+    //! Therefore the thread should not be bound to a single queue
+    Thread(ThreadPool& threadPool);
+
+private:
+    //! @brief Gives the run-function the signal to leave the endless-loop and deinitializes the thread.
+    void deinitalize();
+
+    //! @brief Function that is passed to the managed thread after construction. It starts the endless-loop to pick up
+    //! tasks.
+    void run();
+};
+
+
+
+} // namespace GDL

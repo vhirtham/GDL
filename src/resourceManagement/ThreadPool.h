@@ -5,23 +5,32 @@
 #include "src/resourceManagement/ThreadSafeQueue.h"
 #include "src/resourceManagement/ThreadTask.h"
 
-#include <atomic>
-#include <thread>
+
+#include <deque>
 #include <utility>
-#include <vector>
 
 
 namespace GDL
 {
+
+class Thread;
+
 //! @brief Threadpool class manages a specified number of threads.
 //! @remark Original implemention and documentation can be found here:
 //! http://roar11.com/2016/01/a-platform-independent-thread-pool-using-c14/
 class ThreadPool
 {
+    friend class Thread;
 
-    std::atomic_bool mClose; //!< If TRUE all threads leave their endless loop after finishing their current task
-    ThreadSafeQueue<std::unique_ptr<ThreadTaskBase>> mWorkQueue; //!< Queue of tasks
-    std::vector<std::thread> mThreads; //!< vector of all managed threads
+    //! @brief  Queue of tasks
+    ThreadSafeQueue<std::unique_ptr<ThreadTaskBase>> mWorkQueue;
+
+    //! @brief Container for managed threads
+    //! @remark: Since the Thread class is not copyable and
+    //! also not moveable (see Thread docomentation for reason) a vector can not be used. A deque is one possible option
+    //! that does not a copy ore move constructor of its containing object.
+    std::deque<Thread> mThreads;
+
 
 
 public:
@@ -64,12 +73,8 @@ public:
     auto submit(F&& func, Args&&... args);
 
 private:
-    //! @brief Deinitializes the threadpool
+    //! @brief Deinitializes the thread pool
     void deinitialize();
-
-
-    //! @brief Worker function that are used by the threads. This is probably exchanged by a thread class
-    void worker();
 };
 
 
