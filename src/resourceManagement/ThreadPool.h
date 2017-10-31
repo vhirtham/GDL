@@ -7,6 +7,7 @@
 
 
 #include <deque>
+#include <mutex>
 #include <utility>
 
 
@@ -24,6 +25,9 @@ class ThreadPool
 
     //! @brief  Queue of tasks
     ThreadSafeQueue<std::unique_ptr<ThreadTaskBase>> mWorkQueue;
+
+    //! @brief Protects the thread container from data races on multiple add and kill requests
+    std::mutex mMutexThreads;
 
     //! @brief Container for managed threads
     //! @remark: Since the Thread class is not copyable and
@@ -71,6 +75,17 @@ public:
     //! @return The value/object which is returned by the submitted function
     template <typename F, typename... Args>
     auto submit(F&& func, Args&&... args);
+
+    //! @brief Adds more threads to the thread pool
+    //! @param numThreads: Number of threads that should be added
+    void addThreads(U32 numThreads);
+
+    //! @brief Removes threads from the thread pool
+    //! @param numThreads: Number of Threads that should be removed
+    void killThreads(U32 numThreads);
+
+    //! @brief Gets the current number of threads, that are managed by the thread pool
+    U32 getNumThreads() const;
 
 private:
     //! @brief Deinitializes the thread pool

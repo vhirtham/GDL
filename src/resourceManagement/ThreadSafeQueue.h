@@ -11,7 +11,7 @@ namespace GDL
 template <typename T>
 class ThreadSafeQueue
 {
-    std::atomic_bool mValid = true; //!< If set to FALSE, no more threads can pick tasks
+    std::atomic_bool mValid; //!< If set to FALSE, no more threads can pick tasks
     std::condition_variable mCondition; //! Needed to activate threads waiting to pick up a task
     mutable std::mutex mMutex; //!< Mutex to protect internal data from data races
     std::queue<T> mQueue; //!< Queue filled with tasks

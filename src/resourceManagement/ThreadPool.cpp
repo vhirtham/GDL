@@ -1,6 +1,7 @@
 #include "ThreadPool.h"
 
 
+#include "src/base/Exception.h"
 #include "src/resourceManagement/Thread.h"
 
 GDL::ThreadPool::~ThreadPool()
@@ -11,9 +12,15 @@ GDL::ThreadPool::~ThreadPool()
 GDL::ThreadPool::ThreadPool(const U32 numThreads)
     : mWorkQueue()
 {
+    addThreads(numThreads);
+}
+
+void GDL::ThreadPool::addThreads(GDL::U32 numThreads)
+{
     try
     {
-        for (U32 i = 0u; i < numThreads; ++i)
+        std::lock_guard<std::mutex> lock(mMutexThreads);
+        for (U32 iThreads = 0; iThreads < numThreads; ++iThreads)
         {
             mThreads.emplace_back(*this);
         }
@@ -23,6 +30,26 @@ GDL::ThreadPool::ThreadPool(const U32 numThreads)
         deinitialize();
         throw;
     }
+}
+
+void GDL::ThreadPool::killThreads(GDL::U32 numThreads)
+{
+    std::lock_guard<std::mutex> lock(mMutexThreads);
+    for (U32 iThreads = 0; iThreads < numThreads; ++iThreads)
+    {
+        mThreads.pop_back();
+        if (mThreads.empty())
+        {
+            deinitialize();
+            throw Exception(__PRETTY_FUNCTION__, "No more threads left! Deinitialized thread pool.");
+        }
+    }
+}
+
+
+GDL::U32 GDL::ThreadPool::getNumThreads() const
+{
+    return mThreads.size();
 }
 
 void GDL::ThreadPool::deinitialize()

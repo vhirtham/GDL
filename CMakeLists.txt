@@ -19,7 +19,7 @@ FIND_PACKAGE(Boost REQUIRED unit_test_framework)
 
 # COMPILER SETUP
 # --------------
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++14 -Wall  -Wno-long-long -pedantic -pthread")
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++14 -Wall  -Wno-long-long -pedantic -pthread -D_REENTRANT")
 
 
 

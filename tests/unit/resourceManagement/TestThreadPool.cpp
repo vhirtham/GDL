@@ -2,13 +2,14 @@
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
 
-
+#include "src/base/Exception.h"
 #include "src/resourceManagement/ThreadPool.h"
+
+#include <iostream>
+#include <map>
+#include <set>
 #include <thread>
 #include <unistd.h>
-#include <set>
-#include <map>
-#include <iostream>
 
 
 using namespace GDL;
@@ -21,39 +22,77 @@ constexpr U32 GaussianSumFormula(U32 n)
     return (n * n + n) / 2;
 }
 
-
-//! @brief Adds 100 tasks to the thread pool which should calculate the sum of all numbers up to 10.000
-BOOST_AUTO_TEST_CASE(General)
+//! @brief Fills the thread pools queue with a specified number of tasks to add upp the numbers from 1 to numNumbers
+void EnqueueSummationTasks(ThreadPool& TP, std::vector<TaskFuture<U32>>& vFuture, U32 numTasks, U32 numNumbers)
 {
-    using namespace GDL;
-    constexpr U32 numNumbers = 10000;
-    constexpr U32 numTasks = 100;
-
-    ThreadPool TP(std::thread::hardware_concurrency());
-
-    // add some tasks
-    std::vector<TaskFuture<U32>> v;
+    vFuture.reserve(numTasks);
     for (U32 i = 0; i < numTasks; ++i)
     {
-        v.push_back(TP.submit(
+        vFuture.push_back(TP.submit(
                 [](U32 n) {
                     U32 sum = 0;
                     for (U32 i = 1; i <= n; ++i)
                     {
                         sum += i;
                     }
+                    // std::cout << std::this_thread::get_id() << " sum: " << sum << std::endl;
                     return sum;
                 },
                 numNumbers));
     }
+}
+
+
+//! @brief Adds 100 tasks to the thread pool which should calculate the sum of all numbers up to 10.000. Dynamic
+//! adjustment of the number of threads is also tested
+BOOST_AUTO_TEST_CASE(DynamicThreadCreation)
+{
+    using namespace GDL;
+    constexpr U32 numNumbers = 10000;
+    constexpr U32 numTasks = 100;
+
+
+    // Create thread pool with one thread
+    ThreadPool TP(1);
+    BOOST_CHECK_EQUAL(1, TP.getNumThreads());
+
+
+    // add some tasks
+    std::vector<TaskFuture<U32>> vFuture;
+    EnqueueSummationTasks(TP, vFuture, numTasks, numNumbers);
+
+
+    // increase threads while calculation is running
+    TP.addThreads(3);
+    BOOST_CHECK_EQUAL(4, TP.getNumThreads());
+
 
     // get the results and check them
-    std::vector<U32> results(numTasks);
+    std::vector<U32> results(numTasks, 0);
     for (U32 i = 0; i < numTasks; ++i)
     {
-        results[i] = v[i].get();
+        results[i] = vFuture[i].get();
     }
     std::vector<U32> expectedValues(numTasks, GaussianSumFormula(numNumbers));
+    BOOST_CHECK_EQUAL_COLLECTIONS(results.begin(), results.end(), expectedValues.begin(), expectedValues.end());
+
+
+    // Add new tasks to the queue
+    vFuture.clear();
+    EnqueueSummationTasks(TP, vFuture, numTasks, numNumbers);
+
+
+    // decrease threads while calculation is running - reduction to zero threads should not be possible!
+    TP.killThreads(3);
+    BOOST_CHECK_EQUAL(1, TP.getNumThreads());
+
+
+    // get the results and check them
+    results = std::vector<U32>(numTasks, 0);
+    for (U32 i = 0; i < numTasks; ++i)
+    {
+        results[i] = vFuture[i].get();
+    }
     BOOST_CHECK_EQUAL_COLLECTIONS(results.begin(), results.end(), expectedValues.begin(), expectedValues.end());
 }
 
