@@ -11,9 +11,16 @@ class ThreadPool;
 //! @brief Class that manages a single std::thread of a thread pool.
 class Thread
 {
-    std::atomic_bool mClose; //!< If TRUE, the treads endless loop funtion is left
-    std::thread mThread; //!< The managed Thread of the class
-    ThreadPool& mThreadPool; //!< Reference to parent Threadpool
+    //! @brief If TRUE, the treads endless loop funtion is left
+    std::atomic_bool mClose;
+
+    //! @brief Reference to parent Threadpool
+    ThreadPool& mThreadPool;
+
+    //! @brief //!< The managed Thread of the class
+    //! @remark Never move this over the thread pool reference. Otherwise segmentation faults during initialization can
+    //! occur.
+    std::thread mThread;
 
 
 public:

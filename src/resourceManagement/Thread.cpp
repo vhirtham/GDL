@@ -11,8 +11,8 @@ GDL::Thread::~Thread()
 
 GDL::Thread::Thread(GDL::ThreadPool& threadPool)
     : mClose(false)
-    , mThread(&Thread::run, this)
     , mThreadPool(threadPool)
+    , mThread(&Thread::run, this) // <--- never move this in front of thread pool reference! Reason in class docu
 {
 }
 
