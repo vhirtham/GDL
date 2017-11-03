@@ -7,6 +7,7 @@ ADD_EXECUTABLE(TEST_ThreadPool TestThreadPool.cpp
         ../../../src/resourceManagement/ThreadPool.cpp
         ../../../src/resourceManagement/ThreadSafeQueue.cpp)
 target_link_libraries(TEST_ThreadPool
-    ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
+    Boost::unit_test_framework
+    )
 ADD_TEST(Unit::ThreadPool TEST_ThreadPool)
 

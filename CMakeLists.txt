@@ -1,5 +1,5 @@
 project(GDL)
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.9)
 aux_source_directory(. SRC_LIST)
 
 
@@ -7,6 +7,11 @@ aux_source_directory(. SRC_LIST)
 # -------
 OPTION(ENABLE_CUSTOM_APPS "Enables applications that are located in the applications/custom directory" FALSE)
 OPTION(ENABLE_TESTS "Enables the testfiles" TRUE)
+
+
+IF(ENABLE_TESTS)
+    enable_testing()
+ENDIF()
 
 # ADD CUSTOM SCRIPTS
 # ------------------
@@ -27,11 +32,7 @@ SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++14 -Wall  -Wno-long-long -peda
 # SET INCLUDE DIRECTORIES
 # -----------------------
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR})
-INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS})
 
-# SET LIBRARY DIRECTORIES
-# -----------------------
-LINK_DIRECTORIES(${Boost_LIBRARY_DIRS})
 
 # SUBDIRECTORIES
 # --------------

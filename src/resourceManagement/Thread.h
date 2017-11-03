@@ -19,7 +19,7 @@ class Thread
 
     //! @brief //!< The managed Thread of the class
     //! @remark Never move this over the thread pool reference. Otherwise segmentation faults during initialization can
-    //! occur.
+    //! occur. (See commit badf19d55b40ea924b0538d54eda421c57aa8ae8)
     std::thread mThread;
 
 

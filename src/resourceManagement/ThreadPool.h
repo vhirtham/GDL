@@ -27,7 +27,7 @@ class ThreadPool
     ThreadSafeQueue<std::unique_ptr<ThreadTaskBase>> mWorkQueue;
 
     //! @brief Protects the thread container from data races on multiple add and kill requests
-    std::mutex mMutexThreads;
+    mutable std::mutex mMutexThreads;
 
     //! @brief Container for managed threads
     //! @remark: Since the Thread class is not copyable and
@@ -87,9 +87,10 @@ public:
     //! @brief Gets the current number of threads, that are managed by the thread pool
     U32 getNumThreads() const;
 
-private:
     //! @brief Deinitializes the thread pool
     void deinitialize();
+
+private:
 };
 
 

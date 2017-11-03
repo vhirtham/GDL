@@ -3,9 +3,10 @@ sudo: required
 
 
 before_install:
+- ./scripts/bash/install_cmake.sh
 - sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
 - sudo apt-get -qq update
-- sudo apt-get install -qq -y cmake libboost-test1.55-dev g++-6 libgcc-6-dev
+- sudo apt-get install -qq -y libboost-test1.55-dev g++-6 libgcc-6-dev
 
 before_script:
 - mkdir build

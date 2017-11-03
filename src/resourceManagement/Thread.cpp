@@ -19,10 +19,7 @@ GDL::Thread::Thread(GDL::ThreadPool& threadPool)
 void GDL::Thread::deinitalize()
 {
     mClose = true;
-    if (mThread.joinable())
-    {
-        mThread.join();
-    }
+    mThread.join();
 }
 
 void GDL::Thread::run()
