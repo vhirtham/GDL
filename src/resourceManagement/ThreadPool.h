@@ -6,6 +6,7 @@
 #include "src/resourceManagement/ThreadTask.h"
 
 
+#include <atomic>
 #include <deque>
 #include <mutex>
 #include <utility>
@@ -22,6 +23,15 @@ class Thread;
 class ThreadPool
 {
     friend class Thread;
+
+    //! @brief If set to true, all threads leave their main loop. (Implementation in Thread class)
+    std::atomic_bool mClose;
+
+#ifndef NDEBUG
+    //! @brief Keeps track of how many threads started by the thread pool are still running their main loop.
+    //! @remark This is only used for tests and debugging.
+    std::atomic_uint mRunningThreads;
+#endif
 
     //! @brief  Queue of tasks
     ThreadSafeQueue<std::unique_ptr<ThreadTaskBase>> mWorkQueue;
@@ -87,10 +97,15 @@ public:
     //! @brief Gets the current number of threads, that are managed by the thread pool
     U32 getNumThreads() const;
 
-    //! @brief Deinitializes the thread pool
-    void deinitialize();
+#ifndef NDEBUG
+    //! @brief Gets the number of threads, spawned by the thread pool, that are still running their main loop
+    //! @return Number of running threads
+    U32 getNumRunningThreads() const;
+#endif
 
 private:
+    //! @brief Deinitializes the thread pool
+    void deinitialize();
 };
 
 

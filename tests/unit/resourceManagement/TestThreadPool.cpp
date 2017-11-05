@@ -63,9 +63,11 @@ BOOST_AUTO_TEST_CASE(DynamicThreadCreation)
 
 
     // increase threads while calculation is running
-    // TP.addThreads(3);
-    BOOST_CHECK_EQUAL(1, TP.getNumThreads());
-
+    TP.addThreads(3);
+    BOOST_CHECK_EQUAL(4, TP.getNumThreads());
+#ifndef NDEBUG
+    BOOST_CHECK_EQUAL(4, TP.getNumRunningThreads());
+#endif
 
     // get the results and check them
     std::vector<U32> results(numTasks, 0);
@@ -74,17 +76,16 @@ BOOST_AUTO_TEST_CASE(DynamicThreadCreation)
         results[i] = vFuture[i].get();
     }
     std::vector<U32> expectedValues(numTasks, GaussianSumFormula(numNumbers));
-    //    BOOST_CHECK_EQUAL_COLLECTIONS(results.begin(), results.end(), expectedValues.begin(), expectedValues.end());
+    BOOST_CHECK_EQUAL_COLLECTIONS(results.begin(), results.end(), expectedValues.begin(), expectedValues.end());
 
 
     // Add new tasks to the queue
     vFuture.clear();
     EnqueueSummationTasks(TP, vFuture, numTasks, numNumbers);
 
-
-    //    // decrease threads while calculation is running - reduction to zero threads should not be possible!
-    //    // TP.killThreads(3);
-    //    // BOOST_CHECK_EQUAL(1, TP.getNumThreads());
+    // decrease threads while calculation is running - reduction to zero threads should not be possible!
+    TP.killThreads(3);
+    BOOST_CHECK_EQUAL(1, TP.getNumThreads());
 
 
     // get the results and check them
@@ -94,7 +95,10 @@ BOOST_AUTO_TEST_CASE(DynamicThreadCreation)
         results[i] = vFuture[i].get();
     }
     BOOST_CHECK_EQUAL_COLLECTIONS(results.begin(), results.end(), expectedValues.begin(), expectedValues.end());
-    TP.deinitialize();
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+#ifndef NDEBUG
+    BOOST_CHECK_EQUAL(1, TP.getNumRunningThreads());
+#endif
 }
 
 

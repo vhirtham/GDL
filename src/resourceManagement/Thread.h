@@ -11,6 +11,9 @@ class ThreadPool;
 //! @brief Class that manages a single std::thread of a thread pool.
 class Thread
 {
+    friend class ThreadPool;
+
+
     //! @brief If TRUE, the treads endless loop funtion is left
     std::atomic_bool mClose;
 
@@ -52,6 +55,7 @@ public:
     //! @brief Destructor
     ~Thread();
 
+
     //! @brief Constructor
     //! @param threadPool: Reference to the parent thread pool
     //! @remark At the current status it would be enough to pass only the queue where the thread should pick its tasks
@@ -60,8 +64,14 @@ public:
     Thread(ThreadPool& threadPool);
 
 private:
-    //! @brief Gives the run-function the signal to leave the endless-loop and deinitializes the thread.
-    void deinitalize();
+    //! @brief Gives the run-function the signal to leave the endless-loop and detaches the thread.
+    //! @remark This is needed for dynamic reduction of the number of threads. Joining a thread while the program is
+    //! supposed to continue might lead into a deadlock if the main loop of the deinitialized thread currently waits
+    //! for another job.
+    void deinitializeDetach();
+
+    //! @brief Gives the run-function the signal to leave the endless-loop and joins the thread.
+    void deinitializeJoin();
 
     //! @brief Function that is passed to the managed thread after construction. It starts the endless-loop to pick up
     //! tasks.
