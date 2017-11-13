@@ -2,8 +2,8 @@
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
 
-#include "src/base/Exception.h"
-#include "src/resourceManagement/ThreadPool.h"
+#include "base/Exception.h"
+#include "resourceManagement/ThreadPool.h"
 
 #include <iostream>
 #include <map>

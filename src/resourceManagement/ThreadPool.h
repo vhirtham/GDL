@@ -1,9 +1,9 @@
 #pragma once
 
-#include "src/GDLTypedefs.h"
-#include "src/resourceManagement/TaskFuture.h"
-#include "src/resourceManagement/ThreadSafeQueue.h"
-#include "src/resourceManagement/ThreadTask.h"
+#include "GDLTypedefs.h"
+#include "resourceManagement/TaskFuture.h"
+#include "resourceManagement/ThreadSafeQueue.h"
+#include "resourceManagement/ThreadTask.h"
 
 
 #include <atomic>

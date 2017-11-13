@@ -1,6 +1,5 @@
 project(GDL)
 cmake_minimum_required(VERSION 3.9)
-aux_source_directory(. SRC_LIST)
 
 
 # OPTIONS
@@ -31,7 +30,7 @@ SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++14 -Wall  -Wno-long-long -peda
 
 # SET INCLUDE DIRECTORIES
 # -----------------------
-INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR})
+INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/src)
 
 
 # SUBDIRECTORIES
@@ -43,6 +42,3 @@ if(ENABLE_TESTS)
 endif()
 
 
-# This makes qtcreator show header-only classes...
-file(GLOB_RECURSE HeaderFiles "*.h")
-add_custom_target(headers SOURCES ${HeaderFiles})

@@ -9,5 +9,8 @@ ADD_EXECUTABLE(TEST_ThreadPool TestThreadPool.cpp
 target_link_libraries(TEST_ThreadPool
     Boost::unit_test_framework
     )
+target_include_directories(TEST_ThreadPool
+    PUBLIC
+        ${PROJECT_SOURCE_DIR}/src)
 ADD_TEST(Unit::ThreadPool TEST_ThreadPool)
 

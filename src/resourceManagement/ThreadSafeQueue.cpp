@@ -1,7 +1,7 @@
 #include "ThreadSafeQueue.h"
 
 
-#include "src/resourceManagement/ThreadTaskBase.h"
+#include "resourceManagement/ThreadTaskBase.h"
 #include <memory>
 
 template <typename T>

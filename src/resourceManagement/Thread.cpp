@@ -1,7 +1,8 @@
 #include "Thread.h"
 
-#include "src/resourceManagement/ThreadTaskBase.h"
-#include "src/resourceManagement/ThreadPool.h"
+#include "resourceManagement/ThreadTaskBase.h"
+#include "resourceManagement/ThreadPool.h"
+
 
 
 GDL::Thread::~Thread()

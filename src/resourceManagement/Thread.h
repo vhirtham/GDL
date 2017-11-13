@@ -67,7 +67,7 @@ private:
     //! @brief Gives the run-function the signal to leave the endless-loop and detaches the thread.
     //! @remark This is needed for dynamic reduction of the number of threads. Joining a thread while the program is
     //! supposed to continue might lead into a deadlock if the main loop of the deinitialized thread currently waits
-    //! for another job.
+    //! for another task. ---> commit 0457b13b7f857aa9a28c89daae3a28355d577a86
     void deinitializeDetach();
 
     //! @brief Gives the run-function the signal to leave the endless-loop and joins the thread.

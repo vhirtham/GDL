@@ -1,8 +1,8 @@
 #include "ThreadPool.h"
 
 
-#include "src/base/Exception.h"
-#include "src/resourceManagement/Thread.h"
+#include "base/Exception.h"
+#include "resourceManagement/Thread.h"
 
 GDL::ThreadPool::~ThreadPool()
 {
@@ -39,18 +39,25 @@ void GDL::ThreadPool::addThreads(GDL::U32 numThreads)
 void GDL::ThreadPool::killThreads(GDL::U32 numThreads)
 {
     std::lock_guard<std::mutex> lock(mMutexThreads);
-    for (U32 iThreads = 0; iThreads < numThreads; ++iThreads)
+    try
     {
-        if (mThreads.size() == 1)
+        for (U32 iThreads = 0; iThreads < numThreads; ++iThreads)
         {
-            // deinitialize();
-            std::terminate();
-            throw Exception(__PRETTY_FUNCTION__, "No more threads left! Deinitialized thread pool.");
-        }
 
-        mThreads.back().deinitializeDetach();
-        // std::this_thread::sleep_for(std::chrono::seconds(1));
-        mThreads.pop_back();
+            mThreads.back().deinitializeDetach();
+            // std::this_thread::sleep_for(std::chrono::seconds(1));
+            mThreads.pop_back();
+            if (mThreads.empty())
+            {
+                // std::terminate();
+                throw Exception(__PRETTY_FUNCTION__, "No more threads left! Deinitialized thread pool.");
+            }
+        }
+    }
+    catch (...)
+    {
+        deinitialize();
+        throw;
     }
 }
 
@@ -71,7 +78,6 @@ GDL::U32 GDL::ThreadPool::getNumRunningThreads() const
 void GDL::ThreadPool::deinitialize()
 {
     mClose = true;
-    std::lock_guard<std::mutex> lock(mMutexThreads);
     mWorkQueue.invalidate();
     mThreads.clear();
 }
