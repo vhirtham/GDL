@@ -15,4 +15,4 @@ before_script:
 
 script:
     - make -j2
-    - ctest
+    - make CTEST_OUTPUT_ON_FAILURE=1 test
