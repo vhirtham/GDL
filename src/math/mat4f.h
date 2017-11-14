@@ -1,3 +1,5 @@
+#include "GDLTypedefs.h"
+
 #include <x86intrin.h>
 
 #ifndef NDEBUG
@@ -7,7 +9,7 @@
 namespace GDL
 {
 
-constexpr bool is_aligned(const volatile void* p, size_t n)
+bool is_aligned(const volatile void* p, size_t n)
 {
     return reinterpret_cast<std::uintptr_t>(p) % n == 0;
 }
@@ -25,6 +27,7 @@ public:
     mat4f(__m128 col0, __m128 col1, __m128 col2, __m128 col3);
 
     inline mat4f operator*(const mat4f& pOther_cr) const;
+    inline F32 operator()(const U32 row, const U32 col) const;
 
 private:
 #ifndef NDEBUG

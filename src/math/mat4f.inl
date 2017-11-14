@@ -1,7 +1,6 @@
 #include "mat4f.h"
 
 #include "base/Exception.h"
-#include "GDLTypedefs.h"
 
 #include <cassert>
 #include <type_traits>
@@ -28,41 +27,51 @@ GDL::mat4f::mat4f(__m128 col0, __m128 col1, __m128 col2, __m128 col3)
         throw Exception(__PRETTY_FUNCTION__, "One or more registers of mat4f are not 16 byte aligned");
 }
 
-GDL::mat4f GDL::mat4f::operator*(const GDL::mat4f &pOther_cr) const
+GDL::mat4f GDL::mat4f::operator*(const GDL::mat4f& pOther_cr) const
 {
-    __attribute__((aligned (16))) __m128 Col0     = _mm_add_ps(
-                                                    _mm_add_ps(
-                                                        _mm_mul_ps(_mm_set1_ps(pOther_cr.mCol0[0]), mCol0),
-                                                        _mm_mul_ps(_mm_set1_ps(pOther_cr.mCol0[1]), mCol1)),
-                                                    _mm_add_ps(
-                                                        _mm_mul_ps(_mm_set1_ps(pOther_cr.mCol0[2]), mCol2),
-                                                        _mm_mul_ps(_mm_set1_ps(pOther_cr.mCol0[3]), mCol3)));
+    __attribute__((aligned(16))) __m128 Col0 =
+            _mm_add_ps(_mm_add_ps(_mm_mul_ps(_mm_set1_ps(pOther_cr.mCol0[0]), mCol0),
+                                  _mm_mul_ps(_mm_set1_ps(pOther_cr.mCol0[1]), mCol1)),
+                       _mm_add_ps(_mm_mul_ps(_mm_set1_ps(pOther_cr.mCol0[2]), mCol2),
+                                  _mm_mul_ps(_mm_set1_ps(pOther_cr.mCol0[3]), mCol3)));
 
-    __attribute__((aligned (16))) __m128 Col1     = _mm_add_ps(
-                                                    _mm_add_ps(
-                                                        _mm_mul_ps(_mm_set1_ps(pOther_cr.mCol1[0]), mCol0),
-                                                        _mm_mul_ps(_mm_set1_ps(pOther_cr.mCol1[1]), mCol1)),
-                                                    _mm_add_ps(
-                                                        _mm_mul_ps(_mm_set1_ps(pOther_cr.mCol1[2]), mCol2),
-                                                        _mm_mul_ps(_mm_set1_ps(pOther_cr.mCol1[3]), mCol3)));
+    __attribute__((aligned(16))) __m128 Col1 =
+            _mm_add_ps(_mm_add_ps(_mm_mul_ps(_mm_set1_ps(pOther_cr.mCol1[0]), mCol0),
+                                  _mm_mul_ps(_mm_set1_ps(pOther_cr.mCol1[1]), mCol1)),
+                       _mm_add_ps(_mm_mul_ps(_mm_set1_ps(pOther_cr.mCol1[2]), mCol2),
+                                  _mm_mul_ps(_mm_set1_ps(pOther_cr.mCol1[3]), mCol3)));
 
-    __attribute__((aligned (16))) __m128 Col2     = _mm_add_ps(
-                                                    _mm_add_ps(
-                                                        _mm_mul_ps(_mm_set1_ps(pOther_cr.mCol2[0]), mCol0),
-                                                        _mm_mul_ps(_mm_set1_ps(pOther_cr.mCol2[1]), mCol1)),
-                                                    _mm_add_ps(
-                                                        _mm_mul_ps(_mm_set1_ps(pOther_cr.mCol2[2]), mCol2),
-                                                        _mm_mul_ps(_mm_set1_ps(pOther_cr.mCol2[3]), mCol3)));
+    __attribute__((aligned(16))) __m128 Col2 =
+            _mm_add_ps(_mm_add_ps(_mm_mul_ps(_mm_set1_ps(pOther_cr.mCol2[0]), mCol0),
+                                  _mm_mul_ps(_mm_set1_ps(pOther_cr.mCol2[1]), mCol1)),
+                       _mm_add_ps(_mm_mul_ps(_mm_set1_ps(pOther_cr.mCol2[2]), mCol2),
+                                  _mm_mul_ps(_mm_set1_ps(pOther_cr.mCol2[3]), mCol3)));
 
-    __attribute__((aligned (16)))__m128 Col3     =  _mm_add_ps(
-                                                    _mm_add_ps(
-                                                        _mm_mul_ps(_mm_set1_ps(pOther_cr.mCol3[0]), mCol0),
-                                                        _mm_mul_ps(_mm_set1_ps(pOther_cr.mCol3[1]), mCol1)),
-                                                    _mm_add_ps(
-                                                        _mm_mul_ps(_mm_set1_ps(pOther_cr.mCol3[2]), mCol2),
-                                                        _mm_mul_ps(_mm_set1_ps(pOther_cr.mCol3[3]), mCol3)));
+    __attribute__((aligned(16))) __m128 Col3 =
+            _mm_add_ps(_mm_add_ps(_mm_mul_ps(_mm_set1_ps(pOther_cr.mCol3[0]), mCol0),
+                                  _mm_mul_ps(_mm_set1_ps(pOther_cr.mCol3[1]), mCol1)),
+                       _mm_add_ps(_mm_mul_ps(_mm_set1_ps(pOther_cr.mCol3[2]), mCol2),
+                                  _mm_mul_ps(_mm_set1_ps(pOther_cr.mCol3[3]), mCol3)));
 
-    return mat4f(Col0,Col1,Col2,Col3);
+    return mat4f(Col0, Col1, Col2, Col3);
+}
+
+GDL::F32 GDL::mat4f::operator()(const U32 row, const U32 col) const
+{
+    assert(row < 4 && "row - invalid value! [0..3]");
+    switch (col)
+    {
+    case 0:
+        return mCol0[row];
+    case 1:
+        return mCol1[row];
+    case 2:
+        return mCol2[row];
+    case 3:
+        return mCol3[row];
+    default:
+        throw std::out_of_range("col - invalid value! [0..3]");
+    }
 }
 
 #ifndef NDEBUG
