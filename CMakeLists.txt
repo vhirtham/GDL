@@ -29,6 +29,9 @@ ENDIF()
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/scripts/cmake ${CMAKE_MODULE_PATH})
 include(IncludeScripts)
 
+execute_process(COMMAND "./scripts/bash/pull_google_benchmark.sh" WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
+
+
 # EXTERNAL LIBRARIES
 # ------------------
 FIND_PACKAGE(Boost REQUIRED unit_test_framework)
