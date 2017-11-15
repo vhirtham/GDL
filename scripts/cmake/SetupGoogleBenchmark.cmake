@@ -1,0 +1,6 @@
+function(setupGoogleBenchmark)
+    IF(ENABLE_BENCHMARKS)
+        execute_process(COMMAND "./scripts/bash/setup_google_benchmark.sh" WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
+        add_subdirectory(extern/benchmark)
+    ENDIF()
+endfunction()
