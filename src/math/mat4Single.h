@@ -26,9 +26,9 @@ public:
     //! @param val: Value for initialization of every entry on the main diagonal
     explicit mat4Single(T val);
 
-    //! @brief constructor which initializes the whole matrix with specific values
-    //! @param val: Value array (column major ordering)
-    mat4Single( std::array<T, 16> val);
+    //! @brief Constructor that initializes full matrix with specific values (row major)
+    //! @param v0-v16: Matrix values in row major ordering
+    mat4Single(T v0, T v1, T v2, T v3, T v4, T v5, T v6, T v7, T v8, T v9, T v10, T v11, T v12, T v13, T v14, T v15);
 
     //! @brief Copy Constructor
     //! @param other: Object that should be copied
@@ -59,7 +59,7 @@ public:
     //! @param row: Row of the accessed value
     //! @param col: Column of the accessed value
     //! @return Accessed value
-    inline F32 operator()(const U32 row, const U32 col) const;
+    inline T operator()(const U32 row, const U32 col) const;
 
 private:
 #ifndef NDEBUG

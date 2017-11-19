@@ -18,6 +18,20 @@ GDL::mat4SIMD::mat4SIMD()
 #endif
 }
 
+GDL::mat4SIMD::mat4SIMD(F32 v0, F32 v1, F32 v2, F32 v3, F32 v4, F32 v5, F32 v6, F32 v7, F32 v8, F32 v9, F32 v10,
+                        F32 v11, F32 v12, F32 v13, F32 v14, F32 v15)
+    : mCol0(_mm_setr_ps(v0, v4, v8, v12))
+    , mCol1(_mm_setr_ps(v1, v5, v9, v13))
+    , mCol2(_mm_setr_ps(v2, v6, v10, v14))
+    , mCol3(_mm_setr_ps(v3, v7, v11, v15))
+
+{
+#ifndef NDEBUG
+    if (!(is_aligned(&mCol0, 16) && is_aligned(&mCol1, 16) && is_aligned(&mCol2, 16) && is_aligned(&mCol3, 16)))
+        throw Exception(__PRETTY_FUNCTION__, "One or more registers of mat4SIMD are not 16 byte aligned");
+#endif
+}
+
 GDL::mat4SIMD::mat4SIMD(__m128 col0, __m128 col1, __m128 col2, __m128 col3)
     : mCol0(col0)
     , mCol1(col1)
@@ -45,29 +59,21 @@ GDL::mat4SIMD::mat4SIMD(const GDL::mat4SIMD& other)
 
 GDL::mat4SIMD GDL::mat4SIMD::operator*(const GDL::mat4SIMD& other) const
 {
-    __attribute__((aligned(16))) __m128 Col0 =
-            _mm_add_ps(_mm_add_ps(_mm_mul_ps(_mm_set1_ps(other.mCol0[0]), mCol0),
-                                  _mm_mul_ps(_mm_set1_ps(other.mCol0[1]), mCol1)),
-                       _mm_add_ps(_mm_mul_ps(_mm_set1_ps(other.mCol0[2]), mCol2),
-                                  _mm_mul_ps(_mm_set1_ps(other.mCol0[3]), mCol3)));
+    __attribute__((aligned(16))) __m128 Col0 = _mm_add_ps(
+            _mm_add_ps(_mm_mul_ps(_mm_set1_ps(other.mCol0[0]), mCol0), _mm_mul_ps(_mm_set1_ps(other.mCol0[1]), mCol1)),
+            _mm_add_ps(_mm_mul_ps(_mm_set1_ps(other.mCol0[2]), mCol2), _mm_mul_ps(_mm_set1_ps(other.mCol0[3]), mCol3)));
 
-    __attribute__((aligned(16))) __m128 Col1 =
-            _mm_add_ps(_mm_add_ps(_mm_mul_ps(_mm_set1_ps(other.mCol1[0]), mCol0),
-                                  _mm_mul_ps(_mm_set1_ps(other.mCol1[1]), mCol1)),
-                       _mm_add_ps(_mm_mul_ps(_mm_set1_ps(other.mCol1[2]), mCol2),
-                                  _mm_mul_ps(_mm_set1_ps(other.mCol1[3]), mCol3)));
+    __attribute__((aligned(16))) __m128 Col1 = _mm_add_ps(
+            _mm_add_ps(_mm_mul_ps(_mm_set1_ps(other.mCol1[0]), mCol0), _mm_mul_ps(_mm_set1_ps(other.mCol1[1]), mCol1)),
+            _mm_add_ps(_mm_mul_ps(_mm_set1_ps(other.mCol1[2]), mCol2), _mm_mul_ps(_mm_set1_ps(other.mCol1[3]), mCol3)));
 
-    __attribute__((aligned(16))) __m128 Col2 =
-            _mm_add_ps(_mm_add_ps(_mm_mul_ps(_mm_set1_ps(other.mCol2[0]), mCol0),
-                                  _mm_mul_ps(_mm_set1_ps(other.mCol2[1]), mCol1)),
-                       _mm_add_ps(_mm_mul_ps(_mm_set1_ps(other.mCol2[2]), mCol2),
-                                  _mm_mul_ps(_mm_set1_ps(other.mCol2[3]), mCol3)));
+    __attribute__((aligned(16))) __m128 Col2 = _mm_add_ps(
+            _mm_add_ps(_mm_mul_ps(_mm_set1_ps(other.mCol2[0]), mCol0), _mm_mul_ps(_mm_set1_ps(other.mCol2[1]), mCol1)),
+            _mm_add_ps(_mm_mul_ps(_mm_set1_ps(other.mCol2[2]), mCol2), _mm_mul_ps(_mm_set1_ps(other.mCol2[3]), mCol3)));
 
-    __attribute__((aligned(16))) __m128 Col3 =
-            _mm_add_ps(_mm_add_ps(_mm_mul_ps(_mm_set1_ps(other.mCol3[0]), mCol0),
-                                  _mm_mul_ps(_mm_set1_ps(other.mCol3[1]), mCol1)),
-                       _mm_add_ps(_mm_mul_ps(_mm_set1_ps(other.mCol3[2]), mCol2),
-                                  _mm_mul_ps(_mm_set1_ps(other.mCol3[3]), mCol3)));
+    __attribute__((aligned(16))) __m128 Col3 = _mm_add_ps(
+            _mm_add_ps(_mm_mul_ps(_mm_set1_ps(other.mCol3[0]), mCol0), _mm_mul_ps(_mm_set1_ps(other.mCol3[1]), mCol1)),
+            _mm_add_ps(_mm_mul_ps(_mm_set1_ps(other.mCol3[2]), mCol2), _mm_mul_ps(_mm_set1_ps(other.mCol3[3]), mCol3)));
 
     return mat4SIMD(Col0, Col1, Col2, Col3);
 }

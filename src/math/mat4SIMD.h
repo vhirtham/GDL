@@ -24,10 +24,15 @@ class __attribute__((aligned(16))) mat4SIMD
     __attribute__((aligned(16))) __m128 mCol3;
 
 public:
-
     //! @brief Constructor
     mat4SIMD();
 
+    //! @brief Constructor that initializes full matrix with specific values (row major)
+    //! @param v0-v16: Matrix values in row major ordering
+    mat4SIMD(F32 v0, F32 v1, F32 v2, F32 v3, F32 v4, F32 v5, F32 v6, F32 v7, F32 v8, F32 v9, F32 v10, F32 v11, F32 v12,
+             F32 v13, F32 v14, F32 v15);
+
+private:
     //! @brief Constructor that initializes full matrix with specific columns
     //! @param col0: first column
     //! @param col1: second column
@@ -35,6 +40,7 @@ public:
     //! @param col3: fourth column
     mat4SIMD(__m128 col0, __m128 col1, __m128 col2, __m128 col3);
 
+public:
     //! @brief Copy constructor
     //! @param other: Object that should be copied
     mat4SIMD(const mat4SIMD& other);
@@ -72,6 +78,6 @@ private:
 #endif
 };
 
-typedef  mat4SIMD mat4f;
+typedef mat4SIMD mat4f;
 
 } // namespace GDL
