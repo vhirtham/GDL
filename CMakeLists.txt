@@ -1,6 +1,6 @@
 project(GDL)
 cmake_minimum_required(VERSION 3.9)
-
+#SET(CMAKE_VERBOSE_MAKEFILE ON)
 
 
 # COMPILER SETUP
@@ -9,7 +9,7 @@ SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++14 -Wall -Wno-long-long -pedan
 IF(ENABLE_AVX)
     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native") #Definition needed to replace pure AVX classes by backup versions
 ENDIF()
-
+#set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS} -O3")
 
 # OPTIONS
 # -------
