@@ -14,16 +14,16 @@ static void Multiplication_Single(benchmark::State& state)
 }
 BENCHMARK(Multiplication_Single);
 
-mat4SIMD A_SSE(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15);
-mat4SIMD B_SSE(8, 5, 3, 6, 11, 4, 7, 8, 6, 9, 5, 2, 2, 3, 2, 6);
+mat4SIMD A_SIMD(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15);
+mat4SIMD B_SIMD(8, 5, 3, 6, 11, 4, 7, 8, 6, 9, 5, 2, 2, 3, 2, 6);
 
 
-static void Multiplication_SSE(benchmark::State& state)
+static void Multiplication_SIMD(benchmark::State& state)
 {
     for (auto _ : state)
-        benchmark::DoNotOptimize(A_SSE * B_SSE);
+        benchmark::DoNotOptimize(A_SIMD * B_SIMD);
 }
-BENCHMARK(Multiplication_SSE);
+BENCHMARK(Multiplication_SIMD);
 
 
 static void Constructor1_Single(benchmark::State& state)
@@ -33,11 +33,11 @@ static void Constructor1_Single(benchmark::State& state)
 }
 BENCHMARK(Constructor1_Single);
 
-static void Constructor_SSE(benchmark::State& state)
+static void Constructor_SIMD(benchmark::State& state)
 {
     for (auto _ : state)
         mat4SIMD C(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15);
 }
-BENCHMARK(Constructor_SSE);
+BENCHMARK(Constructor_SIMD);
 
 BENCHMARK_MAIN()

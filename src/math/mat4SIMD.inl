@@ -78,6 +78,15 @@ GDL::mat4SIMD GDL::mat4SIMD::operator*(const GDL::mat4SIMD& other) const
     return mat4SIMD(Col0, Col1, Col2, Col3);
 }
 
+GDL::mat4SIMD& GDL::mat4SIMD::operator+=(const mat4SIMD& other)
+{
+    mCol0 = _mm_add_ps(mCol0, other.mCol0);
+    mCol1 = _mm_add_ps(mCol1, other.mCol1);
+    mCol2 = _mm_add_ps(mCol2, other.mCol2);
+    mCol3 = _mm_add_ps(mCol3, other.mCol3);
+    return *this;
+}
+
 GDL::F32 GDL::mat4SIMD::operator()(const U32 row, const U32 col) const
 {
     assert(row < 4 && "row - invalid value! [0..3]");
