@@ -11,7 +11,8 @@
 namespace GDL
 {
 
-
+//! @brief 4x4 Matrix
+//! @tparam T: Data type
 template <class T>
 class mat4Single
 {
@@ -54,6 +55,11 @@ public:
     //! @param other: Rhs matrix
     //! @return Result of the multiplication
     inline mat4Single operator*(const mat4Single& other) const;
+
+    //! @brief Matrix - matrix addition
+    //! @param rhs: Rhs matrix
+    //! @return Result of the addition (this)
+    inline mat4Single& operator+=(const mat4Single& rhs);
 
     //! @brief Direct access operator
     //! @param row: Row of the accessed value

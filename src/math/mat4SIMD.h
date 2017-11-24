@@ -16,6 +16,7 @@ bool is_aligned(const volatile void* p, size_t n)
 }
 
 
+//! @brief 4x4 Matrix with SIMD support
 class __attribute__((aligned(16))) mat4SIMD
 {
     __attribute__((aligned(16))) __m128 mCol0;

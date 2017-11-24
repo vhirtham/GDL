@@ -46,6 +46,14 @@ GDL::mat4Single<T> GDL::mat4Single<T>::operator*(const mat4Single<T>& other) con
 }
 
 template <class T>
+GDL::mat4Single<T>& GDL::mat4Single<T>::operator+=(const mat4Single<T>& rhs)
+{
+    for(U32 i=0; i<16; ++i)
+        mA[i]+=rhs.mA[i];
+    return *this;
+}
+
+template <class T>
 T GDL::mat4Single<T>::operator()(const U32 row, const U32 col) const
 {
     return mA[row + col * 4];

@@ -16,6 +16,12 @@ static void Multiplication_SIMD(benchmark::State& state)
 }
 BENCHMARK(Multiplication_SIMD);
 
+static void Addition_PE_SIMD(benchmark::State& state)
+{
+    for (auto _ : state)
+        benchmark::DoNotOptimize(A += B);
+}
+BENCHMARK(Addition_PE_SIMD);
 
 static void Construction_SIMD(benchmark::State& state)
 {
