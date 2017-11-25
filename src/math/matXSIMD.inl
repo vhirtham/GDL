@@ -37,29 +37,29 @@ GDL::matXSIMD<tRows, tColsRhs> GDL::matXSIMD<tRows, tCols>::operator*(const matX
     matXSIMD<tRows, tColsRhs> result;
     // loop over RHS rows (column registers)
     for (U32 j = 0; j < registersPerColRhs; ++j)
-    {
         // loop over every RHS Col
         for (U32 i = 0; i < tColsRhs; ++i)
         {
+            const U32 registerNumRhs = i * registersPerColRhs + j;
+            // those temporaries seem to have no effect on performance but they help to keep the code a little bit less
+            // messy. Also check if there is a faster way to extract single values into a new register
+            __mx tmp0 = _mmx_set1_ps<__mx>(rhs.mData[registerNumRhs][0]);
+            __mx tmp1 = _mmx_set1_ps<__mx>(rhs.mData[registerNumRhs][1]);
+            __mx tmp2 = _mmx_set1_ps<__mx>(rhs.mData[registerNumRhs][2]);
+            __mx tmp3 = _mmx_set1_ps<__mx>(rhs.mData[registerNumRhs][3]);
             // loop over LHS rows (column registers)
             for (U32 k = 0; k < registersPerColLhs; ++k)
             {
-                const U32 registerNumRhs = i * registersPerColRhs + j;
                 const U32 registerNumResult = i * registersPerColLhs + k;
                 const U32 currentBlockLhs = j * registerSize * registersPerColLhs + k;
-                result.mData[registerNumResult] = //_mmx_mul_ps(mData[0],mData[0]);
-                        _mmx_add_ps(
-                                _mmx_add_ps(_mmx_add_ps(_mmx_mul_ps(mData[currentBlockLhs + 0 * registersPerColLhs],
-                                                                    _mmx_set1_ps<__mx>(rhs.mData[registerNumRhs][0])),
-                                                        _mmx_mul_ps(mData[currentBlockLhs + 1 * registersPerColLhs],
-                                                                    _mmx_set1_ps<__mx>(rhs.mData[registerNumRhs][1]))),
-                                            _mmx_add_ps(_mmx_mul_ps(mData[currentBlockLhs + 2 * registersPerColLhs],
-                                                                    _mmx_set1_ps<__mx>(rhs.mData[registerNumRhs][2])),
-                                                        _mmx_mul_ps(mData[currentBlockLhs + 3 * registersPerColLhs],
-                                                                    _mmx_set1_ps<__mx>(rhs.mData[registerNumRhs][3])))),
-                                result.mData[registerNumResult]);
+                result.mData[registerNumResult] = _mmx_fmadd_ps(
+                        mData[currentBlockLhs + 0 * registersPerColLhs], tmp0,
+                        _mmx_fmadd_ps(mData[currentBlockLhs + 1 * registersPerColLhs], tmp1,
+                                      _mmx_fmadd_ps(mData[currentBlockLhs + 2 * registersPerColLhs], tmp2,
+                                                    _mmx_fmadd_ps(mData[currentBlockLhs + 3 * registersPerColLhs], tmp3,
+                                                                  result.mData[registerNumResult]))));
             }
         }
-    }
+
     return result;
 }

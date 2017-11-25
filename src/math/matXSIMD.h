@@ -16,6 +16,25 @@ constexpr const unsigned int CalcMinNumArrayRegisters(U32 numElements, U32 regis
     return (numElements / registerSize) + ((numElements % registerSize > 0) ? 1 : 0);
 }
 
+template <typename RegisterType>
+constexpr const U32 GetAlignmentBytes()
+{
+    throw Exception(__PRETTY_FUNCTION__, "No alignment known for given data type.");
+    return 0;
+}
+
+template <>
+constexpr const U32 GetAlignmentBytes<__m128>()
+{
+    return 16;
+}
+
+template <>
+constexpr const U32 GetAlignmentBytes<__m256>()
+{
+    return 32;
+}
+
 template <typename DataType, typename RegisterType>
 constexpr const U32 GetNumRegisterEntries()
 {
@@ -81,7 +100,24 @@ inline __m256 _mmx_mul_ps<__m256>(__m256 a, __m256 b)
     return _mm256_mul_ps(a, b);
 }
 
+template <typename T>
+inline T _mmx_fmadd_ps(T a, T b, T c)
+{
+    throw Exception(__PRETTY_FUNCTION__, "Not defined for selected register type");
+    return 0;
+}
 
+template <>
+inline __m128 _mmx_fmadd_ps<__m128>(__m128 a, __m128 b, __m128 c)
+{
+    return _mm_fmadd_ps(a, b, c);
+}
+
+template <>
+inline __m256 _mmx_fmadd_ps<__m256>(__m256 a, __m256 b, __m256 c)
+{
+    return _mm256_fmadd_ps(a, b, c);
+}
 
 template <typename T>
 inline T _mmx_set1_ps(float f)
@@ -107,10 +143,13 @@ inline __m256 _mmx_set1_ps(float f)
 //! @tparam tRows: Number of rows
 //! @tparam tCols: Number of columns
 template <int tRows, int tCols>
-class __attribute__((aligned(32))) matXSIMD
+class __attribute__((aligned(GetAlignmentBytes<__m128>()))) matXSIMD
+// TODO: if register is a template parameter set corresponding alignment in the row above!
 {
     typedef __m128 __mx;
-    alignas(32) std::array<__mx, tCols * CalcMinNumArrayRegisters(tRows, GetNumRegisterEntries<__mx, F32>())> mData;
+    __attribute__((aligned(16)))
+    std::array<__mx, tCols * CalcMinNumArrayRegisters(tRows, GetNumRegisterEntries<__mx, F32>())>
+            mData;
     //    __mx* mData;
 
 public:
