@@ -6,9 +6,6 @@ cmake_minimum_required(VERSION 3.9)
 # COMPILER SETUP
 # --------------
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++14 -Wall -Wno-long-long -pedantic -pthread -D_REENTRANT")
-IF(ENABLE_AVX)
-    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native") #Definition needed to replace pure AVX classes by backup versions
-ENDIF()
 #set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS} -O3")
 
 # OPTIONS
@@ -18,6 +15,9 @@ OPTION(ENABLE_CUSTOM_APPS "Enables applications that are located in the applicat
 OPTION(ENABLE_TESTS "Enables the testfiles" TRUE)
 OPTION(ENABLE_AVX "Enables advanced vector extensions (SIMD) like _m256 and _m512 registers" TRUE)
 
+IF(ENABLE_AVX)
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native -mavx2 ") #Definition needed to replace pure AVX classes by backup versions
+ENDIF()
 
 
 

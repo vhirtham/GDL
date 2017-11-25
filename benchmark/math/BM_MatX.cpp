@@ -1,33 +1,72 @@
 #include "math/matXSIMD.inl"
+#include "math/matXSingle.inl"
 #include <benchmark/benchmark.h>
 
 
 using namespace GDL;
 
-const U32 N = 12;
+const U32 N = 32;
+class SIMD : public benchmark::Fixture
+{
+public:
+    matXSIMD<N, N> A_SIMD;
+    matXSIMD<N, N> B_SIMD;
+};
 
-matXSIMD<N, N> A;
-matXSIMD<N, N> B;
+class Single : public benchmark::Fixture
+{
+public:
+    matXSingle<F32, N, N> A_Single;
+    matXSingle<F32, N, N> B_Single;
+};
 
-static void Multiplication_SIMD(benchmark::State& state)
+
+// Addition %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+BENCHMARK_F(SIMD, Addition_PE_SIMD)(benchmark::State& state)
+{
+
+    for (auto _ : state)
+        benchmark::DoNotOptimize(A_SIMD += B_SIMD);
+}
+
+
+
+BENCHMARK_F(Single, Addition_PE_Single)(benchmark::State& state)
 {
     for (auto _ : state)
-        benchmark::DoNotOptimize(A * B);
+        benchmark::DoNotOptimize(A_Single += B_Single);
 }
-BENCHMARK(Multiplication_SIMD);
 
-static void Addition_PE_SIMD(benchmark::State& state)
-{
-    for (auto _ : state)
-        benchmark::DoNotOptimize(A += B);
-}
-BENCHMARK(Addition_PE_SIMD);
+// Construction %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-static void Construction_SIMD(benchmark::State& state)
+BENCHMARK_F(SIMD, Construction)(benchmark::State& state)
 {
     for (auto _ : state)
         benchmark::DoNotOptimize(matXSIMD<N, N>());
 }
-BENCHMARK(Construction_SIMD);
+
+
+BENCHMARK_F(Single, Construction)(benchmark::State& state)
+{
+    for (auto _ : state)
+        benchmark::DoNotOptimize(matXSingle<F32, N, N>());
+}
+
+
+// Multiplication %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+BENCHMARK_F(SIMD, Multiplication)(benchmark::State& state)
+{
+    for (auto _ : state)
+        benchmark::DoNotOptimize(A_SIMD * B_SIMD * A_SIMD * B_SIMD);
+}
+
+
+BENCHMARK_F(Single, Multiplication)(benchmark::State& state)
+{
+    for (auto _ : state)
+        benchmark::DoNotOptimize(A_Single * B_Single * A_Single * B_Single);
+}
 
 BENCHMARK_MAIN()
