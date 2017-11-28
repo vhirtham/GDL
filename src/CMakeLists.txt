@@ -14,5 +14,5 @@ target_compile_features(GDLResourceManagement
     PUBLIC
         cxx_std_14)
 
-#singleSourceTargetName(resourceManagement/ThreadSafeQueue.cpp out)
-#message("fsf" ${out})
+createObjectLibs("${GDL_RESOURCE_MANAGEMENT_SOURCES}")
+

@@ -1,3 +1,5 @@
-INCLUDE(AddUnitTest)
-INCLUDE(ExternalDependencies)
-INCLUDE(SingleSourceTargetName)
+include(AddTest)
+include(CreateObjectLibs)
+include(CreateSingleSourceObjectLib)
+include(ExternalDependencies)
+include(SingleSourceTargetName)

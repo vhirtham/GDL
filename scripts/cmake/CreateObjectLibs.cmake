@@ -1,0 +1,5 @@
+function(CreateObjectLibs Sources)
+    foreach(source ${Sources})
+        createSingleSourceObjectLib(${CMAKE_CURRENT_SOURCE_DIR}/${source} object)
+    endforeach()
+endfunction()

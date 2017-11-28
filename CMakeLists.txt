@@ -1,6 +1,6 @@
 project(GDL)
 cmake_minimum_required(VERSION 3.9)
-#SET(CMAKE_VERBOSE_MAKEFILE ON)
+SET(CMAKE_VERBOSE_MAKEFILE OFF)
 
 
 # COMPILER SETUP
@@ -30,19 +30,12 @@ ENDIF()
 # ------------------
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/scripts/cmake ${CMAKE_MODULE_PATH})
 include(IncludeScripts)
-externalDependencies()
+
 
 # EXTERNAL LIBRARIES
 # ------------------
-FIND_PACKAGE(Boost REQUIRED unit_test_framework)
+externalDependencies()
 
-
-
-
-
-# SET INCLUDE DIRECTORIES
-# -----------------------
-INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/src)
 
 
 # SUBDIRECTORIES

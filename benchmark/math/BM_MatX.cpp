@@ -2,23 +2,36 @@
 #include "math/matXSingle.inl"
 #include <benchmark/benchmark.h>
 
-
+#ifdef EIGEN3_FOUND
+#include <eigen3/Eigen/Core>
+#endif
 using namespace GDL;
 
-const U32 N = 24;
+const U32 N = 8;
+
 class SIMD : public benchmark::Fixture
 {
 public:
-    matXSIMD<N, N> A_SIMD;
-    matXSIMD<N, N> B_SIMD;
+    matXSIMD<N, N> A;
+    matXSIMD<N, N> B;
 };
 
 class Single : public benchmark::Fixture
 {
 public:
-    matXSingle<F32, N, N> A_Single;
-    matXSingle<F32, N, N> B_Single;
+    matXSingle<F32, N, N> A;
+    matXSingle<F32, N, N> B;
 };
+
+#ifdef EIGEN3_FOUND
+class Eigen3 : public benchmark::Fixture
+{
+public:
+    Eigen::Matrix<F32, N, N> A;
+    Eigen::Matrix<F32, N, N> B;
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+};
+#endif
 
 
 // Construction %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -39,36 +52,49 @@ BENCHMARK_F(Single, Construction)(benchmark::State& state)
 
 // Addition %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-BENCHMARK_F(SIMD, Addition_PE_SIMD)(benchmark::State& state)
+BENCHMARK_F(SIMD, Addition_Assignment)(benchmark::State& state)
 {
 
     for (auto _ : state)
-        benchmark::DoNotOptimize(A_SIMD += B_SIMD);
+        benchmark::DoNotOptimize(A += B);
 }
 
 
 
-BENCHMARK_F(Single, Addition_PE_Single)(benchmark::State& state)
+BENCHMARK_F(Single, Addition_Assignment)(benchmark::State& state)
 {
     for (auto _ : state)
-        benchmark::DoNotOptimize(A_Single += B_Single);
+        benchmark::DoNotOptimize(A += B);
 }
 
-
-
+#ifdef EIGEN3_FOUND
+BENCHMARK_F(Eigen3, Addition_Assignment)(benchmark::State& state)
+{
+    for (auto _ : state)
+        benchmark::DoNotOptimize(A += B);
+}
+#endif
 // Multiplication %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 BENCHMARK_F(SIMD, Multiplication)(benchmark::State& state)
 {
     for (auto _ : state)
-        benchmark::DoNotOptimize(A_SIMD * B_SIMD);
+        benchmark::DoNotOptimize(A * B);
 }
 
 
 BENCHMARK_F(Single, Multiplication)(benchmark::State& state)
 {
     for (auto _ : state)
-        benchmark::DoNotOptimize(A_Single * B_Single);
+        benchmark::DoNotOptimize(A * B);
 }
+
+#ifdef EIGEN3_FOUND
+BENCHMARK_F(Eigen3, Multiplication)(benchmark::State& state)
+{
+    for (auto _ : state)
+        benchmark::DoNotOptimize((A * B).eval());
+}
+#endif
 
 BENCHMARK_MAIN()
