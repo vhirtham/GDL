@@ -1,3 +1,4 @@
+include(AddBenchmark)
 include(AddTest)
 include(CreateObjectLibs)
 include(CreateSingleSourceObjectLib)

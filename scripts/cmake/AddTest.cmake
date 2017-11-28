@@ -3,7 +3,7 @@ This function does all the necessary steps to set up a unit test
 #]==]
 
 function(addTest TestName)
-    ### Add prefix Test to avoid target naming conflicts (for example with benchmarks or other GDL targets)
+    ### Add prefix "Test_" to avoid target naming conflicts (for example with benchmarks or other GDL targets)
     set(TestName "Test_${TestName}")
 
     ### Find single object targets
