@@ -1,5 +1,3 @@
-#define BOOST_TEST_MODULE mat4 test
-#define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
 
 #include "GDLTypedefs.h"
