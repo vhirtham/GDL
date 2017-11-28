@@ -143,7 +143,7 @@ inline __m256 _mmx_set1_ps(float f)
 //! @tparam tRows: Number of rows
 //! @tparam tCols: Number of columns
 template <int tRows, int tCols>
-class __attribute__((aligned(GetAlignmentBytes<__m128>()))) matXSIMD
+class __attribute__((aligned(16))) matXSIMD
 // TODO: if register is a template parameter set corresponding alignment in the row above!
 {
     typedef __m128 __mx;
