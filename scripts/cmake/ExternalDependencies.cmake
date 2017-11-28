@@ -1,0 +1,8 @@
+function(externalDependencies)
+    find_package(benchmark)
+    if(benchmark_FOUND)
+        message(INFO "Google benchmark found")
+    else()
+        message(INFO "Google benchmark NOT found - Benchmarks won't be build!")
+    endif()
+endfunction()

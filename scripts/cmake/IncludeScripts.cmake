@@ -1,3 +1,3 @@
 INCLUDE(AddUnitTest)
-INCLUDE(SetupGoogleBenchmark)
+INCLUDE(ExternalDependencies)
 INCLUDE(SingleSourceTargetName)

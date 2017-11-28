@@ -1,7 +1,0 @@
-function(setupGoogleBenchmark)
-    IF(ENABLE_BENCHMARKS)
-        option(BENCHMARK_ENABLE_TESTING "Enable testing of the benchmark library." OFF)
-        option(BENCHMARK_ENABLE_INSTALL "Enable installation of benchmark. (Projects embedding benchmark may want to turn this OFF.)" OFF)
-        add_subdirectory(extern/benchmark)
-    ENDIF()
-endfunction()

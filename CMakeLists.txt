@@ -30,7 +30,7 @@ ENDIF()
 # ------------------
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/scripts/cmake ${CMAKE_MODULE_PATH})
 include(IncludeScripts)
-setupGoogleBenchmark()
+externalDependencies()
 
 # EXTERNAL LIBRARIES
 # ------------------
