@@ -1,5 +1,7 @@
 #pragma once
-
+#if defined __GNUC__ && __GNUC__ >= 6
+#pragma GCC diagnostic ignored "-Wignored-attributes"
+#endif
 #include "math/mat4SIMD.inl"
 
 #include "GDLTypedefs.h"

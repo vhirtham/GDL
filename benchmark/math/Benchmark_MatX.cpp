@@ -7,7 +7,7 @@
 #endif
 using namespace GDL;
 
-const U32 N = 8;
+const U32 N = 12;
 
 class SIMD : public benchmark::Fixture
 {
