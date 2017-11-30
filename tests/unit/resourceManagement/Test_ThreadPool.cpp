@@ -47,7 +47,7 @@ BOOST_AUTO_TEST_CASE(DynamicThreadCreation)
 {
     using namespace GDL;
     constexpr U32 numNumbers = 10000;
-    constexpr U32 numTasks = 100;
+    constexpr U32 numTasks = 500;
 
 
     // Create thread pool with one thread
