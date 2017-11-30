@@ -21,6 +21,13 @@ class Single : public benchmark::Fixture
 public:
     matXSingle<F32, N, N> A;
     matXSingle<F32, N, N> B;
+    std::array<F32, N * N> valArray;
+
+    Single()
+    {
+        for (U32 i = 0; i < N * N; ++i)
+            valArray[i] = 2 * i;
+    }
 };
 
 #ifdef EIGEN3_FOUND
@@ -34,22 +41,36 @@ public:
 #endif
 
 
-// Construction %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+// Default Construction %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-BENCHMARK_F(SIMD, Construction)(benchmark::State& state)
+BENCHMARK_F(SIMD, Construction_Def)(benchmark::State& state)
 {
     for (auto _ : state)
         benchmark::DoNotOptimize(matXSIMD<N, N>());
 }
 
 
-BENCHMARK_F(Single, Construction)(benchmark::State& state)
+BENCHMARK_F(Single, Construction_Def)(benchmark::State& state)
 {
     for (auto _ : state)
         benchmark::DoNotOptimize(matXSingle<F32, N, N>());
 }
 
+// Value Construction %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+BENCHMARK_F(Single, Construction_Val)(benchmark::State& state)
+{
+    for (auto _ : state)
+        benchmark::DoNotOptimize(matXSingle<F32, N, N>(valArray));
+}
+
+// Set Zero %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+BENCHMARK_F(Single, Set_Zero)(benchmark::State& state)
+{
+    for (auto _ : state)
+        A.SetZero();
+}
 // Addition %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 BENCHMARK_F(SIMD, Addition_Assignment)(benchmark::State& state)
