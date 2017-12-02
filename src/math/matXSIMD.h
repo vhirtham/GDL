@@ -76,11 +76,13 @@ inline __m128 _mmx_add_ps<__m128>(__m128 a, __m128 b)
     return _mm_add_ps(a, b);
 }
 
+#ifdef ENABLE_AVX
 template <>
 inline __m256 _mmx_add_ps<__m256>(__m256 a, __m256 b)
 {
     return _mm256_add_ps(a, b);
 }
+#endif
 
 
 
@@ -96,12 +98,13 @@ inline __m128 _mmx_mul_ps<__m128>(__m128 a, __m128 b)
 {
     return _mm_mul_ps(a, b);
 }
-
+#ifdef ENABLE_AVX
 template <>
 inline __m256 _mmx_mul_ps<__m256>(__m256 a, __m256 b)
 {
     return _mm256_mul_ps(a, b);
 }
+#endif
 
 template <typename T>
 inline T _mmx_fmadd_ps(T a, T b, T c)
@@ -116,11 +119,13 @@ inline __m128 _mmx_fmadd_ps<__m128>(__m128 a, __m128 b, __m128 c)
     return _mm_fmadd_ps(a, b, c);
 }
 
+#ifdef ENABLE_AVX
 template <>
 inline __m256 _mmx_fmadd_ps<__m256>(__m256 a, __m256 b, __m256 c)
 {
     return _mm256_fmadd_ps(a, b, c);
 }
+#endif
 
 template <typename T>
 inline T _mmx_set1_ps(float f)
@@ -134,13 +139,13 @@ inline __m128 _mmx_set1_ps(float f)
 {
     return _mm_set1_ps(f);
 }
-
+#ifdef ENABLE_AVX
 template <>
 inline __m256 _mmx_set1_ps(float f)
 {
     return _mm256_set1_ps(f);
 }
-
+#endif
 
 //! @brief Matrix of arbitrary size with SIMD support
 //! @tparam tRows: Number of rows

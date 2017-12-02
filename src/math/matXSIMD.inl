@@ -32,7 +32,7 @@ GDL::matXSIMD<tRows, tCols>::matXSIMD(const std::array<F32, tRows * tCols>& data
         for (U32 i = 0; i < tCols; ++i)
         {
             // Set last column register to zero
-            std::memset((&mData[i * numColReg]),0,sizeof(__mx));
+            std::memset((&mData[i * numColReg]), 0, sizeof(__mx));
             // Copy data into column
             std::memcpy(&mData[i * numColReg], &data[i * tRows], sizeof(F32) * tRows);
         }
@@ -70,10 +70,10 @@ GDL::U32 GDL::matXSIMD<tRows, tCols>::Cols() const
     return tCols;
 }
 
-template<int tRows, int tCols>
+template <int tRows, int tCols>
 void GDL::matXSIMD<tRows, tCols>::SetZero()
 {
-    std::fill(mData.begin(),mData.end(),_mm_set1_ps(0.));
+    std::fill(mData.begin(), mData.end(), _mm_set1_ps(0.));
 }
 
 template <int tRows, int tCols>
@@ -138,12 +138,25 @@ GDL::matXSIMD<tRows, tColsRhs> GDL::matXSIMD<tRows, tCols>::operator*(const matX
             {
                 const U32 registerNumResult = i * registersPerColLhs + k;
                 const U32 currentBlockLhs = j * registerSize * registersPerColLhs + k;
+#ifdef ENABLE_SSE4
                 result.mData[registerNumResult] = _mmx_fmadd_ps(
                         mData[currentBlockLhs + 0 * registersPerColLhs], tmp0,
                         _mmx_fmadd_ps(mData[currentBlockLhs + 1 * registersPerColLhs], tmp1,
                                       _mmx_fmadd_ps(mData[currentBlockLhs + 2 * registersPerColLhs], tmp2,
                                                     _mmx_fmadd_ps(mData[currentBlockLhs + 3 * registersPerColLhs], tmp3,
                                                                   result.mData[registerNumResult]))));
+#else
+                result.mData[registerNumResult] =
+                        _mmx_add_ps(
+                                _mmx_add_ps(
+                                        _mmx_add_ps(_mmx_mul_ps(mData[currentBlockLhs + 0 * registersPerColLhs], tmp0),
+                                                    _mmx_mul_ps(mData[currentBlockLhs + 1 * registersPerColLhs], tmp1)),
+                                        _mmx_add_ps(
+                                                _mmx_mul_ps(mData[currentBlockLhs + 2 * registersPerColLhs], tmp2),
+                                                _mmx_mul_ps(mData[currentBlockLhs + 3 * registersPerColLhs], tmp3))),
+                                result.mData[registerNumResult]);
+
+#endif
             }
         }
 
