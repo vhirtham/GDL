@@ -66,7 +66,7 @@ GDL::U32 GDL::matXSingle<T, tRows, tCols>::Cols() const
 }
 
 template <typename T, int tRows, int tCols>
-const std::array<T, tRows * tCols>& GDL::matXSingle<T, tRows, tCols>::Data() const
+std::array<T, tRows * tCols> GDL::matXSingle<T, tRows, tCols>::Data() const
 {
     return mData;
 }

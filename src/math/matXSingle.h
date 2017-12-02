@@ -57,7 +57,7 @@ public:
 
     //! @brief Gets the data array in column major ordering
     //! @return Data
-    inline const std::array<T, tRows * tCols>& Data() const;
+    inline std::array<T, tRows * tCols> Data() const;
 
     //! @brief Sets all matrix entries to zero
     inline void SetZero();
