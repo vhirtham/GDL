@@ -32,7 +32,7 @@ GDL::matXSIMD<tRows, tCols>::matXSIMD(const std::array<F32, tRows * tCols>& data
         for (U32 i = 0; i < tCols; ++i)
         {
             // Set last column register to zero
-            std::memset((&mData[i * numColReg]), 0, sizeof(__mx));
+            std::memset((&mData[(i + 1) * numColReg - 1]), 0, sizeof(__mx));
             // Copy data into column
             std::memcpy(&mData[i * numColReg], &data[i * tRows], sizeof(F32) * tRows);
         }
@@ -146,15 +146,12 @@ GDL::matXSIMD<tRows, tColsRhs> GDL::matXSIMD<tRows, tCols>::operator*(const matX
                                                     _mmx_fmadd_ps(mData[currentBlockLhs + 3 * registersPerColLhs], tmp3,
                                                                   result.mData[registerNumResult]))));
 #else
-                result.mData[registerNumResult] =
-                        _mmx_add_ps(
-                                _mmx_add_ps(
-                                        _mmx_add_ps(_mmx_mul_ps(mData[currentBlockLhs + 0 * registersPerColLhs], tmp0),
-                                                    _mmx_mul_ps(mData[currentBlockLhs + 1 * registersPerColLhs], tmp1)),
-                                        _mmx_add_ps(
-                                                _mmx_mul_ps(mData[currentBlockLhs + 2 * registersPerColLhs], tmp2),
+                result.mData[registerNumResult] = _mmx_add_ps(
+                        _mmx_add_ps(_mmx_add_ps(_mmx_mul_ps(mData[currentBlockLhs + 0 * registersPerColLhs], tmp0),
+                                                _mmx_mul_ps(mData[currentBlockLhs + 1 * registersPerColLhs], tmp1)),
+                                    _mmx_add_ps(_mmx_mul_ps(mData[currentBlockLhs + 2 * registersPerColLhs], tmp2),
                                                 _mmx_mul_ps(mData[currentBlockLhs + 3 * registersPerColLhs], tmp3))),
-                                result.mData[registerNumResult]);
+                        result.mData[registerNumResult]);
 
 #endif
             }
