@@ -28,7 +28,7 @@ public:
     //! @brief Constructor
     mat4SIMD();
 
-    //! @brief Constructor that initializes full matrix with specific values (row major)
+    //! @brief Constructor that initializes full matrix with specific values (column major)
     //! @param v0-v16: Matrix values in row major ordering
     mat4SIMD(F32 v0, F32 v1, F32 v2, F32 v3, F32 v4, F32 v5, F32 v6, F32 v7, F32 v8, F32 v9, F32 v10, F32 v11, F32 v12,
              F32 v13, F32 v14, F32 v15);

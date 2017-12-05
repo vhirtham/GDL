@@ -4,63 +4,73 @@
 
 using namespace GDL;
 
-
-
-static void Multiplication_Single(benchmark::State& state)
+class SIMD : public benchmark::Fixture
 {
-    mat4Single<F32> A_Single(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15);
-    mat4Single<F32> B_Single(8, 5, 3, 6, 11, 4, 7, 8, 6, 9, 5, 2, 2, 3, 2, 6);
-    for (auto _ : state)
-        benchmark::DoNotOptimize(A_Single * B_Single);
-}
-BENCHMARK(Multiplication_Single);
+public:
+    mat4SIMD A;
+    mat4SIMD B;
 
+    SIMD()
+        : A{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15}
+        , B{8, 5, 3, 6, 11, 4, 7, 8, 6, 9, 5, 2, 2, 3, 2, 6}
+    {
+    }
+};
 
-
-static void Multiplication_SIMD(benchmark::State& state)
+class Single : public benchmark::Fixture
 {
-    mat4SIMD A_SIMD(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15);
-    mat4SIMD B_SIMD(8, 5, 3, 6, 11, 4, 7, 8, 6, 9, 5, 2, 2, 3, 2, 6);
-    for (auto _ : state)
-        benchmark::DoNotOptimize(A_SIMD * B_SIMD);
-}
-BENCHMARK(Multiplication_SIMD);
+public:
+    mat4Single<F32> A;
+    mat4Single<F32> B;
 
-
-static void Addition_PE_Single(benchmark::State& state)
-{
-    mat4Single<F32> A_Single(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15);
-    mat4Single<F32> B_Single(8, 5, 3, 6, 11, 4, 7, 8, 6, 9, 5, 2, 2, 3, 2, 6);
-    for (auto _ : state)
-        benchmark::DoNotOptimize(A_Single += B_Single);
-}
-BENCHMARK(Addition_PE_Single);
+    Single()
+        : A{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15}
+        , B{8, 5, 3, 6, 11, 4, 7, 8, 6, 9, 5, 2, 2, 3, 2, 6}
+    {
+    }
+};
 
 
 
-static void Addition_PE_SIMD(benchmark::State& state)
-{
-    mat4SIMD A_SIMD(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15);
-    mat4SIMD B_SIMD(8, 5, 3, 6, 11, 4, 7, 8, 6, 9, 5, 2, 2, 3, 2, 6);
-    for (auto _ : state)
-        benchmark::DoNotOptimize(A_SIMD += B_SIMD);
-}
-BENCHMARK(Addition_PE_SIMD);
-
-
-
-static void Constructor1_Single(benchmark::State& state)
+BENCHMARK_F(Single, Construction)(benchmark::State& state)
 {
     for (auto _ : state)
         mat4Single<F32> C(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15);
 }
-BENCHMARK(Constructor1_Single);
 
-static void Constructor_SIMD(benchmark::State& state)
+
+BENCHMARK_F(SIMD, Construction)(benchmark::State& state)
 {
     for (auto _ : state)
         mat4SIMD C(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15);
 }
-BENCHMARK(Constructor_SIMD);
+
+
+
+BENCHMARK_F(Single, Addition_PE)(benchmark::State& state)
+{
+    for (auto _ : state)
+        benchmark::DoNotOptimize(A += B);
+}
+
+BENCHMARK_F(SIMD, Addition_PE)(benchmark::State& state)
+{
+    for (auto _ : state)
+        benchmark::DoNotOptimize(A += B);
+}
+
+BENCHMARK_F(Single, Multiplication)(benchmark::State& state)
+{
+    for (auto _ : state)
+        benchmark::DoNotOptimize(A * B);
+}
+
+
+
+BENCHMARK_F(SIMD, Multiplication)(benchmark::State& state)
+{
+    for (auto _ : state)
+        benchmark::DoNotOptimize(A * B);
+}
 
 BENCHMARK_MAIN()
