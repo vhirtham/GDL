@@ -10,6 +10,9 @@ using namespace GDL;
 constexpr U32 N = 12;
 constexpr U32 M = N - 1;
 
+
+// Fixture declaration %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 class SIMD : public benchmark::Fixture
 {
 public:
@@ -28,6 +31,7 @@ public:
     }
 };
 
+
 class Single : public benchmark::Fixture
 {
 public:
@@ -42,6 +46,7 @@ public:
     }
 };
 
+
 #ifdef EIGEN3_FOUND
 class Eigen3 : public benchmark::Fixture
 {
@@ -51,6 +56,7 @@ public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 };
 #endif
+
 
 
 // Default Construction %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -89,6 +95,8 @@ BENCHMARK_F(SIMD, Construction_Val_non_full_registers)(benchmark::State& state)
         benchmark::DoNotOptimize(matXSIMD<M, N>(valArray2));
 }
 
+
+
 // Set Zero %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 BENCHMARK_F(Single, Set_Zero)(benchmark::State& state)
@@ -103,6 +111,8 @@ BENCHMARK_F(SIMD, Set_Zero)(benchmark::State& state)
     for (auto _ : state)
         A.SetZero();
 }
+
+
 
 // Data %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -126,7 +136,9 @@ BENCHMARK_F(SIMD, Data_non_full_registers)(benchmark::State& state)
         benchmark::DoNotOptimize(C.Data());
 }
 
-// Addition %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+// Addition Assignment %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 BENCHMARK_F(Single, Addition_Assignment)(benchmark::State& state)
 {
@@ -151,6 +163,8 @@ BENCHMARK_F(Eigen3, Addition_Assignment)(benchmark::State& state)
 }
 #endif
 
+
+
 // Multiplication %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 BENCHMARK_F(Single, Multiplication)(benchmark::State& state)
@@ -174,5 +188,9 @@ BENCHMARK_F(Eigen3, Multiplication)(benchmark::State& state)
         benchmark::DoNotOptimize((A * B).eval());
 }
 #endif
+
+
+
+// Main %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 BENCHMARK_MAIN()

@@ -4,6 +4,8 @@
 
 using namespace GDL;
 
+// Fixture declaration %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 class SIMD : public benchmark::Fixture
 {
 public:
@@ -16,6 +18,7 @@ public:
     {
     }
 };
+
 
 class Single : public benchmark::Fixture
 {
@@ -32,6 +35,8 @@ public:
 
 
 
+// Value Construction %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 BENCHMARK_F(Single, Construction)(benchmark::State& state)
 {
     for (auto _ : state)
@@ -47,17 +52,23 @@ BENCHMARK_F(SIMD, Construction)(benchmark::State& state)
 
 
 
-BENCHMARK_F(Single, Addition_PE)(benchmark::State& state)
+// Addition Assignment %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+BENCHMARK_F(Single, Addition_Assignment)(benchmark::State& state)
 {
     for (auto _ : state)
         benchmark::DoNotOptimize(A += B);
 }
 
-BENCHMARK_F(SIMD, Addition_PE)(benchmark::State& state)
+BENCHMARK_F(SIMD, Addition_Assignment)(benchmark::State& state)
 {
     for (auto _ : state)
         benchmark::DoNotOptimize(A += B);
 }
+
+
+
+// Multiplication %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 BENCHMARK_F(Single, Multiplication)(benchmark::State& state)
 {
@@ -66,11 +77,13 @@ BENCHMARK_F(Single, Multiplication)(benchmark::State& state)
 }
 
 
-
 BENCHMARK_F(SIMD, Multiplication)(benchmark::State& state)
 {
     for (auto _ : state)
         benchmark::DoNotOptimize(A * B);
 }
 
+
+
+// Main %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 BENCHMARK_MAIN()

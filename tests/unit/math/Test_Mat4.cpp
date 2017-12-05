@@ -8,6 +8,8 @@
 
 using namespace GDL;
 
+// Helper functions %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 template <typename T>
 bool checkClose(T a, T b, F32 tolerance = 1e-6)
 {
@@ -18,12 +20,54 @@ bool checkClose(T a, T b, F32 tolerance = 1e-6)
     return true;
 }
 
+
+
+// Fixture definition %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 template <typename matrix>
-void MultiplicationTest()
+struct Fixture
 {
     matrix A{0., 4., 8., 12., 1., 5., 9., 13., 2., 6., 10., 14., 3., 7., 11., 15.};
     matrix B{8., 11., 6., 2., 5., 4., 9., 3., 3., 7., 5., 2., 6., 8., 2., 6.};
+};
 
+
+
+// Addition Assignment %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+template <typename matrix>
+void AdditionAssignmentTest(matrix& A, matrix& B)
+{
+
+    A += B;
+    matrix expA{8., 15., 14., 14., 6., 9., 18., 16., 5., 13., 15., 16., 9., 15., 13., 21.};
+    BOOST_CHECK(checkClose(A, expA));
+
+    // self assignment
+    B += B;
+    matrix expB{16., 22., 12., 4., 10., 8., 18., 6., 6., 14., 10., 4., 12., 16., 4., 12.};
+    BOOST_CHECK(checkClose(B, expB));
+}
+
+
+BOOST_FIXTURE_TEST_CASE(Addition_Assignment_Single, Fixture<mat4Single<F32>>)
+{
+    AdditionAssignmentTest(A, B);
+}
+
+
+BOOST_FIXTURE_TEST_CASE(Addition_Assignment_SIMD, Fixture<mat4SIMD>)
+{
+    AdditionAssignmentTest(A, B);
+}
+
+
+
+// Multiplication %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+template <typename matrix>
+void MultiplicationTest(const matrix& A, const matrix& B)
+{
     auto C = A * B;
     matrix expC{29., 137., 245., 353., 31., 115., 199., 283., 23., 91., 159., 227., 30., 118., 206., 294.};
     BOOST_CHECK(checkClose(C, expC));
@@ -33,13 +77,14 @@ void MultiplicationTest()
     BOOST_CHECK(checkClose(D, expD));
 }
 
-BOOST_AUTO_TEST_CASE(Multiplication_Single)
+
+BOOST_FIXTURE_TEST_CASE(Multiplication_Single, Fixture<mat4Single<F32>>)
 {
-    MultiplicationTest<mat4Single<F32>>();
+    MultiplicationTest<mat4Single<F32>>(A, B);
 }
 
 
-BOOST_AUTO_TEST_CASE(Multiplication_SIMD)
+BOOST_FIXTURE_TEST_CASE(Multiplication_SIMD, Fixture<mat4SIMD>)
 {
-    MultiplicationTest<mat4SIMD>();
+    MultiplicationTest<mat4SIMD>(A, B);
 }
