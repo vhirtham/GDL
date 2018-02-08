@@ -3,3 +3,5 @@ addTest(ThreadPool
     resourceManagement/ThreadPool.cpp
     resourceManagement/ThreadSafeQueue.cpp)
 
+addTest(Allocator)
+

@@ -1,7 +1,8 @@
 set(GDL_RESOURCE_MANAGEMENT_SOURCES
     resourceManagement/Thread.cpp
     resourceManagement/ThreadPool.cpp
-    resourceManagement/ThreadSafeQueue.cpp)
+    resourceManagement/ThreadSafeQueue.cpp
+    )
 
 add_library(GDLResourceManagement
     ${GDL_RESOURCE_MANAGEMENT_SOURCES})
