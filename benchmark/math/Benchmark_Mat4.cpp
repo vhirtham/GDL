@@ -86,4 +86,4 @@ BENCHMARK_F(SIMD, Multiplication)(benchmark::State& state)
 
 
 // Main %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-BENCHMARK_MAIN()
+BENCHMARK_MAIN();

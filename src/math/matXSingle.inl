@@ -3,6 +3,7 @@
 #include "matXSingle.h"
 
 #include <algorithm>
+#include <cassert>
 #ifndef NDEBUG
 #include <iostream>
 #endif
@@ -12,10 +13,19 @@ GDL::matXSingle<T, tRows, tCols>::matXSingle()
 {
 }
 
+template<typename T, int tRows, int tCols>
+template <typename... Args>
+GDL::matXSingle<T, tRows, tCols>::matXSingle(Args... args)
+    : mData{{static_cast<T>(args)...}}
+{
+    assert(mData.size() == sizeof...(args));
+}
+
 template <typename T, int tRows, int tCols>
 GDL::matXSingle<T, tRows, tCols>::matXSingle(const std::array<T, tRows * tCols>& data)
     : mData(data)
 {
+    assert(mData.size() == data.size());
 }
 
 

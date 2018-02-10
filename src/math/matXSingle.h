@@ -23,7 +23,13 @@ public:
     matXSingle();
 
     //! @brief Constructor to set the whole matrix
-    //! @brief Array with values (column major)
+    //! @param args: Values (column major)
+    //! @tparam Args: Variadic data type
+    template <typename... Args>
+    matXSingle(Args... args);
+
+    //! @brief Constructor to set the whole matrix
+    //! @param data: Array with values (column major)
     matXSingle(const std::array<T, tRows * tCols>& data);
 
     //! @brief Matrix - matrix multiplication

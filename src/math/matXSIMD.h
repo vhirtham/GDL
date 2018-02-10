@@ -167,6 +167,13 @@ public:
     matXSIMD();
 
     //! @brief Constructor to set the whole matrix
+    //! @param args: Values (column major)
+    //! @tparam Args: Variadic data type
+    template <typename... Args>
+    matXSIMD(Args... args);
+
+
+    //! @brief Constructor to set the whole matrix
     //! @brief Array with values (column major)
     matXSIMD(const std::array<F32, tRows * tCols>& data);
 

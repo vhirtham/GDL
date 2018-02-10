@@ -17,6 +17,15 @@ GDL::matXSIMD<tRows, tCols>::matXSIMD()
     ConstructionChecks();
 }
 
+
+template<int tRows, int tCols>
+template <typename... Args>
+GDL::matXSIMD< tRows, tCols>::matXSIMD(Args... args)
+{
+    assert(sizeof...(args) == tRows * tCols);
+    *this = matXSIMD(std::array<F32, tRows * tCols>{{static_cast<F32>(args)...}});
+}
+
 template <int tRows, int tCols>
 GDL::matXSIMD<tRows, tCols>::matXSIMD(const std::array<F32, tRows * tCols>& data)
 {
@@ -75,6 +84,8 @@ void GDL::matXSIMD<tRows, tCols>::SetZero()
 {
     std::fill(mData.begin(), mData.end(), _mm_set1_ps(0.));
 }
+
+
 
 template <int tRows, int tCols>
 const std::array<GDL::F32, tRows * tCols> GDL::matXSIMD<tRows, tCols>::Data() const
