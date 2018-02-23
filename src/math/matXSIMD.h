@@ -8,7 +8,7 @@
 #include "base/SSESupportFunctions.h"
 
 #include <array>
-
+#include <type_traits>
 
 namespace GDL
 {
@@ -20,10 +20,11 @@ template <typename T, int tRows, int tCols>
 class __attribute__((aligned(16))) matXSIMD
 // TODO: if register is a template parameter set corresponding alignment in the row above!
 {
-    typedef __m128 __mx;
+    typedef typename std::conditional<std::is_same<T, F32>::value, __m128, __m128d>::type __mx;
     constexpr static U32 mNumRegisterEntries = GetNumRegisterEntries<__mx, T>();
     constexpr static U32 mNumRegistersPerCol = CalcMinNumArrayRegisters(tRows, mNumRegisterEntries);
     constexpr static U32 mNumRegisters = tCols * mNumRegistersPerCol;
+
 
     __attribute__((aligned(16))) std::array<__mx, mNumRegisters> mData;
 

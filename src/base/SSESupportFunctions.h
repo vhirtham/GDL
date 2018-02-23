@@ -59,22 +59,47 @@ constexpr const U32 GetNumRegisterEntries<__m512, F32>()
     return 16;
 }
 
-template <typename T>
-inline T _mmx_add_ps(T a, T b)
+template <>
+constexpr const U32 GetNumRegisterEntries<__m128d, F64>()
 {
-    throw Exception(__PRETTY_FUNCTION__, "Not defined for selected register type");
-    return 0;
+    return 2;
 }
 
 template <>
-inline __m128 _mmx_add_ps<__m128>(__m128 a, __m128 b)
+constexpr const U32 GetNumRegisterEntries<__m256d, F64>()
+{
+    return 4;
+}
+
+template <>
+constexpr const U32 GetNumRegisterEntries<__m512d, F64>()
+{
+    return 8;
+}
+
+
+template <typename T, typename TReg>
+inline TReg _mmx_add_p(TReg a, TReg b)
+{
+    throw Exception(__PRETTY_FUNCTION__, "Not defined for selected register type");
+    return TReg();
+}
+
+template <>
+inline __m128 _mmx_add_p<F32>(__m128 a, __m128 b)
 {
     return _mm_add_ps(a, b);
 }
 
+template <>
+inline __m128d _mmx_add_p<F64>(__m128d a, __m128d b)
+{
+    return _mm_add_pd(a, b);
+}
+
 #ifdef ENABLE_AVX
 template <>
-inline __m256 _mmx_add_ps<__m256>(__m256 a, __m256 b)
+inline __m256 _mmx_add_p<__m256>(__m256 a, __m256 b)
 {
     return _mm256_add_ps(a, b);
 }

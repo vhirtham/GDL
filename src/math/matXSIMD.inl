@@ -50,7 +50,7 @@ template <typename T, int tRows, int tCols>
 GDL::matXSIMD<T, tRows, tCols>& GDL::matXSIMD<T, tRows, tCols>::operator+=(const GDL::matXSIMD<T, tRows, tCols>& rhs)
 {
     for (U32 i = 0; i < mData.size(); ++i)
-        mData[i] = _mmx_add_ps(rhs.mData[i], mData[i]);
+        mData[i] = _mmx_add_p<T>(rhs.mData[i], mData[i]);
     return *this;
 }
 
@@ -149,11 +149,12 @@ operator*(const matXSIMD<T, tRowsRhs, tColsRhs>& rhs) const
                                                     _mmx_fmadd_ps(mData[currentBlockLhs + 3 * mNumRegistersPerCol],
                                                                   tmp3, result.mData[registerNumResult]))));
 #else
-                result.mData[registerNumResult] = _mmx_add_ps(
-                        _mmx_add_ps(_mmx_add_ps(_mmx_mul_ps(mData[currentBlockLhs + 0 * mNumRegistersPerCol], tmp0),
-                                                _mmx_mul_ps(mData[currentBlockLhs + 1 * mNumRegistersPerCol], tmp1)),
-                                    _mmx_add_ps(_mmx_mul_ps(mData[currentBlockLhs + 2 * mNumRegistersPerCol], tmp2),
-                                                _mmx_mul_ps(mData[currentBlockLhs + 3 * mNumRegistersPerCol], tmp3))),
+                result.mData[registerNumResult] = _mmx_add_p<T>(
+                        _mmx_add_p<T>(
+                                _mmx_add_p<T>(_mmx_mul_ps(mData[currentBlockLhs + 0 * mNumRegistersPerCol], tmp0),
+                                              _mmx_mul_ps(mData[currentBlockLhs + 1 * mNumRegistersPerCol], tmp1)),
+                                _mmx_add_p<T>(_mmx_mul_ps(mData[currentBlockLhs + 2 * mNumRegistersPerCol], tmp2),
+                                              _mmx_mul_ps(mData[currentBlockLhs + 3 * mNumRegistersPerCol], tmp3))),
                         result.mData[registerNumResult]);
 
 #endif
@@ -165,7 +166,7 @@ operator*(const matXSIMD<T, tRowsRhs, tColsRhs>& rhs) const
 
 #ifndef NDEBUG
 template <typename T, int tRows2, int tCols2>
-std::ostream& operator<<(std::ostream& os, const GDL::matXSIMD<T,tRows2, tCols2>& mat)
+std::ostream& operator<<(std::ostream& os, const GDL::matXSIMD<T, tRows2, tCols2>& mat)
 {
     using namespace GDL;
     for (U32 i = 0; i < tRows2; ++i)
