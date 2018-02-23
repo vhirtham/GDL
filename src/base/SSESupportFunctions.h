@@ -5,6 +5,10 @@
 
 namespace GDL
 {
+constexpr bool is_aligned(const volatile void* p, size_t n)
+{
+    return reinterpret_cast<std::uintptr_t>(p) % n == 0;
+}
 
 constexpr const unsigned int CalcMinNumArrayRegisters(U32 numElements, U32 registerSize)
 {

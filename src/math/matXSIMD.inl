@@ -21,11 +21,11 @@ template <typename... Args>
 GDL::matXSIMD<T, tRows, tCols>::matXSIMD(Args... args)
 {
     assert(sizeof...(args) == tRows * tCols);
-    *this = matXSIMD(std::array<F32, tRows * tCols>{{static_cast<F32>(args)...}});
+    *this = matXSIMD(std::array<T, tRows * tCols>{{static_cast<T>(args)...}});
 }
 
 template <typename T, int tRows, int tCols>
-GDL::matXSIMD<T, tRows, tCols>::matXSIMD(const std::array<F32, tRows * tCols>& data)
+GDL::matXSIMD<T, tRows, tCols>::matXSIMD(const std::array<T, tRows * tCols>& data)
 {
     if (tRows % mNumRegisterEntries == 0)
     {
@@ -39,7 +39,7 @@ GDL::matXSIMD<T, tRows, tCols>::matXSIMD(const std::array<F32, tRows * tCols>& d
             // Set last column register to zero
             std::memset((&mData[(i + 1) * mNumRegistersPerCol - 1]), 0, sizeof(__mx));
             // Copy data into column
-            std::memcpy(&mData[i * mNumRegistersPerCol], &data[i * tRows], sizeof(F32) * tRows);
+            std::memcpy(&mData[i * mNumRegistersPerCol], &data[i * tRows], sizeof(T) * tRows);
         }
     }
 
@@ -55,7 +55,7 @@ GDL::matXSIMD<T, tRows, tCols>& GDL::matXSIMD<T, tRows, tCols>::operator+=(const
 }
 
 template <typename T, int tRows, int tCols>
-GDL::F32 GDL::matXSIMD<T, tRows, tCols>::operator()(const GDL::U32 row, const GDL::U32 col) const
+T GDL::matXSIMD<T, tRows, tCols>::operator()(const GDL::U32 row, const GDL::U32 col) const
 {
     assert(row < tRows && col < tCols);
     return mData[row / mNumRegisterEntries + col * mNumRegistersPerCol][row % mNumRegisterEntries];
@@ -83,9 +83,9 @@ void GDL::matXSIMD<T, tRows, tCols>::SetZero()
 
 
 template <typename T, int tRows, int tCols>
-const std::array<GDL::F32, tRows * tCols> GDL::matXSIMD<T, tRows, tCols>::Data() const
+const std::array<T, tRows * tCols> GDL::matXSIMD<T, tRows, tCols>::Data() const
 {
-    std::array<GDL::F32, tRows * tCols> data;
+    std::array<T, tRows * tCols> data;
     if (tRows % mNumRegisterEntries == 0)
     {
         assert(sizeof(mData) == sizeof(data));
@@ -95,7 +95,7 @@ const std::array<GDL::F32, tRows * tCols> GDL::matXSIMD<T, tRows, tCols>::Data()
     {
         for (U32 i = 0; i < tCols; ++i)
         {
-            std::memcpy(&data[i * tRows], &mData[i * mNumRegistersPerCol], sizeof(F32) * tRows);
+            std::memcpy(&data[i * tRows], &mData[i * mNumRegistersPerCol], sizeof(T) * tRows);
         }
     }
     return data;
@@ -165,7 +165,7 @@ operator*(const matXSIMD<T, tRowsRhs, tColsRhs>& rhs) const
 
 #ifndef NDEBUG
 template <typename T, int tRows2, int tCols2>
-std::ostream& operator<<(std::ostream& os, const GDL::matXSIMD<tRows2, tCols2>& mat)
+std::ostream& operator<<(std::ostream& os, const GDL::matXSIMD<T,tRows2, tCols2>& mat)
 {
     using namespace GDL;
     for (U32 i = 0; i < tRows2; ++i)

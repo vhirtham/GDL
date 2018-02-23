@@ -4,6 +4,7 @@
 #endif
 
 #include "GDLTypedefs.h"
+#include "base/Exception.h"
 #include "base/SSESupportFunctions.h"
 
 #include <array>
@@ -20,7 +21,7 @@ class __attribute__((aligned(16))) matXSIMD
 // TODO: if register is a template parameter set corresponding alignment in the row above!
 {
     typedef __m128 __mx;
-    constexpr static U32 mNumRegisterEntries = GetNumRegisterEntries<__mx, F32>();
+    constexpr static U32 mNumRegisterEntries = GetNumRegisterEntries<__mx, T>();
     constexpr static U32 mNumRegistersPerCol = CalcMinNumArrayRegisters(tRows, mNumRegisterEntries);
     constexpr static U32 mNumRegisters = tCols * mNumRegistersPerCol;
 
@@ -42,7 +43,7 @@ public:
 
     //! @brief Constructor to set the whole matrix
     //! @brief Array with values (column major)
-    matXSIMD(const std::array<F32, tRows * tCols>& data);
+    matXSIMD(const std::array<T, tRows * tCols>& data);
 
     //! @brief Matrix - matrix multiplication
     //! @tparam tRowsRhs: Rhs matrix number of rows
@@ -61,7 +62,7 @@ public:
     //! @param row: Row of the accessed value
     //! @param col: Column of the accessed value
     //! @return Accessed value
-    inline F32 operator()(const U32 row, const U32 col) const;
+    inline T operator()(const U32 row, const U32 col) const;
 
     //! @brief Gets the number of rows
     //! @return Number of rows
@@ -76,7 +77,7 @@ public:
 
     //! @brief Gets the data array in column major ordering
     //! @return Data
-    inline const std::array<F32, tRows * tCols> Data() const;
+    inline const std::array<T, tRows * tCols> Data() const;
 
 private:
     void ConstructionChecks() const;

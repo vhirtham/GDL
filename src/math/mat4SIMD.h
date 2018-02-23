@@ -1,20 +1,14 @@
 #pragma once
 #include "GDLTypedefs.h"
+#include "base/SSESupportFunctions.h"
 
 #include <x86intrin.h>
-
 #ifndef NDEBUG
 #include <iostream>
 #endif
 
 namespace GDL
 {
-
-bool is_aligned(const volatile void* p, size_t n)
-{
-    return reinterpret_cast<std::uintptr_t>(p) % n == 0;
-}
-
 
 //! @brief 4x4 Matrix with SIMD support
 class __attribute__((aligned(16))) mat4SIMD
