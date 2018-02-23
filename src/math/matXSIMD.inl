@@ -9,23 +9,23 @@
 #include <iostream>
 #endif
 
-template <int tRows, int tCols>
-GDL::matXSIMD<tRows, tCols>::matXSIMD()
+template <typename T, int tRows, int tCols>
+GDL::matXSIMD<T, tRows, tCols>::matXSIMD()
 {
     ConstructionChecks();
 }
 
 
-template <int tRows, int tCols>
+template <typename T, int tRows, int tCols>
 template <typename... Args>
-GDL::matXSIMD<tRows, tCols>::matXSIMD(Args... args)
+GDL::matXSIMD<T, tRows, tCols>::matXSIMD(Args... args)
 {
     assert(sizeof...(args) == tRows * tCols);
     *this = matXSIMD(std::array<F32, tRows * tCols>{{static_cast<F32>(args)...}});
 }
 
-template <int tRows, int tCols>
-GDL::matXSIMD<tRows, tCols>::matXSIMD(const std::array<F32, tRows * tCols>& data)
+template <typename T, int tRows, int tCols>
+GDL::matXSIMD<T, tRows, tCols>::matXSIMD(const std::array<F32, tRows * tCols>& data)
 {
     if (tRows % mNumRegisterEntries == 0)
     {
@@ -46,44 +46,44 @@ GDL::matXSIMD<tRows, tCols>::matXSIMD(const std::array<F32, tRows * tCols>& data
     ConstructionChecks();
 }
 
-template <int tRows, int tCols>
-GDL::matXSIMD<tRows, tCols>& GDL::matXSIMD<tRows, tCols>::operator+=(const GDL::matXSIMD<tRows, tCols>& rhs)
+template <typename T, int tRows, int tCols>
+GDL::matXSIMD<T, tRows, tCols>& GDL::matXSIMD<T, tRows, tCols>::operator+=(const GDL::matXSIMD<T, tRows, tCols>& rhs)
 {
     for (U32 i = 0; i < mData.size(); ++i)
         mData[i] = _mmx_add_ps(rhs.mData[i], mData[i]);
     return *this;
 }
 
-template <int tRows, int tCols>
-GDL::F32 GDL::matXSIMD<tRows, tCols>::operator()(const GDL::U32 row, const GDL::U32 col) const
+template <typename T, int tRows, int tCols>
+GDL::F32 GDL::matXSIMD<T, tRows, tCols>::operator()(const GDL::U32 row, const GDL::U32 col) const
 {
     assert(row < tRows && col < tCols);
     return mData[row / mNumRegisterEntries + col * mNumRegistersPerCol][row % mNumRegisterEntries];
 }
 
-template <int tRows, int tCols>
-GDL::U32 GDL::matXSIMD<tRows, tCols>::Rows() const
+template <typename T, int tRows, int tCols>
+GDL::U32 GDL::matXSIMD<T, tRows, tCols>::Rows() const
 {
     return tRows;
 }
 
 
-template <int tRows, int tCols>
-GDL::U32 GDL::matXSIMD<tRows, tCols>::Cols() const
+template <typename T, int tRows, int tCols>
+GDL::U32 GDL::matXSIMD<T, tRows, tCols>::Cols() const
 {
     return tCols;
 }
 
-template <int tRows, int tCols>
-void GDL::matXSIMD<tRows, tCols>::SetZero()
+template <typename T, int tRows, int tCols>
+void GDL::matXSIMD<T, tRows, tCols>::SetZero()
 {
     std::fill(mData.begin(), mData.end(), _mm_set1_ps(0.));
 }
 
 
 
-template <int tRows, int tCols>
-const std::array<GDL::F32, tRows * tCols> GDL::matXSIMD<tRows, tCols>::Data() const
+template <typename T, int tRows, int tCols>
+const std::array<GDL::F32, tRows * tCols> GDL::matXSIMD<T, tRows, tCols>::Data() const
 {
     std::array<GDL::F32, tRows * tCols> data;
     if (tRows % mNumRegisterEntries == 0)
@@ -101,8 +101,8 @@ const std::array<GDL::F32, tRows * tCols> GDL::matXSIMD<tRows, tCols>::Data() co
     return data;
 }
 
-template <int tRows, int tCols>
-void GDL::matXSIMD<tRows, tCols>::ConstructionChecks() const
+template <typename T, int tRows, int tCols>
+void GDL::matXSIMD<T, tRows, tCols>::ConstructionChecks() const
 {
     assert(sizeof(mData) == sizeof(__mx) * mData.size()); // Array needs to be compact
 #ifndef NDEBUG
@@ -113,15 +113,16 @@ void GDL::matXSIMD<tRows, tCols>::ConstructionChecks() const
 }
 
 
-template <int tRows, int tCols>
+template <typename T, int tRows, int tCols>
 template <int tRowsRhs, int tColsRhs>
-GDL::matXSIMD<tRows, tColsRhs> GDL::matXSIMD<tRows, tCols>::operator*(const matXSIMD<tRowsRhs, tColsRhs>& rhs) const
+GDL::matXSIMD<T, tRows, tColsRhs> GDL::matXSIMD<T, tRows, tCols>::
+operator*(const matXSIMD<T, tRowsRhs, tColsRhs>& rhs) const
 {
     static_assert(tCols == tRowsRhs, "Lhs cols != Rhs rows - Matrix multiplication not possible!");
 
     constexpr U32 registersPerColRhs = CalcMinNumArrayRegisters(tRowsRhs, mNumRegisterEntries);
 
-    matXSIMD<tRows, tColsRhs> result;
+    matXSIMD<T, tRows, tColsRhs> result;
     result.SetZero();
     // loop over RHS rows (column registers)
     for (U32 j = 0; j < registersPerColRhs; ++j)
@@ -145,8 +146,8 @@ GDL::matXSIMD<tRows, tColsRhs> GDL::matXSIMD<tRows, tCols>::operator*(const matX
                         mData[currentBlockLhs + 0 * mNumRegistersPerCol], tmp0,
                         _mmx_fmadd_ps(mData[currentBlockLhs + 1 * mNumRegistersPerCol], tmp1,
                                       _mmx_fmadd_ps(mData[currentBlockLhs + 2 * mNumRegistersPerCol], tmp2,
-                                                    _mmx_fmadd_ps(mData[currentBlockLhs + 3 * mNumRegistersPerCol], tmp3,
-                                                                  result.mData[registerNumResult]))));
+                                                    _mmx_fmadd_ps(mData[currentBlockLhs + 3 * mNumRegistersPerCol],
+                                                                  tmp3, result.mData[registerNumResult]))));
 #else
                 result.mData[registerNumResult] = _mmx_add_ps(
                         _mmx_add_ps(_mmx_add_ps(_mmx_mul_ps(mData[currentBlockLhs + 0 * mNumRegistersPerCol], tmp0),
@@ -163,7 +164,7 @@ GDL::matXSIMD<tRows, tColsRhs> GDL::matXSIMD<tRows, tCols>::operator*(const matX
 }
 
 #ifndef NDEBUG
-template <int tRows2, int tCols2>
+template <typename T, int tRows2, int tCols2>
 std::ostream& operator<<(std::ostream& os, const GDL::matXSIMD<tRows2, tCols2>& mat)
 {
     using namespace GDL;

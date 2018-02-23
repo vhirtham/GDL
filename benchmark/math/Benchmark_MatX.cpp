@@ -16,8 +16,8 @@ constexpr U32 M = N - 1;
 class SIMD : public benchmark::Fixture
 {
 public:
-    matXSIMD<N, N> A;
-    matXSIMD<N, N> B;
+    matXSIMD<F32, N, N> A;
+    matXSIMD<F32, N, N> B;
     matXSingle<F32, M, N> C;
     std::array<F32, N * N> valArray;
     std::array<F32, M * N> valArray2;
@@ -71,7 +71,7 @@ BENCHMARK_F(Single, Construction_Def)(benchmark::State& state)
 BENCHMARK_F(SIMD, Construction_Def)(benchmark::State& state)
 {
     for (auto _ : state)
-        benchmark::DoNotOptimize(matXSIMD<N, N>());
+        benchmark::DoNotOptimize(matXSIMD<F32, N, N>());
 }
 
 // Value Construction %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -87,7 +87,7 @@ BENCHMARK_F(Single, Construction_Val)(benchmark::State& state)
 BENCHMARK_F(SIMD, Construction_Val)(benchmark::State& state)
 {
     for (auto _ : state)
-        benchmark::DoNotOptimize(matXSIMD<N, N>(valArray));
+        benchmark::DoNotOptimize(matXSIMD<F32, N, N>(valArray));
 }
 
 
@@ -95,7 +95,7 @@ BENCHMARK_F(SIMD, Construction_Val)(benchmark::State& state)
 BENCHMARK_F(SIMD, Construction_Val_non_full_registers)(benchmark::State& state)
 {
     for (auto _ : state)
-        benchmark::DoNotOptimize(matXSIMD<M, N>(valArray2));
+        benchmark::DoNotOptimize(matXSIMD<F32, M, N>(valArray2));
 }
 
 BENCHMARK_F(Single, Construction_Val_Variadic_12x12)(benchmark::State& state)
@@ -113,7 +113,7 @@ BENCHMARK_F(Single, Construction_Val_Variadic_12x12)(benchmark::State& state)
 BENCHMARK_F(SIMD, Construction_Val_Variadic_12x12)(benchmark::State& state)
 {
     for (auto _ : state)
-        benchmark::DoNotOptimize(matXSIMD<N, N>(
+        benchmark::DoNotOptimize(matXSIMD<F32, N, N>(
                 1., 2., 3., 4., 5., 6., 7., 8., 9., 10., 11., 12., 1., 2., 3., 4., 5., 6., 7., 8., 9., 10., 11., 12.,
                 1., 2., 3., 4., 5., 6., 7., 8., 9., 10., 11., 12., 1., 2., 3., 4., 5., 6., 7., 8., 9., 10., 11., 12.,
                 1., 2., 3., 4., 5., 6., 7., 8., 9., 10., 11., 12., 1., 2., 3., 4., 5., 6., 7., 8., 9., 10., 11., 12.,
