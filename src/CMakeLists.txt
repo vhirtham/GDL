@@ -13,7 +13,7 @@ target_include_directories(GDLResourceManagement
 
 target_compile_features(GDLResourceManagement
     PUBLIC
-        cxx_std_14)
+        cxx_std_17)
 
 createObjectLibs("${GDL_RESOURCE_MANAGEMENT_SOURCES}")
 

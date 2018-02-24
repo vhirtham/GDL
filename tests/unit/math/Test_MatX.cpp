@@ -127,7 +127,7 @@ BOOST_AUTO_TEST_CASE(Multiplication_Single)
 BOOST_AUTO_TEST_CASE(Multiplication_SIMD)
 {
     MultiplicationTest<matXSIMD, F32>();
-    // MultiplicationTest<matXSIMD, F64>();
+    MultiplicationTest<matXSIMD, F64>();
 }
 
 // Addition Assignment %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

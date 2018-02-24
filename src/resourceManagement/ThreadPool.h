@@ -8,6 +8,7 @@
 
 #include <atomic>
 #include <deque>
+#include <functional>
 #include <mutex>
 #include <utility>
 

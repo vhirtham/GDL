@@ -14,4 +14,8 @@ function(addBenchmark BenchmarkName)
     target_include_directories(${BenchmarkName}
         PUBLIC
             ${PROJECT_SOURCE_DIR}/src)
+
+    target_compile_features(${BenchmarkName}
+        PUBLIC
+            cxx_std_17)
 endfunction()

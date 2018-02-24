@@ -1,6 +1,8 @@
 #pragma once
 
 #include "GDLTypedefs.h"
+#include "base/Exception.h"
+
 #include <x86intrin.h>
 
 namespace GDL
@@ -108,64 +110,81 @@ inline __m256 _mmx_add_p<__m256>(__m256 a, __m256 b)
 
 
 template <typename T>
-inline T _mmx_mul_ps(T a, T b)
+inline T _mmx_mul_p(T a, T b)
 {
     throw Exception(__PRETTY_FUNCTION__, "Not defined for selected register type");
     return 0;
 }
 
 template <>
-inline __m128 _mmx_mul_ps<__m128>(__m128 a, __m128 b)
+inline __m128 _mmx_mul_p<__m128>(__m128 a, __m128 b)
 {
     return _mm_mul_ps(a, b);
 }
+template <>
+inline __m128d _mmx_mul_p<__m128d>(__m128d a, __m128d b)
+{
+    return _mm_mul_pd(a, b);
+}
 #ifdef ENABLE_AVX
 template <>
-inline __m256 _mmx_mul_ps<__m256>(__m256 a, __m256 b)
+inline __m256 _mmx_mul_p<__m256>(__m256 a, __m256 b)
 {
     return _mm256_mul_ps(a, b);
 }
 #endif
 
 template <typename T>
-inline T _mmx_fmadd_ps(T a, T b, T c)
+inline T _mmx_fmadd_p(T a, T b, T c)
 {
     throw Exception(__PRETTY_FUNCTION__, "Not defined for selected register type");
     return 0;
 }
 
 template <>
-inline __m128 _mmx_fmadd_ps<__m128>(__m128 a, __m128 b, __m128 c)
+inline __m128 _mmx_fmadd_p<__m128>(__m128 a, __m128 b, __m128 c)
 {
     return _mm_fmadd_ps(a, b, c);
 }
 
+template <>
+inline __m128d _mmx_fmadd_p<__m128d>(__m128d a, __m128d b, __m128d c)
+{
+    return _mm_fmadd_pd(a, b, c);
+}
+
 #ifdef ENABLE_AVX
 template <>
-inline __m256 _mmx_fmadd_ps<__m256>(__m256 a, __m256 b, __m256 c)
+inline __m256 _mmx_fmadd_p<__m256>(__m256 a, __m256 b, __m256 c)
 {
     return _mm256_fmadd_ps(a, b, c);
 }
 #endif
 
-template <typename T>
-inline T _mmx_set1_ps(float f)
+template <typename T, typename TReg>
+inline TReg _mmx_set1_p(T f)
 {
-    throw Exception(__PRETTY_FUNCTION__, "Not defined for selected register type");
+    throw Exception(__PRETTY_FUNCTION__, "Not defined for selected combination of register type and data type");
     return 0;
 }
 
 template <>
-inline __m128 _mmx_set1_ps(float f)
+inline __m128 _mmx_set1_p(F32 f)
 {
     return _mm_set1_ps(f);
 }
+
+template <>
+inline __m128d _mmx_set1_p(F64 f)
+{
+    return _mm_set1_pd(f);
+}
+
 #ifdef ENABLE_AVX
 template <>
-inline __m256 _mmx_set1_ps(float f)
+inline __m256 _mmx_set1_p(F32 f)
 {
     return _mm256_set1_ps(f);
 }
 #endif
-
 }

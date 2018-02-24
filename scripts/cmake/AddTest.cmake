@@ -35,6 +35,10 @@ function(addTest TestName)
             -DBOOST_TEST_MODULE=${TestName}
             -DBOOST_TEST_DYN_LINK)
 
+    target_compile_features(${TestName}
+        PUBLIC
+            cxx_std_17)
+
     ### Create Test
     string(REPLACE "${CMAKE_SOURCE_DIR}/tests/" ""
         relpath ${CMAKE_CURRENT_SOURCE_DIR})
