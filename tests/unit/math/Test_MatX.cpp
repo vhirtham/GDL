@@ -32,45 +32,38 @@ bool checkCloseMat(T a, T b, F32 tolerance = 1e-6)
 
 
 // Construction %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-BOOST_AUTO_TEST_CASE(Construction_Single)
+template <template <typename, int, int> class matrix, typename T>
+void CtorTest()
 {
     // array ctor
-    std::array<F32, 15> expA = {{0., 1., 2., 3., 4., 5., 6., 7., 8., 9., 10., 11., 12., 13., 14.}};
-    matXSingle<F32, 3, 5> A(expA);
+    std::array<T, 15> expA = {{0., 1., 2., 3., 4., 5., 6., 7., 8., 9., 10., 11., 12., 13., 14.}};
+    matrix<T, 3, 5> A(expA);
     BOOST_CHECK(checkCloseArray(A.Data(), expA));
 
-    std::array<F32, 15> expB = {{0., 1., 2., 3., 4., 5., 6., 7., 8., 9., 10., 11., 12., 13., 14.}};
-    matXSingle<F32, 5, 3> B(expB);
+    std::array<T, 15> expB = {{0., 1., 2., 3., 4., 5., 6., 7., 8., 9., 10., 11., 12., 13., 14.}};
+    matrix<T, 5, 3> B(expB);
     BOOST_CHECK(checkCloseArray(B.Data(), expB));
 
-    std::array<F32, 16> expC = {{0., 1., 2., 3., 4., 5., 6., 7., 8., 9., 10., 11., 12., 13., 14., 15.}};
-    matXSingle<F32, 4, 4> C(expC);
+    std::array<T, 16> expC = {{0., 1., 2., 3., 4., 5., 6., 7., 8., 9., 10., 11., 12., 13., 14., 15.}};
+    matrix<T, 4, 4> C(expC);
     BOOST_CHECK(checkCloseArray(C.Data(), expC));
 
     // variadic ctor
-    matXSingle<F32, 3, 5> A2(0., 1., 2., 3., 4., 5., 6., 7., 8., 9., 10., 11., 12., 13., 14.);
+    matrix<T, 3, 5> A2(0., 1., 2., 3., 4., 5., 6., 7., 8., 9., 10., 11., 12., 13., 14.);
     BOOST_CHECK(checkCloseArray(A2.Data(), expA));
+}
+
+BOOST_AUTO_TEST_CASE(Construction_Single)
+{
+    CtorTest<matXSingle, F32>();
+    CtorTest<matXSingle, F64>();
 }
 
 
 BOOST_AUTO_TEST_CASE(Construction_SSE)
 {
-
-    std::array<F32, 15> expA = {{0., 1., 2., 3., 4., 5., 6., 7., 8., 9., 10., 11., 12., 13., 14.}};
-    matXSIMD<F32, 3, 5> A(expA);
-    BOOST_CHECK(checkCloseArray(A.Data(), expA));
-
-    std::array<F32, 15> expB = {{0., 1., 2., 3., 4., 5., 6., 7., 8., 9., 10., 11., 12., 13., 14.}};
-    matXSIMD<F32, 5, 3> B(expB);
-    BOOST_CHECK(checkCloseArray(B.Data(), expB));
-
-    std::array<F32, 16> expC = {{0., 1., 2., 3., 4., 5., 6., 7., 8., 9., 10., 11., 12., 13., 14., 15.}};
-    matXSIMD<F32, 4, 4> C(expC);
-    BOOST_CHECK(checkCloseArray(C.Data(), expC));
-
-    // variadic ctor
-    matXSIMD<F32, 3, 5> A2(0., 1., 2., 3., 4., 5., 6., 7., 8., 9., 10., 11., 12., 13., 14.);
-    BOOST_CHECK(checkCloseArray(A2.Data(), expA));
+    CtorTest<matXSIMD, F32>();
+    CtorTest<matXSIMD, F64>();
 }
 
 // Multiplication %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
