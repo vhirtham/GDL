@@ -149,11 +149,13 @@ operator*(const matXSIMD<T, tRowsRhs, tColsRhs>& rhs) const
                         const U32 currentBlockLhs = j * mNumRegisterEntries * mNumRegistersPerCol + k;
 #ifdef ENABLE_SSE4
                         result.mData[registerNumResult] = _mmx_fmadd_p(
-                                mData[currentBlockLhs + 0 * mNumRegistersPerCol], tmp0,
+                                mData[currentBlockLhs], tmp0,
                                 _mmx_fmadd_p(mData[currentBlockLhs + 1 * mNumRegistersPerCol], tmp1,
                                              _mmx_fmadd_p(mData[currentBlockLhs + 2 * mNumRegistersPerCol], tmp2,
                                                           _mmx_fmadd_p(mData[currentBlockLhs + 3 * mNumRegistersPerCol],
                                                                        tmp3, result.mData[registerNumResult]))));
+                        auto test = mData[currentBlockLhs + 3 * mNumRegistersPerCol];
+                        int a = 0;
 #else
                         result.mData[registerNumResult] = _mmx_add_p<T>(
                                 _mmx_add_p<T>(
@@ -193,7 +195,7 @@ operator*(const matXSIMD<T, tRowsRhs, tColsRhs>& rhs) const
                             const U32 currentBlockLhs = j * mNumRegisterEntries * mNumRegistersPerCol + k;
 #ifdef ENABLE_SSE4
                             result.mData[registerNumResult] =
-                                    _mmx_fmadd_p(mData[currentBlockLhs + 0 * mNumRegistersPerCol], tmp0,
+                                    _mmx_fmadd_p(mData[currentBlockLhs], tmp0,
                                                  _mmx_fmadd_p(mData[currentBlockLhs + 1 * mNumRegistersPerCol], tmp1,
                                                               result.mData[registerNumResult]));
 #else
