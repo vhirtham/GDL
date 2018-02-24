@@ -10,10 +10,10 @@ namespace GDL
 //! @tparam T: Data type
 //! @tparam tRows: Number of rows
 //! @tparam tCols: Number of columns
-template <typename T, int tRows, int tCols>
+template <typename T, I32 tRows, I32 tCols>
 class matXSingle
 {
-    template <typename T2, int tRows2, int tCols2>
+    template <typename T2, I32 tRows2, I32 tCols2>
     friend class matXSingle;
 
     std::array<T, tRows * tCols> mData;
@@ -37,7 +37,7 @@ public:
     //! @tparam tColsRhs: Rhs matrix number of columns
     //! @param rhs: Rhs matrix
     //! @return Result of the multiplication
-    template <int tRowsRhs, int tColsRhs>
+    template <I32 tRowsRhs, I32 tColsRhs>
     inline matXSingle<T, tRows, tColsRhs> operator*(const matXSingle<T, tRowsRhs, tColsRhs>& rhs) const;
 
 

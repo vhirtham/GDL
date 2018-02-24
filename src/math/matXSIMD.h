@@ -16,7 +16,7 @@ namespace GDL
 //! @brief Matrix of arbitrary size with SIMD support
 //! @tparam tRows: Number of rows
 //! @tparam tCols: Number of columns
-template <typename T, int tRows, int tCols>
+template <typename T, I32 tRows, I32 tCols>
 class __attribute__((aligned(16))) matXSIMD
 // TODO: if register is a template parameter set corresponding alignment in the row above!
 {
@@ -28,7 +28,7 @@ class __attribute__((aligned(16))) matXSIMD
 
     __attribute__((aligned(16))) std::array<__mx, mNumRegisters> mData;
 
-    template <typename T2, int tRows2, int tCols2>
+    template <typename T2, I32 tRows2, I32 tCols2>
     friend class matXSIMD;
 
 public:
@@ -51,7 +51,7 @@ public:
     //! @tparam tColsRhs: Rhs matrix number of columns
     //! @param rhs: Rhs matrix
     //! @return Result of the multiplication
-    template <int tRowsRhs, int tColsRhs>
+    template <I32 tRowsRhs, I32 tColsRhs>
     inline matXSIMD<T, tRows, tColsRhs> operator*(const matXSIMD<T, tRowsRhs, tColsRhs>& rhs) const;
 
     //! @brief Matrix - matrix addition

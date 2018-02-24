@@ -9,14 +9,14 @@
 #include <iostream>
 #endif
 
-template <typename T, int tRows, int tCols>
+template <typename T, GDL::I32 tRows, GDL::I32 tCols>
 GDL::matXSIMD<T, tRows, tCols>::matXSIMD()
 {
     ConstructionChecks();
 }
 
 
-template <typename T, int tRows, int tCols>
+template <typename T, GDL::I32 tRows, GDL::I32 tCols>
 template <typename... Args>
 GDL::matXSIMD<T, tRows, tCols>::matXSIMD(Args... args)
 {
@@ -24,7 +24,7 @@ GDL::matXSIMD<T, tRows, tCols>::matXSIMD(Args... args)
     *this = matXSIMD(std::array<T, tRows * tCols>{{static_cast<T>(args)...}});
 }
 
-template <typename T, int tRows, int tCols>
+template <typename T, GDL::I32 tRows, GDL::I32 tCols>
 GDL::matXSIMD<T, tRows, tCols>::matXSIMD(const std::array<T, tRows * tCols>& data)
 {
     if (tRows % mNumRegisterEntries == 0)
@@ -46,7 +46,7 @@ GDL::matXSIMD<T, tRows, tCols>::matXSIMD(const std::array<T, tRows * tCols>& dat
     ConstructionChecks();
 }
 
-template <typename T, int tRows, int tCols>
+template <typename T, GDL::I32 tRows, GDL::I32 tCols>
 GDL::matXSIMD<T, tRows, tCols>& GDL::matXSIMD<T, tRows, tCols>::operator+=(const GDL::matXSIMD<T, tRows, tCols>& rhs)
 {
     for (U32 i = 0; i < mData.size(); ++i)
@@ -54,27 +54,27 @@ GDL::matXSIMD<T, tRows, tCols>& GDL::matXSIMD<T, tRows, tCols>::operator+=(const
     return *this;
 }
 
-template <typename T, int tRows, int tCols>
+template <typename T, GDL::I32 tRows, GDL::I32 tCols>
 T GDL::matXSIMD<T, tRows, tCols>::operator()(const GDL::U32 row, const GDL::U32 col) const
 {
     assert(row < tRows && col < tCols);
     return mData[row / mNumRegisterEntries + col * mNumRegistersPerCol][row % mNumRegisterEntries];
 }
 
-template <typename T, int tRows, int tCols>
+template <typename T, GDL::I32 tRows, GDL::I32 tCols>
 GDL::U32 GDL::matXSIMD<T, tRows, tCols>::Rows() const
 {
     return tRows;
 }
 
 
-template <typename T, int tRows, int tCols>
+template <typename T, GDL::I32 tRows, GDL::I32 tCols>
 GDL::U32 GDL::matXSIMD<T, tRows, tCols>::Cols() const
 {
     return tCols;
 }
 
-template <typename T, int tRows, int tCols>
+template <typename T, GDL::I32 tRows, GDL::I32 tCols>
 void GDL::matXSIMD<T, tRows, tCols>::SetZero()
 {
     std::fill(mData.begin(), mData.end(), _mmx_set1_p<T, __mx>(0.));
@@ -82,7 +82,7 @@ void GDL::matXSIMD<T, tRows, tCols>::SetZero()
 
 
 
-template <typename T, int tRows, int tCols>
+template <typename T, GDL::I32 tRows, GDL::I32 tCols>
 const std::array<T, tRows * tCols> GDL::matXSIMD<T, tRows, tCols>::Data() const
 {
     std::array<T, tRows * tCols> data;
@@ -101,7 +101,7 @@ const std::array<T, tRows * tCols> GDL::matXSIMD<T, tRows, tCols>::Data() const
     return data;
 }
 
-template <typename T, int tRows, int tCols>
+template <typename T, GDL::I32 tRows, GDL::I32 tCols>
 void GDL::matXSIMD<T, tRows, tCols>::ConstructionChecks() const
 {
     assert(sizeof(mData) == sizeof(__mx) * mData.size()); // Array needs to be compact
@@ -113,8 +113,8 @@ void GDL::matXSIMD<T, tRows, tCols>::ConstructionChecks() const
 }
 
 
-template <typename T, int tRows, int tCols>
-template <int tRowsRhs, int tColsRhs>
+template <typename T, GDL::I32 tRows, GDL::I32 tCols>
+template <GDL::I32 tRowsRhs, GDL::I32 tColsRhs>
 GDL::matXSIMD<T, tRows, tColsRhs> GDL::matXSIMD<T, tRows, tCols>::
 operator*(const matXSIMD<T, tRowsRhs, tColsRhs>& rhs) const
 {
@@ -125,19 +125,17 @@ operator*(const matXSIMD<T, tRowsRhs, tColsRhs>& rhs) const
     matXSIMD<T, tRows, tColsRhs> result;
     result.SetZero();
 
+
+    // Registers with 4 data entries %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     if
         constexpr(mNumRegisterEntries == 4)
         {
             // loop over RHS rows (column registers)
-            for (U32 j = 0; j < registersPerColRhs; ++j)
+            for (U32 j = 0; j < tRowsRhs / mNumRegisterEntries; ++j)
                 // loop over every RHS Col
                 for (U32 i = 0; i < tColsRhs; ++i)
                 {
                     const U32 registerNumRhs = i * registersPerColRhs + j;
-                    // those temporaries seem to have no effect on performance but they help to keep the code a little
-                    // bit
-                    // less
-                    // messy. Also check if there is a faster way to extract single values into a new register
                     __mx tmp0 = _mmx_set1_p<T, __mx>(rhs.mData[registerNumRhs][0]);
                     __mx tmp1 = _mmx_set1_p<T, __mx>(rhs.mData[registerNumRhs][1]);
                     __mx tmp2 = _mmx_set1_p<T, __mx>(rhs.mData[registerNumRhs][2]);
@@ -154,8 +152,6 @@ operator*(const matXSIMD<T, tRowsRhs, tColsRhs>& rhs) const
                                              _mmx_fmadd_p(mData[currentBlockLhs + 2 * mNumRegistersPerCol], tmp2,
                                                           _mmx_fmadd_p(mData[currentBlockLhs + 3 * mNumRegistersPerCol],
                                                                        tmp3, result.mData[registerNumResult]))));
-                        auto test = mData[currentBlockLhs + 3 * mNumRegistersPerCol];
-                        int a = 0;
 #else
                         result.mData[registerNumResult] = _mmx_add_p<T>(
                                 _mmx_add_p<T>(
@@ -170,52 +166,161 @@ operator*(const matXSIMD<T, tRowsRhs, tColsRhs>& rhs) const
 #endif
                     }
                 }
-        }
-    else
-    {
-        if
-            constexpr(mNumRegisterEntries == 2)
+            if (tRowsRhs % mNumRegisterEntries == 3)
             {
-                // loop over RHS rows (column registers)
-                for (U32 j = 0; j < registersPerColRhs; ++j)
-                    // loop over every RHS Col
-                    for (U32 i = 0; i < tColsRhs; ++i)
+                U32 j = tRowsRhs / mNumRegisterEntries;
+                // loop over every RHS Col
+                for (U32 i = 0; i < tColsRhs; ++i)
+                {
+                    const U32 registerNumRhs = i * registersPerColRhs + j;
+                    __mx tmp0 = _mmx_set1_p<T, __mx>(rhs.mData[registerNumRhs][0]);
+                    __mx tmp1 = _mmx_set1_p<T, __mx>(rhs.mData[registerNumRhs][1]);
+                    __mx tmp2 = _mmx_set1_p<T, __mx>(rhs.mData[registerNumRhs][2]);
+                    // loop over LHS rows (column registers)
+                    for (U32 k = 0; k < mNumRegistersPerCol; ++k)
                     {
-                        const U32 registerNumRhs = i * registersPerColRhs + j;
-                        // those temporaries seem to have no effect on performance but they help to keep the code a
-                        // little bit
-                        // less
-                        // messy. Also check if there is a faster way to extract single values into a new register
-                        __mx tmp0 = _mmx_set1_p<T, __mx>(rhs.mData[registerNumRhs][0]);
-                        __mx tmp1 = _mmx_set1_p<T, __mx>(rhs.mData[registerNumRhs][1]);
-                        // loop over LHS rows (column registers)
-                        for (U32 k = 0; k < mNumRegistersPerCol; ++k)
-                        {
-                            const U32 registerNumResult = i * mNumRegistersPerCol + k;
-                            const U32 currentBlockLhs = j * mNumRegisterEntries * mNumRegistersPerCol + k;
+                        const U32 registerNumResult = i * mNumRegistersPerCol + k;
+                        const U32 currentBlockLhs = j * mNumRegisterEntries * mNumRegistersPerCol + k;
 #ifdef ENABLE_SSE4
-                            result.mData[registerNumResult] =
-                                    _mmx_fmadd_p(mData[currentBlockLhs], tmp0,
-                                                 _mmx_fmadd_p(mData[currentBlockLhs + 1 * mNumRegistersPerCol], tmp1,
-                                                              result.mData[registerNumResult]));
+                        result.mData[registerNumResult] =
+                                _mmx_fmadd_p(mData[currentBlockLhs], tmp0,
+                                             _mmx_fmadd_p(mData[currentBlockLhs + 1 * mNumRegistersPerCol], tmp1,
+                                                          _mmx_fmadd_p(mData[currentBlockLhs + 2 * mNumRegistersPerCol],
+                                                                       tmp2, result.mData[registerNumResult])));
 #else
-                            result.mData[registerNumResult] = _mmx_add_p<T>(
-
-                                    _mmx_add_p<T>(_mmx_mul_p(mData[currentBlockLhs + 0 * mNumRegistersPerCol], tmp0),
-                                                  _mmx_mul_p(mData[currentBlockLhs + 1 * mNumRegistersPerCol], tmp1)),
-
-                                    result.mData[registerNumResult]);
+                        result.mData[registerNumResult] = _mmx_add_p<T>(
+                                _mmx_add_p<T>(_mmx_mul_p(mData[currentBlockLhs + 0 * mNumRegistersPerCol], tmp0),
+                                              _mmx_mul_p(mData[currentBlockLhs + 1 * mNumRegistersPerCol], tmp1)),
+                                _mmx_add_p<T>(_mmx_mul_p(mData[currentBlockLhs + 2 * mNumRegistersPerCol], tmp2),
+                                              result.mData[registerNumResult]));
 
 #endif
-                        }
                     }
+                }
             }
-    }
+            if (tRowsRhs % mNumRegisterEntries == 2)
+            {
+                U32 j = tRowsRhs / mNumRegisterEntries;
+                // loop over every RHS Col
+                for (U32 i = 0; i < tColsRhs; ++i)
+                {
+                    const U32 registerNumRhs = i * registersPerColRhs + j;
+                    __mx tmp0 = _mmx_set1_p<T, __mx>(rhs.mData[registerNumRhs][0]);
+                    __mx tmp1 = _mmx_set1_p<T, __mx>(rhs.mData[registerNumRhs][1]);
+                    // loop over LHS rows (column registers)
+                    for (U32 k = 0; k < mNumRegistersPerCol; ++k)
+                    {
+                        const U32 registerNumResult = i * mNumRegistersPerCol + k;
+                        const U32 currentBlockLhs = j * mNumRegisterEntries * mNumRegistersPerCol + k;
+#ifdef ENABLE_SSE4
+                        result.mData[registerNumResult] =
+                                _mmx_fmadd_p(mData[currentBlockLhs], tmp0,
+                                             _mmx_fmadd_p(mData[currentBlockLhs + 1 * mNumRegistersPerCol], tmp1,
+                                                          result.mData[registerNumResult]));
+#else
+                        result.mData[registerNumResult] = _mmx_add_p<T>(
+                                _mmx_add_p<T>(_mmx_mul_p(mData[currentBlockLhs + 0 * mNumRegistersPerCol], tmp0),
+                                              _mmx_mul_p(mData[currentBlockLhs + 1 * mNumRegistersPerCol], tmp1)),
+                                result.mData[registerNumResult]);
+
+#endif
+                    }
+                }
+            }
+            if (tRowsRhs % mNumRegisterEntries == 1)
+            {
+                U32 j = tRowsRhs / mNumRegisterEntries;
+                // loop over every RHS Col
+                for (U32 i = 0; i < tColsRhs; ++i)
+                {
+                    const U32 registerNumRhs = i * registersPerColRhs + j;
+                    __mx tmp0 = _mmx_set1_p<T, __mx>(rhs.mData[registerNumRhs][0]);
+                    // loop over LHS rows (column registers)
+                    for (U32 k = 0; k < mNumRegistersPerCol; ++k)
+                    {
+                        const U32 registerNumResult = i * mNumRegistersPerCol + k;
+                        const U32 currentBlockLhs = j * mNumRegisterEntries * mNumRegistersPerCol + k;
+#ifdef ENABLE_SSE4
+                        result.mData[registerNumResult] =
+                                _mmx_fmadd_p(mData[currentBlockLhs], tmp0, result.mData[registerNumResult]);
+#else
+                        result.mData[registerNumResult] =
+                                _mmx_add_p<T>(_mmx_mul_p(mData[currentBlockLhs + 0 * mNumRegistersPerCol], tmp0),
+                                              result.mData[registerNumResult]);
+
+#endif
+                    }
+                }
+            }
+        }
+
+
+    // Registers with 2 data entries %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    if
+        constexpr(mNumRegisterEntries == 2)
+        {
+            // loop over RHS rows (column registers)
+            for (U32 j = 0; j < tRowsRhs / mNumRegisterEntries; ++j)
+                // loop over every RHS Col
+                for (U32 i = 0; i < tColsRhs; ++i)
+                {
+                    const U32 registerNumRhs = i * registersPerColRhs + j;
+                    __mx tmp0 = _mmx_set1_p<T, __mx>(rhs.mData[registerNumRhs][0]);
+                    __mx tmp1 = _mmx_set1_p<T, __mx>(rhs.mData[registerNumRhs][1]);
+                    // loop over LHS rows (column registers)
+                    for (U32 k = 0; k < mNumRegistersPerCol; ++k)
+                    {
+                        const U32 registerNumResult = i * mNumRegistersPerCol + k;
+                        const U32 currentBlockLhs = j * mNumRegisterEntries * mNumRegistersPerCol + k;
+#ifdef ENABLE_SSE4
+                        result.mData[registerNumResult] =
+                                _mmx_fmadd_p(mData[currentBlockLhs], tmp0,
+                                             _mmx_fmadd_p(mData[currentBlockLhs + 1 * mNumRegistersPerCol], tmp1,
+                                                          result.mData[registerNumResult]));
+#else
+                        result.mData[registerNumResult] = _mmx_add_p<T>(
+
+                                _mmx_add_p<T>(_mmx_mul_p(mData[currentBlockLhs + 0 * mNumRegistersPerCol], tmp0),
+                                              _mmx_mul_p(mData[currentBlockLhs + 1 * mNumRegistersPerCol], tmp1)),
+
+                                result.mData[registerNumResult]);
+
+#endif
+                    }
+                }
+            if (tRowsRhs % mNumRegisterEntries == 1)
+            {
+                U32 j = tRowsRhs / mNumRegisterEntries;
+                for (U32 i = 0; i < tColsRhs; ++i)
+                {
+                    const U32 registerNumRhs = i * registersPerColRhs + j;
+                    __mx tmp0 = _mmx_set1_p<T, __mx>(rhs.mData[registerNumRhs][0]);
+                    // loop over LHS rows (column registers)
+                    for (U32 k = 0; k < mNumRegistersPerCol; ++k)
+                    {
+                        const U32 registerNumResult = i * mNumRegistersPerCol + k;
+                        const U32 currentBlockLhs = j * mNumRegisterEntries * mNumRegistersPerCol + k;
+#ifdef ENABLE_SSE4
+                        result.mData[registerNumResult] =
+                                _mmx_fmadd_p(mData[currentBlockLhs], tmp0, result.mData[registerNumResult]);
+#else
+                        result.mData[registerNumResult] =
+                                _mmx_add_p<T>(_mmx_mul_p(mData[currentBlockLhs + 0 * mNumRegistersPerCol], tmp0),
+                                              result.mData[registerNumResult]);
+
+#endif
+                    }
+                }
+            }
+        }
+
     return result;
 }
 
+
+
 #ifndef NDEBUG
-template <typename T, int tRows2, int tCols2>
+template <typename T, GDL::I32 tRows2, GDL::I32 tCols2>
 std::ostream& operator<<(std::ostream& os, const GDL::matXSIMD<T, tRows2, tCols2>& mat)
 {
     using namespace GDL;

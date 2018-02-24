@@ -8,12 +8,12 @@
 #include <iostream>
 #endif
 
-template <typename T, int tRows, int tCols>
+template <typename T, GDL::I32 tRows, GDL::I32 tCols>
 GDL::matXSingle<T, tRows, tCols>::matXSingle()
 {
 }
 
-template<typename T, int tRows, int tCols>
+template<typename T, GDL::I32 tRows, GDL::I32 tCols>
 template <typename... Args>
 GDL::matXSingle<T, tRows, tCols>::matXSingle(Args... args)
     : mData{{static_cast<T>(args)...}}
@@ -21,7 +21,7 @@ GDL::matXSingle<T, tRows, tCols>::matXSingle(Args... args)
     assert(mData.size() == sizeof...(args));
 }
 
-template <typename T, int tRows, int tCols>
+template <typename T, GDL::I32 tRows, GDL::I32 tCols>
 GDL::matXSingle<T, tRows, tCols>::matXSingle(const std::array<T, tRows * tCols>& data)
     : mData(data)
 {
@@ -29,8 +29,8 @@ GDL::matXSingle<T, tRows, tCols>::matXSingle(const std::array<T, tRows * tCols>&
 }
 
 
-template <typename T, int tRows, int tCols>
-template <int tRowsRhs, int tColsRhs>
+template <typename T, GDL::I32 tRows, GDL::I32 tCols>
+template <GDL::I32 tRowsRhs, GDL::I32 tColsRhs>
 GDL::matXSingle<T, tRows, tColsRhs> GDL::matXSingle<T, tRows, tCols>::
 operator*(const matXSingle<T, tRowsRhs, tColsRhs>& rhs) const
 {
@@ -49,7 +49,7 @@ operator*(const matXSingle<T, tRowsRhs, tColsRhs>& rhs) const
 }
 
 
-template <typename T, int tRows, int tCols>
+template <typename T, GDL::I32 tRows, GDL::I32 tCols>
 GDL::matXSingle<T, tRows, tCols>& GDL::matXSingle<T, tRows, tCols>::operator+=(const matXSingle<T, tRows, tCols>& rhs)
 {
     for (U32 i = 0; i < mData.size(); ++i)
@@ -57,37 +57,37 @@ GDL::matXSingle<T, tRows, tCols>& GDL::matXSingle<T, tRows, tCols>::operator+=(c
     return *this;
 }
 
-template <typename T, int tRows, int tCols>
+template <typename T, GDL::I32 tRows, GDL::I32 tCols>
 T GDL::matXSingle<T, tRows, tCols>::operator()(const GDL::U32 row, const GDL::U32 col) const
 {
     return mData[row + col * tRows];
 }
 
-template <typename T, int tRows, int tCols>
+template <typename T, GDL::I32 tRows, GDL::I32 tCols>
 GDL::U32 GDL::matXSingle<T, tRows, tCols>::Rows() const
 {
     return tRows;
 }
 
-template <typename T, int tRows, int tCols>
+template <typename T, GDL::I32 tRows, GDL::I32 tCols>
 GDL::U32 GDL::matXSingle<T, tRows, tCols>::Cols() const
 {
     return tCols;
 }
 
-template <typename T, int tRows, int tCols>
+template <typename T, GDL::I32 tRows, GDL::I32 tCols>
 std::array<T, tRows * tCols> GDL::matXSingle<T, tRows, tCols>::Data() const
 {
     return mData;
 }
 
-template<typename T, int tRows, int tCols>
+template<typename T, GDL::I32 tRows, GDL::I32 tCols>
 void GDL::matXSingle<T, tRows, tCols>::SetZero()
 {
     std::fill(mData.begin(),mData.end(),0.);
 }
 
-// template <typename T, int tRows, int tCols>
+// template <typename T, GDL::I32 tRows, GDL::I32 tCols>
 // constexpr std::array<T, tRows * tCols>
 // GDL::matXSingle<T, tRows, tCols>::RowMajorToColumnMajor(std::array<T, tRows * tCols> rowMaj)
 //{
@@ -102,7 +102,7 @@ void GDL::matXSingle<T, tRows, tCols>::SetZero()
 //}
 
 #ifndef NDEBUG
-template <typename T2, int tRows2, int tCols2>
+template <typename T2, GDL::I32 tRows2, GDL::I32 tCols2>
 std::ostream& operator<<(std::ostream& os, const GDL::matXSingle<T2, tRows2, tCols2>& mat)
 {
     using namespace GDL;
