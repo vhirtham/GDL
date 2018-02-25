@@ -26,11 +26,11 @@ public:
     //! @param args: Values (column major)
     //! @tparam Args: Variadic data type
     template <typename... Args>
-    matXSingle(Args... args);
+    explicit matXSingle(Args... args);
 
     //! @brief Constructor to set the whole matrix
     //! @param data: Array with values (column major)
-    matXSingle(const std::array<T, tRows * tCols>& data);
+    explicit matXSingle(const std::array<T, tRows * tCols>& data);
 
     //! @brief Matrix - matrix multiplication
     //! @tparam tRowsRhs: Rhs matrix number of rows

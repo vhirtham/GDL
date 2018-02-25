@@ -84,7 +84,7 @@ std::array<T, tRows * tCols> GDL::matXSingle<T, tRows, tCols>::Data() const
 template<typename T, GDL::I32 tRows, GDL::I32 tCols>
 void GDL::matXSingle<T, tRows, tCols>::SetZero()
 {
-    std::fill(mData.begin(),mData.end(),0.);
+    mData.fill(0.);
 }
 
 // template <typename T, GDL::I32 tRows, GDL::I32 tCols>

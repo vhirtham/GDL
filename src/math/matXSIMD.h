@@ -39,12 +39,12 @@ public:
     //! @param args: Values (column major)
     //! @tparam Args: Variadic data type
     template <typename... Args>
-    matXSIMD(Args... args);
+    explicit matXSIMD(Args... args);
 
 
     //! @brief Constructor to set the whole matrix
     //! @brief Array with values (column major)
-    matXSIMD(const std::array<T, tRows * tCols>& data);
+    explicit matXSIMD(const std::array<T, tRows * tCols>& data);
 
     //! @brief Matrix - matrix multiplication
     //! @tparam tRowsRhs: Rhs matrix number of rows

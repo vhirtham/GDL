@@ -77,7 +77,7 @@ GDL::U32 GDL::matXSIMD<T, tRows, tCols>::Cols() const
 template <typename T, GDL::I32 tRows, GDL::I32 tCols>
 void GDL::matXSIMD<T, tRows, tCols>::SetZero()
 {
-    std::fill(mData.begin(), mData.end(), _mmx_set1_p<T, __mx>(0.));
+    mData.fill(_mmx_set1_p<T, __mx>(0.));
 }
 
 
