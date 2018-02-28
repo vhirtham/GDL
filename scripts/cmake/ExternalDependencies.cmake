@@ -25,5 +25,11 @@ function(externalDependencies)
         endif()
     endif()
 
+    ### OpenGL ####################################################################################
+    if(ENABLE_OPENGL)
+        find_package(OpenGL REQUIRED)
+        find_package(GLEW REQUIRED)
+        find_package(GLUT REQUIRED)
+    endif()
 
 endfunction()
