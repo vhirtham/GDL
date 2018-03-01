@@ -3,6 +3,7 @@ if(ENABLE_OPENGL)
 
     target_link_libraries(TriangleOpenGL
         OpenGL::GL
+        OpenGL::GLU
         GLUT::GLUT
         GLEW::GLEW
         )
