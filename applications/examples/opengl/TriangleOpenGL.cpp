@@ -5,6 +5,8 @@
 
 // Tutorials to go on: http://openglbook.com/chapter-1-getting-started.html
 
+#include "rendering/renderWindow.h"
+
 bool KeepRunning(bool keepRunningIn = true)
 {
     static bool keepRunning = true;
@@ -168,41 +170,23 @@ void CreateVBO(void)
         exit(-1);
     }
 }
+using namespace GDL;
+
 int main(int argc, char* argv[])
 {
-    GLenum GlewInitResult;
+    RenderWindowGL renderWindow;
+    renderWindow.SetTitle("OpenGL Triangle Test");
+    renderWindow.Initialize();
 
 
-    glutInit(&argc, argv);
-    glutInitContextVersion(4, 6);
-    glutInitContextFlags(GLUT_FORWARD_COMPATIBLE);
-    glutInitContextProfile(GLUT_CORE_PROFILE);
 
-    glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE, GLUT_ACTION_GLUTMAINLOOP_RETURNS);
-
-    glutInitWindowSize(800, 600);
-
-    glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
-
-    int WindowHandle = glutCreateWindow("WINDOW_TITLE_PREFIX");
-
-    if (WindowHandle < 1)
-    {
-        fprintf(stderr, "ERROR: Could not create a new rendering window.\n");
-        exit(EXIT_FAILURE);
-    }
     glutReshapeFunc(ResizeFunction);
     glutDisplayFunc(RenderFunction);
     glutCloseFunc(Exit);
 
-    GlewInitResult = glewInit();
-    if (GLEW_OK != GlewInitResult)
-    {
-        fprintf(stderr, "ERROR: %s\n", glewGetErrorString(GlewInitResult));
-        exit(EXIT_FAILURE);
-    }
 
-    fprintf(stdout, "INFO: OpenGL Version: %s\n", glGetString(GL_VERSION));
+
+    // fprintf(stdout, "INFO: OpenGL Version: %s\n", glGetString(GL_VERSION));
 
     CreateShaders();
     CreateVBO();

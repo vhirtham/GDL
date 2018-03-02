@@ -17,3 +17,4 @@ target_compile_features(GDLResourceManagement
 
 createObjectLibs("${GDL_RESOURCE_MANAGEMENT_SOURCES}")
 
+add_subdirectory(rendering)
