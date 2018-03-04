@@ -6,6 +6,11 @@
 // Tutorials to go on: http://openglbook.com/chapter-1-getting-started.html
 
 #include "rendering/renderWindow.h"
+#include "rendering/shaderGLSL.h"
+
+
+using namespace GDL;
+
 
 bool KeepRunning(bool keepRunningIn = true)
 {
@@ -58,44 +63,39 @@ void DestroyVBO(GLuint VaoId, GLuint VboId, GLuint ColorBufferId)
 void CreateShaders()
 {
     GLenum ErrorCheckValue = glGetError();
-    GLuint VertexShaderId;
-    GLuint FragmentShaderId;
+
     GLuint ProgramId;
-    const GLchar* VertexShader = {"#version 400\n"
+    const GLchar* VertexShaderCode = {"#version 400\n"
 
-                                  "layout(location=0) in vec4 in_Position;\n"
-                                  "layout(location=1) in vec4 in_Color;\n"
-                                  "out vec4 ex_Color;\n"
+                                      "layout(location=0) in vec4 in_Position;\n"
+                                      "layout(location=1) in vec4 in_Color;\n"
+                                      "out vec4 ex_Color;\n"
 
-                                  "void main(void)\n"
-                                  "{\n"
-                                  "  gl_Position = in_Position;\n"
-                                  "  ex_Color = in_Color;\n"
-                                  "}\n"};
+                                      "void main(void)\n"
+                                      "{\n"
+                                      "  gl_Position = in_Position;\n"
+                                      "  ex_Color = in_Color;\n"
+                                      "}\n"};
 
 
 
-    const GLchar* FragmentShader = {"#version 400\n"
+    const GLchar* FragmentShaderCode = {"#version 400\n"
 
-                                    "in vec4 ex_Color;\n"
-                                    "out vec4 out_Color;\n"
+                                        "in vec4 ex_Color;\n"
+                                        "out vec4 out_Color;\n"
 
-                                    "void main(void)\n"
-                                    "{\n"
-                                    "  out_Color = ex_Color;\n"
-                                    "}\n"};
+                                        "void main(void)\n"
+                                        "{\n"
+                                        "  out_Color = ex_Color;\n"
+                                        "}\n"};
 
-    VertexShaderId = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(VertexShaderId, 1, &VertexShader, NULL);
-    glCompileShader(VertexShaderId);
+    ShaderGLSL vertexShader(GL_VERTEX_SHADER, VertexShaderCode);
+    ShaderGLSL fragmentShader(GL_FRAGMENT_SHADER, FragmentShaderCode);
 
-    FragmentShaderId = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(FragmentShaderId, 1, &FragmentShader, NULL);
-    glCompileShader(FragmentShaderId);
 
     ProgramId = glCreateProgram();
-    glAttachShader(ProgramId, VertexShaderId);
-    glAttachShader(ProgramId, FragmentShaderId);
+    glAttachShader(ProgramId, vertexShader.GetHandle());
+    glAttachShader(ProgramId, fragmentShader.GetHandle());
     glLinkProgram(ProgramId);
     glUseProgram(ProgramId);
 
@@ -116,8 +116,6 @@ void DestroyShaders(GLuint VertexShaderId, GLuint FragmentShaderId, GLuint Progr
     glDetachShader(ProgramId, VertexShaderId);
     glDetachShader(ProgramId, FragmentShaderId);
 
-    glDeleteShader(FragmentShaderId);
-    glDeleteShader(VertexShaderId);
 
     glDeleteProgram(ProgramId);
 
@@ -170,7 +168,7 @@ void CreateVBO(void)
         exit(-1);
     }
 }
-using namespace GDL;
+
 
 int main(int argc, char* argv[])
 {

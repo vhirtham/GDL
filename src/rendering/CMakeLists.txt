@@ -1,6 +1,7 @@
 if(ENABLE_OPENGL)
     add_library(GDL_OpenGL
         renderWindow.cpp
+        shaderGLSL.cpp
         )
     add_library(GDL::OpenGL ALIAS GDL_OpenGL)
     target_link_libraries(GDL_OpenGL
