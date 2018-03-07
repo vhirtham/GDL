@@ -69,24 +69,46 @@ void CreateShaders()
 
                                       "layout(location=0) in vec4 in_Position;\n"
                                       "layout(location=1) in vec4 in_Color;\n"
+                                      "layout(location=2) in vec2 in_TexCoord;\n"
                                       "out vec4 ex_Color;\n"
+                                      "out vec2 ex_TexCoord;\n"
 
                                       "void main(void)\n"
                                       "{\n"
                                       "  gl_Position = in_Position;\n"
                                       "  ex_Color = in_Color;\n"
+                                      " ex_TexCoord = in_TexCoord;\n"
                                       "}\n"};
 
 
 
+    //    const GLchar* FragmentShaderCode = {"#version 400\n"
+
+    //                                        "in vec4 ex_Color;\n"
+    //                                        "out vec4 out_Color;\n"
+
+    //                                        "void main(void)\n"
+    //                                        "{\n"
+    //                                        "  out_Color = ex_Color;\n"
+    //                                        "}\n"};
+
     const GLchar* FragmentShaderCode = {"#version 400\n"
 
                                         "in vec4 ex_Color;\n"
+                                        "in vec2 ex_TexCoord;\n"
                                         "out vec4 out_Color;\n"
 
                                         "void main(void)\n"
                                         "{\n"
-                                        "  out_Color = ex_Color;\n"
+                                        "float factor = 6.28 * 40;"
+                                        "float y = ex_TexCoord.y * factor;\n"
+                                        "float dy = dFdy(ex_TexCoord.y) * 6.28 * factor;\n"
+                                        "dy = clamp(dy,0.,6.28);"
+                                        "float y1 = y - dy*0.5;\n"
+                                        "float y2 = y + dy*0.5;\n"
+                                        "float f1 = (sin(y)+1)*0.5;\n"
+                                        "float f2 = (-cos(y2)+y2 + cos(y1)-y1)*0.5/dy;\n"
+                                        "  out_Color = vec4(ex_Color.xyz,f2);\n"
                                         "}\n"};
 
     ShaderGLSL vertexShader(GL_VERTEX_SHADER, VertexShaderCode);
@@ -138,10 +160,13 @@ void CreateVBO(void)
     GLuint VaoId;
     GLuint VboId;
     GLuint ColorBufferId;
+    GLuint TexCoordId;
 
-    GLfloat Vertices[] = {-0.8f, -0.8f, 0.0f, 1.0f, 0.0f, 0.8f, 0.0f, 1.0f, 0.8f, -0.8f, 0.0f, 1.0f};
+
+    GLfloat Vertices[] = {-0.8f, -1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.8f, -1.0f, 0.0f, 1.0f};
 
     GLfloat Colors[] = {1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f};
+    GLfloat TexCoords[] = {0.0f, 0.0f, 0.5f, 1.0f, 1.0f, 0.0f};
 
     GLenum ErrorCheckValue = glGetError();
 
@@ -159,6 +184,12 @@ void CreateVBO(void)
     glBufferData(GL_ARRAY_BUFFER, sizeof(Colors), Colors, GL_STATIC_DRAW);
     glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, 0);
     glEnableVertexAttribArray(1);
+
+    glGenBuffers(1, &TexCoordId);
+    glBindBuffer(GL_ARRAY_BUFFER, TexCoordId);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(TexCoords), TexCoords, GL_STATIC_DRAW);
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, 0);
+    glEnableVertexAttribArray(2);
 
     ErrorCheckValue = glGetError();
     if (ErrorCheckValue != GL_NO_ERROR)
@@ -188,7 +219,7 @@ int main(int argc, char* argv[])
 
     CreateShaders();
     CreateVBO();
-    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+    glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     // glutShowWindow();
