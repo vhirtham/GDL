@@ -1,5 +1,6 @@
 if(ENABLE_OPENGL)
     add_library(GDL_OpenGL
+        programGL
         renderWindow.cpp
         shaderGLSL.cpp
         )

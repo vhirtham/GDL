@@ -5,6 +5,7 @@
 
 // Tutorials to go on: http://openglbook.com/chapter-1-getting-started.html
 
+#include "rendering/programGL.h"
 #include "rendering/renderWindow.h"
 #include "rendering/shaderGLSL.h"
 
@@ -60,75 +61,7 @@ void DestroyVBO(GLuint VaoId, GLuint VboId, GLuint ColorBufferId)
         exit(-1);
     }
 }
-void CreateShaders()
-{
-    GLenum ErrorCheckValue = glGetError();
 
-    GLuint ProgramId;
-    const GLchar* VertexShaderCode = {"#version 400\n"
-
-                                      "layout(location=0) in vec4 in_Position;\n"
-                                      "layout(location=1) in vec4 in_Color;\n"
-                                      "layout(location=2) in vec2 in_TexCoord;\n"
-                                      "out vec4 ex_Color;\n"
-                                      "out vec2 ex_TexCoord;\n"
-
-                                      "void main(void)\n"
-                                      "{\n"
-                                      "  gl_Position = in_Position;\n"
-                                      "  ex_Color = in_Color;\n"
-                                      " ex_TexCoord = in_TexCoord;\n"
-                                      "}\n"};
-
-
-
-    //    const GLchar* FragmentShaderCode = {"#version 400\n"
-
-    //                                        "in vec4 ex_Color;\n"
-    //                                        "out vec4 out_Color;\n"
-
-    //                                        "void main(void)\n"
-    //                                        "{\n"
-    //                                        "  out_Color = ex_Color;\n"
-    //                                        "}\n"};
-
-    const GLchar* FragmentShaderCode = {"#version 400\n"
-
-                                        "in vec4 ex_Color;\n"
-                                        "in vec2 ex_TexCoord;\n"
-                                        "out vec4 out_Color;\n"
-
-                                        "void main(void)\n"
-                                        "{\n"
-                                        "float factor = 6.28 * 40;"
-                                        "float y = ex_TexCoord.y * factor;\n"
-                                        "float dy = dFdy(ex_TexCoord.y) * 6.28 * factor;\n"
-                                        "dy = clamp(dy,0.,6.28);"
-                                        "float y1 = y - dy*0.5;\n"
-                                        "float y2 = y + dy*0.5;\n"
-                                        "float f1 = (sin(y)+1)*0.5;\n"
-                                        "float f2 = (-cos(y2)+y2 + cos(y1)-y1)*0.5/dy;\n"
-                                        "  out_Color = vec4(ex_Color.xyz,f2);\n"
-                                        "}\n"};
-
-    ShaderGLSL vertexShader(GL_VERTEX_SHADER, VertexShaderCode);
-    ShaderGLSL fragmentShader(GL_FRAGMENT_SHADER, FragmentShaderCode);
-
-
-    ProgramId = glCreateProgram();
-    glAttachShader(ProgramId, vertexShader.GetHandle());
-    glAttachShader(ProgramId, fragmentShader.GetHandle());
-    glLinkProgram(ProgramId);
-    glUseProgram(ProgramId);
-
-    ErrorCheckValue = glGetError();
-    if (ErrorCheckValue != GL_NO_ERROR)
-    {
-        fprintf(stderr, "ERROR: Could not create the shaders: %s \n", gluErrorString(ErrorCheckValue));
-
-        exit(-1);
-    }
-}
 void DestroyShaders(GLuint VertexShaderId, GLuint FragmentShaderId, GLuint ProgramId)
 {
     GLenum ErrorCheckValue = glGetError();
@@ -203,6 +136,8 @@ void CreateVBO(void)
 
 int main(int argc, char* argv[])
 {
+    GLenum ErrorCheckValue = glGetError();
+
     RenderWindowGL renderWindow;
     renderWindow.SetTitle("OpenGL Triangle Test");
     renderWindow.Initialize();
@@ -216,8 +151,66 @@ int main(int argc, char* argv[])
 
 
     // fprintf(stdout, "INFO: OpenGL Version: %s\n", glGetString(GL_VERSION));
+    const GLchar* VertexShaderCode = {"#version 400\n"
 
-    CreateShaders();
+                                      "layout(location=0) in vec4 in_Position;\n"
+                                      "layout(location=1) in vec4 in_Color;\n"
+                                      "layout(location=2) in vec2 in_TexCoord;\n"
+                                      "out vec4 ex_Color;\n"
+                                      "out vec2 ex_TexCoord;\n"
+
+                                      "void main(void)\n"
+                                      "{\n"
+                                      "  gl_Position = in_Position;\n"
+                                      "  ex_Color = in_Color;\n"
+                                      " ex_TexCoord = in_TexCoord;\n"
+                                      "}\n"};
+
+
+
+    //    const GLchar* FragmentShaderCode = {"#version 400\n"
+
+    //                                        "in vec4 ex_Color;\n"
+    //                                        "out vec4 out_Color;\n"
+
+    //                                        "void main(void)\n"
+    //                                        "{\n"
+    //                                        "  out_Color = ex_Color;\n"
+    //                                        "}\n"};
+
+    const GLchar* FragmentShaderCode = {"#version 400\n"
+
+                                        "in vec4 ex_Color;\n"
+                                        "in vec2 ex_TexCoord;\n"
+                                        "out vec4 out_Color;\n"
+
+                                        "void main(void)\n"
+                                        "{\n"
+                                        "float factor = 6.28 * 40;"
+                                        "float y = ex_TexCoord.y * factor;\n"
+                                        "float dy = dFdy(ex_TexCoord.y) * 6.28 * factor;\n"
+                                        "dy = clamp(dy,0.,6.28);"
+                                        "float y1 = y - dy*0.5;\n"
+                                        "float y2 = y + dy*0.5;\n"
+                                        "float f1 = (sin(y)+1)*0.5;\n"
+                                        "float f2 = (-cos(y2)+y2 + cos(y1)-y1)*0.5/dy;\n"
+                                        "  out_Color = vec4(ex_Color.xyz,f2);\n"
+                                        "}\n"};
+
+    ShaderGLSL vertexShader(GL_VERTEX_SHADER, VertexShaderCode);
+    ShaderGLSL fragmentShader(GL_FRAGMENT_SHADER, FragmentShaderCode);
+
+    ProgramGL program(vertexShader, fragmentShader);
+    glUseProgram(program.GetHandle());
+
+    ErrorCheckValue = glGetError();
+    if (ErrorCheckValue != GL_NO_ERROR)
+    {
+        fprintf(stderr, "ERROR: Could not create the shaders: %s \n", gluErrorString(ErrorCheckValue));
+
+        exit(-1);
+    }
+
     CreateVBO();
     glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
     glEnable(GL_BLEND);

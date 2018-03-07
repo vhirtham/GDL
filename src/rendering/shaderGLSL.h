@@ -31,6 +31,13 @@ public:
         return mHandle;
     }
 
+    //! @brief Gets the shaders type enum, e.g. vertex, fragment etc.
+    //! @return Shader type
+    GLenum GetType() const
+    {
+        return mShaderType;
+    }
+
 
     //! @brief Returns the shader type name as a string
     //! @param shaderType: GLenum that corresponds to the shader type
