@@ -1,4 +1,4 @@
-#include "renderWindow.h"
+#include "renderWindowGL.h"
 #include "base/Exception.h"
 
 #include <GL/glew.h>

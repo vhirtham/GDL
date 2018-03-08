@@ -1,14 +1,15 @@
+
+// Tutorials to go on: http://openglbook.com/chapter-1-getting-started.html
+
+#include "rendering/openGL/programGL.h"
+#include "rendering/openGL/renderWindowGL.h"
+#include "rendering/openGL/shaderGL.h"
+
+#include <chrono>
 #include <stdlib.h>
 #include <stdio.h>
 #include <GL/glew.h>
 #include <GL/freeglut.h>
-
-// Tutorials to go on: http://openglbook.com/chapter-1-getting-started.html
-
-#include "rendering/programGL.h"
-#include "rendering/renderWindow.h"
-#include "rendering/shaderGLSL.h"
-
 
 using namespace GDL;
 
@@ -180,13 +181,15 @@ int main(int argc, char* argv[])
 
     const GLchar* FragmentShaderCode = {"#version 400\n"
 
+                                        "uniform float frequency;"
+
                                         "in vec4 ex_Color;\n"
                                         "in vec2 ex_TexCoord;\n"
                                         "out vec4 out_Color;\n"
 
                                         "void main(void)\n"
                                         "{\n"
-                                        "float factor = 6.28 * 40;"
+                                        "float factor = 6.28 * frequency;"
                                         "float y = ex_TexCoord.y * factor;\n"
                                         "float dy = dFdy(ex_TexCoord.y) * 6.28 * factor;\n"
                                         "dy = clamp(dy,0.,6.28);"
@@ -201,6 +204,7 @@ int main(int argc, char* argv[])
     ShaderGLSL fragmentShader(GL_FRAGMENT_SHADER, FragmentShaderCode);
 
     ProgramGL program(vertexShader, fragmentShader);
+    program.SetUniformScalar("frequency", 10.f);
     glUseProgram(program.GetHandle());
 
     ErrorCheckValue = glGetError();
@@ -216,10 +220,22 @@ int main(int argc, char* argv[])
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     // glutShowWindow();
-
+    std::chrono::system_clock::time_point prevTime = std::chrono::system_clock::now();
+    std::chrono::system_clock::time_point currTime = std::chrono::system_clock::now();
+    F32 frequency = 1.0;
+    F32 factor = 1.;
     while (KeepRunning())
     {
+        currTime = std::chrono::system_clock::now();
+        F32 delta_t = std::chrono::duration_cast<std::chrono::microseconds>(currTime - prevTime).count();
+        frequency += factor * delta_t / (10.e3 * 4);
+        if (frequency > 120.)
+            factor = -1.0;
+        if (frequency < 1.)
+            factor = 1.0;
+        program.SetUniformScalar("frequency", frequency);
         glutMainLoopEvent();
+        prevTime = currTime;
     }
     // glutMainLoop(); // Alternative: glutMainLoopEvent
     // glutMainLoopEvent();

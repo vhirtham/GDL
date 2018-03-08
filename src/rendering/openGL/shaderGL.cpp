@@ -1,4 +1,4 @@
-#include "shaderGLSL.h"
+#include "shaderGL.h"
 
 #include "base/Exception.h"
 
