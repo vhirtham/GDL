@@ -152,7 +152,7 @@ int main(int argc, char* argv[])
 
 
     // fprintf(stdout, "INFO: OpenGL Version: %s\n", glGetString(GL_VERSION));
-    const GLchar* VertexShaderCode = {"#version 400\n"
+    const GLchar* VertexShaderCode = {"#version 430\n"
 
                                       "layout(location=0) in vec4 in_Position;\n"
                                       "layout(location=1) in vec4 in_Color;\n"
@@ -169,7 +169,7 @@ int main(int argc, char* argv[])
 
 
 
-    //    const GLchar* FragmentShaderCode = {"#version 400\n"
+    //    const GLchar* FragmentShaderCode = {"#version 430\n"
 
     //                                        "in vec4 ex_Color;\n"
     //                                        "out vec4 out_Color;\n"
@@ -179,7 +179,7 @@ int main(int argc, char* argv[])
     //                                        "  out_Color = ex_Color;\n"
     //                                        "}\n"};
 
-    const GLchar* FragmentShaderCode = {"#version 400\n"
+    const GLchar* FragmentShaderCode = {"#version 430\n"
 
                                         "uniform float frequency;"
 

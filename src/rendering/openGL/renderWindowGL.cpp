@@ -11,11 +11,9 @@ GDL::RenderWindowGL::RenderWindowGL(U32 width, U32 height, std::string title)
 {
 }
 
-void GDL::RenderWindowGL::Initialize()
+void GDL::RenderWindowGL::Initialize(int argc, char* argv)
 {
-    int argc = 1;
-    char* argv[1] = {(char*)""};
-    glutInit(&argc, argv);
+    glutInit(&argc, &argv);
 
     glutInitContextVersion(4, 6);
     glutInitContextFlags(GLUT_FORWARD_COMPATIBLE);

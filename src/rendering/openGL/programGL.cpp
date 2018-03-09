@@ -3,6 +3,7 @@
 #include "base/Exception.h"
 
 #include <cassert>
+#include <memory>
 
 GDL::ProgramGL::~ProgramGL()
 {
@@ -39,18 +40,15 @@ void GDL::ProgramGL::CheckLinkStatus()
     GLint status;
     glGetProgramiv(mHandle, GL_LINK_STATUS, &status);
 
-    // error handling
     if (status == GL_FALSE)
     {
         GLint infoLogLength;
         glGetProgramiv(mHandle, GL_INFO_LOG_LENGTH, &infoLogLength);
 
-        GLchar* infoLog = new GLchar[infoLogLength + 1];
-        glGetProgramInfoLog(mHandle, infoLogLength, nullptr, infoLog);
+        std::unique_ptr<GLchar[]> infoLog = std::make_unique<GLchar[]>(infoLogLength);
+        glGetProgramInfoLog(mHandle, infoLogLength, nullptr, infoLog.get());
 
-        std::string errorMessage(infoLog);
-        delete[] infoLog;
-
+        std::string errorMessage(infoLog.get());
         throw Exception(__PRETTY_FUNCTION__, "Failed to compile shader program \n\nLog Message:\n" + errorMessage);
     }
 }
@@ -83,27 +81,25 @@ void GDL::ProgramGL::FindUniforms()
 {
     GLint numUniforms = 0;
     glGetProgramInterfaceiv(mHandle, GL_UNIFORM, GL_ACTIVE_RESOURCES, &numUniforms);
-    GLenum quedProperties[] = {GL_NAME_LENGTH, GL_TYPE, GL_LOCATION, GL_BLOCK_INDEX};
-    GLint quedResults[4];
+
+    constexpr U32 nProps = 3;
+    GLenum quedProperties[nProps] = {GL_NAME_LENGTH, GL_LOCATION, GL_BLOCK_INDEX};
+    GLint quedResults[nProps];
 
     for (I32 i = 0; i < numUniforms; i++)
     {
-        glGetProgramResourceiv(mHandle, GL_UNIFORM, i, 4, quedProperties, 4, nullptr, quedResults);
+        glGetProgramResourceiv(mHandle, GL_UNIFORM, i, nProps, quedProperties, nProps, nullptr, quedResults);
 
         // if uniform is a block
-        if (quedResults[3] != -1)
+        if (quedResults[2] != -1)
             continue;
         else
         // if uniform is not a block
         {
             GLint nameBufferSize = quedResults[0] + 1;
-            char* uniformName = new char[nameBufferSize];
-            glGetProgramResourceName(mHandle, GL_UNIFORM, i, nameBufferSize, nullptr, uniformName);
-
-            // insert into uniform map
-            mUniforms.emplace(std::string(uniformName), quedResults[2]);
-
-            delete[] uniformName;
+            std::unique_ptr<GLchar[]> uniformName = std::make_unique<GLchar[]>(nameBufferSize);
+            glGetProgramResourceName(mHandle, GL_UNIFORM, i, nameBufferSize, nullptr, uniformName.get());
+            mUniforms.emplace(std::string(uniformName.get()), quedResults[1]);
         }
     }
 }

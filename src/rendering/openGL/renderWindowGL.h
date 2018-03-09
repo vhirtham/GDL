@@ -18,7 +18,9 @@ public:
     RenderWindowGL(U32 width = 800, U32 height = 600, std::string title = "GDL OpenGL Window");
 
     //! @brief Initializes the Window
-    void Initialize();
+    //! @param argc: Additional argument count
+    //! @param argv: Additional arguments
+    void Initialize(int argc = 1, char* argv = nullptr);
 
     //! @brief Sets the title
     //! @param title: New Window Title

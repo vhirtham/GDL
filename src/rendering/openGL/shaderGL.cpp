@@ -2,6 +2,8 @@
 
 #include "base/Exception.h"
 
+#include <memory>
+
 GDL::ShaderGLSL::~ShaderGLSL()
 {
     glDeleteShader(mHandle);
@@ -22,14 +24,12 @@ GDL::ShaderGLSL::ShaderGLSL(GLenum shaderType, const char* shaderCode)
         GLint infoLogLength;
         glGetShaderiv(mHandle, GL_INFO_LOG_LENGTH, &infoLogLength);
 
-        GLchar* infoLog = new GLchar[infoLogLength + 1];
-        glGetShaderInfoLog(mHandle, infoLogLength, nullptr, infoLog);
-        std::string errorMessage(infoLog);
-        delete[] infoLog;
+        std::unique_ptr<GLchar[]> infoLog = std::make_unique<GLchar[]>(infoLogLength);
+        glGetShaderInfoLog(mHandle, infoLogLength, nullptr, infoLog.get());
 
         throw Exception(__PRETTY_FUNCTION__,
                         "Failed to compile " + GetShaderTypeString(mShaderType) + "! \n\nLog Message:\n" +
-                                errorMessage);
+                                infoLog.get());
     }
 }
 
