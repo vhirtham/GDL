@@ -74,32 +74,53 @@ void GDL::ProgramGL::Initialize(std::initializer_list<std::reference_wrapper<con
         glDetachShader(mHandle, shader.second.get().GetHandle());
     }
     CheckLinkStatus();
+    FindInputs();
     FindUniforms();
 }
 
+
+
+void GDL::ProgramGL::FindInputs()
+{
+    auto inputData = FindProgramResourceData<2>(GL_PROGRAM_INPUT, {{GL_LOCATION, GL_NAME_LENGTH}});
+    for (U32 i = 0; i < inputData.size(); ++i)
+        mProgramInputs.emplace(GetResourceName(GL_PROGRAM_INPUT, inputData[i][0], inputData[i][1]), inputData[i][0]);
+}
+
+
+
 void GDL::ProgramGL::FindUniforms()
 {
-    GLint numUniforms = 0;
-    glGetProgramInterfaceiv(mHandle, GL_UNIFORM, GL_ACTIVE_RESOURCES, &numUniforms);
-
-    constexpr U32 nProps = 3;
-    GLenum quedProperties[nProps] = {GL_NAME_LENGTH, GL_LOCATION, GL_BLOCK_INDEX};
-    GLint quedResults[nProps];
-
-    for (I32 i = 0; i < numUniforms; i++)
-    {
-        glGetProgramResourceiv(mHandle, GL_UNIFORM, i, nProps, quedProperties, nProps, nullptr, quedResults);
-
-        // if uniform is a block
-        if (quedResults[2] != -1)
+    auto uniformData = FindProgramResourceData<3>(GL_UNIFORM, {{GL_LOCATION, GL_NAME_LENGTH, GL_BLOCK_INDEX}});
+    for (U32 i = 0; i < uniformData.size(); ++i)
+        if (uniformData[i][2] != -1) // if uniform is a block
             continue;
-        else
-        // if uniform is not a block
-        {
-            GLint nameBufferSize = quedResults[0] + 1;
-            std::unique_ptr<GLchar[]> uniformName = std::make_unique<GLchar[]>(nameBufferSize);
-            glGetProgramResourceName(mHandle, GL_UNIFORM, i, nameBufferSize, nullptr, uniformName.get());
-            mUniforms.emplace(std::string(uniformName.get()), quedResults[1]);
-        }
+        else // if uniform is NOT a block
+            mUniforms.emplace(GetResourceName(GL_UNIFORM, uniformData[i][0], uniformData[i][1]), uniformData[i][0]);
+}
+
+
+
+std::string GDL::ProgramGL::GetResourceName(GLenum eResourceType, GLint location, GLint bufferSize)
+{
+    std::unique_ptr<GLchar[]> resourceName = std::make_unique<GLchar[]>(bufferSize);
+    glGetProgramResourceName(mHandle, eResourceType, location, bufferSize, nullptr, resourceName.get());
+    return std::string(resourceName.get());
+}
+
+
+
+template <GDL::U32 TNumProps>
+std::vector<std::array<GLint, TNumProps>>
+GDL::ProgramGL::FindProgramResourceData(GLenum eResourceType, std::array<GLenum, TNumProps> properties)
+{
+    GLint numResources = 0;
+    glGetProgramInterfaceiv(mHandle, eResourceType, GL_ACTIVE_RESOURCES, &numResources);
+    std::vector<std::array<GLint, TNumProps>> results(numResources);
+    for (I32 i = 0; i < numResources; ++i)
+    {
+        glGetProgramResourceiv(mHandle, eResourceType, i, TNumProps, properties.data(), TNumProps, nullptr,
+                               results[i].data());
     }
+    return results;
 }

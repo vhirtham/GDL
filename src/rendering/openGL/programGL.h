@@ -13,8 +13,8 @@ class ProgramGL
 {
     GLuint mHandle = 0;
     std::map<GLenum, std::reference_wrapper<const ShaderGLSL>> mShader;
-    std::map<std::string,GLuint> mUniforms;
-
+    std::map<std::string, GLuint> mUniforms;
+    std::map<std::string, GLuint> mProgramInputs;
 
 public:
     ProgramGL() = delete;
@@ -62,7 +62,6 @@ public:
     void SetUniformScalar(std::string uniformName, TScalar value);
 
 private:
-
     //! @brief Checks if the program links without errors
     void CheckLinkStatus();
 
@@ -70,24 +69,41 @@ private:
     //! @param shaderList: Shaders that should be linked
     void Initialize(std::initializer_list<std::reference_wrapper<const ShaderGLSL>> shaderList);
 
+    //! @brief Finds all the programs inputs and stores their names and handles.
+    void FindInputs();
+
     //! @brief Finds all the programs uniforms and stores their names and handles.
     void FindUniforms();
-};
 
+    //! @brief Finds the specified properties of all instances of the given resource type
+    //! @param eResourceType: Enum that speciefies the resource type
+    //! @param properties: Proberties that should be determined
+    //! @tparam TNumProps: Number of properties that should be determined
+    template <U32 TNumProps>
+    std::vector<std::array<GLint, TNumProps>> FindProgramResourceData(GLenum eResourceType,
+                                                                      std::array<GLenum, TNumProps> properties);
+
+    //! @brief Gets the name of a resource
+    //! @param eResourceType: Enum that speciefies the resource type
+    //! @param location: shader location identifier
+    //! @param buffersize: Length of the buffer that gets the name (must be queried)
+    //! @return Name of the resource
+    std::string GetResourceName(GLenum eResourceType, GLint location, GLint bufferSize);
+};
 }
 
 
-template<typename TScalar>
+template <typename TScalar>
 void GDL::ProgramGL::SetUniformScalar(GLuint uniformHandle, TScalar value)
 {
-    throw Exception(__PRETTY_FUNCTION__,"Type not supported!");
+    throw Exception(__PRETTY_FUNCTION__, "Type not supported!");
 }
 
 
-template<typename TScalar>
+template <typename TScalar>
 void GDL::ProgramGL::SetUniformScalar(std::string uniformName, TScalar value)
 {
-    SetUniformScalar(GetUniformHandle(uniformName),value);
+    SetUniformScalar(GetUniformHandle(uniformName), value);
 }
 
 template <typename... TShader>
