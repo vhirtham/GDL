@@ -3,9 +3,11 @@
 #include "GDLTypedefs.h"
 #include "base/Exception.h"
 #include "rendering/openGL/shaderGL.h"
+#include "rendering/openGL/Uniform.h"
 
 #include <functional>
 #include <map>
+#include <set>
 
 namespace GDL
 {
@@ -13,7 +15,7 @@ class ProgramGL
 {
     GLuint mHandle = 0;
     std::map<GLenum, std::reference_wrapper<const ShaderGLSL>> mShader;
-    std::map<std::string, GLuint> mUniforms;
+    std::map<std::string, Uniform> mUniforms;
     std::map<std::string, GLuint> mProgramInputs;
 
 public:
@@ -85,18 +87,19 @@ private:
 
     //! @brief Gets the name of a resource
     //! @param eResourceType: Enum that speciefies the resource type
-    //! @param location: shader location identifier
+    //! @param handle: Resource handle
     //! @param buffersize: Length of the buffer that gets the name (must be queried)
     //! @return Name of the resource
-    std::string GetResourceName(GLenum eResourceType, GLint location, GLint bufferSize);
+    std::string GetResourceName(GLenum eResourceType, GLuint handle, GLint bufferSize);
+
+#ifndef NDEBUG
+    //! @brief Gets a uniform by its handle
+    //! @param handle: The uniforms handle
+    //! @return Uniform
+    //! @remark DEBUG only!
+    const Uniform& GetUniformByHandle(GLuint handle);
+#endif
 };
-}
-
-
-template <typename TScalar>
-void GDL::ProgramGL::SetUniformScalar(GLuint uniformHandle, TScalar value)
-{
-    throw Exception(__PRETTY_FUNCTION__, "Type not supported!");
 }
 
 

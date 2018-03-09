@@ -26,12 +26,14 @@ GLuint GDL::ProgramGL::GetUniformHandle(std::string uniformName)
                         "Did not find uniform \"" + uniformName +
                                 "\". GLSL compiler optimization might be the reason.");
 #endif
-    return iterator->second;
+    return iterator->second.GetHandle();
 }
+
 
 template <>
 void GDL::ProgramGL::SetUniformScalar(GLuint uniformHandle, F32 value)
 {
+    assert(GetUniformByHandle(uniformHandle).GetType() == GL_FLOAT);
     glProgramUniform1f(mHandle, uniformHandle, value);
 }
 
@@ -91,23 +93,36 @@ void GDL::ProgramGL::FindInputs()
 
 void GDL::ProgramGL::FindUniforms()
 {
-    auto uniformData = FindProgramResourceData<3>(GL_UNIFORM, {{GL_LOCATION, GL_NAME_LENGTH, GL_BLOCK_INDEX}});
+    auto uniformData = FindProgramResourceData<4>(GL_UNIFORM, {{GL_LOCATION, GL_NAME_LENGTH, GL_TYPE, GL_BLOCK_INDEX}});
     for (U32 i = 0; i < uniformData.size(); ++i)
-        if (uniformData[i][2] != -1) // if uniform is a block
+        if (uniformData[i][3] != -1) // if uniform is a block
             continue;
         else // if uniform is NOT a block
-            mUniforms.emplace(GetResourceName(GL_UNIFORM, uniformData[i][0], uniformData[i][1]), uniformData[i][0]);
+        {
+            mUniforms.emplace(GetResourceName(GL_UNIFORM, uniformData[i][0], uniformData[i][1]),
+                              Uniform(uniformData[i][0], uniformData[i][2]));
+        }
 }
 
 
 
-std::string GDL::ProgramGL::GetResourceName(GLenum eResourceType, GLint location, GLint bufferSize)
+std::string GDL::ProgramGL::GetResourceName(GLenum eResourceType, GLuint handle, GLint bufferSize)
 {
     std::unique_ptr<GLchar[]> resourceName = std::make_unique<GLchar[]>(bufferSize);
-    glGetProgramResourceName(mHandle, eResourceType, location, bufferSize, nullptr, resourceName.get());
+    glGetProgramResourceName(mHandle, eResourceType, handle, bufferSize, nullptr, resourceName.get());
     return std::string(resourceName.get());
 }
 
+#ifndef NDEBUG
+const GDL::Uniform& GDL::ProgramGL::GetUniformByHandle(GLuint handle)
+{
+    for (const auto& uniform : mUniforms)
+        if (uniform.second.GetHandle() == handle)
+            return uniform.second;
+
+    throw Exception(__PRETTY_FUNCTION__, "Uniform not found!");
+}
+#endif
 
 
 template <GDL::U32 TNumProps>
@@ -117,7 +132,7 @@ GDL::ProgramGL::FindProgramResourceData(GLenum eResourceType, std::array<GLenum,
     GLint numResources = 0;
     glGetProgramInterfaceiv(mHandle, eResourceType, GL_ACTIVE_RESOURCES, &numResources);
     std::vector<std::array<GLint, TNumProps>> results(numResources);
-    for (I32 i = 0; i < numResources; ++i)
+    for (GLint i = 0; i < numResources; ++i)
     {
         glGetProgramResourceiv(mHandle, eResourceType, i, TNumProps, properties.data(), TNumProps, nullptr,
                                results[i].data());
