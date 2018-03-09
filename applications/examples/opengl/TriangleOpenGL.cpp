@@ -154,6 +154,10 @@ int main(int argc, char* argv[])
     // fprintf(stdout, "INFO: OpenGL Version: %s\n", glGetString(GL_VERSION));
     const GLchar* VertexShaderCode = {"#version 430\n"
 
+                                      "layout(std140) uniform GlobalMatrices"
+                                      "{"
+                                      " mat4 U_Perspective_Matrix;"
+                                      "};"
                                       "layout(location=0) in vec4 in_Position;\n"
                                       "layout(location=1) in vec4 in_Color;\n"
                                       "layout(location=2) in vec2 in_TexCoord;\n"
@@ -181,7 +185,7 @@ int main(int argc, char* argv[])
 
     const GLchar* FragmentShaderCode = {"#version 430\n"
 
-                                        "uniform float frequency;"
+                                        "layout(location=0)uniform float frequency;"
 
                                         "in vec4 ex_Color;\n"
                                         "in vec2 ex_TexCoord;\n"

@@ -90,7 +90,7 @@ private:
     //! @param handle: Resource handle
     //! @param buffersize: Length of the buffer that gets the name (must be queried)
     //! @return Name of the resource
-    std::string GetResourceName(GLenum eResourceType, GLuint handle, GLint bufferSize);
+    std::string GetResourceName(GLenum eResourceType, GLuint index, GLint bufferSize);
 
 #ifndef NDEBUG
     //! @brief Gets a uniform by its handle

@@ -86,7 +86,7 @@ void GDL::ProgramGL::FindInputs()
 {
     auto inputData = FindProgramResourceData<2>(GL_PROGRAM_INPUT, {{GL_LOCATION, GL_NAME_LENGTH}});
     for (U32 i = 0; i < inputData.size(); ++i)
-        mProgramInputs.emplace(GetResourceName(GL_PROGRAM_INPUT, inputData[i][0], inputData[i][1]), inputData[i][0]);
+        mProgramInputs.emplace(GetResourceName(GL_PROGRAM_INPUT, i, inputData[i][1]), inputData[i][0]);
 }
 
 
@@ -99,17 +99,17 @@ void GDL::ProgramGL::FindUniforms()
             continue;
         else // if uniform is NOT a block
         {
-            mUniforms.emplace(GetResourceName(GL_UNIFORM, uniformData[i][0], uniformData[i][1]),
+            mUniforms.emplace(GetResourceName(GL_UNIFORM, i, uniformData[i][1]),
                               Uniform(uniformData[i][0], uniformData[i][2]));
         }
 }
 
 
 
-std::string GDL::ProgramGL::GetResourceName(GLenum eResourceType, GLuint handle, GLint bufferSize)
+std::string GDL::ProgramGL::GetResourceName(GLenum eResourceType, GLuint index, GLint bufferSize)
 {
     std::unique_ptr<GLchar[]> resourceName = std::make_unique<GLchar[]>(bufferSize);
-    glGetProgramResourceName(mHandle, eResourceType, handle, bufferSize, nullptr, resourceName.get());
+    glGetProgramResourceName(mHandle, eResourceType, index, bufferSize, nullptr, resourceName.get());
     return std::string(resourceName.get());
 }
 
