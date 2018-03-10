@@ -55,13 +55,13 @@ public:
     //! @param uniformHandle: handle of the uniform
     //! @param value: New value
     template <typename TScalar>
-    void SetUniformScalar(GLuint uniformHandle, TScalar value);
+    void SetUniformScalar(GLuint uniformHandle, TScalar value, GLsizei index = 1);
 
     //! @brief Sets the value of an uniform
     //! @param uniformName: Name of the uniform
     //! @param value: New value
     template <typename TScalar>
-    void SetUniformScalar(std::string uniformName, TScalar value);
+    void SetUniformScalar(std::string uniformName, TScalar value, GLsizei index = 1);
 
 private:
     //! @brief Checks if the program links without errors
@@ -76,6 +76,9 @@ private:
 
     //! @brief Finds all the programs uniforms and stores their names and handles.
     void FindUniforms();
+
+    //! @brief Finds all the programs uniform blocks and stores their names and handles.
+    void FindUniformBlocks();
 
     //! @brief Finds the specified properties of all instances of the given resource type
     //! @param eResourceType: Enum that speciefies the resource type
@@ -104,9 +107,9 @@ private:
 
 
 template <typename TScalar>
-void GDL::ProgramGL::SetUniformScalar(std::string uniformName, TScalar value)
+void GDL::ProgramGL::SetUniformScalar(std::string uniformName, TScalar value, GLsizei index)
 {
-    SetUniformScalar(GetUniformHandle(uniformName), value);
+    SetUniformScalar(GetUniformHandle(uniformName), value, index);
 }
 
 template <typename... TShader>

@@ -8,6 +8,7 @@ namespace GDL
 class Uniform
 {
     GLuint mHandle;
+    GLuint mArraySize;
     GLenum mType;
 
 public:
@@ -18,8 +19,9 @@ public:
     Uniform& operator=(Uniform&&) = default;
     ~Uniform() = default;
 
-    Uniform(GLint handle, GLenum type)
+    Uniform(GLint handle, GLenum type, GLint arraySize)
         : mHandle(handle)
+        , mArraySize(arraySize)
         , mType(type)
     {
     }
@@ -36,5 +38,3 @@ public:
     }
 };
 }
-
-

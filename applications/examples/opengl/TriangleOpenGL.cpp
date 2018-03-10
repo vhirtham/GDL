@@ -154,9 +154,12 @@ int main(int argc, char* argv[])
     // fprintf(stdout, "INFO: OpenGL Version: %s\n", glGetString(GL_VERSION));
     const GLchar* VertexShaderCode = {"#version 430\n"
 
-                                      "layout(std140) uniform GlobalMatrices"
+                                      "layout(std140,binding=3) uniform GlobalMatrices"
                                       "{"
-                                      " mat4 U_Perspective_Matrix;"
+                                      " mat4 perspectiveMatrix;"
+                                      " mat4 translationMatrix[2];"
+                                      "float values[15];"
+                                      "float test;"
                                       "};"
                                       "layout(location=0) in vec4 in_Position;\n"
                                       "layout(location=1) in vec4 in_Color;\n"
@@ -183,32 +186,39 @@ int main(int argc, char* argv[])
     //                                        "  out_Color = ex_Color;\n"
     //                                        "}\n"};
 
-    const GLchar* FragmentShaderCode = {"#version 430\n"
+    const GLchar* FragmentShaderCode = {
+            "#version 430\n"
 
-                                        "layout(location=0)uniform float frequency;"
+            "layout(location=0)uniform float frequency;"
+            "uniform float colMod[3];"
 
-                                        "in vec4 ex_Color;\n"
-                                        "in vec2 ex_TexCoord;\n"
-                                        "out vec4 out_Color;\n"
+            "in vec4 ex_Color;\n"
+            "in vec2 ex_TexCoord;\n"
+            "out vec4 out_Color;\n"
 
-                                        "void main(void)\n"
-                                        "{\n"
-                                        "float factor = 6.28 * frequency;"
-                                        "float y = ex_TexCoord.y * factor;\n"
-                                        "float dy = dFdy(ex_TexCoord.y) * 6.28 * factor;\n"
-                                        "dy = clamp(dy,0.,6.28);"
-                                        "float y1 = y - dy*0.5;\n"
-                                        "float y2 = y + dy*0.5;\n"
-                                        "float f1 = (sin(y)+1)*0.5;\n"
-                                        "float f2 = (-cos(y2)+y2 + cos(y1)-y1)*0.5/dy;\n"
-                                        "  out_Color = vec4(ex_Color.xyz,f2);\n"
-                                        "}\n"};
+            "void main(void)\n"
+            "{\n"
+            "vec4 color = vec4(ex_Color.x*colMod[0],ex_Color.y*colMod[1],ex_Color.z*colMod[2],ex_Color.w);"
+            "float factor = 6.28 * frequency;"
+            "float y = ex_TexCoord.y * factor;\n"
+            "float dy = dFdy(ex_TexCoord.y) * 6.28 * factor;\n"
+            "dy = clamp(dy,0.,6.28);"
+            "float y1 = y - dy*0.5;\n"
+            "float y2 = y + dy*0.5;\n"
+            "float f1 = (sin(y)+1)*0.5;\n"
+            "float f2 = (-cos(y2)+y2 + cos(y1)-y1)*0.5/dy;\n"
+            "  out_Color = vec4(color.xyz,f2);\n"
+            "}\n"};
 
     ShaderGLSL vertexShader(GL_VERTEX_SHADER, VertexShaderCode);
     ShaderGLSL fragmentShader(GL_FRAGMENT_SHADER, FragmentShaderCode);
 
     ProgramGL program(vertexShader, fragmentShader);
     program.SetUniformScalar("frequency", 10.f);
+    program.SetUniformScalar("colMod[0]", 1.f, 3);
+    // program.SetUniformScalar("colMod", 1.f, 1);
+    // program.SetUniformScalar("colMod", 1.f, 2);
+
     glUseProgram(program.GetHandle());
 
     ErrorCheckValue = glGetError();

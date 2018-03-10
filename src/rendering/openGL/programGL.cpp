@@ -31,10 +31,13 @@ GLuint GDL::ProgramGL::GetUniformHandle(std::string uniformName)
 
 
 template <>
-void GDL::ProgramGL::SetUniformScalar(GLuint uniformHandle, F32 value)
+void GDL::ProgramGL::SetUniformScalar(GLuint uniformHandle, F32 value, GLsizei index)
 {
+    std::vector<GLfloat> values(index);
+    for (U32 i = 0; i < index; ++i)
+        values[i] = value;
     assert(GetUniformByHandle(uniformHandle).GetType() == GL_FLOAT);
-    glProgramUniform1f(mHandle, uniformHandle, value);
+    glProgramUniform1fv(mHandle, uniformHandle, index, values.data());
 }
 
 void GDL::ProgramGL::CheckLinkStatus()
@@ -78,6 +81,12 @@ void GDL::ProgramGL::Initialize(std::initializer_list<std::reference_wrapper<con
     CheckLinkStatus();
     FindInputs();
     FindUniforms();
+    FindUniformBlocks();
+    GLenum errorCode = glGetError();
+    if (errorCode != GL_NO_ERROR)
+        throw Exception(__PRETTY_FUNCTION__,
+                        "Could not create program:\n" +
+                                std::string(reinterpret_cast<const char*>(gluErrorString(errorCode))));
 }
 
 
@@ -93,15 +102,65 @@ void GDL::ProgramGL::FindInputs()
 
 void GDL::ProgramGL::FindUniforms()
 {
-    auto uniformData = FindProgramResourceData<4>(GL_UNIFORM, {{GL_LOCATION, GL_NAME_LENGTH, GL_TYPE, GL_BLOCK_INDEX}});
+    auto uniformData = FindProgramResourceData<5>(
+            GL_UNIFORM, {{GL_LOCATION, GL_NAME_LENGTH, GL_TYPE, GL_ARRAY_SIZE, GL_BLOCK_INDEX}});
     for (U32 i = 0; i < uniformData.size(); ++i)
-        if (uniformData[i][3] != -1) // if uniform is a block
+    {
+        if (uniformData[i][4] != -1) // if uniform is member of a UBO
             continue;
-        else // if uniform is NOT a block
+        //        if (uniformData[i][3] > 1)
+        //            // READ:
+        //            //
+        //            https://stackoverflow.com/questions/32154710/are-glgetuniformlocation-indices-for-arrays-of-uniforms-guaranteed-sequential-ex
+        //            // Possibilities:
+        //            // 1. Keep size in uniform to store array size -> Duplicate entries (or decending to the end. Last
+        //            element
+        //            // should have size=1)
+        //            // 2. Store array data in an extra container -> unnecessary complexity
+        //            // 3. Count number of entries in uniform map -> slow, but you should do that only once and
+        //            remember the
+        //            // value
+        //            // Currently favour version 1 because version 2 gets to messy and with version 3. you need to hope
+        //            always
+        //            // remembering that this solution is slow. If you forget it, you might slow the program down!
+        //            // Copy these thoughts to github in a new issue and reference it above the function to always
+        //            remember the
+        //            // reasons for the decision.
+        //            throw Exception(__PRETTY_FUNCTION__,
+        //                            "Arrays not handled yet. Add each arrayelemet to the uniforms list. "
+        //                            "Think about how to get the size. Store an extra element or just search for the
+        //                            number of "
+        //                            "elements with the same name in the UniformList");
+        mUniforms.emplace(GetResourceName(GL_UNIFORM, i, uniformData[i][1]),
+                          Uniform(uniformData[i][0], uniformData[i][2], uniformData[i][3]));
+    }
+}
+
+void GDL::ProgramGL::FindUniformBlocks()
+{
+    auto uniformData = FindProgramResourceData<4>(
+            GL_UNIFORM_BLOCK, {{GL_NAME_LENGTH, GL_BUFFER_BINDING, GL_BUFFER_DATA_SIZE, GL_NUM_ACTIVE_VARIABLES}});
+    for (U32 i = 0; i < uniformData.size(); ++i)
+    {
+        std::string uniformBlockName = GetResourceName(GL_UNIFORM_BLOCK, i, uniformData[i][0]);
+        GLint bufferBindingPoint = uniformData[i][0];
+        assert(glGetUniformBlockIndex(mHandle, uniformBlockName.c_str()) == i);
+
+        std::vector<GLint> varIndices(uniformData[i][3]);
+        glGetActiveUniformBlockiv(mHandle, i, GL_UNIFORM_BLOCK_ACTIVE_UNIFORM_INDICES, varIndices.data());
+        for (U32 j = 0; j < uniformData[i][3]; ++j)
         {
-            mUniforms.emplace(GetResourceName(GL_UNIFORM, i, uniformData[i][1]),
-                              Uniform(uniformData[i][0], uniformData[i][2]));
+            GLuint uniformIndex = static_cast<GLuint>(varIndices[j]);
+            GLint uniformNameLength;
+            glGetActiveUniformsiv(mHandle, 1, &uniformIndex, GL_UNIFORM_NAME_LENGTH, &uniformNameLength);
+            std::string uniformName = GetResourceName(GL_UNIFORM, uniformIndex, uniformNameLength);
+            GLint uniformOffset;
+            glGetActiveUniformsiv(mHandle, 1, &uniformIndex, GL_UNIFORM_OFFSET, &uniformOffset);
+            GLint uniformSize;
+            glGetActiveUniformsiv(mHandle, 1, &uniformIndex, GL_UNIFORM_SIZE, &uniformSize);
+            int a = 0;
         }
+    }
 }
 
 
@@ -110,7 +169,8 @@ std::string GDL::ProgramGL::GetResourceName(GLenum eResourceType, GLuint index, 
 {
     std::unique_ptr<GLchar[]> resourceName = std::make_unique<GLchar[]>(bufferSize);
     glGetProgramResourceName(mHandle, eResourceType, index, bufferSize, nullptr, resourceName.get());
-    return std::string(resourceName.get());
+    std::string nameString(resourceName.get());
+    return nameString;
 }
 
 #ifndef NDEBUG
