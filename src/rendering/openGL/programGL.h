@@ -7,16 +7,15 @@
 
 #include <functional>
 #include <map>
-#include <set>
+#include <vector>
 
 namespace GDL
 {
 class ProgramGL
 {
-    GLuint mHandle = 0;
-    std::map<GLenum, std::reference_wrapper<const ShaderGLSL>> mShader;
-    std::map<std::string, Uniform> mUniforms;
-    std::map<std::string, GLuint> mProgramInputs;
+    GLuint const mHandle = 0;
+    std::map<const std::string, const Uniform> mUniforms;
+    std::map<const std::string, const GLuint> mProgramInputs;
 
 public:
     ProgramGL() = delete;
@@ -37,7 +36,7 @@ public:
 
     //! @brief Constructor that takes as many shaders as desired and links the program (initializer version)
     //! @param shaderList: List of shaders
-    ProgramGL(std::initializer_list<std::reference_wrapper<const ShaderGLSL>> shaderList);
+    ProgramGL(std::initializer_list<std::reference_wrapper<const ShaderGL>> shaderList);
 
     //! @brief Gets the programs handle
     //! @return Program handle
@@ -55,13 +54,25 @@ public:
     //! @param uniformHandle: handle of the uniform
     //! @param value: New value
     template <typename TScalar>
-    void SetUniformScalar(GLuint uniformHandle, TScalar value, GLsizei index = 1);
+    void SetUniformScalar(GLuint uniformHandle, TScalar value);
 
     //! @brief Sets the value of an uniform
     //! @param uniformName: Name of the uniform
     //! @param value: New value
     template <typename TScalar>
-    void SetUniformScalar(std::string uniformName, TScalar value, GLsizei index = 1);
+    void SetUniformScalar(std::string uniformName, TScalar value);
+
+    //! @brief Sets the values of an uniform array
+    //! @param uniformHandle: handle of the first uniform array member that should be set
+    //! @param values: Vector with values
+    template <typename TScalar>
+    void SetUniformScalarArray(GLuint uniformHandle, std::vector<TScalar> values);
+
+    //! @brief Sets the values of an uniform array
+    //! @param uniformHandle: Name of the first uniform array member that should be set (including "[i]")
+    //! @param values: Vector with values
+    template <typename TScalar>
+    void SetUniformScalarArray(std::string uniformName, std::vector<TScalar> values);
 
 private:
     //! @brief Checks if the program links without errors
@@ -69,13 +80,18 @@ private:
 
     //! @brief Links all the passed shaders to the program
     //! @param shaderList: Shaders that should be linked
-    void Initialize(std::initializer_list<std::reference_wrapper<const ShaderGLSL>> shaderList);
+    void Initialize(std::initializer_list<std::reference_wrapper<const ShaderGL>> shaderList);
 
     //! @brief Finds all the programs inputs and stores their names and handles.
     void FindInputs();
 
     //! @brief Finds all the programs uniforms and stores their names and handles.
     void FindUniforms();
+
+    //! @brief Finds the additional members locations of a uniform array and stores their names and handles.
+    //! @param firstElementName: Name of the first element -> "arrayName[0]"
+    //! @param firstElement: First elements uniform data
+    void FindUniformArrayMembers(const std::string& firstElementName, const Uniform& firstElement);
 
     //! @brief Finds all the programs uniform blocks and stores their names and handles.
     void FindUniformBlocks();
@@ -106,14 +122,22 @@ private:
 }
 
 
+
 template <typename TScalar>
-void GDL::ProgramGL::SetUniformScalar(std::string uniformName, TScalar value, GLsizei index)
+void GDL::ProgramGL::SetUniformScalar(std::string uniformName, TScalar value)
 {
-    SetUniformScalar(GetUniformHandle(uniformName), value, index);
+    SetUniformScalar(GetUniformHandle(uniformName), value);
+}
+
+template <typename TScalar>
+void GDL::ProgramGL::SetUniformScalarArray(std::string uniformName, std::vector<TScalar> values)
+{
+    SetUniformScalarArray(GetUniformHandle(uniformName), values);
 }
 
 template <typename... TShader>
 GDL::ProgramGL::ProgramGL(const TShader&... shaderList)
+    : mHandle(glCreateProgram())
 {
     Initialize({std::forward<const TShader&>(shaderList)...});
 }

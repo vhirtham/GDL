@@ -210,14 +210,13 @@ int main(int argc, char* argv[])
             "  out_Color = vec4(color.xyz,f2);\n"
             "}\n"};
 
-    ShaderGLSL vertexShader(GL_VERTEX_SHADER, VertexShaderCode);
-    ShaderGLSL fragmentShader(GL_FRAGMENT_SHADER, FragmentShaderCode);
+    ShaderGL vertexShader(GL_VERTEX_SHADER, VertexShaderCode);
+    ShaderGL fragmentShader(GL_FRAGMENT_SHADER, FragmentShaderCode);
 
     ProgramGL program(vertexShader, fragmentShader);
     program.SetUniformScalar("frequency", 10.f);
-    program.SetUniformScalar("colMod[0]", 1.f, 3);
-    // program.SetUniformScalar("colMod", 1.f, 1);
-    // program.SetUniformScalar("colMod", 1.f, 2);
+    program.SetUniformScalar("colMod[0]", 1.f);
+    program.SetUniformScalarArray("colMod[1]", std::vector<F32>{1.f, 1.f});
 
     glUseProgram(program.GetHandle());
 

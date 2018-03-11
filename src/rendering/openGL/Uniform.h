@@ -8,7 +8,7 @@ namespace GDL
 class Uniform
 {
     GLuint mHandle;
-    GLuint mArraySize;
+    GLuint mSubsequentElementCount;
     GLenum mType;
 
 public:
@@ -19,22 +19,34 @@ public:
     Uniform& operator=(Uniform&&) = default;
     ~Uniform() = default;
 
-    Uniform(GLint handle, GLenum type, GLint arraySize)
+    //! @brief Ctor
+    //! @param handle: The uniforms handle
+    //! @param type: The uniforms type enum
+    //! @param subsequentElementCount: Number of subsequent array elements (1 for non array types or last elements)
+    Uniform(GLint handle, GLenum type, GLint subsequentElementCount)
         : mHandle(handle)
-        , mArraySize(arraySize)
+        , mSubsequentElementCount(subsequentElementCount)
         , mType(type)
     {
     }
 
 
+    //! @brief Gets the uniforms type enum
     GLenum GetType() const
     {
         return mType;
     }
 
+    //! @brief Gets the uniforms handle
     GLuint GetHandle() const
     {
         return mHandle;
+    }
+
+    //! @brief Gets the number of subsequent array elements (1 for non array types or last elements)
+    GLuint GetSubsequentElementCount() const
+    {
+        return mSubsequentElementCount;
     }
 };
 }

@@ -4,6 +4,7 @@
 
 #include <cassert>
 #include <memory>
+#include <set>
 
 GDL::ProgramGL::~ProgramGL()
 {
@@ -12,7 +13,8 @@ GDL::ProgramGL::~ProgramGL()
 
 
 
-GDL::ProgramGL::ProgramGL(std::initializer_list<std::reference_wrapper<const ShaderGLSL>> shaderList)
+GDL::ProgramGL::ProgramGL(std::initializer_list<std::reference_wrapper<const ShaderGL>> shaderList)
+    : mHandle(glCreateProgram())
 {
     Initialize(shaderList);
 }
@@ -31,13 +33,18 @@ GLuint GDL::ProgramGL::GetUniformHandle(std::string uniformName)
 
 
 template <>
-void GDL::ProgramGL::SetUniformScalar(GLuint uniformHandle, F32 value, GLsizei index)
+void GDL::ProgramGL::SetUniformScalar(GLuint uniformHandle, F32 value)
 {
-    std::vector<GLfloat> values(index);
-    for (U32 i = 0; i < index; ++i)
-        values[i] = value;
     assert(GetUniformByHandle(uniformHandle).GetType() == GL_FLOAT);
-    glProgramUniform1fv(mHandle, uniformHandle, index, values.data());
+    glProgramUniform1f(mHandle, uniformHandle, value);
+}
+
+template <>
+void GDL::ProgramGL::SetUniformScalarArray(GLuint uniformHandle, std::vector<F32> values)
+{
+    assert(GetUniformByHandle(uniformHandle).GetType() == GL_FLOAT);
+    assert(GetUniformByHandle(uniformHandle).GetSubsequentElementCount() >= values.size());
+    glProgramUniform1fv(mHandle, uniformHandle, values.size(), values.data());
 }
 
 void GDL::ProgramGL::CheckLinkStatus()
@@ -58,25 +65,25 @@ void GDL::ProgramGL::CheckLinkStatus()
     }
 }
 
-void GDL::ProgramGL::Initialize(std::initializer_list<std::reference_wrapper<const GDL::ShaderGLSL>> shaderList)
+void GDL::ProgramGL::Initialize(std::initializer_list<std::reference_wrapper<const GDL::ShaderGL>> shaderList)
 {
-    mHandle = glCreateProgram();
+    std::set<GLenum> attachedShaderTypes;
     for (auto& shader : shaderList)
     {
-        assert(mShader.find(shader.get().GetType()) == mShader.end() &&
-               "Multiple shaders of the same type in one program are not supported");
-
-        auto emplaceResult = mShader.emplace(shader.get().GetType(), shader);
-        assert(emplaceResult.second == true && "Could not emplace shader into program data");
-
-        glAttachShader(mHandle, emplaceResult.first->second.get().GetHandle());
+        if (attachedShaderTypes.find(shader.get().GetType()) != attachedShaderTypes.end())
+            throw Exception(__PRETTY_FUNCTION__,
+                            "Multiple shaders of the same type in one program are not "
+                            "supported.\n You tried to attach multiple shaders of type: " +
+                                    ShaderGL::GetShaderTypeString(shader.get().GetType()));
+        glAttachShader(mHandle, shader.get().GetHandle());
+        attachedShaderTypes.emplace(shader.get().GetType());
     }
 
     glLinkProgram(mHandle);
 
-    for (auto& shader : mShader)
+    for (auto& shader : shaderList)
     {
-        glDetachShader(mHandle, shader.second.get().GetHandle());
+        glDetachShader(mHandle, shader.get().GetHandle());
     }
     CheckLinkStatus();
     FindInputs();
@@ -102,53 +109,59 @@ void GDL::ProgramGL::FindInputs()
 
 void GDL::ProgramGL::FindUniforms()
 {
-    auto uniformData = FindProgramResourceData<5>(
-            GL_UNIFORM, {{GL_LOCATION, GL_NAME_LENGTH, GL_TYPE, GL_ARRAY_SIZE, GL_BLOCK_INDEX}});
-    for (U32 i = 0; i < uniformData.size(); ++i)
+    auto data = FindProgramResourceData<5>(GL_UNIFORM,
+                                           {{GL_LOCATION, GL_NAME_LENGTH, GL_TYPE, GL_ARRAY_SIZE, GL_BLOCK_INDEX}});
+    for (U32 i = 0; i < data.size(); ++i)
     {
-        if (uniformData[i][4] != -1) // if uniform is member of a UBO
+        if (data[i][4] != -1) // if uniform is member of a Uniform Block (handled seperately)
             continue;
-        //        if (uniformData[i][3] > 1)
-        //            // READ:
-        //            //
-        //            https://stackoverflow.com/questions/32154710/are-glgetuniformlocation-indices-for-arrays-of-uniforms-guaranteed-sequential-ex
-        //            // Possibilities:
-        //            // 1. Keep size in uniform to store array size -> Duplicate entries (or decending to the end. Last
-        //            element
-        //            // should have size=1)
-        //            // 2. Store array data in an extra container -> unnecessary complexity
-        //            // 3. Count number of entries in uniform map -> slow, but you should do that only once and
-        //            remember the
-        //            // value
-        //            // Currently favour version 1 because version 2 gets to messy and with version 3. you need to hope
-        //            always
-        //            // remembering that this solution is slow. If you forget it, you might slow the program down!
-        //            // Copy these thoughts to github in a new issue and reference it above the function to always
-        //            remember the
-        //            // reasons for the decision.
-        //            throw Exception(__PRETTY_FUNCTION__,
-        //                            "Arrays not handled yet. Add each arrayelemet to the uniforms list. "
-        //                            "Think about how to get the size. Store an extra element or just search for the
-        //                            number of "
-        //                            "elements with the same name in the UniformList");
-        mUniforms.emplace(GetResourceName(GL_UNIFORM, i, uniformData[i][1]),
-                          Uniform(uniformData[i][0], uniformData[i][2], uniformData[i][3]));
+
+        auto uniformIt = mUniforms
+                                 .emplace(GetResourceName(GL_UNIFORM, i, data[i][1]),
+                                          Uniform(data[i][0], data[i][2], data[i][3]))
+                                 .first;
+
+        FindUniformArrayMembers(uniformIt->first, uniformIt->second);
+    }
+}
+
+void GDL::ProgramGL::FindUniformArrayMembers(const std::string& firstElementName, const Uniform& firstElement)
+{
+    if (firstElement.GetSubsequentElementCount() > 1)
+    {
+        std::string arrayName = firstElementName;
+        assert(arrayName.find("[0]", arrayName.length() - 3) == arrayName.length() - 3);
+        arrayName.erase(arrayName.length() - 3, 3);
+
+        for (GLint j = 1; j < firstElement.GetSubsequentElementCount(); ++j)
+        {
+            std::string arrayElementName = arrayName + "[" + std::to_string(j) + "]";
+            GLint arrayElementHandle = glGetUniformLocation(mHandle, arrayElementName.c_str());
+
+            if (arrayElementHandle < 0)
+                throw Exception(__PRETTY_FUNCTION__,
+                                "Could not find location of array element \"" + arrayElementName +
+                                        "\"! This error might be caused by GLSL compiler optimizaion");
+
+            mUniforms.emplace(arrayElementName, Uniform(arrayElementHandle, firstElement.GetType(),
+                                                        firstElement.GetSubsequentElementCount() - j));
+        }
     }
 }
 
 void GDL::ProgramGL::FindUniformBlocks()
 {
-    auto uniformData = FindProgramResourceData<4>(
+    auto data = FindProgramResourceData<4>(
             GL_UNIFORM_BLOCK, {{GL_NAME_LENGTH, GL_BUFFER_BINDING, GL_BUFFER_DATA_SIZE, GL_NUM_ACTIVE_VARIABLES}});
-    for (U32 i = 0; i < uniformData.size(); ++i)
+    for (U32 i = 0; i < data.size(); ++i)
     {
-        std::string uniformBlockName = GetResourceName(GL_UNIFORM_BLOCK, i, uniformData[i][0]);
-        GLint bufferBindingPoint = uniformData[i][0];
+        std::string uniformBlockName = GetResourceName(GL_UNIFORM_BLOCK, i, data[i][0]);
+        GLint bufferBindingPoint = data[i][0];
         assert(glGetUniformBlockIndex(mHandle, uniformBlockName.c_str()) == i);
 
-        std::vector<GLint> varIndices(uniformData[i][3]);
+        std::vector<GLint> varIndices(data[i][3]);
         glGetActiveUniformBlockiv(mHandle, i, GL_UNIFORM_BLOCK_ACTIVE_UNIFORM_INDICES, varIndices.data());
-        for (U32 j = 0; j < uniformData[i][3]; ++j)
+        for (U32 j = 0; j < data[i][3]; ++j)
         {
             GLuint uniformIndex = static_cast<GLuint>(varIndices[j]);
             GLint uniformNameLength;

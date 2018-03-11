@@ -6,23 +6,23 @@
 namespace GDL
 {
 
-class ShaderGLSL
+class ShaderGL
 {
-    GLuint mHandle = 0;
-    GLenum mShaderType;
+    const GLenum mShaderType;
+    const GLuint mHandle = 0;
 
 public:
-    ShaderGLSL() = delete;
-    ShaderGLSL(const ShaderGLSL&) = delete; // don't use default -> dtor calls glDeleteShader
-    ShaderGLSL(ShaderGLSL&&) = delete; // don't use default -> dtor calls glDeleteShader
-    ShaderGLSL& operator=(const ShaderGLSL&) = delete; // don't use default -> dtor calls glDeleteShader
-    ShaderGLSL& operator=(ShaderGLSL&&) = delete; // don't use default -> dtor calls glDeleteShader
-    ~ShaderGLSL();
+    ShaderGL() = delete;
+    ShaderGL(const ShaderGL&) = delete; // don't use default -> dtor calls glDeleteShader
+    ShaderGL(ShaderGL&&) = delete; // don't use default -> dtor calls glDeleteShader
+    ShaderGL& operator=(const ShaderGL&) = delete; // don't use default -> dtor calls glDeleteShader
+    ShaderGL& operator=(ShaderGL&&) = delete; // don't use default -> dtor calls glDeleteShader
+    ~ShaderGL();
 
     //! @brief Ctor which takes the Shader code and compiles it. Throws on compilation errors.
     //! @param shaderType: GLenum that corresponds to the shader type
     //! @param shaderCode: Shader code
-    ShaderGLSL(GLenum shaderType, const char* shaderCode);
+    ShaderGL(GLenum shaderType, const char* shaderCode);
 
     //! @brief Gets the shaders handle
     //! @return Shader handle
