@@ -9,9 +9,15 @@ function(addTest TestName)
     ### Find single object targets
     if(ARGN)
         foreach(filename ${ARGN})
-            singleSourceTargetName(${CMAKE_SOURCE_DIR}/src/${filename} target)
-            set(AdditionalObjects
-                "${AdditionalObjects};$<TARGET_OBJECTS:${target}>")
+            string(FIND "${ARGN}" ".cpp" IsCpp)
+            if(${IsCpp} EQUAL "-1")
+                set(AdditionalLibs
+                    "${AdditionalLibs}${ARGN}")
+            else()
+                singleSourceTargetName(${CMAKE_SOURCE_DIR}/src/${filename} target)
+                set(AdditionalObjects
+                    "${AdditionalObjects};$<TARGET_OBJECTS:${target}>")
+            endif()
         endforeach()
     endif()
 
@@ -22,7 +28,9 @@ function(addTest TestName)
 
     ### Link necessary libs
     target_link_Libraries(${TestName}
-        Boost::unit_test_framework)
+        Boost::unit_test_framework
+        ${AdditionalLibs}
+        )
 
     ### Add source directory
     target_include_directories(${TestName}
