@@ -7,12 +7,18 @@ before_install:
 - sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
 - sudo apt-get -qq update
 - sudo apt-get install -qq -y libboost-test1.55-dev g++-7 libgcc-7-dev
+- sudo apt-get install -y lcov curl libglu1-mesa-dev
 
 before_script:
 - mkdir build
 - cd build
-- CXX=g++-7 cmake ..
+- CXX=g++-7 cmake -DCMAKE_CXX_FLAGS="--coverage" ..
 
 script:
     - make -j2
     - make CTEST_OUTPUT_ON_FAILURE=1 test
+
+after_success:
+    - lcov --directory build --capture --output-file coverage.info
+    - lcov --remove coverage.info 'usr/*' --output-file coverage.info
+    - bash <(curl -s https://codecov.io/bash) || echo "Codecov did not collect coverage reports"
