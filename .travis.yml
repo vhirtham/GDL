@@ -7,6 +7,7 @@ before_install:
 - sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
 - sudo apt-get -qq update
 - sudo apt-get install -qq -y libboost-test1.55-dev g++-7 libgcc-7-dev
+- sudo apt-get install -y lcov curl libglu1-mesa-dev
 
 before_script:
 - mkdir build
@@ -16,3 +17,6 @@ before_script:
 script:
     - make -j2
     - make CTEST_OUTPUT_ON_FAILURE=1 test
+
+after_success:
+
