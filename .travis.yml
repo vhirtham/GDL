@@ -8,6 +8,7 @@ before_install:
 - sudo apt-get -qq update
 - sudo apt-get install -qq -y libboost-test1.55-dev g++-7 libgcc-7-dev
 - sudo apt-get install -y lcov curl libglu1-mesa-dev
+- sudo apt-get install libglew-dev freeglut3-dev
 
 before_script:
 - mkdir build
