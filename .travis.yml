@@ -10,7 +10,10 @@ before_install:
 - sudo apt-get install -y lcov curl libglu1-mesa-dev
 - sudo apt-get install libglew-dev freeglut3-dev
 
+
 before_script:
+- sudo apt-get install -qq --force-yes mesa-utils libgl1-mesa-swx11 libgl1-mesa-swx11-dev xvfb
+- /sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_99.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :99 -screen 0 1400x900x24 -ac +extension GLX +render
 - mkdir build
 - cd build
 - CXX=g++-7 cmake -DCMAKE_CXX_FLAGS="--coverage" ..
