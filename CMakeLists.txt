@@ -16,7 +16,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++17 -Wall -Wno-long-long -pedan
 option(ENABLE_ADVANCED_SSE "Enables advanced vector extensions (SIMD) like _m256 and _m512 registers" FALSE)
 option(ENABLE_BENCHMARKS "Enables the benchmarks" FALSE)
 option(ENABLE_CUSTOM_APPS "Enables applications that are located in the applications/custom directory" FALSE)
-option(ENABLE_OPENGL "Enables OpenGL" TRUE)
+option(ENABLE_OPENGL "Enables OpenGL" FALSE)
 option(ENABLE_TESTS "Enables the testfiles" TRUE)
 option(ENABLE_VULKAN "Enables Vulkan API" FALSE)
 
