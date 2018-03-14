@@ -1,0 +1,2 @@
+addTest(renderWindowGL
+    GDL::OpenGL)
