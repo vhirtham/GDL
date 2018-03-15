@@ -28,7 +28,18 @@ int main()
     v.push_back(11);
     v.push_back(22);
     v.reserve(20);
+    bool caught = false;
+    try
+    {
+        v.reserve(200);
+    }
+    catch (Exception e)
+    {
+        caught = true;
+    }
 
+    if (caught == false)
+        throw Exception(__PRETTY_FUNCTION__, "Exception not caught as expected");
     std::cout << "End of program" << std::endl;
     //    v.push_back(33);
     //    v.push_back(44);
