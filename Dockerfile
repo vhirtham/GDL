@@ -7,6 +7,9 @@ RUN apt-get update
 # Get basic libraries
 RUN apt-get install -y cmake git g++ libboost-test-dev
 
+# Get libraries for codecov
+RUN apt-get -y install lcov curl
+
 # Get opengl related libraries
 RUN apt-get install -y freeglut3-dev libglew-dev mesa-utils xvfb
 

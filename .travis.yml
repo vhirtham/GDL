@@ -36,6 +36,7 @@ script:
     #- make CTEST_OUTPUT_ON_FAILURE=1 test
 
 after_success:
-#    - lcov --directory build --capture --output-file coverage.info
-#    - lcov --remove coverage.info 'usr/*' --output-file coverage.info
-#    - bash <(curl -s https://codecov.io/bash) || echo "Codecov did not collect coverage reports"
+    - docker exec dock lcov --directory . --capture --output-file ../code/coverage.info
+#   - docker exec dock lcov --remove coverage.info 'usr/*' --output-file coverage.info
+    - bash <(curl -s https://codecov.io/bash)
+    #- docker exec dock bash -c "bash <(curl -s https://codecov.io/bash)"
