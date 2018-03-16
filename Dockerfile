@@ -12,8 +12,8 @@ RUN apt-get install -y freeglut3-dev libglew-dev mesa-utils xvfb
 
 
 # Create directories
-RUN mkdir /home/usr && mkdir /home/usr/gdl && mkdir /home/usr/gdl/build
+RUN mkdir /home/usr && mkdir /home/usr/gdl && mkdir /home/usr/gdl/build && mkdir /home/usr/gdl/code
 
-RUN export DISPLAY=:99 && export LIBGL_ALWAYS_SOFTWARE=1
+#RUN export DISPLAY=:99 && export LIBGL_ALWAYS_SOFTWARE=1
 
-WORKDIR /home/usr/gdl
+WORKDIR /home/usr/gdl/build
