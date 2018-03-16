@@ -5,7 +5,7 @@ FROM ubuntu:17.10
 RUN apt-get update
 
 # Get basic libraries
-RUN apt-get install -y cmake git g++ libboost-test-dev
+RUN apt-get install -y cmake git g++ clang libboost-test-dev
 
 # Get libraries for codecov
 RUN apt-get -y install lcov curl
