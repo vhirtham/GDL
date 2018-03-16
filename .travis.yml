@@ -5,15 +5,16 @@ services: docker
 matrix:
     include:
         - compiler: clang
-          env: BUILD_TYPE=Release
+          env: BUILD_TYPE=Release COMPILER=clang++-5.0
         - compiler: clang
-          env: BUILD_TYPE=Debug
+          env: BUILD_TYPE=Debug COMPILER=clang++-5.0
         - compiler: g++
-          env: BUILD_TYPE=Release
+          env: BUILD_TYPE=Release COMPILER=g++
         - compiler: g++
-          env: BUILD_TYPE=Debug COVERAGE=--coverage
+          env: BUILD_TYPE=Debug COVERAGE=--coverage COMPILER=g++
 
 before_install:
+- if [[ "$CXX" == "clang++" ]]; then export CXX=clang++-5.0; fi
 - CI_ENV=`bash <(curl -s https://codecov.io/env)`
 - travis_retry timeout 120 docker pull vhirtham/gdl
 - docker run $CI_ENV -itd --name dock -v $(pwd):/home/usr/gdl/code vhirtham/gdl
@@ -21,12 +22,12 @@ before_install:
 before_script:
 
 script:
-    - docker exec dock cmake -DCMAKE_CXX_COMPILER=$CXX -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_CXX_FLAGS="$COVERAGE" ../code
+    - docker exec dock cmake -DCMAKE_CXX_COMPILER=$COMPILER -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_CXX_FLAGS="$COVERAGE" ../code
     - docker exec dock make -j2
     - docker exec dock ctest --output-on-failure
-    - if [[ "$COVERAGE" == "--coverage" ]]docker exec dock lcov --directory . --capture --output-file ../code/coverage.info; fi
-    - if [[ "$COVERAGE" == "--coverage" ]]docker exec dock lcov --remove ../code/coverage.info 'usr/*' --output-file ../code/coverage.info; fi
-    - if [[ "$COVERAGE" == "--coverage" ]]docker exec dock lcov --remove ../code/coverage.info '*/tests/*' --output-file ../code/coverage.info; fi
-    - if [[ "$COVERAGE" == "--coverage" ]]bash <(curl -s https://codecov.io/bash); fi
+    - if [[ "$COVERAGE" == "--coverage" ]]; then docker exec dock lcov --directory . --capture --output-file ../code/coverage.info; fi
+    - if [[ "$COVERAGE" == "--coverage" ]]; then docker exec dock lcov --remove ../code/coverage.info 'usr/*' --output-file ../code/coverage.info; fi
+    - if [[ "$COVERAGE" == "--coverage" ]]; then docker exec dock lcov --remove ../code/coverage.info '*/tests/*' --output-file ../code/coverage.info; fi
+    - if [[ "$COVERAGE" == "--coverage" ]]; then bash <(curl -s https://codecov.io/bash); fi
 
 after_success:
