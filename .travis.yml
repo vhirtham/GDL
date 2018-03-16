@@ -15,9 +15,8 @@ matrix:
 
 before_install:
 - if [[ "$CXX" == "clang++" ]]; then export CXX=clang++-5.0; fi
-- CI_ENV=`bash <(curl -s https://codecov.io/env)`
 - travis_retry timeout 120 docker pull vhirtham/gdl
-- docker run $CI_ENV -itd --name dock -v $(pwd):/home/usr/gdl/code vhirtham/gdl
+- docker run -itd --name dock -v $(pwd):/home/usr/gdl/code vhirtham/gdl
 
 before_script:
 
