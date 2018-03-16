@@ -4,7 +4,7 @@
 
 template <class T>
 GDL::mat4Single<T>::mat4Single()
-    : mA({0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0})
+    : mA({{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}})
 {
 }
 
@@ -57,6 +57,12 @@ template <class T>
 T GDL::mat4Single<T>::operator()(const U32 row, const U32 col) const
 {
     return mA[row + col * 4];
+}
+
+template<class T>
+const std::array<T, 16> GDL::mat4Single<T>::Data() const
+{
+    return mA;
 }
 
 #ifndef NDEBUG

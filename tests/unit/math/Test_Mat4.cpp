@@ -11,6 +11,26 @@ using namespace GDL;
 // Helper functions %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 template <typename T>
+bool checkArrayZero(const T& a)
+{
+    for (U32 i = 0; i < a.size(); ++i)
+        if (std::fabs(a[i]) > 0.)
+            return false;
+    return true;
+}
+
+template <typename T>
+bool checkCloseArray(const T& a, const T& b, F32 tolerance = 1e-6)
+{
+    if (a.size() != b.size())
+        return false;
+    for (U32 i = 0; i < a.size(); ++i)
+        if (std::fabs(a[i] - b[i]) > tolerance)
+            return false;
+    return true;
+}
+
+template <typename T>
 bool checkClose(T a, T b, F32 tolerance = 1e-6)
 {
     for (U32 i = 0; i < 4; ++i)
@@ -32,6 +52,28 @@ struct Fixture
 };
 
 
+// Addition Assignment %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+template <typename matrix>
+void ConstructionTest()
+{
+    matrix A;
+    BOOST_CHECK(checkArrayZero(A.Data()));
+
+    matrix B(0., 1., 2., 3., 4., 5., 6., 7., 8., 9., 10., 11., 12., 13., 14., 15.);
+    std::array<F32, 16> expB{{0., 1., 2., 3., 4., 5., 6., 7., 8., 9., 10., 11., 12., 13., 14., 15.}};
+    BOOST_CHECK(checkCloseArray(B.Data(), expB));
+}
+
+BOOST_AUTO_TEST_CASE(Construction_Single)
+{
+    ConstructionTest<mat4Single<F32>>();
+}
+
+BOOST_AUTO_TEST_CASE(Construction_SIMD)
+{
+    ConstructionTest<mat4SIMD>();
+}
 
 // Addition Assignment %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

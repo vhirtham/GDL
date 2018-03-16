@@ -3,6 +3,7 @@
 #include "base/SSESupportFunctions.h"
 
 #include <x86intrin.h>
+#include <array>
 #ifndef NDEBUG
 #include <iostream>
 #endif
@@ -13,10 +14,11 @@ namespace GDL
 //! @brief 4x4 Matrix with SIMD support
 class __attribute__((aligned(16))) mat4SIMD
 {
-    __attribute__((aligned(16))) __m128 mCol0;
-    __attribute__((aligned(16))) __m128 mCol1;
-    __attribute__((aligned(16))) __m128 mCol2;
-    __attribute__((aligned(16))) __m128 mCol3;
+    __attribute__((aligned(16))) std::array<__m128, 4> mData;
+    //    __attribute__((aligned(16))) __m128 mCol0;
+    //    __attribute__((aligned(16))) __m128 mCol1;
+    //    __attribute__((aligned(16))) __m128 mCol2;
+    //    __attribute__((aligned(16))) __m128 mCol3;
 
 public:
     //! @brief Constructor
@@ -70,6 +72,10 @@ public:
     //! @param col: Column of the accessed value
     //! @return Accessed value
     inline F32 operator()(const U32 row, const U32 col) const;
+
+    //! @brief Gets the data array in column major ordering
+    //! @return Data
+    inline const std::array<F32, 16> Data() const;
 
 
 private:

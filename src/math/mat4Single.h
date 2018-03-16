@@ -67,6 +67,10 @@ public:
     //! @return Accessed value
     inline T operator()(const U32 row, const U32 col) const;
 
+    //! @brief Gets the data array in column major ordering
+    //! @return Data
+    inline const std::array<T, 16> Data() const;
+
 private:
 #ifndef NDEBUG
     template <typename T2>

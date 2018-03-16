@@ -35,6 +35,7 @@ int main()
     }
     catch (Exception e)
     {
+        e.what();
         caught = true;
     }
 
