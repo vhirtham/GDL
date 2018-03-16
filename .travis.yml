@@ -37,6 +37,7 @@ script:
 
 after_success:
     - docker exec dock lcov --directory . --capture --output-file ../code/coverage.info
-#   - docker exec dock lcov --remove coverage.info 'usr/*' --output-file coverage.info
+    - docker exec dock lcov --remove ../code/coverage.info 'usr/*' --output-file ../code/coverage.info
+    - docker exec dock lcov --remove ../code/coverage.info '*/tests/*' --output-file ../code/coverage.info
     - bash <(curl -s https://codecov.io/bash)
     #- docker exec dock bash -c "bash <(curl -s https://codecov.io/bash)"
