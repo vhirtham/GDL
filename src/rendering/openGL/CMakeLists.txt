@@ -16,4 +16,8 @@ if(ENABLE_OPENGL)
     target_include_directories(GDL_OpenGL
         PUBLIC
             ${GDL_SOURCE_DIR})
+
+        target_compile_features(GDL_OpenGL
+            PUBLIC
+                cxx_std_17)
 endif()

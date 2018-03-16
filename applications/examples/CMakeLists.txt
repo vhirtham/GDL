@@ -5,4 +5,6 @@ if(ENABLE_OPENGL)
         GDL::OpenGL
         )
 
+    target_compile_features(TriangleOpenGL PUBLIC cxx_std_17)
+
 endif()

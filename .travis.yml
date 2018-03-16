@@ -1,30 +1,32 @@
 language: cpp
-sudo: required
+sudo: false
+services: docker
 
+matrix:
+    include:
+        - compiler: clang
+          env: BUILD_TYPE=Release
+        - compiler: clang
+          env: BUILD_TYPE=Debug
+        - compiler: g++
+          env: BUILD_TYPE=Release
+        - compiler: g++
+          env: BUILD_TYPE=Debug COVERAGE=--coverage
 
 before_install:
-- ./scripts/bash/install_cmake.sh
-- sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
-- sudo apt-get -qq update
-- sudo apt-get install -qq -y libboost-test1.55-dev g++-7 libgcc-7-dev
-- sudo apt-get install -y lcov curl libglu1-mesa-dev
-- sudo apt-get install libglew-dev freeglut3-dev
-#- sudo apt-get install xvfb
+- if [[ "$CXX" == "clang++" ]]; then export CXX=clang++-5.0; fi
+- travis_retry timeout 120 docker pull vhirtham/gdl
+- docker run -itd --name dock -v $(pwd):/home/usr/gdl/code vhirtham/gdl
 
 before_script:
-#- sudo apt-get install -qq --force-yes mesa-utils libgl1-mesa-swx11 libgl1-mesa-swx11-dev xvfb
-#- /sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_99.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :99 -screen 0 1400x900x24 -ac +extension GLX +render
-#- export DISPLAY=:99.0
-#- sh -e /etc/init.d/xvfb start
-- mkdir build
-- cd build
-- CXX=g++-7 cmake -DCMAKE_CXX_FLAGS="--coverage" ..
 
 script:
-    - make -j2
-    - make CTEST_OUTPUT_ON_FAILURE=1 test
+    - docker exec dock cmake -DCMAKE_CXX_COMPILER=$CXX -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_CXX_FLAGS="$COVERAGE" ../code
+    - docker exec dock make -j2
+    - docker exec dock ctest --output-on-failure
+    - if [[ "$COVERAGE" == "--coverage" ]]; then docker exec dock lcov --directory . --capture --output-file ../code/coverage.info; fi
+    - if [[ "$COVERAGE" == "--coverage" ]]; then docker exec dock lcov --remove ../code/coverage.info 'usr/*' --output-file ../code/coverage.info; fi
+    - if [[ "$COVERAGE" == "--coverage" ]]; then docker exec dock lcov --remove ../code/coverage.info '*/tests/*' --output-file ../code/coverage.info; fi
+    - if [[ "$COVERAGE" == "--coverage" ]]; then bash <(curl -s https://codecov.io/bash); fi
 
 after_success:
-    - lcov --directory build --capture --output-file coverage.info
-    - lcov --remove coverage.info 'usr/*' --output-file coverage.info
-    - bash <(curl -s https://codecov.io/bash) || echo "Codecov did not collect coverage reports"
