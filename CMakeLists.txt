@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.9)
 set(CMAKE_VERBOSE_MAKEFILE OFF)
 
 set(GDL_PROJECT_DIR ${CMAKE_CURRENT_SOURCE_DIR})
-set(GDL_SOURCE_DIR ${GDL_PROJECT_DIR}/src)
+set(GDL_SOURCE_DIR ${GDL_PROJECT_DIR}/gdl)
 
 
 # COMPILER SETUP
@@ -48,7 +48,7 @@ externalDependencies()
 # SUBDIRECTORIES
 # --------------
 add_subdirectory(applications)
-add_subdirectory(src)
+add_subdirectory(gdl)
 if(ENABLE_TESTS)
     add_subdirectory(tests)
 endif()

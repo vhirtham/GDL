@@ -1,7 +1,7 @@
 #pragma once
 #include "mat4SIMD.h"
 
-#include "base/Exception.h"
+#include "gdl/base/Exception.h"
 
 
 #include <cassert>

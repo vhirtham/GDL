@@ -1,5 +1,5 @@
-#include "math/mat4SIMD.inl"
-#include "math/mat4Single.inl"
+#include "gdl/math/mat4SIMD.inl"
+#include "gdl/math/mat4Single.inl"
 #include <benchmark/benchmark.h>
 
 using namespace GDL;

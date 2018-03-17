@@ -9,7 +9,7 @@ add_library(GDLResourceManagement
 
 target_include_directories(GDLResourceManagement
     PUBLIC
-        ${CMAKE_CURRENT_SOURCE_DIR})
+        ${CMAKE_SOURCE_DIR})
 
 target_compile_features(GDLResourceManagement
     PUBLIC

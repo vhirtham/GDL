@@ -14,7 +14,7 @@ function(addTest TestName)
                 set(AdditionalLibs
                     "${AdditionalLibs}${ARGN}")
             else()
-                singleSourceTargetName(${CMAKE_SOURCE_DIR}/src/${filename} target)
+                singleSourceTargetName(${CMAKE_SOURCE_DIR}/gdl/${filename} target)
                 set(AdditionalObjects
                     "${AdditionalObjects};$<TARGET_OBJECTS:${target}>")
             endif()
@@ -35,7 +35,7 @@ function(addTest TestName)
     ### Add source directory
     target_include_directories(${TestName}
         PUBLIC
-            ${PROJECT_SOURCE_DIR}/src)
+            ${PROJECT_SOURCE_DIR})
 
     ### Add necessary definitions
     target_compile_definitions(${TestName}

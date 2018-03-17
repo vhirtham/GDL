@@ -1,8 +1,8 @@
 #include <boost/test/unit_test.hpp>
 
-#include "GDLTypedefs.h"
-#include "math/mat4SIMD.inl"
-#include "math/mat4Single.inl"
+#include "gdl/GDLTypedefs.h"
+#include "gdl/math/mat4SIMD.inl"
+#include "gdl/math/mat4Single.inl"
 
 #include <cmath>
 

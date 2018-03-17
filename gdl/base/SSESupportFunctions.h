@@ -1,7 +1,7 @@
 #pragma once
 
-#include "GDLTypedefs.h"
-#include "base/Exception.h"
+#include "gdl/GDLTypedefs.h"
+#include "gdl/base/Exception.h"
 
 #include <x86intrin.h>
 

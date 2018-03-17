@@ -1,8 +1,8 @@
 #include "ThreadPool.h"
 
 
-#include "base/Exception.h"
-#include "resourceManagement/Thread.h"
+#include "gdl/base/Exception.h"
+#include "gdl/resourceManagement/Thread.h"
 
 GDL::ThreadPool::~ThreadPool()
 {

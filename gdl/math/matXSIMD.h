@@ -3,9 +3,9 @@
 #pragma GCC diagnostic ignored "-Wignored-attributes"
 #endif
 
-#include "GDLTypedefs.h"
-#include "base/Exception.h"
-#include "base/SSESupportFunctions.h"
+#include "gdl/GDLTypedefs.h"
+#include "gdl/base/Exception.h"
+#include "gdl/base/SSESupportFunctions.h"
 
 #include <array>
 #include <type_traits>

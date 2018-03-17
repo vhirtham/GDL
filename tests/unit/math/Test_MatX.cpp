@@ -1,7 +1,7 @@
 #include <boost/test/unit_test.hpp>
 
-#include "math/matXSIMD.inl"
-#include "math/matXSingle.inl"
+#include "gdl/math/matXSIMD.inl"
+#include "gdl/math/matXSingle.inl"
 
 #include <cmath>
 #ifndef NDEBUG

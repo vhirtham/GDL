@@ -1,6 +1,6 @@
 #pragma once
 
-#include "GDLTypedefs.h"
+#include "gdl/GDLTypedefs.h"
 
 #include <array>
 

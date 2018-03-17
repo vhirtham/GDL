@@ -1,6 +1,6 @@
 #pragma once
 
-#include "resourceManagement/ThreadTaskBase.h"
+#include "gdl/resourceManagement/ThreadTaskBase.h"
 
 namespace GDL
 {

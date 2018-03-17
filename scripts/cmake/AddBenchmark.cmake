@@ -13,7 +13,7 @@ function(addBenchmark BenchmarkName)
     ### Add source directory
     target_include_directories(${BenchmarkName}
         PUBLIC
-            ${PROJECT_SOURCE_DIR}/src)
+            ${PROJECT_SOURCE_DIR})
 
     target_compile_features(${BenchmarkName}
         PUBLIC

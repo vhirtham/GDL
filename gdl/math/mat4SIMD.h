@@ -1,6 +1,6 @@
 #pragma once
-#include "GDLTypedefs.h"
-#include "base/SSESupportFunctions.h"
+#include "gdl/GDLTypedefs.h"
+#include "gdl/base/SSESupportFunctions.h"
 
 #include <x86intrin.h>
 #include <array>
