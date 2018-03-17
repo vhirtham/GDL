@@ -1,6 +1,6 @@
 #include "shaderGL.h"
 
-#include "base/Exception.h"
+#include "gdl/base/Exception.h"
 
 #include <memory>
 

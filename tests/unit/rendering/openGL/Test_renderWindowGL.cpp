@@ -1,6 +1,6 @@
 #include <boost/test/unit_test.hpp>
 
-#include "rendering/openGL/renderWindowGL.h"
+#include "gdl/rendering/openGL/renderWindowGL.h"
 
 using namespace GDL;
 

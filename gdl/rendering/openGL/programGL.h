@@ -1,9 +1,9 @@
 #pragma once
 
-#include "GDLTypedefs.h"
-#include "base/Exception.h"
-#include "rendering/openGL/shaderGL.h"
-#include "rendering/openGL/Uniform.h"
+#include "gdl/GDLTypedefs.h"
+#include "gdl/base/Exception.h"
+#include "gdl/rendering/openGL/shaderGL.h"
+#include "gdl/rendering/openGL/Uniform.h"
 
 #include <functional>
 #include <map>

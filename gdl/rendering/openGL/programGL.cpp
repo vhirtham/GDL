@@ -1,6 +1,6 @@
 #include "programGL.h"
 
-#include "base/Exception.h"
+#include "gdl/base/Exception.h"
 
 #include <cassert>
 #include <memory>

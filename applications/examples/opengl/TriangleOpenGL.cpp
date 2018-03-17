@@ -1,9 +1,9 @@
 
 // Tutorials to go on: http://openglbook.com/chapter-1-getting-started.html
 
-#include "rendering/openGL/programGL.h"
-#include "rendering/openGL/renderWindowGL.h"
-#include "rendering/openGL/shaderGL.h"
+#include "gdl/rendering/openGL/programGL.h"
+#include "gdl/rendering/openGL/renderWindowGL.h"
+#include "gdl/rendering/openGL/shaderGL.h"
 
 #include <chrono>
 #include <stdlib.h>
