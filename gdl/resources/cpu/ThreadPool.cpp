@@ -2,7 +2,7 @@
 
 
 #include "gdl/base/Exception.h"
-#include "gdl/resourceManagement/Thread.h"
+#include "gdl/resources/cpu/Thread.h"
 
 GDL::ThreadPool::~ThreadPool()
 {

@@ -1,7 +1,7 @@
 #include "Thread.h"
 
-#include "gdl/resourceManagement/ThreadTaskBase.h"
-#include "gdl/resourceManagement/ThreadPool.h"
+#include "gdl/resources/cpu/ThreadTaskBase.h"
+#include "gdl/resources/cpu/ThreadPool.h"
 
 
 

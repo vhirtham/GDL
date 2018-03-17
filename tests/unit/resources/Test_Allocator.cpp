@@ -1,5 +1,5 @@
 //#include <boost/test/unit_test.hpp>
-#include "gdl/resourceManagement/memory/PoolAllocator.h"
+#include "gdl/resources/memory/PoolAllocator.h"
 #include <vector>
 
 struct test

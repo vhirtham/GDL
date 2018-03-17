@@ -1,7 +1,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include "gdl/base/Exception.h"
-#include "gdl/resourceManagement/ThreadPool.h"
+#include "gdl/resources/cpu/ThreadPool.h"
 
 #include <iostream>
 #include <map>
