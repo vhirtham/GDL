@@ -45,7 +45,7 @@ function(addTest TestName)
 
     target_compile_features(${TestName}
         PUBLIC
-            cxx_std_17)
+            ${GDL_COMPILE_FEATURES})
 
     ### Create Test
     string(REPLACE "${CMAKE_SOURCE_DIR}/tests/" ""

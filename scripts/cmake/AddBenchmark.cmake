@@ -17,5 +17,5 @@ function(addBenchmark BenchmarkName)
 
     target_compile_features(${BenchmarkName}
         PUBLIC
-            cxx_std_17)
+            ${GDL_COMPILE_FEATURES})
 endfunction()

@@ -6,7 +6,7 @@ function(CreateSingleSourceObjectLib Source Object)
     ### Add src directory
     target_include_directories(${libName} PUBLIC ${CMAKE_SOURCE_DIR})
     ### Add compile features
-    target_compile_features(${libName} PUBLIC cxx_std_17)
+    target_compile_features(${libName} PUBLIC ${GDL_COMPILE_FEATURES})
     ### Make target global
     set(${Object} "$<TARGET_OBJECTS:${libName}>" PARENT_SCOPE)
 endfunction()

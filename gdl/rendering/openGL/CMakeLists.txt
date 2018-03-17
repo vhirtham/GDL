@@ -19,5 +19,5 @@ if(ENABLE_OPENGL)
 
         target_compile_features(GDL_OpenGL
             PUBLIC
-                cxx_std_17)
+                ${GDL_COMPILE_FEATURES})
 endif()
