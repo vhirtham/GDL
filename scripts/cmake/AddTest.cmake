@@ -6,17 +6,16 @@ function(addTest TestName)
     ### Add prefix "Test_" to avoid target naming conflicts (for example with benchmarks or other GDL targets)
     set(TestName "Test_${TestName}")
 
-    ### Find single object targets
+    ### Separate sources from libs
     if(ARGN)
-        foreach(filename ${ARGN})
-            string(FIND "${ARGN}" ".cpp" IsCpp)
+        foreach(input ${ARGN})
+            string(FIND "${input}" ".cpp" IsCpp)
             if(${IsCpp} EQUAL "-1")
                 set(AdditionalLibs
-                    "${AdditionalLibs}${ARGN}")
+                    "${AdditionalLibs};${input}")
             else()
-                singleSourceTargetName(${CMAKE_SOURCE_DIR}/gdl/${filename} target)
-                set(AdditionalObjects
-                    "${AdditionalObjects};$<TARGET_OBJECTS:${target}>")
+                set(AdditionalSources
+                    "${AdditionalSources};${GDL_SOURCE_DIR}/gdl/${input}")
             endif()
         endforeach()
     endif()
@@ -24,7 +23,7 @@ function(addTest TestName)
     ### Create executable
     add_executable(${TestName}
         "${TestName}.cpp"
-        ${AdditionalObjects})
+        ${AdditionalSources})
 
     ### Link necessary libs
     target_link_Libraries(${TestName}
@@ -32,10 +31,7 @@ function(addTest TestName)
         ${AdditionalLibs}
         )
 
-    ### Add source directory
-    target_include_directories(${TestName}
-        PUBLIC
-            ${PROJECT_SOURCE_DIR})
+    TargetDefaultBuildSetup(${TestName})
 
     ### Add necessary definitions
     target_compile_definitions(${TestName}
@@ -43,12 +39,9 @@ function(addTest TestName)
             -DBOOST_TEST_MODULE=${TestName}
             -DBOOST_TEST_DYN_LINK)
 
-    target_compile_features(${TestName}
-        PUBLIC
-            ${GDL_COMPILE_FEATURES})
 
     ### Create Test
-    string(REPLACE "${CMAKE_SOURCE_DIR}/tests/" ""
+    string(REPLACE "${GDL_SOURCE_DIR}/tests/" ""
         relpath ${CMAKE_CURRENT_SOURCE_DIR})
     string(REPLACE "/" "::"
         TestPrefix ${relpath})

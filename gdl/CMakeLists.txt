@@ -1,20 +1,7 @@
-set(GDL_RESOURCE_MANAGEMENT_SOURCES
+AddGDLLib(Recources
     resourceManagement/Thread.cpp
     resourceManagement/ThreadPool.cpp
     resourceManagement/ThreadSafeQueue.cpp
     )
-
-add_library(GDLResourceManagement
-    ${GDL_RESOURCE_MANAGEMENT_SOURCES})
-
-target_include_directories(GDLResourceManagement
-    PUBLIC
-        ${CMAKE_SOURCE_DIR})
-
-target_compile_features(GDLResourceManagement
-    PUBLIC
-        ${GDL_COMPILE_FEATURES})
-
-createObjectLibs("${GDL_RESOURCE_MANAGEMENT_SOURCES}")
 
 add_subdirectory(rendering)

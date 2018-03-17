@@ -1,6 +1,0 @@
-function(singleSourceTargetName Source TargetName)
-    string(REPLACE "${CMAKE_SOURCE_DIR}/gdl/" "" tmp ${Source})
-    string(REPLACE "/" "." tmp ${tmp})
-    string(REPLACE ".cpp" "" tmp ${tmp})
-    set(${TargetName} ${tmp} PARENT_SCOPE)
-endfunction()

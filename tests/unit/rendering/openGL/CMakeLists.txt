@@ -1,5 +1,18 @@
 addTest(renderWindowGL
-    GDL::OpenGL)
+    rendering/openGL/renderWindowGL.cpp
+    # External libs
+    OpenGL::GL
+    OpenGL::GLU
+    GLUT::GLUT
+    GLEW::GLEW
+    )
 
 addTest(shaderGL
-    GDL::OpenGL)
+    rendering/openGL/shaderGL.cpp
+    rendering/openGL/renderWindowGL.cpp
+    # External libs
+    OpenGL::GL
+    OpenGL::GLU
+    GLUT::GLUT
+    GLEW::GLEW
+    )

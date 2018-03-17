@@ -10,12 +10,5 @@ function(addBenchmark BenchmarkName)
     target_link_libraries(${BenchmarkName}
         benchmark)
 
-    ### Add source directory
-    target_include_directories(${BenchmarkName}
-        PUBLIC
-            ${PROJECT_SOURCE_DIR})
-
-    target_compile_features(${BenchmarkName}
-        PUBLIC
-            ${GDL_COMPILE_FEATURES})
+    TargetDefaultBuildSetup(${BenchmarkName})
 endfunction()

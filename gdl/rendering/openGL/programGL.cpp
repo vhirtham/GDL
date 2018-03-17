@@ -133,7 +133,7 @@ void GDL::ProgramGL::FindUniformArrayMembers(const std::string& firstElementName
         assert(arrayName.find("[0]", arrayName.length() - 3) == arrayName.length() - 3);
         arrayName.erase(arrayName.length() - 3, 3);
 
-        for (GLint j = 1; j < firstElement.GetSubsequentElementCount(); ++j)
+        for (GLuint j = 1; j < firstElement.GetSubsequentElementCount(); ++j)
         {
             std::string arrayElementName = arrayName + "[" + std::to_string(j) + "]";
             GLint arrayElementHandle = glGetUniformLocation(mHandle, arrayElementName.c_str());
@@ -161,7 +161,7 @@ void GDL::ProgramGL::FindUniformBlocks()
 
         std::vector<GLint> varIndices(data[i][3]);
         glGetActiveUniformBlockiv(mHandle, i, GL_UNIFORM_BLOCK_ACTIVE_UNIFORM_INDICES, varIndices.data());
-        for (U32 j = 0; j < data[i][3]; ++j)
+        for (GLint j = 0; j < data[i][3]; ++j)
         {
             GLuint uniformIndex = static_cast<GLuint>(varIndices[j]);
             GLint uniformNameLength;

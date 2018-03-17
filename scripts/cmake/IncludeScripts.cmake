@@ -1,6 +1,5 @@
 include(AddBenchmark)
 include(AddTest)
-include(CreateObjectLibs)
-include(CreateSingleSourceObjectLib)
+include(AddGDLLib)
 include(ExternalDependencies)
-include(SingleSourceTargetName)
+include(TargetDefaultBuildSetup)

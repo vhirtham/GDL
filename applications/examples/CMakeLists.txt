@@ -1,10 +1,11 @@
 if(ENABLE_OPENGL)
-    add_executable(TriangleOpenGL opengl/TriangleOpenGL)
+    add_executable(TriangleOpenGL
+        opengl/TriangleOpenGL.cpp)
 
     target_link_libraries(TriangleOpenGL
         GDL::OpenGL
         )
 
-    target_compile_features(TriangleOpenGL PUBLIC ${GDL_COMPILE_FEATURES})
+    TargetDefaultBuildSetup(TriangleOpenGL)
 
 endif()
