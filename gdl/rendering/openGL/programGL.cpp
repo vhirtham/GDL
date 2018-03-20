@@ -79,16 +79,23 @@ void GDL::ProgramGL::Initialize(std::initializer_list<std::reference_wrapper<con
         attachedShaderTypes.emplace(shader.get().GetType());
     }
 
+    if (attachedShaderTypes.find(GL_VERTEX_SHADER) == attachedShaderTypes.end() ||
+        attachedShaderTypes.find(GL_FRAGMENT_SHADER) == attachedShaderTypes.end())
+        throw Exception(__PRETTY_FUNCTION__,
+                        "You have to provide a vertex shader and a fragment shader for each program!");
+
     glLinkProgram(mHandle);
 
     for (auto& shader : shaderList)
     {
         glDetachShader(mHandle, shader.get().GetHandle());
     }
+
     CheckLinkStatus();
     FindInputs();
     FindUniforms();
     FindUniformBlocks();
+
     GLenum errorCode = glGetError();
     if (errorCode != GL_NO_ERROR)
         throw Exception(__PRETTY_FUNCTION__,
