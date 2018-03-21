@@ -2,11 +2,13 @@
 
 #include "gdl/GDLTypedefs.h"
 #include "gdl/base/Exception.h"
+#include "gdl/rendering/openGL/programInput.h"
 #include "gdl/rendering/openGL/shaderGL.h"
-#include "gdl/rendering/openGL/Uniform.h"
+#include "gdl/rendering/openGL/uniform.h"
 
 #include <functional>
 #include <map>
+#include <string>
 #include <vector>
 
 namespace GDL
@@ -15,7 +17,7 @@ class ProgramGL
 {
     GLuint const mHandle = 0;
     std::map<const std::string, const Uniform> mUniforms;
-    std::map<const std::string, const GLuint> mProgramInputs;
+    std::map<const std::string, const ProgramInput> mInputs;
 
 public:
     ProgramGL() = delete;
@@ -45,10 +47,22 @@ public:
         return mHandle;
     }
 
+    //! @brief Gets the specified program input
+    //! @param inputName: Name of the input
+    //! @return Specified input
+    ProgramInput GetInput(std::string inputName) const;
+
+    //! @brief Gets the number of inputs
+    //! @return Number of inputs
+    U32 GetNumInputs() const
+    {
+        return mInputs.size();
+    }
+
     //! @brief Gets the handle of an uniform
     //! @param uniformName: Name of the uniform
     //! @return Handle of the uniform
-    GLuint GetUniformHandle(std::string uniformName);
+    GLuint GetUniformHandle(std::string uniformName) const;
 
     //! @brief Sets the value of an uniform
     //! @param uniformHandle: handle of the uniform

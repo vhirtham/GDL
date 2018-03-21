@@ -1,7 +1,6 @@
 #pragma once
 
-#include <GL/gl.h>
-#include <string>
+#include <GL/glew.h>
 
 namespace GDL
 {

@@ -19,7 +19,18 @@ GDL::ProgramGL::ProgramGL(std::initializer_list<std::reference_wrapper<const Sha
     Initialize(shaderList);
 }
 
-GLuint GDL::ProgramGL::GetUniformHandle(std::string uniformName)
+GDL::ProgramInput GDL::ProgramGL::GetInput(std::string inputName) const
+{
+    auto iterator = mInputs.find(inputName);
+#ifndef NDEBUG
+    if (iterator == mInputs.end())
+        throw Exception(__PRETTY_FUNCTION__,
+                        "Did not find input \"" + inputName + "\". GLSL compiler optimization might be the reason.");
+#endif
+    return iterator->second;
+}
+
+GLuint GDL::ProgramGL::GetUniformHandle(std::string uniformName) const
 {
     auto iterator = mUniforms.find(uniformName);
 #ifndef NDEBUG
@@ -107,9 +118,10 @@ void GDL::ProgramGL::Initialize(std::initializer_list<std::reference_wrapper<con
 
 void GDL::ProgramGL::FindInputs()
 {
-    auto inputData = FindProgramResourceData<2>(GL_PROGRAM_INPUT, {{GL_LOCATION, GL_NAME_LENGTH}});
+    auto inputData = FindProgramResourceData<3>(GL_PROGRAM_INPUT, {{GL_LOCATION, GL_NAME_LENGTH, GL_TYPE}});
     for (U32 i = 0; i < inputData.size(); ++i)
-        mProgramInputs.emplace(GetResourceName(GL_PROGRAM_INPUT, i, inputData[i][1]), inputData[i][0]);
+        mInputs.emplace(GetResourceName(GL_PROGRAM_INPUT, i, inputData[i][1]),
+                        ProgramInput(inputData[i][0], inputData[i][2]));
 }
 
 
