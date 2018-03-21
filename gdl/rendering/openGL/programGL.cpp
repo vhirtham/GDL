@@ -22,23 +22,19 @@ GDL::ProgramGL::ProgramGL(std::initializer_list<std::reference_wrapper<const Sha
 GDL::ProgramInput GDL::ProgramGL::GetInput(std::string inputName) const
 {
     auto iterator = mInputs.find(inputName);
-#ifndef NDEBUG
     if (iterator == mInputs.end())
         throw Exception(__PRETTY_FUNCTION__,
                         "Did not find input \"" + inputName + "\". GLSL compiler optimization might be the reason.");
-#endif
     return iterator->second;
 }
 
 GLuint GDL::ProgramGL::GetUniformHandle(std::string uniformName) const
 {
     auto iterator = mUniforms.find(uniformName);
-#ifndef NDEBUG
     if (iterator == mUniforms.end())
         throw Exception(__PRETTY_FUNCTION__,
                         "Did not find uniform \"" + uniformName +
                                 "\". GLSL compiler optimization might be the reason.");
-#endif
     return iterator->second.GetHandle();
 }
 
