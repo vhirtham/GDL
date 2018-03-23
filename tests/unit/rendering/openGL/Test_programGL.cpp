@@ -142,31 +142,31 @@ BOOST_AUTO_TEST_CASE(Uniforms)
 
     BOOST_CHECK_NO_THROW(program.GetUniform("X"));
     BOOST_CHECK(program.GetUniform("X").GetType() == GL_FLOAT);
-    BOOST_CHECK(program.GetUniform("X").GetSubsequentArrayLength() == 1);
+    BOOST_CHECK(program.GetUniform("X").GetSubsequentArraySize() == 1);
 
     BOOST_CHECK_NO_THROW(program.GetUniform("YZ"));
     BOOST_CHECK(program.GetUniform("YZ").GetType() == GL_FLOAT_VEC2);
-    BOOST_CHECK(program.GetUniform("YZ").GetSubsequentArrayLength() == 1);
+    BOOST_CHECK(program.GetUniform("YZ").GetSubsequentArraySize() == 1);
     BOOST_CHECK(program.GetUniform("YZ").GetLocation() == 0);
 
     BOOST_CHECK_THROW(program.GetUniform("w"), Exception);
     BOOST_CHECK_NO_THROW(program.GetUniform("w[0]"));
     BOOST_CHECK(program.GetUniform("w[0]").GetType() == GL_FLOAT);
-    BOOST_CHECK(program.GetUniform("w[0]").GetSubsequentArrayLength() == 2);
+    BOOST_CHECK(program.GetUniform("w[0]").GetSubsequentArraySize() == 2);
     BOOST_CHECK_NO_THROW(program.GetUniform("w[1]"));
     BOOST_CHECK(program.GetUniform("w[1]").GetType() == GL_FLOAT);
-    BOOST_CHECK(program.GetUniform("w[1]").GetSubsequentArrayLength() == 1);
+    BOOST_CHECK(program.GetUniform("w[1]").GetSubsequentArraySize() == 1);
 
     BOOST_CHECK_THROW(program.GetUniform("a"), Exception);
     BOOST_CHECK_NO_THROW(program.GetUniform("a[0]"));
     BOOST_CHECK(program.GetUniform("a[0]").GetType() == GL_FLOAT_VEC4);
-    BOOST_CHECK(program.GetUniform("a[0]").GetSubsequentArrayLength() == 3);
+    BOOST_CHECK(program.GetUniform("a[0]").GetSubsequentArraySize() == 3);
     BOOST_CHECK_NO_THROW(program.GetUniform("a[1]"));
     BOOST_CHECK(program.GetUniform("a[1]").GetType() == GL_FLOAT_VEC4);
-    BOOST_CHECK(program.GetUniform("a[1]").GetSubsequentArrayLength() == 2);
+    BOOST_CHECK(program.GetUniform("a[1]").GetSubsequentArraySize() == 2);
     BOOST_CHECK_NO_THROW(program.GetUniform("a[2]"));
     BOOST_CHECK(program.GetUniform("a[2]").GetType() == GL_FLOAT_VEC4);
-    BOOST_CHECK(program.GetUniform("a[2]").GetSubsequentArrayLength() == 1);
+    BOOST_CHECK(program.GetUniform("a[2]").GetSubsequentArraySize() == 1);
 
 
     // Check Setter #############################

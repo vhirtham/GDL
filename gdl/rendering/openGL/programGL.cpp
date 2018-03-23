@@ -50,7 +50,7 @@ template <>
 void GDL::ProgramGL::SetUniformScalarArray(GLuint uniformHandle, std::vector<F32> values)
 {
     assert(GetUniformByLocation(uniformHandle).GetType() == GL_FLOAT);
-    assert(GetUniformByLocation(uniformHandle).GetSubsequentArrayLength() >= values.size());
+    assert(GetUniformByLocation(uniformHandle).GetSubsequentArraySize() >= values.size());
     glProgramUniform1fv(mHandle, uniformHandle, values.size(), values.data());
 }
 
@@ -142,13 +142,13 @@ void GDL::ProgramGL::FindUniforms()
 
 void GDL::ProgramGL::FindUniformArrayMembers(const std::string& firstElementName, const Uniform& firstElement)
 {
-    if (firstElement.GetSubsequentArrayLength() > 1)
+    if (firstElement.GetSubsequentArraySize() > 1)
     {
         std::string arrayName = firstElementName;
         assert(arrayName.find("[0]", arrayName.length() - 3) == arrayName.length() - 3);
         arrayName.erase(arrayName.length() - 3, 3);
 
-        for (GLuint j = 1; j < firstElement.GetSubsequentArrayLength(); ++j)
+        for (GLuint j = 1; j < firstElement.GetSubsequentArraySize(); ++j)
         {
             std::string arrayElementName = arrayName + "[" + std::to_string(j) + "]";
             GLint arrayElementHandle = glGetUniformLocation(mHandle, arrayElementName.c_str());
@@ -159,7 +159,7 @@ void GDL::ProgramGL::FindUniformArrayMembers(const std::string& firstElementName
                                         "\"! This error might be caused by GLSL compiler optimizaion");
 
             mUniforms.emplace(arrayElementName, Uniform(arrayElementHandle, firstElement.GetType(),
-                                                        firstElement.GetSubsequentArrayLength() - j));
+                                                        firstElement.GetSubsequentArraySize() - j));
         }
     }
 }

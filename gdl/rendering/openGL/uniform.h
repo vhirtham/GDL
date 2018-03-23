@@ -7,7 +7,7 @@ namespace GDL
 class Uniform
 {
     GLuint mLocation;
-    GLuint mSubsequentArrayLength;
+    GLuint mSubsequentArraySize;
     GLenum mType;
 
 public:
@@ -21,10 +21,10 @@ public:
     //! @brief Ctor
     //! @param location: The uniforms location
     //! @param type: The uniforms type enum
-    //! @param subsequentArrayLength: Number of subsequent array elements (1 for non array types or last elements)
-    Uniform(GLint location, GLenum type, GLint subsequentArrayLength)
+    //! @param subsequentArraySize: Number of subsequent array elements (1 for non array types or last elements)
+    Uniform(GLint location, GLenum type, GLint subsequentArraySize)
         : mLocation(location)
-        , mSubsequentArrayLength(subsequentArrayLength)
+        , mSubsequentArraySize(subsequentArraySize)
         , mType(type)
     {
     }
@@ -43,9 +43,9 @@ public:
     }
 
     //! @brief Gets the number of subsequent array elements (1 for non array types or last elements)
-    GLuint GetSubsequentArrayLength() const
+    GLuint GetSubsequentArraySize() const
     {
-        return mSubsequentArrayLength;
+        return mSubsequentArraySize;
     }
 };
 }
