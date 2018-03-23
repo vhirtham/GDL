@@ -59,10 +59,17 @@ public:
         return mInputs.size();
     }
 
-    //! @brief Gets the handle of an uniform
+    //! @brief Gets the number of uniforms
+    //! @return Number of uniforms
+    U32 GetNumUniforms() const
+    {
+        return mUniforms.size();
+    }
+
+    //! @brief Gets the an uniform
     //! @param uniformName: Name of the uniform
-    //! @return Handle of the uniform
-    GLuint GetUniformHandle(std::string uniformName) const;
+    //! @return The uniform
+    Uniform GetUniform(std::string uniformName) const;
 
     //! @brief Sets the value of an uniform
     //! @param uniformHandle: handle of the uniform
@@ -126,11 +133,11 @@ private:
     std::string GetResourceName(GLenum eResourceType, GLuint index, GLint bufferSize);
 
 #ifndef NDEBUG
-    //! @brief Gets a uniform by its handle
-    //! @param handle: The uniforms handle
+    //! @brief Gets a uniform by its location
+    //! @param handle: The uniforms location
     //! @return Uniform
     //! @remark DEBUG only!
-    const Uniform& GetUniformByHandle(GLuint handle);
+    const Uniform& GetUniformByLocation(GLuint location);
 #endif
 };
 }
@@ -140,13 +147,13 @@ private:
 template <typename TScalar>
 void GDL::ProgramGL::SetUniformScalar(std::string uniformName, TScalar value)
 {
-    SetUniformScalar(GetUniformHandle(uniformName), value);
+    SetUniformScalar(GetUniform(uniformName).GetLocation(), value);
 }
 
 template <typename TScalar>
 void GDL::ProgramGL::SetUniformScalarArray(std::string uniformName, std::vector<TScalar> values)
 {
-    SetUniformScalarArray(GetUniformHandle(uniformName), values);
+    SetUniformScalarArray(GetUniform(uniformName).GetLocation(), values);
 }
 
 template <typename... TShader>

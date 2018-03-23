@@ -28,29 +28,29 @@ GDL::ProgramInput GDL::ProgramGL::GetInput(std::string inputName) const
     return iterator->second;
 }
 
-GLuint GDL::ProgramGL::GetUniformHandle(std::string uniformName) const
+GDL::Uniform GDL::ProgramGL::GetUniform(std::string uniformName) const
 {
     auto iterator = mUniforms.find(uniformName);
     if (iterator == mUniforms.end())
         throw Exception(__PRETTY_FUNCTION__,
                         "Did not find uniform \"" + uniformName +
                                 "\". GLSL compiler optimization might be the reason.");
-    return iterator->second.GetHandle();
+    return iterator->second;
 }
 
 
 template <>
 void GDL::ProgramGL::SetUniformScalar(GLuint uniformHandle, F32 value)
 {
-    assert(GetUniformByHandle(uniformHandle).GetType() == GL_FLOAT);
+    assert(GetUniformByLocation(uniformHandle).GetType() == GL_FLOAT);
     glProgramUniform1f(mHandle, uniformHandle, value);
 }
 
 template <>
 void GDL::ProgramGL::SetUniformScalarArray(GLuint uniformHandle, std::vector<F32> values)
 {
-    assert(GetUniformByHandle(uniformHandle).GetType() == GL_FLOAT);
-    assert(GetUniformByHandle(uniformHandle).GetSubsequentElementCount() >= values.size());
+    assert(GetUniformByLocation(uniformHandle).GetType() == GL_FLOAT);
+    assert(GetUniformByLocation(uniformHandle).GetSubsequentArrayLength() >= values.size());
     glProgramUniform1fv(mHandle, uniformHandle, values.size(), values.data());
 }
 
@@ -142,13 +142,13 @@ void GDL::ProgramGL::FindUniforms()
 
 void GDL::ProgramGL::FindUniformArrayMembers(const std::string& firstElementName, const Uniform& firstElement)
 {
-    if (firstElement.GetSubsequentElementCount() > 1)
+    if (firstElement.GetSubsequentArrayLength() > 1)
     {
         std::string arrayName = firstElementName;
         assert(arrayName.find("[0]", arrayName.length() - 3) == arrayName.length() - 3);
         arrayName.erase(arrayName.length() - 3, 3);
 
-        for (GLuint j = 1; j < firstElement.GetSubsequentElementCount(); ++j)
+        for (GLuint j = 1; j < firstElement.GetSubsequentArrayLength(); ++j)
         {
             std::string arrayElementName = arrayName + "[" + std::to_string(j) + "]";
             GLint arrayElementHandle = glGetUniformLocation(mHandle, arrayElementName.c_str());
@@ -159,7 +159,7 @@ void GDL::ProgramGL::FindUniformArrayMembers(const std::string& firstElementName
                                         "\"! This error might be caused by GLSL compiler optimizaion");
 
             mUniforms.emplace(arrayElementName, Uniform(arrayElementHandle, firstElement.GetType(),
-                                                        firstElement.GetSubsequentElementCount() - j));
+                                                        firstElement.GetSubsequentArrayLength() - j));
         }
     }
 }
@@ -202,10 +202,10 @@ std::string GDL::ProgramGL::GetResourceName(GLenum eResourceType, GLuint index, 
 }
 
 #ifndef NDEBUG
-const GDL::Uniform& GDL::ProgramGL::GetUniformByHandle(GLuint handle)
+const GDL::Uniform& GDL::ProgramGL::GetUniformByLocation(GLuint location)
 {
     for (const auto& uniform : mUniforms)
-        if (uniform.second.GetHandle() == handle)
+        if (uniform.second.GetLocation() == location)
             return uniform.second;
 
     throw Exception(__PRETTY_FUNCTION__, "Uniform not found!");

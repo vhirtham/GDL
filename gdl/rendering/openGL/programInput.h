@@ -6,7 +6,7 @@ namespace GDL
 {
 class ProgramInput
 {
-    GLuint mHandle;
+    GLuint mLocation;
     GLenum mType;
 
 public:
@@ -18,10 +18,10 @@ public:
     ~ProgramInput() = default;
 
     //! @brief Ctor
-    //! @param handle: The program inputs handle
+    //! @param location: The program inputs location
     //! @param type: The program inputs type enum
-    ProgramInput(GLint handle, GLenum type)
-        : mHandle(handle)
+    ProgramInput(GLint location, GLenum type)
+        : mLocation(location)
         , mType(type)
     {
     }
@@ -33,10 +33,10 @@ public:
         return mType;
     }
 
-    //! @brief Gets the program inputs handle
-    GLuint GetHandle() const
+    //! @brief Gets the program inputs location
+    GLuint GetLocation() const
     {
-        return mHandle;
+        return mLocation;
     }
 };
 }
