@@ -176,3 +176,49 @@ BOOST_AUTO_TEST_CASE(Uniforms)
     BOOST_CHECK_NO_THROW(
             program.SetUniformScalarArray(program.GetUniform("w[0]").GetLocation(), std::vector<F32>{{1.f, 2.f}}));
 }
+
+
+BOOST_AUTO_TEST_CASE(UniformBlockss)
+{
+    GetRenderWindow();
+    const char vertexShaderCode[] = R"glsl(
+                                    #version 430
+
+                                    layout(std140,binding=3) uniform GlobalVariables
+                                    {
+                                        mat4 Perspective;
+                                        vec4 Translation;
+                                        mat3 Rotation;
+                                    };
+
+                                    layout(std140,binding=1) uniform test
+                                    {
+                                        mat4 T1;
+                                        vec4 T2;
+                                        mat3 R3;
+                                    };
+
+                                    void main(void)
+                                    {
+                                        gl_Position = vec4(1.,1.,1.,1.);
+                                    }
+                                    )glsl";
+
+
+    const char fragmentShaderCode[] = R"glsl(
+                                    #version 430
+
+                                    out vec4 out_Color;
+
+                                    void main(void)
+                                    {
+                                        out_Color = vec4(1.,1.,1.,1.);
+                                    }
+                                    )glsl";
+
+    ShaderGL vertexShader(GL_VERTEX_SHADER, vertexShaderCode);
+    ShaderGL fragmentShader(GL_FRAGMENT_SHADER, fragmentShaderCode);
+
+    ProgramGL program(vertexShader, fragmentShader);
+    int a = 0;
+}

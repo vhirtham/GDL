@@ -72,6 +72,13 @@ void GDL::ProgramGL::CheckLinkStatus()
     }
 }
 
+void GDL::ProgramGL::GatherProgramData()
+{
+    FindInputs();
+    FindUniforms();
+    FindUniformBlocks();
+}
+
 void GDL::ProgramGL::Initialize(std::initializer_list<std::reference_wrapper<const GDL::ShaderGL>> shaderList)
 {
     std::set<GLenum> attachedShaderTypes;
@@ -94,14 +101,11 @@ void GDL::ProgramGL::Initialize(std::initializer_list<std::reference_wrapper<con
     glLinkProgram(mHandle);
 
     for (auto& shader : shaderList)
-    {
         glDetachShader(mHandle, shader.get().GetHandle());
-    }
+
 
     CheckLinkStatus();
-    FindInputs();
-    FindUniforms();
-    FindUniformBlocks();
+    GatherProgramData();
 
     GLenum errorCode = glGetError();
     if (errorCode != GL_NO_ERROR)
@@ -133,7 +137,7 @@ void GDL::ProgramGL::FindUniforms()
 
         auto uniformIt = mUniforms
                                  .emplace(GetResourceName(GL_UNIFORM, i, data[i][1]),
-                                          Uniform(data[i][0], data[i][2], data[i][3]))
+                                          Uniform(data[i][0], data[i][2], data[i][3], data[i][4]))
                                  .first;
 
         FindUniformArrayMembers(uniformIt->first, uniformIt->second);
@@ -158,8 +162,9 @@ void GDL::ProgramGL::FindUniformArrayMembers(const std::string& firstElementName
                                 "Could not find location of array element \"" + arrayElementName +
                                         "\"! This error might be caused by GLSL compiler optimizaion");
 
-            mUniforms.emplace(arrayElementName, Uniform(arrayElementHandle, firstElement.GetType(),
-                                                        firstElement.GetSubsequentArraySize() - j));
+            mUniforms.emplace(arrayElementName,
+                              Uniform(arrayElementHandle, firstElement.GetType(),
+                                      firstElement.GetSubsequentArraySize() - j, firstElement.GetBlockIndex()));
         }
     }
 }
@@ -167,16 +172,20 @@ void GDL::ProgramGL::FindUniformArrayMembers(const std::string& firstElementName
 void GDL::ProgramGL::FindUniformBlocks()
 {
     auto data = FindProgramResourceData<4>(
-            GL_UNIFORM_BLOCK, {{GL_NAME_LENGTH, GL_BUFFER_BINDING, GL_BUFFER_DATA_SIZE, GL_NUM_ACTIVE_VARIABLES}});
-    for (U32 i = 0; i < data.size(); ++i)
+            GL_UNIFORM_BLOCK, {{GL_NAME_LENGTH, GL_BUFFER_BINDING, GL_NUM_ACTIVE_VARIABLES, GL_BUFFER_DATA_SIZE}});
+    for (GLuint i = 0; i < data.size(); ++i)
     {
         std::string uniformBlockName = GetResourceName(GL_UNIFORM_BLOCK, i, data[i][0]);
-        GLint bufferBindingPoint = data[i][0];
         assert(glGetUniformBlockIndex(mHandle, uniformBlockName.c_str()) == i);
 
-        std::vector<GLint> varIndices(data[i][3]);
+        UniformBlock& uniformBlock =
+                mUniformBlocks.emplace(uniformBlockName, UniformBlock(i, data[i][1], data[i][2], data[i][3]))
+                        .first->second;
+
+        // Put the following stuff in own function!
+        std::vector<GLint> varIndices(data[i][2]);
         glGetActiveUniformBlockiv(mHandle, i, GL_UNIFORM_BLOCK_ACTIVE_UNIFORM_INDICES, varIndices.data());
-        for (GLint j = 0; j < data[i][3]; ++j)
+        for (GLint j = 0; j < data[i][2]; ++j)
         {
             GLuint uniformIndex = static_cast<GLuint>(varIndices[j]);
             GLint uniformNameLength;
@@ -202,7 +211,7 @@ std::string GDL::ProgramGL::GetResourceName(GLenum eResourceType, GLuint index, 
 }
 
 #ifndef NDEBUG
-const GDL::Uniform& GDL::ProgramGL::GetUniformByLocation(GLuint location)
+const GDL::Uniform& GDL::ProgramGL::GetUniformByLocation(GLint location)
 {
     for (const auto& uniform : mUniforms)
         if (uniform.second.GetLocation() == location)

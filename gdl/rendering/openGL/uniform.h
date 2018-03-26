@@ -6,9 +6,10 @@ namespace GDL
 {
 class Uniform
 {
-    GLuint mLocation;
+    GLint mLocation;
     GLuint mSubsequentArraySize;
     GLenum mType;
+    GLint mBlockIndex;
 
 public:
     Uniform() = delete;
@@ -22,27 +23,39 @@ public:
     //! @param location: The uniforms location
     //! @param type: The uniforms type enum
     //! @param subsequentArraySize: Number of subsequent array elements (1 for non array types or last elements)
-    Uniform(GLint location, GLenum type, GLint subsequentArraySize)
+    //! @param blockIndex: the uniforms block index (-1)
+    Uniform(GLint location, GLenum type, GLint subsequentArraySize, GLint blockIndex)
         : mLocation(location)
         , mSubsequentArraySize(subsequentArraySize)
         , mType(type)
+        , mBlockIndex(blockIndex)
     {
     }
 
 
+    //! @brief Gets the block index
+    //! @return Block index
+    GLint GetBlockIndex() const
+    {
+        return mBlockIndex;
+    }
+
     //! @brief Gets the uniforms type enum
+    //! @return type enum
     GLenum GetType() const
     {
         return mType;
     }
 
     //! @brief Gets the uniforms location
-    GLuint GetLocation() const
+    //! @return uniform location
+    GLint GetLocation() const
     {
         return mLocation;
     }
 
     //! @brief Gets the number of subsequent array elements (1 for non array types or last elements)
+    //! @retur Subsequent array size
     GLuint GetSubsequentArraySize() const
     {
         return mSubsequentArraySize;

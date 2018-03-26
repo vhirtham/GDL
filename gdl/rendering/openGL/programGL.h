@@ -5,6 +5,7 @@
 #include "gdl/rendering/openGL/programInput.h"
 #include "gdl/rendering/openGL/shaderGL.h"
 #include "gdl/rendering/openGL/uniform.h"
+#include "gdl/rendering/openGL/uniformBlock.h"
 
 #include <functional>
 #include <map>
@@ -17,6 +18,7 @@ class ProgramGL
 {
     GLuint const mHandle = 0;
     std::map<const std::string, const Uniform> mUniforms;
+    std::map<const std::string, UniformBlock> mUniformBlocks;
     std::map<const std::string, const ProgramInput> mInputs;
 
 public:
@@ -99,6 +101,9 @@ private:
     //! @brief Checks if the program links without errors
     void CheckLinkStatus();
 
+    //! @brief Gathers program information (uniforms, subroutines, inputs etc.)
+    void GatherProgramData();
+
     //! @brief Links all the passed shaders to the program
     //! @param shaderList: Shaders that should be linked
     void Initialize(std::initializer_list<std::reference_wrapper<const ShaderGL>> shaderList);
@@ -137,7 +142,7 @@ private:
     //! @param handle: The uniforms location
     //! @return Uniform
     //! @remark DEBUG only!
-    const Uniform& GetUniformByLocation(GLuint location);
+    const Uniform& GetUniformByLocation(GLint location);
 #endif
 };
 }
