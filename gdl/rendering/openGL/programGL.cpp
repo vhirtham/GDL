@@ -236,3 +236,10 @@ GDL::ProgramGL::FindProgramResourceData(GLenum eResourceType, std::array<GLenum,
     }
     return results;
 }
+
+template <>
+void GDL::ProgramGL::SetUniform<GL_FLOAT>(GLuint uniformHandle, GDL::F32 value)
+{
+    assert(GetUniformByLocation(uniformHandle).GetType() == GL_FLOAT);
+    glProgramUniform1f(mHandle, uniformHandle, value);
+}

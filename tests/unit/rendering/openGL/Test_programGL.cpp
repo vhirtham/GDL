@@ -171,6 +171,8 @@ BOOST_AUTO_TEST_CASE(Uniforms)
 
     // Check Setter #############################
     BOOST_CHECK_NO_THROW(program.SetUniformScalar("X", 1.f));
+    BOOST_CHECK_NO_THROW(program.SetUniform<GL_FLOAT>("X", 1.f));
+    BOOST_CHECK_NO_THROW(program.SetUniform<GL_FLOAT>(program.GetUniform("X").GetLocation(), 1.f));
     BOOST_CHECK_NO_THROW(program.SetUniformScalar(program.GetUniform("w[1]").GetLocation(), 1.f));
     BOOST_CHECK_NO_THROW(program.SetUniformScalarArray("w[0]", std::vector<F32>{{1.f, 2.f}}));
     BOOST_CHECK_NO_THROW(

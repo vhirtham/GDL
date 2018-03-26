@@ -80,6 +80,21 @@ public:
     void SetUniformScalar(GLuint uniformHandle, TScalar value);
 
     //! @brief Sets the value of an uniform
+    //! @param uniformHandle: handle of the uniform
+    //! @param value: New value
+    template <GLuint TTypeEnum, typename TValue>
+    void SetUniform(GLuint uniformHandle, TValue value);
+
+    //! @brief Sets the value of an uniform
+    //! @param uniformName: Name of the uniform
+    //! @param value: New value
+    template <GLuint TTypeEnum, typename TValue>
+    void SetUniform(std::string uniformName, TValue value)
+    {
+        SetUniform<TTypeEnum>(GetUniform(uniformName).GetLocation(), value);
+    }
+
+    //! @brief Sets the value of an uniform
     //! @param uniformName: Name of the uniform
     //! @param value: New value
     template <typename TScalar>
