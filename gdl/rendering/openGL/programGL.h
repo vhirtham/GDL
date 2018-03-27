@@ -85,7 +85,7 @@ public:
     //! @param uniformLocation: Location of the uniform
     //! @param value: New value
     template <GLuint TTypeEnum, typename TValue>
-    void SetUniform(GLuint uniformLocation, TValue value);
+    void SetUniform(GLuint uniformLocation, TValue value) const;
 
     //! @brief Sets the value of an uniform
     //! @tparam TTypeEnum: GL type enum
@@ -93,7 +93,7 @@ public:
     //! @param uniformName: Name of the uniform
     //! @param value: New value
     template <GLuint TTypeEnum, typename TValue>
-    void SetUniform(std::string uniformName, TValue value)
+    void SetUniform(std::string uniformName, TValue value) const
     {
         SetUniform<TTypeEnum>(GetUniform(uniformName).GetLocation(), value);
     }
@@ -105,7 +105,7 @@ public:
     //! @param uniformLocation: location of the first uniform array member that should be set
     //! @param values: Vector with values
     template <GLuint TTypeEnum, typename TValue>
-    void SetUniformArray(GLuint uniformLocation, const TValue* const values, U32 size);
+    void SetUniformArray(GLuint uniformLocation, const TValue* const values, U32 size) const;
 
     //! @brief Sets the values of an uniform array
     //! @tparam TTypeEnum: GL type enum
@@ -113,7 +113,7 @@ public:
     //! @param uniformName: Name of the uniform
     //! @param values: Vector with values
     template <GLuint TTypeEnum, typename TValue>
-    void SetUniformArray(std::string uniformName, const TValue* const values, U32 size)
+    void SetUniformArray(std::string uniformName, const TValue* const values, U32 size) const
     {
         SetUniformArray<TTypeEnum>(GetUniform(uniformName).GetLocation(), values, size);
     }
@@ -121,7 +121,7 @@ public:
 
 private:
     //! @brief Checks if the program links without errors
-    void CheckLinkStatus();
+    void CheckLinkStatus() const;
 
     //! @brief Gathers program information (uniforms, subroutines, inputs etc.)
     void GatherProgramData();
@@ -150,21 +150,21 @@ private:
     //! @tparam TNumProps: Number of properties that should be determined
     template <U32 TNumProps>
     std::vector<std::array<GLint, TNumProps>> FindProgramResourceData(GLenum eResourceType,
-                                                                      std::array<GLenum, TNumProps> properties);
+                                                                      std::array<GLenum, TNumProps> properties) const;
 
     //! @brief Gets the name of a resource
     //! @param eResourceType: Enum that speciefies the resource type
     //! @param handle: Resource handle
     //! @param buffersize: Length of the buffer that gets the name (must be queried)
     //! @return Name of the resource
-    std::string GetResourceName(GLenum eResourceType, GLuint index, GLint bufferSize);
+    std::string GetResourceName(GLenum eResourceType, GLuint index, GLint bufferSize) const;
 
 #ifndef NDEBUG
     //! @brief Gets a uniform by its location
     //! @param handle: The uniforms location
     //! @return Uniform
     //! @remark DEBUG only!
-    const Uniform& GetUniformByLocation(GLint location);
+    const Uniform& GetUniformByLocation(GLint location) const;
 #endif
 };
 }

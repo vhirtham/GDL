@@ -40,7 +40,7 @@ GDL::Uniform GDL::ProgramGL::GetUniform(std::string uniformName) const
 
 
 
-void GDL::ProgramGL::CheckLinkStatus()
+void GDL::ProgramGL::CheckLinkStatus() const
 {
     GLint status;
     glGetProgramiv(mHandle, GL_LINK_STATUS, &status);
@@ -188,7 +188,7 @@ void GDL::ProgramGL::FindUniformBlocks()
 
 
 
-std::string GDL::ProgramGL::GetResourceName(GLenum eResourceType, GLuint index, GLint bufferSize)
+std::string GDL::ProgramGL::GetResourceName(GLenum eResourceType, GLuint index, GLint bufferSize) const
 {
     std::unique_ptr<GLchar[]> resourceName = std::make_unique<GLchar[]>(bufferSize);
     glGetProgramResourceName(mHandle, eResourceType, index, bufferSize, nullptr, resourceName.get());
@@ -197,7 +197,7 @@ std::string GDL::ProgramGL::GetResourceName(GLenum eResourceType, GLuint index, 
 }
 
 #ifndef NDEBUG
-const GDL::Uniform& GDL::ProgramGL::GetUniformByLocation(GLint location)
+const GDL::Uniform& GDL::ProgramGL::GetUniformByLocation(GLint location) const
 {
     for (const auto& uniform : mUniforms)
         if (uniform.second.GetLocation() == location)
@@ -210,7 +210,7 @@ const GDL::Uniform& GDL::ProgramGL::GetUniformByLocation(GLint location)
 
 template <GDL::U32 TNumProps>
 std::vector<std::array<GLint, TNumProps>>
-GDL::ProgramGL::FindProgramResourceData(GLenum eResourceType, std::array<GLenum, TNumProps> properties)
+GDL::ProgramGL::FindProgramResourceData(GLenum eResourceType, std::array<GLenum, TNumProps> properties) const
 {
     GLint numResources = 0;
     glGetProgramInterfaceiv(mHandle, eResourceType, GL_ACTIVE_RESOURCES, &numResources);
@@ -224,7 +224,7 @@ GDL::ProgramGL::FindProgramResourceData(GLenum eResourceType, std::array<GLenum,
 }
 
 template <>
-void GDL::ProgramGL::SetUniform<GL_FLOAT>(GLuint uniformLocation, GDL::F32 value)
+void GDL::ProgramGL::SetUniform<GL_FLOAT>(GLuint uniformLocation, GDL::F32 value) const
 {
     assert(GetUniformByLocation(uniformLocation).GetType() == GL_FLOAT);
     glProgramUniform1f(mHandle, uniformLocation, value);
@@ -232,7 +232,7 @@ void GDL::ProgramGL::SetUniform<GL_FLOAT>(GLuint uniformLocation, GDL::F32 value
 
 
 template <>
-void GDL::ProgramGL::SetUniformArray<GL_FLOAT>(GLuint uniformLocation, const F32* const values, U32 size)
+void GDL::ProgramGL::SetUniformArray<GL_FLOAT>(GLuint uniformLocation, const F32* const values, U32 size) const
 {
     assert(GetUniformByLocation(uniformLocation).GetType() == GL_FLOAT);
     assert(GetUniformByLocation(uniformLocation).GetSubsequentArraySize() >= size);
