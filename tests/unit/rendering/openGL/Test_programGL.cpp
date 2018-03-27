@@ -142,31 +142,31 @@ BOOST_AUTO_TEST_CASE(Uniforms)
 
     BOOST_CHECK_NO_THROW(program.GetUniform("X"));
     BOOST_CHECK(program.GetUniform("X").GetType() == GL_FLOAT);
-    BOOST_CHECK(program.GetUniform("X").GetSubsequentArraySize() == 1);
+    BOOST_CHECK(program.GetUniform("X").GetArraySize() == 1);
 
     BOOST_CHECK_NO_THROW(program.GetUniform("YZ"));
     BOOST_CHECK(program.GetUniform("YZ").GetType() == GL_FLOAT_VEC2);
-    BOOST_CHECK(program.GetUniform("YZ").GetSubsequentArraySize() == 1);
+    BOOST_CHECK(program.GetUniform("YZ").GetArraySize() == 1);
     BOOST_CHECK(program.GetUniform("YZ").GetLocation() == 0);
 
     BOOST_CHECK_THROW(program.GetUniform("w"), Exception);
     BOOST_CHECK_NO_THROW(program.GetUniform("w[0]"));
     BOOST_CHECK(program.GetUniform("w[0]").GetType() == GL_FLOAT);
-    BOOST_CHECK(program.GetUniform("w[0]").GetSubsequentArraySize() == 2);
+    BOOST_CHECK(program.GetUniform("w[0]").GetArraySize() == 2);
     BOOST_CHECK_NO_THROW(program.GetUniform("w[1]"));
     BOOST_CHECK(program.GetUniform("w[1]").GetType() == GL_FLOAT);
-    BOOST_CHECK(program.GetUniform("w[1]").GetSubsequentArraySize() == 1);
+    BOOST_CHECK(program.GetUniform("w[1]").GetArraySize() == 1);
 
     BOOST_CHECK_THROW(program.GetUniform("a"), Exception);
     BOOST_CHECK_NO_THROW(program.GetUniform("a[0]"));
     BOOST_CHECK(program.GetUniform("a[0]").GetType() == GL_FLOAT_VEC4);
-    BOOST_CHECK(program.GetUniform("a[0]").GetSubsequentArraySize() == 3);
+    BOOST_CHECK(program.GetUniform("a[0]").GetArraySize() == 3);
     BOOST_CHECK_NO_THROW(program.GetUniform("a[1]"));
     BOOST_CHECK(program.GetUniform("a[1]").GetType() == GL_FLOAT_VEC4);
-    BOOST_CHECK(program.GetUniform("a[1]").GetSubsequentArraySize() == 2);
+    BOOST_CHECK(program.GetUniform("a[1]").GetArraySize() == 2);
     BOOST_CHECK_NO_THROW(program.GetUniform("a[2]"));
     BOOST_CHECK(program.GetUniform("a[2]").GetType() == GL_FLOAT_VEC4);
-    BOOST_CHECK(program.GetUniform("a[2]").GetSubsequentArraySize() == 1);
+    BOOST_CHECK(program.GetUniform("a[2]").GetArraySize() == 1);
 
 
     // Check Setter #############################
@@ -199,11 +199,11 @@ BOOST_AUTO_TEST_CASE(UniformBlocks)
                                         mat3 Rotation;
                                     };
 
-                                    layout(std140,binding=1) uniform test
+                                    layout(std140,binding=1) uniform FrameVariables
                                     {
-                                        mat4 T1;
-                                        vec4 T2;
-                                        mat3 R3;
+                                        float T1;
+                                        vec2 T2;
+                                        mat2 R3;
                                     };
 
                                     void main(void)
@@ -228,5 +228,47 @@ BOOST_AUTO_TEST_CASE(UniformBlocks)
     ShaderGL fragmentShader(GL_FRAGMENT_SHADER, fragmentShaderCode);
 
     ProgramGL program(vertexShader, fragmentShader);
-    int a = 0;
+
+    BOOST_CHECK(program.GetNumUniformBlocks() == 2);
+    BOOST_CHECK_NO_THROW(program.GetUniformBlock("GlobalVariables"));
+    BOOST_CHECK_NO_THROW(program.GetUniformBlock("FrameVariables"));
+    BOOST_CHECK_THROW(program.GetUniformBlock("No_Variables"), Exception);
+
+    const UniformBlock& globalVariables = program.GetUniformBlock("GlobalVariables");
+    BOOST_CHECK(globalVariables.GetBindingPoint() == 3);
+    BOOST_CHECK(globalVariables.GetNumVariables() == 3);
+    BOOST_CHECK(globalVariables.GetIndex() < program.GetNumUniformBlocks());
+    BOOST_CHECK(globalVariables.GetSize() == 128);
+
+    const UniformBlock& frameVariables = program.GetUniformBlock("FrameVariables");
+    BOOST_CHECK(frameVariables.GetBindingPoint() == 1);
+    BOOST_CHECK(frameVariables.GetNumVariables() == 3);
+    BOOST_CHECK(frameVariables.GetIndex() < program.GetNumUniformBlocks());
+    BOOST_CHECK(frameVariables.GetSize() == 48);
+
+    BOOST_CHECK(frameVariables.GetIndex() != globalVariables.GetIndex());
+
+    BOOST_CHECK_NO_THROW(globalVariables.GetVariable("Perspective"));
+    BOOST_CHECK_NO_THROW(globalVariables.GetVariable("Translation"));
+    BOOST_CHECK_NO_THROW(globalVariables.GetVariable("Rotation"));
+    BOOST_CHECK_THROW(globalVariables.GetVariable("NotThere"), Exception);
+
+    const UniformBlockVariable& Perspective = globalVariables.GetVariable("Perspective");
+    BOOST_CHECK(Perspective.GetArraySize() == 1);
+    BOOST_CHECK(Perspective.GetOffset() == 0);
+    BOOST_CHECK(Perspective.GetType() == GL_FLOAT_MAT4);
+
+    const UniformBlockVariable& Translation = globalVariables.GetVariable("Translation");
+    BOOST_CHECK(Translation.GetArraySize() == 1);
+    BOOST_CHECK(Translation.GetOffset() == 64);
+    BOOST_CHECK(Translation.GetType() == GL_FLOAT_VEC4);
+
+    const UniformBlockVariable& Rotation = globalVariables.GetVariable("Rotation");
+    BOOST_CHECK(Rotation.GetArraySize() == 1);
+    BOOST_CHECK(Rotation.GetOffset() == 80);
+    BOOST_CHECK(Rotation.GetType() == GL_FLOAT_MAT3);
+
+    BOOST_CHECK(Perspective.GetIndex() != Translation.GetIndex());
+    BOOST_CHECK(Perspective.GetIndex() != Rotation.GetIndex());
+    BOOST_CHECK(Rotation.GetIndex() != Translation.GetIndex());
 }

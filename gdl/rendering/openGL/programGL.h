@@ -56,7 +56,7 @@ public:
     //! @brief Gets the specified program input
     //! @param inputName: Name of the input
     //! @return Specified input
-    ProgramInput GetInput(std::string inputName) const;
+    const ProgramInput& GetInput(std::string inputName) const;
 
     //! @brief Gets the number of inputs
     //! @return Number of inputs
@@ -65,6 +65,12 @@ public:
         return mInputs.size();
     }
 
+
+    //! @brief Gets an uniform
+    //! @param uniformName: Name of the uniform
+    //! @return The uniform
+    const Uniform& GetUniform(std::string uniformName) const;
+
     //! @brief Gets the number of uniforms
     //! @return Number of uniforms
     U32 GetNumUniforms() const
@@ -72,12 +78,17 @@ public:
         return mUniforms.size();
     }
 
-    //! @brief Gets the an uniform
-    //! @param uniformName: Name of the uniform
-    //! @return The uniform
-    Uniform GetUniform(std::string uniformName) const;
+    //! @brief Gets a uniform block
+    //! @param uniformBlockName: Name of the uniform block
+    //! @return The uniform block
+    const UniformBlock& GetUniformBlock(std::string uniformBlockName) const;
 
-
+    //! @brief Gets the number of uniforms blocks
+    //! @return Number of uniform blocks
+    U32 GetNumUniformBlocks() const
+    {
+        return mUniformBlocks.size();
+    }
 
     //! @brief Sets the value of an uniform
     //! @tparam TTypeEnum: GL type enum
@@ -143,6 +154,9 @@ private:
 
     //! @brief Finds all the programs uniform blocks and stores their names and handles.
     void FindUniformBlocks();
+
+    //! @brief Finds all variables of one  of the programs uniform blocks and stores them.
+    void FindUniformBlockVariables(UniformBlock& uniformBlock);
 
     //! @brief Finds the specified properties of all instances of the given resource type
     //! @param eResourceType: Enum that speciefies the resource type

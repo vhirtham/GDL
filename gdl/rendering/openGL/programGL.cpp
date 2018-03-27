@@ -19,7 +19,7 @@ GDL::ProgramGL::ProgramGL(std::initializer_list<std::reference_wrapper<const Sha
     Initialize(shaderList);
 }
 
-GDL::ProgramInput GDL::ProgramGL::GetInput(std::string inputName) const
+const GDL::ProgramInput& GDL::ProgramGL::GetInput(std::string inputName) const
 {
     auto iterator = mInputs.find(inputName);
     if (iterator == mInputs.end())
@@ -28,12 +28,22 @@ GDL::ProgramInput GDL::ProgramGL::GetInput(std::string inputName) const
     return iterator->second;
 }
 
-GDL::Uniform GDL::ProgramGL::GetUniform(std::string uniformName) const
+const GDL::Uniform& GDL::ProgramGL::GetUniform(std::string uniformName) const
 {
     auto iterator = mUniforms.find(uniformName);
     if (iterator == mUniforms.end())
         throw Exception(__PRETTY_FUNCTION__,
                         "Did not find uniform \"" + uniformName +
+                                "\". GLSL compiler optimization might be the reason.");
+    return iterator->second;
+}
+
+const GDL::UniformBlock& GDL::ProgramGL::GetUniformBlock(std::string uniformBlockName) const
+{
+    auto iterator = mUniformBlocks.find(uniformBlockName);
+    if (iterator == mUniformBlocks.end())
+        throw Exception(__PRETTY_FUNCTION__,
+                        "Did not find uniform block \"" + uniformBlockName +
                                 "\". GLSL compiler optimization might be the reason.");
     return iterator->second;
 }
@@ -123,7 +133,7 @@ void GDL::ProgramGL::FindUniforms()
 
         auto uniformIt = mUniforms
                                  .emplace(GetResourceName(GL_UNIFORM, i, data[i][1]),
-                                          Uniform(data[i][0], data[i][2], data[i][3], data[i][4]))
+                                          Uniform(data[i][0], data[i][2], data[i][3]))
                                  .first;
 
         FindUniformArrayMembers(uniformIt->first, uniformIt->second);
@@ -132,13 +142,13 @@ void GDL::ProgramGL::FindUniforms()
 
 void GDL::ProgramGL::FindUniformArrayMembers(const std::string& firstElementName, const Uniform& firstElement)
 {
-    if (firstElement.GetSubsequentArraySize() > 1)
+    if (firstElement.GetArraySize() > 1)
     {
         std::string arrayName = firstElementName;
         assert(arrayName.find("[0]", arrayName.length() - 3) == arrayName.length() - 3);
         arrayName.erase(arrayName.length() - 3, 3);
 
-        for (GLuint j = 1; j < firstElement.GetSubsequentArraySize(); ++j)
+        for (GLuint j = 1; j < firstElement.GetArraySize(); ++j)
         {
             std::string arrayElementName = arrayName + "[" + std::to_string(j) + "]";
             GLint arrayElementHandle = glGetUniformLocation(mHandle, arrayElementName.c_str());
@@ -149,8 +159,7 @@ void GDL::ProgramGL::FindUniformArrayMembers(const std::string& firstElementName
                                         "\"! This error might be caused by GLSL compiler optimizaion");
 
             mUniforms.emplace(arrayElementName,
-                              Uniform(arrayElementHandle, firstElement.GetType(),
-                                      firstElement.GetSubsequentArraySize() - j, firstElement.GetBlockIndex()));
+                              Uniform(arrayElementHandle, firstElement.GetType(), firstElement.GetArraySize() - j));
         }
     }
 }
@@ -168,21 +177,31 @@ void GDL::ProgramGL::FindUniformBlocks()
                 mUniformBlocks.emplace(uniformBlockName, UniformBlock(i, data[i][1], data[i][2], data[i][3]))
                         .first->second;
 
-        // Put the following stuff in own function!
-        std::vector<GLint> varIndices(data[i][2]);
-        glGetActiveUniformBlockiv(mHandle, i, GL_UNIFORM_BLOCK_ACTIVE_UNIFORM_INDICES, varIndices.data());
-        for (GLint j = 0; j < data[i][2]; ++j)
-        {
-            GLuint uniformIndex = static_cast<GLuint>(varIndices[j]);
-            GLint uniformNameLength;
-            glGetActiveUniformsiv(mHandle, 1, &uniformIndex, GL_UNIFORM_NAME_LENGTH, &uniformNameLength);
-            std::string uniformName = GetResourceName(GL_UNIFORM, uniformIndex, uniformNameLength);
-            GLint uniformOffset;
-            glGetActiveUniformsiv(mHandle, 1, &uniformIndex, GL_UNIFORM_OFFSET, &uniformOffset);
-            GLint uniformSize;
-            glGetActiveUniformsiv(mHandle, 1, &uniformIndex, GL_UNIFORM_SIZE, &uniformSize);
-            int a = 0;
-        }
+        FindUniformBlockVariables(uniformBlock);
+    }
+}
+
+void GDL::ProgramGL::FindUniformBlockVariables(GDL::UniformBlock& uniformBlock)
+{
+    GLuint numVariables = uniformBlock.GetNumVariables();
+    std::vector<GLint> indices(numVariables);
+    std::vector<GLint> nameLengths(numVariables);
+    std::vector<GLint> offsets(numVariables);
+    std::vector<GLint> arraySizes(numVariables);
+    std::vector<GLint> types(numVariables);
+
+    glGetActiveUniformBlockiv(mHandle, uniformBlock.GetIndex(), GL_UNIFORM_BLOCK_ACTIVE_UNIFORM_INDICES,
+                              indices.data());
+    std::vector<GLuint> indicesUnsigned(indices.begin(), indices.end());
+    glGetActiveUniformsiv(mHandle, numVariables, indicesUnsigned.data(), GL_UNIFORM_NAME_LENGTH, nameLengths.data());
+    glGetActiveUniformsiv(mHandle, numVariables, indicesUnsigned.data(), GL_UNIFORM_OFFSET, offsets.data());
+    glGetActiveUniformsiv(mHandle, numVariables, indicesUnsigned.data(), GL_UNIFORM_SIZE, arraySizes.data());
+    glGetActiveUniformsiv(mHandle, numVariables, indicesUnsigned.data(), GL_UNIFORM_TYPE, types.data());
+
+    for (GLuint i = 0; i < numVariables; ++i)
+    {
+        uniformBlock.mVariables.emplace(GetResourceName(GL_UNIFORM, indicesUnsigned[i], nameLengths[i]),
+                                        UniformBlockVariable(indicesUnsigned[i], offsets[i], types[i], arraySizes[i]));
     }
 }
 
@@ -235,6 +254,6 @@ template <>
 void GDL::ProgramGL::SetUniformArray<GL_FLOAT>(GLuint uniformLocation, const F32* const values, U32 size) const
 {
     assert(GetUniformByLocation(uniformLocation).GetType() == GL_FLOAT);
-    assert(GetUniformByLocation(uniformLocation).GetSubsequentArraySize() >= size);
+    assert(GetUniformByLocation(uniformLocation).GetArraySize() >= size);
     glProgramUniform1fv(mHandle, uniformLocation, size, values);
 }

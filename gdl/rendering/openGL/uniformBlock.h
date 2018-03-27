@@ -1,15 +1,24 @@
 #pragma once
 
+#include "gdl/rendering/openGL/uniformBlockVariable.h"
+
 #include <GL/glew.h>
+
+#include <map>
+#include <string>
 
 namespace GDL
 {
 class UniformBlock
 {
+    friend class ProgramGL;
+
     GLuint mIndex;
     GLint mBindingPoint;
     GLint mNumVariables;
     GLint mSize;
+
+    std::map<std::string, UniformBlockVariable> mVariables;
 
 public:
     UniformBlock() = delete;
@@ -30,6 +39,47 @@ public:
         , mNumVariables(numVariables)
         , mSize(size)
     {
+    }
+
+    //! @brief Gets the index of the uniform block
+    //! @return Index of the uniform block
+    GLuint GetIndex() const
+    {
+        return mIndex;
+    }
+
+    //! @brief Gets the binding point of the uniform block
+    //! @return Binding point of the uniform block
+    GLuint GetBindingPoint() const
+    {
+        return mBindingPoint;
+    }
+
+    //! @brief Gets the number of variables of the uniform block
+    //! @return Number of variables of the uniform block
+    GLuint GetNumVariables() const
+    {
+        return mNumVariables;
+    }
+
+    //! @brief Gets the size of the uniform block
+    //! @return Size of the uniform block
+    GLuint GetSize() const
+    {
+        return mSize;
+    }
+
+    //! @brief Gets a variable
+    //! @param variableName: Name of the variable
+    //! @return Variable
+    const UniformBlockVariable& GetVariable(std::string variableName) const
+    {
+        auto iterator = mVariables.find(variableName);
+        if (iterator == mVariables.end())
+            throw Exception(__PRETTY_FUNCTION__,
+                            "Did not find variable \"" + variableName +
+                                    "\". GLSL compiler optimization might be the reason.");
+        return iterator->second;
     }
 };
 }

@@ -7,9 +7,8 @@ namespace GDL
 class Uniform
 {
     GLint mLocation;
-    GLuint mSubsequentArraySize;
+    GLuint mArraySize;
     GLenum mType;
-    GLint mBlockIndex;
 
 public:
     Uniform() = delete;
@@ -22,23 +21,15 @@ public:
     //! @brief Ctor
     //! @param location: The uniforms location
     //! @param type: The uniforms type enum
-    //! @param subsequentArraySize: Number of subsequent array elements (1 for non array types or last elements)
-    //! @param blockIndex: the uniforms block index (-1)
-    Uniform(GLint location, GLenum type, GLint subsequentArraySize, GLint blockIndex)
+    //! @param arraySize: Number of array elements until the arrays end including the current element (1 for non array
+    //! types or last elements)
+    Uniform(GLint location, GLenum type, GLint arraySize)
         : mLocation(location)
-        , mSubsequentArraySize(subsequentArraySize)
+        , mArraySize(arraySize)
         , mType(type)
-        , mBlockIndex(blockIndex)
     {
     }
 
-
-    //! @brief Gets the block index
-    //! @return Block index
-    GLint GetBlockIndex() const
-    {
-        return mBlockIndex;
-    }
 
     //! @brief Gets the uniforms type enum
     //! @return type enum
@@ -54,11 +45,12 @@ public:
         return mLocation;
     }
 
-    //! @brief Gets the number of subsequent array elements (1 for non array types or last elements)
-    //! @retur Subsequent array size
-    GLuint GetSubsequentArraySize() const
+    //! @brief Gets the number of array elements until the arrays end including the current element (1 for non array
+    //! types or last elements)
+    //! @return Number of array elements
+    GLuint GetArraySize() const
     {
-        return mSubsequentArraySize;
+        return mArraySize;
     }
 };
 }
