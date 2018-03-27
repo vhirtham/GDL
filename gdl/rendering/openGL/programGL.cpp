@@ -230,13 +230,6 @@ void GDL::ProgramGL::SetUniform<GL_FLOAT>(GLuint uniformLocation, GDL::F32 value
     glProgramUniform1f(mHandle, uniformLocation, value);
 }
 
-template <>
-void GDL::ProgramGL::SetUniformArray<GL_FLOAT>(GLuint uniformLocation, const std::vector<F32>& values)
-{
-    assert(GetUniformByLocation(uniformLocation).GetType() == GL_FLOAT);
-    assert(GetUniformByLocation(uniformLocation).GetSubsequentArraySize() >= values.size());
-    glProgramUniform1fv(mHandle, uniformLocation, values.size(), values.data());
-}
 
 template <>
 void GDL::ProgramGL::SetUniformArray<GL_FLOAT>(GLuint uniformLocation, const F32* const values, U32 size)

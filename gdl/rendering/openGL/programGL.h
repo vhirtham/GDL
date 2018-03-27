@@ -80,12 +80,16 @@ public:
 
 
     //! @brief Sets the value of an uniform
+    //! @tparam TTypeEnum: GL type enum
+    //! @tparam TValue: Value type
     //! @param uniformLocation: Location of the uniform
     //! @param value: New value
     template <GLuint TTypeEnum, typename TValue>
     void SetUniform(GLuint uniformLocation, TValue value);
 
     //! @brief Sets the value of an uniform
+    //! @tparam TTypeEnum: GL type enum
+    //! @tparam TValue: Value type
     //! @param uniformName: Name of the uniform
     //! @param value: New value
     template <GLuint TTypeEnum, typename TValue>
@@ -94,19 +98,18 @@ public:
         SetUniform<TTypeEnum>(GetUniform(uniformName).GetLocation(), value);
     }
 
-    //! @brief Sets the values of an uniform array
-    //! @param uniformLocation: Location of the first uniform array member that should be set
-    //! @param values: Vector with values
-    template <GLuint TTypeEnum, typename TValue>
-    void SetUniformArray(GLuint uniformLocation, const std::vector<TValue>& values);
 
     //! @brief Sets the values of an uniform array
+    //! @tparam TTypeEnum: GL type enum
+    //! @tparam TValue: Value type
     //! @param uniformLocation: location of the first uniform array member that should be set
     //! @param values: Vector with values
     template <GLuint TTypeEnum, typename TValue>
     void SetUniformArray(GLuint uniformLocation, const TValue* const values, U32 size);
 
     //! @brief Sets the values of an uniform array
+    //! @tparam TTypeEnum: GL type enum
+    //! @tparam TValue: Value type
     //! @param uniformName: Name of the uniform
     //! @param values: Vector with values
     template <GLuint TTypeEnum, typename TValue>
