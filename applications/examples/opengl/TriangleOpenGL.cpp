@@ -214,9 +214,9 @@ int main(int argc, char* argv[])
     ShaderGL fragmentShader(GL_FRAGMENT_SHADER, FragmentShaderCode);
 
     ProgramGL program(vertexShader, fragmentShader);
-    program.SetUniformScalar("frequency", 10.f);
-    program.SetUniformScalar("colMod[0]", 1.f);
-    program.SetUniformScalarArray("colMod[1]", std::vector<F32>{1.f, 1.f});
+    program.SetUniform<GL_FLOAT>("frequency", 10.f);
+    program.SetUniform<GL_FLOAT>("colMod[0]", 1.f);
+    program.SetUniformArray<GL_FLOAT>("colMod[1]", std::vector<F32>{1.f, 1.f}.data(), 2);
 
     glUseProgram(program.GetHandle());
 
@@ -246,7 +246,7 @@ int main(int argc, char* argv[])
             factor = -1.0;
         if (frequency < 1.)
             factor = 1.0;
-        program.SetUniformScalar("frequency", frequency);
+        program.SetUniform<GL_FLOAT>("frequency", frequency);
         glutMainLoopEvent();
         prevTime = currTime;
     }

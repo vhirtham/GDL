@@ -35,7 +35,11 @@ public:
     //! @remark Even though the template should be callable with any input type, only the shaderGL class will compile.
     //! Didn't find a better way to use a parameter pack.
     template <typename... TShader>
-    ProgramGL(const TShader&... shaderList);
+    ProgramGL(const TShader&... shaderList)
+        : mHandle(glCreateProgram())
+    {
+        Initialize({std::forward<const TShader&>(shaderList)...});
+    }
 
 
     //! @brief Constructor that takes as many shaders as desired and links the program (initializer version)
@@ -73,17 +77,13 @@ public:
     //! @return The uniform
     Uniform GetUniform(std::string uniformName) const;
 
-    //! @brief Sets the value of an uniform
-    //! @param uniformHandle: handle of the uniform
-    //! @param value: New value
-    template <typename TScalar>
-    void SetUniformScalar(GLuint uniformHandle, TScalar value);
+
 
     //! @brief Sets the value of an uniform
-    //! @param uniformHandle: handle of the uniform
+    //! @param uniformLocation: Location of the uniform
     //! @param value: New value
     template <GLuint TTypeEnum, typename TValue>
-    void SetUniform(GLuint uniformHandle, TValue value);
+    void SetUniform(GLuint uniformLocation, TValue value);
 
     //! @brief Sets the value of an uniform
     //! @param uniformName: Name of the uniform
@@ -94,23 +94,27 @@ public:
         SetUniform<TTypeEnum>(GetUniform(uniformName).GetLocation(), value);
     }
 
-    //! @brief Sets the value of an uniform
+    //! @brief Sets the values of an uniform array
+    //! @param uniformLocation: Location of the first uniform array member that should be set
+    //! @param values: Vector with values
+    template <GLuint TTypeEnum, typename TValue>
+    void SetUniformArray(GLuint uniformLocation, const std::vector<TValue>& values);
+
+    //! @brief Sets the values of an uniform array
+    //! @param uniformLocation: location of the first uniform array member that should be set
+    //! @param values: Vector with values
+    template <GLuint TTypeEnum, typename TValue>
+    void SetUniformArray(GLuint uniformLocation, const TValue* const values, U32 size);
+
+    //! @brief Sets the values of an uniform array
     //! @param uniformName: Name of the uniform
-    //! @param value: New value
-    template <typename TScalar>
-    void SetUniformScalar(std::string uniformName, TScalar value);
-
-    //! @brief Sets the values of an uniform array
-    //! @param uniformHandle: handle of the first uniform array member that should be set
     //! @param values: Vector with values
-    template <typename TScalar>
-    void SetUniformScalarArray(GLuint uniformHandle, std::vector<TScalar> values);
+    template <GLuint TTypeEnum, typename TValue>
+    void SetUniformArray(std::string uniformName, const TValue* const values, U32 size)
+    {
+        SetUniformArray<TTypeEnum>(GetUniform(uniformName).GetLocation(), values, size);
+    }
 
-    //! @brief Sets the values of an uniform array
-    //! @param uniformHandle: Name of the first uniform array member that should be set (including "[i]")
-    //! @param values: Vector with values
-    template <typename TScalar>
-    void SetUniformScalarArray(std::string uniformName, std::vector<TScalar> values);
 
 private:
     //! @brief Checks if the program links without errors
@@ -160,25 +164,4 @@ private:
     const Uniform& GetUniformByLocation(GLint location);
 #endif
 };
-}
-
-
-
-template <typename TScalar>
-void GDL::ProgramGL::SetUniformScalar(std::string uniformName, TScalar value)
-{
-    SetUniformScalar(GetUniform(uniformName).GetLocation(), value);
-}
-
-template <typename TScalar>
-void GDL::ProgramGL::SetUniformScalarArray(std::string uniformName, std::vector<TScalar> values)
-{
-    SetUniformScalarArray(GetUniform(uniformName).GetLocation(), values);
-}
-
-template <typename... TShader>
-GDL::ProgramGL::ProgramGL(const TShader&... shaderList)
-    : mHandle(glCreateProgram())
-{
-    Initialize({std::forward<const TShader&>(shaderList)...});
 }

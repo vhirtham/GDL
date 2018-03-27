@@ -39,20 +39,6 @@ GDL::Uniform GDL::ProgramGL::GetUniform(std::string uniformName) const
 }
 
 
-template <>
-void GDL::ProgramGL::SetUniformScalar(GLuint uniformHandle, F32 value)
-{
-    assert(GetUniformByLocation(uniformHandle).GetType() == GL_FLOAT);
-    glProgramUniform1f(mHandle, uniformHandle, value);
-}
-
-template <>
-void GDL::ProgramGL::SetUniformScalarArray(GLuint uniformHandle, std::vector<F32> values)
-{
-    assert(GetUniformByLocation(uniformHandle).GetType() == GL_FLOAT);
-    assert(GetUniformByLocation(uniformHandle).GetSubsequentArraySize() >= values.size());
-    glProgramUniform1fv(mHandle, uniformHandle, values.size(), values.data());
-}
 
 void GDL::ProgramGL::CheckLinkStatus()
 {
@@ -238,8 +224,24 @@ GDL::ProgramGL::FindProgramResourceData(GLenum eResourceType, std::array<GLenum,
 }
 
 template <>
-void GDL::ProgramGL::SetUniform<GL_FLOAT>(GLuint uniformHandle, GDL::F32 value)
+void GDL::ProgramGL::SetUniform<GL_FLOAT>(GLuint uniformLocation, GDL::F32 value)
 {
-    assert(GetUniformByLocation(uniformHandle).GetType() == GL_FLOAT);
-    glProgramUniform1f(mHandle, uniformHandle, value);
+    assert(GetUniformByLocation(uniformLocation).GetType() == GL_FLOAT);
+    glProgramUniform1f(mHandle, uniformLocation, value);
+}
+
+template <>
+void GDL::ProgramGL::SetUniformArray<GL_FLOAT>(GLuint uniformLocation, const std::vector<F32>& values)
+{
+    assert(GetUniformByLocation(uniformLocation).GetType() == GL_FLOAT);
+    assert(GetUniformByLocation(uniformLocation).GetSubsequentArraySize() >= values.size());
+    glProgramUniform1fv(mHandle, uniformLocation, values.size(), values.data());
+}
+
+template <>
+void GDL::ProgramGL::SetUniformArray<GL_FLOAT>(GLuint uniformLocation, const F32* const values, U32 size)
+{
+    assert(GetUniformByLocation(uniformLocation).GetType() == GL_FLOAT);
+    assert(GetUniformByLocation(uniformLocation).GetSubsequentArraySize() >= size);
+    glProgramUniform1fv(mHandle, uniformLocation, size, values);
 }

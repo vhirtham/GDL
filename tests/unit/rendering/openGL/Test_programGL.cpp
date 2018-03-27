@@ -170,17 +170,23 @@ BOOST_AUTO_TEST_CASE(Uniforms)
 
 
     // Check Setter #############################
-    BOOST_CHECK_NO_THROW(program.SetUniformScalar("X", 1.f));
+
+    // make this a template function when checking multiple types
+    std::vector<F32> valueVector{{1.f, 2.f}};
+    std::array<F32, 2> valueArray{{1.f, 2.f}};
     BOOST_CHECK_NO_THROW(program.SetUniform<GL_FLOAT>("X", 1.f));
     BOOST_CHECK_NO_THROW(program.SetUniform<GL_FLOAT>(program.GetUniform("X").GetLocation(), 1.f));
-    BOOST_CHECK_NO_THROW(program.SetUniformScalar(program.GetUniform("w[1]").GetLocation(), 1.f));
-    BOOST_CHECK_NO_THROW(program.SetUniformScalarArray("w[0]", std::vector<F32>{{1.f, 2.f}}));
-    BOOST_CHECK_NO_THROW(
-            program.SetUniformScalarArray(program.GetUniform("w[0]").GetLocation(), std::vector<F32>{{1.f, 2.f}}));
+    BOOST_CHECK_NO_THROW(program.SetUniform<GL_FLOAT>(program.GetUniform("w[1]").GetLocation(), 1.f));
+    BOOST_CHECK_NO_THROW(program.SetUniformArray<GL_FLOAT>("w[0]", valueVector.data(), valueVector.size()));
+    BOOST_CHECK_NO_THROW(program.SetUniformArray<GL_FLOAT>(program.GetUniform("w[0]").GetLocation(), valueVector.data(),
+                                                           valueVector.size()));
+    BOOST_CHECK_NO_THROW(program.SetUniformArray<GL_FLOAT>("w[0]", valueArray.data(), valueArray.size()));
+    BOOST_CHECK_NO_THROW(program.SetUniformArray<GL_FLOAT>(program.GetUniform("w[0]").GetLocation(), valueArray.data(),
+                                                           valueArray.size()));
 }
 
 
-BOOST_AUTO_TEST_CASE(UniformBlockss)
+BOOST_AUTO_TEST_CASE(UniformBlocks)
 {
     GetRenderWindow();
     const char vertexShaderCode[] = R"glsl(
