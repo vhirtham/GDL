@@ -27,3 +27,12 @@ addTest(programGL
     GLUT::GLUT
     GLEW::GLEW
     )
+
+addTest(uniformBufferObject
+    rendering/openGL/renderWindowGL.cpp
+    # External libs
+    OpenGL::GL
+    OpenGL::GLU
+    GLUT::GLUT
+    GLEW::GLEW
+    )

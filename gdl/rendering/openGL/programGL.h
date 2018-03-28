@@ -156,7 +156,9 @@ private:
     void FindUniformBlocks();
 
     //! @brief Finds all variables of one  of the programs uniform blocks and stores them.
-    void FindUniformBlockVariables(UniformBlock& uniformBlock);
+    //! @param uniformBlock: The uniform block which varibles should be found
+    //! @param numVariables: Number of variables (must be queried before)
+    void FindUniformBlockVariables(UniformBlock& uniformBlock, GLuint numVariables);
 
     //! @brief Finds the specified properties of all instances of the given resource type
     //! @param eResourceType: Enum that speciefies the resource type

@@ -174,16 +174,14 @@ void GDL::ProgramGL::FindUniformBlocks()
         assert(glGetUniformBlockIndex(mHandle, uniformBlockName.c_str()) == i);
 
         UniformBlock& uniformBlock =
-                mUniformBlocks.emplace(uniformBlockName, UniformBlock(i, data[i][1], data[i][2], data[i][3]))
-                        .first->second;
+                mUniformBlocks.emplace(uniformBlockName, UniformBlock(i, data[i][1], data[i][3])).first->second;
 
-        FindUniformBlockVariables(uniformBlock);
+        FindUniformBlockVariables(uniformBlock, data[i][2]);
     }
 }
 
-void GDL::ProgramGL::FindUniformBlockVariables(GDL::UniformBlock& uniformBlock)
+void GDL::ProgramGL::FindUniformBlockVariables(GDL::UniformBlock& uniformBlock, GLuint numVariables)
 {
-    GLuint numVariables = uniformBlock.GetNumVariables();
     std::vector<GLint> indices(numVariables);
     std::vector<GLint> nameLengths(numVariables);
     std::vector<GLint> offsets(numVariables);

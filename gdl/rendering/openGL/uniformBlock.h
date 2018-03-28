@@ -1,5 +1,6 @@
 #pragma once
 
+#include "gdl/base/Exception.h"
 #include "gdl/rendering/openGL/uniformBlockVariable.h"
 
 #include <GL/glew.h>
@@ -12,10 +13,10 @@ namespace GDL
 class UniformBlock
 {
     friend class ProgramGL;
+    friend class UniformBufferObject;
 
     GLuint mIndex;
     GLint mBindingPoint;
-    GLint mNumVariables;
     GLint mSize;
 
     std::map<std::string, UniformBlockVariable> mVariables;
@@ -31,13 +32,25 @@ public:
     //! @brief ctor
     //! @param index: Index of the uniform block
     //! @param bindingPoint: the UBs binding point
-    //! @param numVariables: number of active variables in the uniform block
     //! @param size: Size of the whole uniform block
-    UniformBlock(GLuint index, GLint bindingPoint, GLint numVariables, GLint size)
+    UniformBlock(GLuint index, GLint bindingPoint, GLint size)
         : mIndex(index)
         , mBindingPoint(bindingPoint)
-        , mNumVariables(numVariables)
         , mSize(size)
+    {
+    }
+
+    //! @brief ctor
+    //! @param index: Index of the uniform block
+    //! @param bindingPoint: the UBs binding point
+    //! @param size: Size of the whole uniform block
+    //! @param variables: Map that contains the uniform blocks members
+    UniformBlock(GLuint index, GLint bindingPoint, GLint size,
+                 const std::map<std::string, UniformBlockVariable>& variables)
+        : mIndex(index)
+        , mBindingPoint(bindingPoint)
+        , mSize(size)
+        , mVariables(variables)
     {
     }
 
@@ -59,7 +72,7 @@ public:
     //! @return Number of variables of the uniform block
     GLuint GetNumVariables() const
     {
-        return mNumVariables;
+        return mVariables.size();
     }
 
     //! @brief Gets the size of the uniform block

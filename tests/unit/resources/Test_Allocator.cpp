@@ -126,8 +126,14 @@ using namespace GDL;
 // BOOST_AUTO_TEST_CASE(PoolAllocator)
 int main()
 {
+    std::cout << "Num GLOBAL allocations CP START: " << GlobalNewAllocationCounter::GetTotalNumAllocations()
+              << std::endl;
+    std::cout << "Num GLOBAL deallocations CP START: " << GlobalNewAllocationCounter::GetTotalNumDeallocations();
     //    int allocs = number_of_allocs;
     MemoryManager::Instance(1024);
+    std::cout << "Num GLOBAL allocations CP START: " << GlobalNewAllocationCounter::GetTotalNumAllocations()
+              << std::endl;
+    std::cout << "Num GLOBAL deallocations CP START: " << GlobalNewAllocationCounter::GetTotalNumDeallocations();
     GlobalNewAllocationCounter ac;
     std::cout << "Num allocations start: " << ac.GetNumAllocations() << std::endl;
     {
@@ -148,7 +154,7 @@ int main()
         v3.back().mVec.push_back(2);
         v3.emplace_back(v3.back());
 
-        test2 test;
+        test2<std::allocator> test;
         std::cout << "Num allocations CP 2: " << ac.GetNumAllocations() << std::endl;
         test.mVec.push_back(42);
         std::cout << "Num allocations CP 3: " << ac.GetNumAllocations() << std::endl;
@@ -159,22 +165,22 @@ int main()
         std::cout << "Num allocations CP delete a1: " << ac.GetNumAllocations() << std::endl;
         std::cout << "Num deallocations CP delete a1: " << ac.GetNumDeallocations() << std::endl;
 
-        bool caught = false;
-        //    try
-        //    {
-        //        v.reserve(200);
-        //    }
-        //    catch (Exception e)
-        //    {
-        //        e.what();
-        //        caught = true;
-        //    }
+        //        bool caught = false;
+        //        try
+        //        {
+        //            v.reserve(200);
+        //        }
+        //        catch (Exception e)
+        //        {
+        //            e.what();
+        //            caught = true;
+        //        }
 
-        //    if (caught == false)
-        //        throw Exception(__PRETTY_FUNCTION__, "Exception not caught as expected");
-        //    std::cout << "End of program" << std::endl;
-        //    v.push_back(33);
-        //    v.push_back(44);
+        //        if (caught == false)
+        //            throw Exception(__PRETTY_FUNCTION__, "Exception not caught as expected");
+        //        std::cout << "End of program" << std::endl;
+        //        v.push_back(33);
+        //        v.push_back(44);
     }
     std::cout << "Num allocations CP END: " << ac.GetNumAllocations() << std::endl;
     std::cout << "Num deallocations CP END: " << ac.GetNumDeallocations() << std::endl;
