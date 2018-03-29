@@ -272,3 +272,18 @@ BOOST_AUTO_TEST_CASE(UniformBlocks)
     BOOST_CHECK(Perspective.GetIndex() != Rotation.GetIndex());
     BOOST_CHECK(Rotation.GetIndex() != Translation.GetIndex());
 }
+
+BOOST_AUTO_TEST_CASE(Uniform_Block_Variable)
+{
+    UniformBlockVariable Ref(1, 2, GL_FLOAT, 3);
+    UniformBlockVariable IndexDiff(2, 2, GL_FLOAT, 3);
+    UniformBlockVariable OffsetDiff(1, 1, GL_FLOAT, 3);
+    UniformBlockVariable TypeDiff(1, 2, GL_INT, 3);
+    UniformBlockVariable ArraySizeDiff(1, 2, GL_FLOAT, 4);
+
+    BOOST_CHECK(Ref.CheckEqualDataStructure(Ref));
+    BOOST_CHECK(Ref.CheckEqualDataStructure(IndexDiff));
+    BOOST_CHECK(Ref.CheckEqualDataStructure(OffsetDiff) == false);
+    BOOST_CHECK(Ref.CheckEqualDataStructure(TypeDiff) == false);
+    BOOST_CHECK(Ref.CheckEqualDataStructure(ArraySizeDiff) == false);
+}

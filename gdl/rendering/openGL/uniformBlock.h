@@ -13,11 +13,10 @@ namespace GDL
 class UniformBlock
 {
     friend class ProgramGL;
-    friend class UniformBufferObject;
 
     GLuint mIndex;
-    GLint mBindingPoint;
-    GLint mSize;
+    GLuint mBindingPoint;
+    GLuint mSize;
 
     std::map<std::string, UniformBlockVariable> mVariables;
 
@@ -93,6 +92,13 @@ public:
                             "Did not find variable \"" + variableName +
                                     "\". GLSL compiler optimization might be the reason.");
         return iterator->second;
+    }
+
+    //! @brief Gets a constant reference to the internal variable container
+    //! @return Constant reference to the internal variable container
+    const std::map<std::string, UniformBlockVariable>& GetVariables() const
+    {
+        return mVariables;
     }
 };
 }

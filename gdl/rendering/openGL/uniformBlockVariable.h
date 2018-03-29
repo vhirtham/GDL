@@ -34,6 +34,15 @@ public:
     {
     }
 
+
+    //! @brief Checks if two uniform block variables have the same data structure
+    //! @param other: Uniform block variable that should be compared
+    //! @return true/false
+    bool CheckEqualDataStructure(const UniformBlockVariable& other) const
+    {
+        return mOffset == other.mOffset && mArraySize == other.mArraySize && mType == other.mType;
+    }
+
     //! @brief Gets the index of the uniform block variable
     //! @return Index of the uniform block variable
     GLuint GetIndex() const
