@@ -11,7 +11,7 @@ GDL::OpenGL::ManagedUniformBufferObject::ManagedUniformBufferObject(const Unifor
     : mUBO(buffer, usage)
     , mVariables(uniformBlock.GetVariables())
 {
-    if (buffer.size() != uniformBlock.GetSize())
+    if (static_cast<GLsizei>(buffer.size()) != uniformBlock.GetSize())
         throw Exception(
                 __PRETTY_FUNCTION__,
                 "Dimension of buffer which is provided for initialization does not fit the uniform blocks size!");
@@ -23,6 +23,17 @@ GDL::OpenGL::ManagedUniformBufferObject::ManagedUniformBufferObject(const Unifor
     , mVariables(uniformBlock.GetVariables())
 {
     Initialize(uniformBlock);
+}
+
+const GDL::OpenGL::UniformBlockVariable&
+GDL::OpenGL::ManagedUniformBufferObject::GetVariable(std::string variableName) const
+{
+    auto iterator = mVariables.find(variableName);
+    if (iterator == mVariables.end())
+        throw Exception(__PRETTY_FUNCTION__,
+                        "Did not find uniform \"" + variableName +
+                                "\". GLSL compiler optimization might be the reason.");
+    return iterator->second;
 }
 
 

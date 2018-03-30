@@ -14,6 +14,7 @@ namespace GDL
 {
 namespace OpenGL
 {
+//! @brief Class that manages a uniform buffer object with predifined data structure
 class ManagedUniformBufferObject
 {
 
@@ -63,6 +64,11 @@ public:
         return mVariables.size();
     }
 
+    //! @brief Gets a variable
+    //! @param variableName: Name of the variable
+    //! @return Requested variable
+    const UniformBlockVariable& GetVariable(std::string variableName) const;
+
     //! @brief Gets the size of the uniform buffer object
     //! @return Size of the uniform buffer object
     GLuint GetSize() const
@@ -75,6 +81,26 @@ public:
     void SetBindingPoint(GLint bindingPoint)
     {
         mUBO.SetBindingPoint(bindingPoint);
+    }
+
+    //! @brief Writes data to the uniform buffer object starting at the given offset
+    //! @tparam TDataType: Data type of the provided data
+    //! @param offset: Location inside the buffer where the data should be written
+    //! @param data: The data that should be written to the uniform buffer object
+    template <typename TDataType>
+    void SetData(GLint offset, TDataType data) const
+    {
+        mUBO.SetData<TDataType>(offset, data);
+    }
+
+    //! @brief Writes data to the uniform buffer object starting at the position of a given variable
+    //! @tparam TDataType: Data type of the provided data
+    //! @param variableName: Name of the variable from which the write offset is determined
+    //! @param data: The data that should be written to the uniform buffer object
+    template <typename TDataType>
+    void SetData(std::string variableName, TDataType data) const
+    {
+        SetData<TDataType>(GetVariable(variableName).GetOffset(), data);
     }
 
     //! @brief Checks if the uniform buffer objects data layout is compatible to a uniform block

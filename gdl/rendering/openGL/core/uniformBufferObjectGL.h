@@ -12,8 +12,8 @@ class UniformBufferObject
 {
 
     GLuint mHandle;
-    GLuint mSize;
     GLint mBindingPoint;
+    GLsizei mSize;
     GLenum mUsage;
 
 public:
@@ -53,7 +53,7 @@ public:
 
     //! @brief Gets the size of the uniform buffer object
     //! @return Size of the uniform buffer object
-    GLuint GetSize() const
+    GLsizei GetSize() const
     {
         return mSize;
     }
@@ -67,16 +67,24 @@ public:
 
     //! @brief Sets the binding point of the uniform buffer object
     //! @param bindingPoint: New binding point
-    void SetBindingPoint(GLint bindingPoint)
-    {
-        mBindingPoint = bindingPoint;
-        glBindBufferBase(GL_UNIFORM_BUFFER, mBindingPoint, mHandle);
-    }
+    void SetBindingPoint(GLint bindingPoint);
+
+    //! @brief Writes data to the uniform buffer object starting at the given offset
+    //! @tparam TDataType: Data type of the provided data
+    //! @param offset: Location inside the buffer where the data should be written
+    //! @param data: The data that should be written to the uniform buffer object
+    template <typename TDataType>
+    void SetData(GLint offset, TDataType data) const;
+
 
 
 private:
     //! @brief Initializes the uniform buffer object
     //! @param usage: Enum that specifies the UBOs usage (have a look at the official reference for glNamedBufferData)
     void Initialize(const std::vector<U8>& buffer, GLenum usage);
+
+    //! @brief Checks if the buffer is still bound to its binding point
+    //! @return true/false
+    bool BindingPointValid() const;
 };
 }

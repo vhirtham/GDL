@@ -18,7 +18,7 @@ class UniformBlock
 
     GLuint mIndex;
     GLuint mBindingPoint;
-    GLuint mSize;
+    GLsizei mSize;
 
     std::map<std::string, UniformBlockVariable> mVariables;
 
@@ -34,7 +34,7 @@ public:
     //! @param index: Index of the uniform block
     //! @param bindingPoint: the UBs binding point
     //! @param size: Size of the whole uniform block
-    UniformBlock(GLuint index, GLint bindingPoint, GLint size)
+    UniformBlock(GLuint index, GLint bindingPoint, GLsizei size)
         : mIndex(index)
         , mBindingPoint(bindingPoint)
         , mSize(size)
@@ -46,7 +46,7 @@ public:
     //! @param bindingPoint: the UBs binding point
     //! @param size: Size of the whole uniform block
     //! @param variables: Map that contains the uniform blocks members
-    UniformBlock(GLuint index, GLint bindingPoint, GLint size,
+    UniformBlock(GLuint index, GLint bindingPoint, GLsizei size,
                  const std::map<std::string, UniformBlockVariable>& variables)
         : mIndex(index)
         , mBindingPoint(bindingPoint)
@@ -78,7 +78,7 @@ public:
 
     //! @brief Gets the size of the uniform block
     //! @return Size of the uniform block
-    GLuint GetSize() const
+    GLsizei GetSize() const
     {
         return mSize;
     }

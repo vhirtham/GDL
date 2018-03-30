@@ -5,6 +5,7 @@
 #include "gdl/rendering/openGL/core/renderWindowGL.h"
 #include "gdl/rendering/openGL/core/shaderGL.h"
 #include "gdl/rendering/openGL/management/programDataManagerGL.h"
+#include "gdl/rendering/openGL/management/managedUniformBufferObjectGL.h"
 
 #include <chrono>
 #include <stdlib.h>
@@ -170,7 +171,7 @@ int main(int argc, char* argv[])
 
                                       "void main(void)\n"
                                       "{\n"
-                                      "  gl_Position = in_Position;\n"
+                                      "  gl_Position = perspectiveMatrix*in_Position;\n"
                                       "  ex_Color = in_Color;\n"
                                       " ex_TexCoord = in_TexCoord;\n"
                                       "}\n"};
@@ -214,8 +215,12 @@ int main(int argc, char* argv[])
     Shader vertexShader(GL_VERTEX_SHADER, VertexShaderCode);
     Shader fragmentShader(GL_FRAGMENT_SHADER, FragmentShaderCode);
 
+    std::vector<F32> perspectiveMatValues{1.2, 0., 0., 0., 0., 0.9, 0., 0., 0., 0., 1., 0., 0., 0., 0., 1.};
+
     Program program(vertexShader, fragmentShader);
     ProgramDataManager programDM(program);
+    ManagedUniformBufferObject ubo(programDM.GetUniformBlock("GlobalMatrices"), GL_DYNAMIC_DRAW);
+    ubo.SetData("perspectiveMatrix", perspectiveMatValues);
     programDM.SetUniform<GL_FLOAT>("frequency", 10.f);
     programDM.SetUniform<GL_FLOAT>("colMod[0]", 1.f);
     programDM.SetUniformArray<GL_FLOAT>("colMod[1]", std::vector<F32>{1.f, 1.f}.data(), 2);

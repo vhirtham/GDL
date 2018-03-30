@@ -25,7 +25,7 @@ BOOST_AUTO_TEST_CASE(Construction_And_Binding)
     GetRenderWindow();
 
     // Ctor with size test
-    constexpr GLuint size_A = 120;
+    constexpr GLsizei size_A = 120;
     constexpr GLuint binding_A = 2;
     constexpr GLenum usage_A = GL_STATIC_DRAW;
 
@@ -45,12 +45,12 @@ BOOST_AUTO_TEST_CASE(Construction_And_Binding)
     glGetNamedBufferParameteriv(uniformBufferObject_A.GetHandle(), GL_BUFFER_USAGE, &queriedBufferUsage_A);
     glGetIntegeri_v(GL_UNIFORM_BUFFER_BINDING, binding_A, &queriedBufferHandle_A);
     BOOST_CHECK(uniformBufferObject_A.GetHandle() == static_cast<GLuint>(queriedBufferHandle_A));
-    BOOST_CHECK(uniformBufferObject_A.GetSize() == static_cast<GLuint>(queriedBufferSize_A));
+    BOOST_CHECK(uniformBufferObject_A.GetSize() == static_cast<GLsizei>(queriedBufferSize_A));
     BOOST_CHECK(uniformBufferObject_A.GetUsage() == static_cast<GLenum>(queriedBufferUsage_A));
 
 
     // Ctor with buffer test
-    constexpr GLuint size_B = 180;
+    constexpr GLsizei size_B = 180;
     constexpr GLuint binding_B = 7;
     constexpr GLenum usage_B = GL_DYNAMIC_READ;
 
@@ -72,6 +72,6 @@ BOOST_AUTO_TEST_CASE(Construction_And_Binding)
     glGetNamedBufferParameteriv(uniformBufferObject_B.GetHandle(), GL_BUFFER_USAGE, &queriedBufferUsage_B);
     glGetIntegeri_v(GL_UNIFORM_BUFFER_BINDING, binding_B, &queriedBufferHandle_B);
     BOOST_CHECK(uniformBufferObject_B.GetHandle() == static_cast<GLuint>(queriedBufferHandle_B));
-    BOOST_CHECK(uniformBufferObject_B.GetSize() == static_cast<GLuint>(queriedBufferSize_B));
+    BOOST_CHECK(uniformBufferObject_B.GetSize() == static_cast<GLsizei>(queriedBufferSize_B));
     BOOST_CHECK(uniformBufferObject_B.GetUsage() == static_cast<GLenum>(queriedBufferUsage_B));
 }
