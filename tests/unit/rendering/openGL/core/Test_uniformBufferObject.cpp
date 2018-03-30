@@ -1,10 +1,10 @@
 #include <boost/test/unit_test.hpp>
 
 #include "gdl/GDLTypedefs.h"
-#include "gdl/rendering/openGL/renderWindowGL.h"
-#include "gdl/rendering/openGL/uniformBlock.h"
-#include "gdl/rendering/openGL/uniformBlockVariable.h"
-#include "gdl/rendering/openGL/uniformBufferObject.h"
+#include "gdl/rendering/openGL/core/renderWindowGL.h"
+#include "gdl/rendering/openGL/core/uniformBlock.h"
+#include "gdl/rendering/openGL/core/uniformBlockVariable.h"
+#include "gdl/rendering/openGL/core/uniformBufferObject.h"
 
 #include <map>
 #include <string>

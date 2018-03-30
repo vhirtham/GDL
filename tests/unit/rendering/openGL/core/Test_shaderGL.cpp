@@ -1,8 +1,8 @@
 #include <boost/test/unit_test.hpp>
 
 #include "gdl/base/Exception.h"
-#include "gdl/rendering/openGL/renderWindowGL.h"
-#include "gdl/rendering/openGL/shaderGL.h"
+#include "gdl/rendering/openGL/core/renderWindowGL.h"
+#include "gdl/rendering/openGL/core/shaderGL.h"
 
 using namespace GDL;
 

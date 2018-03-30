@@ -2,10 +2,10 @@
 
 #include "gdl/GDLTypedefs.h"
 #include "gdl/base/Exception.h"
-#include "gdl/rendering/openGL/programInput.h"
-#include "gdl/rendering/openGL/shaderGL.h"
-#include "gdl/rendering/openGL/uniform.h"
-#include "gdl/rendering/openGL/uniformBlock.h"
+#include "gdl/rendering/openGL/core/programInput.h"
+#include "gdl/rendering/openGL/core/shaderGL.h"
+#include "gdl/rendering/openGL/core/uniform.h"
+#include "gdl/rendering/openGL/core/uniformBlock.h"
 
 #include <functional>
 #include <map>

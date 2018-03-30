@@ -2,7 +2,7 @@
 
 #include "gdl/GDLTypedefs.h"
 #include "gdl/base/Exception.h"
-#include "gdl/rendering/openGL/uniformBlock.h"
+#include "gdl/rendering/openGL/core/uniformBlock.h"
 
 #include <GL/glew.h>
 
