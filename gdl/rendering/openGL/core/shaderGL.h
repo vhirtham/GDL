@@ -13,10 +13,10 @@ class ShaderGL
 
 public:
     ShaderGL() = delete;
-    ShaderGL(const ShaderGL&) = delete; // don't use default -> dtor calls glDeleteShader
-    ShaderGL(ShaderGL&&) = delete; // don't use default -> dtor calls glDeleteShader
-    ShaderGL& operator=(const ShaderGL&) = delete; // don't use default -> dtor calls glDeleteShader
-    ShaderGL& operator=(ShaderGL&&) = delete; // don't use default -> dtor calls glDeleteShader
+    ShaderGL(const ShaderGL&) = delete;
+    ShaderGL(ShaderGL&&) = delete;
+    ShaderGL& operator=(const ShaderGL&) = delete;
+    ShaderGL& operator=(ShaderGL&&) = delete;
     ~ShaderGL();
 
     //! @brief Ctor which takes the Shader code and compiles it. Throws on compilation errors.

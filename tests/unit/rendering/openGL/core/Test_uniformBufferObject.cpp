@@ -2,9 +2,9 @@
 
 #include "gdl/GDLTypedefs.h"
 #include "gdl/rendering/openGL/core/renderWindowGL.h"
-#include "gdl/rendering/openGL/core/uniformBlock.h"
-#include "gdl/rendering/openGL/core/uniformBlockVariable.h"
 #include "gdl/rendering/openGL/core/uniformBufferObject.h"
+#include "gdl/rendering/openGL/management/uniformBlock.h"
+#include "gdl/rendering/openGL/management/uniformBlockVariable.h"
 
 #include <map>
 #include <string>
