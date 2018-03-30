@@ -1,13 +1,10 @@
 #include <boost/test/unit_test.hpp>
 
+#include "gdl/base/Exception.h"
 #include "gdl/GDLTypedefs.h"
 #include "gdl/rendering/openGL/core/renderWindowGL.h"
 #include "gdl/rendering/openGL/core/uniformBufferObject.h"
-#include "gdl/rendering/openGL/management/uniformBlock.h"
-#include "gdl/rendering/openGL/management/uniformBlockVariable.h"
 
-#include <map>
-#include <string>
 using namespace GDL;
 
 RenderWindowGL& GetRenderWindow()
@@ -22,74 +19,58 @@ RenderWindowGL& GetRenderWindow()
     return renderWindow;
 }
 
-BOOST_AUTO_TEST_CASE(Construct_From_UniformBlock)
+BOOST_AUTO_TEST_CASE(Construction_And_Binding)
 {
     GetRenderWindow();
 
-    constexpr U32 bufferSize = 160;
-    std::vector<U8> buffer(bufferSize, 0);
-    std::vector<U8> bufferMismatched(bufferSize + 1, 0);
+    // Ctor with size test
+    constexpr GLuint size_A = 120;
+    constexpr GLuint binding_A = 2;
+    constexpr GLenum usage_A = GL_STATIC_DRAW;
 
-    std::map<std::string, UniformBlockVariable> uBVars = {
-            {"TranslationVec", UniformBlockVariable(0, 0, GL_FLOAT_VEC4, 1)},
-            {"RotationMat", UniformBlockVariable(1, 16, GL_FLOAT_MAT4, 1)},
-            {"OtherVec", UniformBlockVariable(2, 80, GL_FLOAT_VEC3, 1)},
-            {"ProjectionMat", UniformBlockVariable(3, 96, GL_FLOAT_MAT4, 1)}};
-    UniformBlock uniformBlock(1337, 2, bufferSize, uBVars);
+    UniformBufferObject uniformBufferObject_A(size_A, usage_A);
+    uniformBufferObject_A.SetBindingPoint(binding_A);
 
-    UniformBufferObject uniformBufferObject_A(uniformBlock, GL_STATIC_DRAW);
-    UniformBufferObject uniformBufferObject_B(uniformBlock, GL_STATIC_DRAW, buffer);
+    // Check data in class
+    BOOST_CHECK(uniformBufferObject_A.GetBindingPoint() == binding_A);
+    BOOST_CHECK(uniformBufferObject_A.GetSize() == size_A);
+    BOOST_CHECK(uniformBufferObject_A.GetUsage() == usage_A);
 
-
-    BOOST_CHECK(uniformBufferObject_A.CheckUniformBlockCompatibility(uniformBlock));
-    BOOST_CHECK(uniformBufferObject_B.CheckUniformBlockCompatibility(uniformBlock));
-
-    BOOST_CHECK(uniformBufferObject_A.GetBindingPoint() == uniformBlock.GetBindingPoint());
-    BOOST_CHECK(uniformBufferObject_B.GetBindingPoint() == uniformBlock.GetBindingPoint());
-
-    BOOST_CHECK_THROW(UniformBufferObject(uniformBlock, GL_STATIC_DRAW, bufferMismatched), Exception);
-}
-
-
-BOOST_AUTO_TEST_CASE(UniformBlockCompatibility)
-{
-    GetRenderWindow();
-
-    constexpr U32 bufferSize = 160;
-
-    std::map<std::string, UniformBlockVariable> uBVars = {
-            {"TranslationVec", UniformBlockVariable(0, 0, GL_FLOAT_VEC4, 1)},
-            {"RotationMat", UniformBlockVariable(1, 16, GL_FLOAT_MAT4, 1)},
-            {"OtherVec", UniformBlockVariable(2, 80, GL_FLOAT_VEC3, 1)}};
-    std::map<std::string, UniformBlockVariable> uBVarsDiffMemberNames(uBVars);
-    std::map<std::string, UniformBlockVariable> uBVarsDiffMemberDataAllowed(uBVars);
-    std::map<std::string, UniformBlockVariable> uBVarsDiffMemberDataForbidden(uBVars);
-    uBVars.emplace("ProjectionMat", UniformBlockVariable(3, 96, GL_FLOAT_MAT4, 1));
-    uBVarsDiffMemberNames.emplace("ProTectionMat", UniformBlockVariable(3, 96, GL_FLOAT_MAT4, 1));
-    uBVarsDiffMemberDataAllowed.emplace("ProjectionMat", UniformBlockVariable(555, 96, GL_FLOAT_MAT4, 1));
-    uBVarsDiffMemberDataForbidden.emplace("ProjectionMat", UniformBlockVariable(3, 96, GL_FLOAT_MAT3, 1));
-    std::map<std::string, UniformBlockVariable> uBVarsDiffNumber(uBVars);
-    uBVarsDiffNumber.emplace("ExtraMat", UniformBlockVariable(3, 96, GL_FLOAT_MAT4, 1));
+    // Check data on OpenGL side
+    GLint queriedBufferSize_A = -1;
+    GLint queriedBufferHandle_A = -1;
+    GLint queriedBufferUsage_A = GL_NONE;
+    glGetNamedBufferParameteriv(uniformBufferObject_A.GetHandle(), GL_BUFFER_SIZE, &queriedBufferSize_A);
+    glGetNamedBufferParameteriv(uniformBufferObject_A.GetHandle(), GL_BUFFER_USAGE, &queriedBufferUsage_A);
+    glGetIntegeri_v(GL_UNIFORM_BUFFER_BINDING, binding_A, &queriedBufferHandle_A);
+    BOOST_CHECK(uniformBufferObject_A.GetHandle() == static_cast<GLuint>(queriedBufferHandle_A));
+    BOOST_CHECK(uniformBufferObject_A.GetSize() == static_cast<GLuint>(queriedBufferSize_A));
+    BOOST_CHECK(uniformBufferObject_A.GetUsage() == static_cast<GLenum>(queriedBufferUsage_A));
 
 
-    UniformBlock uniformBlockRef(1337, 2, bufferSize, uBVars);
-    UniformBlock uniformBlockDiffIndex(42, 2, bufferSize, uBVars);
-    UniformBlock uniformBlockDiffBinding(1337, 3, bufferSize, uBVars);
-    UniformBlock uniformBlockDiffSize(1337, 2, bufferSize + 1, uBVars);
-    UniformBlock uniformBlockDiffNumVariables(1337, 2, bufferSize, uBVarsDiffNumber);
-    UniformBlock uniformBlockDiffMemberNames(1337, 2, bufferSize, uBVarsDiffMemberNames);
-    UniformBlock uniformBlockDiffMemberDataAllowed(1337, 2, bufferSize, uBVarsDiffMemberDataAllowed);
-    UniformBlock uniformBlockDiffMemberDataForbidden(1337, 2, bufferSize, uBVarsDiffMemberDataForbidden);
+    // Ctor with buffer test
+    constexpr GLuint size_B = 180;
+    constexpr GLuint binding_B = 7;
+    constexpr GLenum usage_B = GL_DYNAMIC_READ;
 
-    UniformBufferObject uniformBufferObject(uniformBlockRef, GL_STATIC_DRAW);
+    std::vector<U8> buffer_B(size_B, 42);
 
-    // Only data structure related mismatches should return false!
-    BOOST_CHECK(uniformBufferObject.CheckUniformBlockCompatibility(uniformBlockRef));
-    BOOST_CHECK(uniformBufferObject.CheckUniformBlockCompatibility(uniformBlockDiffIndex));
-    BOOST_CHECK(uniformBufferObject.CheckUniformBlockCompatibility(uniformBlockDiffBinding));
-    BOOST_CHECK(uniformBufferObject.CheckUniformBlockCompatibility(uniformBlockDiffSize) == false);
-    BOOST_CHECK(uniformBufferObject.CheckUniformBlockCompatibility(uniformBlockDiffNumVariables) == false);
-    BOOST_CHECK(uniformBufferObject.CheckUniformBlockCompatibility(uniformBlockDiffMemberNames) == false);
-    BOOST_CHECK(uniformBufferObject.CheckUniformBlockCompatibility(uniformBlockDiffMemberDataAllowed));
-    BOOST_CHECK(uniformBufferObject.CheckUniformBlockCompatibility(uniformBlockDiffMemberDataForbidden) == false);
+    UniformBufferObject uniformBufferObject_B(buffer_B, usage_B);
+    uniformBufferObject_B.SetBindingPoint(binding_B);
+
+    // Check data in class
+    BOOST_CHECK(uniformBufferObject_B.GetBindingPoint() == binding_B);
+    BOOST_CHECK(uniformBufferObject_B.GetSize() == size_B);
+    BOOST_CHECK(uniformBufferObject_B.GetUsage() == usage_B);
+
+    // Check data on OpenGL side
+    GLint queriedBufferSize_B = -1;
+    GLint queriedBufferHandle_B = -1;
+    GLint queriedBufferUsage_B = GL_NONE;
+    glGetNamedBufferParameteriv(uniformBufferObject_B.GetHandle(), GL_BUFFER_SIZE, &queriedBufferSize_B);
+    glGetNamedBufferParameteriv(uniformBufferObject_B.GetHandle(), GL_BUFFER_USAGE, &queriedBufferUsage_B);
+    glGetIntegeri_v(GL_UNIFORM_BUFFER_BINDING, binding_B, &queriedBufferHandle_B);
+    BOOST_CHECK(uniformBufferObject_B.GetHandle() == static_cast<GLuint>(queriedBufferHandle_B));
+    BOOST_CHECK(uniformBufferObject_B.GetSize() == static_cast<GLuint>(queriedBufferSize_B));
+    BOOST_CHECK(uniformBufferObject_B.GetUsage() == static_cast<GLenum>(queriedBufferUsage_B));
 }
