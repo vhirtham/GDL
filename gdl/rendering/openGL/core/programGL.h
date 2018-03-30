@@ -3,7 +3,7 @@
 #include "gdl/GDLTypedefs.h"
 
 #include <GL/glew.h>
-#include <string>
+#include <functional>
 
 namespace GDL
 {

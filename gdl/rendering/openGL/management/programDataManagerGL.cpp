@@ -1,6 +1,8 @@
 #include "programDataManagerGL.h"
 
-#include <cassert>
+
+#include "gdl/base/Exception.h"
+
 #include <memory>
 
 const GDL::ProgramInput& GDL::ProgramDataManager::GetInput(std::string inputName) const
