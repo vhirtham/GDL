@@ -3,7 +3,7 @@ if(ENABLE_OPENGL)
         opengl/TriangleOpenGL.cpp)
 
     target_link_libraries(TriangleOpenGL
-        GDL::OpenGL
+        GDL::OpenGLCore
         )
 
     TargetDefaultBuildSetup(TriangleOpenGL)

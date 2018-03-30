@@ -3,10 +3,12 @@
 #include "gdl/GDLTypedefs.h"
 #include "gdl/base/Exception.h"
 #include "gdl/rendering/openGL/core/programInput.h"
+#include "gdl/rendering/openGL/core/programGL.h"
 #include "gdl/rendering/openGL/core/shaderGL.h"
 #include "gdl/rendering/openGL/core/uniform.h"
 #include "gdl/rendering/openGL/core/uniformBlock.h"
 
+#include <cassert>
 #include <functional>
 #include <map>
 #include <string>
@@ -14,43 +16,35 @@
 
 namespace GDL
 {
-class ProgramGL
+class ProgramDataManager
 {
-    GLuint const mHandle = 0;
+    const ProgramGL& mProgram;
+
     std::map<const std::string, const Uniform> mUniforms;
     std::map<const std::string, UniformBlock> mUniformBlocks;
     std::map<const std::string, const ProgramInput> mInputs;
 
 public:
-    ProgramGL() = delete;
-    ProgramGL(const ProgramGL&) = delete; // don't use default -> dtor calls glDeleteProgram
-    ProgramGL(ProgramGL&&) = delete; // don't use default -> dtor calls glDeleteProgram
-    ProgramGL& operator=(const ProgramGL&) = delete; // don't use default -> dtor calls glDeleteProgram
-    ProgramGL& operator=(ProgramGL&&) = delete; // don't use default -> dtor calls glDeleteProgram
-    ~ProgramGL();
+    ProgramDataManager() = delete;
+    ProgramDataManager(const ProgramDataManager&) = delete;
+    ProgramDataManager(ProgramDataManager&&) = delete;
+    ProgramDataManager& operator=(const ProgramDataManager&) = delete;
+    ProgramDataManager& operator=(ProgramDataManager&&) = delete;
+    ~ProgramDataManager() = default;
 
-    //! @brief Constructor that takes as many shaders as desired and links the program
-    //! @tparam TShader: Varying number of shaders
-    //! @param shaderList: List of shaders
-    //! @remark Even though the template should be callable with any input type, only the shaderGL class will compile.
-    //! Didn't find a better way to use a parameter pack.
-    template <typename... TShader>
-    ProgramGL(const TShader&... shaderList)
-        : mHandle(glCreateProgram())
+    //! @brief Constructor that gathers all informations about the passed program
+    //! @param program: OpenGL program that should be managed
+    ProgramDataManager(const ProgramGL& program)
+        : mProgram(program)
     {
-        Initialize({std::forward<const TShader&>(shaderList)...});
+        GatherProgramData();
     }
 
-
-    //! @brief Constructor that takes as many shaders as desired and links the program (initializer version)
-    //! @param shaderList: List of shaders
-    ProgramGL(std::initializer_list<std::reference_wrapper<const ShaderGL>> shaderList);
-
-    //! @brief Gets the programs handle
-    //! @return Program handle
+    //! @brief Gets the handle of the managed program
+    //! @return Handle of the manged Program
     GLuint GetHandle() const
     {
-        return mHandle;
+        return mProgram.GetHandle();
     }
 
     //! @brief Gets the specified program input
@@ -96,7 +90,11 @@ public:
     //! @param uniformLocation: Location of the uniform
     //! @param value: New value
     template <GLuint TTypeEnum, typename TValue>
-    void SetUniform(GLuint uniformLocation, TValue value) const;
+    void SetUniform(GLuint uniformLocation, TValue value) const
+    {
+        assert(GetUniformByLocation(uniformLocation).GetType() == TTypeEnum);
+        mProgram.SetUniform<TTypeEnum>(uniformLocation, value);
+    }
 
     //! @brief Sets the value of an uniform
     //! @tparam TTypeEnum: GL type enum
@@ -116,7 +114,12 @@ public:
     //! @param uniformLocation: location of the first uniform array member that should be set
     //! @param values: Vector with values
     template <GLuint TTypeEnum, typename TValue>
-    void SetUniformArray(GLuint uniformLocation, const TValue* const values, U32 size) const;
+    void SetUniformArray(GLuint uniformLocation, const TValue* const values, U32 size) const
+    {
+        assert(GetUniformByLocation(uniformLocation).GetType() == TTypeEnum);
+        assert(GetUniformByLocation(uniformLocation).GetArraySize() >= size);
+        mProgram.SetUniformArray<TTypeEnum>(uniformLocation, values, size);
+    }
 
     //! @brief Sets the values of an uniform array
     //! @tparam TTypeEnum: GL type enum
@@ -131,15 +134,11 @@ public:
 
 
 private:
-    //! @brief Checks if the program links without errors
-    void CheckLinkStatus() const;
-
     //! @brief Gathers program information (uniforms, subroutines, inputs etc.)
     void GatherProgramData();
 
-    //! @brief Links all the passed shaders to the program
-    //! @param shaderList: Shaders that should be linked
-    void Initialize(std::initializer_list<std::reference_wrapper<const ShaderGL>> shaderList);
+    //! @brief Finds all the programs inputs and stores their names and handles.
+    void FindInputs();
 
     //! @brief Finds all the programs uniforms and stores their names and handles.
     void FindUniforms();
@@ -172,12 +171,10 @@ private:
     //! @return Name of the resource
     std::string GetResourceName(GLenum eResourceType, GLuint index, GLint bufferSize) const;
 
-#ifndef NDEBUG
     //! @brief Gets a uniform by its location
     //! @param handle: The uniforms location
     //! @return Uniform
-    //! @remark DEBUG only!
     const Uniform& GetUniformByLocation(GLint location) const;
-#endif
+
 };
 }

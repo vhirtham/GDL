@@ -12,7 +12,7 @@ namespace GDL
 {
 class UniformBlock
 {
-    friend class ProgramGL;
+    friend class ProgramDataManager;
 
     GLuint mIndex;
     GLuint mBindingPoint;

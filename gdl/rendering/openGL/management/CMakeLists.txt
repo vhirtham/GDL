@@ -1,7 +1,6 @@
-addGDLLib(OpenGLCore
-    programGL.cpp
-    renderWindowGL.cpp
-    shaderGL.cpp
+addGDLLib(OpenGLManagement
+    programDataManagerGL.cpp
+    GDL::OpenGLCore
 
     # External libs
     OpenGL::GL
@@ -9,4 +8,3 @@ addGDLLib(OpenGLCore
     GLUT::GLUT
     GLEW::GLEW
 )
-

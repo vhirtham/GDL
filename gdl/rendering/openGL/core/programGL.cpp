@@ -70,7 +70,6 @@ void GDL::ProgramGL::CheckLinkStatus() const
 
 void GDL::ProgramGL::GatherProgramData()
 {
-    FindInputs();
     FindUniforms();
     FindUniformBlocks();
 }
@@ -108,16 +107,6 @@ void GDL::ProgramGL::Initialize(std::initializer_list<std::reference_wrapper<con
         throw Exception(__PRETTY_FUNCTION__,
                         "Could not create program:\n" +
                                 std::string(reinterpret_cast<const char*>(gluErrorString(errorCode))));
-}
-
-
-
-void GDL::ProgramGL::FindInputs()
-{
-    auto inputData = FindProgramResourceData<3>(GL_PROGRAM_INPUT, {{GL_LOCATION, GL_NAME_LENGTH, GL_TYPE}});
-    for (U32 i = 0; i < inputData.size(); ++i)
-        mInputs.emplace(GetResourceName(GL_PROGRAM_INPUT, i, inputData[i][1]),
-                        ProgramInput(inputData[i][0], inputData[i][2]));
 }
 
 
@@ -198,8 +187,9 @@ void GDL::ProgramGL::FindUniformBlockVariables(GDL::UniformBlock& uniformBlock, 
 
     for (GLuint i = 0; i < numVariables; ++i)
     {
-        uniformBlock.mVariables.emplace(GetResourceName(GL_UNIFORM, indicesUnsigned[i], nameLengths[i]),
-                                        UniformBlockVariable(indicesUnsigned[i], offsets[i], types[i], arraySizes[i]));
+        //        uniformBlock.mVariables.emplace(GetResourceName(GL_UNIFORM, indicesUnsigned[i], nameLengths[i]),
+        //                                        UniformBlockVariable(indicesUnsigned[i], offsets[i], types[i],
+        //                                        arraySizes[i]));
     }
 }
 
