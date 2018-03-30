@@ -7,23 +7,23 @@ namespace GDL
 {
 namespace OpenGL
 {
-class ShaderGL
+class Shader
 {
     const GLenum mShaderType;
     const GLuint mHandle = 0;
 
 public:
-    ShaderGL() = delete;
-    ShaderGL(const ShaderGL&) = delete;
-    ShaderGL(ShaderGL&&) = delete;
-    ShaderGL& operator=(const ShaderGL&) = delete;
-    ShaderGL& operator=(ShaderGL&&) = delete;
-    ~ShaderGL();
+    Shader() = delete;
+    Shader(const Shader&) = delete;
+    Shader(Shader&&) = delete;
+    Shader& operator=(const Shader&) = delete;
+    Shader& operator=(Shader&&) = delete;
+    ~Shader();
 
     //! @brief Ctor which takes the Shader code and compiles it. Throws on compilation errors.
     //! @param shaderType: GLenum that corresponds to the shader type
     //! @param shaderCode: Shader code
-    ShaderGL(GLenum shaderType, const char* shaderCode);
+    Shader(GLenum shaderType, const char* shaderCode);
 
     //! @brief Gets the shaders handle
     //! @return Shader handle

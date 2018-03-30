@@ -8,10 +8,10 @@
 using namespace GDL;
 using namespace GDL::OpenGL;
 
-RenderWindowGL& GetRenderWindow()
+RenderWindow& GetRenderWindow()
 {
     static bool initialized = false;
-    static RenderWindowGL renderWindow;
+    static RenderWindow renderWindow;
     if (!initialized)
     {
         renderWindow.Initialize();
@@ -46,10 +46,10 @@ BOOST_AUTO_TEST_CASE(Inputs)
                                     }
                                     )glsl";
 
-    ShaderGL vertexShader(GL_VERTEX_SHADER, vertexShaderCode);
-    ShaderGL fragmentShader(GL_FRAGMENT_SHADER, fragmentShaderCode);
+    Shader vertexShader(GL_VERTEX_SHADER, vertexShaderCode);
+    Shader fragmentShader(GL_FRAGMENT_SHADER, fragmentShaderCode);
 
-    ProgramGL program(vertexShader, fragmentShader);
+    Program program(vertexShader, fragmentShader);
     ProgramDataManager programDM(program);
 
     BOOST_CHECK(programDM.GetNumInputs() == 3);
@@ -100,10 +100,10 @@ BOOST_AUTO_TEST_CASE(Uniforms)
                                     }
                                     )glsl";
 
-    ShaderGL vertexShader(GL_VERTEX_SHADER, vertexShaderCode);
-    ShaderGL fragmentShader(GL_FRAGMENT_SHADER, fragmentShaderCode);
+    Shader vertexShader(GL_VERTEX_SHADER, vertexShaderCode);
+    Shader fragmentShader(GL_FRAGMENT_SHADER, fragmentShaderCode);
 
-    ProgramGL program(vertexShader, fragmentShader);
+    Program program(vertexShader, fragmentShader);
     ProgramDataManager programDM(program);
 
     // Check Data and Getter ####################
@@ -196,10 +196,10 @@ BOOST_AUTO_TEST_CASE(UniformBlocks)
                                     }
                                     )glsl";
 
-    ShaderGL vertexShader(GL_VERTEX_SHADER, vertexShaderCode);
-    ShaderGL fragmentShader(GL_FRAGMENT_SHADER, fragmentShaderCode);
+    Shader vertexShader(GL_VERTEX_SHADER, vertexShaderCode);
+    Shader fragmentShader(GL_FRAGMENT_SHADER, fragmentShaderCode);
 
-    ProgramGL program(vertexShader, fragmentShader);
+    Program program(vertexShader, fragmentShader);
     ProgramDataManager programDM(program);
 
     BOOST_CHECK(programDM.GetNumUniformBlocks() == 2);

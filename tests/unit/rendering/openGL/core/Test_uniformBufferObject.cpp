@@ -8,10 +8,10 @@
 using namespace GDL;
 using namespace GDL::OpenGL;
 
-RenderWindowGL& GetRenderWindow()
+RenderWindow& GetRenderWindow()
 {
     static bool initialized = false;
-    static RenderWindowGL renderWindow;
+    static RenderWindow renderWindow;
     if (!initialized)
     {
         renderWindow.Initialize();

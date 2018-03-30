@@ -7,21 +7,20 @@
 #include <memory>
 #include <set>
 
-GDL::OpenGL::ProgramGL::~ProgramGL()
+GDL::OpenGL::Program::~Program()
 {
     glDeleteProgram(mHandle);
 }
 
 
 
-GDL::OpenGL::ProgramGL::ProgramGL(std::initializer_list<std::reference_wrapper<const ShaderGL>> shaderList)
+GDL::OpenGL::Program::Program(std::initializer_list<std::reference_wrapper<const Shader>> shaderList)
     : mHandle(glCreateProgram())
 {
     Initialize(shaderList);
 }
 
-void GDL::OpenGL::ProgramGL::CheckShaders(
-        std::initializer_list<std::reference_wrapper<const ShaderGL>> shaderList) const
+void GDL::OpenGL::Program::CheckShaders(std::initializer_list<std::reference_wrapper<const Shader>> shaderList) const
 {
     std::set<GLenum> attachedShaderTypes;
     for (auto& shader : shaderList)
@@ -30,7 +29,7 @@ void GDL::OpenGL::ProgramGL::CheckShaders(
             throw Exception(__PRETTY_FUNCTION__,
                             "Multiple shaders of the same type in one program are not "
                             "supported.\n You tried to attach multiple shaders of type: " +
-                                    ShaderGL::GetShaderTypeString(shader.get().GetType()));
+                                    Shader::GetShaderTypeString(shader.get().GetType()));
         attachedShaderTypes.emplace(shader.get().GetType());
     }
     if (attachedShaderTypes.find(GL_VERTEX_SHADER) == attachedShaderTypes.end() ||
@@ -41,7 +40,7 @@ void GDL::OpenGL::ProgramGL::CheckShaders(
 
 
 
-void GDL::OpenGL::ProgramGL::CheckLinkStatus() const
+void GDL::OpenGL::Program::CheckLinkStatus() const
 {
     GLint status;
     glGetProgramiv(mHandle, GL_LINK_STATUS, &status);
@@ -59,7 +58,7 @@ void GDL::OpenGL::ProgramGL::CheckLinkStatus() const
     }
 }
 
-void GDL::OpenGL::ProgramGL::CheckForErrors() const
+void GDL::OpenGL::Program::CheckForErrors() const
 {
     GLenum errorCode = glGetError();
     if (errorCode != GL_NO_ERROR)
@@ -69,7 +68,7 @@ void GDL::OpenGL::ProgramGL::CheckForErrors() const
 }
 
 
-void GDL::OpenGL::ProgramGL::Initialize(std::initializer_list<std::reference_wrapper<const ShaderGL>> shaderList)
+void GDL::OpenGL::Program::Initialize(std::initializer_list<std::reference_wrapper<const Shader>> shaderList)
 {
     CheckShaders(shaderList);
 
@@ -88,14 +87,14 @@ void GDL::OpenGL::ProgramGL::Initialize(std::initializer_list<std::reference_wra
 
 
 template <>
-void GDL::OpenGL::ProgramGL::SetUniform<GL_FLOAT>(GLuint uniformLocation, F32 value) const
+void GDL::OpenGL::Program::SetUniform<GL_FLOAT>(GLuint uniformLocation, F32 value) const
 {
     glProgramUniform1f(mHandle, uniformLocation, value);
 }
 
 
 template <>
-void GDL::OpenGL::ProgramGL::SetUniformArray<GL_FLOAT>(GLuint uniformLocation, const F32* const values, U32 size) const
+void GDL::OpenGL::Program::SetUniformArray<GL_FLOAT>(GLuint uniformLocation, const F32* const values, U32 size) const
 {
     glProgramUniform1fv(mHandle, uniformLocation, size, values);
 }

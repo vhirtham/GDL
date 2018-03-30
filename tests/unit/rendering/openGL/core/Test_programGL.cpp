@@ -8,10 +8,10 @@
 using namespace GDL;
 using namespace GDL::OpenGL;
 
-RenderWindowGL& GetRenderWindow()
+RenderWindow& GetRenderWindow()
 {
     static bool initialized = false;
-    static RenderWindowGL renderWindow;
+    static RenderWindow renderWindow;
     if (!initialized)
     {
         renderWindow.Initialize();
@@ -43,12 +43,12 @@ BOOST_AUTO_TEST_CASE(LinkProgram)
                                     }
                                     )glsl";
 
-    ShaderGL vertexShader(GL_VERTEX_SHADER, vertexShaderCode);
-    ShaderGL fragmentShader(GL_FRAGMENT_SHADER, fragmentShaderCode);
+    Shader vertexShader(GL_VERTEX_SHADER, vertexShaderCode);
+    Shader fragmentShader(GL_FRAGMENT_SHADER, fragmentShaderCode);
 
-    ProgramGL program(vertexShader, fragmentShader);
+    Program program(vertexShader, fragmentShader);
 
-    BOOST_CHECK_THROW(ProgramGL(vertexShader, vertexShader, fragmentShader), Exception);
-    BOOST_CHECK_THROW(ProgramGL{vertexShader}, Exception);
-    BOOST_CHECK_THROW(ProgramGL{fragmentShader}, Exception);
+    BOOST_CHECK_THROW(Program(vertexShader, vertexShader, fragmentShader), Exception);
+    BOOST_CHECK_THROW(Program{vertexShader}, Exception);
+    BOOST_CHECK_THROW(Program{fragmentShader}, Exception);
 }

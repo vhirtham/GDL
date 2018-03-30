@@ -140,7 +140,7 @@ int main(int argc, char* argv[])
 {
     GLenum ErrorCheckValue = glGetError();
 
-    RenderWindowGL renderWindow;
+    RenderWindow renderWindow;
     renderWindow.SetTitle("OpenGL Triangle Test");
     renderWindow.Initialize();
 
@@ -211,10 +211,10 @@ int main(int argc, char* argv[])
             "  out_Color = vec4(color.xyz,f2);\n"
             "}\n"};
 
-    ShaderGL vertexShader(GL_VERTEX_SHADER, VertexShaderCode);
-    ShaderGL fragmentShader(GL_FRAGMENT_SHADER, FragmentShaderCode);
+    Shader vertexShader(GL_VERTEX_SHADER, VertexShaderCode);
+    Shader fragmentShader(GL_FRAGMENT_SHADER, FragmentShaderCode);
 
-    ProgramGL program(vertexShader, fragmentShader);
+    Program program(vertexShader, fragmentShader);
     ProgramDataManager programDM(program);
     programDM.SetUniform<GL_FLOAT>("frequency", 10.f);
     programDM.SetUniform<GL_FLOAT>("colMod[0]", 1.f);

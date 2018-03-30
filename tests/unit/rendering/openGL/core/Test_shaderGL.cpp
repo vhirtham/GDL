@@ -7,12 +7,12 @@
 using namespace GDL;
 using namespace GDL::OpenGL;
 
-BOOST_AUTO_TEST_CASE(shaderGL)
+BOOST_AUTO_TEST_CASE(Construction)
 {
-    RenderWindowGL renderWindow;
+    RenderWindow renderWindow;
     renderWindow.Initialize();
 
-    BOOST_CHECK_THROW(ShaderGL shader(GL_VERTEX_SHADER, "fail"), Exception);
+    BOOST_CHECK_THROW(Shader shader(GL_VERTEX_SHADER, "fail"), Exception);
 
     const char vertexShaderCode[] = R"glsl(
                                     #version 430
@@ -23,5 +23,5 @@ BOOST_AUTO_TEST_CASE(shaderGL)
                                     }
                                     )glsl";
 
-    ShaderGL shader2(GL_VERTEX_SHADER, vertexShaderCode);
+    Shader shader2(GL_VERTEX_SHADER, vertexShaderCode);
 }

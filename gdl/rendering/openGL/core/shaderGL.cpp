@@ -4,12 +4,12 @@
 
 #include <memory>
 
-GDL::OpenGL::ShaderGL::~ShaderGL()
+GDL::OpenGL::Shader::~Shader()
 {
     glDeleteShader(mHandle);
 }
 
-GDL::OpenGL::ShaderGL::ShaderGL(GLenum shaderType, const char* shaderCode)
+GDL::OpenGL::Shader::Shader(GLenum shaderType, const char* shaderCode)
     : mShaderType(shaderType)
     , mHandle(glCreateShader(mShaderType))
 {
@@ -33,7 +33,7 @@ GDL::OpenGL::ShaderGL::ShaderGL(GLenum shaderType, const char* shaderCode)
     }
 }
 
-std::string GDL::OpenGL::ShaderGL::GetShaderTypeString(GLenum shaderType)
+std::string GDL::OpenGL::Shader::GetShaderTypeString(GLenum shaderType)
 {
     // clang-format off
     switch (shaderType)

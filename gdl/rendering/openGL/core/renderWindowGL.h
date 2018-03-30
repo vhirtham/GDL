@@ -8,7 +8,7 @@ namespace GDL
 {
 namespace OpenGL
 {
-class RenderWindowGL
+class RenderWindow
 {
     U32 mWindowHandle = 0;
     U32 mWidth = 800;
@@ -17,7 +17,7 @@ class RenderWindowGL
 
 public:
     //! @brief CTor
-    RenderWindowGL(U32 width = 800, U32 height = 600, std::string title = "GDL OpenGL Window");
+    RenderWindow(U32 width = 800, U32 height = 600, std::string title = "GDL OpenGL Window");
 
     //! @brief Initializes the Window
     //! @param argc: Additional argument count

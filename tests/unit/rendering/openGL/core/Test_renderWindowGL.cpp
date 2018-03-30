@@ -7,7 +7,7 @@ using namespace GDL::OpenGL;
 
 BOOST_AUTO_TEST_CASE(renderWindow)
 {
-    RenderWindowGL renderWindow;
+    RenderWindow renderWindow;
     renderWindow.SetTitle("render window test");
     renderWindow.Initialize();
 }

@@ -9,28 +9,28 @@ namespace GDL
 {
 namespace OpenGL
 {
-class ShaderGL;
+class Shader;
 
 //! @brief Class that manages the lifetime of a OpenGL program
-class ProgramGL
+class Program
 {
     GLuint const mHandle = 0;
 
 public:
-    ProgramGL() = delete;
-    ProgramGL(const ProgramGL&) = delete;
-    ProgramGL(ProgramGL&&) = delete;
-    ProgramGL& operator=(const ProgramGL&) = delete;
-    ProgramGL& operator=(ProgramGL&&) = delete;
-    ~ProgramGL();
+    Program() = delete;
+    Program(const Program&) = delete;
+    Program(Program&&) = delete;
+    Program& operator=(const Program&) = delete;
+    Program& operator=(Program&&) = delete;
+    ~Program();
 
     //! @brief Constructor that takes as many shaders as desired and links the program
     //! @tparam TShader: Varying number of shaders
     //! @param shaderList: List of shaders
-    //! @remark Even though the template should be callable with any input type, only the shaderGL class will compile.
+    //! @remark Even though the template should be callable with any input type, only the Shader class will compile.
     //! Didn't find a better way to use a parameter pack.
     template <typename... TShader>
-    ProgramGL(const TShader&... shaderList)
+    Program(const TShader&... shaderList)
         : mHandle(glCreateProgram())
     {
         Initialize({std::forward<const TShader&>(shaderList)...});
@@ -39,7 +39,7 @@ public:
 
     //! @brief Constructor that takes as many shaders as desired and links the program (initializer version)
     //! @param shaderList: List of shaders
-    ProgramGL(std::initializer_list<std::reference_wrapper<const ShaderGL>> shaderList);
+    Program(std::initializer_list<std::reference_wrapper<const Shader>> shaderList);
 
     //! @brief Gets the programs handle
     //! @return Program handle
@@ -69,7 +69,7 @@ public:
 
 private:
     //! @brief Checks if the included shaders can actually be linked into a program
-    void CheckShaders(std::initializer_list<std::reference_wrapper<const GDL::OpenGL::ShaderGL>> shaderList) const;
+    void CheckShaders(std::initializer_list<std::reference_wrapper<const GDL::OpenGL::Shader>> shaderList) const;
 
     //! @brief Checks if the program links without errors
     void CheckLinkStatus() const;
@@ -79,7 +79,7 @@ private:
 
     //! @brief Links all the passed shaders to the program
     //! @param shaderList: Shaders that should be linked
-    void Initialize(std::initializer_list<std::reference_wrapper<const ShaderGL>> shaderList);
+    void Initialize(std::initializer_list<std::reference_wrapper<const Shader>> shaderList);
 
 };
 }

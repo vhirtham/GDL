@@ -20,7 +20,7 @@ namespace OpenGL
 //! modify it.
 class ProgramDataManager
 {
-    const ProgramGL& mProgram;
+    const Program& mProgram;
 
     std::map<const std::string, const Uniform> mUniforms;
     std::map<const std::string, UniformBlock> mUniformBlocks;
@@ -36,7 +36,7 @@ public:
 
     //! @brief Constructor that gathers all informations about the passed program
     //! @param program: OpenGL program that should be managed
-    ProgramDataManager(const ProgramGL& program)
+    ProgramDataManager(const Program& program)
         : mProgram(program)
     {
         GatherProgramData();
