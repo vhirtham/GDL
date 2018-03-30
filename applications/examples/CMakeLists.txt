@@ -4,6 +4,7 @@ if(ENABLE_OPENGL)
 
     target_link_libraries(TriangleOpenGL
         GDL::OpenGLCore
+        GDL::OpenGLManagement
         )
 
     TargetDefaultBuildSetup(TriangleOpenGL)

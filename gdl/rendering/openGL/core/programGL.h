@@ -2,10 +2,7 @@
 
 #include "gdl/GDLTypedefs.h"
 #include "gdl/base/Exception.h"
-#include "gdl/rendering/openGL/core/programInput.h"
 #include "gdl/rendering/openGL/core/shaderGL.h"
-#include "gdl/rendering/openGL/core/uniform.h"
-#include "gdl/rendering/openGL/core/uniformBlock.h"
 
 #include <functional>
 #include <map>
@@ -17,9 +14,6 @@ namespace GDL
 class ProgramGL
 {
     GLuint const mHandle = 0;
-    std::map<const std::string, const Uniform> mUniforms;
-    std::map<const std::string, UniformBlock> mUniformBlocks;
-    std::map<const std::string, const ProgramInput> mInputs;
 
 public:
     ProgramGL() = delete;
@@ -53,42 +47,6 @@ public:
         return mHandle;
     }
 
-    //! @brief Gets the specified program input
-    //! @param inputName: Name of the input
-    //! @return Specified input
-    const ProgramInput& GetInput(std::string inputName) const;
-
-    //! @brief Gets the number of inputs
-    //! @return Number of inputs
-    U32 GetNumInputs() const
-    {
-        return mInputs.size();
-    }
-
-
-    //! @brief Gets an uniform
-    //! @param uniformName: Name of the uniform
-    //! @return The uniform
-    const Uniform& GetUniform(std::string uniformName) const;
-
-    //! @brief Gets the number of uniforms
-    //! @return Number of uniforms
-    U32 GetNumUniforms() const
-    {
-        return mUniforms.size();
-    }
-
-    //! @brief Gets a uniform block
-    //! @param uniformBlockName: Name of the uniform block
-    //! @return The uniform block
-    const UniformBlock& GetUniformBlock(std::string uniformBlockName) const;
-
-    //! @brief Gets the number of uniforms blocks
-    //! @return Number of uniform blocks
-    U32 GetNumUniformBlocks() const
-    {
-        return mUniformBlocks.size();
-    }
 
     //! @brief Sets the value of an uniform
     //! @tparam TTypeEnum: GL type enum
@@ -97,17 +55,6 @@ public:
     //! @param value: New value
     template <GLuint TTypeEnum, typename TValue>
     void SetUniform(GLuint uniformLocation, TValue value) const;
-
-    //! @brief Sets the value of an uniform
-    //! @tparam TTypeEnum: GL type enum
-    //! @tparam TValue: Value type
-    //! @param uniformName: Name of the uniform
-    //! @param value: New value
-    template <GLuint TTypeEnum, typename TValue>
-    void SetUniform(std::string uniformName, TValue value) const
-    {
-        SetUniform<TTypeEnum>(GetUniform(uniformName).GetLocation(), value);
-    }
 
 
     //! @brief Sets the values of an uniform array
@@ -118,66 +65,14 @@ public:
     template <GLuint TTypeEnum, typename TValue>
     void SetUniformArray(GLuint uniformLocation, const TValue* const values, U32 size) const;
 
-    //! @brief Sets the values of an uniform array
-    //! @tparam TTypeEnum: GL type enum
-    //! @tparam TValue: Value type
-    //! @param uniformName: Name of the uniform
-    //! @param values: Vector with values
-    template <GLuint TTypeEnum, typename TValue>
-    void SetUniformArray(std::string uniformName, const TValue* const values, U32 size) const
-    {
-        SetUniformArray<TTypeEnum>(GetUniform(uniformName).GetLocation(), values, size);
-    }
-
 
 private:
     //! @brief Checks if the program links without errors
     void CheckLinkStatus() const;
 
-    //! @brief Gathers program information (uniforms, subroutines, inputs etc.)
-    void GatherProgramData();
-
     //! @brief Links all the passed shaders to the program
     //! @param shaderList: Shaders that should be linked
     void Initialize(std::initializer_list<std::reference_wrapper<const ShaderGL>> shaderList);
 
-    //! @brief Finds all the programs uniforms and stores their names and handles.
-    void FindUniforms();
-
-    //! @brief Finds the additional members locations of a uniform array and stores their names and handles.
-    //! @param firstElementName: Name of the first element -> "arrayName[0]"
-    //! @param firstElement: First elements uniform data
-    void FindUniformArrayMembers(const std::string& firstElementName, const Uniform& firstElement);
-
-    //! @brief Finds all the programs uniform blocks and stores their names and handles.
-    void FindUniformBlocks();
-
-    //! @brief Finds all variables of one  of the programs uniform blocks and stores them.
-    //! @param uniformBlock: The uniform block which varibles should be found
-    //! @param numVariables: Number of variables (must be queried before)
-    void FindUniformBlockVariables(UniformBlock& uniformBlock, GLuint numVariables);
-
-    //! @brief Finds the specified properties of all instances of the given resource type
-    //! @param eResourceType: Enum that speciefies the resource type
-    //! @param properties: Proberties that should be determined
-    //! @tparam TNumProps: Number of properties that should be determined
-    template <U32 TNumProps>
-    std::vector<std::array<GLint, TNumProps>> FindProgramResourceData(GLenum eResourceType,
-                                                                      std::array<GLenum, TNumProps> properties) const;
-
-    //! @brief Gets the name of a resource
-    //! @param eResourceType: Enum that speciefies the resource type
-    //! @param handle: Resource handle
-    //! @param buffersize: Length of the buffer that gets the name (must be queried)
-    //! @return Name of the resource
-    std::string GetResourceName(GLenum eResourceType, GLuint index, GLint bufferSize) const;
-
-#ifndef NDEBUG
-    //! @brief Gets a uniform by its location
-    //! @param handle: The uniforms location
-    //! @return Uniform
-    //! @remark DEBUG only!
-    const Uniform& GetUniformByLocation(GLint location) const;
-#endif
 };
 }

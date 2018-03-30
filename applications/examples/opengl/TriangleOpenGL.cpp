@@ -4,6 +4,7 @@
 #include "gdl/rendering/openGL/core/programGL.h"
 #include "gdl/rendering/openGL/core/renderWindowGL.h"
 #include "gdl/rendering/openGL/core/shaderGL.h"
+#include "gdl/rendering/openGL/management/programDataManagerGL.h"
 
 #include <chrono>
 #include <stdlib.h>
@@ -214,9 +215,10 @@ int main(int argc, char* argv[])
     ShaderGL fragmentShader(GL_FRAGMENT_SHADER, FragmentShaderCode);
 
     ProgramGL program(vertexShader, fragmentShader);
-    program.SetUniform<GL_FLOAT>("frequency", 10.f);
-    program.SetUniform<GL_FLOAT>("colMod[0]", 1.f);
-    program.SetUniformArray<GL_FLOAT>("colMod[1]", std::vector<F32>{1.f, 1.f}.data(), 2);
+    ProgramDataManager programDM(program);
+    programDM.SetUniform<GL_FLOAT>("frequency", 10.f);
+    programDM.SetUniform<GL_FLOAT>("colMod[0]", 1.f);
+    programDM.SetUniformArray<GL_FLOAT>("colMod[1]", std::vector<F32>{1.f, 1.f}.data(), 2);
 
     glUseProgram(program.GetHandle());
 
@@ -246,7 +248,7 @@ int main(int argc, char* argv[])
             factor = -1.0;
         if (frequency < 1.)
             factor = 1.0;
-        program.SetUniform<GL_FLOAT>("frequency", frequency);
+        programDM.SetUniform<GL_FLOAT>("frequency", frequency);
         glutMainLoopEvent();
         prevTime = currTime;
     }
