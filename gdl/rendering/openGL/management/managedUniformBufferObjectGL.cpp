@@ -1,4 +1,4 @@
-#include "gdl/rendering/openGL/management/managedUniformBufferObject.h"
+#include "gdl/rendering/openGL/management/managedUniformBufferObjectGL.h"
 
 
 #include "gdl/base/Exception.h"

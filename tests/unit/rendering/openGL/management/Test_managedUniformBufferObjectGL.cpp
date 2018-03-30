@@ -3,10 +3,10 @@
 
 #include "gdl/GDLTypedefs.h"
 #include "gdl/rendering/openGL/core/renderWindowGL.h"
-#include "gdl/rendering/openGL/core/uniformBufferObject.h"
-#include "gdl/rendering/openGL/management/uniformBlock.h"
-#include "gdl/rendering/openGL/management/uniformBlockVariable.h"
-#include "gdl/rendering/openGL/management/managedUniformBufferObject.h"
+#include "gdl/rendering/openGL/core/uniformBufferObjectGL.h"
+#include "gdl/rendering/openGL/management/uniformBlockGL.h"
+#include "gdl/rendering/openGL/management/uniformBlockVariableGL.h"
+#include "gdl/rendering/openGL/management/managedUniformBufferObjectGL.h"
 
 #include <map>
 #include <string>

@@ -1,4 +1,4 @@
-#include "gdl/rendering/openGL/core/uniformBufferObject.h"
+#include "gdl/rendering/openGL/core/uniformBufferObjectGL.h"
 
 
 #include <cassert>

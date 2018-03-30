@@ -3,7 +3,7 @@
 #include "gdl/base/Exception.h"
 #include "gdl/GDLTypedefs.h"
 #include "gdl/rendering/openGL/core/renderWindowGL.h"
-#include "gdl/rendering/openGL/core/uniformBufferObject.h"
+#include "gdl/rendering/openGL/core/uniformBufferObjectGL.h"
 
 using namespace GDL;
 using namespace GDL::OpenGL;

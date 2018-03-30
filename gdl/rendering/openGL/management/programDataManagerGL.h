@@ -2,9 +2,9 @@
 
 #include "gdl/GDLTypedefs.h"
 #include "gdl/rendering/openGL/core/programGL.h"
-#include "gdl/rendering/openGL/management/programInput.h"
-#include "gdl/rendering/openGL/management/uniform.h"
-#include "gdl/rendering/openGL/management/uniformBlock.h"
+#include "gdl/rendering/openGL/management/programInputGL.h"
+#include "gdl/rendering/openGL/management/uniformGL.h"
+#include "gdl/rendering/openGL/management/uniformBlockGL.h"
 
 #include <cassert>
 #include <map>

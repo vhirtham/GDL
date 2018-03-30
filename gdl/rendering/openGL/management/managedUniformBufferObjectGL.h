@@ -1,8 +1,8 @@
 #pragma once
 
 #include "gdl/GDLTypedefs.h"
-#include "gdl/rendering/openGL/management/uniformBlock.h"
-#include "gdl/rendering/openGL/core/uniformBufferObject.h"
+#include "gdl/rendering/openGL/management/uniformBlockGL.h"
+#include "gdl/rendering/openGL/core/uniformBufferObjectGL.h"
 
 #include <GL/glew.h>
 

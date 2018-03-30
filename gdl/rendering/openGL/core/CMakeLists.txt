@@ -2,7 +2,7 @@ addGDLLib(OpenGLCore
     programGL.cpp
     renderWindowGL.cpp
     shaderGL.cpp
-    uniformBufferObject.cpp
+    uniformBufferObjectGL.cpp
 
     # External libs
     OpenGL::GL

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "gdl/base/Exception.h"
-#include "gdl/rendering/openGL/management/uniformBlockVariable.h"
+#include "gdl/rendering/openGL/management/uniformBlockVariableGL.h"
 
 #include <GL/glew.h>
 

@@ -28,9 +28,9 @@ addTest(programGL
     GLEW::GLEW
     )
 
-addTest(uniformBufferObject
+addTest(uniformBufferObjectGL
     rendering/openGL/core/renderWindowGL.cpp
-    rendering/openGL/core/uniformBufferObject.cpp
+    rendering/openGL/core/uniformBufferObjectGL.cpp
     # External libs
     OpenGL::GL
     OpenGL::GLU

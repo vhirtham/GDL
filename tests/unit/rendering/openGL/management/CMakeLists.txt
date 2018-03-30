@@ -10,12 +10,12 @@ addTest(programDataManagerGL
     GLEW::GLEW
     )
 
-addTest(managedUniformBufferObject
-    rendering/openGL/management/managedUniformBufferObject.cpp
+addTest(managedUniformBufferObjectGL
+    rendering/openGL/management/managedUniformBufferObjectGL.cpp
     rendering/openGL/core/programGL.cpp
     rendering/openGL/core/shaderGL.cpp
     rendering/openGL/core/renderWindowGL.cpp
-    rendering/openGL/core/uniformBufferObject.cpp
+    rendering/openGL/core/uniformBufferObjectGL.cpp
     # External libs
     OpenGL::GL
     OpenGL::GLU
