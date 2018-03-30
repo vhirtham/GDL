@@ -1,6 +1,7 @@
 #include "programGL.h"
 
 #include "gdl/base/Exception.h"
+#include "gdl/rendering/openGL/core/shaderGL.h"
 
 #include <cassert>
 #include <memory>

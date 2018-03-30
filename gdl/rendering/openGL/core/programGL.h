@@ -1,16 +1,15 @@
 #pragma once
 
 #include "gdl/GDLTypedefs.h"
-#include "gdl/base/Exception.h"
-#include "gdl/rendering/openGL/core/shaderGL.h"
 
-#include <functional>
-#include <map>
+#include <GL/glew.h>
 #include <string>
-#include <vector>
 
 namespace GDL
 {
+
+class ShaderGL;
+
 //! @brief Class that manages the lifetime of a OpenGL program
 class ProgramGL
 {

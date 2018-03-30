@@ -1,5 +1,6 @@
 #include <boost/test/unit_test.hpp>
 
+#include "gdl/base/Exception.h"
 #include "gdl/rendering/openGL/core/programGL.h"
 #include "gdl/rendering/openGL/core/shaderGL.h"
 #include "gdl/rendering/openGL/core/renderWindowGL.h"
