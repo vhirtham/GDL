@@ -16,6 +16,9 @@
 
 namespace GDL
 {
+
+//! @brief Gathers information about a programs data(uniforms, inputs etc.) and provides additional functionality to
+//! modify it.
 class ProgramDataManager
 {
     const ProgramGL& mProgram;
@@ -48,43 +51,43 @@ public:
     }
 
     //! @brief Gets the specified program input
-    //! @param inputName: Name of the input
+    //! @param inputName: Name of the input of the managed program
     //! @return Specified input
     const ProgramInput& GetInput(std::string inputName) const;
 
-    //! @brief Gets the number of inputs
-    //! @return Number of inputs
+    //! @brief Gets the number of inputs of the managed program
+    //! @return Number of inputs of the managed program
     U32 GetNumInputs() const
     {
         return mInputs.size();
     }
 
 
-    //! @brief Gets an uniform
+    //! @brief Gets an uniform of the managed program
     //! @param uniformName: Name of the uniform
-    //! @return The uniform
+    //! @return The specified uniform
     const Uniform& GetUniform(std::string uniformName) const;
 
-    //! @brief Gets the number of uniforms
-    //! @return Number of uniforms
+    //! @brief Gets the number of uniforms of the managed program
+    //! @return Number of uniforms of the managed program
     U32 GetNumUniforms() const
     {
         return mUniforms.size();
     }
 
-    //! @brief Gets a uniform block
+    //! @brief Gets a uniform block of the managed program
     //! @param uniformBlockName: Name of the uniform block
     //! @return The uniform block
     const UniformBlock& GetUniformBlock(std::string uniformBlockName) const;
 
-    //! @brief Gets the number of uniforms blocks
-    //! @return Number of uniform blocks
+    //! @brief Gets the number of uniforms blocks of the managed program
+    //! @return Number of uniform blocks of the managed program
     U32 GetNumUniformBlocks() const
     {
         return mUniformBlocks.size();
     }
 
-    //! @brief Sets the value of an uniform
+    //! @brief Sets the value of an uniform of the managed program
     //! @tparam TTypeEnum: GL type enum
     //! @tparam TValue: Value type
     //! @param uniformLocation: Location of the uniform
@@ -96,7 +99,7 @@ public:
         mProgram.SetUniform<TTypeEnum>(uniformLocation, value);
     }
 
-    //! @brief Sets the value of an uniform
+    //! @brief Sets the value of an uniform of the managed program
     //! @tparam TTypeEnum: GL type enum
     //! @tparam TValue: Value type
     //! @param uniformName: Name of the uniform
@@ -108,7 +111,7 @@ public:
     }
 
 
-    //! @brief Sets the values of an uniform array
+    //! @brief Sets the values of an uniform array of the managed program
     //! @tparam TTypeEnum: GL type enum
     //! @tparam TValue: Value type
     //! @param uniformLocation: location of the first uniform array member that should be set
@@ -121,7 +124,7 @@ public:
         mProgram.SetUniformArray<TTypeEnum>(uniformLocation, values, size);
     }
 
-    //! @brief Sets the values of an uniform array
+    //! @brief Sets the values of an uniform array of the managed program
     //! @tparam TTypeEnum: GL type enum
     //! @tparam TValue: Value type
     //! @param uniformName: Name of the uniform
@@ -175,6 +178,5 @@ private:
     //! @param handle: The uniforms location
     //! @return Uniform
     const Uniform& GetUniformByLocation(GLint location) const;
-
 };
 }

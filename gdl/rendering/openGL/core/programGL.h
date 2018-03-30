@@ -11,16 +11,17 @@
 
 namespace GDL
 {
+//! @brief Class that manages the lifetime of a OpenGL program
 class ProgramGL
 {
     GLuint const mHandle = 0;
 
 public:
     ProgramGL() = delete;
-    ProgramGL(const ProgramGL&) = delete; // don't use default -> dtor calls glDeleteProgram
-    ProgramGL(ProgramGL&&) = delete; // don't use default -> dtor calls glDeleteProgram
-    ProgramGL& operator=(const ProgramGL&) = delete; // don't use default -> dtor calls glDeleteProgram
-    ProgramGL& operator=(ProgramGL&&) = delete; // don't use default -> dtor calls glDeleteProgram
+    ProgramGL(const ProgramGL&) = delete;
+    ProgramGL(ProgramGL&&) = delete;
+    ProgramGL& operator=(const ProgramGL&) = delete;
+    ProgramGL& operator=(ProgramGL&&) = delete;
     ~ProgramGL();
 
     //! @brief Constructor that takes as many shaders as desired and links the program
@@ -67,8 +68,14 @@ public:
 
 
 private:
+    //! @brief Checks if the included shaders can actually be linked into a program
+    void CheckShaders(std::initializer_list<std::reference_wrapper<const GDL::ShaderGL>> shaderList) const;
+
     //! @brief Checks if the program links without errors
     void CheckLinkStatus() const;
+
+    //! @brief Checks if any errors have occured
+    void CheckForErrors() const;
 
     //! @brief Links all the passed shaders to the program
     //! @param shaderList: Shaders that should be linked

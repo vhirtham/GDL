@@ -19,6 +19,24 @@ GDL::ProgramGL::ProgramGL(std::initializer_list<std::reference_wrapper<const Sha
     Initialize(shaderList);
 }
 
+void GDL::ProgramGL::CheckShaders(std::initializer_list<std::reference_wrapper<const GDL::ShaderGL>> shaderList) const
+{
+    std::set<GLenum> attachedShaderTypes;
+    for (auto& shader : shaderList)
+    {
+        if (attachedShaderTypes.find(shader.get().GetType()) != attachedShaderTypes.end())
+            throw Exception(__PRETTY_FUNCTION__,
+                            "Multiple shaders of the same type in one program are not "
+                            "supported.\n You tried to attach multiple shaders of type: " +
+                                    ShaderGL::GetShaderTypeString(shader.get().GetType()));
+        attachedShaderTypes.emplace(shader.get().GetType());
+    }
+    if (attachedShaderTypes.find(GL_VERTEX_SHADER) == attachedShaderTypes.end() ||
+        attachedShaderTypes.find(GL_FRAGMENT_SHADER) == attachedShaderTypes.end())
+        throw Exception(__PRETTY_FUNCTION__,
+                        "You have to provide a vertex shader and a fragment shader for each program!");
+}
+
 
 
 void GDL::ProgramGL::CheckLinkStatus() const
@@ -39,39 +57,30 @@ void GDL::ProgramGL::CheckLinkStatus() const
     }
 }
 
+void GDL::ProgramGL::CheckForErrors() const
+{
+    GLenum errorCode = glGetError();
+    if (errorCode != GL_NO_ERROR)
+        throw Exception(__PRETTY_FUNCTION__,
+                        "Could not create program:\n" +
+                                std::string(reinterpret_cast<const char*>(gluErrorString(errorCode))));
+}
+
 
 void GDL::ProgramGL::Initialize(std::initializer_list<std::reference_wrapper<const GDL::ShaderGL>> shaderList)
 {
-    std::set<GLenum> attachedShaderTypes;
-    for (auto& shader : shaderList)
-    {
-        if (attachedShaderTypes.find(shader.get().GetType()) != attachedShaderTypes.end())
-            throw Exception(__PRETTY_FUNCTION__,
-                            "Multiple shaders of the same type in one program are not "
-                            "supported.\n You tried to attach multiple shaders of type: " +
-                                    ShaderGL::GetShaderTypeString(shader.get().GetType()));
-        glAttachShader(mHandle, shader.get().GetHandle());
-        attachedShaderTypes.emplace(shader.get().GetType());
-    }
+    CheckShaders(shaderList);
 
-    if (attachedShaderTypes.find(GL_VERTEX_SHADER) == attachedShaderTypes.end() ||
-        attachedShaderTypes.find(GL_FRAGMENT_SHADER) == attachedShaderTypes.end())
-        throw Exception(__PRETTY_FUNCTION__,
-                        "You have to provide a vertex shader and a fragment shader for each program!");
+    for (auto& shader : shaderList)
+        glAttachShader(mHandle, shader.get().GetHandle());
 
     glLinkProgram(mHandle);
 
     for (auto& shader : shaderList)
         glDetachShader(mHandle, shader.get().GetHandle());
 
-
     CheckLinkStatus();
-
-    GLenum errorCode = glGetError();
-    if (errorCode != GL_NO_ERROR)
-        throw Exception(__PRETTY_FUNCTION__,
-                        "Could not create program:\n" +
-                                std::string(reinterpret_cast<const char*>(gluErrorString(errorCode))));
+    CheckForErrors();
 }
 
 
