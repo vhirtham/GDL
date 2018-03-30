@@ -13,7 +13,7 @@
 #include <GL/freeglut.h>
 
 using namespace GDL;
-
+using namespace GDL::OpenGL;
 
 bool KeepRunning(bool keepRunningIn = true)
 {

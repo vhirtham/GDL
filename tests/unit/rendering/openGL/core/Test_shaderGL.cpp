@@ -5,6 +5,7 @@
 #include "gdl/rendering/openGL/core/shaderGL.h"
 
 using namespace GDL;
+using namespace GDL::OpenGL;
 
 BOOST_AUTO_TEST_CASE(shaderGL)
 {

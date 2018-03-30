@@ -10,6 +10,8 @@
 
 namespace GDL
 {
+namespace OpenGL
+{
 class UniformBlock
 {
     friend class ProgramDataManager;
@@ -101,4 +103,5 @@ public:
         return mVariables;
     }
 };
+}
 }

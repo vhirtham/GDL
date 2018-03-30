@@ -4,14 +4,14 @@
 #include <GL/glew.h>
 #include <GL/freeglut.h>
 
-GDL::RenderWindowGL::RenderWindowGL(U32 width, U32 height, std::string title)
+GDL::OpenGL::RenderWindowGL::RenderWindowGL(U32 width, U32 height, std::string title)
     : mWidth(width)
     , mHeight(height)
     , mTitle(title)
 {
 }
 
-void GDL::RenderWindowGL::Initialize(int argc, char* argv)
+void GDL::OpenGL::RenderWindowGL::Initialize(int argc, char* argv)
 {
     glutInit(&argc, &argv);
 
@@ -35,7 +35,7 @@ void GDL::RenderWindowGL::Initialize(int argc, char* argv)
                                 std::string(reinterpret_cast<const char*>(glewGetErrorString(GlewInitResult))));
 }
 
-void GDL::RenderWindowGL::SetTitle(std::string title)
+void GDL::OpenGL::RenderWindowGL::SetTitle(std::string title)
 {
     mTitle = title;
 }

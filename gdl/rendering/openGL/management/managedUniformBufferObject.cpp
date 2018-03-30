@@ -6,8 +6,8 @@
 
 #include <cassert>
 
-GDL::ManagedUniformBufferObject::ManagedUniformBufferObject(const GDL::UniformBlock& uniformBlock, GLenum usage,
-                                                            const std::vector<GDL::U8>& buffer)
+GDL::OpenGL::ManagedUniformBufferObject::ManagedUniformBufferObject(const UniformBlock& uniformBlock, GLenum usage,
+                                                                    const std::vector<U8>& buffer)
     : mUBO(buffer, usage)
     , mVariables(uniformBlock.GetVariables())
 {
@@ -18,7 +18,7 @@ GDL::ManagedUniformBufferObject::ManagedUniformBufferObject(const GDL::UniformBl
     Initialize(uniformBlock);
 }
 
-GDL::ManagedUniformBufferObject::ManagedUniformBufferObject(const GDL::UniformBlock& uniformBlock, GLenum usage)
+GDL::OpenGL::ManagedUniformBufferObject::ManagedUniformBufferObject(const UniformBlock& uniformBlock, GLenum usage)
     : mUBO(uniformBlock.GetSize(), usage)
     , mVariables(uniformBlock.GetVariables())
 {
@@ -26,7 +26,7 @@ GDL::ManagedUniformBufferObject::ManagedUniformBufferObject(const GDL::UniformBl
 }
 
 
-bool GDL::ManagedUniformBufferObject::CheckUniformBlockCompatibility(const GDL::UniformBlock& uniformBlock) const
+bool GDL::OpenGL::ManagedUniformBufferObject::CheckUniformBlockCompatibility(const UniformBlock& uniformBlock) const
 {
     if (mUBO.GetSize() != uniformBlock.GetSize() || mVariables.size() != uniformBlock.GetNumVariables())
         return false;
@@ -42,7 +42,7 @@ bool GDL::ManagedUniformBufferObject::CheckUniformBlockCompatibility(const GDL::
     return true;
 }
 
-void GDL::ManagedUniformBufferObject::Initialize(const GDL::UniformBlock& uniformBlock)
+void GDL::OpenGL::ManagedUniformBufferObject::Initialize(const UniformBlock& uniformBlock)
 {
     assert(mUBO.GetSize() == uniformBlock.GetSize());
     assert(CheckUniformBlockCompatibility(uniformBlock));

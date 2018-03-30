@@ -5,7 +5,7 @@
 
 #include <memory>
 
-const GDL::ProgramInput& GDL::ProgramDataManager::GetInput(std::string inputName) const
+const GDL::OpenGL::ProgramInput& GDL::OpenGL::ProgramDataManager::GetInput(std::string inputName) const
 {
     auto iterator = mInputs.find(inputName);
     if (iterator == mInputs.end())
@@ -14,7 +14,7 @@ const GDL::ProgramInput& GDL::ProgramDataManager::GetInput(std::string inputName
     return iterator->second;
 }
 
-const GDL::Uniform& GDL::ProgramDataManager::GetUniform(std::string uniformName) const
+const GDL::OpenGL::Uniform& GDL::OpenGL::ProgramDataManager::GetUniform(std::string uniformName) const
 {
     auto iterator = mUniforms.find(uniformName);
     if (iterator == mUniforms.end())
@@ -24,7 +24,7 @@ const GDL::Uniform& GDL::ProgramDataManager::GetUniform(std::string uniformName)
     return iterator->second;
 }
 
-const GDL::UniformBlock& GDL::ProgramDataManager::GetUniformBlock(std::string uniformBlockName) const
+const GDL::OpenGL::UniformBlock& GDL::OpenGL::ProgramDataManager::GetUniformBlock(std::string uniformBlockName) const
 {
     auto iterator = mUniformBlocks.find(uniformBlockName);
     if (iterator == mUniformBlocks.end())
@@ -34,14 +34,14 @@ const GDL::UniformBlock& GDL::ProgramDataManager::GetUniformBlock(std::string un
     return iterator->second;
 }
 
-void GDL::ProgramDataManager::GatherProgramData()
+void GDL::OpenGL::ProgramDataManager::GatherProgramData()
 {
     FindInputs();
     FindUniforms();
     FindUniformBlocks();
 }
 
-void GDL::ProgramDataManager::FindInputs()
+void GDL::OpenGL::ProgramDataManager::FindInputs()
 {
     auto inputData = FindProgramResourceData<3>(GL_PROGRAM_INPUT, {{GL_LOCATION, GL_NAME_LENGTH, GL_TYPE}});
     for (U32 i = 0; i < inputData.size(); ++i)
@@ -49,7 +49,7 @@ void GDL::ProgramDataManager::FindInputs()
                         ProgramInput(inputData[i][0], inputData[i][2]));
 }
 
-void GDL::ProgramDataManager::FindUniforms()
+void GDL::OpenGL::ProgramDataManager::FindUniforms()
 {
     auto data = FindProgramResourceData<5>(GL_UNIFORM,
                                            {{GL_LOCATION, GL_NAME_LENGTH, GL_TYPE, GL_ARRAY_SIZE, GL_BLOCK_INDEX}});
@@ -67,8 +67,8 @@ void GDL::ProgramDataManager::FindUniforms()
     }
 }
 
-void GDL::ProgramDataManager::FindUniformArrayMembers(const std::string& firstElementName,
-                                                      const GDL::Uniform& firstElement)
+void GDL::OpenGL::ProgramDataManager::FindUniformArrayMembers(const std::string& firstElementName,
+                                                              const Uniform& firstElement)
 {
     if (firstElement.GetArraySize() > 1)
     {
@@ -92,7 +92,7 @@ void GDL::ProgramDataManager::FindUniformArrayMembers(const std::string& firstEl
     }
 }
 
-void GDL::ProgramDataManager::FindUniformBlocks()
+void GDL::OpenGL::ProgramDataManager::FindUniformBlocks()
 {
     auto data = FindProgramResourceData<4>(
             GL_UNIFORM_BLOCK, {{GL_NAME_LENGTH, GL_BUFFER_BINDING, GL_NUM_ACTIVE_VARIABLES, GL_BUFFER_DATA_SIZE}});
@@ -108,7 +108,7 @@ void GDL::ProgramDataManager::FindUniformBlocks()
     }
 }
 
-void GDL::ProgramDataManager::FindUniformBlockVariables(GDL::UniformBlock& uniformBlock, GLuint numVariables)
+void GDL::OpenGL::ProgramDataManager::FindUniformBlockVariables(UniformBlock& uniformBlock, GLuint numVariables)
 {
     std::vector<GLint> indices(numVariables);
     std::vector<GLint> nameLengths(numVariables);
@@ -132,7 +132,7 @@ void GDL::ProgramDataManager::FindUniformBlockVariables(GDL::UniformBlock& unifo
     }
 }
 
-std::string GDL::ProgramDataManager::GetResourceName(GLenum eResourceType, GLuint index, GLint bufferSize) const
+std::string GDL::OpenGL::ProgramDataManager::GetResourceName(GLenum eResourceType, GLuint index, GLint bufferSize) const
 {
     std::unique_ptr<GLchar[]> resourceName = std::make_unique<GLchar[]>(bufferSize);
     glGetProgramResourceName(mProgram.GetHandle(), eResourceType, index, bufferSize, nullptr, resourceName.get());
@@ -140,7 +140,7 @@ std::string GDL::ProgramDataManager::GetResourceName(GLenum eResourceType, GLuin
     return nameString;
 }
 
-const GDL::Uniform& GDL::ProgramDataManager::GetUniformByLocation(GLint location) const
+const GDL::OpenGL::Uniform& GDL::OpenGL::ProgramDataManager::GetUniformByLocation(GLint location) const
 {
     for (const auto& uniform : mUniforms)
         if (uniform.second.GetLocation() == location)
@@ -152,7 +152,8 @@ const GDL::Uniform& GDL::ProgramDataManager::GetUniformByLocation(GLint location
 
 template <GDL::U32 TNumProps>
 std::vector<std::array<GLint, TNumProps>>
-GDL::ProgramDataManager::FindProgramResourceData(GLenum eResourceType, std::array<GLenum, TNumProps> properties) const
+GDL::OpenGL::ProgramDataManager::FindProgramResourceData(GLenum eResourceType,
+                                                         std::array<GLenum, TNumProps> properties) const
 {
     GLint numResources = 0;
     glGetProgramInterfaceiv(mProgram.GetHandle(), eResourceType, GL_ACTIVE_RESOURCES, &numResources);

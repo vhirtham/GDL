@@ -13,6 +13,8 @@
 
 namespace GDL
 {
+namespace OpenGL
+{
 
 //! @brief Gathers information about a programs data(uniforms, inputs etc.) and provides additional functionality to
 //! modify it.
@@ -176,4 +178,5 @@ private:
     //! @return Uniform
     const Uniform& GetUniformByLocation(GLint location) const;
 };
+}
 }

@@ -7,7 +7,8 @@
 
 namespace GDL
 {
-
+namespace OpenGL
+{
 class ShaderGL;
 
 //! @brief Class that manages the lifetime of a OpenGL program
@@ -68,7 +69,7 @@ public:
 
 private:
     //! @brief Checks if the included shaders can actually be linked into a program
-    void CheckShaders(std::initializer_list<std::reference_wrapper<const GDL::ShaderGL>> shaderList) const;
+    void CheckShaders(std::initializer_list<std::reference_wrapper<const GDL::OpenGL::ShaderGL>> shaderList) const;
 
     //! @brief Checks if the program links without errors
     void CheckLinkStatus() const;
@@ -81,4 +82,5 @@ private:
     void Initialize(std::initializer_list<std::reference_wrapper<const ShaderGL>> shaderList);
 
 };
+}
 }

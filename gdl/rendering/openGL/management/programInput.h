@@ -4,6 +4,8 @@
 
 namespace GDL
 {
+namespace OpenGL
+{
 class ProgramInput
 {
     GLuint mLocation;
@@ -39,4 +41,5 @@ public:
         return mLocation;
     }
 };
+}
 }

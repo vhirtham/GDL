@@ -4,6 +4,8 @@
 
 namespace GDL
 {
+namespace OpenGL
+{
 class Uniform
 {
     GLint mLocation;
@@ -53,4 +55,5 @@ public:
         return mArraySize;
     }
 };
+}
 }

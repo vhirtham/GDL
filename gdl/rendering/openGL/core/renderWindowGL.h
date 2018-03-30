@@ -6,6 +6,8 @@
 
 namespace GDL
 {
+namespace OpenGL
+{
 class RenderWindowGL
 {
     U32 mWindowHandle = 0;
@@ -26,4 +28,5 @@ public:
     //! @param title: New Window Title
     void SetTitle(std::string title);
 };
+}
 }

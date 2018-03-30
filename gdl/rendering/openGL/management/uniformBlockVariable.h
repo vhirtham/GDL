@@ -4,6 +4,8 @@
 
 namespace GDL
 {
+namespace OpenGL
+{
 class UniformBlockVariable
 {
     GLuint mIndex;
@@ -72,4 +74,5 @@ public:
         return mArraySize;
     }
 };
+}
 }

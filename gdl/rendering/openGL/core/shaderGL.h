@@ -5,7 +5,8 @@
 
 namespace GDL
 {
-
+namespace OpenGL
+{
 class ShaderGL
 {
     const GLenum mShaderType;
@@ -44,4 +45,5 @@ public:
     //! @return Shader type as a string
     static std::string GetShaderTypeString(GLenum shaderType);
 };
+}
 }

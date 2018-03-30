@@ -6,6 +6,7 @@
 #include "gdl/rendering/openGL/core/renderWindowGL.h"
 
 using namespace GDL;
+using namespace GDL::OpenGL;
 
 RenderWindowGL& GetRenderWindow()
 {

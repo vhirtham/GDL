@@ -12,6 +12,8 @@
 
 namespace GDL
 {
+namespace OpenGL
+{
 class ManagedUniformBufferObject
 {
 
@@ -84,4 +86,5 @@ private:
     //! @Initializes the manged UBO with data from a uniform block
     void Initialize(const UniformBlock& uniformBlock);
 };
+}
 }

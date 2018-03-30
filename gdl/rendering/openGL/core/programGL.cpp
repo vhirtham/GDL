@@ -7,20 +7,21 @@
 #include <memory>
 #include <set>
 
-GDL::ProgramGL::~ProgramGL()
+GDL::OpenGL::ProgramGL::~ProgramGL()
 {
     glDeleteProgram(mHandle);
 }
 
 
 
-GDL::ProgramGL::ProgramGL(std::initializer_list<std::reference_wrapper<const ShaderGL>> shaderList)
+GDL::OpenGL::ProgramGL::ProgramGL(std::initializer_list<std::reference_wrapper<const ShaderGL>> shaderList)
     : mHandle(glCreateProgram())
 {
     Initialize(shaderList);
 }
 
-void GDL::ProgramGL::CheckShaders(std::initializer_list<std::reference_wrapper<const GDL::ShaderGL>> shaderList) const
+void GDL::OpenGL::ProgramGL::CheckShaders(
+        std::initializer_list<std::reference_wrapper<const ShaderGL>> shaderList) const
 {
     std::set<GLenum> attachedShaderTypes;
     for (auto& shader : shaderList)
@@ -40,7 +41,7 @@ void GDL::ProgramGL::CheckShaders(std::initializer_list<std::reference_wrapper<c
 
 
 
-void GDL::ProgramGL::CheckLinkStatus() const
+void GDL::OpenGL::ProgramGL::CheckLinkStatus() const
 {
     GLint status;
     glGetProgramiv(mHandle, GL_LINK_STATUS, &status);
@@ -58,7 +59,7 @@ void GDL::ProgramGL::CheckLinkStatus() const
     }
 }
 
-void GDL::ProgramGL::CheckForErrors() const
+void GDL::OpenGL::ProgramGL::CheckForErrors() const
 {
     GLenum errorCode = glGetError();
     if (errorCode != GL_NO_ERROR)
@@ -68,7 +69,7 @@ void GDL::ProgramGL::CheckForErrors() const
 }
 
 
-void GDL::ProgramGL::Initialize(std::initializer_list<std::reference_wrapper<const GDL::ShaderGL>> shaderList)
+void GDL::OpenGL::ProgramGL::Initialize(std::initializer_list<std::reference_wrapper<const ShaderGL>> shaderList)
 {
     CheckShaders(shaderList);
 
@@ -87,14 +88,14 @@ void GDL::ProgramGL::Initialize(std::initializer_list<std::reference_wrapper<con
 
 
 template <>
-void GDL::ProgramGL::SetUniform<GL_FLOAT>(GLuint uniformLocation, GDL::F32 value) const
+void GDL::OpenGL::ProgramGL::SetUniform<GL_FLOAT>(GLuint uniformLocation, F32 value) const
 {
     glProgramUniform1f(mHandle, uniformLocation, value);
 }
 
 
 template <>
-void GDL::ProgramGL::SetUniformArray<GL_FLOAT>(GLuint uniformLocation, const F32* const values, U32 size) const
+void GDL::OpenGL::ProgramGL::SetUniformArray<GL_FLOAT>(GLuint uniformLocation, const F32* const values, U32 size) const
 {
     glProgramUniform1fv(mHandle, uniformLocation, size, values);
 }

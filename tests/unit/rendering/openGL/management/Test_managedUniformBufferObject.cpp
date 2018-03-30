@@ -11,6 +11,7 @@
 #include <map>
 #include <string>
 using namespace GDL;
+using namespace GDL::OpenGL;
 
 RenderWindowGL& GetRenderWindow()
 {
