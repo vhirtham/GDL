@@ -37,3 +37,13 @@ addTest(uniformBufferObjectGL
     GLUT::GLUT
     GLEW::GLEW
     )
+
+addTest(bufferObjectGL
+    rendering/openGL/core/renderWindowGL.cpp
+    rendering/openGL/core/bufferObjectGL.cpp
+    # External libs
+    OpenGL::GL
+    OpenGL::GLU
+    GLUT::GLUT
+    GLEW::GLEW
+    )

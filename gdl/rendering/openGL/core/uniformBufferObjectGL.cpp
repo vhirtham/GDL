@@ -4,7 +4,7 @@
 #include <cassert>
 #include <vector>
 
-GDL::UniformBufferObject::UniformBufferObject(GLuint size, GLenum usage)
+GDL::OpenGL::UniformBufferObject::UniformBufferObject(GLuint size, GLenum usage)
     : mSize(size)
     , mUsage(usage)
 {
@@ -12,33 +12,33 @@ GDL::UniformBufferObject::UniformBufferObject(GLuint size, GLenum usage)
     Initialize(buffer, usage);
 }
 
-GDL::UniformBufferObject::UniformBufferObject(const std::vector<GDL::U8>& buffer, GLenum usage)
+GDL::OpenGL::UniformBufferObject::UniformBufferObject(const std::vector<GDL::U8>& buffer, GLenum usage)
     : mSize(buffer.size())
     , mUsage(usage)
 {
     Initialize(buffer, usage);
 }
 
-GDL::UniformBufferObject::~UniformBufferObject()
+GDL::OpenGL::UniformBufferObject::~UniformBufferObject()
 {
     glDeleteBuffers(1, &mHandle);
 }
 
-void GDL::UniformBufferObject::SetBindingPoint(GLint bindingPoint)
+void GDL::OpenGL::UniformBufferObject::SetBindingPoint(GLint bindingPoint)
 {
     mBindingPoint = bindingPoint;
     glBindBufferBase(GL_UNIFORM_BUFFER, mBindingPoint, mHandle);
     assert(BindingPointValid());
 }
 
-void GDL::UniformBufferObject::Initialize(const std::vector<GDL::U8>& buffer, GLenum usage)
+void GDL::OpenGL::UniformBufferObject::Initialize(const std::vector<GDL::U8>& buffer, GLenum usage)
 {
     glCreateBuffers(1, &mHandle);
     glNamedBufferData(mHandle, buffer.size(), buffer.data(), usage);
     assert(glGetError() == GL_NO_ERROR);
 }
 
-bool GDL::UniformBufferObject::BindingPointValid() const
+bool GDL::OpenGL::UniformBufferObject::BindingPointValid() const
 {
     GLint boundBufferHandle = -1;
     glGetIntegeri_v(GL_UNIFORM_BUFFER_BINDING, mBindingPoint, &boundBufferHandle);
@@ -46,7 +46,14 @@ bool GDL::UniformBufferObject::BindingPointValid() const
 }
 
 template <>
-void GDL::UniformBufferObject::SetData<std::vector<GDL::F32>>(GLint offset, std::vector<F32> data) const
+void GDL::OpenGL::UniformBufferObject::SetData<std::vector<GDL::U8>>(std::vector<U8> data, GLint offset) const
+{
+    assert(static_cast<GLsizei>(offset + data.size() * sizeof(U8)) <= mSize);
+    glNamedBufferSubData(mHandle, offset, data.size() * sizeof(U8), data.data());
+}
+
+template <>
+void GDL::OpenGL::UniformBufferObject::SetData<std::vector<GDL::F32>>(std::vector<F32> data, GLint offset) const
 {
     assert(static_cast<GLsizei>(offset + data.size() * sizeof(F32)) <= mSize);
     glNamedBufferSubData(mHandle, offset, data.size() * sizeof(F32), data.data());

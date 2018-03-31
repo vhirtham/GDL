@@ -75,3 +75,19 @@ BOOST_AUTO_TEST_CASE(Construction_And_Binding)
     BOOST_CHECK(uniformBufferObject_B.GetSize() == static_cast<GLsizei>(queriedBufferSize_B));
     BOOST_CHECK(uniformBufferObject_B.GetUsage() == static_cast<GLenum>(queriedBufferUsage_B));
 }
+
+BOOST_AUTO_TEST_CASE(Set_Data)
+{
+    GetRenderWindow();
+
+    constexpr GLsizei size = 120;
+    constexpr GLenum usage = GL_STATIC_DRAW;
+    UniformBufferObject uniformBufferObject(size, usage);
+
+    std::vector<F32> valA(30, 13.f);
+    uniformBufferObject.SetData(valA);
+
+    std::vector<U8> valB(60, 111);
+    uniformBufferObject.SetData(valB);
+    uniformBufferObject.SetData(valB, 60);
+}

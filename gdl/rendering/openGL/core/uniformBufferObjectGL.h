@@ -8,6 +8,8 @@
 
 namespace GDL
 {
+namespace OpenGL
+{
 class UniformBufferObject
 {
 
@@ -71,10 +73,10 @@ public:
 
     //! @brief Writes data to the uniform buffer object starting at the given offset
     //! @tparam TDataType: Data type of the provided data
-    //! @param offset: Location inside the buffer where the data should be written
     //! @param data: The data that should be written to the uniform buffer object
+    //! @param offset: Location inside the buffer where the data should be written
     template <typename TDataType>
-    void SetData(GLint offset, TDataType data) const;
+    void SetData(TDataType data, GLint offset = 0) const;
 
 
 
@@ -87,4 +89,5 @@ private:
     //! @return true/false
     bool BindingPointValid() const;
 };
+}
 }

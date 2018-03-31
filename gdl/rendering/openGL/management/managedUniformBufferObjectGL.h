@@ -85,12 +85,12 @@ public:
 
     //! @brief Writes data to the uniform buffer object starting at the given offset
     //! @tparam TDataType: Data type of the provided data
-    //! @param offset: Location inside the buffer where the data should be written
     //! @param data: The data that should be written to the uniform buffer object
+    //! @param offset: Location inside the buffer where the data should be written
     template <typename TDataType>
-    void SetData(GLint offset, TDataType data) const
+    void SetData(TDataType data, GLint offset = 0) const
     {
-        mUBO.SetData<TDataType>(offset, data);
+        mUBO.SetData<TDataType>(data, offset);
     }
 
     //! @brief Writes data to the uniform buffer object starting at the position of a given variable
@@ -100,7 +100,7 @@ public:
     template <typename TDataType>
     void SetData(std::string variableName, TDataType data) const
     {
-        SetData<TDataType>(GetVariable(variableName).GetOffset(), data);
+        SetData<TDataType>(data, GetVariable(variableName).GetOffset());
     }
 
     //! @brief Checks if the uniform buffer objects data layout is compatible to a uniform block
