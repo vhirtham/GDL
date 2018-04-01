@@ -24,6 +24,7 @@ public:
     BufferObject(BufferObject&&) = delete;
     BufferObject& operator=(const BufferObject&) = delete;
     BufferObject& operator=(BufferObject&&) = delete;
+    ~BufferObject();
 
     //! @brief Constructs a buffer object with the given size. All values are set to 0.
     //! @param size: Desired size of the buffer object
@@ -36,9 +37,6 @@ public:
     //! @param usage: Enum that specifies the buffer objects usage (have a look at the official reference for
     //! glNamedBufferData)
     BufferObject(const std::vector<U8>& buffer, GLenum usage);
-
-    //! @brief Destructor that deletes the buffer object
-    ~BufferObject();
 
     //! @brief Gets the handle of the buffer object
     //! @return Handle of the buffer object

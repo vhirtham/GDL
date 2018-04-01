@@ -32,6 +32,7 @@ void BufferObject::Initialize(const std::vector<U8>& buffer, GLenum usage)
 {
     glCreateBuffers(1, &mHandle);
     glNamedBufferData(mHandle, buffer.size(), buffer.data(), usage);
+    assert(mHandle > 0);
     assert(glGetError() == GL_NO_ERROR);
 }
 

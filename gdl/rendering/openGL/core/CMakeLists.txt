@@ -1,9 +1,10 @@
 addGDLLib(OpenGLCore
+    bufferObjectGL.cpp
     programGL.cpp
     renderWindowGL.cpp
     shaderGL.cpp
     uniformBufferObjectGL.cpp
-    bufferObjectGL.cpp
+    vertexArrayObjectGL.cpp
 
     # External libs
     OpenGL::GL

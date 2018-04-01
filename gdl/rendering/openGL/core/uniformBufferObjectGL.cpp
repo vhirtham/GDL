@@ -35,6 +35,7 @@ void GDL::OpenGL::UniformBufferObject::Initialize(const std::vector<GDL::U8>& bu
 {
     glCreateBuffers(1, &mHandle);
     glNamedBufferData(mHandle, buffer.size(), buffer.data(), usage);
+    assert(mHandle > 0);
     assert(glGetError() == GL_NO_ERROR);
 }
 

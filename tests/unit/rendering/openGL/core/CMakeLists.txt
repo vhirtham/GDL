@@ -47,3 +47,14 @@ addTest(bufferObjectGL
     GLUT::GLUT
     GLEW::GLEW
     )
+
+addTest(vertexArrayObjectGL
+    rendering/openGL/core/renderWindowGL.cpp
+    rendering/openGL/core/vertexArrayObjectGL.cpp
+    rendering/openGL/core/bufferObjectGL.cpp
+    # External libs
+    OpenGL::GL
+    OpenGL::GLU
+    GLUT::GLUT
+    GLEW::GLEW
+    )

@@ -1,9 +1,11 @@
 
 // Tutorials to go on: http://openglbook.com/chapter-1-getting-started.html
 
+#include "gdl/rendering/openGL/core/bufferObjectGL.h"
 #include "gdl/rendering/openGL/core/programGL.h"
 #include "gdl/rendering/openGL/core/renderWindowGL.h"
 #include "gdl/rendering/openGL/core/shaderGL.h"
+#include "gdl/rendering/openGL/core/vertexArrayObjectGL.h"
 #include "gdl/rendering/openGL/management/programDataManagerGL.h"
 #include "gdl/rendering/openGL/management/managedUniformBufferObjectGL.h"
 
@@ -236,6 +238,29 @@ int main(int argc, char* argv[])
     }
 
     CreateVBO();
+
+    std::vector<F32> Vertices{-0.8f, -1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.8f, -1.0f, 0.0f, 1.0f};
+    std::vector<F32> Colors{1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f};
+    std::vector<F32> TexCoords{0.0f, 0.0f, 0.5f, 1.0f, 1.0f, 0.0f};
+    std::vector<F32> VerticesAndColors{-0.8f, -1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.8f, -1.0f, 0.0f, 1.0f,
+                                       1.0f,  0.0f,  0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f,  1.0f, 0.0f};
+    BufferObject bufferVertices(48, GL_STATIC_DRAW);
+    BufferObject bufferColors(48, GL_STATIC_DRAW);
+    BufferObject bufferTexCoords(24, GL_STATIC_DRAW);
+    BufferObject bufferVerticesAndColors(96, GL_STATIC_DRAW);
+    bufferVertices.SetData(Vertices);
+    bufferColors.SetData(Colors);
+    bufferTexCoords.SetData(TexCoords);
+    bufferVerticesAndColors.SetData(VerticesAndColors);
+    VertexArrayObject vao;
+    //    vao.AddAttribute(bufferVertices, 4, GL_FLOAT, 16);
+    //    vao.AddAttribute(bufferColors, 4, GL_FLOAT, 16);
+    vao.AddAttribute(bufferVerticesAndColors, 4, GL_FLOAT, 16);
+    vao.AddAttribute(bufferVerticesAndColors, 4, GL_FLOAT, 16, 48);
+    vao.AddAttribute(bufferTexCoords, 2, GL_FLOAT, 8);
+    vao.Bind();
+
+
     glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
