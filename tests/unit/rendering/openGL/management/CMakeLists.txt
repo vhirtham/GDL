@@ -12,6 +12,7 @@ addTest(programDataManagerGL
 
 addTest(managedUniformBufferObjectGL
     rendering/openGL/management/managedUniformBufferObjectGL.cpp
+    rendering/openGL/core/bufferObjectGL.cpp
     rendering/openGL/core/programGL.cpp
     rendering/openGL/core/shaderGL.cpp
     rendering/openGL/core/renderWindowGL.cpp

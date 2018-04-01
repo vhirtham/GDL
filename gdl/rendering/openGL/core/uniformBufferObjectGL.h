@@ -1,7 +1,7 @@
 #pragma once
 
 #include "gdl/GDLTypedefs.h"
-
+#include "gdl/rendering/openGL/core/bufferObjectGL.h"
 #include <GL/glew.h>
 
 #include <vector>
@@ -12,11 +12,8 @@ namespace OpenGL
 {
 class UniformBufferObject
 {
-
-    GLuint mHandle;
     GLint mBindingPoint;
-    GLsizei mSize;
-    GLenum mUsage;
+    BufferObject mBufferObject;
 
 public:
     UniformBufferObject() = delete;
@@ -43,7 +40,7 @@ public:
     //! @return Handle of the uniform buffer object
     GLuint GetHandle() const
     {
-        return mHandle;
+        return mBufferObject.GetHandle();
     }
 
     //! @brief Gets the binding point of the uniform buffer object
@@ -57,14 +54,14 @@ public:
     //! @return Size of the uniform buffer object
     GLsizei GetSize() const
     {
-        return mSize;
+        return mBufferObject.GetSize();
     }
 
     //! @brief Gets the usage enum of the uniform buffer object
     //! @return usage enum of the uniform buffer object
     GLenum GetUsage() const
     {
-        return mUsage;
+        return mBufferObject.GetUsage();
     }
 
     //! @brief Sets the binding point of the uniform buffer object
@@ -76,15 +73,14 @@ public:
     //! @param data: The data that should be written to the uniform buffer object
     //! @param offset: Location inside the buffer where the data should be written
     template <typename TDataType>
-    void SetData(TDataType data, GLint offset = 0) const;
+    void SetData(TDataType data, GLint offset = 0) const
+    {
+        mBufferObject.SetData<TDataType>(data, offset);
+    }
 
 
 
 private:
-    //! @brief Initializes the uniform buffer object
-    //! @param usage: Enum that specifies the UBOs usage (have a look at the official reference for glNamedBufferData)
-    void Initialize(const std::vector<U8>& buffer, GLenum usage);
-
     //! @brief Checks if the buffer is still bound to its binding point
     //! @return true/false
     bool BindingPointValid() const;

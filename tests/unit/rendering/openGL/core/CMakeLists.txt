@@ -30,6 +30,7 @@ addTest(programGL
 
 addTest(uniformBufferObjectGL
     rendering/openGL/core/renderWindowGL.cpp
+    rendering/openGL/core/bufferObjectGL.cpp
     rendering/openGL/core/uniformBufferObjectGL.cpp
     # External libs
     OpenGL::GL
