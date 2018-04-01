@@ -4,6 +4,7 @@
 
 #include <GL/glew.h>
 
+#include <cassert>
 #include <vector>
 
 namespace GDL
@@ -32,11 +33,12 @@ public:
     //! glNamedBufferData)
     BufferObject(GLuint size, GLenum usage);
 
-    //! @brief Constructs a buffer object with the data from a fitting buffer
-    //! @param buffer: Vector of U8 containing the byte data that should be used for initialization
+    //! @brief Constructs a buffer object with the passed data
+    //! @param bufferData: Vector of data that should be used for initialization
     //! @param usage: Enum that specifies the buffer objects usage (have a look at the official reference for
     //! glNamedBufferData)
-    BufferObject(const std::vector<U8>& buffer, GLenum usage);
+    template <typename TDataType>
+    explicit BufferObject(const std::vector<TDataType>& bufferData, GLenum usage);
 
     //! @brief Gets the handle of the buffer object
     //! @return Handle of the buffer object
@@ -68,10 +70,11 @@ public:
 
 private:
     //! @brief Initializes the buffer object
-    //! @param buffer: Vector of U8 containing the byte data that should be used for initialization
+    //! @param bufferData: Data that should be used for initialization
     //! @param usage: Enum that specifies the buffer objects usage (have a look at the official reference for
     //! glNamedBufferData)
-    void Initialize(const std::vector<U8>& buffer, GLenum usage);
+    template <typename TDataType>
+    void Initialize(const std::vector<TDataType>& bufferData, GLenum usage);
 };
 }
 }

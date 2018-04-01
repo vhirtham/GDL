@@ -8,6 +8,7 @@ namespace OpenGL
 {
 
 
+
 BufferObject::BufferObject(GLuint size, GLenum usage)
     : mSize(size)
     , mUsage(usage)
@@ -16,25 +17,27 @@ BufferObject::BufferObject(GLuint size, GLenum usage)
     Initialize(buffer, usage);
 }
 
-BufferObject::BufferObject(const std::vector<U8>& buffer, GLenum usage)
-    : mSize(buffer.size())
+
+
+template <typename TDataType>
+BufferObject::BufferObject(const std::vector<TDataType>& bufferData, GLenum usage)
+    : mSize(bufferData.size())
     , mUsage(usage)
 {
-    Initialize(buffer, usage);
+    Initialize(bufferData, usage);
 }
+// explicit instantiation
+template BufferObject::BufferObject(const std::vector<U8>& bufferData, GLenum usage);
+template BufferObject::BufferObject(const std::vector<F32>& bufferData, GLenum usage);
+
+
 
 BufferObject::~BufferObject()
 {
     glDeleteBuffers(1, &mHandle);
 }
 
-void BufferObject::Initialize(const std::vector<U8>& buffer, GLenum usage)
-{
-    glCreateBuffers(1, &mHandle);
-    glNamedBufferData(mHandle, buffer.size(), buffer.data(), usage);
-    assert(mHandle > 0);
-    assert(glGetError() == GL_NO_ERROR);
-}
+
 
 template <>
 void BufferObject::SetData<std::vector<U8>>(std::vector<U8> data, GLint offset) const
@@ -43,12 +46,26 @@ void BufferObject::SetData<std::vector<U8>>(std::vector<U8> data, GLint offset) 
     glNamedBufferSubData(mHandle, offset, data.size() * sizeof(U8), data.data());
 }
 
+
+
 template <>
 void BufferObject::SetData<std::vector<F32>>(std::vector<F32> data, GLint offset) const
 {
     assert(static_cast<GLsizei>(offset + data.size() * sizeof(F32)) <= mSize);
     glNamedBufferSubData(mHandle, offset, data.size() * sizeof(F32), data.data());
 }
+
+
+
+template <typename TDataType>
+void BufferObject::Initialize(const std::vector<TDataType>& bufferData, GLenum usage)
+{
+    glCreateBuffers(1, &mHandle);
+    glNamedBufferData(mHandle, bufferData.size() * sizeof(TDataType), bufferData.data(), usage);
+    assert(mHandle > 0);
+    assert(glGetError() == GL_NO_ERROR);
+}
+
 
 } // namespace OpenGl
 } // namespace GDL

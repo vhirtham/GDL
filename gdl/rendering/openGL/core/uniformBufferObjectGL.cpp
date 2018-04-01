@@ -9,14 +9,7 @@ GDL::OpenGL::UniformBufferObject::UniformBufferObject(GLuint size, GLenum usage)
 {
 }
 
-GDL::OpenGL::UniformBufferObject::UniformBufferObject(const std::vector<GDL::U8>& buffer, GLenum usage)
-    : mBufferObject(buffer, usage)
-{
-}
 
-GDL::OpenGL::UniformBufferObject::~UniformBufferObject()
-{
-}
 
 void GDL::OpenGL::UniformBufferObject::SetBindingPoint(GLint bindingPoint)
 {

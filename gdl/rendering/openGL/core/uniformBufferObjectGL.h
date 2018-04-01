@@ -21,20 +21,24 @@ public:
     UniformBufferObject(UniformBufferObject&&) = delete;
     UniformBufferObject& operator=(const UniformBufferObject&) = delete;
     UniformBufferObject& operator=(UniformBufferObject&&) = delete;
+    ~UniformBufferObject() = default;
 
     //! @brief Constructs a uniform buffer object with the given size. All values are set to 0.
     //! @param size: Desired size of the UBO
     //! @param usage: Enum that specifies the UBOs usage (have a look at the official reference for glNamedBufferData)
     UniformBufferObject(GLuint size, GLenum usage);
 
-    //! @brief Constructs a uniform buffer object with the data from a fitting buffer
-    //! @param buffer: Vector of U8 containing the byte data that should be used for initialization
-    //! @param usage: Enum that specifies the UBOs usage (have a look at the official reference for glNamedBufferData)
-    UniformBufferObject(const std::vector<U8>& buffer, GLenum usage);
+    //! @brief Constructs a buffer object with the passed data
+    //! @param bufferData: Vector of data that should be used for initialization
+    //! @param usage: Enum that specifies the buffer objects usage (have a look at the official reference for
+    //! glNamedBufferData)
+    template <typename TDataType>
+    UniformBufferObject(const std::vector<TDataType>& buffer, GLenum usage)
+        : mBufferObject(buffer, usage)
+    {
+    }
 
 
-    //! @brief Destructor that deletes the buffer object
-    ~UniformBufferObject();
 
     //! @brief Gets the handle of the uniform buffer object
     //! @return Handle of the uniform buffer object
@@ -75,7 +79,7 @@ public:
     template <typename TDataType>
     void SetData(TDataType data, GLint offset = 0) const
     {
-        mBufferObject.SetData<TDataType>(data, offset);
+        mBufferObject.SetData(data, offset);
     }
 
 
