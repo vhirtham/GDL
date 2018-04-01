@@ -240,7 +240,7 @@ int main(int argc, char* argv[])
     CreateVBO();
 
     std::vector<F32> Vertices{-0.8f, -1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.8f, -1.0f, 0.0f, 1.0f};
-    std::vector<F32> Colors{1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f};
+    std::vector<F32> Colors{1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f};
     std::vector<F32> TexCoords{0.0f, 0.0f, 0.5f, 1.0f, 1.0f, 0.0f};
     std::vector<F32> VerticesAndColors{-0.8f, -1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.8f, -1.0f, 0.0f, 1.0f,
                                        1.0f,  0.0f,  0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f,  1.0f, 0.0f};
@@ -255,11 +255,15 @@ int main(int argc, char* argv[])
     VertexArrayObject vao;
     //    vao.AddAttribute(bufferVertices, 4, GL_FLOAT, 16);
     //    vao.AddAttribute(bufferColors, 4, GL_FLOAT, 16);
-    vao.AddAttribute(bufferVerticesAndColors, 4, GL_FLOAT, 16);
-    vao.AddAttribute(bufferVerticesAndColors, 4, GL_FLOAT, 16, 48);
-    vao.AddAttribute(bufferTexCoords, 2, GL_FLOAT, 8);
-    vao.Bind();
+    vao.EnableAttribute(0, bufferVerticesAndColors, 4, GL_FLOAT, 16);
+    // vao.EnableAttribute(1, bufferVerticesAndColors, 4, GL_FLOAT, 16, 48);
+    vao.EnableAttribute(1, 4, GL_FLOAT);
+    vao.EnableAttribute(2, bufferTexCoords, 2, GL_FLOAT, 8);
 
+    // vao.SetAttributeBuffer(1, bufferColors, 16);
+    vao.SetAttributeBuffer(1, bufferVerticesAndColors, 16, 48);
+
+    vao.Bind();
 
     glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
     glEnable(GL_BLEND);
