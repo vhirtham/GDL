@@ -1,7 +1,9 @@
 // GDL version of the sample code from
 // OpenGL 4 Shading Language Cookbook - Second Edtion - Chapter 1 - Page 25:
 // "Sending data to a shader using vertex attributes and vertex buffer objects"
-
+//
+// Free link to the book:
+// https://doc.lagout.org/programmation/OpenGL/OpenGL%204%20Shading%20Language%20Cookbook%20%282nd%20ed.%29%20%5BWolff%202013-12-24%5D.pdf
 
 
 #include "gdl/rendering/openGL/core/bufferObjectGL.h"
