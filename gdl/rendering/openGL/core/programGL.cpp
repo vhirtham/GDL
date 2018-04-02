@@ -1,6 +1,7 @@
 #include "programGL.h"
 
 #include "gdl/base/Exception.h"
+#include "gdl/math/mat4.inl"
 #include "gdl/rendering/openGL/core/shaderGL.h"
 
 #include <cassert>
@@ -18,6 +19,13 @@ GDL::OpenGL::Program::Program(std::initializer_list<std::reference_wrapper<const
     : mHandle(glCreateProgram())
 {
     Initialize(shaderList);
+}
+
+GLuint GDL::OpenGL::Program::QueryUniformLocation(const std::string& uniformName) const
+{
+    GLint uniformLocation = glGetUniformLocation(mHandle, uniformName.data());
+    assert(uniformLocation >= 0);
+    return uniformLocation;
 }
 
 void GDL::OpenGL::Program::Use() const
@@ -92,14 +100,20 @@ void GDL::OpenGL::Program::Initialize(std::initializer_list<std::reference_wrapp
 
 
 template <>
-void GDL::OpenGL::Program::SetUniform<GL_FLOAT>(GLuint uniformLocation, F32 value) const
+void GDL::OpenGL::Program::SetUniform(GLint uniformLocation, F32 value) const
 {
     glProgramUniform1f(mHandle, uniformLocation, value);
 }
 
+template <>
+void GDL::OpenGL::Program::SetUniform(GLint uniformLocation, Mat4f value) const
+{
+    glProgramUniformMatrix4fv(mHandle, uniformLocation, 1, GL_FALSE, value.Data().data());
+}
+
 
 template <>
-void GDL::OpenGL::Program::SetUniformArray<GL_FLOAT>(GLuint uniformLocation, const F32* const values, U32 size) const
+void GDL::OpenGL::Program::SetUniformArray(GLint uniformLocation, const F32* const values, U32 size) const
 {
     glProgramUniform1fv(mHandle, uniformLocation, size, values);
 }

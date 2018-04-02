@@ -48,14 +48,19 @@ public:
         return mHandle;
     }
 
+    //! @brief Queries the location of a uniform with the given name
+    //! @param uniformName: Name of the uniform
+    //! @return Handle of the uniform
+    GLuint QueryUniformLocation(const std::string& uniformName) const;
+
 
     //! @brief Sets the value of an uniform
     //! @tparam TTypeEnum: GL type enum
     //! @tparam TValue: Value type
     //! @param uniformLocation: Location of the uniform
     //! @param value: New value
-    template <GLuint TTypeEnum, typename TValue>
-    void SetUniform(GLuint uniformLocation, TValue value) const;
+    template <typename TValue>
+    void SetUniform(GLint uniformLocation, TValue value) const;
 
 
     //! @brief Sets the values of an uniform array
@@ -63,8 +68,8 @@ public:
     //! @tparam TValue: Value type
     //! @param uniformLocation: location of the first uniform array member that should be set
     //! @param values: Vector with values
-    template <GLuint TTypeEnum, typename TValue>
-    void SetUniformArray(GLuint uniformLocation, const TValue* const values, U32 size) const;
+    template <typename TValue>
+    void SetUniformArray(GLint uniformLocation, const TValue* const values, U32 size) const;
 
     //! @brief Sets this program as active program
     void Use() const;

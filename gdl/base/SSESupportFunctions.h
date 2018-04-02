@@ -7,7 +7,7 @@
 
 namespace GDL
 {
-bool is_aligned(const volatile void* p, size_t n)
+inline bool is_aligned(const volatile void* p, size_t n)
 {
     return reinterpret_cast<std::uintptr_t>(p) % n == 0;
 }

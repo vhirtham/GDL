@@ -7,3 +7,14 @@ target_link_libraries(Cookbook_Chapter1_Page25_GL
     )
 
 TargetDefaultBuildSetup(Cookbook_Chapter1_Page25_GL)
+
+
+add_executable(Cookbook_Chapter1_Page37_GL
+    cookbook_Chapter1_Page37_GL.cpp)
+
+target_link_libraries(Cookbook_Chapter1_Page37_GL
+    GDL::OpenGLCore
+    GDL::OpenGLManagement
+    )
+
+TargetDefaultBuildSetup(Cookbook_Chapter1_Page37_GL)

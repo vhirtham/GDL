@@ -21,34 +21,35 @@ class mat4Single
 
 public:
     //! @brief constructor
-    mat4Single();
+    inline mat4Single();
 
     //! @brief constructor which initializes every entry on the main diagonal with the given value
     //! @param val: Value for initialization of every entry on the main diagonal
-    explicit mat4Single(T val);
+    inline explicit mat4Single(T val);
 
     //! @brief Constructor that initializes full matrix with specific values (column major)
     //! @param v0-v16: Matrix values in row major ordering
-    mat4Single(T v0, T v1, T v2, T v3, T v4, T v5, T v6, T v7, T v8, T v9, T v10, T v11, T v12, T v13, T v14, T v15);
+    inline mat4Single(T v0, T v1, T v2, T v3, T v4, T v5, T v6, T v7, T v8, T v9, T v10, T v11, T v12, T v13, T v14,
+                      T v15);
 
     //! @brief Copy Constructor
     //! @param other: Object that should be copied
-    mat4Single(const mat4Single& other) = default;
+    inline mat4Single(const mat4Single& other) = default;
 
     //! @brief Move Constructor
     //! @param other: Object that should be moved
-    mat4Single(mat4Single&& other) = default;
+    inline mat4Single(mat4Single&& other) = default;
 
     //! @brief Copy assignment operator
     //! @param other: Object that should be copied
-    mat4Single& operator=(const mat4Single& other) = default;
+    inline mat4Single& operator=(const mat4Single& other) = default;
 
     //! @brief Move assignment operator
     //! @param other: Object that should be moved
-    mat4Single& operator=(mat4Single&& other) = default;
+    inline mat4Single& operator=(mat4Single&& other) = default;
 
     //! @brief Destructor
-    ~mat4Single() = default;
+    inline ~mat4Single() = default;
 
 
     //! @brief Matrix - matrix multiplication

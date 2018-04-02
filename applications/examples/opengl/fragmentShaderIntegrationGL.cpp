@@ -25,6 +25,8 @@ bool KeepRunning(bool keepRunningIn = true)
         keepRunning = false;
     return keepRunning;
 }
+
+
 void Exit()
 {
     KeepRunning(false);

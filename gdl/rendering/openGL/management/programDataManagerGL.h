@@ -92,10 +92,10 @@ public:
     //! @param uniformLocation: Location of the uniform
     //! @param value: New value
     template <GLuint TTypeEnum, typename TValue>
-    void SetUniform(GLuint uniformLocation, TValue value) const
+    void SetUniform(GLint uniformLocation, TValue value) const
     {
         assert(GetUniformByLocation(uniformLocation).GetType() == TTypeEnum);
-        mProgram.SetUniform<TTypeEnum>(uniformLocation, value);
+        mProgram.SetUniform(uniformLocation, value);
     }
 
     //! @brief Sets the value of an uniform of the managed program
@@ -116,11 +116,11 @@ public:
     //! @param uniformLocation: location of the first uniform array member that should be set
     //! @param values: Vector with values
     template <GLuint TTypeEnum, typename TValue>
-    void SetUniformArray(GLuint uniformLocation, const TValue* const values, U32 size) const
+    void SetUniformArray(GLint uniformLocation, const TValue* const values, U32 size) const
     {
         assert(GetUniformByLocation(uniformLocation).GetType() == TTypeEnum);
         assert(GetUniformByLocation(uniformLocation).GetArraySize() >= size);
-        mProgram.SetUniformArray<TTypeEnum>(uniformLocation, values, size);
+        mProgram.SetUniformArray(uniformLocation, values, size);
     }
 
     //! @brief Sets the values of an uniform array of the managed program

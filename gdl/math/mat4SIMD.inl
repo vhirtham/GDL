@@ -135,7 +135,7 @@ const std::array<GDL::F32, 16> GDL::mat4SIMD::Data() const
 #ifndef NDEBUG
 namespace GDL
 {
-std::ostream& operator<<(std::ostream& os, const GDL::mat4SIMD& mat)
+inline std::ostream& operator<<(std::ostream& os, const GDL::mat4SIMD& mat)
 {
     for (U32 i = 0; i < 4; ++i)
         os << "| " << mat.mData[0][i] << " " << mat.mData[1][i] << " " << mat.mData[2][i] << " " << mat.mData[3][i] << " |"

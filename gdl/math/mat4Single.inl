@@ -69,7 +69,7 @@ const std::array<T, 16> GDL::mat4Single<T>::Data() const
 namespace GDL
 {
 template <typename T2>
-std::ostream& operator<<(std::ostream& os, const GDL::mat4Single<T2>& mat)
+inline std::ostream& operator<<(std::ostream& os, const GDL::mat4Single<T2>& mat)
 {
     for (U32 i = 0; i < 4; ++i)
         os << "| " << mat(i, 0) << " " << mat(i, 1) << " " << mat(i, 2) << " " << mat(i, 3) << " |" << std::endl;
