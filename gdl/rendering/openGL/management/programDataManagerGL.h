@@ -134,6 +134,9 @@ public:
         SetUniformArray<TTypeEnum>(GetUniform(uniformName).GetLocation(), values, size);
     }
 
+    //! @brief Sets this program as active program
+    void Use() const;
+
 
 private:
     //! @brief Gathers program information (uniforms, subroutines, inputs etc.)

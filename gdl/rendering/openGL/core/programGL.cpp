@@ -20,6 +20,11 @@ GDL::OpenGL::Program::Program(std::initializer_list<std::reference_wrapper<const
     Initialize(shaderList);
 }
 
+void GDL::OpenGL::Program::Use() const
+{
+    glUseProgram(mHandle);
+}
+
 void GDL::OpenGL::Program::CheckShaders(std::initializer_list<std::reference_wrapper<const Shader>> shaderList) const
 {
     std::set<GLenum> attachedShaderTypes;

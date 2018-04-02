@@ -34,6 +34,11 @@ const GDL::OpenGL::UniformBlock& GDL::OpenGL::ProgramDataManager::GetUniformBloc
     return iterator->second;
 }
 
+void GDL::OpenGL::ProgramDataManager::Use() const
+{
+    mProgram.Use();
+}
+
 void GDL::OpenGL::ProgramDataManager::GatherProgramData()
 {
     FindInputs();

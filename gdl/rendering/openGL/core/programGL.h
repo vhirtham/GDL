@@ -66,6 +66,8 @@ public:
     template <GLuint TTypeEnum, typename TValue>
     void SetUniformArray(GLuint uniformLocation, const TValue* const values, U32 size) const;
 
+    //! @brief Sets this program as active program
+    void Use() const;
 
 private:
     //! @brief Checks if the included shaders can actually be linked into a program
@@ -80,7 +82,6 @@ private:
     //! @brief Links all the passed shaders to the program
     //! @param shaderList: Shaders that should be linked
     void Initialize(std::initializer_list<std::reference_wrapper<const Shader>> shaderList);
-
 };
 }
 }
