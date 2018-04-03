@@ -1,105 +1,9 @@
 //#include <boost/test/unit_test.hpp>
+#include "gdl/resources/memory/utility/globalNewCounter.h"
 #include "gdl/resources/memory/PoolAllocator.h"
 #include <vector>
-
+#include <map>
 #include <new>
-
-class GlobalNewAllocationCounter
-{
-    friend void* operator new(std::size_t size);
-    friend void* operator new(std::size_t size, const std::nothrow_t&) noexcept;
-    friend void* operator new[](std::size_t size);
-    friend void* operator new[](std::size_t size, const std::nothrow_t&) noexcept;
-    friend void operator delete(void* ptr) noexcept;
-    friend void operator delete(void* ptr, const std::nothrow_t&)noexcept;
-    friend void operator delete[](void* ptr) noexcept;
-    friend void operator delete[](void* ptr, const std::nothrow_t&) noexcept;
-
-    int mAllocationsOnConstruction = -1;
-    int mDeallocationsOnConstruction = -1;
-
-    static int mTotalAllocations;
-    static int mTotalDeallocations;
-
-public:
-    GlobalNewAllocationCounter()
-        : mAllocationsOnConstruction(mTotalAllocations)
-        , mDeallocationsOnConstruction(mTotalDeallocations)
-    {
-    }
-
-    int GetNumAllocations() const
-    {
-        return mTotalAllocations - mAllocationsOnConstruction;
-    }
-    int GetNumDeallocations() const
-    {
-        return mTotalDeallocations - mDeallocationsOnConstruction;
-    }
-
-    static int GetTotalNumAllocations()
-    {
-        return mTotalAllocations;
-    }
-    static int GetTotalNumDeallocations()
-    {
-        return mTotalDeallocations;
-    }
-};
-
-int GlobalNewAllocationCounter::mTotalAllocations = 0;
-int GlobalNewAllocationCounter::mTotalDeallocations = 0;
-
-void* operator new(std::size_t size)
-{
-    ++GlobalNewAllocationCounter::mTotalAllocations;
-    void* p = malloc(size);
-    if (!p)
-        throw std::bad_alloc();
-    return p;
-}
-
-void* operator new[](std::size_t size)
-{
-    ++GlobalNewAllocationCounter::mTotalAllocations;
-    void* p = malloc(size);
-    if (!p)
-        throw std::bad_alloc();
-    return p;
-}
-
-void* operator new[](std::size_t size, const std::nothrow_t&) noexcept
-{
-    ++GlobalNewAllocationCounter::mTotalAllocations;
-    return malloc(size);
-}
-void* operator new(std::size_t size, const std::nothrow_t&) noexcept
-{
-    ++GlobalNewAllocationCounter::mTotalAllocations;
-    return malloc(size);
-}
-
-
-void operator delete(void* ptr) noexcept
-{
-    ++GlobalNewAllocationCounter::mTotalDeallocations;
-    free(ptr);
-}
-void operator delete(void* ptr, const std::nothrow_t&)noexcept
-{
-    ++GlobalNewAllocationCounter::mTotalDeallocations;
-    free(ptr);
-}
-void operator delete[](void* ptr) noexcept
-{
-    ++GlobalNewAllocationCounter::mTotalDeallocations;
-    free(ptr);
-}
-void operator delete[](void* ptr, const std::nothrow_t&) noexcept
-{
-    ++GlobalNewAllocationCounter::mTotalDeallocations;
-    free(ptr);
-}
 
 
 
@@ -120,29 +24,34 @@ struct test2
     std::vector<int, Allocator<int>> mVec;
 };
 
-
+template <typename TAllocator>
+void someFunc(const std::vector<GDL::F32, TAllocator>& A)
+{
+    std::cout << "can do it" << std::endl;
+}
 
 using namespace GDL;
 // BOOST_AUTO_TEST_CASE(PoolAllocator)
 int main()
 {
-    std::cout << "Num GLOBAL allocations CP START: " << GlobalNewAllocationCounter::GetTotalNumAllocations()
-              << std::endl;
-    std::cout << "Num GLOBAL deallocations CP START: " << GlobalNewAllocationCounter::GetTotalNumDeallocations();
+    std::cout << "Num GLOBAL allocations CP START: " << GlobalNewCounter::GetTotalNumNewCalls() << std::endl;
+    std::cout << "Num GLOBAL deallocations CP START: " << GlobalNewCounter::GetTotalNumDeleteCalls();
     //    int allocs = number_of_allocs;
     MemoryManager::Instance(1024);
-    std::cout << "Num GLOBAL allocations CP START: " << GlobalNewAllocationCounter::GetTotalNumAllocations()
-              << std::endl;
-    std::cout << "Num GLOBAL deallocations CP START: " << GlobalNewAllocationCounter::GetTotalNumDeallocations();
-    GlobalNewAllocationCounter ac;
-    std::cout << "Num allocations start: " << ac.GetNumAllocations() << std::endl;
+    std::cout << "Num GLOBAL allocations CP START: " << GlobalNewCounter::GetTotalNumNewCalls() << std::endl;
+    std::cout << "Num GLOBAL deallocations CP START: " << GlobalNewCounter::GetTotalNumDeleteCalls();
+    GlobalNewCounter ac;
+    std::cout << "Num allocations start: " << ac.GetNumNewCalls() << std::endl;
     {
-        std::cout << "Num allocations CP 1: " << ac.GetNumAllocations() << std::endl;
+        std::cout << "Num allocations CP 1: " << ac.GetNumNewCalls() << std::endl;
 
         std::vector<test, GDL::custom_allocator<test>> v;
         std::vector<test2<GDL::custom_allocator>, GDL::custom_allocator<test2<GDL::custom_allocator>>> v3;
         std::vector<F32, GDL::custom_allocator<F32>> v2;
 
+        std::map<I32, I32, std::less<I32>, MyAlloc<std::pair<I32, I32>>> m;
+
+        m.insert(std::pair<I32, I32>(1, 1));
         v.push_back(42);
         v2.push_back(3.14);
         v.push_back(56);
@@ -154,16 +63,18 @@ int main()
         v3.back().mVec.push_back(2);
         v3.emplace_back(v3.back());
 
+        someFunc(v2);
+
         test2<std::allocator> test;
-        std::cout << "Num allocations CP 2: " << ac.GetNumAllocations() << std::endl;
+        std::cout << "Num allocations CP 2: " << ac.GetNumNewCalls() << std::endl;
         test.mVec.push_back(42);
-        std::cout << "Num allocations CP 3: " << ac.GetNumAllocations() << std::endl;
+        std::cout << "Num allocations CP 3: " << ac.GetNumNewCalls() << std::endl;
         int* a1 = new int(10);
-        std::cout << "Num allocations CP new a1: " << ac.GetNumAllocations() << std::endl;
-        std::cout << "Num deallocations CP new a1: " << ac.GetNumDeallocations() << std::endl;
+        std::cout << "Num allocations CP new a1: " << ac.GetNumNewCalls() << std::endl;
+        std::cout << "Num deallocations CP new a1: " << ac.GetNumDeleteCalls() << std::endl;
         delete a1;
-        std::cout << "Num allocations CP delete a1: " << ac.GetNumAllocations() << std::endl;
-        std::cout << "Num deallocations CP delete a1: " << ac.GetNumDeallocations() << std::endl;
+        std::cout << "Num allocations CP delete a1: " << ac.GetNumNewCalls() << std::endl;
+        std::cout << "Num deallocations CP delete a1: " << ac.GetNumDeleteCalls() << std::endl;
 
         //        bool caught = false;
         //        try
@@ -182,9 +93,8 @@ int main()
         //        v.push_back(33);
         //        v.push_back(44);
     }
-    std::cout << "Num allocations CP END: " << ac.GetNumAllocations() << std::endl;
-    std::cout << "Num deallocations CP END: " << ac.GetNumDeallocations() << std::endl;
-    std::cout << "Num GLOBAL allocations CP END: " << GlobalNewAllocationCounter::GetTotalNumAllocations() << std::endl;
-    std::cout << "Num GLOBAL deallocations CP END: " << GlobalNewAllocationCounter::GetTotalNumDeallocations()
-              << std::endl;
+    std::cout << "Num allocations CP END: " << ac.GetNumNewCalls() << std::endl;
+    std::cout << "Num deallocations CP END: " << ac.GetNumDeleteCalls() << std::endl;
+    std::cout << "Num GLOBAL allocations CP END: " << GlobalNewCounter::GetTotalNumNewCalls() << std::endl;
+    std::cout << "Num GLOBAL deallocations CP END: " << GlobalNewCounter::GetTotalNumDeleteCalls() << std::endl;
 }

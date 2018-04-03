@@ -5,3 +5,6 @@ addTest(ThreadPool
 
 addTest(Allocator)
 
+
+addTest(allocators)
+addTest(globalNewCounter)
