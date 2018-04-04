@@ -1,1 +1,3 @@
-addBenchmark(allocators)
+addBenchmark(allocators
+    resources/memory/memoryManager.cpp
+    )

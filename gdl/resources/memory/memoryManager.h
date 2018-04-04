@@ -5,22 +5,33 @@
 #include "gdl/resources/memory/memoryStack.h"
 
 #include <atomic>
-#include <cassert>
 #include <map>
 #include <memory>
 #include <thread>
 
 namespace GDL
 {
+
+//! @brief Singleton class that manages a single block of memory. Different kind of allocators can be used to access
+//! that memory in different locations and allocation patterns.
 class MemoryManager
 {
-    // U64 mMemorySize;
-    // std::unique_ptr<U8[]> mMemory;
+    template <class T>
+    friend struct InternalStackAllocator;
+
     // std::atomic<U8*> mCurrentPosition;
+
+    static bool mInitialized;
+    static U32 mMaxNumThreads;
+    static U32 mInternalStackSizeThread;
+    static U64 mFreeMemorySize;
+
+    std::unique_ptr<U8[]> mMemory;
 
     std::map<std::thread::id, ThreadPrivateMemoryStack> mInternalStack;
 
-    MemoryManager() = default;
+    //! @brief Constructor that allocates a single big single block of memory to suffice the programs need for memory
+    MemoryManager();
 
 public:
     MemoryManager(const MemoryManager&) = delete;
@@ -29,34 +40,29 @@ public:
     MemoryManager& operator=(MemoryManager&&) = delete;
     ~MemoryManager() = default;
 
-    static MemoryManager& Instance()
-    {
-        static MemoryManager memoryManager;
-        return memoryManager;
-    }
+    //! @brief Gets the memory manager instance
+    //! @return Memory manager Instance
+    static MemoryManager& Instance();
 
-    void* Allocate();
 
-    void* AllocateInternalStack(U32 size)
-    {
-        constexpr U32 memorySize = 1024 * 1024;
-        const std::thread::id id = std::this_thread::get_id();
-        auto memoryStackIterator = mInternalStack.find(id);
-        if (memoryStackIterator == mInternalStack.end())
-            memoryStackIterator = mInternalStack.emplace(id, ThreadPrivateMemoryStack(memorySize)).first; // second new
+    //! @brief Sets the size of the internal thread private memory stacks
+    //! @param size: Size of the internal thread private memory stacks
+    //! @remark The call must happen before the first call of Instance(). Otherwise this function throws.
+    static void SetInternalThreadStackSize(U32 size);
 
-        assert(mInternalStack.find(id) != mInternalStack.end());
-        assert(mInternalStack.find(id) == memoryStackIterator);
-        return memoryStackIterator->second.Allocate(size);
-    }
+private:
+    //! @brief Allocates memory on the internal thread private stack.
+    //! @param size: Size of the memory that should be allocated
+    //! @return Pointer to the memory
+    void* AllocateInternalThreadStack(U32 size);
 
-    void DeallocateInternalStack()
-    {
-        const std::thread::id id = std::this_thread::get_id();
-        assert(mInternalStack.find(id) != mInternalStack.end());
-        mInternalStack.find(id)->second.Deallocate();
-    }
+    //! @brief Deallocates memory on the internal thread private stack.
+    void DeallocateInternalThreadStack();
+
+    //! @brief Throws an exception if the memory manager is already initialized
+    static void ThrowOnInitialized();
 };
+
 
 // MemoryManager::MemoryManager(U64 memorySize)
 //    : mMemorySize(memorySize)

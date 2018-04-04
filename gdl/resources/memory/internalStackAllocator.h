@@ -21,11 +21,12 @@ struct InternalStackAllocator
     T* allocate(std::size_t n)
     {
         MemoryManager& memoryManager = MemoryManager::Instance();
-        return static_cast<T*>(memoryManager.AllocateInternalStack(n * sizeof(T)));
+        return static_cast<T*>(memoryManager.AllocateInternalThreadStack(n * sizeof(T)));
     }
+
     void deallocate(T* p, std::size_t n)
     {
-        MemoryManager::Instance().DeallocateInternalStack();
+        MemoryManager::Instance().DeallocateInternalThreadStack();
     }
 };
 

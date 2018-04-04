@@ -6,5 +6,7 @@ addTest(ThreadPool
 addTest(Allocator)
 
 
-addTest(allocators)
+addTest(allocators
+    resources/memory/memoryManager.cpp
+    )
 addTest(globalNewCounter)
