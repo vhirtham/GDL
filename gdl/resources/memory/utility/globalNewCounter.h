@@ -55,14 +55,13 @@ int GlobalNewCounter::mTotalNewCalls = 0;
 int GlobalNewCounter::mTotalDeleteCalls = 0;
 }
 
-// LCOV_EXCL_START
 
 void* operator new(std::size_t size)
 {
     ++GDL::GlobalNewCounter::mTotalNewCalls;
     void* p = malloc(size);
     if (!p)
-        throw std::bad_alloc();
+        throw std::bad_alloc(); // LCOV_EXCL_START
     return p;
 }
 
@@ -71,16 +70,17 @@ void* operator new[](std::size_t size)
     ++GDL::GlobalNewCounter::mTotalNewCalls;
     void* p = malloc(size);
     if (!p)
-        throw std::bad_alloc();
+        throw std::bad_alloc(); // LCOV_EXCL_START
     return p;
 }
 
-void* operator new[](std::size_t size, const std::nothrow_t&) noexcept
+void* operator new(std::size_t size, const std::nothrow_t&) noexcept
 {
     ++GDL::GlobalNewCounter::mTotalNewCalls;
     return malloc(size);
 }
-void* operator new(std::size_t size, const std::nothrow_t&) noexcept
+
+void* operator new[](std::size_t size, const std::nothrow_t&) noexcept
 {
     ++GDL::GlobalNewCounter::mTotalNewCalls;
     return malloc(size);
@@ -107,5 +107,3 @@ void operator delete[](void* ptr, const std::nothrow_t&) noexcept
     ++GDL::GlobalNewCounter::mTotalDeleteCalls;
     free(ptr);
 }
-
-// LCOV_EXCL_STOP
