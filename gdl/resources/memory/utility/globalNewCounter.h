@@ -61,7 +61,7 @@ void* operator new(std::size_t size)
     ++GDL::GlobalNewCounter::mTotalNewCalls;
     void* p = malloc(size);
     if (!p)
-        throw std::bad_alloc(); // LCOV_EXCL_START
+        throw std::bad_alloc(); // LCOV_EXCL_LINE
     return p;
 }
 
@@ -70,7 +70,7 @@ void* operator new[](std::size_t size)
     ++GDL::GlobalNewCounter::mTotalNewCalls;
     void* p = malloc(size);
     if (!p)
-        throw std::bad_alloc(); // LCOV_EXCL_START
+        throw std::bad_alloc(); // LCOV_EXCL_LINE
     return p;
 }
 
