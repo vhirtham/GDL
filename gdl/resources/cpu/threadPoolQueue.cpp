@@ -6,7 +6,6 @@
 namespace GDL
 {
 
-template class ThreadPoolQueue<std::unique_ptr<TaskBase>>;
 
 template <typename T>
 ThreadPoolQueue<T>::ThreadPoolQueue()
@@ -47,4 +46,6 @@ bool ThreadPoolQueue<T>::tryPop(T& out)
     mQueue.pop();
     return true;
 }
+
+template class ThreadPoolQueue<std::unique_ptr<TaskBase>>;
 }

@@ -55,11 +55,11 @@ struct is_void<void> : std::true_type
 template <typename F, typename... Args>
 void ThreadPoolNEW::submit(F&& func, Args&&... args)
 {
+    // static assertion
     using ResultType = std::result_of_t<decltype(std::bind(std::forward<F>(func), std::forward<Args>(args)...))()>;
     using TaskType = Task<decltype(std::bind(std::forward<F>(func), std::forward<Args>(args)...))>;
 
     static_assert(is_void<ResultType>::value, "Used submit() with non void function!");
-
     mQueue.Push(std::make_unique<TaskType>(std::bind(std::forward<F>(func), std::forward<Args>(args)...)));
 }
 }

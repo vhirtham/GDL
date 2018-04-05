@@ -1,7 +1,7 @@
 AddGDLLib(Recources
+    cpu/threadPoolQueue.cpp
     cpu/thread.cpp
     cpu/threadPool.cpp
-    cpu/threadPoolQueue.cpp
     cpu/Thread.cpp
     cpu/ThreadPool.cpp
     cpu/ThreadSafeQueue.cpp
