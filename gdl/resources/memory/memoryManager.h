@@ -40,10 +40,9 @@ public:
     MemoryManager& operator=(MemoryManager&&) = delete;
     ~MemoryManager() = default;
 
-    //! @brief Gets the memory manager instance
-    //! @return Memory manager Instance
-    static MemoryManager& Instance();
 
+    //! Initializes the memory manager
+    static void Initialize();
 
     //! @brief Sets the size of the internal thread private memory stacks
     //! @param size: Size of the internal thread private memory stacks
@@ -51,6 +50,10 @@ public:
     static void SetInternalThreadStackSize(U32 size);
 
 private:
+    //! @brief Gets the memory manager instance
+    //! @return Memory manager Instance
+    static MemoryManager& Instance();
+
     //! @brief Allocates memory on the internal thread private stack.
     //! @param size: Size of the memory that should be allocated
     //! @return Pointer to the memory

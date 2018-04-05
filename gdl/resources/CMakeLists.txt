@@ -1,0 +1,9 @@
+AddGDLLib(Recources
+    cpu/thread.cpp
+    cpu/threadPool.cpp
+    cpu/threadPoolQueue.cpp
+    cpu/Thread.cpp
+    cpu/ThreadPool.cpp
+    cpu/ThreadSafeQueue.cpp
+    memory/memoryManager.cpp
+    )
