@@ -1,7 +1,7 @@
 #pragma once
 
-
 #include <cstdlib>
+#include <iostream>
 #include <new>
 
 namespace GDL
@@ -48,6 +48,12 @@ public:
     static int GetTotalNumDeleteCalls()
     {
         return mTotalDeleteCalls;
+    }
+
+    void PrintCalls() const
+    {
+        std::cout << "Number of new calls    : " << GetNumNewCalls() << std::endl;
+        std::cout << "Number of delete calls : " << GetNumDeleteCalls() << std::endl;
     }
 };
 

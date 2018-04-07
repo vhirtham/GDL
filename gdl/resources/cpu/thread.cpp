@@ -10,8 +10,7 @@ namespace GDL
 ThreadNEW::~ThreadNEW()
 {
     mClose = true;
-    if (mThread.joinable())
-        mThread.join();
+    mThread.join();
 }
 
 ThreadNEW::ThreadNEW(ThreadPoolNEW& threadPool)
@@ -25,13 +24,9 @@ void ThreadNEW::Run()
 {
     try
     {
-        while (!mClose)
+        while (!mClose && !mThreadPool.mClose)
         {
-            std::unique_ptr<TaskBase> pTask{nullptr};
-            if (mThreadPool.mQueue.tryPop(pTask))
-            {
-                pTask->execute();
-            }
+            mThreadPool.GetTask();
         }
     }
     catch (std::exception)
@@ -41,6 +36,7 @@ void ThreadNEW::Run()
     {
         std::terminate();
     }
+    std::cout << "Thread closed" << std::endl;
 }
 
 } // namespace GDL

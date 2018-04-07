@@ -47,5 +47,14 @@ bool ThreadPoolQueue<T>::tryPop(T& out)
     return true;
 }
 
+
+
+template <typename T>
+bool ThreadPoolQueue<T>::IsEmpty() const
+{
+    std::lock_guard<std::mutex> lock(mMutex);
+    return mQueue.empty();
+}
+
 template class ThreadPoolQueue<std::unique_ptr<TaskBase>>;
 }

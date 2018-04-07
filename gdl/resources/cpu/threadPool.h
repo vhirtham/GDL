@@ -6,6 +6,7 @@
 #include "gdl/resources/cpu/taskBase.h"
 #include "gdl/resources/cpu/threadPoolQueue.h"
 
+#include <condition_variable>
 #include <deque>
 #include <functional>
 #include <mutex>
@@ -19,8 +20,18 @@ class ThreadPoolNEW
 {
     friend class ThreadNEW;
 
-    mutable std::mutex mMutexThreads;
+    // put in own Waiter class
+    std::condition_variable mConditionParentThreadWait;
+    mutable std::mutex mMutexParentThreadWait;
+    bool mParentThreadWait = true;
+
+
+
+    mutable std::mutex mMutex;
+    std::condition_variable mConditionThreads;
+
     std::deque<ThreadNEW> mThreads;
+    std::atomic_bool mClose = false;
     ThreadPoolQueue<std::unique_ptr<TaskBase>> mQueue;
 
 public:
@@ -35,6 +46,11 @@ public:
     explicit ThreadPoolNEW(const U32 numThreads);
 
     void Deinitialize();
+
+    void ParentThreadWait();
+    void ParentThreadContinue();
+
+    void GetTask();
 
     template <typename F, typename... Args>
     void submit(F&& func, Args&&... args);
