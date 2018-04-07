@@ -9,23 +9,16 @@ namespace GDL
 
 template <typename T>
 ThreadPoolQueue<T>::ThreadPoolQueue()
-    : mValid{true}
-    , mMutex{}
+    : mMutex{}
 {
 }
 
 template <typename T>
 ThreadPoolQueue<T>::~ThreadPoolQueue()
 {
-    Deinitialize();
 }
 
-template <typename T>
-void ThreadPoolQueue<T>::Deinitialize()
-{
-    std::lock_guard<std::mutex> lock(mMutex);
-    mValid = false;
-}
+
 
 template <typename T>
 void ThreadPoolQueue<T>::Push(T value)
@@ -38,7 +31,7 @@ template <typename T>
 bool ThreadPoolQueue<T>::tryPop(T& out)
 {
     std::lock_guard<std::mutex> lock(mMutex);
-    if (mQueue.empty() || !mValid)
+    if (mQueue.empty())
     {
         return false;
     }
@@ -55,6 +48,7 @@ bool ThreadPoolQueue<T>::IsEmpty() const
     std::lock_guard<std::mutex> lock(mMutex);
     return mQueue.empty();
 }
+
 
 template class ThreadPoolQueue<std::unique_ptr<TaskBase>>;
 }

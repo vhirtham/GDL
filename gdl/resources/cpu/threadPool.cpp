@@ -27,12 +27,11 @@ ThreadPoolNEW::ThreadPoolNEW(const U32 numThreads)
 
 void ThreadPoolNEW::Deinitialize()
 {
-    std::cout << "thread pool deinitializes" << std::endl;
+    // std::cout << "thread pool deinitializes" << std::endl;
     mClose = true;
-    mQueue.Deinitialize();
     mConditionThreads.notify_all();
     mThreads.clear();
-    std::cout << "all threads cleared" << std::endl;
+    // std::cout << "all threads cleared" << std::endl;
 }
 
 void ThreadPoolNEW::ParentThreadWait()
@@ -42,7 +41,7 @@ void ThreadPoolNEW::ParentThreadWait()
     mConditionParentThreadWait.wait(lock, [this] { return !mParentThreadWait; });
 
     mParentThreadWait = true;
-    std::cout << "Parent thread done waiting" << std::endl;
+    // std::cout << "Parent thread done waiting" << std::endl;
 }
 
 void ThreadPoolNEW::ParentThreadContinue()
@@ -61,6 +60,11 @@ void ThreadPoolNEW::GetTask()
     {
         task->execute();
     }
+}
+
+bool ThreadPoolNEW::HasTasks()
+{
+    return !mQueue.IsEmpty();
 }
 
 

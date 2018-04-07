@@ -36,7 +36,7 @@ void ThreadNEW::Run()
     {
         std::terminate();
     }
-    std::cout << "Thread closed" << std::endl;
+    // std::cout << "Thread closed" << std::endl;
 }
 
 } // namespace GDL

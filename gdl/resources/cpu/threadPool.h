@@ -52,6 +52,8 @@ public:
 
     void GetTask();
 
+    bool HasTasks();
+
     template <typename F, typename... Args>
     void submit(F&& func, Args&&... args);
 };
@@ -77,5 +79,6 @@ void ThreadPoolNEW::submit(F&& func, Args&&... args)
 
     static_assert(is_void<ResultType>::value, "Used submit() with non void function!");
     mQueue.Push(std::make_unique<TaskType>(std::bind(std::forward<F>(func), std::forward<Args>(args)...)));
+    mConditionThreads.notify_one();
 }
 }
