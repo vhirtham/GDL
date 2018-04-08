@@ -41,20 +41,6 @@ void ThreadPoolNEW::Deinitialize()
     }
 }
 
-void ThreadPoolNEW::ParentThreadWait()
-{
-
-    std::unique_lock<std::mutex> lock(mMutexParentThreadWait);
-    mConditionParentThreadWait.wait(lock, [this] { return !mParentThreadWait; });
-
-    mParentThreadWait = true;
-}
-
-void ThreadPoolNEW::ParentThreadContinue()
-{
-    mParentThreadWait = false;
-    mConditionParentThreadWait.notify_one();
-}
 
 void ThreadPoolNEW::GetTask()
 {

@@ -20,11 +20,6 @@ class ThreadPoolNEW
 {
     friend class ThreadNEW;
 
-    // put in own Waiter class
-    std::condition_variable mConditionParentThreadWait;
-    mutable std::mutex mMutexParentThreadWait;
-    bool mParentThreadWait = true;
-
 
 
     mutable std::mutex mMutex;
@@ -46,9 +41,6 @@ public:
     explicit ThreadPoolNEW(const U32 numThreads);
 
     void Deinitialize();
-
-    void ParentThreadWait();
-    void ParentThreadContinue();
 
     void GetTask();
 
