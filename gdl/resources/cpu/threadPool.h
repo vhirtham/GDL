@@ -61,21 +61,50 @@ public:
     void ThisThreadWaitFor(F&& function);
 
     template <typename F>
-    void CheckEnque(F& function, std::condition_variable& condition);
+    void CheckEnque(ThreadPoolNEW& threadPool, F&& function, std::condition_variable& condition);
+};
+
+
+// http://en.cppreference.com/w/cpp/language/template_specialization
+template <typename T> // primary template
+struct is_bool : std::false_type
+{
+};
+template <> // explicit specialization for T = void
+struct is_bool<bool> : std::true_type
+{
 };
 
 template <typename F>
 void ThreadPoolNEW::ThisThreadWaitFor(F&& function)
 {
-    std::condition_variable condtition;
+    static_assert(is_bool<std::result_of_t<decltype(function)()>>::value, "Return type moost be bool");
+
     std::mutex mutex;
-    CheckEnque(function, condtition);
+    std::unique_lock<std::mutex> lock(mutex);
+    std::condition_variable condition;
+    bool condition_met = false;
+
+    CheckEnque(*this,
+               [&] {
+                   if (function())
+                       condition_met = true;
+                   return condition_met;
+               },
+               condition);
+
+    condition.wait(lock, [&] { return condition_met; });
 }
 
 template <typename F>
-void ThreadPoolNEW::CheckEnque(F& function, std::condition_variable& condition)
+void ThreadPoolNEW::CheckEnque(ThreadPoolNEW& threadPool, F&& function, std::condition_variable& condition)
 {
-    function();
+    if (function())
+        condition.notify_one();
+    else
+    {
+        submit([&] { threadPool.CheckEnque(threadPool, function, condition); });
+    }
 }
 
 

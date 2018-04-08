@@ -45,7 +45,7 @@ bool ThreadPoolQueue<T>::tryPop(T& out)
 template <typename T>
 bool ThreadPoolQueue<T>::IsEmpty() const
 {
-    std::lock_guard<std::mutex> lock(mMutex);
+    std::lock_guard<std::mutex> lockGuard(mMutex);
     return mQueue.empty();
 }
 
