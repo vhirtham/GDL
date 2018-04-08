@@ -9,15 +9,20 @@ namespace GDL
 
 ThreadNEW::~ThreadNEW()
 {
-    mClose = true;
     mThread.join();
 }
 
 ThreadNEW::ThreadNEW(ThreadPoolNEW& threadPool)
     : mClose{false}
+    , mIsClosed{false}
     , mThreadPool(threadPool)
     , mThread(&ThreadNEW::Run, this)
 {
+}
+
+bool ThreadNEW::IsClosed() const
+{
+    return mIsClosed;
 }
 
 void ThreadNEW::Run()
@@ -36,7 +41,7 @@ void ThreadNEW::Run()
     {
         std::terminate();
     }
-    // std::cout << "Thread closed" << std::endl;
+    mIsClosed = true;
 }
 
 } // namespace GDL

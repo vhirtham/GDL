@@ -5,9 +5,13 @@
 
 using namespace GDL;
 
-BOOST_AUTO_TEST_CASE(Construction)
+//! @brief Tests the construction and deinitialization
+//! @remark 100 Threads are spawned to test for a possible deadlock during deconstruction. There are possible paths were
+//! a thread has checked the condition and is going to sleep while the notify_all message is transmitted. This results
+//! in a deadlock if the thread is yet not asleep and notify_all is only called once.
+BOOST_AUTO_TEST_CASE(Construction_And_Deinitialization)
 {
-    ThreadPoolNEW tp(10);
+    ThreadPoolNEW tp(2);
 }
 
 BOOST_AUTO_TEST_CASE(Deadlock_submit_notification_missing)
@@ -40,9 +44,10 @@ BOOST_AUTO_TEST_CASE(Parent_thread_wait)
 
     tp.submit([&]() {
         std::this_thread::sleep_for(std::chrono::milliseconds(1));
-
         tp.ParentThreadContinue();
+
     });
+    // tp.ThisThreadWaitFor([]() { std::cout << "condition checked" << std::endl; });
     tp.ParentThreadWait();
     BOOST_CHECK(tp.HasTasks() == false);
 }

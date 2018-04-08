@@ -27,11 +27,18 @@ ThreadPoolNEW::ThreadPoolNEW(const U32 numThreads)
 
 void ThreadPoolNEW::Deinitialize()
 {
-    // std::cout << "thread pool deinitializes" << std::endl;
     mClose = true;
-    mConditionThreads.notify_all();
-    mThreads.clear();
-    // std::cout << "all threads cleared" << std::endl;
+
+    while (!mThreads.empty())
+    {
+        mConditionThreads.notify_all();
+
+        // Give threads a short time to shut down. If you don't and want to use valgrind it will take forever.
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+
+        while (!mThreads.empty() && mThreads.front().IsClosed())
+            mThreads.pop_front();
+    }
 }
 
 void ThreadPoolNEW::ParentThreadWait()
@@ -41,7 +48,6 @@ void ThreadPoolNEW::ParentThreadWait()
     mConditionParentThreadWait.wait(lock, [this] { return !mParentThreadWait; });
 
     mParentThreadWait = true;
-    // std::cout << "Parent thread done waiting" << std::endl;
 }
 
 void ThreadPoolNEW::ParentThreadContinue()
@@ -66,6 +72,7 @@ bool ThreadPoolNEW::HasTasks()
 {
     return !mQueue.IsEmpty();
 }
+
 
 
 } // namespace GDL

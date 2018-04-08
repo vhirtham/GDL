@@ -13,6 +13,7 @@ class ThreadNEW
 
 
     std::atomic_bool mClose;
+    std::atomic_bool mIsClosed;
     ThreadPoolNEW& mThreadPool;
     std::thread mThread; // <--- Always last member (initialization problems may occur if not)
 
@@ -27,6 +28,7 @@ public:
     ThreadNEW(ThreadPoolNEW& threadPool);
 
 
+    bool IsClosed() const;
     void Run();
 };
 }

@@ -56,7 +56,27 @@ public:
 
     template <typename F, typename... Args>
     void submit(F&& func, Args&&... args);
+
+    template <typename F>
+    void ThisThreadWaitFor(F&& function);
+
+    template <typename F>
+    void CheckEnque(F& function, std::condition_variable& condition);
 };
+
+template <typename F>
+void ThreadPoolNEW::ThisThreadWaitFor(F&& function)
+{
+    std::condition_variable condtition;
+    std::mutex mutex;
+    CheckEnque(function, condtition);
+}
+
+template <typename F>
+void ThreadPoolNEW::CheckEnque(F& function, std::condition_variable& condition)
+{
+    function();
+}
 
 
 // http://en.cppreference.com/w/cpp/language/template_specialization
