@@ -23,7 +23,7 @@ BOOST_AUTO_TEST_CASE(Deadlock_submit_notification_missing)
     std::this_thread::sleep_for(std::chrono::milliseconds(2));
 
     for (U32 i = 0; i < 8; ++i)
-        tp.submit([]() { std::this_thread::sleep_for(std::chrono::milliseconds(1)); });
+        tp.Submit([]() { std::this_thread::sleep_for(std::chrono::milliseconds(1)); });
 }
 
 BOOST_AUTO_TEST_CASE(Destruction_with_non_empty_queue)
@@ -31,7 +31,7 @@ BOOST_AUTO_TEST_CASE(Destruction_with_non_empty_queue)
     ThreadPoolNEW tp(4);
 
     for (U32 i = 0; i < 1000; ++i)
-        tp.submit([]() { std::this_thread::sleep_for(std::chrono::milliseconds(100)); });
+        tp.Submit([]() { std::this_thread::sleep_for(std::chrono::milliseconds(100)); });
 }
 
 //! @brief The ThisThreadWaitFor function is tested by simply waiting for the thread pool to run out of tasks. Internal
@@ -41,7 +41,7 @@ BOOST_AUTO_TEST_CASE(This_thread_wait_for)
     ThreadPoolNEW tp(4);
 
     U32 numFunctionCalls = 0;
-    tp.ThisThreadWaitFor([&]() {
+    tp.SubmitThreadWaitCondition([&]() {
         ++numFunctionCalls;
         return !tp.HasTasks();
     });
@@ -51,9 +51,9 @@ BOOST_AUTO_TEST_CASE(This_thread_wait_for)
     numFunctionCalls = 0;
 
     for (U32 i = 0; i < 100; ++i)
-        tp.submit([]() { std::this_thread::sleep_for(std::chrono::milliseconds(1)); });
+        tp.Submit([]() { std::this_thread::sleep_for(std::chrono::milliseconds(1)); });
 
-    tp.ThisThreadWaitFor([&]() {
+    tp.SubmitThreadWaitCondition([&]() {
         ++numFunctionCalls;
         return !tp.HasTasks();
     });
@@ -64,26 +64,26 @@ BOOST_AUTO_TEST_CASE(This_thread_wait_for)
     numFunctionCalls = 0;
 
     for (U32 i = 0; i < 100; ++i)
-        tp.submit([]() { std::this_thread::sleep_for(std::chrono::milliseconds(1)); });
+        tp.Submit([]() { std::this_thread::sleep_for(std::chrono::milliseconds(1)); });
 
     // Causes internal resubmission of the condition check. (3 times)
-    tp.submit([&]() {
-        tp.submit([&]() {
-            tp.submit([&]() {
+    tp.Submit([&]() {
+        tp.Submit([&]() {
+            tp.Submit([&]() {
                 for (U32 i = 0; i < 100; ++i)
-                    tp.submit([]() { std::this_thread::sleep_for(std::chrono::milliseconds(1)); });
+                    tp.Submit([]() { std::this_thread::sleep_for(std::chrono::milliseconds(1)); });
             });
             for (U32 i = 0; i < 100; ++i)
-                tp.submit([]() { std::this_thread::sleep_for(std::chrono::milliseconds(1)); });
+                tp.Submit([]() { std::this_thread::sleep_for(std::chrono::milliseconds(1)); });
         });
         for (U32 i = 0; i < 100; ++i)
-            tp.submit([]() { std::this_thread::sleep_for(std::chrono::milliseconds(1)); });
+            tp.Submit([]() { std::this_thread::sleep_for(std::chrono::milliseconds(1)); });
     });
 
     for (U32 i = 0; i < 100; ++i)
-        tp.submit([]() { std::this_thread::sleep_for(std::chrono::milliseconds(1)); });
+        tp.Submit([]() { std::this_thread::sleep_for(std::chrono::milliseconds(1)); });
 
-    tp.ThisThreadWaitFor([&]() {
+    tp.SubmitThreadWaitCondition([&]() {
         ++numFunctionCalls;
         return !tp.HasTasks();
     });

@@ -47,12 +47,12 @@ public:
     bool HasTasks();
 
     template <typename F, typename... Args>
-    void submit(F&& func, Args&&... args);
+    void Submit(F&& func, Args&&... args);
 
     // ThisThreadWaitFor must be renamed to something that makes clear that the condition
     // is enqued and only checked when the task is processed.
     template <typename F>
-    void ThisThreadWaitFor(F&& function);
+    void SubmitThreadWaitCondition(F&& function);
 
     template <typename F>
     void CheckEnque(ThreadPoolNEW& threadPool, F&& function, std::condition_variable& condition);
@@ -70,7 +70,7 @@ struct is_bool<bool> : std::true_type
 };
 
 template <typename F>
-void ThreadPoolNEW::ThisThreadWaitFor(F&& function)
+void ThreadPoolNEW::SubmitThreadWaitCondition(F&& function)
 {
     static_assert(is_bool<std::result_of_t<decltype(function)()>>::value, "Return type moost be bool");
 
@@ -97,7 +97,7 @@ void ThreadPoolNEW::CheckEnque(ThreadPoolNEW& threadPool, F&& function, std::con
         condition.notify_one();
     else
     {
-        submit([&] { threadPool.CheckEnque(threadPool, function, condition); });
+        Submit([&] { threadPool.CheckEnque(threadPool, function, condition); });
     }
 }
 
@@ -114,7 +114,7 @@ struct is_void<void> : std::true_type
 
 
 template <typename F, typename... Args>
-void ThreadPoolNEW::submit(F&& func, Args&&... args)
+void ThreadPoolNEW::Submit(F&& func, Args&&... args)
 {
     // static assertion
     using ResultType = std::result_of_t<decltype(std::bind(std::forward<F>(func), std::forward<Args>(args)...))()>;
