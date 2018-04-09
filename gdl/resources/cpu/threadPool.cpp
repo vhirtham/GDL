@@ -44,8 +44,10 @@ void ThreadPoolNEW::Deinitialize()
 
 void ThreadPoolNEW::GetTask()
 {
+    // Put in own wait for function (WaitForTasks).
     std::unique_lock<std::mutex> lock(mMutex);
     mConditionThreads.wait(lock, [this] { return !mQueue.IsEmpty() || mClose; });
+    lock.unlock();
 
     std::unique_ptr<TaskBase> task{nullptr};
     if (mQueue.tryPop(task))

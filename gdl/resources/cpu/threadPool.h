@@ -49,6 +49,8 @@ public:
     template <typename F, typename... Args>
     void submit(F&& func, Args&&... args);
 
+    // ThisThreadWaitFor must be renamed to something that makes clear that the condition
+    // is enqued and only checked when the task is processed.
     template <typename F>
     void ThisThreadWaitFor(F&& function);
 
