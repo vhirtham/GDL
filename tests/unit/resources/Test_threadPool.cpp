@@ -36,7 +36,7 @@ BOOST_AUTO_TEST_CASE(Destruction_with_non_empty_queue)
 
 //! @brief The ThisThreadWaitFor function is tested by simply waiting for the thread pool to run out of tasks. Internal
 //! resubmission of the condition check is also tested.
-BOOST_AUTO_TEST_CASE(This_thread_wait_for)
+BOOST_AUTO_TEST_CASE(SubmitThreadWaitCondition)
 {
     ThreadPoolNEW tp(4);
 
@@ -74,4 +74,47 @@ BOOST_AUTO_TEST_CASE(This_thread_wait_for)
 
     BOOST_CHECK(numFunctionCalls == 5); // 4 resubmission (call of ThisThreadWaitFor() + refilling submits)
     BOOST_CHECK(tp.HasTasks() == false);
+}
+
+
+
+void ParentOnlyTask(U32& counter, std::thread::id& parentThreadID, ThreadPoolNEW& threadPool)
+{
+    if (parentThreadID == std::this_thread::get_id())
+        ++counter;
+    else
+        threadPool.Submit([&] { ParentOnlyTask(counter, parentThreadID, threadPool); });
+    std::this_thread::sleep_for(std::chrono::milliseconds(1));
+}
+
+void MemberOnlyTask(std::atomic<U32>& counter, std::thread::id& parentThreadID, ThreadPoolNEW& threadPool)
+{
+    if (parentThreadID != std::this_thread::get_id())
+        ++counter;
+    else
+        threadPool.Submit([&] { MemberOnlyTask(counter, parentThreadID, threadPool); });
+    std::this_thread::sleep_for(std::chrono::milliseconds(1));
+}
+
+BOOST_AUTO_TEST_CASE(External_thread_process_tasks)
+{
+    ThreadPoolNEW tp(4);
+
+    std::thread::id parentThreadID = std::this_thread::get_id();
+
+    U32 counterParent = 0; // only parent thread should modify it (no atomic type needed)
+    std::atomic<U32> counterMember = 0;
+
+    for (U32 i = 0; i < 10; ++i)
+        tp.Submit([&] { ParentOnlyTask(counterParent, parentThreadID, tp); });
+    for (U32 i = 0; i < 100; ++i)
+        tp.Submit([&] { MemberOnlyTask(counterMember, parentThreadID, tp); });
+
+    while (tp.HasTasks())
+        tp.TryExecuteTask();
+
+    tp.Deinitialize(); // <-- Avoid that member threads are still processing before checking the numbers
+
+    BOOST_CHECK(counterParent == 10);
+    BOOST_CHECK(counterMember == 100);
 }

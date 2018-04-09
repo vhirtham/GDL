@@ -31,7 +31,7 @@ void ThreadNEW::Run()
     {
         while (!mClose && !mThreadPool.mClose)
         {
-            mThreadPool.GetTask();
+            mThreadPool.TryExecuteTaskWait();
         }
     }
     catch (std::exception)

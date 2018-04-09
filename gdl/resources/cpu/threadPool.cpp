@@ -12,17 +12,7 @@ ThreadPoolNEW::~ThreadPoolNEW()
 
 ThreadPoolNEW::ThreadPoolNEW(const U32 numThreads)
 {
-    std::lock_guard<std::mutex> lock(mMutex);
-    try
-    {
-        for (U32 i = 0; i < numThreads; ++i)
-            mThreads.emplace_back(*this);
-    }
-    catch (...)
-    {
-        Deinitialize();
-        throw;
-    }
+    Initialize(numThreads);
 }
 
 void ThreadPoolNEW::Deinitialize()
@@ -41,14 +31,23 @@ void ThreadPoolNEW::Deinitialize()
     }
 }
 
-
-void ThreadPoolNEW::GetTask()
+void ThreadPoolNEW::Initialize(const U32 numThreads)
 {
-    // Put in own wait for function (WaitForTasks).
-    std::unique_lock<std::mutex> lock(mMutex);
-    mConditionThreads.wait(lock, [this] { return !mQueue.IsEmpty() || mClose; });
-    lock.unlock();
+    std::lock_guard<std::mutex> lock(mMutex);
+    try
+    {
+        for (U32 i = 0; i < numThreads; ++i)
+            mThreads.emplace_back(*this);
+    }
+    catch (...)
+    {
+        Deinitialize();
+        throw;
+    }
+}
 
+void ThreadPoolNEW::TryExecuteTask()
+{
     std::unique_ptr<TaskBase> task{nullptr};
     if (mQueue.tryPop(task))
     {
@@ -56,9 +55,22 @@ void ThreadPoolNEW::GetTask()
     }
 }
 
+
+void ThreadPoolNEW::TryExecuteTaskWait()
+{
+    WaitForTask();
+    TryExecuteTask();
+}
+
 bool ThreadPoolNEW::HasTasks()
 {
     return !mQueue.IsEmpty();
+}
+
+void ThreadPoolNEW::WaitForTask()
+{
+    std::unique_lock<std::mutex> lock(mMutex);
+    mConditionThreads.wait(lock, [this] { return !mQueue.IsEmpty() || mClose; });
 }
 
 

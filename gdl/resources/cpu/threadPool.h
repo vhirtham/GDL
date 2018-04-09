@@ -42,9 +42,15 @@ public:
 
     void Deinitialize();
 
-    void GetTask();
+    void Initialize(const U32 numThreads);
+
+    void TryExecuteTask();
+
+    void TryExecuteTaskWait();
 
     bool HasTasks();
+
+    void WaitForTask();
 
     template <typename F, typename... Args>
     void Submit(F&& func, Args&&... args);
