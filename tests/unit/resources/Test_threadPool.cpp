@@ -1,5 +1,6 @@
 #include <boost/test/unit_test.hpp>
 
+#include "gdl/base/Exception.h"
 #include "gdl/resources/cpu/threadPool.h"
 #include <iostream>
 
@@ -86,4 +87,25 @@ BOOST_AUTO_TEST_CASE(External_thread_process_tasks)
 
     BOOST_CHECK(counterParent == 10);
     BOOST_CHECK(counterMember == 100);
+}
+
+BOOST_AUTO_TEST_CASE(Exception_handling)
+{
+    ThreadPoolNEW tp(4);
+    BOOST_CHECK_NO_THROW(tp.CheckExceptions());
+
+    tp.Submit([&] { throw Exception(__PRETTY_FUNCTION__, "test"); });
+    std::this_thread::sleep_for(std::chrono::milliseconds(10));
+
+    BOOST_CHECK_THROW(tp.CheckExceptions(), Exception);
+
+    tp.ClearExceptionLog();
+    BOOST_CHECK_NO_THROW(tp.CheckExceptions());
+
+    tp.Submit([&] { throw int{1}; });
+    std::this_thread::sleep_for(std::chrono::milliseconds(10));
+
+    BOOST_CHECK_THROW(tp.Deinitialize(), Exception);
+
+    tp.ClearExceptionLog();
 }

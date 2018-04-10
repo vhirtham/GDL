@@ -27,19 +27,25 @@ bool ThreadNEW::IsClosed() const
 
 void ThreadNEW::Run()
 {
-    try
+    while (!mClose && !mThreadPool.mClose)
     {
-        while (!mClose && !mThreadPool.mClose)
+        try
         {
             mThreadPool.TryExecuteTaskWait();
         }
-    }
-    catch (std::exception)
-    {
-    }
-    catch (...)
-    {
-        std::terminate();
+        catch (const std::exception& e)
+        {
+            mThreadPool.mExceptionLog.append("\n");
+            mThreadPool.mExceptionLog.append("Thread caught the following Excption:\n");
+            mThreadPool.mExceptionLog.append(e.what());
+            mThreadPool.mExceptionLog.append("\n");
+        }
+        catch (...)
+        {
+            mThreadPool.mExceptionLog.append("\n");
+            mThreadPool.mExceptionLog.append("Thread caught UNKNOWN exception");
+            mThreadPool.mExceptionLog.append("\n");
+        }
     }
     mIsClosed = true;
 }

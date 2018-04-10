@@ -1,6 +1,8 @@
 #include "gdl/resources/cpu/threadPool.h"
 
 
+#include "gdl/base/Exception.h"
+
 namespace GDL
 {
 
@@ -19,6 +21,7 @@ void ThreadPoolNEW::Deinitialize()
 {
     mClose = true;
 
+
     while (!mThreads.empty())
     {
         mConditionThreads.notify_all();
@@ -29,21 +32,18 @@ void ThreadPoolNEW::Deinitialize()
         while (!mThreads.empty() && mThreads.front().IsClosed())
             mThreads.pop_front();
     }
+
+    CheckExceptions();
 }
 
 void ThreadPoolNEW::Initialize(const U32 numThreads)
 {
     std::lock_guard<std::mutex> lock(mMutex);
-    try
-    {
-        for (U32 i = 0; i < numThreads; ++i)
-            mThreads.emplace_back(*this);
-    }
-    catch (...)
-    {
-        Deinitialize();
-        throw;
-    }
+
+    for (U32 i = 0; i < numThreads; ++i)
+        mThreads.emplace_back(*this);
+
+    mExceptionLog.reserve(2000);
 }
 
 void ThreadPoolNEW::TryExecuteTask()
@@ -65,6 +65,17 @@ void ThreadPoolNEW::TryExecuteTaskWait()
 bool ThreadPoolNEW::HasTasks() const
 {
     return !mQueue.IsEmpty();
+}
+
+void ThreadPoolNEW::ClearExceptionLog()
+{
+    mExceptionLog.clear();
+}
+
+void ThreadPoolNEW::CheckExceptions()
+{
+    if (!mExceptionLog.empty())
+        throw Exception(__PRETTY_FUNCTION__, mExceptionLog);
 }
 
 void ThreadPoolNEW::WaitForTask()
