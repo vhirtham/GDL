@@ -54,58 +54,7 @@ public:
 
     template <typename F, typename... Args>
     void Submit(F&& func, Args&&... args);
-
-    // ThisThreadWaitFor must be renamed to something that makes clear that the condition
-    // is enqued and only checked when the task is processed.
-    template <typename F>
-    void SubmitThreadWaitCondition(F&& function);
-
-    template <typename F>
-    void CheckEnque(ThreadPoolNEW& threadPool, F&& function, std::condition_variable& condition);
 };
-
-
-// http://en.cppreference.com/w/cpp/language/template_specialization
-template <typename T> // primary template
-struct is_bool : std::false_type
-{
-};
-template <> // explicit specialization for T = void
-struct is_bool<bool> : std::true_type
-{
-};
-
-template <typename F>
-void ThreadPoolNEW::SubmitThreadWaitCondition(F&& function)
-{
-    static_assert(std::is_same<bool, std::result_of_t<decltype(function)()>>::value, "Return type moost be bool");
-
-    std::mutex mutex;
-    std::unique_lock<std::mutex> lock(mutex);
-    std::condition_variable condition;
-    bool condition_met = false;
-
-    CheckEnque(*this,
-               [&] {
-                   if (function())
-                       condition_met = true;
-                   return condition_met;
-               },
-               condition);
-
-    condition.wait(lock, [&] { return condition_met; });
-}
-
-template <typename F>
-void ThreadPoolNEW::CheckEnque(ThreadPoolNEW& threadPool, F&& function, std::condition_variable& condition)
-{
-    if (function())
-        condition.notify_one();
-    else
-    {
-        Submit([&] { threadPool.CheckEnque(threadPool, function, condition); });
-    }
-}
 
 
 
