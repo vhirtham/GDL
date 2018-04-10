@@ -62,7 +62,7 @@ void ThreadPoolNEW::TryExecuteTaskWait()
     TryExecuteTask();
 }
 
-bool ThreadPoolNEW::HasTasks()
+bool ThreadPoolNEW::HasTasks() const
 {
     return !mQueue.IsEmpty();
 }

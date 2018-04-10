@@ -22,11 +22,11 @@ class ThreadPoolNEW
 
 
 
+    std::atomic_bool mClose = false;
     mutable std::mutex mMutex;
     std::condition_variable mConditionThreads;
 
     std::deque<ThreadNEW> mThreads;
-    std::atomic_bool mClose = false;
     ThreadPoolQueue<std::unique_ptr<TaskBase>> mQueue;
 
 public:
@@ -48,7 +48,7 @@ public:
 
     void TryExecuteTaskWait();
 
-    bool HasTasks();
+    bool HasTasks() const;
 
     void WaitForTask();
 
@@ -78,7 +78,7 @@ struct is_bool<bool> : std::true_type
 template <typename F>
 void ThreadPoolNEW::SubmitThreadWaitCondition(F&& function)
 {
-    static_assert(is_bool<std::result_of_t<decltype(function)()>>::value, "Return type moost be bool");
+    static_assert(std::is_same<bool, std::result_of_t<decltype(function)()>>::value, "Return type moost be bool");
 
     std::mutex mutex;
     std::unique_lock<std::mutex> lock(mutex);
@@ -108,16 +108,6 @@ void ThreadPoolNEW::CheckEnque(ThreadPoolNEW& threadPool, F&& function, std::con
 }
 
 
-// http://en.cppreference.com/w/cpp/language/template_specialization
-template <typename T> // primary template
-struct is_void : std::false_type
-{
-};
-template <> // explicit specialization for T = void
-struct is_void<void> : std::true_type
-{
-};
-
 
 template <typename F, typename... Args>
 void ThreadPoolNEW::Submit(F&& func, Args&&... args)
@@ -126,7 +116,7 @@ void ThreadPoolNEW::Submit(F&& func, Args&&... args)
     using ResultType = std::result_of_t<decltype(std::bind(std::forward<F>(func), std::forward<Args>(args)...))()>;
     using TaskType = Task<decltype(std::bind(std::forward<F>(func), std::forward<Args>(args)...))>;
 
-    static_assert(is_void<ResultType>::value, "Used submit() with non void function!");
+    static_assert(std::is_same<void, ResultType>::value, "Used submit() with non void function!");
     mQueue.Push(std::make_unique<TaskType>(std::bind(std::forward<F>(func), std::forward<Args>(args)...)));
     mConditionThreads.notify_one();
 }
