@@ -80,10 +80,9 @@ BOOST_AUTO_TEST_CASE(External_thread_process_tasks)
     for (U32 i = 0; i < 100; ++i)
         tp.Submit([&] { MemberOnlyTask(counterMember, parentThreadID, tp); });
 
-    while (tp.HasTasks())
-        tp.TryExecuteTask();
 
-    tp.Deinitialize(); // <-- Avoid that member threads are still processing before checking the numbers
+    while (tp.HasTasks() || counterParent < 10 || counterMember < 100)
+        tp.TryExecuteTask();
 
     BOOST_CHECK(counterParent == 10);
     BOOST_CHECK(counterMember == 100);
@@ -92,15 +91,15 @@ BOOST_AUTO_TEST_CASE(External_thread_process_tasks)
 BOOST_AUTO_TEST_CASE(Exception_handling)
 {
     ThreadPoolNEW tp(4);
-    BOOST_CHECK_NO_THROW(tp.CheckExceptions());
+    BOOST_CHECK_NO_THROW(tp.PropagateExceptions());
 
     tp.Submit([&] { throw Exception(__PRETTY_FUNCTION__, "test"); });
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
-    BOOST_CHECK_THROW(tp.CheckExceptions(), Exception);
+    BOOST_CHECK_THROW(tp.PropagateExceptions(), Exception);
 
     tp.ClearExceptionLog();
-    BOOST_CHECK_NO_THROW(tp.CheckExceptions());
+    BOOST_CHECK_NO_THROW(tp.PropagateExceptions());
 
     tp.Submit([&] { throw int{1}; });
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
@@ -108,4 +107,45 @@ BOOST_AUTO_TEST_CASE(Exception_handling)
     BOOST_CHECK_THROW(tp.Deinitialize(), Exception);
 
     tp.ClearExceptionLog();
+}
+
+
+BOOST_AUTO_TEST_CASE(Start_and_Close_Threads)
+{
+    // with empty queue
+    ThreadPoolNEW tp(2);
+    BOOST_CHECK(tp.GetNumThreads() == 2);
+    tp.StartThreads(3);
+    BOOST_CHECK(tp.GetNumThreads() == 5);
+    tp.CloseThreads(2);
+    BOOST_CHECK(tp.GetNumThreads() == 3);
+    tp.CloseAllThreads();
+    BOOST_CHECK(tp.GetNumThreads() == 0);
+
+    for (U32 i = 0; i < 1000; ++i)
+        tp.Submit([]() { std::this_thread::sleep_for(std::chrono::milliseconds(1)); });
+
+    tp.StartThreads(1);
+    tp.StartThreads(2);
+    tp.StartThreads(3);
+    std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    BOOST_CHECK(tp.GetNumThreads() == 6);
+    BOOST_CHECK(tp.GetNumTasks() > 0);
+
+    tp.CloseThreads(3);
+    BOOST_CHECK(tp.GetNumThreads() == 3);
+    BOOST_CHECK(tp.GetNumTasks() > 0);
+
+    tp.CloseThreads(10);
+    BOOST_CHECK(tp.GetNumThreads() == 0);
+    BOOST_CHECK(tp.GetNumTasks() > 0);
+
+
+    tp.StartThreads(3);
+    BOOST_CHECK(tp.GetNumThreads() == 3);
+    BOOST_CHECK(tp.GetNumTasks() > 0);
+
+    tp.CloseAllThreads();
+    BOOST_CHECK(tp.GetNumThreads() == 0);
+    BOOST_CHECK(tp.GetNumTasks() > 0);
 }

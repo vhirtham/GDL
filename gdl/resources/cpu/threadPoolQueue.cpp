@@ -49,6 +49,13 @@ bool ThreadPoolQueue<T>::IsEmpty() const
     return mQueue.empty();
 }
 
+template <typename T>
+U32 ThreadPoolQueue<T>::GetSize() const
+{
+    std::lock_guard<std::mutex> lockGuard(mMutex);
+    return mQueue.size();
+}
+
 
 template class ThreadPoolQueue<std::unique_ptr<TaskBase>>;
 }

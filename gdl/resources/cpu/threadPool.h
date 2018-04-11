@@ -21,8 +21,9 @@ class ThreadPoolNEW
     friend class ThreadNEW;
 
 
-    std::atomic<bool> mClose = false;
+    std::atomic<bool> mCloseThreads = false;
     mutable std::mutex mMutex;
+    std::mutex mMutexCondition;
     std::condition_variable mConditionThreads;
 
     std::string mExceptionLog;
@@ -46,9 +47,31 @@ public:
     //! @brief Deinitializes the thread pool
     void Deinitialize();
 
-    //! @brief Initializes the thread pool and starts the passed number of threads
+    //! @brief Initializes the thread pool
+    void Initialize();
+
+    //! @brief Gets the current number of threads
+    //! @return Current number of threads
+    U32 GetNumThreads() const;
+
+    //! @brief Starts a specified number of thread
     //! @param numThreads: Number of threads that should be started
-    void Initialize(const U32 numThreads);
+    void StartThreads(U32 numThreads);
+
+    //! @brief Closes a specified number of thread
+    //! @param numThreads: Number of threads that should be closed
+    void CloseThreads(U32 numThreads);
+
+    //! @brief Closes all threads
+    void CloseAllThreads();
+
+    //! @brief Returns true if the thread pool has tasks in its queue
+    //! @return true/false
+    bool HasTasks() const;
+
+    //! @brief Gets the number of enqued tasks
+    //! @return Number of enqued tasks
+    U32 GetNumTasks() const;
 
     //! @brief Tries to fetch and execute a task from the thread pools queue
     void TryExecuteTask();
@@ -56,11 +79,6 @@ public:
     //! @brief Tries to fetch and execute a task from the thread pools queue. If no tasks are available, the current
     //! thread waits until new tasks are submitted
     void TryExecuteTaskWait();
-
-    //! @brief Returns true if the thread pool has tasks in its queue
-    //! @return true/false
-    bool HasTasks() const;
-
 
     //! @brief Submits a task to the thread pool
     //! @tparam _F: Function or functor type
@@ -71,8 +89,14 @@ public:
     void Submit(_F&& function, _Args&&... args);
 
 
+
+    //! @brief Clears the exception log
     void ClearExceptionLog();
-    void CheckExceptions();
+
+    //! @brief Checks if a worker thread has caught an exception and rethrows it.
+    void PropagateExceptions() const;
+
+
 
 private:
     //! @brief Lets the current thread wait until there are tasks in the queue

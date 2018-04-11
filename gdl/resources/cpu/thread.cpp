@@ -14,20 +14,25 @@ ThreadNEW::~ThreadNEW()
 
 ThreadNEW::ThreadNEW(ThreadPoolNEW& threadPool)
     : mClose{false}
-    , mIsClosed{false}
+    , mFinished{false}
     , mThreadPool(threadPool)
     , mThread(&ThreadNEW::Run, this)
 {
 }
 
-bool ThreadNEW::IsClosed() const
+void ThreadNEW::Close()
 {
-    return mIsClosed;
+    mClose = true;
+}
+
+bool ThreadNEW::HasFinished() const
+{
+    return mFinished;
 }
 
 void ThreadNEW::Run()
 {
-    while (!mClose && !mThreadPool.mClose)
+    while (!mClose && !mThreadPool.mCloseThreads)
     {
         try
         {
@@ -47,7 +52,7 @@ void ThreadNEW::Run()
             mThreadPool.mExceptionLog.append("\n");
         }
     }
-    mIsClosed = true;
+    mFinished = true;
 }
 
 } // namespace GDL
