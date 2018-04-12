@@ -2,6 +2,8 @@
 
 #include "gdl/resources/cpu/taskBase.h"
 
+#include <algorithm>
+
 namespace GDL
 {
 //! @brief This class stores a callable object that should be executed when the corresponding member function is called.

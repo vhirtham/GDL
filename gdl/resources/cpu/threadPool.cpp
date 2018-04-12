@@ -142,6 +142,54 @@ void ThreadPoolNEW::WaitForTask()
     mConditionThreads.wait(lock, [this] { return !mQueue.IsEmpty() || mCloseThreads; });
 }
 
+ThreadPoolNEW::ThreadNEW::~ThreadNEW()
+{
+    mThread.join();
+}
+
+ThreadPoolNEW::ThreadNEW::ThreadNEW(ThreadPoolNEW& threadPool)
+    : mClose{false}
+    , mFinished{false}
+    , mThreadPool(threadPool)
+    , mThread(&ThreadNEW::Run, this)
+{
+}
+
+void ThreadPoolNEW::ThreadNEW::Close()
+{
+    mClose = true;
+}
+
+bool ThreadPoolNEW::ThreadNEW::HasFinished() const
+{
+    return mFinished;
+}
+
+void ThreadPoolNEW::ThreadNEW::Run()
+{
+    while (!mClose && !mThreadPool.mCloseThreads)
+    {
+        try
+        {
+            mThreadPool.TryExecuteTaskWait();
+        }
+        catch (const std::exception& e)
+        {
+            mThreadPool.mExceptionLog.append("\n");
+            mThreadPool.mExceptionLog.append("Thread caught the following Excption:\n");
+            mThreadPool.mExceptionLog.append(e.what());
+            mThreadPool.mExceptionLog.append("\n");
+        }
+        catch (...)
+        {
+            mThreadPool.mExceptionLog.append("\n");
+            mThreadPool.mExceptionLog.append("Thread caught UNKNOWN exception");
+            mThreadPool.mExceptionLog.append("\n");
+        }
+    }
+    mFinished = true;
+}
+
 
 
 } // namespace GDL

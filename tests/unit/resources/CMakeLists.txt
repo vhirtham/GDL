@@ -4,7 +4,6 @@ addTest(ThreadPool
     resources/cpu/ThreadSafeQueue.cpp)
 
 addTest(threadPool
-    resources/cpu/thread.cpp
     resources/cpu/threadPool.cpp
     resources/cpu/threadPoolQueue.cpp
     )

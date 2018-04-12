@@ -1,7 +1,7 @@
 #pragma once
 
 #include "gdl/GDLTypedefs.h"
-#include "gdl/resources/cpu/thread.h"
+//#include "gdl/resources/cpu/thread.h"
 #include "gdl/resources/cpu/task.h"
 #include "gdl/resources/cpu/taskBase.h"
 #include "gdl/resources/cpu/threadPoolQueue.h"
@@ -10,6 +10,7 @@
 #include <deque>
 #include <functional>
 #include <mutex>
+#include <thread>
 
 #include <iostream>
 
@@ -22,7 +23,29 @@ namespace GDL
 //! use self submitting (when result is not ready) proceed funtions.
 class ThreadPoolNEW
 {
-    friend class ThreadNEW;
+    class ThreadNEW
+    {
+
+
+        std::atomic_bool mClose;
+        std::atomic_bool mFinished = false;
+        ThreadPoolNEW& mThreadPool;
+        std::thread mThread; // <--- Always last member (initialization problems may occur if not)
+
+    public:
+        ThreadNEW() = delete;
+        ThreadNEW(const ThreadNEW&) = delete;
+        ThreadNEW(ThreadNEW&&) = delete;
+        ThreadNEW& operator=(const ThreadNEW&) = delete;
+        ThreadNEW& operator=(ThreadNEW&&) = delete;
+        ~ThreadNEW();
+
+        ThreadNEW(ThreadPoolNEW& threadPool);
+
+        void Close();
+        bool HasFinished() const;
+        void Run();
+    };
 
 
     std::atomic<bool> mCloseThreads = false;
