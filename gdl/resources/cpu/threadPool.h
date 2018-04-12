@@ -16,6 +16,10 @@
 namespace GDL
 {
 
+//! @brief Class that manages multiple worker threads.
+//! @remark Worker thread exceptions are caught and the messages are stored in an exception message buffer that can be
+//! checked. This pool does not use futures to avoid an additional source of dedlocks. If you need to wait for results
+//! use self submitting (when result is not ready) proceed funtions.
 class ThreadPoolNEW
 {
     friend class ThreadNEW;
