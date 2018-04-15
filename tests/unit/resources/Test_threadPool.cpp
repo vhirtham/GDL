@@ -149,3 +149,52 @@ BOOST_AUTO_TEST_CASE(Start_and_Close_Threads)
     BOOST_CHECK(tp.GetNumThreads() == 0);
     BOOST_CHECK(tp.GetNumTasks() > 0);
 }
+
+BOOST_AUTO_TEST_CASE(Start_Thread_With_Custom_Main_Loop)
+{
+    ThreadPoolNEW tp(0);
+
+    for (U32 i = 0; i < 100; ++i)
+        tp.Submit([]() { std::this_thread::sleep_for(std::chrono::microseconds(1)); });
+
+    // Reproduce default behaviour %%%%%%%%%%%%%%
+    tp.StartThreads(3, [&] { tp.TryExecuteTaskWait(); });
+
+    while (tp.HasTasks())
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+
+    tp.CloseAllThreads();
+    BOOST_CHECK(tp.GetNumThreads() == 0);
+    BOOST_CHECK(tp.GetNumTasks() == 0);
+
+
+
+    // Submit different main loops %%%%%%%%%%%%%%
+
+    constexpr U32 numSubmits = 1000;
+    U32 ML_Counter_0 = 0;
+    U32 ML_Counter_1 = 0;
+    U32 ML_Counter_2 = 0;
+
+    auto ML_function = [&tp](U32& counter) {
+        tp.TryExecuteTaskWait();
+        ++counter;
+    };
+
+    tp.StartThreads(1, ML_function, std::ref(ML_Counter_0));
+    tp.StartThreads(1, ML_function, std::ref(ML_Counter_1));
+    tp.StartThreads(1, ML_function, std::ref(ML_Counter_2));
+
+    for (U32 i = 0; i < numSubmits; ++i)
+        tp.Submit([]() { std::this_thread::sleep_for(std::chrono::microseconds(1)); });
+
+    while (tp.HasTasks() || ML_Counter_0 + ML_Counter_1 + ML_Counter_2 < numSubmits)
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+
+
+    BOOST_CHECK(ML_Counter_0 > 0);
+    BOOST_CHECK(ML_Counter_1 > 0);
+    BOOST_CHECK(ML_Counter_2 > 0);
+    // since  thrads are waiting for tasks, the sum of the counters should match the number of submitted tasks
+    BOOST_CHECK(ML_Counter_0 + ML_Counter_1 + ML_Counter_2 == numSubmits);
+}

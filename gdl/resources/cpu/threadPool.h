@@ -39,12 +39,24 @@ class ThreadPoolNEW
         ThreadNEW& operator=(ThreadNEW&&) = delete;
         ~ThreadNEW();
 
+        //! @brief Constructor that takes a function that should be run in a while loop until the tread is closed
+        //! @tparam _Func: Function type
+        //! @param threadPool: The threads thread pool
+        //! @param function: Function that should be run
         template <typename _Func>
         ThreadNEW(ThreadPoolNEW& threadPool, _Func&& function);
 
+        //! @brief Stops the threads while loop
         void Close();
+
+        //! @brief Returns if the thread has left its while loop
+        //! @return True/false
         bool HasFinished() const;
 
+        //! @param The threads main function which runs until Close() is called or the thread pool is closed. All
+        //! exceptions are caught and written to the thread pools exception log
+        //! @tparam _Func: Type of the function which is executed in the threads main loop
+        //! @param function: Function which is executed in the threads main loop
         template <typename _Func>
         void Run(_Func&& function);
     };
@@ -87,6 +99,15 @@ public:
     //! @brief Starts a specified number of thread
     //! @param numThreads: Number of threads that should be started
     void StartThreads(U32 numThreads);
+
+    //! @brief Starts a specified number of thread with a alternative main loop function
+    //! @tparam _Func: Alternative function type
+    //! @tparam _Args: Function arguments types
+    //! @param numThreads: Number of threads that should be started
+    //! @param function: Alternative main loop function
+    //! @param args: Arguments that should be passed to the provided function
+    template <typename _Func, typename... _Args>
+    void StartThreads(U32 numThreads, _Func&& function, _Args&&... args);
 
     //! @brief Closes a specified number of thread
     //! @param numThreads: Number of threads that should be closed
@@ -133,6 +154,8 @@ private:
     void WaitForTask();
 };
 
+
+
 template <typename _Func>
 ThreadPoolNEW::ThreadNEW::ThreadNEW(ThreadPoolNEW& threadPool, _Func&& function)
     : mClose{false}
@@ -169,6 +192,14 @@ void ThreadPoolNEW::ThreadNEW::Run(_Func&& function)
     mFinished = true;
 }
 
+
+template <typename _Func, typename... _Args>
+void ThreadPoolNEW::StartThreads(U32 numThreads, _Func&& function, _Args&&... args)
+{
+    std::lock_guard<std::mutex> lock(mMutex);
+    for (U32 i = 0; i < numThreads; ++i)
+        mThreads.emplace_back(*this, std::bind(std::forward<_Func>(function), std::forward<_Args>(args)...));
+}
 
 template <typename _F, typename... _Args>
 void ThreadPoolNEW::Submit(_F&& function, _Args&&... args)

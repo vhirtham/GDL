@@ -42,9 +42,7 @@ U32 ThreadPoolNEW::GetNumThreads() const
 
 void ThreadPoolNEW::StartThreads(U32 numThreads)
 {
-    std::lock_guard<std::mutex> lock(mMutex);
-    for (U32 i = 0; i < numThreads; ++i)
-        mThreads.emplace_back(*this, [this] { TryExecuteTaskWait(); });
+    StartThreads(numThreads, [this] { TryExecuteTaskWait(); });
 }
 
 void ThreadPoolNEW::CloseThreads(U32 numThreads)
