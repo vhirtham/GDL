@@ -44,7 +44,7 @@ void ThreadPoolNEW::StartThreads(U32 numThreads)
 {
     std::lock_guard<std::mutex> lock(mMutex);
     for (U32 i = 0; i < numThreads; ++i)
-        mThreads.emplace_back(*this);
+        mThreads.emplace_back(*this, [this] { TryExecuteTaskWait(); });
 }
 
 void ThreadPoolNEW::CloseThreads(U32 numThreads)
@@ -147,13 +147,7 @@ ThreadPoolNEW::ThreadNEW::~ThreadNEW()
     mThread.join();
 }
 
-ThreadPoolNEW::ThreadNEW::ThreadNEW(ThreadPoolNEW& threadPool)
-    : mClose{false}
-    , mFinished{false}
-    , mThreadPool(threadPool)
-    , mThread(&ThreadNEW::Run, this)
-{
-}
+
 
 void ThreadPoolNEW::ThreadNEW::Close()
 {
@@ -163,31 +157,6 @@ void ThreadPoolNEW::ThreadNEW::Close()
 bool ThreadPoolNEW::ThreadNEW::HasFinished() const
 {
     return mFinished;
-}
-
-void ThreadPoolNEW::ThreadNEW::Run()
-{
-    while (!mClose && !mThreadPool.mCloseThreads)
-    {
-        try
-        {
-            mThreadPool.TryExecuteTaskWait();
-        }
-        catch (const std::exception& e)
-        {
-            mThreadPool.mExceptionLog.append("\n");
-            mThreadPool.mExceptionLog.append("Thread caught the following Excption:\n");
-            mThreadPool.mExceptionLog.append(e.what());
-            mThreadPool.mExceptionLog.append("\n");
-        }
-        catch (...)
-        {
-            mThreadPool.mExceptionLog.append("\n");
-            mThreadPool.mExceptionLog.append("Thread caught UNKNOWN exception");
-            mThreadPool.mExceptionLog.append("\n");
-        }
-    }
-    mFinished = true;
 }
 
 

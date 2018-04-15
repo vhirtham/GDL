@@ -26,7 +26,6 @@ class ThreadPoolNEW
     class ThreadNEW
     {
 
-
         std::atomic_bool mClose;
         std::atomic_bool mFinished = false;
         ThreadPoolNEW& mThreadPool;
@@ -40,12 +39,16 @@ class ThreadPoolNEW
         ThreadNEW& operator=(ThreadNEW&&) = delete;
         ~ThreadNEW();
 
-        ThreadNEW(ThreadPoolNEW& threadPool);
+        template <typename _Func>
+        ThreadNEW(ThreadPoolNEW& threadPool, _Func&& function);
 
         void Close();
         bool HasFinished() const;
-        void Run();
+
+        template <typename _Func>
+        void Run(_Func&& function);
     };
+
 
 
     std::atomic<bool> mCloseThreads = false;
@@ -130,6 +133,41 @@ private:
     void WaitForTask();
 };
 
+template <typename _Func>
+ThreadPoolNEW::ThreadNEW::ThreadNEW(ThreadPoolNEW& threadPool, _Func&& function)
+    : mClose{false}
+    , mFinished{false}
+    , mThreadPool(threadPool)
+    , mThread(&ThreadNEW::Run<_Func>, this, function)
+{
+}
+
+
+template <typename _Func>
+void ThreadPoolNEW::ThreadNEW::Run(_Func&& function)
+{
+    while (!mClose && !mThreadPool.mCloseThreads)
+    {
+        try
+        {
+            function();
+        }
+        catch (const std::exception& e)
+        {
+            mThreadPool.mExceptionLog.append("\n");
+            mThreadPool.mExceptionLog.append("Thread caught the following Excption:\n");
+            mThreadPool.mExceptionLog.append(e.what());
+            mThreadPool.mExceptionLog.append("\n");
+        }
+        catch (...)
+        {
+            mThreadPool.mExceptionLog.append("\n");
+            mThreadPool.mExceptionLog.append("Thread caught UNKNOWN exception");
+            mThreadPool.mExceptionLog.append("\n");
+        }
+    }
+    mFinished = true;
+}
 
 
 template <typename _F, typename... _Args>
