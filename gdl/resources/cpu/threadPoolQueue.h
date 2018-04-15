@@ -37,13 +37,6 @@ public:
     bool tryPop(T& out);
 
 
-    //    //! @brief Waits until the queue contains values to fetch and then tries to get the next one
-    //    //! @param out: reference to a variable that stores fetched value
-    //    //! @return TRUE if the operation was successful, FALSE if not
-    //    bool tryWaitPop(T& out);
-
-
-
     //! @brief Returns if the queue is empty or not
     //! @return TRUE if the queue is empty, FALSE if not
     bool IsEmpty() const;
@@ -51,19 +44,5 @@ public:
     //! @brief Gets the size of the queue
     //! @return Size
     U32 GetSize() const;
-
-
-    //    //! @brief Deletes all elements and informs all waiting threads
-    //    void clear();
-
-
-    //    //! @brief Invalidates the queue and informs all threads
-    //    //! @remark This is used to free all waiting threads, when the queue should not be used any more
-    //    void invalidate();
-
-
-    //    //! @brief Returns if the queue is valid or not
-    //    //! @return TRUE if the queue is valid, FALSE if not
-    //    bool isValid();
 };
 }
