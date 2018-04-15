@@ -195,6 +195,5 @@ BOOST_AUTO_TEST_CASE(Start_Thread_With_Custom_Main_Loop)
     BOOST_CHECK(ML_Counter_0 > 0);
     BOOST_CHECK(ML_Counter_1 > 0);
     BOOST_CHECK(ML_Counter_2 > 0);
-    // since  thrads are waiting for tasks, the sum of the counters should match the number of submitted tasks
-    BOOST_CHECK(ML_Counter_0 + ML_Counter_1 + ML_Counter_2 == numSubmits);
+    BOOST_CHECK(ML_Counter_0 + ML_Counter_1 + ML_Counter_2 >= numSubmits);
 }
