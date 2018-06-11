@@ -1,7 +1,6 @@
 #pragma once
 
 #include "gdl/GDLTypedefs.h"
-//#include "gdl/resources/cpu/thread.h"
 #include "gdl/resources/cpu/task.h"
 #include "gdl/resources/cpu/taskBase.h"
 #include "gdl/resources/cpu/threadPoolQueue.h"
@@ -21,30 +20,30 @@ namespace GDL
 //! @remark Worker thread exceptions are caught and the messages are stored in an exception message buffer that can be
 //! checked. This pool does not use futures to avoid an additional source of dedlocks. If you need to wait for results
 //! use self submitting (when result is not ready) proceed funtions.
-class ThreadPoolNEW
+class ThreadPool
 {
-    class ThreadNEW
+    class Thread
     {
 
         std::atomic_bool mClose;
         std::atomic_bool mFinished = false;
-        ThreadPoolNEW& mThreadPool;
+        ThreadPool& mThreadPool;
         std::thread mThread; // <--- Always last member (initialization problems may occur if not)
 
     public:
-        ThreadNEW() = delete;
-        ThreadNEW(const ThreadNEW&) = delete;
-        ThreadNEW(ThreadNEW&&) = delete;
-        ThreadNEW& operator=(const ThreadNEW&) = delete;
-        ThreadNEW& operator=(ThreadNEW&&) = delete;
-        ~ThreadNEW();
+        Thread() = delete;
+        Thread(const Thread&) = delete;
+        Thread(Thread&&) = delete;
+        Thread& operator=(const Thread&) = delete;
+        Thread& operator=(Thread&&) = delete;
+        ~Thread();
 
         //! @brief Constructor that takes a function that should be run in a while loop until the tread is closed
         //! @tparam _Func: Function type
         //! @param threadPool: The threads thread pool
         //! @param function: Function that should be run
         template <typename _Func>
-        ThreadNEW(ThreadPoolNEW& threadPool, _Func&& function);
+        Thread(ThreadPool& threadPool, _Func&& function);
 
         //! @brief Stops the threads while loop
         void Close();
@@ -70,21 +69,21 @@ class ThreadPoolNEW
 
     std::string mExceptionLog;
 
-    std::deque<ThreadNEW> mThreads;
+    std::deque<Thread> mThreads;
     ThreadPoolQueue<std::unique_ptr<TaskBase>> mQueue;
 
 
 public:
-    ThreadPoolNEW() = delete;
-    ThreadPoolNEW(const ThreadPoolNEW&) = delete;
-    ThreadPoolNEW(ThreadPoolNEW&&) = delete;
-    ThreadPoolNEW& operator=(const ThreadPoolNEW&) = delete;
-    ThreadPoolNEW& operator=(ThreadPoolNEW&&) = delete;
-    ~ThreadPoolNEW();
+    ThreadPool() = delete;
+    ThreadPool(const ThreadPool&) = delete;
+    ThreadPool(ThreadPool&&) = delete;
+    ThreadPool& operator=(const ThreadPool&) = delete;
+    ThreadPool& operator=(ThreadPool&&) = delete;
+    ~ThreadPool();
 
     //! @brief Constructs the thread pool and starts the passed number of threads
     //! @param numThreads: Number of threads that should be started
-    explicit ThreadPoolNEW(const U32 numThreads);
+    explicit ThreadPool(const U32 numThreads);
 
     //! @brief Deinitializes the thread pool
     void Deinitialize();
@@ -157,17 +156,17 @@ private:
 
 
 template <typename _Func>
-ThreadPoolNEW::ThreadNEW::ThreadNEW(ThreadPoolNEW& threadPool, _Func&& function)
+ThreadPool::Thread::Thread(ThreadPool& threadPool, _Func&& function)
     : mClose{false}
     , mFinished{false}
     , mThreadPool(threadPool)
-    , mThread(&ThreadNEW::Run<_Func>, this, function)
+    , mThread(&Thread::Run<_Func>, this, function)
 {
 }
 
 
 template <typename _Func>
-void ThreadPoolNEW::ThreadNEW::Run(_Func&& function)
+void ThreadPool::Thread::Run(_Func&& function)
 {
     while (!mClose && !mThreadPool.mCloseThreads)
     {
@@ -194,7 +193,7 @@ void ThreadPoolNEW::ThreadNEW::Run(_Func&& function)
 
 
 template <typename _Func, typename... _Args>
-void ThreadPoolNEW::StartThreads(U32 numThreads, _Func&& function, _Args&&... args)
+void ThreadPool::StartThreads(U32 numThreads, _Func&& function, _Args&&... args)
 {
     std::lock_guard<std::mutex> lock(mMutex);
     for (U32 i = 0; i < numThreads; ++i)
@@ -202,7 +201,7 @@ void ThreadPoolNEW::StartThreads(U32 numThreads, _Func&& function, _Args&&... ar
 }
 
 template <typename _F, typename... _Args>
-void ThreadPoolNEW::Submit(_F&& function, _Args&&... args)
+void ThreadPool::Submit(_F&& function, _Args&&... args)
 {
     // static assertion
     using ResultType =

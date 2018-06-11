@@ -9,30 +9,30 @@ namespace GDL
 {
 
 
-ThreadPoolNEW::~ThreadPoolNEW()
+ThreadPool::~ThreadPool()
 {
     Deinitialize();
 }
 
-ThreadPoolNEW::ThreadPoolNEW(const U32 numThreads)
+ThreadPool::ThreadPool(const U32 numThreads)
 {
     Initialize();
     StartThreads(numThreads);
 }
 
-void ThreadPoolNEW::Deinitialize()
+void ThreadPool::Deinitialize()
 {
     CloseAllThreads();
     PropagateExceptions();
 }
 
-void ThreadPoolNEW::Initialize()
+void ThreadPool::Initialize()
 {
     std::lock_guard<std::mutex> lock(mMutex);
     mExceptionLog.reserve(200);
 }
 
-U32 ThreadPoolNEW::GetNumThreads() const
+U32 ThreadPool::GetNumThreads() const
 {
     std::lock_guard<std::mutex> lock(mMutex);
     return mThreads.size();
@@ -40,12 +40,12 @@ U32 ThreadPoolNEW::GetNumThreads() const
 
 
 
-void ThreadPoolNEW::StartThreads(U32 numThreads)
+void ThreadPool::StartThreads(U32 numThreads)
 {
     StartThreads(numThreads, [this] { TryExecuteTaskWait(); });
 }
 
-void ThreadPoolNEW::CloseThreads(U32 numThreads)
+void ThreadPool::CloseThreads(U32 numThreads)
 {
     std::lock_guard<std::mutex> lock(mMutex);
 
@@ -69,7 +69,7 @@ void ThreadPoolNEW::CloseThreads(U32 numThreads)
 
 
 
-void ThreadPoolNEW::CloseAllThreads()
+void ThreadPool::CloseAllThreads()
 {
     std::lock_guard<std::mutex> lock(mMutex);
     mCloseThreads = true;
@@ -88,7 +88,7 @@ void ThreadPoolNEW::CloseAllThreads()
 
 
 
-void ThreadPoolNEW::TryExecuteTask()
+void ThreadPool::TryExecuteTask()
 {
     std::unique_ptr<TaskBase> task{nullptr};
     if (mQueue.tryPop(task))
@@ -99,7 +99,7 @@ void ThreadPoolNEW::TryExecuteTask()
 
 
 
-void ThreadPoolNEW::TryExecuteTaskWait()
+void ThreadPool::TryExecuteTaskWait()
 {
     WaitForTask();
     TryExecuteTask();
@@ -107,19 +107,19 @@ void ThreadPoolNEW::TryExecuteTaskWait()
 
 
 
-bool ThreadPoolNEW::HasTasks() const
+bool ThreadPool::HasTasks() const
 {
     return !mQueue.IsEmpty();
 }
 
-U32 ThreadPoolNEW::GetNumTasks() const
+U32 ThreadPool::GetNumTasks() const
 {
     return mQueue.GetSize();
 }
 
 
 
-void ThreadPoolNEW::ClearExceptionLog()
+void ThreadPool::ClearExceptionLog()
 {
     std::lock_guard<std::mutex> lock(mMutex);
     mExceptionLog.clear();
@@ -127,32 +127,32 @@ void ThreadPoolNEW::ClearExceptionLog()
 
 
 
-void ThreadPoolNEW::PropagateExceptions() const
+void ThreadPool::PropagateExceptions() const
 {
     std::lock_guard<std::mutex> lock(mMutex);
     if (!mExceptionLog.empty())
         throw Exception(__PRETTY_FUNCTION__, mExceptionLog);
 }
 
-void ThreadPoolNEW::WaitForTask()
+void ThreadPool::WaitForTask()
 {
     std::unique_lock<std::mutex> lock(mMutexCondition);
     mConditionThreads.wait(lock, [this] { return !mQueue.IsEmpty() || mCloseThreads; });
 }
 
-ThreadPoolNEW::ThreadNEW::~ThreadNEW()
+ThreadPool::Thread::~Thread()
 {
     mThread.join();
 }
 
 
 
-void ThreadPoolNEW::ThreadNEW::Close()
+void ThreadPool::Thread::Close()
 {
     mClose = true;
 }
 
-bool ThreadPoolNEW::ThreadNEW::HasFinished() const
+bool ThreadPool::Thread::HasFinished() const
 {
     return mFinished;
 }

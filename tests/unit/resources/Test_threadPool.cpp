@@ -9,7 +9,7 @@ using namespace GDL;
 
 // Helper functions %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-void ParentOnlyTask(U32& counter, std::thread::id& parentThreadID, ThreadPoolNEW& threadPool)
+void ParentOnlyTask(U32& counter, std::thread::id& parentThreadID, ThreadPool& threadPool)
 {
     if (parentThreadID == std::this_thread::get_id())
         ++counter;
@@ -18,7 +18,7 @@ void ParentOnlyTask(U32& counter, std::thread::id& parentThreadID, ThreadPoolNEW
     std::this_thread::sleep_for(std::chrono::milliseconds(1));
 }
 
-void MemberOnlyTask(std::atomic<U32>& counter, std::thread::id& parentThreadID, ThreadPoolNEW& threadPool)
+void MemberOnlyTask(std::atomic<U32>& counter, std::thread::id& parentThreadID, ThreadPool& threadPool)
 {
     if (parentThreadID != std::this_thread::get_id())
         ++counter;
@@ -37,14 +37,14 @@ void MemberOnlyTask(std::atomic<U32>& counter, std::thread::id& parentThreadID, 
 //! in a deadlock if the thread is yet not asleep and notify_all is only called once.
 BOOST_AUTO_TEST_CASE(Construction_And_Deinitialization)
 {
-    ThreadPoolNEW tp(2);
+    ThreadPool tp(2);
 }
 
 
 
 BOOST_AUTO_TEST_CASE(Deadlock_submit_notification_missing)
 {
-    ThreadPoolNEW tp(2);
+    ThreadPool tp(2);
 
     // Possible deadlock if queue is empty and all threads are waiting. Deadlock occurs if notification is missing
     // during submit call
@@ -58,7 +58,7 @@ BOOST_AUTO_TEST_CASE(Deadlock_submit_notification_missing)
 
 BOOST_AUTO_TEST_CASE(Destruction_with_non_empty_queue)
 {
-    ThreadPoolNEW tp(4);
+    ThreadPool tp(4);
 
     for (U32 i = 0; i < 1000; ++i)
         tp.Submit([]() { std::this_thread::sleep_for(std::chrono::milliseconds(100)); });
@@ -68,7 +68,7 @@ BOOST_AUTO_TEST_CASE(Destruction_with_non_empty_queue)
 
 BOOST_AUTO_TEST_CASE(External_thread_process_tasks)
 {
-    ThreadPoolNEW tp(4);
+    ThreadPool tp(4);
 
     std::thread::id parentThreadID = std::this_thread::get_id();
 
@@ -90,7 +90,7 @@ BOOST_AUTO_TEST_CASE(External_thread_process_tasks)
 
 BOOST_AUTO_TEST_CASE(Exception_handling)
 {
-    ThreadPoolNEW tp(4);
+    ThreadPool tp(4);
     BOOST_CHECK_NO_THROW(tp.PropagateExceptions());
 
     tp.Submit([&] { throw Exception(__PRETTY_FUNCTION__, "test"); });
@@ -113,7 +113,7 @@ BOOST_AUTO_TEST_CASE(Exception_handling)
 BOOST_AUTO_TEST_CASE(Start_and_Close_Threads)
 {
     // with empty queue
-    ThreadPoolNEW tp(2);
+    ThreadPool tp(2);
     BOOST_CHECK(tp.GetNumThreads() == 2);
     tp.StartThreads(3);
     BOOST_CHECK(tp.GetNumThreads() == 5);
@@ -152,7 +152,7 @@ BOOST_AUTO_TEST_CASE(Start_and_Close_Threads)
 
 BOOST_AUTO_TEST_CASE(Start_Thread_With_Custom_Main_Loop)
 {
-    ThreadPoolNEW tp(0);
+    ThreadPool tp(0);
 
     for (U32 i = 0; i < 100; ++i)
         tp.Submit([]() { std::this_thread::sleep_for(std::chrono::microseconds(1)); });
