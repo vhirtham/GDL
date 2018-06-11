@@ -9,7 +9,7 @@ using namespace GDL;
 
 // Helper functions %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-void ParentOnlyTask(U32& counter, std::thread::id& parentThreadID, ThreadPool& threadPool)
+void ParentOnlyTask(U32& counter, std::thread::id& parentThreadID, ThreadPool<1>& threadPool)
 {
     if (parentThreadID == std::this_thread::get_id())
         ++counter;
@@ -18,7 +18,7 @@ void ParentOnlyTask(U32& counter, std::thread::id& parentThreadID, ThreadPool& t
     std::this_thread::sleep_for(std::chrono::milliseconds(1));
 }
 
-void MemberOnlyTask(std::atomic<U32>& counter, std::thread::id& parentThreadID, ThreadPool& threadPool)
+void MemberOnlyTask(std::atomic<U32>& counter, std::thread::id& parentThreadID, ThreadPool<1>& threadPool)
 {
     if (parentThreadID != std::this_thread::get_id())
         ++counter;
