@@ -152,66 +152,6 @@ private:
     //! @brief Lets the current thread wait until there are tasks in the queue
     void WaitForTask();
 };
-
-
-
-template <typename _Func>
-ThreadPool::Thread::Thread(ThreadPool& threadPool, _Func&& function)
-    : mClose{false}
-    , mFinished{false}
-    , mThreadPool(threadPool)
-    , mThread(&Thread::Run<_Func>, this, function)
-{
-}
-
-
-template <typename _Func>
-void ThreadPool::Thread::Run(_Func&& function)
-{
-    while (!mClose && !mThreadPool.mCloseThreads)
-    {
-        try
-        {
-            function();
-        }
-        catch (const std::exception& e)
-        {
-            mThreadPool.mExceptionLog.append("\n");
-            mThreadPool.mExceptionLog.append("Thread caught the following Excption:\n");
-            mThreadPool.mExceptionLog.append(e.what());
-            mThreadPool.mExceptionLog.append("\n");
-        }
-        catch (...)
-        {
-            mThreadPool.mExceptionLog.append("\n");
-            mThreadPool.mExceptionLog.append("Thread caught UNKNOWN exception");
-            mThreadPool.mExceptionLog.append("\n");
-        }
-    }
-    mFinished = true;
-}
-
-
-template <typename _Func, typename... _Args>
-void ThreadPool::StartThreads(U32 numThreads, _Func&& function, _Args&&... args)
-{
-    std::lock_guard<std::mutex> lock(mMutex);
-    for (U32 i = 0; i < numThreads; ++i)
-        mThreads.emplace_back(*this, std::bind(std::forward<_Func>(function), std::forward<_Args>(args)...));
-}
-
-template <typename _F, typename... _Args>
-void ThreadPool::Submit(_F&& function, _Args&&... args)
-{
-    // static assertion
-    using ResultType =
-            std::result_of_t<decltype(std::bind(std::forward<_F>(function), std::forward<_Args>(args)...))()>;
-    using TaskType = Task<decltype(std::bind(std::forward<_F>(function), std::forward<_Args>(args)...))>;
-
-    static_assert(std::is_same<void, ResultType>::value, "Used submit() with non void function!");
-    mQueue.Push(std::make_unique<TaskType>(std::bind(std::forward<_F>(function), std::forward<_Args>(args)...)));
-    mConditionThreads.notify_one();
-}
 }
 
 #include "gdl/resources/cpu/threadPool.inl"
