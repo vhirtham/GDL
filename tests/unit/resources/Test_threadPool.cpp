@@ -28,7 +28,7 @@ void MemberOnlyTask(std::atomic<U32>& counter, std::thread::id& parentThreadID, 
 }
 
 
-// Thread pool tests %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+// Thread pool tests (single queue) %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
 //! @brief Tests the construction and deinitialization
@@ -37,21 +37,24 @@ void MemberOnlyTask(std::atomic<U32>& counter, std::thread::id& parentThreadID, 
 //! in a deadlock if the thread is yet not asleep and notify_all is only called once.
 BOOST_AUTO_TEST_CASE(Construction_And_Deinitialization)
 {
-    ThreadPool tp(2);
+    ThreadPool tp(100);
 }
 
 
-
+//! @brief Tests to check if threads are notified correctly when an empty queue is filled and all threads are sleeping.
 BOOST_AUTO_TEST_CASE(Deadlock_submit_notification_missing)
 {
     ThreadPool tp(2);
 
     // Possible deadlock if queue is empty and all threads are waiting. Deadlock occurs if notification is missing
     // during submit call
-    std::this_thread::sleep_for(std::chrono::milliseconds(2));
+    std::this_thread::sleep_for(std::chrono::milliseconds(1));
 
     for (U32 i = 0; i < 8; ++i)
         tp.Submit([]() { std::this_thread::sleep_for(std::chrono::milliseconds(1)); });
+
+    while (tp.HasTasks())
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
 }
 
 
@@ -196,4 +199,85 @@ BOOST_AUTO_TEST_CASE(Start_Thread_With_Custom_Main_Loop)
     BOOST_CHECK(ML_Counter_1 > 0);
     BOOST_CHECK(ML_Counter_2 > 0);
     BOOST_CHECK(ML_Counter_0 + ML_Counter_1 + ML_Counter_2 >= numSubmits);
+}
+
+
+// Thread pool tests (multiple queue) %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+//! @brief Tests the construction and deinitialization
+BOOST_AUTO_TEST_CASE(MultiQueue_Construction_And_Deinitialization)
+{
+    ThreadPool<4> tp(100);
+}
+
+
+
+//! @brief Tests to check if threads are notified correctly when an empty queue is filled. It also checks if all tasks
+//! are processed.
+BOOST_AUTO_TEST_CASE(MultiQueue_Submit_And_Process)
+{
+    constexpr U32 numQueues = 3;
+    ThreadPool<numQueues> tp(2);
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(1));
+
+    for (U32 i = 0; i < numQueues; ++i)
+    {
+        for (U32 j = 0; j < 8; ++j)
+            tp.SubmitToQueue(i, []() { std::this_thread::sleep_for(std::chrono::milliseconds(1)); });
+
+        while (tp.HasTasks())
+            std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    }
+}
+
+
+
+//! @brief Tests if tasks are put into the right queue and processed as expected
+BOOST_AUTO_TEST_CASE(MultiQueue_Submit_And_Process_Specific_Queues)
+{
+    constexpr U32 numQueues = 3;
+    ThreadPool<numQueues> tp(0);
+
+    tp.SubmitToQueue(2, []() { std::this_thread::sleep_for(std::chrono::milliseconds(1)); });
+    for (U32 i = 0; i < 2; ++i)
+        tp.SubmitToQueue(0, []() { std::this_thread::sleep_for(std::chrono::milliseconds(1)); });
+    for (U32 i = 0; i < 3; ++i)
+        tp.SubmitToQueue(1, []() { std::this_thread::sleep_for(std::chrono::milliseconds(1)); });
+
+    BOOST_CHECK(tp.GetNumTasks(0) == 2);
+    BOOST_CHECK(tp.GetNumTasks(1) == 3);
+    BOOST_CHECK(tp.GetNumTasks(2) == 1);
+    BOOST_CHECK(tp.GetNumTasks() == 6);
+
+    tp.StartThreads(1, [&tp]() { tp.TryExecuteTask(1); });
+    while (tp.HasTasks(1))
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    BOOST_CHECK(tp.GetNumTasks(0) == 2);
+    BOOST_CHECK(tp.GetNumTasks(1) == 0);
+    BOOST_CHECK(tp.GetNumTasks(2) == 1);
+    BOOST_CHECK(tp.GetNumTasks() == 3);
+    tp.CloseAllThreads();
+
+    tp.StartThreads(1, [&tp]() { tp.TryExecuteTask(0); });
+    while (tp.HasTasks(0))
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    BOOST_CHECK(tp.GetNumTasks(0) == 0);
+    BOOST_CHECK(tp.GetNumTasks(1) == 0);
+    BOOST_CHECK(tp.GetNumTasks(2) == 1);
+    BOOST_CHECK(tp.GetNumTasks() == 1);
+    tp.CloseAllThreads();
+
+    for (U32 i = 0; i < 3; ++i)
+        tp.SubmitToQueue(1, []() { std::this_thread::sleep_for(std::chrono::milliseconds(1)); });
+
+    tp.StartThreads(1);
+    while (tp.HasTasks())
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+
+    BOOST_CHECK(tp.GetNumTasks(0) == 0);
+    BOOST_CHECK(tp.GetNumTasks(1) == 0);
+    BOOST_CHECK(tp.GetNumTasks(2) == 0);
+    BOOST_CHECK(tp.GetNumTasks() == 0);
 }

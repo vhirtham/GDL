@@ -26,6 +26,8 @@ class ThreadPool
 {
     static_assert(_NumQueues > 0, "The threadpool needs at least 1 queue");
 
+    using QueueArray = std::array<ThreadPoolQueue<std::unique_ptr<TaskBase>>, _NumQueues>;
+
     class Thread
     {
 
@@ -74,7 +76,7 @@ class ThreadPool
     std::string mExceptionLog;
 
     std::deque<Thread> mThreads;
-    std::array<ThreadPoolQueue<std::unique_ptr<TaskBase>>, _NumQueues> mQueue;
+    QueueArray mQueue;
 
 
 public:
@@ -119,16 +121,30 @@ public:
     //! @brief Closes all threads
     void CloseAllThreads();
 
-    //! @brief Returns true if the thread pool has tasks in its queue
+    //! @brief Returns true if the thread pool has tasks in one or more queues
     //! @return true/false
     bool HasTasks() const;
 
-    //! @brief Gets the number of enqued tasks
-    //! @return Number of enqued tasks
+    //! @brief Returns true if the thread pool has tasks in the specified queue
+    //! @param queueNum: Array number of the queue
+    //! @return true/false
+    bool HasTasks(I32 queueNum) const;
+
+    //! @brief Gets the total number of tasks in all queues
+    //! @return Number of tasks in all queues
     U32 GetNumTasks() const;
 
-    //! @brief Tries to fetch and execute a task from the thread pools queue
+    //! @brief Gets the number of tasks in the specified queue
+    //! @param queueNum: Array number of the queue
+    //! @return Number of tasks in the queue
+    U32 GetNumTasks(I32 queueNum) const;
+
+    //! @brief Tries to fetch and execute a task from one of the thread pools queue
     void TryExecuteTask();
+
+    //! @brief Tries to fetch and execute a task from a specific queue
+    //! @param queueNum: Array number of the queue
+    void TryExecuteTask(I32 queueNum);
 
     //! @brief Tries to fetch and execute a task from the thread pools queue. If no tasks are available, the current
     //! thread waits until new tasks are submitted
@@ -145,11 +161,11 @@ public:
     //! @brief Submits a task to a certain queue of the thread pool
     //! @tparam _F: Function or functor type
     //! @tparam _Args: Parameter pack of the functions argument types
-    //! @param queNum: Number of the queue that should store the task
+    //! @param queueNum: Array number of the queue that should store the task
     //! @param function: Function that should be executed
     //! @param args: Function arguments
     template <typename _F, typename... _Args>
-    void Submit(I32 queueNum, _F&& function, _Args&&... args);
+    void SubmitToQueue(I32 queueNum, _F&& function, _Args&&... args);
 
 
 

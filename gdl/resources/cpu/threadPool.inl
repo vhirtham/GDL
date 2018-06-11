@@ -193,6 +193,13 @@ bool ThreadPool<_NumQueues>::HasTasks() const
     return false;
 }
 
+template <int _NumQueues>
+bool ThreadPool<_NumQueues>::HasTasks(I32 queueNum) const
+{
+    assert(queueNum < _NumQueues && queueNum >= 0);
+    return !mQueue[queueNum].IsEmpty();
+}
+
 
 
 template <int _NumQueues>
@@ -202,6 +209,13 @@ U32 ThreadPool<_NumQueues>::GetNumTasks() const
     for (U32 i = 0; i < mQueue.size(); ++i)
         numTasks += mQueue[i].GetSize();
     return numTasks;
+}
+
+template <int _NumQueues>
+U32 ThreadPool<_NumQueues>::GetNumTasks(I32 queueNum) const
+{
+    assert(queueNum < _NumQueues && queueNum >= 0);
+    return mQueue[queueNum].GetSize();
 }
 
 
@@ -216,6 +230,15 @@ void ThreadPool<_NumQueues>::TryExecuteTask()
             task->execute();
             break;
         }
+}
+
+template <int _NumQueues>
+void ThreadPool<_NumQueues>::TryExecuteTask(I32 queueNum)
+{
+    assert(queueNum < _NumQueues && queueNum >= 0);
+    std::unique_ptr<TaskBase> task{nullptr};
+    if (mQueue[queueNum].tryPop(task))
+        task->execute();
 }
 
 
@@ -242,20 +265,20 @@ template <int _NumQueues>
 template <typename _F, typename... _Args>
 void ThreadPool<_NumQueues>::Submit(_F&& function, _Args&&... args)
 {
-    Submit(0, function, std::forward(args)...);
+    SubmitToQueue(0, function, std::forward(args)...);
 }
 
 
 template <int _NumQueues>
 template <typename _F, typename... _Args>
-void ThreadPool<_NumQueues>::Submit(I32 queueNum, _F&& function, _Args&&... args)
+void ThreadPool<_NumQueues>::SubmitToQueue(I32 queueNum, _F&& function, _Args&&... args)
 {
     using ResultType =
             std::result_of_t<decltype(std::bind(std::forward<_F>(function), std::forward<_Args>(args)...))()>;
     using TaskType = Task<decltype(std::bind(std::forward<_F>(function), std::forward<_Args>(args)...))>;
 
     static_assert(std::is_same<void, ResultType>::value, "Used submit() with non void function!");
-    assert(queueNum < _NumQueues && queueNum >=0);
+    assert(queueNum < _NumQueues && queueNum >= 0);
 
     mQueue[queueNum].Push(
             std::make_unique<TaskType>(std::bind(std::forward<_F>(function), std::forward<_Args>(args)...)));
