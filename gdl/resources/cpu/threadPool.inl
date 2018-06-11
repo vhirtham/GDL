@@ -31,7 +31,6 @@ ThreadPool<_NumQueues>::Thread::~Thread()
 
 
 
-
 template <int _NumQueues>
 void ThreadPool<_NumQueues>::Thread::Close()
 {
@@ -40,13 +39,11 @@ void ThreadPool<_NumQueues>::Thread::Close()
 
 
 
-
 template <int _NumQueues>
 bool ThreadPool<_NumQueues>::Thread::HasFinished() const
 {
     return mFinished;
 }
-
 
 
 
@@ -79,13 +76,11 @@ void ThreadPool<_NumQueues>::Thread::Run(_Func&& function)
 
 
 
-
 template <int _NumQueues>
 ThreadPool<_NumQueues>::~ThreadPool()
 {
     Deinitialize();
 }
-
 
 
 
@@ -98,14 +93,12 @@ ThreadPool<_NumQueues>::ThreadPool(const U32 numThreads)
 
 
 
-
 template <int _NumQueues>
 void ThreadPool<_NumQueues>::Deinitialize()
 {
     CloseAllThreads();
     PropagateExceptions();
 }
-
 
 
 
@@ -118,14 +111,12 @@ void ThreadPool<_NumQueues>::Initialize()
 
 
 
-
 template <int _NumQueues>
 U32 ThreadPool<_NumQueues>::GetNumThreads() const
 {
     std::lock_guard<std::mutex> lock(mMutex);
     return mThreads.size();
 }
-
 
 
 
@@ -137,7 +128,6 @@ void ThreadPool<_NumQueues>::StartThreads(U32 numThreads)
 
 
 
-
 template <int _NumQueues>
 template <typename _Func, typename... _Args>
 void ThreadPool<_NumQueues>::StartThreads(U32 numThreads, _Func&& function, _Args&&... args)
@@ -146,7 +136,6 @@ void ThreadPool<_NumQueues>::StartThreads(U32 numThreads, _Func&& function, _Arg
     for (U32 i = 0; i < numThreads; ++i)
         mThreads.emplace_back(*this, std::bind(std::forward<_Func>(function), std::forward<_Args>(args)...));
 }
-
 
 
 
@@ -175,7 +164,6 @@ void ThreadPool<_NumQueues>::CloseThreads(U32 numThreads)
 
 
 
-
 template <int _NumQueues>
 void ThreadPool<_NumQueues>::CloseAllThreads()
 {
@@ -196,22 +184,25 @@ void ThreadPool<_NumQueues>::CloseAllThreads()
 
 
 
-
 template <int _NumQueues>
 bool ThreadPool<_NumQueues>::HasTasks() const
 {
-    return !mQueue.IsEmpty();
+    for (U32 i = 0; i < mQueue.size(); ++i)
+        if (!mQueue[i].IsEmpty())
+            return true;
+    return false;
 }
-
 
 
 
 template <int _NumQueues>
 U32 ThreadPool<_NumQueues>::GetNumTasks() const
 {
-    return mQueue.GetSize();
+    U32 numTasks = 0;
+    for (U32 i = 0; i < mQueue.size(); ++i)
+        numTasks += mQueue[i].GetSize();
+    return numTasks;
 }
-
 
 
 
@@ -219,12 +210,13 @@ template <int _NumQueues>
 void ThreadPool<_NumQueues>::TryExecuteTask()
 {
     std::unique_ptr<TaskBase> task{nullptr};
-    if (mQueue.tryPop(task))
-    {
-        task->execute();
-    }
+    for (U32 i = 0; i < mQueue.size(); ++i)
+        if (mQueue[i].tryPop(task))
+        {
+            task->execute();
+            break;
+        }
 }
-
 
 
 
@@ -237,14 +229,12 @@ void ThreadPool<_NumQueues>::TryExecuteTaskWait()
 
 
 
-
 template <int _NumQueues>
 void ThreadPool<_NumQueues>::WaitForTask()
 {
     std::unique_lock<std::mutex> lock(mMutexCondition);
-    mConditionThreads.wait(lock, [this] { return !mQueue.IsEmpty() || mCloseThreads; });
+    mConditionThreads.wait(lock, [this] { return HasTasks() || mCloseThreads; });
 }
-
 
 
 
@@ -252,16 +242,25 @@ template <int _NumQueues>
 template <typename _F, typename... _Args>
 void ThreadPool<_NumQueues>::Submit(_F&& function, _Args&&... args)
 {
-    // static assertion
+    Submit(0, function, std::forward(args)...);
+}
+
+
+template <int _NumQueues>
+template <typename _F, typename... _Args>
+void ThreadPool<_NumQueues>::Submit(I32 queueNum, _F&& function, _Args&&... args)
+{
     using ResultType =
             std::result_of_t<decltype(std::bind(std::forward<_F>(function), std::forward<_Args>(args)...))()>;
     using TaskType = Task<decltype(std::bind(std::forward<_F>(function), std::forward<_Args>(args)...))>;
 
     static_assert(std::is_same<void, ResultType>::value, "Used submit() with non void function!");
-    mQueue.Push(std::make_unique<TaskType>(std::bind(std::forward<_F>(function), std::forward<_Args>(args)...)));
+    assert(queueNum < _NumQueues && queueNum >=0);
+
+    mQueue[queueNum].Push(
+            std::make_unique<TaskType>(std::bind(std::forward<_F>(function), std::forward<_Args>(args)...)));
     mConditionThreads.notify_one();
 }
-
 
 
 
@@ -271,7 +270,6 @@ void ThreadPool<_NumQueues>::ClearExceptionLog()
     std::lock_guard<std::mutex> lock(mMutex);
     mExceptionLog.clear();
 }
-
 
 
 

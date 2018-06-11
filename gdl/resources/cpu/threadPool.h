@@ -5,6 +5,7 @@
 #include "gdl/resources/cpu/taskBase.h"
 #include "gdl/resources/cpu/threadPoolQueue.h"
 
+#include <array>
 #include <condition_variable>
 #include <deque>
 #include <functional>
@@ -23,6 +24,8 @@ namespace GDL
 template <int _NumQueues = 1>
 class ThreadPool
 {
+    static_assert(_NumQueues > 0, "The threadpool needs at least 1 queue");
+
     class Thread
     {
 
@@ -71,7 +74,7 @@ class ThreadPool
     std::string mExceptionLog;
 
     std::deque<Thread> mThreads;
-    ThreadPoolQueue<std::unique_ptr<TaskBase>> mQueue;
+    std::array<ThreadPoolQueue<std::unique_ptr<TaskBase>>, _NumQueues> mQueue;
 
 
 public:
@@ -131,13 +134,22 @@ public:
     //! thread waits until new tasks are submitted
     void TryExecuteTaskWait();
 
-    //! @brief Submits a task to the thread pool
+    //! @brief Submits a task to main queue ([0]) of the thread pool
     //! @tparam _F: Function or functor type
     //! @tparam _Args: Parameter pack of the functions argument types
     //! @param function: Function that should be executed
     //! @param args: Function arguments
     template <typename _F, typename... _Args>
     void Submit(_F&& function, _Args&&... args);
+
+    //! @brief Submits a task to a certain queue of the thread pool
+    //! @tparam _F: Function or functor type
+    //! @tparam _Args: Parameter pack of the functions argument types
+    //! @param queNum: Number of the queue that should store the task
+    //! @param function: Function that should be executed
+    //! @param args: Function arguments
+    template <typename _F, typename... _Args>
+    void Submit(I32 queueNum, _F&& function, _Args&&... args);
 
 
 
