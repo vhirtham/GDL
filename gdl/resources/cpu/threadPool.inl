@@ -1,7 +1,10 @@
+#pragma once
+
 #include "gdl/resources/cpu/threadPool.h"
 
 
 #include "gdl/base/Exception.h"
+
 
 #include <cassert>
 

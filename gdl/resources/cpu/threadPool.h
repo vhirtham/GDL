@@ -213,3 +213,5 @@ void ThreadPool::Submit(_F&& function, _Args&&... args)
     mConditionThreads.notify_one();
 }
 }
+
+#include "gdl/resources/cpu/threadPool.inl"

@@ -1,5 +1,4 @@
 addTest(threadPool
-    resources/cpu/threadPool.cpp
     resources/cpu/threadPoolQueue.cpp
     )
 
