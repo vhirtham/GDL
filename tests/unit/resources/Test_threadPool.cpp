@@ -58,7 +58,7 @@ BOOST_AUTO_TEST_CASE(Deadlock_submit_notification_missing)
 }
 
 
-
+//! @brief Checks if the threadpool can be destroyed while it still contains tasks
 BOOST_AUTO_TEST_CASE(Destruction_with_non_empty_queue)
 {
     ThreadPool tp(4);
@@ -68,7 +68,7 @@ BOOST_AUTO_TEST_CASE(Destruction_with_non_empty_queue)
 }
 
 
-
+//! @brief Tests task processing by threads that are not managed by the threadpool
 BOOST_AUTO_TEST_CASE(External_thread_process_tasks)
 {
     ThreadPool tp(4);
@@ -91,6 +91,8 @@ BOOST_AUTO_TEST_CASE(External_thread_process_tasks)
     BOOST_CHECK(counterMember == 100);
 }
 
+
+//! @brief Checks the exception handling mechanism.
 BOOST_AUTO_TEST_CASE(Exception_handling)
 {
     ThreadPool tp(4);
@@ -112,7 +114,10 @@ BOOST_AUTO_TEST_CASE(Exception_handling)
     tp.ClearExceptionLog();
 }
 
-
+//! @brief Tests if threads are started and closed correctly.
+//! @remark This test didn't catch a bug were the CloseThreads function caused all threads to leave its main loop
+//! instead of just the specified number of threads. This is still the case, but the LIFO test will fail/deadlock
+//! in this case.
 BOOST_AUTO_TEST_CASE(Start_and_Close_Threads)
 {
     // with empty queue
@@ -153,6 +158,8 @@ BOOST_AUTO_TEST_CASE(Start_and_Close_Threads)
     BOOST_CHECK(tp.GetNumTasks() > 0);
 }
 
+
+//! @brief Tests if threads with custom main loop work as expected
 BOOST_AUTO_TEST_CASE(Start_Thread_With_Custom_Main_Loop)
 {
     ThreadPool tp(0);
