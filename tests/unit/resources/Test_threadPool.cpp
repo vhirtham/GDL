@@ -281,3 +281,53 @@ BOOST_AUTO_TEST_CASE(MultiQueue_Submit_And_Process_Specific_Queues)
     BOOST_CHECK(tp.GetNumTasks(2) == 0);
     BOOST_CHECK(tp.GetNumTasks() == 0);
 }
+
+
+//! @brief Tests if the last created  threads are destroyed first
+//! @remark This could also be tested with a single queue, but it is simpler with multiple queues
+BOOST_AUTO_TEST_CASE(MultiQueue_LIFO_ThreadDestruction)
+{
+    constexpr U32 numQueues = 4;
+    ThreadPool<numQueues> tp(0);
+
+    for (U32 i = 0; i < numQueues; ++i)
+        tp.StartThreads(1, [&tp, i]() { tp.TryExecuteTask(i); });
+
+    for (U32 i = 0; i < numQueues; ++i)
+        tp.SubmitToQueue(i, []() { std::this_thread::sleep_for(std::chrono::milliseconds(1)); });
+
+    while (tp.GetNumTasks() > 0)
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+
+    for (U32 i = 0; i < numQueues; ++i)
+        BOOST_CHECK(tp.GetNumTasks(i) == 0);
+
+
+
+    tp.CloseThreads(1);
+    for (U32 i = 0; i < numQueues; ++i)
+        tp.SubmitToQueue(i, []() { std::this_thread::sleep_for(std::chrono::milliseconds(1)); });
+
+    while (tp.GetNumTasks() > 1)
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+
+    for (U32 i = 0; i < numQueues - 1; ++i)
+        BOOST_CHECK(tp.GetNumTasks(i) == 0);
+
+    BOOST_CHECK(tp.GetNumTasks(numQueues - 1) == 1);
+
+
+
+    tp.CloseThreads(2);
+    for (U32 i = 0; i < numQueues; ++i)
+        tp.SubmitToQueue(i, []() { std::this_thread::sleep_for(std::chrono::milliseconds(1)); });
+
+    while (tp.GetNumTasks() > 4)
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+
+    for (U32 i = 0; i < numQueues - 3; ++i)
+        BOOST_CHECK(tp.GetNumTasks(i) == 0);
+    for (U32 i = numQueues - 1; i > 0; --i)
+        BOOST_CHECK(tp.GetNumTasks(numQueues - 1) > 0);
+    BOOST_CHECK(tp.GetNumTasks() == 4);
+}

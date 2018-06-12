@@ -51,7 +51,7 @@ template <int _NumQueues>
 template <typename _Func>
 void ThreadPool<_NumQueues>::Thread::Run(_Func&& function)
 {
-    while (!mClose && !mThreadPool.mCloseThreads)
+    while (!mClose)
     {
         try
         {
@@ -168,7 +168,11 @@ template <int _NumQueues>
 void ThreadPool<_NumQueues>::CloseAllThreads()
 {
     std::lock_guard<std::mutex> lock(mMutex);
+
     mCloseThreads = true;
+    for(auto& thread : mThreads)
+        thread.Close();
+
     while (!mThreads.empty())
     {
         mConditionThreads.notify_all();

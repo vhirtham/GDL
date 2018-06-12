@@ -68,11 +68,16 @@ class ThreadPool
 
 
 
-    std::atomic<bool> mCloseThreads = false;
-    mutable std::mutex mMutex;
-    std::mutex mMutexCondition;
-    std::condition_variable mConditionThreads;
+    // Member Variables --------------------------------------------------
 
+    //!@brief As long as this variable is true, threads won't wait for empty queues to be filled. This avoids deadlocks
+    //! due to waiting for threads to close which are currently waiting for tasks.
+    std::atomic<bool> mCloseThreads = false;
+
+    std::condition_variable mConditionThreads;
+    std::mutex mMutexCondition;
+
+    mutable std::mutex mMutex;
     std::string mExceptionLog;
 
     std::deque<Thread> mThreads;
