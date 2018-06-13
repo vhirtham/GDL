@@ -271,7 +271,7 @@ template <int _NumQueues>
 template <typename _F, typename... _Args>
 void ThreadPool<_NumQueues>::Submit(_F&& function, _Args&&... args)
 {
-    SubmitToQueue(0, function, std::forward(args)...);
+    SubmitToQueue(0, function, args...);
 }
 
 
