@@ -59,6 +59,7 @@ void ThreadPool<_NumQueues>::Thread::Run(_Func&& function)
         }
         catch (const std::exception& e)
         {
+            std::lock_guard<std::mutex> lock(mThreadPool.mMutex);
             mThreadPool.mExceptionLog.append("\n");
             mThreadPool.mExceptionLog.append("Thread caught the following Excption:\n");
             mThreadPool.mExceptionLog.append(e.what());
@@ -66,6 +67,7 @@ void ThreadPool<_NumQueues>::Thread::Run(_Func&& function)
         }
         catch (...)
         {
+            std::lock_guard<std::mutex> lock(mThreadPool.mMutex);
             mThreadPool.mExceptionLog.append("\n");
             mThreadPool.mExceptionLog.append("Thread caught UNKNOWN exception");
             mThreadPool.mExceptionLog.append("\n");
@@ -170,7 +172,7 @@ void ThreadPool<_NumQueues>::CloseAllThreads()
     std::lock_guard<std::mutex> lock(mMutex);
 
     mCloseThreads = true;
-    for(auto& thread : mThreads)
+    for (auto& thread : mThreads)
         thread.Close();
 
     while (!mThreads.empty())
@@ -296,6 +298,13 @@ void ThreadPool<_NumQueues>::ClearExceptionLog()
 {
     std::lock_guard<std::mutex> lock(mMutex);
     mExceptionLog.clear();
+}
+
+template<int _NumQueues>
+U32 ThreadPool<_NumQueues>::ExceptionLogSize() const
+{
+    std::lock_guard<std::mutex> lock(mMutex);
+    return mExceptionLog.size();
 }
 
 

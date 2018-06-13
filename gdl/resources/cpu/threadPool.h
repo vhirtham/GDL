@@ -177,6 +177,10 @@ public:
     //! @brief Clears the exception log
     void ClearExceptionLog();
 
+    //! @brief Gets the size of the exception log
+    //! @return Size of the exception log
+    U32 ExceptionLogSize() const;
+
     //! @brief Checks if a worker thread has caught an exception and rethrows it.
     void PropagateExceptions() const;
 

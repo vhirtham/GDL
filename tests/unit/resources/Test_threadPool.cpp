@@ -2,6 +2,7 @@
 
 #include "gdl/base/Exception.h"
 #include "gdl/resources/cpu/threadPool.h"
+#include "gdl/resources/cpu/utility/deadlockTerminationTimer.h"
 #include <iostream>
 
 using namespace GDL;
@@ -37,6 +38,7 @@ void MemberOnlyTask(std::atomic<U32>& counter, std::thread::id& parentThreadID, 
 //! in a deadlock if the thread is yet not asleep and notify_all is only called once.
 BOOST_AUTO_TEST_CASE(Construction_And_Deinitialization)
 {
+    DeadlockTerminationTimer dtt;
     ThreadPool tp(100);
 }
 
@@ -44,6 +46,7 @@ BOOST_AUTO_TEST_CASE(Construction_And_Deinitialization)
 //! @brief Tests to check if threads are notified correctly when an empty queue is filled and all threads are sleeping.
 BOOST_AUTO_TEST_CASE(Deadlock_submit_notification_missing)
 {
+    DeadlockTerminationTimer dtt;
     ThreadPool tp(2);
 
     // Possible deadlock if queue is empty and all threads are waiting. Deadlock occurs if notification is missing
@@ -61,8 +64,8 @@ BOOST_AUTO_TEST_CASE(Deadlock_submit_notification_missing)
 //! @brief Checks if the threadpool can be destroyed while it still contains tasks
 BOOST_AUTO_TEST_CASE(Destruction_with_non_empty_queue)
 {
+    DeadlockTerminationTimer dtt;
     ThreadPool tp(4);
-
     for (U32 i = 0; i < 1000; ++i)
         tp.Submit([]() { std::this_thread::sleep_for(std::chrono::milliseconds(100)); });
 }
@@ -71,6 +74,7 @@ BOOST_AUTO_TEST_CASE(Destruction_with_non_empty_queue)
 //! @brief Tests task processing by threads that are not managed by the threadpool
 BOOST_AUTO_TEST_CASE(External_thread_process_tasks)
 {
+    DeadlockTerminationTimer dtt;
     ThreadPool tp(4);
 
     std::thread::id parentThreadID = std::this_thread::get_id();
@@ -95,11 +99,13 @@ BOOST_AUTO_TEST_CASE(External_thread_process_tasks)
 //! @brief Checks the exception handling mechanism.
 BOOST_AUTO_TEST_CASE(Exception_handling)
 {
+    DeadlockTerminationTimer dtt;
     ThreadPool tp(4);
     BOOST_CHECK_NO_THROW(tp.PropagateExceptions());
 
     tp.Submit([&] { throw Exception(__PRETTY_FUNCTION__, "test"); });
-    std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    while (tp.ExceptionLogSize() == 0)
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
 
     BOOST_CHECK_THROW(tp.PropagateExceptions(), Exception);
 
@@ -120,6 +126,8 @@ BOOST_AUTO_TEST_CASE(Exception_handling)
 //! in this case.
 BOOST_AUTO_TEST_CASE(Start_and_Close_Threads)
 {
+    DeadlockTerminationTimer dtt;
+
     // with empty queue
     ThreadPool tp(2);
     BOOST_CHECK(tp.GetNumThreads() == 2);
@@ -162,6 +170,7 @@ BOOST_AUTO_TEST_CASE(Start_and_Close_Threads)
 //! @brief Tests if threads with custom main loop work as expected
 BOOST_AUTO_TEST_CASE(Start_Thread_With_Custom_Main_Loop)
 {
+    DeadlockTerminationTimer dtt;
     ThreadPool tp(0);
 
     for (U32 i = 0; i < 100; ++i)
@@ -215,6 +224,7 @@ BOOST_AUTO_TEST_CASE(Start_Thread_With_Custom_Main_Loop)
 //! @brief Tests the construction and deinitialization
 BOOST_AUTO_TEST_CASE(MultiQueue_Construction_And_Deinitialization)
 {
+    DeadlockTerminationTimer dtt;
     ThreadPool<4> tp(100);
 }
 
@@ -224,6 +234,7 @@ BOOST_AUTO_TEST_CASE(MultiQueue_Construction_And_Deinitialization)
 //! are processed.
 BOOST_AUTO_TEST_CASE(MultiQueue_Submit_And_Process)
 {
+    DeadlockTerminationTimer dtt;
     constexpr U32 numQueues = 3;
     ThreadPool<numQueues> tp(2);
 
@@ -244,6 +255,7 @@ BOOST_AUTO_TEST_CASE(MultiQueue_Submit_And_Process)
 //! @brief Tests if tasks are put into the right queue and processed as expected
 BOOST_AUTO_TEST_CASE(MultiQueue_Submit_And_Process_Specific_Queues)
 {
+    DeadlockTerminationTimer dtt;
     constexpr U32 numQueues = 3;
     ThreadPool<numQueues> tp(0);
 
@@ -294,6 +306,7 @@ BOOST_AUTO_TEST_CASE(MultiQueue_Submit_And_Process_Specific_Queues)
 //! @remark This could also be tested with a single queue, but it is simpler with multiple queues
 BOOST_AUTO_TEST_CASE(MultiQueue_LIFO_ThreadDestruction)
 {
+    DeadlockTerminationTimer dtt;
     constexpr U32 numQueues = 4;
     ThreadPool<numQueues> tp(0);
 
