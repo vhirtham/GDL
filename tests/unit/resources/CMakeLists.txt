@@ -9,3 +9,4 @@ addTest(allocators
     resources/memory/memoryManager.cpp
     )
 addTest(globalNewCounter)
+addTest(traceBuffer)
