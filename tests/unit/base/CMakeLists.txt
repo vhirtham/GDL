@@ -1,2 +1,2 @@
-addTest(timer
-    )
+addTest(timer)
+addTest(outputFile)

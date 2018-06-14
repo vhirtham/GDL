@@ -15,11 +15,11 @@ BOOST_AUTO_TEST_CASE(traceBuffer_Single)
 {
     TraceBuffer<100>& tb = TraceBuffer<100>::Instance();
     BOOST_CHECK(tb.GetCurrentIndex() == 0);
-    for (I32 i = 0; i < tb.GetBufferSize() - 2; ++i)
+    for (U32 i = 0; i < tb.GetBufferSize() - 2; ++i)
         tb.LogEvent("event");
-    BOOST_CHECK(tb.GetCurrentIndex() == tb.GetBufferSize() - 2);
+    BOOST_CHECK(tb.GetCurrentIndex() == static_cast<I32>(tb.GetBufferSize()) - 2);
     tb.LogEvent("event");
-    BOOST_CHECK(tb.GetCurrentIndex() == tb.GetBufferSize() - 1);
+    BOOST_CHECK(tb.GetCurrentIndex() == static_cast<I32>(tb.GetBufferSize()) - 1);
     tb.LogEvent("event");
     BOOST_CHECK(tb.GetCurrentIndex() == 0);
     tb.LogEvent("event");
@@ -60,7 +60,7 @@ BOOST_AUTO_TEST_CASE(traceBuffer_Multi_Index_Correct)
         threads[i].join();
 
 
-    BOOST_CHECK(tb.GetCurrentIndex() == totalNumberOfEvents % tb.GetBufferSize());
+    BOOST_CHECK(tb.GetCurrentIndex() == static_cast<I32>(totalNumberOfEvents % tb.GetBufferSize()));
 }
 
 
@@ -93,7 +93,7 @@ BOOST_AUTO_TEST_CASE(traceBuffer_Multi_Unique_Indices)
     for (U32 i = 0; i < numLogsForThread.size(); ++i)
         threads[i].join();
 
-    for (U32 i = 0; i < totalNumberOfEvents; ++i)
+    for (I32 i = 0; i < static_cast<I32>(totalNumberOfEvents); ++i)
     {
         BOOST_CHECK(tb[i].mEventMessage.size() == 1);
         BOOST_CHECK(tb[i].mEventMessage[0] == 'e');

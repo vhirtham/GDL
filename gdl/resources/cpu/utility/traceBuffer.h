@@ -82,7 +82,7 @@ public:
     //! @return Requested event log
     const EventLog& operator[](I32 index) const
     {
-        assert(index >-1 && index < _BufferSize);
+        assert(index >-1 && index < static_cast<I32>(_BufferSize));
         return mLog[index];
     }
 
