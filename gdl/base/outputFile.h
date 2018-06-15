@@ -20,11 +20,10 @@ public:
     //! @param fileName: Name of the file that should be written to
     OutputFile(const std::string& fileName)
     {
-        mFile.open(fileName, std::ofstream::out | std::ofstream::trunc);
-        if (!mFile.is_open())
-            throw Exception(__PRETTY_FUNCTION__, "Can't open output file \"" + fileName + "\" !");
+        Open(fileName);
     }
 
+    OutputFile() = default;
     OutputFile(const OutputFile&) = delete;
     OutputFile(OutputFile&&) = delete;
     OutputFile& operator=(const OutputFile&) = delete;
@@ -34,7 +33,33 @@ public:
     //! @brief Dtor which closes the opened file
     ~OutputFile()
     {
-        mFile.close();
+        Close();
+    }
+
+    //! @brief Opens the output file
+    //! @param fileName: Name of the file that should be written to
+    void Open(std::string fileName)
+    {
+        if (IsOpen())
+            Close();
+        mFile.open(fileName, std::ofstream::out | std::ofstream::trunc);
+        if (!IsOpen())
+            throw Exception(__PRETTY_FUNCTION__, "Can't open output file \"" + fileName + "\" !");
+    }
+
+
+    //! @brief Closes the output file
+    void Close()
+    {
+        if (IsOpen())
+            mFile.close();
+    }
+
+    //! @brief Returns if a file is opened
+    //! @return TRUE if a file is opened, FALSE otherwise
+    bool IsOpen() const
+    {
+        return mFile.is_open();
     }
 
     //! @brief Writes data to the file

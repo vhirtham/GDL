@@ -1,6 +1,7 @@
 #pragma once
 
 #include "gdl/GDLTypedefs.h"
+#include "gdl/base/outputFile.h"
 #include "gdl/base/timer.h"
 
 #include <array>
@@ -56,17 +57,21 @@ class TraceBuffer
             return *this;
         }
 
-        ~EventLog()=default;
+        ~EventLog() = default;
     };
 
 
     std::atomic_int32_t mIndex;
+    std::atomic_bool mWriteToLogfile;
     std::array<EventLog, _BufferSize> mLog;
     Timer mTimer;
+    OutputFile mLogFile;
+    //    std::thread mWriterThread;
 
 
     TraceBuffer()
         : mIndex{0}
+        , mWriteToLogfile{false}
     {
     }
 
@@ -82,7 +87,7 @@ public:
     //! @return Requested event log
     const EventLog& operator[](I32 index) const
     {
-        assert(index >-1 && index < static_cast<I32>(_BufferSize));
+        assert(index > -1 && index < static_cast<I32>(_BufferSize));
         return mLog[index];
     }
 
@@ -95,13 +100,13 @@ public:
     }
 
 
-    //! @brief Stores a new event in the buffer
-    //! @param eventMessage: Message for that describes the event
-    void LogEvent(const std::string& eventMessage)
+    //! @brief Returns the buffer size
+    //! @return Buffer size
+    constexpr U32 GetBufferSize() const
     {
-        I32 index = GetNewIndex();
-        mLog[index] = EventLog(std::this_thread::get_id(), mTimer.GetMilliseconds(), eventMessage, false);
+        return _BufferSize;
     }
+
 
     //! @brief Returns the current array index of the trace buffer that would be written to
     //! @return Current array index of the trace buffer that would be written to
@@ -111,13 +116,27 @@ public:
     }
 
 
-    //! @brief Returns the buffer size
-    //! @return Buffer size
-    constexpr U32 GetBufferSize() const
+    //! @brief Stores a new event in the buffer
+    //! @param eventMessage: Message for that describes the event
+    void LogEvent(const std::string& eventMessage)
     {
-        return _BufferSize;
+        I32 index = GetNewIndex();
+        mLog[index] = EventLog(std::this_thread::get_id(), mTimer.GetMilliseconds(), eventMessage, false);
     }
 
+
+    //! @brief Opens an output file and starts a writer thread
+    //! @param fileName: Name of the output file
+    void OpenLogFile(std::string fileName)
+    {
+        //        if (mWriterThread.joinable())
+        //        {
+        //            mWriteToLogfile = false;
+        //            mWriterThread.join();
+        //        }
+
+        //        mWriterThread.
+    }
 
 private:
     //! @brief Gets the desired index that should be reserved for the current thread
