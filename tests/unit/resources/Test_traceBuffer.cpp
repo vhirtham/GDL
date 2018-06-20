@@ -100,3 +100,62 @@ BOOST_AUTO_TEST_CASE(traceBuffer_Multi_Unique_Indices)
     }
     BOOST_CHECK(tb[totalNumberOfEvents].mEventMessage.size() == 0);
 }
+
+//! @brief Checks if log files are written correctly.
+BOOST_AUTO_TEST_CASE(traceBuffer_LogFile_Write)
+{
+    constexpr U32 numThreads = 4;
+    constexpr U32 bufferSize = 6;
+    std::string fileName{"traceBufferLog"};
+    TraceBuffer<bufferSize>& tb = TraceBuffer<bufferSize>::Instance();
+    tb.OpenLogFile(fileName);
+
+    // Give writer thread some time to start
+    std::this_thread::sleep_for(std::chrono::milliseconds(10));
+
+
+    std::vector<std::thread> threads;
+
+    for (U32 i = 0; i < numThreads; ++i)
+    {
+        threads.emplace_back([]() {
+            TraceBuffer<bufferSize>& tb_thread = TraceBuffer<bufferSize>::Instance();
+            tb_thread.LogEvent("e");
+        });
+    }
+    for (U32 i = 0; i < numThreads; ++i)
+        threads[i].join();
+    threads.clear();
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(1));
+
+    for (U32 i = 0; i < numThreads; ++i)
+    {
+        threads.emplace_back([]() {
+            TraceBuffer<bufferSize>& tb_thread = TraceBuffer<bufferSize>::Instance();
+            tb_thread.LogEvent("e");
+        });
+    }
+    for (U32 i = 0; i < numThreads; ++i)
+        threads[i].join();
+    threads.clear();
+
+    // Check File content !!!
+}
+
+template <class _TraceBuffer>
+void FillTraceBufferWithEvents(_TraceBuffer& tb, U32 numEvents)
+{
+    for (U32 i = 0; i < numEvents; ++i)
+        tb.LogEvent("e");
+}
+
+//! @brief Checks if an exception is thrown if the trace buffer is filled faster than the logfile can be written
+BOOST_AUTO_TEST_CASE(traceBuffer_Buffer_Overflow)
+{
+    constexpr U32 bufferSize = 3;
+    std::string fileName{"traceBufferLog"};
+    TraceBuffer<bufferSize>& tb = TraceBuffer<bufferSize>::Instance();
+    tb.OpenLogFile(fileName);
+    BOOST_CHECK_THROW(FillTraceBufferWithEvents(tb, 10000), Exception);
+}

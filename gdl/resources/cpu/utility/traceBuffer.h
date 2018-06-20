@@ -3,15 +3,17 @@
 #include "gdl/GDLTypedefs.h"
 #include "gdl/base/outputFile.h"
 #include "gdl/base/timer.h"
+#include "gdl/resources/cpu/thread.h"
 
 #include <array>
 #include <atomic>
 #include <cassert>
+#include <memory>
 #include <string>
 #include <tuple>
 #include <thread>
 
-
+#include <iostream>
 namespace GDL
 {
 template <U32 _BufferSize>
@@ -23,23 +25,23 @@ class TraceBuffer
     {
         std::thread::id mThreadId;
         U32 mTimestamp;
-        std::atomic_bool mWrittenToFile;
+        std::atomic_bool mWriteToFile;
         std::string mEventMessage;
 
 
         EventLog()
             : mThreadId{std::this_thread::get_id()}
             , mTimestamp{0}
-            , mWrittenToFile{true}
+            , mWriteToFile{false}
             , mEventMessage{""}
         {
         }
 
 
-        EventLog(std::thread::id threadId, U32 timestamp, std::string eventMessage, bool writtenToFile)
+        EventLog(std::thread::id threadId, U32 timestamp, std::string eventMessage, bool writeToFile)
             : mThreadId{threadId}
             , mTimestamp{timestamp}
-            , mWrittenToFile{writtenToFile}
+            , mWriteToFile{writeToFile}
             , mEventMessage{eventMessage}
         {
         }
@@ -52,7 +54,7 @@ class TraceBuffer
         {
             mThreadId = other.mThreadId;
             mTimestamp = other.mTimestamp;
-            mWrittenToFile = other.mWrittenToFile.load();
+            mWriteToFile = other.mWriteToFile.load();
             mEventMessage = std::move(other.mEventMessage);
             return *this;
         }
@@ -65,13 +67,13 @@ class TraceBuffer
     std::atomic_bool mWriteToLogfile;
     std::array<EventLog, _BufferSize> mLog;
     Timer mTimer;
-    OutputFile mLogFile;
-    //    std::thread mWriterThread;
+    std::unique_ptr<Thread> mWriterThread;
 
 
     TraceBuffer()
         : mIndex{0}
         , mWriteToLogfile{false}
+        , mWriterThread{nullptr}
     {
     }
 
@@ -80,7 +82,12 @@ public:
     TraceBuffer(TraceBuffer&&) = delete;
     TraceBuffer& operator=(const TraceBuffer&) = delete;
     TraceBuffer& operator=(TraceBuffer&&) = delete;
-    ~TraceBuffer() = default;
+
+    //! Dtor - Stops the thread which is writing to the log file
+    ~TraceBuffer()
+    {
+        CloseLogFile();
+    }
 
     //! @brief Direct access operator to get a specific event log
     //! @param index: Index of the desired event log
@@ -120,44 +127,78 @@ public:
     //! @param eventMessage: Message for that describes the event
     void LogEvent(const std::string& eventMessage)
     {
-        I32 index = GetNewIndex();
-        mLog[index] = EventLog(std::this_thread::get_id(), mTimer.GetMilliseconds(), eventMessage, false);
+        I32 index = GetReservedIndex();
+        if (mLog[index].mWriteToFile)
+            throw Exception(__PRETTY_FUNCTION__, "Trace buffer full! Messages are logged faster as they are written to "
+                                                 "file. Adjust buffer size or delay events.");
+        mLog[index] = EventLog(std::this_thread::get_id(), mTimer.GetMilliseconds(), eventMessage, mWriteToLogfile);
     }
+
+    //! @brief Closes the log file
+    void CloseLogFile()
+    {
+        // send exit signal for writer loop
+        mWriteToLogfile = false;
+        // Waits until the thread is joined before setting the loop variable back to true
+        mWriterThread.reset(nullptr);
+    }
+
 
 
     //! @brief Opens an output file and starts a writer thread
     //! @param fileName: Name of the output file
     void OpenLogFile(std::string fileName)
     {
-        //        if (mWriterThread.joinable())
-        //        {
-        //            mWriteToLogfile = false;
-        //            mWriterThread.join();
-        //        }
+        CloseLogFile();
+
+        mWriteToLogfile = true;
+
+        mWriterThread.reset(new Thread{[fileName, this]() {
+            OutputFile logFile{fileName};
+
+            I32 index = mIndex.load();
+
+            while (mWriteToLogfile || mLog[index].mWriteToFile)
+            {
+                EventLog& logMessage = mLog[index];
+                if (logMessage.mWriteToFile)
+                {
+                    logFile.Write(logMessage.mThreadId, ", ", logMessage.mTimestamp, ", ", logMessage.mEventMessage,
+                                  "\n");
+                    logMessage.mWriteToFile = false;
+                    index = GetNextIndex(index);
+                    continue;
+                }
+                std::this_thread::yield();
+            }
+        }});
+
 
         //        mWriterThread.
     }
 
+
+
 private:
-    //! @brief Gets the desired index that should be reserved for the current thread
-    //! @param expectedValue: Expected value of the atomic index
-    //! @return Index that should be reserved for the current thread
-    I32 GetDesiredIndex(I32 expectedValue) const
+    //! @brief Gets the next index, based on the passed value
+    //! @param currentIndex: Current index
+    //! @return Next index, based on the passed value
+    I32 GetNextIndex(I32 currentIndex) const
     {
-        if (expectedValue == _BufferSize - 1)
+        if (currentIndex == _BufferSize - 1)
             return 0;
-        return expectedValue + 1;
+        return currentIndex + 1;
     }
 
     //! @brief Gets the index that is reserved for the current thread
     //! @return Index that is reserved for the current thread
-    I32 GetNewIndex()
+    I32 GetReservedIndex()
     {
-        I32 newIndex = mIndex.load();
+        I32 reservedIndex = mIndex.load();
 
-        while (!mIndex.compare_exchange_weak(newIndex, GetDesiredIndex(newIndex)))
+        while (!mIndex.compare_exchange_weak(reservedIndex, GetNextIndex(reservedIndex)))
             ;
-        return newIndex;
+        return reservedIndex;
     }
 };
 }
