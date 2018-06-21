@@ -28,7 +28,8 @@ BOOST_AUTO_TEST_CASE(outputFile_Write)
 
     // Check content
     std::string content;
-    std::getline(inputFile, content);
+    if (inputFile.is_open())
+        std::getline(inputFile, content);
 
     std::string expected{"42outputFileTest1337"};
     BOOST_CHECK(content.size() == expected.size());

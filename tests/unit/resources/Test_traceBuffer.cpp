@@ -4,6 +4,7 @@
 
 
 #include <iostream>
+#include <fstream>
 #include <vector>
 
 
@@ -140,7 +141,25 @@ BOOST_AUTO_TEST_CASE(traceBuffer_LogFile_Write)
         threads[i].join();
     threads.clear();
 
-    // Check File content !!!
+    // Wait for file to be written
+    std::this_thread::sleep_for(std::chrono::milliseconds(1));
+
+    // Check File content
+    std::ifstream inputFile;
+    inputFile.open(fileName);
+
+    // File is accessable
+    BOOST_CHECK(inputFile.is_open());
+
+    U32 lineCounter = 0;
+    if (inputFile.is_open())
+        while (!inputFile.eof())
+        {
+            std::string line;
+            std::getline(inputFile, line);
+            ++lineCounter;
+        }
+    BOOST_CHECK(lineCounter == 9); // last line is empty but not eof
 }
 
 template <class _TraceBuffer>

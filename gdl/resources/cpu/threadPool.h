@@ -64,6 +64,10 @@ class ThreadPool
         //! @param function: Function which is executed in the threads main loop
         template <typename _Func>
         void Run(_Func&& function);
+
+    private:
+        template <typename _Func>
+        void HandleExceptions(_Func&& function);
     };
 
 

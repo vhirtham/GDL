@@ -52,9 +52,18 @@ template <typename _Func>
 void ThreadPool<_NumQueues>::Thread::Run(_Func&& function)
 {
 
+    // Main loop
+    HandleExceptions([&](){ while (!mClose)
+            function();});
+    mFinished = true;
+}
+
+template <int _NumQueues>
+template <typename _Func>
+void ThreadPool<_NumQueues>::Thread::HandleExceptions(_Func&& function)
+{
     try
     {
-        while (!mClose)
             function();
     }
     catch (const std::exception& e)
@@ -72,10 +81,7 @@ void ThreadPool<_NumQueues>::Thread::Run(_Func&& function)
         mThreadPool.mExceptionLog.append("Thread caught UNKNOWN exception");
         mThreadPool.mExceptionLog.append("\n");
     }
-
-    mFinished = true;
 }
-
 
 
 template <int _NumQueues>
