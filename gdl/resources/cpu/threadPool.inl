@@ -51,28 +51,28 @@ template <int _NumQueues>
 template <typename _Func>
 void ThreadPool<_NumQueues>::Thread::Run(_Func&& function)
 {
-    while (!mClose)
+
+    try
     {
-        try
-        {
+        while (!mClose)
             function();
-        }
-        catch (const std::exception& e)
-        {
-            std::lock_guard<std::mutex> lock(mThreadPool.mMutex);
-            mThreadPool.mExceptionLog.append("\n");
-            mThreadPool.mExceptionLog.append("Thread caught the following Excption:\n");
-            mThreadPool.mExceptionLog.append(e.what());
-            mThreadPool.mExceptionLog.append("\n");
-        }
-        catch (...)
-        {
-            std::lock_guard<std::mutex> lock(mThreadPool.mMutex);
-            mThreadPool.mExceptionLog.append("\n");
-            mThreadPool.mExceptionLog.append("Thread caught UNKNOWN exception");
-            mThreadPool.mExceptionLog.append("\n");
-        }
     }
+    catch (const std::exception& e)
+    {
+        std::lock_guard<std::mutex> lock(mThreadPool.mMutex);
+        mThreadPool.mExceptionLog.append("\n");
+        mThreadPool.mExceptionLog.append("Thread caught the following Excption:\n");
+        mThreadPool.mExceptionLog.append(e.what());
+        mThreadPool.mExceptionLog.append("\n");
+    }
+    catch (...)
+    {
+        std::lock_guard<std::mutex> lock(mThreadPool.mMutex);
+        mThreadPool.mExceptionLog.append("\n");
+        mThreadPool.mExceptionLog.append("Thread caught UNKNOWN exception");
+        mThreadPool.mExceptionLog.append("\n");
+    }
+
     mFinished = true;
 }
 
