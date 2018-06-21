@@ -131,12 +131,16 @@ void ThreadPool<_NumQueues>::StartThreads(U32 numThreads)
 
 
 template <int _NumQueues>
-template <typename _Func, typename... _Args>
-void ThreadPool<_NumQueues>::StartThreads(U32 numThreads, _Func&& function, _Args&&... args)
+template <typename _Func>
+void ThreadPool<_NumQueues>::StartThreads(U32 numThreads, _Func&& function)
 {
+    using ResultType = std::result_of_t<decltype(function)()>;
+    static_assert(std::is_same<void, ResultType>::value, "The threads main loop function should not return any value.");
+
+
     std::lock_guard<std::mutex> lock(mMutex);
     for (U32 i = 0; i < numThreads; ++i)
-        mThreads.emplace_back(*this, std::bind(std::forward<_Func>(function), std::forward<_Args>(args)...));
+        mThreads.emplace_back(*this, std::move(function));
 }
 
 
@@ -300,7 +304,7 @@ void ThreadPool<_NumQueues>::ClearExceptionLog()
     mExceptionLog.clear();
 }
 
-template<int _NumQueues>
+template <int _NumQueues>
 U32 ThreadPool<_NumQueues>::ExceptionLogSize() const
 {
     std::lock_guard<std::mutex> lock(mMutex);

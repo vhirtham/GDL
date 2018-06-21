@@ -112,12 +112,11 @@ public:
 
     //! @brief Starts a specified number of thread with a alternative main loop function
     //! @tparam _Func: Alternative function type
-    //! @tparam _Args: Function arguments types
     //! @param numThreads: Number of threads that should be started
     //! @param function: Alternative main loop function
-    //! @param args: Arguments that should be passed to the provided function
-    template <typename _Func, typename... _Args>
-    void StartThreads(U32 numThreads, _Func&& function, _Args&&... args);
+    //! @remark The function signature should always be void()
+    template <typename _Func>
+    void StartThreads(U32 numThreads, _Func&& function);
 
     //! @brief Closes a specified number of thread
     //! @param numThreads: Number of threads that should be closed

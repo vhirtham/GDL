@@ -200,9 +200,10 @@ BOOST_AUTO_TEST_CASE(Start_Thread_With_Custom_Main_Loop)
         ++counter;
     };
 
-    tp.StartThreads(1, ML_function, std::ref(ML_Counter_0));
-    tp.StartThreads(1, ML_function, std::ref(ML_Counter_1));
-    tp.StartThreads(1, ML_function, std::ref(ML_Counter_2));
+    tp.StartThreads(1, [&]() { ML_function(ML_Counter_0); });
+    tp.StartThreads(1, [&]() { ML_function(ML_Counter_1); });
+    tp.StartThreads(1, [&]() { ML_function(ML_Counter_2); });
+
 
     for (U32 i = 0; i < numSubmits; ++i)
         tp.Submit([]() { std::this_thread::sleep_for(std::chrono::microseconds(1)); });

@@ -3,6 +3,7 @@
 #include "gdl/GDLTypedefs.h"
 #include "gdl/base/timer.h"
 
+#include <iostream>
 #include <thread>
 
 
@@ -31,8 +32,12 @@ public:
             while (!mStopTerminationTimer)
             {
                 if (mTimer.GetMilliseconds() > mMillisecondsUntilTermination)
+                {
+                    std::cout << "Deadlock timer idle time expired. Possible deadlock. Terminating application..."
+                              << std::endl; // LCOV_EXCL_LINE
+                    std::cout.flush(); // LCOV_EXCL_LINE
                     std::terminate(); // LCOV_EXCL_LINE
-
+                }
                 // no busy waiting ---> valgrind
                 std::this_thread::sleep_for(std::chrono::milliseconds(1));
             }
