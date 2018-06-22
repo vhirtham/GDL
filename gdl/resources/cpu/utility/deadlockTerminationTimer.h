@@ -33,10 +33,12 @@ public:
             {
                 if (mTimer.GetMilliseconds() > mMillisecondsUntilTermination)
                 {
+                    // LCOV_EXCL_START
                     std::cout << "Deadlock timer idle time expired. Possible deadlock. Terminating application..."
-                              << std::endl; // LCOV_EXCL_LINE
-                    std::cout.flush(); // LCOV_EXCL_LINE
-                    std::terminate(); // LCOV_EXCL_LINE
+                              << std::endl;
+                    std::cout.flush();
+                    std::terminate();
+                    // LCOV_EXCL_END
                 }
                 // no busy waiting ---> valgrind
                 std::this_thread::sleep_for(std::chrono::milliseconds(1));
