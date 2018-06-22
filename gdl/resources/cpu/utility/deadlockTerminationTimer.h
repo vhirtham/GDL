@@ -38,7 +38,7 @@ public:
                               << std::endl;
                     std::cout.flush();
                     std::terminate();
-                    // LCOV_EXCL_END
+                    // LCOV_EXCL_STOP
                 }
                 // no busy waiting ---> valgrind
                 std::this_thread::sleep_for(std::chrono::milliseconds(1));
