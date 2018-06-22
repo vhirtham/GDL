@@ -46,10 +46,15 @@ class ThreadPool
 
         //! @brief Constructor that takes a function that should be run in a while loop until the tread is closed
         //! @tparam _Func: Function type
+        //! @tparam _InitFunction: Type of the initialization function
+        //! @tparam _DeinitFunction: Type of the deinitialization function
         //! @param threadPool: The threads thread pool
         //! @param function: Function that should be run
-        template <typename _Func>
-        Thread(ThreadPool& threadPool, _Func&& function);
+        //! @param initFunction: Initialization function
+        //! @param deinitFunction: Deinitialization function
+        template <typename _Func, typename _InitFunction, typename _DeinitFunction>
+        Thread(ThreadPool& threadPool, _Func&& function, _InitFunction&& initFunction,
+               _DeinitFunction&& deinitFunction);
 
         //! @brief Stops the threads while loop
         void Close();
@@ -62,8 +67,8 @@ class ThreadPool
         //! exceptions are caught and written to the thread pools exception log
         //! @tparam _Func: Type of the function which is executed in the threads main loop
         //! @param function: Function which is executed in the threads main loop
-        template <typename _Func>
-        void Run(_Func&& function);
+        template <typename _Func, typename _InitFunction, typename _DeinitFunction>
+        void Run(_Func&& function, _InitFunction&& initFunction, _DeinitFunction&& deinitFunction);
 
     private:
         template <typename _Func>
@@ -81,7 +86,8 @@ class ThreadPool
     std::condition_variable mConditionThreads;
     std::mutex mMutexCondition;
 
-    mutable std::mutex mMutex;
+    mutable std::mutex mMutexThreads;
+    mutable std::mutex mMutexExceptionLog;
     std::string mExceptionLog;
 
     std::deque<Thread> mThreads;
@@ -115,16 +121,30 @@ public:
     void StartThreads(U32 numThreads);
 
     //! @brief Starts a specified number of thread with a alternative main loop function
-    //! @tparam _Func: Alternative function type
+    //! @tparam _Func: Alternative main loop function type
     //! @param numThreads: Number of threads that should be started
     //! @param function: Alternative main loop function
     //! @remark The function signature should always be void()
     template <typename _Func>
     void StartThreads(U32 numThreads, _Func&& function);
 
+
+    //! @brief Starts a specified number of thread with a alternative main loop function
+    //! @tparam _Func: Alternative main loop function type
+    //! @tparam _InitFunction: Type of the initialization function
+    //! @tparam _DeinitFunction: Type of the deinitialization function
+    //! @param numThreads: Number of threads that should be started
+    //! @param function: Alternative main loop function
+    //! @param initFunction: Initialization function
+    //! @param deinitFunction: Deinitialization function
+    //! @remark The  signature of all passed functions should always be void()
+    template <typename _Func, typename _InitFunction, typename _DeinitFunction>
+    void StartThreads(U32 numThreads, _Func&& function, _InitFunction&& initFunction, _DeinitFunction&& deinitFunction);
+
     //! @brief Closes a specified number of thread
-    //! @param numThreads: Number of threads that should be closed
-    void CloseThreads(U32 numThreads);
+    //! @param numThreadsToClose: Number of threads that should be closed
+    //! @remark Negative values close all threads
+    void CloseThreads(I32 numThreadsToClose);
 
     //! @brief Closes all threads
     void CloseAllThreads();
