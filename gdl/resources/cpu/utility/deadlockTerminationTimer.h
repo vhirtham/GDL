@@ -25,7 +25,7 @@ class DeadlockTerminationTimer
 public:
     //! @brief Ctor that takes the number of milliseconds until std::terminate is called
     //! @param millisecondsUntilTermination: Milliseconds until std::terminate is called
-    DeadlockTerminationTimer(U32 millisecondsUntilTermination = 30000)
+    DeadlockTerminationTimer(U32 millisecondsUntilTermination = 60000)
         : mMillisecondsUntilTermination{millisecondsUntilTermination}
         , mStopTerminationTimer{false}
         , mThread{[this]() {

@@ -242,6 +242,55 @@ BOOST_AUTO_TEST_CASE(Initialization_and_Deinitialization_functions)
     BOOST_CHECK(deinit == true);
 }
 
+//! @brief Tests if the Initialization and Deinitialization functions are called
+BOOST_AUTO_TEST_CASE(Exceptions_in_Initialization_and_Deinitialization_functions)
+{
+    DeadlockTerminationTimer dtt;
+    ThreadPool tp(0);
+
+    std::atomic_bool init = false;
+    std::atomic_bool mainLoopRun = false;
+    std::atomic_bool deinit = false;
+
+    tp.StartThreads(1, [&]() { tp.TryExecuteTask(); },
+                    [&]() {
+                        throw Exception(__PRETTY_FUNCTION__, "You shall not initialize!");
+                        init = true;
+                    },
+                    [&]() { deinit = true; });
+
+    tp.Submit([&]() { mainLoopRun = true; });
+    tp.Submit([]() {});
+    while (deinit == false)
+        std::this_thread::yield();
+    BOOST_CHECK(init == false);
+    BOOST_CHECK(mainLoopRun == false);
+    BOOST_CHECK(deinit == true);
+    BOOST_CHECK(tp.GetNumTasks() == 2);
+    BOOST_CHECK_THROW(tp.PropagateExceptions(), Exception);
+    tp.ClearExceptionLog();
+    tp.CloseAllThreads();
+
+    deinit = false;
+    tp.StartThreads(1, [&]() { tp.TryExecuteTask(); }, [&]() { init = true; },
+                    [&]() {
+                        throw Exception(__PRETTY_FUNCTION__, "You shall not deinitialize!");
+                        deinit = true;
+                    });
+
+    while (tp.HasTasks())
+        std::this_thread::yield();
+    tp.CloseAllThreads();
+    BOOST_CHECK_THROW(tp.PropagateExceptions(), Exception);
+    tp.ClearExceptionLog();
+    BOOST_CHECK(init == true);
+    BOOST_CHECK(mainLoopRun == true);
+    BOOST_CHECK(deinit == false);
+    BOOST_CHECK(tp.GetNumTasks() == 0);
+    //    BOOST_CHECK(init == true);
+    //    BOOST_CHECK(deinit == true);
+}
+
 // Thread pool tests (multiple queue) %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
