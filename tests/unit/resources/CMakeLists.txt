@@ -1,14 +1,2 @@
-addTest(thread)
-
-addTest(threadPool
-    resources/cpu/threadPoolQueue.cpp
-    )
-
-addTest(Allocator)
-
-
-addTest(allocators
-    resources/memory/memoryManager.cpp
-    )
-addTest(globalNewCounter)
-addTest(traceBuffer)
+add_subdirectory(cpu)
+add_subdirectory(memory)
