@@ -20,6 +20,8 @@ MemoryPool::MemoryPool(U32 elementSize, U32 memorySize)
     CheckConsistency();
 }
 
+
+
 void* MemoryPool::Allocate(U32 size)
 {
     if (size > mElementSize)
@@ -28,16 +30,17 @@ void* MemoryPool::Allocate(U32 size)
         throw Exception(__PRETTY_FUNCTION__, "No more memory available.");
 
     void* allocatedMemory = mFirstFreeElement;
-    std::memcpy(&mFirstFreeElement, mFirstFreeElement, sizeof(void*));
-    --mFreeMemorySize;
+
+    mFirstFreeElement = ReadListEntry(mFirstFreeElement);
 
     // no more memory left, so here is no last free either
     if (mFirstFreeElement == nullptr)
         mLastFreeElement = nullptr;
 
-    std::cout << allocatedMemory << std::endl;
+    --mFreeMemorySize;
     return allocatedMemory;
 }
+
 
 
 void MemoryPool::Deallocate(void* address)
@@ -46,13 +49,12 @@ void MemoryPool::Deallocate(void* address)
     // Check if there is any way to check if the memory is already freed!
 
     if (mLastFreeElement != nullptr)
-        std::memcpy(mLastFreeElement, &address, sizeof(void*));
+        WriteListEntry(mLastFreeElement, address);
     else
         mFirstFreeElement = static_cast<U8*>(address);
 
     mLastFreeElement = static_cast<U8*>(address);
-    address = nullptr;
-    std::memcpy(mLastFreeElement, &address, sizeof(void*));
+    WriteListEntry(mLastFreeElement, nullptr);
     ++mFreeMemorySize;
 }
 
@@ -65,7 +67,7 @@ void MemoryPool::CheckConsistency() const
 
     while (currentPosition != nullptr)
     {
-        std::memcpy(&currentPosition, currentPosition, sizeof(void*));
+        currentPosition = ReadListEntry(currentPosition);
         ++freeElementsCount;
         if (freeElementsCount > mFreeMemorySize)
             throw Exception(__PRETTY_FUNCTION__, "Found more free elements than expected. Check for loops in the list "
@@ -77,6 +79,8 @@ void MemoryPool::CheckConsistency() const
                         "Free memory count is not as expected. Check if it is set correctly in allocation routine.");
 }
 
+
+
 void MemoryPool::Initialize()
 {
     constexpr U32 minimalElementSize = sizeof(void*);
@@ -86,19 +90,32 @@ void MemoryPool::Initialize()
 
 
     U8* currentPosition = mMemory.get();
-    void* nextAddressPtr = nullptr;
 
     // Set up linked list in free memory
     for (U32 i = 0; i < mMemorySize - 1; ++i)
     {
-        nextAddressPtr = static_cast<void*>(currentPosition + mElementSize);
-        std::memcpy(currentPosition, &nextAddressPtr, sizeof(void*));
+        void* nextAddressPtr = static_cast<void*>(currentPosition + mElementSize);
+        WriteListEntry(currentPosition, nextAddressPtr);
         currentPosition += mElementSize;
     }
-    mLastFreeElement = currentPosition;
 
-    // Set last entry to nullptr
-    nextAddressPtr = nullptr;
-    std::memcpy(currentPosition, &nextAddressPtr, sizeof(void*));
+    mLastFreeElement = currentPosition;
+    WriteListEntry(mLastFreeElement, nullptr);
+}
+
+
+
+U8* MemoryPool::ReadListEntry(const U8* addressToRead) const
+{
+    U8* entry = nullptr;
+    std::memcpy(&entry, addressToRead, sizeof(void*));
+    return entry;
+}
+
+
+
+void MemoryPool::WriteListEntry(U8* positionInMemory, const void* addressToWrite)
+{
+    std::memcpy(positionInMemory, &addressToWrite, sizeof(void*));
 }
 }
