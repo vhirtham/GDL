@@ -131,6 +131,8 @@ void MemoryPool::CheckConstructionParameters() const
     if (mElementSize < minimalElementSize)
         throw Exception(__PRETTY_FUNCTION__,
                         "Element size must be " + std::to_string(minimalElementSize) + " or higher.");
+    if (mNumElements == 0)
+        throw Exception(__PRETTY_FUNCTION__, "Number of elements must be larger than 0");
     if (!is_power_of_2(mAlignment))
         throw Exception(__PRETTY_FUNCTION__, "Alignment must be a power of 2");
     if (mElementSize % mAlignment > 0)

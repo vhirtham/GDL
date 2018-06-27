@@ -17,7 +17,12 @@ using namespace GDL;
 BOOST_AUTO_TEST_CASE(Construction_destruction)
 {
     BOOST_CHECK_NO_THROW(MemoryPool(16, 3));
+
+    // Minimal size is sizeof(void*)
     BOOST_CHECK_THROW(MemoryPool(1, 3), Exception);
+
+    // Zero Elements not allowed
+    BOOST_CHECK_THROW(MemoryPool(16, 0), Exception);
 }
 
 //!@brief This test checks if allocations and deallocations work. Because of the internal design, memory which is
@@ -115,7 +120,8 @@ BOOST_AUTO_TEST_CASE(Deallocation_Exceptions)
     BOOST_CHECK_THROW(mp.Deallocate(static_cast<U8*>(addresses[0]) - 100), Exception);
     BOOST_CHECK_THROW(mp.Deallocate(static_cast<U8*>(addresses[5]) + 100), Exception);
 
-
+    // not a valid element start
+    BOOST_CHECK_THROW(mp.Deallocate(static_cast<U8*>(addresses[2]) + 1), Exception);
 
     addresses[2] = mp.Allocate(8);
     for (U32 i = 0; i < addresses.size(); ++i)
@@ -140,6 +146,12 @@ BOOST_AUTO_TEST_CASE(Alignment)
 
     for (U32 i = 0; i < addresses.size(); ++i)
         BOOST_CHECK_NO_THROW(mp.Deallocate(addresses[i]));
+
+    // alignment must be power of 2
+    BOOST_CHECK_THROW(MemoryPool(5, 5, 5), Exception);
+
+    // element size must be a multiple of alignment
+    BOOST_CHECK_THROW(MemoryPool(4, 5, 8), Exception);
 }
 
 
