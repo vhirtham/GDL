@@ -148,10 +148,10 @@ BOOST_AUTO_TEST_CASE(Alignment)
         BOOST_CHECK_NO_THROW(mp.Deallocate(addresses[i]));
 
     // alignment must be power of 2
-    BOOST_CHECK_THROW(MemoryPool(5, 5, 5), Exception);
+    BOOST_CHECK_THROW(MemoryPool(16, 5, 5), Exception);
 
     // element size must be a multiple of alignment
-    BOOST_CHECK_THROW(MemoryPool(4, 5, 8), Exception);
+    BOOST_CHECK_THROW(MemoryPool(16, 5, 32), Exception);
 }
 
 
