@@ -2,7 +2,10 @@
 
 #include "gdl/GDLTypedefs.h"
 
-#include "memory"
+#include <memory>
+#include <mutex>
+
+
 
 namespace GDL
 {
@@ -14,6 +17,7 @@ class MemoryPool
     U32 mElementSize;
     U32 mMemorySize;
     U32 mFreeMemorySize;
+    mutable std::mutex mMutex;
     std::unique_ptr<U8[]> mMemory;
     U8* mFirstFreeElement;
     U8* mLastFreeElement;
@@ -29,7 +33,7 @@ public:
     MemoryPool(MemoryPool&&) = delete;
     MemoryPool& operator=(const MemoryPool&) = delete;
     MemoryPool& operator=(MemoryPool&&) = delete;
-    ~MemoryPool() = default;
+    ~MemoryPool();
 
     //! @brief Allocates memory
     //! @param size: Size of the memory that should be allocated

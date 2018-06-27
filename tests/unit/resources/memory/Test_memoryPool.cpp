@@ -4,8 +4,11 @@
 #include "gdl/base/Exception.h"
 #include "gdl/resources/memory/memoryPool.h"
 
+#include <atomic>
 #include <array>
 #include <cstring>
+#include <thread>
+#include <vector>
 
 using namespace GDL;
 
@@ -22,6 +25,8 @@ BOOST_AUTO_TEST_CASE(Construction_destruction)
 BOOST_AUTO_TEST_CASE(Allocation_and_Deallocation)
 {
     std::array<void*, 5> addresses;
+    addresses.fill(nullptr);
+
     MemoryPool mp(16, 5);
 
     // Object too big
@@ -52,6 +57,9 @@ BOOST_AUTO_TEST_CASE(Allocation_and_Deallocation)
 
     // Memory full
     BOOST_CHECK_THROW(mp.Allocate(8), Exception);
+
+    for (U32 i = 0; i < addresses.size(); ++i)
+        BOOST_CHECK_NO_THROW(mp.Deallocate(addresses[i]));
 }
 
 //! @brief This test checks if the exceptions are triggered correctly. Therefore the internal list is destroyed by
@@ -80,4 +88,52 @@ BOOST_AUTO_TEST_CASE(Consistency_Check_Exceptions)
     std::memcpy(addressToModify, &valueToWrite, sizeof(void*));
 
     BOOST_CHECK_THROW(mp.CheckConsistency(), Exception);
+}
+
+
+//! @brief This test checks if the access of the memory pool is thread safe.
+BOOST_AUTO_TEST_CASE(Thread_Safety)
+{
+    constexpr U32 numThreads = 4;
+    constexpr U32 numThreadAllocs = 5;
+    constexpr U32 numAllocationRuns = 100;
+
+    MemoryPool mp(16, numThreadAllocs * numThreads);
+
+    std::atomic_bool kickoff = false;
+    std::atomic_bool exceptionThrown = false;
+
+    std::vector<std::thread> threads;
+    for (U32 i = 0; i < numThreads; ++i)
+        threads.emplace_back([&]() {
+            try
+            {
+                std::array<void*, numThreadAllocs> addresses;
+                addresses.fill(nullptr);
+                while (!kickoff)
+                    std::this_thread::yield();
+                for (U32 j = 0; j < numAllocationRuns; ++j)
+                {
+                    for (U32 k = 0; k < numThreadAllocs; ++k)
+                        addresses[k] = mp.Allocate(16);
+                    for (U32 k = 0; k < numThreadAllocs; ++k)
+                    {
+                        mp.Deallocate(addresses[k]);
+                        addresses[k] = nullptr;
+                    }
+                }
+            }
+            catch (...)
+            {
+
+                exceptionThrown = true;
+            }
+        });
+
+    kickoff = true;
+
+    for (U32 i = 0; i < numThreads; ++i)
+        threads[i].join();
+
+    BOOST_CHECK(exceptionThrown == false);
 }

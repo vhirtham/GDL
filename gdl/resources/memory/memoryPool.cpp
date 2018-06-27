@@ -3,6 +3,7 @@
 
 #include "gdl/base/Exception.h"
 
+#include <cassert>
 #include <cstring>
 #include <iostream>
 
@@ -20,10 +21,16 @@ MemoryPool::MemoryPool(U32 elementSize, U32 memorySize)
     CheckConsistency();
 }
 
+MemoryPool::~MemoryPool()
+{
+    assert(mFreeMemorySize == mMemorySize && "Memory still in use");
+}
+
 
 
 void* MemoryPool::Allocate(U32 size)
 {
+    std::lock_guard<std::mutex> lock(mMutex);
     if (size > mElementSize)
         throw Exception(__PRETTY_FUNCTION__, "Allocation size is larger than a pool element.");
     if (mFirstFreeElement == nullptr)
@@ -45,6 +52,7 @@ void* MemoryPool::Allocate(U32 size)
 
 void MemoryPool::Deallocate(void* address)
 {
+    std::lock_guard<std::mutex> lock(mMutex);
     // Check if pointer has a valid address -> address - memoryStart / mElementsize = abs( ... )
     // Check if there is any way to check if the memory is already freed!
 
@@ -63,6 +71,8 @@ void MemoryPool::Deallocate(void* address)
 void MemoryPool::CheckConsistency() const
 {
     U32 freeElementsCount = 0;
+
+    std::lock_guard<std::mutex> lock(mMutex);
     U8* currentPosition = mFirstFreeElement;
 
     while (currentPosition != nullptr)
@@ -83,6 +93,7 @@ void MemoryPool::CheckConsistency() const
 
 void MemoryPool::Initialize()
 {
+    std::lock_guard<std::mutex> lock(mMutex);
     constexpr U32 minimalElementSize = sizeof(void*);
     if (mElementSize < minimalElementSize)
         throw Exception(__PRETTY_FUNCTION__,
