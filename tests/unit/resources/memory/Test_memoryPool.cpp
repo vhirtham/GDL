@@ -2,6 +2,7 @@
 
 #include "gdl/GDLTypedefs.h"
 #include "gdl/base/Exception.h"
+#include "gdl/base/SSESupportFunctions.h"
 #include "gdl/resources/memory/memoryPool.h"
 
 #include <atomic>
@@ -88,6 +89,57 @@ BOOST_AUTO_TEST_CASE(Consistency_Check_Exceptions)
     std::memcpy(addressToModify, &valueToWrite, sizeof(void*));
 
     BOOST_CHECK_THROW(mp.CheckConsistency(), Exception);
+}
+
+//! @brief Tests exceptions that can be thrown during deallocation
+BOOST_AUTO_TEST_CASE(Deallocation_Exceptions)
+{
+    std::array<void*, 5> addresses;
+    addresses.fill(nullptr);
+
+    MemoryPool mp(16, 5);
+
+    for (U32 i = 0; i < addresses.size(); ++i)
+        BOOST_CHECK_NO_THROW(addresses[i] = mp.Allocate(8));
+
+    // double free
+    BOOST_CHECK_NO_THROW(mp.Deallocate(addresses[2]));
+#ifndef NDEBUG
+    BOOST_CHECK_THROW(mp.Deallocate(addresses[2]), Exception);
+#endif
+
+    // nullptr
+    BOOST_CHECK_THROW(mp.Deallocate(nullptr), Exception);
+
+    // out of range
+    BOOST_CHECK_THROW(mp.Deallocate(static_cast<U8*>(addresses[0]) - 100), Exception);
+    BOOST_CHECK_THROW(mp.Deallocate(static_cast<U8*>(addresses[5]) + 100), Exception);
+
+
+
+    addresses[2] = mp.Allocate(8);
+    for (U32 i = 0; i < addresses.size(); ++i)
+        BOOST_CHECK_NO_THROW(mp.Deallocate(addresses[i]));
+}
+
+BOOST_AUTO_TEST_CASE(Alignment)
+{
+
+    constexpr U32 numElements = 5;
+    constexpr U32 alignment = 128;
+    MemoryPool mp(alignment, numElements, alignment);
+
+    std::array<void*, numElements> addresses;
+    addresses.fill(nullptr);
+
+    for (U32 i = 0; i < addresses.size(); ++i)
+    {
+        BOOST_CHECK_NO_THROW(addresses[i] = mp.Allocate(alignment));
+        BOOST_CHECK(is_aligned(addresses[i], alignment));
+    }
+
+    for (U32 i = 0; i < addresses.size(); ++i)
+        BOOST_CHECK_NO_THROW(mp.Deallocate(addresses[i]));
 }
 
 

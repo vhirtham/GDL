@@ -6,16 +6,25 @@
 #include <cassert>
 #include <cstring>
 #include <iostream>
+#include <memory>
 
 namespace GDL
 {
 
-MemoryPool::MemoryPool(U32 elementSize, U32 memorySize)
+bool is_power_of_2(size_t x)
+{
+    return x > 0 && !(x & (x - 1));
+}
+
+MemoryPool::MemoryPool(size_t elementSize, U32 numElements, size_t alignment)
     : mElementSize{elementSize}
-    , mMemorySize{memorySize}
-    , mFreeMemorySize{mMemorySize}
-    , mMemory{std::make_unique<U8[]>(mMemorySize * mElementSize)}
-    , mFirstFreeElement{mMemory.get()}
+    , mAlignment{alignment}
+    , mNumElements{numElements}
+    , mNumFreeElements{0}
+    , mMemory{std::make_unique<U8[]>(TotalMemorySize())}
+    , mMemoryStart{nullptr}
+    , mFirstFreeElement{nullptr}
+    , mLastFreeElement{nullptr}
 {
     Initialize();
     CheckConsistency();
@@ -23,12 +32,12 @@ MemoryPool::MemoryPool(U32 elementSize, U32 memorySize)
 
 MemoryPool::~MemoryPool()
 {
-    assert(mFreeMemorySize == mMemorySize && "Memory still in use");
+    assert(mNumFreeElements == mNumElements && "Memory still in use");
 }
 
 
 
-void* MemoryPool::Allocate(U32 size)
+void* MemoryPool::Allocate(size_t size)
 {
     std::lock_guard<std::mutex> lock(mMutex);
     if (size > mElementSize)
@@ -44,7 +53,7 @@ void* MemoryPool::Allocate(U32 size)
     if (mFirstFreeElement == nullptr)
         mLastFreeElement = nullptr;
 
-    --mFreeMemorySize;
+    --mNumFreeElements;
     return allocatedMemory;
 }
 
@@ -53,8 +62,8 @@ void* MemoryPool::Allocate(U32 size)
 void MemoryPool::Deallocate(void* address)
 {
     std::lock_guard<std::mutex> lock(mMutex);
-    // Check if pointer has a valid address -> address - memoryStart / mElementsize = abs( ... )
-    // Check if there is any way to check if the memory is already freed!
+
+    CheckDeallocation(address);
 
     if (mLastFreeElement != nullptr)
         WriteListEntry(mLastFreeElement, address);
@@ -63,7 +72,7 @@ void MemoryPool::Deallocate(void* address)
 
     mLastFreeElement = static_cast<U8*>(address);
     WriteListEntry(mLastFreeElement, nullptr);
-    ++mFreeMemorySize;
+    ++mNumFreeElements;
 }
 
 
@@ -79,14 +88,75 @@ void MemoryPool::CheckConsistency() const
     {
         currentPosition = ReadListEntry(currentPosition);
         ++freeElementsCount;
-        if (freeElementsCount > mFreeMemorySize)
+        if (freeElementsCount > mNumFreeElements)
             throw Exception(__PRETTY_FUNCTION__, "Found more free elements than expected. Check for loops in the list "
                                                  "of free elements or if the free memory counter is set correctly");
     }
 
-    if (mFreeMemorySize != freeElementsCount)
+    if (mNumFreeElements != freeElementsCount)
         throw Exception(__PRETTY_FUNCTION__,
                         "Free memory count is not as expected. Check if it is set correctly in allocation routine.");
+}
+
+void MemoryPool::AlignMemory()
+{
+    void* memoryStart = mMemory.get();
+    size_t memorySize = TotalMemorySize();
+    std::align(mAlignment, mNumElements, memoryStart, memorySize);
+
+    // LCOV_EXCL_START
+    // should never happen and can't be enforcedi n a test from outside of the class -> ignored by LCOV
+    if (memorySize < MemorySize())
+        throw Exception(__PRETTY_FUNCTION__, "Memory alignment results in a smaller pool size than desired.");
+    // LCOV_EXCL_STOP
+
+    mMemoryStart = static_cast<U8*>(memoryStart);
+}
+
+size_t MemoryPool::TotalMemorySize() const
+{
+    return MemorySize() + mAlignment;
+}
+
+size_t MemoryPool::MemorySize() const
+{
+    return mNumElements * mElementSize;
+}
+
+
+
+void MemoryPool::CheckConstructionParameters() const
+{
+    constexpr size_t minimalElementSize = sizeof(void*);
+    if (mElementSize < minimalElementSize)
+        throw Exception(__PRETTY_FUNCTION__,
+                        "Element size must be " + std::to_string(minimalElementSize) + " or higher.");
+    if (!is_power_of_2(mAlignment))
+        throw Exception(__PRETTY_FUNCTION__, "Alignment must be a power of 2");
+    if (mElementSize % mAlignment > 0)
+        throw Exception(__PRETTY_FUNCTION__, "Pool element size must be a multiple of alignment");
+}
+
+
+void MemoryPool::CheckDeallocation(void* address) const
+{
+    if (address == nullptr)
+        throw Exception(__PRETTY_FUNCTION__, "Can't free a nullptr");
+    if (static_cast<U8*>(address) < mMemoryStart || static_cast<U8*>(address) > mMemoryStart + MemorySize())
+        throw Exception(__PRETTY_FUNCTION__, "Memory address is not part of the pool allocators memory");
+    if ((static_cast<U8*>(address) - mMemoryStart) % mElementSize > 0)
+        throw Exception(__PRETTY_FUNCTION__, "Memory address is not start of a valid memory block");
+
+// Only in debug mode, since it is expensive
+#ifndef NDEBUG
+    U8* currentPosition = mFirstFreeElement;
+    while (currentPosition != nullptr)
+    {
+        if (static_cast<U8*>(address) == currentPosition)
+            throw Exception(__PRETTY_FUNCTION__, "Memory block already freed.");
+        currentPosition = ReadListEntry(currentPosition);
+    }
+#endif
 }
 
 
@@ -94,24 +164,10 @@ void MemoryPool::CheckConsistency() const
 void MemoryPool::Initialize()
 {
     std::lock_guard<std::mutex> lock(mMutex);
-    constexpr U32 minimalElementSize = sizeof(void*);
-    if (mElementSize < minimalElementSize)
-        throw Exception(__PRETTY_FUNCTION__,
-                        "Element size must be " + std::to_string(minimalElementSize) + " or higher.");
-
-
-    U8* currentPosition = mMemory.get();
-
-    // Set up linked list in free memory
-    for (U32 i = 0; i < mMemorySize - 1; ++i)
-    {
-        void* nextAddressPtr = static_cast<void*>(currentPosition + mElementSize);
-        WriteListEntry(currentPosition, nextAddressPtr);
-        currentPosition += mElementSize;
-    }
-
-    mLastFreeElement = currentPosition;
-    WriteListEntry(mLastFreeElement, nullptr);
+    CheckConstructionParameters();
+    AlignMemory();
+    InitializeFreeMemoryList();
+    mNumFreeElements = mNumElements;
 }
 
 
@@ -121,6 +177,24 @@ U8* MemoryPool::ReadListEntry(const U8* addressToRead) const
     U8* entry = nullptr;
     std::memcpy(&entry, addressToRead, sizeof(void*));
     return entry;
+}
+
+void MemoryPool::InitializeFreeMemoryList()
+{
+    mFirstFreeElement = mMemoryStart;
+
+    U8* currentPosition = mFirstFreeElement;
+
+    // Set up linked list in free memory
+    for (U32 i = 0; i < mNumElements - 1; ++i)
+    {
+        void* nextAddressPtr = static_cast<void*>(currentPosition + mElementSize);
+        WriteListEntry(currentPosition, nextAddressPtr);
+        currentPosition += mElementSize;
+    }
+
+    mLastFreeElement = currentPosition;
+    WriteListEntry(mLastFreeElement, nullptr);
 }
 
 
