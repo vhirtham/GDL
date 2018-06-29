@@ -39,6 +39,8 @@ BOOST_AUTO_TEST_CASE(Not_Initialized_Exceptions)
     BOOST_CHECK_NO_THROW(mp.Deallocate(address));
     BOOST_CHECK_NO_THROW(mp.Deinitialize());
     BOOST_CHECK_THROW(mp.Deallocate(address), Exception);
+
+    BOOST_CHECK_THROW(mp.Deinitialize(), Exception);
 }
 
 //!@brief This test checks if allocations and deallocations work. Because of the internal design, memory which is
