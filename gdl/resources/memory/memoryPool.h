@@ -2,6 +2,7 @@
 
 #include "gdl/GDLTypedefs.h"
 
+#include <atomic>
 #include <memory>
 #include <mutex>
 
@@ -19,6 +20,7 @@ class MemoryPool
     U32 mNumElements;
     U32 mNumFreeElements;
     mutable std::mutex mMutex;
+    std::atomic_bool mInitialized;
     std::unique_ptr<U8[]> mMemory;
     U8* mMemoryStart;
     U8* mFirstFreeElement;
@@ -49,6 +51,12 @@ public:
     //! @brief Checks the internal consistency of the memory pool
     void CheckConsistency() const;
 
+    //! @brief Initializes the memory pool and sets up the internal linked list of free memory blocks
+    void Initialize();
+
+    //! @brief Deinitializes the memory pool
+    void Deinitialize();
+
 private:
     //! @brief Aligns the memory.
     void AlignMemory();
@@ -69,8 +77,6 @@ private:
     void CheckDeallocation(void* address) const;
 
 
-    //! @brief Initializes the memory pool and sets up the internal linked list of free memory blocks
-    void Initialize();
 
     //! @brief Reads the value of the internal free memory list at the given position and returns the pointer to the
     //! next element.

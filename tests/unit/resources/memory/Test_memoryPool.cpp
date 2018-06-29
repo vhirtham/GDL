@@ -25,6 +25,22 @@ BOOST_AUTO_TEST_CASE(Construction_destruction)
     BOOST_CHECK_THROW(MemoryPool(16, 0), Exception);
 }
 
+
+BOOST_AUTO_TEST_CASE(Not_Initialized_Exceptions)
+{
+    MemoryPool mp(16, 5);
+
+    BOOST_CHECK_THROW(mp.Allocate(16), Exception);
+    BOOST_CHECK_THROW(mp.CheckConsistency(), Exception);
+
+    mp.Initialize();
+    void* address = mp.Allocate(16);
+    BOOST_CHECK_THROW(mp.Deinitialize(), Exception);
+    BOOST_CHECK_NO_THROW(mp.Deallocate(address));
+    BOOST_CHECK_NO_THROW(mp.Deinitialize());
+    BOOST_CHECK_THROW(mp.Deallocate(address), Exception);
+}
+
 //!@brief This test checks if allocations and deallocations work. Because of the internal design, memory which is
 //! deallocated first is also allocated first again (FIFO). To expose this for the test, the memory is completly filled
 //! before the first deallocation.
@@ -34,6 +50,7 @@ BOOST_AUTO_TEST_CASE(Allocation_and_Deallocation)
     addresses.fill(nullptr);
 
     MemoryPool mp(16, 5);
+    mp.Initialize();
 
     // Object too big
     BOOST_CHECK_THROW(mp.Allocate(100), Exception);
@@ -66,6 +83,8 @@ BOOST_AUTO_TEST_CASE(Allocation_and_Deallocation)
 
     for (U32 i = 0; i < addresses.size(); ++i)
         BOOST_CHECK_NO_THROW(mp.Deallocate(addresses[i]));
+
+    BOOST_CHECK_NO_THROW(mp.Deinitialize());
 }
 
 //! @brief This test checks if the exceptions are triggered correctly. Therefore the internal list is destroyed by
@@ -74,6 +93,7 @@ BOOST_AUTO_TEST_CASE(Consistency_Check_Exceptions)
 {
     void* valueToWrite = nullptr;
     MemoryPool mp(16, 5);
+    mp.Initialize();
 
     void* addressToModify = mp.Allocate(8);
     void* address2 = mp.Allocate(8);
@@ -94,6 +114,12 @@ BOOST_AUTO_TEST_CASE(Consistency_Check_Exceptions)
     std::memcpy(addressToModify, &valueToWrite, sizeof(void*));
 
     BOOST_CHECK_THROW(mp.CheckConsistency(), Exception);
+
+    // restore value
+    std::memcpy(addressToModify, &address2, sizeof(void*));
+    BOOST_CHECK_NO_THROW(mp.CheckConsistency());
+
+    BOOST_CHECK_NO_THROW(mp.Deinitialize());
 }
 
 //! @brief Tests exceptions that can be thrown during deallocation
@@ -103,6 +129,7 @@ BOOST_AUTO_TEST_CASE(Deallocation_Exceptions)
     addresses.fill(nullptr);
 
     MemoryPool mp(16, 5);
+    mp.Initialize();
 
     for (U32 i = 0; i < addresses.size(); ++i)
         BOOST_CHECK_NO_THROW(addresses[i] = mp.Allocate(8));
@@ -126,6 +153,8 @@ BOOST_AUTO_TEST_CASE(Deallocation_Exceptions)
     addresses[2] = mp.Allocate(8);
     for (U32 i = 0; i < addresses.size(); ++i)
         BOOST_CHECK_NO_THROW(mp.Deallocate(addresses[i]));
+
+    BOOST_CHECK_NO_THROW(mp.Deinitialize());
 }
 
 BOOST_AUTO_TEST_CASE(Alignment)
@@ -134,6 +163,7 @@ BOOST_AUTO_TEST_CASE(Alignment)
     constexpr U32 numElements = 5;
     constexpr U32 alignment = 128;
     MemoryPool mp(alignment, numElements, alignment);
+    mp.Initialize();
 
     std::array<void*, numElements> addresses;
     addresses.fill(nullptr);
@@ -152,6 +182,8 @@ BOOST_AUTO_TEST_CASE(Alignment)
 
     // element size must be a multiple of alignment
     BOOST_CHECK_THROW(MemoryPool(16, 5, 32), Exception);
+
+    BOOST_CHECK_NO_THROW(mp.Deinitialize());
 }
 
 
@@ -163,6 +195,7 @@ BOOST_AUTO_TEST_CASE(Thread_Safety)
     constexpr U32 numAllocationRuns = 100;
 
     MemoryPool mp(16, numThreadAllocs * numThreads);
+    mp.Initialize();
 
     std::atomic_bool kickoff = false;
     std::atomic_bool exceptionThrown = false;
@@ -200,4 +233,5 @@ BOOST_AUTO_TEST_CASE(Thread_Safety)
         threads[i].join();
 
     BOOST_CHECK(exceptionThrown == false);
+    BOOST_CHECK_NO_THROW(mp.Deinitialize());
 }

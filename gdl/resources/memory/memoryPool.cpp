@@ -20,19 +20,21 @@ MemoryPool::MemoryPool(size_t elementSize, U32 numElements, size_t alignment)
     : mElementSize{elementSize}
     , mAlignment{alignment}
     , mNumElements{numElements}
-    , mNumFreeElements{0}
+    , mNumFreeElements{numElements}
+    , mInitialized{false}
     , mMemory{std::make_unique<U8[]>(TotalMemorySize())}
     , mMemoryStart{nullptr}
     , mFirstFreeElement{nullptr}
     , mLastFreeElement{nullptr}
 {
-    Initialize();
-    CheckConsistency();
+    std::lock_guard<std::mutex> lock(mMutex);
+    CheckConstructionParameters();
 }
 
 MemoryPool::~MemoryPool()
 {
-    assert(mNumFreeElements == mNumElements && "Memory still in use");
+    assert(mInitialized == false && "Deinitialize the memory pool before destruction");
+    // assert(mNumFreeElements == mNumElements && "Memory still in use");
 }
 
 
@@ -40,6 +42,8 @@ MemoryPool::~MemoryPool()
 void* MemoryPool::Allocate(size_t size)
 {
     std::lock_guard<std::mutex> lock(mMutex);
+    if (mInitialized == false)
+        throw Exception(__PRETTY_FUNCTION__, "Memory pool not initialized");
     if (size > mElementSize)
         throw Exception(__PRETTY_FUNCTION__, "Allocation size is larger than a pool element.");
     if (mFirstFreeElement == nullptr)
@@ -79,6 +83,9 @@ void MemoryPool::Deallocate(void* address)
 
 void MemoryPool::CheckConsistency() const
 {
+    if (mInitialized == false)
+        throw Exception(__PRETTY_FUNCTION__, "Memory pool not initialized");
+
     U32 freeElementsCount = 0;
 
     std::lock_guard<std::mutex> lock(mMutex);
@@ -142,6 +149,8 @@ void MemoryPool::CheckConstructionParameters() const
 
 void MemoryPool::CheckDeallocation(void* address) const
 {
+    if (mInitialized == false)
+        throw Exception(__PRETTY_FUNCTION__, "memory pool not initialized");
     if (address == nullptr)
         throw Exception(__PRETTY_FUNCTION__, "Can't free a nullptr");
     if (static_cast<U8*>(address) < mMemoryStart || static_cast<U8*>(address) > mMemoryStart + MemorySize())
@@ -166,10 +175,20 @@ void MemoryPool::CheckDeallocation(void* address) const
 void MemoryPool::Initialize()
 {
     std::lock_guard<std::mutex> lock(mMutex);
-    CheckConstructionParameters();
     AlignMemory();
     InitializeFreeMemoryList();
     mNumFreeElements = mNumElements;
+    mInitialized = true;
+}
+
+void MemoryPool::Deinitialize()
+{
+    if (mInitialized == false)
+        throw Exception(__PRETTY_FUNCTION__, "Memory pool already deinitialized.");
+    if (mNumElements != mNumFreeElements)
+        throw Exception(__PRETTY_FUNCTION__, "Can't deinitialize. Memory still in use.");
+    CheckConsistency();
+    mInitialized = false;
 }
 
 
