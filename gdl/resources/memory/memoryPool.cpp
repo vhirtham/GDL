@@ -21,8 +21,7 @@ MemoryPool::MemoryPool(size_t elementSize, U32 numElements, size_t alignment)
     , mAlignment{alignment}
     , mNumElements{numElements}
     , mNumFreeElements{numElements}
-    , mInitialized{false}
-    , mMemory{std::make_unique<U8[]>(TotalMemorySize())}
+    , mMemory{nullptr}
     , mMemoryStart{nullptr}
     , mFirstFreeElement{nullptr}
     , mLastFreeElement{nullptr}
@@ -31,10 +30,13 @@ MemoryPool::MemoryPool(size_t elementSize, U32 numElements, size_t alignment)
     CheckConstructionParameters();
 }
 
+
+
 MemoryPool::~MemoryPool()
 {
-    assert(mInitialized == false && "Deinitialize the memory pool before destruction");
-    // assert(mNumFreeElements == mNumElements && "Memory still in use");
+    std::lock_guard<std::mutex> lock(mMutex);
+    assert(IsInitialized() == false &&
+           "Deinitialize the memory pool before destruction - If you did, there might have been an exception");
 }
 
 
@@ -42,7 +44,7 @@ MemoryPool::~MemoryPool()
 void* MemoryPool::Allocate(size_t size)
 {
     std::lock_guard<std::mutex> lock(mMutex);
-    if (mInitialized == false)
+    if (IsInitialized() == false)
         throw Exception(__PRETTY_FUNCTION__, "Memory pool not initialized");
     if (size > mElementSize)
         throw Exception(__PRETTY_FUNCTION__, "Allocation size is larger than a pool element.");
@@ -81,29 +83,13 @@ void MemoryPool::Deallocate(void* address)
 
 
 
-void MemoryPool::CheckConsistency() const
+void MemoryPool::CheckMemoryConsistency() const
 {
-    if (mInitialized == false)
-        throw Exception(__PRETTY_FUNCTION__, "Memory pool not initialized");
-
-    U32 freeElementsCount = 0;
-
     std::lock_guard<std::mutex> lock(mMutex);
-    U8* currentPosition = mFirstFreeElement;
-
-    while (currentPosition != nullptr)
-    {
-        currentPosition = ReadListEntry(currentPosition);
-        ++freeElementsCount;
-        if (freeElementsCount > mNumFreeElements)
-            throw Exception(__PRETTY_FUNCTION__, "Found more free elements than expected. Check for loops in the list "
-                                                 "of free elements or if the free memory counter is set correctly");
-    }
-
-    if (mNumFreeElements != freeElementsCount)
-        throw Exception(__PRETTY_FUNCTION__,
-                        "Free memory count is not as expected. Check if it is set correctly in allocation routine.");
+    CheckMemoryConsistencyLockFree();
 }
+
+
 
 void MemoryPool::AlignMemory()
 {
@@ -120,10 +106,14 @@ void MemoryPool::AlignMemory()
     mMemoryStart = static_cast<U8*>(memoryStart);
 }
 
+
+
 size_t MemoryPool::TotalMemorySize() const
 {
     return MemorySize() + mAlignment;
 }
+
+
 
 size_t MemoryPool::MemorySize() const
 {
@@ -147,9 +137,10 @@ void MemoryPool::CheckConstructionParameters() const
 }
 
 
+
 void MemoryPool::CheckDeallocation(void* address) const
 {
-    if (mInitialized == false)
+    if (IsInitialized() == false)
         throw Exception(__PRETTY_FUNCTION__, "memory pool not initialized");
     if (address == nullptr)
         throw Exception(__PRETTY_FUNCTION__, "Can't free a nullptr");
@@ -172,23 +163,66 @@ void MemoryPool::CheckDeallocation(void* address) const
 
 
 
+void MemoryPool::CheckMemoryConsistencyLockFree() const
+{
+    if (IsInitialized() == false)
+        throw Exception(__PRETTY_FUNCTION__, "Memory pool not initialized");
+
+    U32 freeElementsCount = 0;
+    U8* currentPosition = mFirstFreeElement;
+
+    while (currentPosition != nullptr)
+    {
+        currentPosition = ReadListEntry(currentPosition);
+        ++freeElementsCount;
+        if (freeElementsCount > mNumFreeElements)
+            throw Exception(__PRETTY_FUNCTION__, "Found more free elements than expected. Check for loops in the list "
+                                                 "of free elements or if the free memory counter is set correctly");
+    }
+
+    if (mNumFreeElements != freeElementsCount)
+        throw Exception(__PRETTY_FUNCTION__,
+                        "Free memory count is not as expected. Check if it is set correctly in allocation routine.");
+}
+
+
+
+bool MemoryPool::IsInitialized() const
+{
+    return mMemory != nullptr;
+}
+
+
+
 void MemoryPool::Initialize()
 {
     std::lock_guard<std::mutex> lock(mMutex);
+
+    mMemory.reset(new U8[TotalMemorySize()]);
+
     AlignMemory();
     InitializeFreeMemoryList();
     mNumFreeElements = mNumElements;
-    mInitialized = true;
 }
+
+
 
 void MemoryPool::Deinitialize()
 {
-    if (mInitialized == false)
+    std::lock_guard<std::mutex> lock(mMutex);
+
+    if (IsInitialized() == false)
         throw Exception(__PRETTY_FUNCTION__, "Memory pool already deinitialized.");
     if (mNumElements != mNumFreeElements)
         throw Exception(__PRETTY_FUNCTION__, "Can't deinitialize. Memory still in use.");
-    CheckConsistency();
-    mInitialized = false;
+
+    CheckMemoryConsistencyLockFree();
+
+    // reset internal variables and free memory
+    mMemoryStart = nullptr;
+    mFirstFreeElement = nullptr;
+    mLastFreeElement = nullptr;
+    mMemory.reset(nullptr);
 }
 
 

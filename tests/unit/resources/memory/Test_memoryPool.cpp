@@ -5,6 +5,7 @@
 #include "gdl/base/SSESupportFunctions.h"
 #include "gdl/resources/memory/memoryPool.h"
 
+
 #include <atomic>
 #include <array>
 #include <cstring>
@@ -31,7 +32,7 @@ BOOST_AUTO_TEST_CASE(Not_Initialized_Exceptions)
     MemoryPool mp(16, 5);
 
     BOOST_CHECK_THROW(mp.Allocate(16), Exception);
-    BOOST_CHECK_THROW(mp.CheckConsistency(), Exception);
+    BOOST_CHECK_THROW(mp.CheckMemoryConsistency(), Exception);
 
     mp.Initialize();
     void* address = mp.Allocate(16);
@@ -48,20 +49,22 @@ BOOST_AUTO_TEST_CASE(Not_Initialized_Exceptions)
 //! before the first deallocation.
 BOOST_AUTO_TEST_CASE(Allocation_and_Deallocation)
 {
-    std::array<void*, 5> addresses;
+    constexpr U32 elementSize = 16;
+    constexpr U32 numElements = 5;
+    std::array<void*, numElements> addresses;
     addresses.fill(nullptr);
 
-    MemoryPool mp(16, 5);
+    MemoryPool mp(elementSize, numElements);
     mp.Initialize();
 
     // Object too big
     BOOST_CHECK_THROW(mp.Allocate(100), Exception);
 
     for (U32 i = 0; i < addresses.size(); ++i)
-        BOOST_CHECK_NO_THROW(addresses[i] = mp.Allocate(8));
+        BOOST_CHECK_NO_THROW(addresses[i] = mp.Allocate(elementSize - i)); // -i to check that smaller sizes alos work
 
-    std::array<void*, 5> refAddresses{addresses};
-    BOOST_CHECK_NO_THROW(mp.CheckConsistency());
+    std::array<void*, numElements> refAddresses{addresses};
+    BOOST_CHECK_NO_THROW(mp.CheckMemoryConsistency());
 
     std::array<U32, 4> indices{{4, 1, 2, 0}};
     for (U32 i = 0; i < indices.size(); ++i)
@@ -70,18 +73,18 @@ BOOST_AUTO_TEST_CASE(Allocation_and_Deallocation)
         BOOST_CHECK_NO_THROW(mp.Deallocate(addresses[index]));
         addresses[index] = nullptr;
     }
-    BOOST_CHECK_NO_THROW(mp.CheckConsistency());
+    BOOST_CHECK_NO_THROW(mp.CheckMemoryConsistency());
 
     for (U32 i = 0; i < indices.size(); ++i)
-        BOOST_CHECK_NO_THROW(addresses[indices[i]] = mp.Allocate(8));
+        BOOST_CHECK_NO_THROW(addresses[indices[i]] = mp.Allocate(elementSize));
 
-    BOOST_CHECK_NO_THROW(mp.CheckConsistency());
+    BOOST_CHECK_NO_THROW(mp.CheckMemoryConsistency());
 
     for (U32 i = 0; i < addresses.size(); ++i)
         BOOST_CHECK(addresses[i] == refAddresses[i]);
 
     // Memory full
-    BOOST_CHECK_THROW(mp.Allocate(8), Exception);
+    BOOST_CHECK_THROW(mp.Allocate(elementSize), Exception);
 
     for (U32 i = 0; i < addresses.size(); ++i)
         BOOST_CHECK_NO_THROW(mp.Deallocate(addresses[i]));
@@ -93,33 +96,36 @@ BOOST_AUTO_TEST_CASE(Allocation_and_Deallocation)
 //! keeping a pointer to the memory and modify it after deallocation.
 BOOST_AUTO_TEST_CASE(Consistency_Check_Exceptions)
 {
+    constexpr U32 elementSize = 16;
+    constexpr U32 numElements = 5;
+
     void* valueToWrite = nullptr;
-    MemoryPool mp(16, 5);
+    MemoryPool mp(elementSize, numElements);
     mp.Initialize();
 
-    void* addressToModify = mp.Allocate(8);
-    void* address2 = mp.Allocate(8);
+    void* addressToModify = mp.Allocate(elementSize);
+    void* address2 = mp.Allocate(elementSize);
 
     mp.Deallocate(addressToModify);
     mp.Deallocate(address2);
 
-    BOOST_CHECK_NO_THROW(mp.CheckConsistency());
+    BOOST_CHECK_NO_THROW(mp.CheckMemoryConsistency());
     std::memcpy(addressToModify, &valueToWrite, sizeof(void*));
-    BOOST_CHECK_THROW(mp.CheckConsistency(), Exception);
+    BOOST_CHECK_THROW(mp.CheckMemoryConsistency(), Exception);
 
     // restore value
     std::memcpy(addressToModify, &address2, sizeof(void*));
-    BOOST_CHECK_NO_THROW(mp.CheckConsistency());
+    BOOST_CHECK_NO_THROW(mp.CheckMemoryConsistency());
 
     // build loop by pointing to own position
     valueToWrite = addressToModify;
     std::memcpy(addressToModify, &valueToWrite, sizeof(void*));
 
-    BOOST_CHECK_THROW(mp.CheckConsistency(), Exception);
+    BOOST_CHECK_THROW(mp.CheckMemoryConsistency(), Exception);
 
     // restore value
     std::memcpy(addressToModify, &address2, sizeof(void*));
-    BOOST_CHECK_NO_THROW(mp.CheckConsistency());
+    BOOST_CHECK_NO_THROW(mp.CheckMemoryConsistency());
 
     BOOST_CHECK_NO_THROW(mp.Deinitialize());
 }
@@ -127,14 +133,17 @@ BOOST_AUTO_TEST_CASE(Consistency_Check_Exceptions)
 //! @brief Tests exceptions that can be thrown during deallocation
 BOOST_AUTO_TEST_CASE(Deallocation_Exceptions)
 {
-    std::array<void*, 5> addresses;
+    constexpr U32 elementSize = 16;
+    constexpr U32 numElements = 5;
+
+    std::array<void*, numElements> addresses;
     addresses.fill(nullptr);
 
-    MemoryPool mp(16, 5);
+    MemoryPool mp(elementSize, numElements);
     mp.Initialize();
 
     for (U32 i = 0; i < addresses.size(); ++i)
-        BOOST_CHECK_NO_THROW(addresses[i] = mp.Allocate(8));
+        BOOST_CHECK_NO_THROW(addresses[i] = mp.Allocate(elementSize));
 
     // double free
     BOOST_CHECK_NO_THROW(mp.Deallocate(addresses[2]));
@@ -147,12 +156,12 @@ BOOST_AUTO_TEST_CASE(Deallocation_Exceptions)
 
     // out of range
     BOOST_CHECK_THROW(mp.Deallocate(static_cast<U8*>(addresses[0]) - 100), Exception);
-    BOOST_CHECK_THROW(mp.Deallocate(static_cast<U8*>(addresses[5]) + 100), Exception);
+    BOOST_CHECK_THROW(mp.Deallocate(static_cast<U8*>(addresses[4]) + 100), Exception);
 
     // not a valid element start
     BOOST_CHECK_THROW(mp.Deallocate(static_cast<U8*>(addresses[2]) + 1), Exception);
 
-    addresses[2] = mp.Allocate(8);
+    addresses[2] = mp.Allocate(elementSize);
     for (U32 i = 0; i < addresses.size(); ++i)
         BOOST_CHECK_NO_THROW(mp.Deallocate(addresses[i]));
 
@@ -162,9 +171,11 @@ BOOST_AUTO_TEST_CASE(Deallocation_Exceptions)
 BOOST_AUTO_TEST_CASE(Alignment)
 {
 
-    constexpr U32 numElements = 5;
     constexpr U32 alignment = 128;
-    MemoryPool mp(alignment, numElements, alignment);
+    constexpr U32 elementSize = alignment;
+    constexpr U32 numElements = 5;
+
+    MemoryPool mp(elementSize, numElements, alignment);
     mp.Initialize();
 
     std::array<void*, numElements> addresses;
@@ -172,7 +183,7 @@ BOOST_AUTO_TEST_CASE(Alignment)
 
     for (U32 i = 0; i < addresses.size(); ++i)
     {
-        BOOST_CHECK_NO_THROW(addresses[i] = mp.Allocate(alignment));
+        BOOST_CHECK_NO_THROW(addresses[i] = mp.Allocate(elementSize));
         BOOST_CHECK(is_aligned(addresses[i], alignment));
     }
 
@@ -188,6 +199,24 @@ BOOST_AUTO_TEST_CASE(Alignment)
     BOOST_CHECK_NO_THROW(mp.Deinitialize());
 }
 
+//! @brief Checks if the memory pool can be initialized again after deinitialization and works correct
+BOOST_AUTO_TEST_CASE(Multiple_Initialization)
+{
+    constexpr U32 elementSize = 16;
+    constexpr U32 numElements = 5;
+    MemoryPool mp(elementSize, numElements);
+    mp.Initialize();
+    void* address = mp.Allocate(elementSize);
+    mp.Deallocate(address);
+    BOOST_CHECK_NO_THROW(mp.Deinitialize());
+
+    BOOST_CHECK_NO_THROW(mp.Initialize());
+    BOOST_CHECK_NO_THROW(address = mp.Allocate(elementSize));
+    BOOST_CHECK_NO_THROW(mp.Deallocate(address));
+    BOOST_CHECK_NO_THROW(mp.Deinitialize());
+}
+
+
 
 //! @brief This test checks if the access of the memory pool is thread safe.
 BOOST_AUTO_TEST_CASE(Thread_Safety)
@@ -196,7 +225,10 @@ BOOST_AUTO_TEST_CASE(Thread_Safety)
     constexpr U32 numThreadAllocs = 5;
     constexpr U32 numAllocationRuns = 100;
 
-    MemoryPool mp(16, numThreadAllocs * numThreads);
+    constexpr U32 elementSize = 16;
+    constexpr U32 numElements = numThreadAllocs * numThreads;
+
+    MemoryPool mp(elementSize, numElements);
     mp.Initialize();
 
     std::atomic_bool kickoff = false;
@@ -214,7 +246,7 @@ BOOST_AUTO_TEST_CASE(Thread_Safety)
                 for (U32 j = 0; j < numAllocationRuns; ++j)
                 {
                     for (U32 k = 0; k < numThreadAllocs; ++k)
-                        addresses[k] = mp.Allocate(16);
+                        addresses[k] = mp.Allocate(elementSize);
                     for (U32 k = 0; k < numThreadAllocs; ++k)
                     {
                         mp.Deallocate(addresses[k]);
@@ -236,4 +268,43 @@ BOOST_AUTO_TEST_CASE(Thread_Safety)
 
     BOOST_CHECK(exceptionThrown == false);
     BOOST_CHECK_NO_THROW(mp.Deinitialize());
+}
+
+
+
+// ################################################################################################
+// Valgrind conflicts with the global new counter because it overrides global new. If tested on release builds, valgrind
+// will throw a lot of errors. Find a solution for this. Until then, remove the test when using valgrind in release
+
+
+#include "gdl/resources/memory/utility/globalNewCounter.h"
+
+//! @brief This test checks if the number of allocations is as expected
+//! @remark The exceptions in the other tests call new due to the internal usage of strings. This makes it hard to
+//! keep track of the expected number of allocations since it can vary for each exception depending on the message.
+BOOST_AUTO_TEST_CASE(No_hidden_allocations)
+{
+    constexpr size_t elementSize = 16;
+    constexpr U32 numElements = 5;
+
+    GlobalNewCounter gnc;
+
+    void* address = nullptr;
+
+    MemoryPool mp(elementSize, numElements);
+    mp.Initialize();
+    address = mp.Allocate(elementSize);
+    mp.Deallocate(address);
+    mp.Deinitialize();
+
+    BOOST_CHECK(gnc.GetNumNewCalls() == 1);
+    BOOST_CHECK(gnc.GetNumDeleteCalls() == 1);
+
+    mp.Initialize();
+    address = mp.Allocate(elementSize);
+    mp.Deallocate(address);
+    mp.Deinitialize();
+
+    BOOST_CHECK(gnc.GetNumNewCalls() == 2);
+    BOOST_CHECK(gnc.GetNumDeleteCalls() == 2);
 }

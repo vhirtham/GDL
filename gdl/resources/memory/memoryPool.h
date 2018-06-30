@@ -2,7 +2,6 @@
 
 #include "gdl/GDLTypedefs.h"
 
-#include <atomic>
 #include <memory>
 #include <mutex>
 
@@ -19,12 +18,11 @@ class MemoryPool
     size_t mAlignment;
     U32 mNumElements;
     U32 mNumFreeElements;
-    mutable std::mutex mMutex;
-    std::atomic_bool mInitialized;
     std::unique_ptr<U8[]> mMemory;
     U8* mMemoryStart;
     U8* mFirstFreeElement;
     U8* mLastFreeElement;
+    mutable std::mutex mMutex;
 
 public:
     //! @brief Creates the memory pool with <numElements> memory slots for elements of size <elementSize>
@@ -44,30 +42,22 @@ public:
     //! @return Pointer to memory
     void* Allocate(size_t size);
 
+    //! @brief Checks the internal consistency of the memory pool
+    void CheckMemoryConsistency() const;
+
     //! @brief Deallocates memory at the passed address
     //! @param address: Adress that should be freed
     void Deallocate(void* address);
 
-    //! @brief Checks the internal consistency of the memory pool
-    void CheckConsistency() const;
+    //! @brief Deinitializes the memory pool
+    void Deinitialize();
 
     //! @brief Initializes the memory pool and sets up the internal linked list of free memory blocks
     void Initialize();
 
-    //! @brief Deinitializes the memory pool
-    void Deinitialize();
-
 private:
     //! @brief Aligns the memory.
     void AlignMemory();
-
-    //! @brief Returns the memory size including the extra alignment bytes
-    //! @return Memory size including the extra alignment bytes
-    size_t TotalMemorySize() const;
-
-    //! @brief Returns the memory size without the extra alignment bytes
-    //! @return Memory size without the extra alignment bytes
-    size_t MemorySize() const;
 
     //! @brief Checks if the memory pool is constructed with valid parameters: Throws if not.
     void CheckConstructionParameters() const;
@@ -76,7 +66,21 @@ private:
     //! @param address: Adress that should be freed
     void CheckDeallocation(void* address) const;
 
+    //! @brief Checks the internal consistency of the memory pool
+    //! @remark In contrast to the public CheckConsistency, this version does not aquire a lock. This way it can be used
+    //! in functions that already aquiered a lock without introducing any further locking complexity.
+    void CheckMemoryConsistencyLockFree() const;
 
+    //! @brief Returns if the memory pool is initialized
+    //! @return TRUE / FALSE
+    bool IsInitialized() const;
+
+    //! @brief Initializes the internal free memory list.
+    void InitializeFreeMemoryList();
+
+    //! @brief Returns the memory size without the extra alignment bytes
+    //! @return Memory size without the extra alignment bytes
+    size_t MemorySize() const;
 
     //! @brief Reads the value of the internal free memory list at the given position and returns the pointer to the
     //! next element.
@@ -84,8 +88,9 @@ private:
     //! @return Pointer to next free memory block (nullptr if there is no free memory)
     U8* ReadListEntry(const U8* addressToRead) const;
 
-    //! @brief Initializes the internal free memory list.
-    void InitializeFreeMemoryList();
+    //! @brief Returns the memory size including the extra alignment bytes
+    //! @return Memory size including the extra alignment bytes
+    size_t TotalMemorySize() const;
 
     //! @brief Writes a new entry to the free memory list
     //! @param positionInMemory: Position in memory where the value should be written
