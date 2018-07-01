@@ -4,6 +4,7 @@ set(CMAKE_VERBOSE_MAKEFILE OFF)
 
 set(GDL_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 set(GDL_COMPILE_FEATURES cxx_std_17)
+set(GDL_COMPILE_DEFINITIONS )
 
 
 # COMPILER SETUP
@@ -16,6 +17,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-long-long -pedantic -pthread 
 option(ENABLE_ADVANCED_SSE "Enables advanced vector extensions (SIMD) like _m256 and _m512 registers" FALSE)
 option(ENABLE_BENCHMARKS "Enables the benchmarks" FALSE)
 option(ENABLE_CUSTOM_APPS "Enables applications that are located in the applications/custom directory" FALSE)
+option(ENABLE_DEV_TOOLS "Enables extea tools for the development process" TRUE)
 option(ENABLE_OPENGL "Enables OpenGL API" FALSE)
 option(ENABLE_TESTS "Enables the testfiles" TRUE)
 option(ENABLE_VULKAN "Enables Vulkan API" FALSE)
@@ -26,7 +28,9 @@ if(ENABLE_ADVANCED_SSE)
     add_definitions(-DENABLE_AVX)
 endif()
 
-
+if(NOT ENABLE_DEV_TOOLS)
+    set(GDL_COMPILE_DEFINITIONS -DNDEVEXCEPTION ${GDL_COMPILE_DEFINITIONS})
+endif()
 
 if(ENABLE_TESTS)
     enable_testing()

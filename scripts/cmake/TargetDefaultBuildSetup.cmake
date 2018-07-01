@@ -12,4 +12,8 @@ function(TargetDefaultBuildSetup target)
         PUBLIC
             ${GDL_COMPILE_FEATURES})
 
+    target_compile_definitions(${target}
+        PUBLIC
+            ${GDL_COMPILE_DEFINITIONS})
+
 endfunction()

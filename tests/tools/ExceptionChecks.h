@@ -13,7 +13,7 @@
 #define GDL_CHECK_THROW_DEBUG_DISABLE(command, exceptionType)
 #endif
 
-#ifndef NDEVTOOLS
+#ifndef NDEVEXCEPTION
 #define GDL_CHECK_THROW_DEV(command, exceptionType) BOOST_CHECK_THROW(command, exceptionType)
 #define GDL_CHECK_THROW_DEV_DISABLE(command, exceptionType) BOOST_CHECK_THROW(command, exceptionType)
 #else

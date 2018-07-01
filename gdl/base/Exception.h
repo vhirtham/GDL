@@ -18,7 +18,7 @@
 #endif
 
 
-#ifndef NDEVTOOLS
+#ifndef NDEVEXCEPTION
 #define DEV_EXCEPTION(condition, message) EXCEPTION(condition, message)
 #else
 #define DEV_EXCEPTION(condition, message)
