@@ -3,6 +3,27 @@
 #include <string>
 #include <stdexcept>
 
+
+#define EXCEPTION(condition, message)                                                                                  \
+    if (condition)                                                                                                     \
+    throw GDL::Exception(__PRETTY_FUNCTION__, message)
+
+
+// Debug exceptions are turned off in release mode like assertions. In contrast to assertions, debug exceptions can be
+// tessted to be triggered in unit tests.
+#ifndef NDEBUG
+#define DEBUG_EXCEPTION(condition, message) EXCEPTION(condition, message)
+#else
+#define DEBUG_EXCEPTION(condition, message)
+#endif
+
+
+#ifndef NDEVTOOLS
+#define DEV_EXCEPTION(condition, message) EXCEPTION(condition, message)
+#else
+#define DEV_EXCEPTION(condition, message)
+#endif
+
 namespace GDL
 {
 

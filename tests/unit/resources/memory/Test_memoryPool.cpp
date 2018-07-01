@@ -1,4 +1,5 @@
 #include <boost/test/unit_test.hpp>
+#include "tests/tools/ExceptionChecks.h"
 
 #include "gdl/GDLTypedefs.h"
 #include "gdl/base/Exception.h"
