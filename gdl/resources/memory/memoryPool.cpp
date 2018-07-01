@@ -96,11 +96,7 @@ void MemoryPool::AlignMemory()
     size_t memorySize = TotalMemorySize();
     std::align(mAlignment, mNumElements, memoryStart, memorySize);
 
-    // LCOV_EXCL_START
-    // should never happen and can't be enforcedi n a test from outside of the class -> ignored by LCOV
-    if (memorySize < MemorySize())
-        throw Exception(__PRETTY_FUNCTION__, "Memory alignment results in a smaller pool size than desired.");
-    // LCOV_EXCL_STOP
+    EXCEPTION(memorySize < MemorySize(), "Memory alignment results in a smaller pool size than desired.");
 
     mMemoryStart = static_cast<U8*>(memoryStart);
 }
@@ -124,15 +120,11 @@ size_t MemoryPool::MemorySize() const
 void MemoryPool::CheckConstructionParameters() const
 {
     constexpr size_t minimalElementSize = sizeof(void*);
-    if (mElementSize < minimalElementSize)
-        throw Exception(__PRETTY_FUNCTION__,
-                        "Element size must be " + std::to_string(minimalElementSize) + " or higher.");
-    if (mNumElements == 0)
-        throw Exception(__PRETTY_FUNCTION__, "Number of elements must be larger than 0");
-    if (!is_power_of_2(mAlignment))
-        throw Exception(__PRETTY_FUNCTION__, "Alignment must be a power of 2");
-    if (mElementSize % mAlignment > 0)
-        throw Exception(__PRETTY_FUNCTION__, "Pool element size must be a multiple of alignment");
+    EXCEPTION(mElementSize < minimalElementSize,
+              "Element size must be " + std::to_string(minimalElementSize) + " or higher.");
+    EXCEPTION(mNumElements == 0, "Number of elements must be larger than 0");
+    EXCEPTION(!is_power_of_2(mAlignment), "Alignment must be a power of 2");
+    EXCEPTION(mElementSize % mAlignment > 0, "Pool element size must be a multiple of alignment");
 }
 
 
@@ -161,8 +153,7 @@ void MemoryPool::CheckDeallocation(void* address) const
 
 void MemoryPool::CheckMemoryConsistencyLockFree() const
 {
-    if (IsInitialized() == false)
-        throw Exception(__PRETTY_FUNCTION__, "Memory pool not initialized");
+    EXCEPTION(IsInitialized() == false, "Memory pool not initialized");
 
     U32 freeElementsCount = 0;
     U8* currentPosition = mFirstFreeElement;
@@ -171,14 +162,13 @@ void MemoryPool::CheckMemoryConsistencyLockFree() const
     {
         currentPosition = ReadListEntry(currentPosition);
         ++freeElementsCount;
-        if (freeElementsCount > mNumFreeElements)
-            throw Exception(__PRETTY_FUNCTION__, "Found more free elements than expected. Check for loops in the list "
-                                                 "of free elements or if the free memory counter is set correctly");
+        EXCEPTION(freeElementsCount > mNumFreeElements, "Found more free elements than expected. Check for loops in "
+                                                        "the list of free elements or if the free memory counter is "
+                                                        "set correctly");
     }
 
-    if (mNumFreeElements != freeElementsCount)
-        throw Exception(__PRETTY_FUNCTION__,
-                        "Free memory count is not as expected. Check if it is set correctly in allocation routine.");
+    EXCEPTION(mNumFreeElements != freeElementsCount,
+              "Free memory count is not as expected. Check if it is set correctly in allocation routine.");
 }
 
 
@@ -207,10 +197,8 @@ void MemoryPool::Deinitialize()
 {
     std::lock_guard<std::mutex> lock(mMutex);
 
-    if (IsInitialized() == false)
-        throw Exception(__PRETTY_FUNCTION__, "Memory pool already deinitialized.");
-    if (mNumElements != mNumFreeElements)
-        throw Exception(__PRETTY_FUNCTION__, "Can't deinitialize. Memory still in use.");
+    EXCEPTION(IsInitialized() == false, "Memory pool already deinitialized.");
+    EXCEPTION(mNumElements != mNumFreeElements, "Can't deinitialize. Memory still in use.");
 
     CheckMemoryConsistencyLockFree();
 
