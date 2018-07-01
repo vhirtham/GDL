@@ -69,7 +69,9 @@ void MemoryPool::Deallocate(void* address)
 {
     std::lock_guard<std::mutex> lock(mMutex);
 
+#if !(defined(NDEBUG) && defined(NDEVEXCEPTION))
     CheckDeallocation(address);
+#endif
 
     if (mLastFreeElement != nullptr)
         WriteListEntry(mLastFreeElement, address);
@@ -140,20 +142,19 @@ void MemoryPool::CheckConstructionParameters() const
 
 void MemoryPool::CheckDeallocation(void* address) const
 {
-    EXCEPTION(IsInitialized() == false, "memory pool not initialized");
-    EXCEPTION(address == nullptr, "Can't free a nullptr");
-    EXCEPTION(static_cast<U8*>(address) < mMemoryStart || static_cast<U8*>(address) > mMemoryStart + MemorySize(),
-              "Memory address is not part of the pool allocators memory");
-    EXCEPTION((static_cast<U8*>(address) - mMemoryStart) % mElementSize > 0,
-              "Memory address is not start of a valid memory block");
+    DEV_EXCEPTION(IsInitialized() == false, "memory pool not initialized");
+    DEV_EXCEPTION(address == nullptr, "Can't free a nullptr");
+    DEV_EXCEPTION(static_cast<U8*>(address) < mMemoryStart || static_cast<U8*>(address) > mMemoryStart + MemorySize(),
+                  "Memory address is not part of the pool allocators memory");
+    DEV_EXCEPTION((static_cast<U8*>(address) - mMemoryStart) % mElementSize > 0,
+                  "Memory address is not start of a valid memory block");
 
 // Only in debug mode, since it is expensive
 #ifndef NDEBUG
     U8* currentPosition = mFirstFreeElement;
     while (currentPosition != nullptr)
     {
-        if (static_cast<U8*>(address) == currentPosition)
-            throw Exception(__PRETTY_FUNCTION__, "Memory block already freed.");
+        DEBUG_EXCEPTION(static_cast<U8*>(address) == currentPosition, "Memory block already freed.");
         currentPosition = ReadListEntry(currentPosition);
     }
 #endif

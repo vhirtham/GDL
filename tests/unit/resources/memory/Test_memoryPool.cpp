@@ -40,7 +40,9 @@ BOOST_AUTO_TEST_CASE(Not_Initialized_Exceptions)
     BOOST_CHECK_THROW(mp.Deinitialize(), Exception);
     BOOST_CHECK_NO_THROW(mp.Deallocate(address));
     BOOST_CHECK_NO_THROW(mp.Deinitialize());
-    BOOST_CHECK_THROW(mp.Deallocate(address), Exception);
+
+    // Trying to deallocate from uninitialized memory pool
+    GDL_CHECK_THROW_DEV_DISABLE(mp.Deallocate(address), Exception);
 
     BOOST_CHECK_THROW(mp.Deinitialize(), Exception);
 }
@@ -148,19 +150,17 @@ BOOST_AUTO_TEST_CASE(Deallocation_Exceptions)
 
     // double free
     BOOST_CHECK_NO_THROW(mp.Deallocate(addresses[2]));
-#ifndef NDEBUG
-    BOOST_CHECK_THROW(mp.Deallocate(addresses[2]), Exception);
-#endif
+    GDL_CHECK_THROW_DEBUG_DISABLE(mp.Deallocate(addresses[2]), Exception);
 
     // nullptr
-    BOOST_CHECK_THROW(mp.Deallocate(nullptr), Exception);
+    GDL_CHECK_THROW_DEV_DISABLE(mp.Deallocate(nullptr), Exception);
 
     // out of range
-    BOOST_CHECK_THROW(mp.Deallocate(static_cast<U8*>(addresses[0]) - 100), Exception);
-    BOOST_CHECK_THROW(mp.Deallocate(static_cast<U8*>(addresses[4]) + 100), Exception);
+    GDL_CHECK_THROW_DEV_DISABLE(mp.Deallocate(static_cast<U8*>(addresses[0]) - 100), Exception);
+    GDL_CHECK_THROW_DEV_DISABLE(mp.Deallocate(static_cast<U8*>(addresses[4]) + 100), Exception);
 
     // not a valid element start
-    BOOST_CHECK_THROW(mp.Deallocate(static_cast<U8*>(addresses[2]) + 1), Exception);
+    GDL_CHECK_THROW_DEV_DISABLE(mp.Deallocate(static_cast<U8*>(addresses[2]) + 1), Exception);
 
     addresses[2] = mp.Allocate(elementSize);
     for (U32 i = 0; i < addresses.size(); ++i)
