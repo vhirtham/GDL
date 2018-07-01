@@ -2,6 +2,7 @@
 
 
 #include "gdl/base/Exception.h"
+#include "gdl/base/functions/isPowerOf2.h"
 
 #include <cassert>
 #include <cstring>
@@ -11,20 +12,15 @@
 namespace GDL
 {
 
-bool is_power_of_2(size_t x)
-{
-    return x > 0 && !(x & (x - 1));
-}
-
 MemoryPool::MemoryPool(size_t elementSize, U32 numElements, size_t alignment)
     : mElementSize{elementSize}
     , mAlignment{alignment}
     , mNumElements{numElements}
     , mNumFreeElements{numElements}
-    , mMemory{nullptr}
     , mMemoryStart{nullptr}
     , mFirstFreeElement{nullptr}
     , mLastFreeElement{nullptr}
+    , mMemory{nullptr}
 {
     std::lock_guard<std::mutex> lock(mMutex);
     CheckConstructionParameters();
@@ -92,13 +88,12 @@ void MemoryPool::CheckMemoryConsistency() const
 
 void MemoryPool::AlignMemory()
 {
-    void* memoryStart = mMemory.get();
-    size_t memorySize = TotalMemorySize();
-    std::align(mAlignment, mNumElements, memoryStart, memorySize);
+    void* memoryStartBefAlign = mMemory.get();
+    size_t memorySizeBefAlign = TotalMemorySize();
 
-    EXCEPTION(memorySize < MemorySize(), "Memory alignment results in a smaller pool size than desired.");
+    mMemoryStart = static_cast<U8*>(std::align(mAlignment, MemorySize(), memoryStartBefAlign, memorySizeBefAlign));
 
-    mMemoryStart = static_cast<U8*>(memoryStart);
+    EXCEPTION(mMemoryStart == nullptr, "Memory alignment failed.");
 }
 
 
@@ -123,7 +118,7 @@ void MemoryPool::CheckConstructionParameters() const
     EXCEPTION(mElementSize < minimalElementSize,
               "Element size must be " + std::to_string(minimalElementSize) + " or higher.");
     EXCEPTION(mNumElements == 0, "Number of elements must be larger than 0");
-    EXCEPTION(!is_power_of_2(mAlignment), "Alignment must be a power of 2");
+    EXCEPTION(!IsPowerOf2(mAlignment), "Alignment must be a power of 2");
     EXCEPTION(mElementSize % mAlignment > 0, "Pool element size must be a multiple of alignment");
 }
 

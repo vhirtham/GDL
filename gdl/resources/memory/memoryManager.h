@@ -2,7 +2,7 @@
 
 #include "gdl/GDLTypedefs.h"
 #include "gdl/base/Exception.h"
-#include "gdl/resources/memory/memoryStack.h"
+#include "gdl/resources/memory/memoryStack_old.h"
 
 #include <atomic>
 #include <map>

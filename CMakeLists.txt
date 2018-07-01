@@ -31,6 +31,8 @@ endif()
 if(NOT ENABLE_DEV_TOOLS)
     set(GDL_COMPILE_DEFINITIONS -DNDEVEXCEPTION ${GDL_COMPILE_DEFINITIONS})
     message(STATUS "Development tools disabled")
+else()
+    message(STATUS "Development tools enabled")
 endif()
 
 if(ENABLE_TESTS)

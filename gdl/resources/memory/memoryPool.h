@@ -18,16 +18,17 @@ class MemoryPool
     size_t mAlignment;
     U32 mNumElements;
     U32 mNumFreeElements;
-    std::unique_ptr<U8[]> mMemory;
     U8* mMemoryStart;
     U8* mFirstFreeElement;
     U8* mLastFreeElement;
+    std::unique_ptr<U8[]> mMemory;
     mutable std::mutex mMutex;
 
 public:
     //! @brief Creates the memory pool with <numElements> memory slots for elements of size <elementSize>
     //! @param elementSize: Size of a single element
     //! @param numElements: Number of elements that can be stored
+    //! @param alignment: Memory alignment
     MemoryPool(size_t elementSize, U32 numElements, size_t alignment = 1);
 
     MemoryPool() = delete;
@@ -59,7 +60,7 @@ private:
     //! @brief Aligns the memory.
     void AlignMemory();
 
-    //! @brief Checks if the memory pool is constructed with valid parameters: Throws if not.
+    //! @brief Checks if the memory pool is constructed with valid parameters. Throws if not.
     void CheckConstructionParameters() const;
 
     //! @brief Checks if the address that should be freed is valid. Throws if not.
