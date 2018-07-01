@@ -44,12 +44,9 @@ MemoryPool::~MemoryPool()
 void* MemoryPool::Allocate(size_t size)
 {
     std::lock_guard<std::mutex> lock(mMutex);
-    if (IsInitialized() == false)
-        throw Exception(__PRETTY_FUNCTION__, "Memory pool not initialized");
-    if (size > mElementSize)
-        throw Exception(__PRETTY_FUNCTION__, "Allocation size is larger than a pool element.");
-    if (mFirstFreeElement == nullptr)
-        throw Exception(__PRETTY_FUNCTION__, "No more memory available.");
+    DEV_EXCEPTION(IsInitialized() == false, "Memory pool not initialized");
+    DEV_EXCEPTION(size > mElementSize, "Allocation size is larger than a pool element.");
+    EXCEPTION(mFirstFreeElement == nullptr, "No more memory available.");
 
     void* allocatedMemory = mFirstFreeElement;
 

@@ -32,7 +32,7 @@ BOOST_AUTO_TEST_CASE(Not_Initialized_Exceptions)
 {
     MemoryPool mp(16, 5);
 
-    BOOST_CHECK_THROW(mp.Allocate(16), Exception);
+    GDL_CHECK_THROW_DEV_DISABLE(mp.Allocate(16), Exception);
     BOOST_CHECK_THROW(mp.CheckMemoryConsistency(), Exception);
 
     mp.Initialize();
@@ -61,7 +61,7 @@ BOOST_AUTO_TEST_CASE(Allocation_and_Deallocation)
     mp.Initialize();
 
     // Object too big
-    BOOST_CHECK_THROW(mp.Allocate(100), Exception);
+    GDL_CHECK_THROW_DEV_DISABLE(mp.Allocate(100), Exception);
 
     for (U32 i = 0; i < addresses.size(); ++i)
         BOOST_CHECK_NO_THROW(addresses[i] = mp.Allocate(elementSize - i)); // -i to check that smaller sizes alos work
