@@ -5,13 +5,17 @@ services: docker
 matrix:
     include:
         - compiler: clang
-          env: BUILD_TYPE=Release
+          env: BUILD_TYPE=Release DEV_TOOLS=ON
         - compiler: clang
-          env: BUILD_TYPE=Debug
+          env: BUILD_TYPE=Debug DEV_TOOLS=ON
         - compiler: g++
-          env: BUILD_TYPE=Release
+          env: BUILD_TYPE=Release DEV_TOOLS=ON
         - compiler: g++
-          env: BUILD_TYPE=Debug COVERAGE=--coverage
+          env: BUILD_TYPE=Debug DEV_TOOLS=ON COVERAGE=--coverage
+        - compiler: clang
+          env: BUILD_TYPE=Release DEV_TOOLS=OFF
+        - compiler: clang
+          env: BUILD_TYPE=Debug DEV_TOOLS=OFF
 
 before_install:
 - if [[ "$CXX" == "clang++" ]]; then export CXX=clang++-5.0; fi
@@ -21,7 +25,7 @@ before_install:
 before_script:
 
 script:
-    - docker exec dock cmake -DCMAKE_CXX_COMPILER=$CXX -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_CXX_FLAGS="$COVERAGE" ../code
+    - docker exec dock cmake -DCMAKE_CXX_COMPILER=$CXX -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DENABLE_DEV_TOOLS=$DEV_TOOLS -DCMAKE_CXX_FLAGS="$COVERAGE" ../code
     - docker exec dock make -j2
     - docker exec dock ctest --output-on-failure
     - if [[ "$COVERAGE" == "--coverage" ]]; then docker exec dock lcov --directory . --capture --output-file ../code/coverage.info; fi
