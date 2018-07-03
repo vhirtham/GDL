@@ -44,7 +44,7 @@ void* MemoryPool::Allocate(size_t size)
     DEV_EXCEPTION(size > mElementSize, "Allocation size is larger than a pool element.");
     EXCEPTION(mFirstFreeElement == nullptr, "No more memory available.");
 
-    void* allocatedMemory = mFirstFreeElement;
+    void* allocatedMemoryPtr = mFirstFreeElement;
 
     mFirstFreeElement = ReadListEntry(mFirstFreeElement);
 
@@ -53,7 +53,7 @@ void* MemoryPool::Allocate(size_t size)
         mLastFreeElement = nullptr;
 
     --mNumFreeElements;
-    return allocatedMemory;
+    return allocatedMemoryPtr;
 }
 
 

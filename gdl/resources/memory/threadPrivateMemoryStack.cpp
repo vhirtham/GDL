@@ -4,6 +4,8 @@
 #include "gdl/base/Exception.h"
 #include "gdl/base/functions/isPowerOf2.h"
 
+#include <cassert>
+
 namespace GDL
 {
 
@@ -13,6 +15,7 @@ threadPrivateMemoryStack::threadPrivateMemoryStack(size_t memorySize, size_t ali
     , mNumAllocations{0}
     , mOwningTreadId{std::this_thread::get_id()}
     , mMemoryStart{nullptr}
+    , mCurrentMemoryPtr{nullptr}
     , mMemory{nullptr}
 {
     CheckConstructionParameters();
@@ -20,6 +23,43 @@ threadPrivateMemoryStack::threadPrivateMemoryStack(size_t memorySize, size_t ali
 
 threadPrivateMemoryStack::~threadPrivateMemoryStack()
 {
+    assert(IsInitialized() == false && "Deinitialize the thread private memory stack before destruction - If you did, "
+                                       "there might have been an exception");
+}
+
+void* threadPrivateMemoryStack::Allocate(size_t size)
+{
+    // https://stackoverflow.com/questions/2745074/fast-ceiling-of-an-integer-division-in-c-c
+    size_t consumedMemorySize = ((size + mAlignment - 1) / mAlignment) * mAlignment;
+
+
+    DEV_EXCEPTION(mOwningTreadId != std::this_thread::get_id(),
+                  "Thread private memory stack can only be accessed by owning thread");
+    DEV_EXCEPTION(consumedMemorySize == 0, "Allocated memory size is 0.");
+    DEV_EXCEPTION(IsInitialized() == false, "Memory pool not initialized");
+    EXCEPTION(mCurrentMemoryPtr + consumedMemorySize > mMemoryStart + mMemorySize, "No more memory available.");
+
+
+    void* allocatedMemoryPtr = mCurrentMemoryPtr;
+    mCurrentMemoryPtr += consumedMemorySize;
+
+    ++mNumAllocations;
+
+    return allocatedMemoryPtr;
+}
+
+void threadPrivateMemoryStack::Deallocate(void* address)
+{
+    DEV_EXCEPTION(mOwningTreadId != std::this_thread::get_id(),
+                  "Thread private memory stack can only be accessed by owning thread");
+    DEV_EXCEPTION(address == nullptr, "Can't free a nullptr");
+    DEV_EXCEPTION(static_cast<U8*>(address) < mMemoryStart || static_cast<U8*>(address) > mMemoryStart + mMemorySize,
+                  "Memory address is not part of the pool allocators memory");
+    DEV_EXCEPTION(mNumAllocations == 0, "No memory allocated that can be deallocated");
+
+    --mNumAllocations;
+    if (mNumAllocations == 0)
+        mCurrentMemoryPtr = mMemoryStart;
 }
 
 void threadPrivateMemoryStack::Deinitialize()
@@ -31,6 +71,10 @@ void threadPrivateMemoryStack::Deinitialize()
 
     EXCEPTION(IsInitialized() == false, "Memory pool already deinitialized.");
     EXCEPTION(mNumAllocations != 0, "Can't deinitialize. Memory still in use.");
+
+    mMemory.reset(nullptr);
+    mMemoryStart = nullptr;
+    mCurrentMemoryPtr = {nullptr};
 }
 
 void threadPrivateMemoryStack::Initialize()
@@ -40,6 +84,8 @@ void threadPrivateMemoryStack::Initialize()
 
     mMemory.reset(new U8[TotalMemorySize()]);
     AlignMemory();
+    mNumAllocations = 0;
+    mCurrentMemoryPtr = mMemoryStart;
 }
 
 

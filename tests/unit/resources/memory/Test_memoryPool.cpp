@@ -28,7 +28,7 @@ BOOST_AUTO_TEST_CASE(Construction_destruction)
 }
 
 
-BOOST_AUTO_TEST_CASE(Not_Initialized_Exceptions)
+BOOST_AUTO_TEST_CASE(Initialization_Deinitialization_Exceptions)
 {
     MemoryPool mp(16, 5);
 

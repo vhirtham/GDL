@@ -19,6 +19,7 @@ class threadPrivateMemoryStack
     U32 mNumAllocations;
     std::thread::id mOwningTreadId;
     U8* mMemoryStart;
+    U8* mCurrentMemoryPtr;
     std::unique_ptr<U8[]> mMemory;
 
 public:
@@ -35,6 +36,15 @@ public:
     ~threadPrivateMemoryStack();
 
 
+    //! @brief Allocates memory
+    //! @param size: Size of the memory that should be allocated
+    //! @return Pointer to memory
+    void* Allocate(size_t size);
+
+    //! @brief Deallocates memory at the passed address
+    //! @param address: Adress that should be freed
+    void Deallocate(void* address);
+
     //! @brief Deinitializes the memory stack
     void Deinitialize();
 
@@ -42,7 +52,6 @@ public:
     void Initialize();
 
 private:
-
     //! @brief Aligns the memory.
     void AlignMemory();
 
@@ -58,4 +67,4 @@ private:
     size_t TotalMemorySize() const;
 };
 
-}  //namespace GDL
+} // namespace GDL
