@@ -10,5 +10,5 @@ addTest(memoryPool
     resources/memory/memoryPool.cpp
     )
 addTest(threadPrivateMemoryStack
-    resources/memory/threadPrivateMemoryStack.cpp
+    resources/memory/memoryStack.cpp
     )

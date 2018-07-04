@@ -208,7 +208,7 @@ int main(int argc, char* argv[])
             "float factor = 6.28 * frequency;"
             "float y = ex_TexCoord.y * factor;\n"
             "float dy = dFdy(ex_TexCoord.y) * 6.28 * factor;\n"
-            "dy = clamp(dy,0.,6.28);"
+            //"dy = clamp(dy,0.,6.28);"
             "float y1 = y - dy*0.5;\n"
             "float y2 = y + dy*0.5;\n"
             "float f1 = (sin(y)+1)*0.5;\n"

@@ -3,7 +3,7 @@
 
 #include "gdl/base/Exception.h"
 #include "gdl/base/SSESupportFunctions.h"
-#include "gdl/resources/memory/threadPrivateMemoryStack.h"
+#include "gdl/resources/memory/memoryStack.h"
 
 #include <array>
 #include <atomic>
@@ -73,7 +73,7 @@ BOOST_AUTO_TEST_CASE(Allocation_and_Deallocation)
 
     tpms.Deallocate(addresses[0]);
     // memory full --->  memory is only freed if all allocated memory is deallocated
-    BOOST_CHECK_THROW(addresses[0] = tpms.Allocate(allocationSize), Exception);
+    BOOST_CHECK_THROW(addresses[0] = tpms.Allocate(1), Exception);
 
     for (U32 i = 1; i < numAllocations; ++i)
         tpms.Deallocate(addresses[i]);
