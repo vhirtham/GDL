@@ -1,7 +1,4 @@
 #pragma once
-#if defined __GNUC__ && __GNUC__ >= 6
-#pragma GCC diagnostic ignored "-Wignored-attributes"
-#endif
 
 #include "gdl/GDLTypedefs.h"
 #include "gdl/base/Exception.h"
@@ -10,14 +7,16 @@
 #include <array>
 #include <type_traits>
 
+
 namespace GDL
 {
+
 
 //! @brief Matrix of arbitrary size with SIMD support
 //! @tparam tRows: Number of rows
 //! @tparam tCols: Number of columns
 template <typename T, I32 tRows, I32 tCols>
-class __attribute__((aligned(16))) matXSIMD
+class alignas(AlignmentBytes<__m128>) matXSIMD
 // TODO: if register is a template parameter set corresponding alignment in the row above!
 {
     typedef typename std::conditional<std::is_same<T, F32>::value, __m128, __m128d>::type __mx;
@@ -26,7 +25,7 @@ class __attribute__((aligned(16))) matXSIMD
     constexpr static U32 mNumRegisters = tCols * mNumRegistersPerCol;
 
 
-    __attribute__((aligned(16))) std::array<__mx, mNumRegisters> mData;
+    alignas(AlignmentBytes<__mx>) std::array<__mx, mNumRegisters> mData;
 
     template <typename T2, I32 tRows2, I32 tCols2>
     friend class matXSIMD;

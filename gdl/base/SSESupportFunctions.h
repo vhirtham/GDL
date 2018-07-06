@@ -1,5 +1,10 @@
 #pragma once
 
+#pragma once
+#if defined __GNUC__ && __GNUC__ >= 6
+#pragma GCC diagnostic ignored "-Wignored-attributes"
+#endif
+
 #include "gdl/GDLTypedefs.h"
 #include "gdl/base/Exception.h"
 
@@ -17,24 +22,19 @@ constexpr const U32 CalcMinNumArrayRegisters(U32 numElements, U32 registerSize)
     return (numElements / registerSize) + ((numElements % registerSize > 0) ? 1 : 0);
 }
 
-template <typename RegisterType>
-constexpr const U32 GetAlignmentBytes()
-{
-    throw Exception(__PRETTY_FUNCTION__, "No alignment known for given data type.");
-    return 0;
-}
+template <typename _Register>
+constexpr const U32 AlignmentBytes = 0;
 
 template <>
-constexpr const U32 GetAlignmentBytes<__m128>()
-{
-    return 16;
-}
+constexpr const U32 AlignmentBytes<__m128> = 16;
+template <>
+constexpr const U32 AlignmentBytes<__m128d> = 16;
 
 template <>
-constexpr const U32 GetAlignmentBytes<__m256>()
-{
-    return 32;
-}
+constexpr const U32 AlignmentBytes<__m256> = 32;
+
+template <>
+constexpr const U32 AlignmentBytes<__m512> = 64;
 
 template <typename DataType, typename RegisterType>
 constexpr const U32 GetNumRegisterEntries()

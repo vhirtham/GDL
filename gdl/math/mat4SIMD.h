@@ -1,7 +1,4 @@
 #pragma once
-#if defined __GNUC__ && __GNUC__ >= 6
-#pragma GCC diagnostic ignored "-Wignored-attributes"
-#endif
 
 #include "gdl/GDLTypedefs.h"
 #include "gdl/base/SSESupportFunctions.h"
@@ -17,9 +14,9 @@ namespace GDL
 {
 
 //! @brief 4x4 Matrix with SIMD support
-class __attribute__((aligned(16))) mat4SIMD
+class alignas(16) mat4SIMD
 {
-    __attribute__((aligned(16))) std::array<__m128, 4> mData;
+    alignas(16) std::array<__m128, 4> mData;
     //    __attribute__((aligned(16))) __m128 mCol0;
     //    __attribute__((aligned(16))) __m128 mCol1;
     //    __attribute__((aligned(16))) __m128 mCol2;
