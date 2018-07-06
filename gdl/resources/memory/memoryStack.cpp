@@ -8,24 +8,29 @@
 #include <cassert>
 
 
-
-#include <iostream>
-
 namespace GDL
 {
 
-template <bool _ThreadPrivate>
-memoryStackTemplate<_ThreadPrivate>::memoryStackTemplate(size_t memorySize)
+template <>
+memoryStackTemplate<true>::memoryStackTemplate(size_t memorySize)
     : mMemorySize{memorySize}
     , mNumAllocations{0}
     , mCurrentMemoryPtr{nullptr}
     , mMemory{nullptr}
-    , mOwningTreadId{std::this_thread::get_id()}
+    , mMutexOrThreadId{std::this_thread::get_id()}
 {
     CheckConstructionParameters();
 }
 
-
+template <>
+memoryStackTemplate<false>::memoryStackTemplate(size_t memorySize)
+    : mMemorySize{memorySize}
+    , mNumAllocations{0}
+    , mCurrentMemoryPtr{nullptr}
+    , mMemory{nullptr}
+{
+    CheckConstructionParameters();
+}
 
 template <bool _ThreadPrivate>
 memoryStackTemplate<_ThreadPrivate>::~memoryStackTemplate()
@@ -39,7 +44,7 @@ memoryStackTemplate<_ThreadPrivate>::~memoryStackTemplate()
 template <>
 void* memoryStackTemplate<true>::Allocate(size_t size, size_t alignment)
 {
-    DEV_EXCEPTION(mOwningTreadId != std::this_thread::get_id(),
+    DEV_EXCEPTION(mMutexOrThreadId != std::this_thread::get_id(),
                   "Thread private memory stack can only be accessed by owning thread");
 
     return AllocateInternal(size, alignment);
@@ -50,6 +55,7 @@ void* memoryStackTemplate<true>::Allocate(size_t size, size_t alignment)
 template <>
 void* memoryStackTemplate<false>::Allocate(size_t size, size_t alignment)
 {
+    std::unique_lock<std::mutex> lock(mMutexOrThreadId);
     return AllocateInternal(size, alignment);
 }
 
@@ -58,7 +64,7 @@ void* memoryStackTemplate<false>::Allocate(size_t size, size_t alignment)
 template <>
 void memoryStackTemplate<true>::Deallocate(void* address)
 {
-    DEV_EXCEPTION(mOwningTreadId != std::this_thread::get_id(),
+    DEV_EXCEPTION(mMutexOrThreadId != std::this_thread::get_id(),
                   "Thread private memory stack can only be accessed by owning thread");
 
     DeallocateInternal(address);
@@ -69,6 +75,7 @@ void memoryStackTemplate<true>::Deallocate(void* address)
 template <>
 void memoryStackTemplate<false>::Deallocate(void* address)
 {
+    std::unique_lock<std::mutex> lock(mMutexOrThreadId);
     DeallocateInternal(address);
 }
 
@@ -77,7 +84,7 @@ void memoryStackTemplate<false>::Deallocate(void* address)
 template <>
 void memoryStackTemplate<true>::Deinitialize()
 {
-    EXCEPTION(mOwningTreadId != std::this_thread::get_id(),
+    EXCEPTION(mMutexOrThreadId != std::this_thread::get_id(),
               "Thread private memory stack can only be accessed by owning thread");
 
     DeinitializeInternal();
@@ -88,6 +95,7 @@ void memoryStackTemplate<true>::Deinitialize()
 template <>
 void memoryStackTemplate<false>::Deinitialize()
 {
+    std::unique_lock<std::mutex> lock(mMutexOrThreadId);
     DeinitializeInternal();
 }
 
@@ -96,7 +104,7 @@ void memoryStackTemplate<false>::Deinitialize()
 template <>
 void memoryStackTemplate<true>::Initialize()
 {
-    EXCEPTION(mOwningTreadId != std::this_thread::get_id(),
+    EXCEPTION(mMutexOrThreadId != std::this_thread::get_id(),
               "Thread private memory stack can only be accessed by owning thread");
 
     InitializeInternal();
@@ -107,6 +115,7 @@ void memoryStackTemplate<true>::Initialize()
 template <>
 void memoryStackTemplate<false>::Initialize()
 {
+    std::unique_lock<std::mutex> lock(mMutexOrThreadId);
     InitializeInternal();
 }
 
@@ -120,7 +129,8 @@ void* memoryStackTemplate<_ThreadPrivate>::AllocateInternal(size_t size, size_t 
     U8* allocatedMemoryPtr = mCurrentMemoryPtr + correction;
 
     DEV_EXCEPTION(size == 0, "Allocated memory size is 0.");
-    DEV_EXCEPTION(IsInitialized() == false, "Memory pool not initialized");
+    DEV_EXCEPTION(!IsInitialized(), "Memory pool not initialized.");
+    DEV_EXCEPTION(!IsPowerOf2(alignment), "Alignment must be a power of 2.");
     EXCEPTION(allocatedMemoryPtr + size > mMemory.get() + mMemorySize, "No more memory available.");
 
     mCurrentMemoryPtr = allocatedMemoryPtr + size;

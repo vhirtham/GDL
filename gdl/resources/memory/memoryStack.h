@@ -4,6 +4,7 @@
 #include "gdl/GDLTypedefs.h"
 
 #include <memory>
+#include <mutex>
 #include <thread>
 
 namespace GDL
@@ -17,11 +18,14 @@ namespace GDL
 template <bool _ThreadPrivate>
 class memoryStackTemplate
 {
+
+    typedef typename std::conditional<_ThreadPrivate, std::thread::id, std::mutex>::type MutexOrThreadId;
+
     size_t mMemorySize;
     U32 mNumAllocations;
     U8* mCurrentMemoryPtr;
     std::unique_ptr<U8[]> mMemory;
-    std::thread::id mOwningTreadId;
+    MutexOrThreadId mMutexOrThreadId;
 
 public:
     //! @brief Creates the thread private memory stack with <memorySize> bytes of memory
@@ -79,6 +83,6 @@ private:
 
 
 using threadPrivateMemoryStack = memoryStackTemplate<true>;
-using memoryStack = memoryStackTemplate<true>;
+using memoryStack = memoryStackTemplate<false>;
 
 } // namespace GDL
