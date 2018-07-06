@@ -9,6 +9,6 @@ addTest(globalNewCounter)
 addTest(memoryPool
     resources/memory/memoryPool.cpp
     )
-addTest(threadPrivateMemoryStack
+addTest(memoryStack
     resources/memory/memoryStack.cpp
     )

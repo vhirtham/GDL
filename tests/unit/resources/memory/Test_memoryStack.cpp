@@ -12,22 +12,26 @@
 
 using namespace GDL;
 
+template <bool _ThreadPrivate>
+void ConstructionDestructionTest()
+{
+    BOOST_CHECK_NO_THROW(memoryStackTemplate<_ThreadPrivate>(100));
+
+    BOOST_CHECK_THROW(memoryStackTemplate<_ThreadPrivate>(0), Exception);
+}
+
 BOOST_AUTO_TEST_CASE(Construction_destruction)
 {
-    BOOST_CHECK_NO_THROW(threadPrivateMemoryStack(100));
-
-    BOOST_CHECK_THROW(threadPrivateMemoryStack(0), Exception);
-    BOOST_CHECK_THROW(threadPrivateMemoryStack(100, 0), Exception);
-    BOOST_CHECK_THROW(threadPrivateMemoryStack(100, 5), Exception);
+    ConstructionDestructionTest<true>();
+    ConstructionDestructionTest<false>();
 }
 
 
-//! @brief Checks if exceptions during initialization and deinitialization are thrown as expected
-BOOST_AUTO_TEST_CASE(Initialization_Deinitialization_Exceptions)
+template <bool _ThreadPrivate>
+void InitializationDeinitializationExceptions()
 {
-
     constexpr U32 memorySize = 128;
-    threadPrivateMemoryStack tpms{memorySize};
+    memoryStackTemplate<_ThreadPrivate> tpms{memorySize};
 
 
     GDL_CHECK_THROW_DEV_DISABLE(tpms.Allocate(10), Exception);
@@ -44,12 +48,23 @@ BOOST_AUTO_TEST_CASE(Initialization_Deinitialization_Exceptions)
     BOOST_CHECK_THROW(tpms.Deinitialize(), Exception);
 }
 
-BOOST_AUTO_TEST_CASE(Allocation_and_Deallocation)
+
+//! @brief Checks if exceptions during initialization and deinitialization are thrown as expected
+BOOST_AUTO_TEST_CASE(Initialization_Deinitialization_Exceptions)
+{
+    InitializationDeinitializationExceptions<true>();
+    InitializationDeinitializationExceptions<false>();
+}
+
+
+
+template <bool _ThreadPrivate>
+void AllocationDeallocation()
 {
     constexpr U32 numAllocations = 5;
     constexpr U32 allocationSize = 10;
     constexpr U32 memorySize = allocationSize * numAllocations;
-    threadPrivateMemoryStack tpms{memorySize};
+    memoryStackTemplate<_ThreadPrivate> tpms{memorySize};
 
     std::array<void*, numAllocations> addresses;
     addresses.fill(nullptr);
@@ -85,19 +100,29 @@ BOOST_AUTO_TEST_CASE(Allocation_and_Deallocation)
     tpms.Deinitialize();
 }
 
+BOOST_AUTO_TEST_CASE(Allocation_and_Deallocation)
+{
+    AllocationDeallocation<true>();
+    AllocationDeallocation<false>();
+}
 
-BOOST_AUTO_TEST_CASE(Alignment)
+
+template <bool _ThreadPrivate>
+void AlignedAllocation()
 {
     constexpr U32 alignment = 128;
-    constexpr U32 memorySize = alignment * 4;
-    threadPrivateMemoryStack tpms{memorySize, alignment};
+    constexpr U32 memorySize = alignment * 5;
+    memoryStackTemplate<_ThreadPrivate> tpms{memorySize};
     std::array<void*, 3> addresses{{nullptr, nullptr, nullptr}};
 
     tpms.Initialize();
 
-    addresses[0] = tpms.Allocate(alignment - alignment / 2);
-    addresses[1] = tpms.Allocate(alignment);
-    addresses[2] = tpms.Allocate(alignment + alignment / 2);
+    // The following lines allocate memory with total size of 4 * <alignment>. Another allocation might fail, because
+    // the chances are high that the first pointer after allocation needs to be corrected. So there is probably no space
+    // left for another element with size <alignment> even if it should not be aligned.
+    addresses[0] = tpms.Allocate(0.5 * alignment, alignment);
+    addresses[1] = tpms.Allocate(1.5 * alignment, alignment);
+    addresses[2] = tpms.Allocate(alignment, alignment);
 
     for (U32 i = 0; i < addresses.size(); ++i)
         BOOST_CHECK(is_aligned(addresses[i], alignment));
@@ -108,8 +133,15 @@ BOOST_AUTO_TEST_CASE(Alignment)
     tpms.Deinitialize();
 }
 
+
+BOOST_AUTO_TEST_CASE(Alignment)
+{
+    AlignedAllocation<true>();
+    AlignedAllocation<false>();
+}
+
 //! @brief Checks than only the owning thread can modify the state of the memory stack
-BOOST_AUTO_TEST_CASE(Non_owning_thread_access)
+BOOST_AUTO_TEST_CASE(Thread_safety_thread_private)
 {
     std::atomic_bool constructed = false;
     std::atomic_bool initialize = false;

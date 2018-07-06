@@ -3,18 +3,21 @@
 
 #include "gdl/base/Exception.h"
 #include "gdl/base/functions/isPowerOf2.h"
+#include "gdl/base/SSESupportFunctions.h"
 
 #include <cassert>
+
+
+
+#include <iostream>
 
 namespace GDL
 {
 
 template <bool _ThreadPrivate>
-memoryStackTemplate<_ThreadPrivate>::memoryStackTemplate(size_t memorySize, size_t alignment)
+memoryStackTemplate<_ThreadPrivate>::memoryStackTemplate(size_t memorySize)
     : mMemorySize{memorySize}
-    , mAlignment{alignment}
     , mNumAllocations{0}
-    , mMemoryStart{nullptr}
     , mCurrentMemoryPtr{nullptr}
     , mMemory{nullptr}
     , mOwningTreadId{std::this_thread::get_id()}
@@ -34,20 +37,20 @@ memoryStackTemplate<_ThreadPrivate>::~memoryStackTemplate()
 
 
 template <>
-void* memoryStackTemplate<true>::Allocate(size_t size)
+void* memoryStackTemplate<true>::Allocate(size_t size, size_t alignment)
 {
     DEV_EXCEPTION(mOwningTreadId != std::this_thread::get_id(),
                   "Thread private memory stack can only be accessed by owning thread");
 
-    return AllocateInternal(size);
+    return AllocateInternal(size, alignment);
 }
 
 
 
 template <>
-void* memoryStackTemplate<false>::Allocate(size_t size)
+void* memoryStackTemplate<false>::Allocate(size_t size, size_t alignment)
 {
-    return AllocateInternal(size);
+    return AllocateInternal(size, alignment);
 }
 
 
@@ -109,28 +112,18 @@ void memoryStackTemplate<false>::Initialize()
 
 
 template <bool _ThreadPrivate>
-void memoryStackTemplate<_ThreadPrivate>::AlignMemory()
+void* memoryStackTemplate<_ThreadPrivate>::AllocateInternal(size_t size, size_t alignment)
 {
-    void* memoryStartBefAlign = mMemory.get();
-    size_t memorySizeBefAlign = TotalMemorySize();
+    size_t misalignment = Misalignment(mCurrentMemoryPtr, alignment);
+    size_t correction = ((misalignment + alignment - 1) / alignment) * alignment - misalignment;
 
-    mMemoryStart = static_cast<U8*>(std::align(mAlignment, mMemorySize, memoryStartBefAlign, memorySizeBefAlign));
+    U8* allocatedMemoryPtr = mCurrentMemoryPtr + correction;
 
-    EXCEPTION(mMemoryStart == nullptr, "Memory alignment failed.");
-}
-
-template <bool _ThreadPrivate>
-void* memoryStackTemplate<_ThreadPrivate>::AllocateInternal(size_t size)
-{
-    // https://stackoverflow.com/questions/2745074/fast-ceiling-of-an-integer-division-in-c-c
-    size_t consumedMemorySize = ((size + mAlignment - 1) / mAlignment) * mAlignment;
-
-    DEV_EXCEPTION(consumedMemorySize == 0, "Allocated memory size is 0.");
+    DEV_EXCEPTION(size == 0, "Allocated memory size is 0.");
     DEV_EXCEPTION(IsInitialized() == false, "Memory pool not initialized");
-    EXCEPTION(mCurrentMemoryPtr + consumedMemorySize > mMemoryStart + mMemorySize, "No more memory available.");
+    EXCEPTION(allocatedMemoryPtr + size > mMemory.get() + mMemorySize, "No more memory available.");
 
-    void* allocatedMemoryPtr = mCurrentMemoryPtr;
-    mCurrentMemoryPtr += consumedMemorySize;
+    mCurrentMemoryPtr = allocatedMemoryPtr + size;
 
     ++mNumAllocations;
 
@@ -141,13 +134,13 @@ template <bool _ThreadPrivate>
 void memoryStackTemplate<_ThreadPrivate>::DeallocateInternal(void* address)
 {
     DEV_EXCEPTION(address == nullptr, "Can't free a nullptr");
-    DEV_EXCEPTION(static_cast<U8*>(address) < mMemoryStart || static_cast<U8*>(address) > mMemoryStart + mMemorySize,
+    DEV_EXCEPTION(static_cast<U8*>(address) < mMemory.get() || static_cast<U8*>(address) > mMemory.get() + mMemorySize,
                   "Memory address is not part of the pool allocators memory");
     DEV_EXCEPTION(mNumAllocations == 0, "No memory allocated that can be deallocated");
 
     --mNumAllocations;
     if (mNumAllocations == 0)
-        mCurrentMemoryPtr = mMemoryStart;
+        mCurrentMemoryPtr = mMemory.get();
 }
 
 template <bool _ThreadPrivate>
@@ -158,17 +151,15 @@ void memoryStackTemplate<_ThreadPrivate>::DeinitializeInternal()
     EXCEPTION(mNumAllocations != 0, "Can't deinitialize. Memory still in use.");
 
     mMemory.reset(nullptr);
-    mMemoryStart = nullptr;
     mCurrentMemoryPtr = {nullptr};
 }
 
 template <bool _ThreadPrivate>
 void memoryStackTemplate<_ThreadPrivate>::InitializeInternal()
 {
-    mMemory.reset(new U8[TotalMemorySize()]);
-    AlignMemory();
+    mMemory.reset(new U8[mMemorySize]);
     mNumAllocations = 0;
-    mCurrentMemoryPtr = mMemoryStart;
+    mCurrentMemoryPtr = mMemory.get();
 }
 
 
@@ -177,7 +168,6 @@ template <bool _ThreadPrivate>
 void memoryStackTemplate<_ThreadPrivate>::CheckConstructionParameters() const
 {
     EXCEPTION(mMemorySize < 1, "Memory size must be bigger than 0");
-    EXCEPTION(!IsPowerOf2(mAlignment), "Alignment must be a power of 2");
 }
 
 
@@ -189,12 +179,6 @@ bool memoryStackTemplate<_ThreadPrivate>::IsInitialized() const
 }
 
 
-
-template <bool _ThreadPrivate>
-size_t memoryStackTemplate<_ThreadPrivate>::TotalMemorySize() const
-{
-    return mMemorySize + mAlignment;
-}
 
 template class memoryStackTemplate<true>;
 template class memoryStackTemplate<false>;

@@ -17,6 +17,11 @@ inline bool is_aligned(const volatile void* p, size_t n)
     return reinterpret_cast<std::uintptr_t>(p) % n == 0;
 }
 
+inline size_t Misalignment(const volatile void* p, size_t n)
+{
+    return reinterpret_cast<std::uintptr_t>(p) % n;
+}
+
 constexpr const U32 CalcMinNumArrayRegisters(U32 numElements, U32 registerSize)
 {
     return (numElements / registerSize) + ((numElements % registerSize > 0) ? 1 : 0);

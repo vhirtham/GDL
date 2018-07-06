@@ -18,18 +18,15 @@ template <bool _ThreadPrivate>
 class memoryStackTemplate
 {
     size_t mMemorySize;
-    size_t mAlignment;
     U32 mNumAllocations;
-    U8* mMemoryStart;
     U8* mCurrentMemoryPtr;
     std::unique_ptr<U8[]> mMemory;
     std::thread::id mOwningTreadId;
 
 public:
-    //! @brief Creates the thread private memory pool with <memorySize> bytes of memory
+    //! @brief Creates the thread private memory stack with <memorySize> bytes of memory
     //! @param elementSize: total amount of memory
-    //! @param alignment: Memory alignment
-    memoryStackTemplate(size_t memorySize, size_t alignment = 1);
+    memoryStackTemplate(size_t memorySize);
 
     memoryStackTemplate() = delete;
     memoryStackTemplate(const memoryStackTemplate&) = delete;
@@ -42,7 +39,8 @@ public:
     //! @brief Allocates memory
     //! @param size: Size of the memory that should be allocated
     //! @return Pointer to memory
-    void* Allocate(size_t size);
+    //! @param alignment: Memory alignment
+    void* Allocate(size_t size, size_t alignment = 1);
 
     //! @brief Deallocates memory at the passed address
     //! @param address: Adress that should be freed
@@ -55,13 +53,11 @@ public:
     void Initialize();
 
 private:
-    //! @brief Aligns the memory.
-    void AlignMemory();
-
     //! @brief Class internal function which does the memory allocation
     //! @param size: Size of the memory that should be allocated
     //! @return Pointer to memory
-    void* AllocateInternal(size_t size);
+    //! @param alignment: Memory alignment
+    void* AllocateInternal(size_t size, size_t alignment);
 
     //! @brief Checks if the memory stack is constructed with valid parameters. Throws if not.
     void CheckConstructionParameters() const;
@@ -79,10 +75,6 @@ private:
     //! @brief Returns if the memory stack is initialized
     //! @return TRUE / FALSE
     bool IsInitialized() const;
-
-    //! @brief Returns the memory size including the extra alignment bytes
-    //! @return Memory size including the extra alignment bytes
-    size_t TotalMemorySize() const;
 };
 
 
