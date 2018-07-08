@@ -29,7 +29,7 @@ class memoryStackTemplate
 
 public:
     //! @brief Creates the thread private memory stack with <memorySize> bytes of memory
-    //! @param elementSize: total amount of memory
+    //! @param memorySize: total amount of memory
     memoryStackTemplate(size_t memorySize);
 
     memoryStackTemplate() = delete;

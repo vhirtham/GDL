@@ -179,6 +179,8 @@ void MemoryPool::Initialize()
 {
     std::lock_guard<std::mutex> lock(mMutex);
 
+    EXCEPTION(IsInitialized(), "Memory pool is already initialized.");
+
     mMemory.reset(new U8[TotalMemorySize()]);
 
     AlignMemory();

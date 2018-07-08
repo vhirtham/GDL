@@ -37,6 +37,9 @@ void InitializationDeinitializationExceptions()
     GDL_CHECK_THROW_DEV_DISABLE(ms.Allocate(10), Exception);
     ms.Initialize();
 
+    // already initialized
+    BOOST_CHECK_THROW(ms.Initialize(), Exception);
+
     void* address = ms.Allocate(10);
     // memory still in use
     BOOST_CHECK_THROW(ms.Deinitialize(), Exception);

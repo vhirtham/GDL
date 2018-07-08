@@ -55,7 +55,7 @@ void* memoryStackTemplate<true>::Allocate(size_t size, size_t alignment)
 template <>
 void* memoryStackTemplate<false>::Allocate(size_t size, size_t alignment)
 {
-    std::unique_lock<std::mutex> lock(mMutexOrThreadId);
+    std::lock_guard<std::mutex> lock(mMutexOrThreadId);
     return AllocateInternal(size, alignment);
 }
 
@@ -75,7 +75,7 @@ void memoryStackTemplate<true>::Deallocate(void* address)
 template <>
 void memoryStackTemplate<false>::Deallocate(void* address)
 {
-    std::unique_lock<std::mutex> lock(mMutexOrThreadId);
+    std::lock_guard<std::mutex> lock(mMutexOrThreadId);
     DeallocateInternal(address);
 }
 
@@ -95,7 +95,7 @@ void memoryStackTemplate<true>::Deinitialize()
 template <>
 void memoryStackTemplate<false>::Deinitialize()
 {
-    std::unique_lock<std::mutex> lock(mMutexOrThreadId);
+    std::lock_guard<std::mutex> lock(mMutexOrThreadId);
     DeinitializeInternal();
 }
 
@@ -115,7 +115,7 @@ void memoryStackTemplate<true>::Initialize()
 template <>
 void memoryStackTemplate<false>::Initialize()
 {
-    std::unique_lock<std::mutex> lock(mMutexOrThreadId);
+    std::lock_guard<std::mutex> lock(mMutexOrThreadId);
     InitializeInternal();
 }
 
@@ -167,6 +167,8 @@ void memoryStackTemplate<_ThreadPrivate>::DeinitializeInternal()
 template <bool _ThreadPrivate>
 void memoryStackTemplate<_ThreadPrivate>::InitializeInternal()
 {
+    EXCEPTION(IsInitialized(), "Memory stack is already initialized");
+
     mMemory.reset(new U8[mMemorySize]);
     mNumAllocations = 0;
     mCurrentMemoryPtr = mMemory.get();

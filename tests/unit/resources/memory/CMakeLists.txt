@@ -6,6 +6,9 @@ addTest(allocators
     )
 addTest(globalNewCounter)
 
+addTest(generalPurposeMemory
+    resources/memory/generalPurposeMemory.cpp
+    )
 addTest(memoryPool
     resources/memory/memoryPool.cpp
     )

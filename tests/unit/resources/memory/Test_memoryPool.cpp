@@ -36,6 +36,9 @@ BOOST_AUTO_TEST_CASE(Initialization_Deinitialization_Exceptions)
     BOOST_CHECK_THROW(mp.CheckMemoryConsistency(), Exception);
 
     mp.Initialize();
+    // Already initialized
+    BOOST_CHECK_THROW(mp.Initialize(), Exception);
+
     void* address = mp.Allocate(16);
     BOOST_CHECK_THROW(mp.Deinitialize(), Exception);
     BOOST_CHECK_NO_THROW(mp.Deallocate(address));
@@ -44,6 +47,7 @@ BOOST_AUTO_TEST_CASE(Initialization_Deinitialization_Exceptions)
     // Trying to deallocate from uninitialized memory pool
     GDL_CHECK_THROW_DEV_DISABLE(mp.Deallocate(address), Exception);
 
+    // Already deinitialized
     BOOST_CHECK_THROW(mp.Deinitialize(), Exception);
 }
 
