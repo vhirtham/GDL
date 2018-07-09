@@ -13,8 +13,8 @@ class GeneralPurposeMemory
 {
     size_t mMemorySize;
     U32 mNumAllocations;
-    U8* mFirstFreeMemory;
-    U8* mLastFreeMemory;
+    U8* mFirstFreeMemoryPtr;
+    U8* mLastFreeMemoryPtr;
     std::unique_ptr<U8[]> mMemory;
     mutable std::mutex mMutex;
 
@@ -29,6 +29,17 @@ public:
     GeneralPurposeMemory& operator=(const GeneralPurposeMemory&) = delete;
     GeneralPurposeMemory& operator=(GeneralPurposeMemory&&) = delete;
     ~GeneralPurposeMemory();
+
+
+    //! @brief Allocates memory
+    //! @param size: Size of the memory that should be allocated
+    //! @param alignment: Memory alignment
+    //! @return Pointer to memory
+    void* Allocate(size_t size, size_t alignment = 1);
+
+    //! @brief Deallocates memory at the passed address
+    //! @param address: Adress that should be freed
+    void Deallocate(void* address);
 
     //! @brief Deinitializes the general purpose memory
     void Deinitialize();

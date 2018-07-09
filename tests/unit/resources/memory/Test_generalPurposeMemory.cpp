@@ -26,7 +26,7 @@ BOOST_AUTO_TEST_CASE(Initialization_Deinitialization)
     // already initialized
     BOOST_CHECK_THROW(gpm.Initialize(), Exception);
 
-    // void* address = gpm.Allocate(10);
+    void* address = gpm.Allocate(10);
     // memory still in use
     // BOOST_CHECK_THROW(gpm.Deinitialize(), Exception);
 

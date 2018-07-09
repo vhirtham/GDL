@@ -42,8 +42,8 @@ public:
 
     //! @brief Allocates memory
     //! @param size: Size of the memory that should be allocated
-    //! @return Pointer to memory
     //! @param alignment: Memory alignment
+    //! @return Pointer to memory
     void* Allocate(size_t size, size_t alignment = 1);
 
     //! @brief Deallocates memory at the passed address
