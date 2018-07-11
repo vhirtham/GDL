@@ -37,6 +37,9 @@ public:
     //! @return Pointer to memory
     void* Allocate(size_t size, size_t alignment = 1);
 
+    //! @brief Checks the internal consistency of the general purpose memory
+    void CheckMemoryConsistency() const;
+
     //! @brief Deallocates memory at the passed address
     //! @param address: Adress that should be freed
     void Deallocate(void* address);

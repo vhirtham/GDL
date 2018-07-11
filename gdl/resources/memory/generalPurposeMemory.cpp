@@ -30,16 +30,28 @@ void* GeneralPurposeMemory::Allocate(size_t size, size_t alignment)
 
     DEV_EXCEPTION(alignment > 255, "Alignment must be smaller than 256");
 
+    // Data from first free memory block - maybe collect them in a private struct
     U8* currentMemoryPtr = mFirstFreeMemoryPtr;
     U8* prevFreeMemoryPtr = nullptr;
     U8* nextFreeMemoryPtr = ReadAddressFromMemory(currentMemoryPtr + sizeof(size_t));
     size_t freeMemorySize = ReadSizeFromMemory(currentMemoryPtr);
+
     size_t totalAllocationSize = size + alignment + sizeof(size_t);
 
-    // ---- free memory size > totalAllocationSize
-    // ---- adjust total allocation size if left memory is not big enough for free memory info (size + ptr to next free
-    // header)
+    while (freeMemorySize < totalAllocationSize)
+    {
+        EXCEPTION(nextFreeMemoryPtr == nullptr, "No properly sized memory block available.");
 
+        // Traverse to next memory block
+        prevFreeMemoryPtr = currentMemoryPtr;
+        currentMemoryPtr = nextFreeMemoryPtr;
+        nextFreeMemoryPtr = ReadAddressFromMemory(currentMemoryPtr + sizeof(size_t));
+        freeMemorySize = ReadSizeFromMemory(currentMemoryPtr);
+    }
+
+
+    // Adjust allocation size if not enough space for a free memory header is left and update pointer of previous free
+    // memory header
     size_t leftMemorySize = freeMemorySize - totalAllocationSize;
     if (leftMemorySize < sizeof(size_t) + sizeof(void*))
     {
@@ -51,19 +63,20 @@ void* GeneralPurposeMemory::Allocate(size_t size, size_t alignment)
     else
     {
         U8* leftFreeMemoryPtr = currentMemoryPtr + totalAllocationSize;
-        if (prevFreeMemoryPtr != nullptr)
-            WriteAddressToMemory(prevFreeMemoryPtr + sizeof(size_t), leftFreeMemoryPtr);
         WriteSizeToMemory(leftFreeMemoryPtr, leftMemorySize);
         WriteAddressToMemory(leftFreeMemoryPtr + sizeof(size_t), nextFreeMemoryPtr);
 
         if (prevFreeMemoryPtr == nullptr)
             mFirstFreeMemoryPtr = leftFreeMemoryPtr;
+        else
+            WriteAddressToMemory(prevFreeMemoryPtr + sizeof(size_t), leftFreeMemoryPtr);
+
         if (nextFreeMemoryPtr == nullptr)
             mLastFreeMemoryPtr = leftFreeMemoryPtr;
     }
 
 
-    // Store allocation size in memory in front of returned pointer
+    // Store allocation size in memory in front of returned pointer. This is needed for deallocation
     WriteSizeToMemory(currentMemoryPtr, totalAllocationSize);
     currentMemoryPtr += sizeof(size_t);
 
@@ -76,12 +89,53 @@ void* GeneralPurposeMemory::Allocate(size_t size, size_t alignment)
 
     std::cout << (void*)allocatedMemoryPtr << std::endl;
 
+    // return pointer
     return allocatedMemoryPtr;
+}
+
+void GeneralPurposeMemory::CheckMemoryConsistency() const
+{
+    U8* currentMemoryPtr = mFirstFreeMemoryPtr;
+    U8* nextFreeMemoryPtr = ReadAddressFromMemory(currentMemoryPtr + sizeof(size_t));
+    U8* totalMemoryEndPtr = mMemory.get() + mMemorySize;
+
+    // Traverse free memory blocks to the last one
+    while (nextFreeMemoryPtr != nullptr)
+    {
+        EXCEPTION(nextFreeMemoryPtr <= currentMemoryPtr, "Internal linked list of free memory blocks is not ordered.");
+
+        U8* currentMemoryPtr = nextFreeMemoryPtr;
+        U8* nextFreeMemoryPtr = ReadAddressFromMemory(currentMemoryPtr + sizeof(size_t));
+
+        EXCEPTION(nextFreeMemoryPtr != nullptr &&
+                          (nextFreeMemoryPtr < mMemory.get() || nextFreeMemoryPtr > totalMemoryEndPtr),
+                  "Internal linked list of free memory blocks points to a value that is not inside the managed memory "
+                  "section.");
+    }
+
+    // Traverse occupied memory blocks at the end, if there are some
+    size_t blockSize = ReadSizeFromMemory(currentMemoryPtr);
+    while (currentMemoryPtr != totalMemoryEndPtr)
+    {
+        currentMemoryPtr += blockSize;
+        blockSize = ReadSizeFromMemory(currentMemoryPtr);
+
+        EXCEPTION(blockSize <= 0, "Read block size <= 0.");
+        EXCEPTION(currentMemoryPtr > totalMemoryEndPtr,
+                  "Read block size bigger than the distance to the memories end.");
+    }
 }
 
 void GeneralPurposeMemory::Deallocate(void* address)
 {
     std::lock_guard<std::mutex> lock{mMutex};
+
+    // find previous and next free memory block of freed address. Therefore the free memory blocks is traversed until
+    // the both enclosing blocks are found (special case before the first element and behind the last)
+
+    // Merge the freed block with its enclosing blocks if possible.
+
+    // Update pointer of previous block (or lastFree elementPointer) if necessary
 }
 
 void GeneralPurposeMemory::Deinitialize()

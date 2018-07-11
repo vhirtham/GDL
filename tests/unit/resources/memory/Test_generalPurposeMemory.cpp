@@ -28,6 +28,8 @@ BOOST_AUTO_TEST_CASE(Initialization_Deinitialization)
 
     void* address = gpm.Allocate(10);
     void* address2 = gpm.Allocate(10);
+
+    gpm.CheckMemoryConsistency();
     // memory still in use
     // BOOST_CHECK_THROW(gpm.Deinitialize(), Exception);
 
