@@ -28,6 +28,7 @@ void* GeneralPurposeMemory::Allocate(size_t size, size_t alignment)
 {
     std::lock_guard<std::mutex> lock{mMutex};
 
+    EXCEPTION(mFirstFreeMemoryPtr == nullptr, "No more memory left");
     DEV_EXCEPTION(alignment > 255, "Alignment must be smaller than 256");
 
     // Data from first free memory block - maybe collect them in a private struct
@@ -58,7 +59,12 @@ void* GeneralPurposeMemory::Allocate(size_t size, size_t alignment)
         totalAllocationSize = freeMemorySize;
         leftMemorySize = 0;
         if (prevFreeMemoryPtr != nullptr)
+        {
             WriteAddressToMemory(prevFreeMemoryPtr + sizeof(size_t), nextFreeMemoryPtr);
+        }
+        else if (nextFreeMemoryPtr == nullptr)
+            mLastFreeMemoryPtr = nullptr;
+        mFirstFreeMemoryPtr = nextFreeMemoryPtr;
     }
     else
     {
@@ -93,10 +99,17 @@ void* GeneralPurposeMemory::Allocate(size_t size, size_t alignment)
     return allocatedMemoryPtr;
 }
 
+
+
 void GeneralPurposeMemory::CheckMemoryConsistency() const
 {
     U8* currentMemoryPtr = mFirstFreeMemoryPtr;
-    U8* nextFreeMemoryPtr = ReadAddressFromMemory(currentMemoryPtr + sizeof(size_t));
+    U8* nextFreeMemoryPtr = nullptr;
+
+    // Memory not full
+    if (currentMemoryPtr != nullptr)
+        ReadAddressFromMemory(currentMemoryPtr + sizeof(size_t));
+
     U8* totalMemoryEndPtr = mMemory.get() + mMemorySize;
 
     // Traverse free memory blocks to the last one
@@ -114,13 +127,24 @@ void GeneralPurposeMemory::CheckMemoryConsistency() const
     }
 
     // Traverse occupied memory blocks at the end, if there are some
-    size_t blockSize = ReadSizeFromMemory(currentMemoryPtr);
-    while (currentMemoryPtr != totalMemoryEndPtr)
+    while (currentMemoryPtr != totalMemoryEndPtr && currentMemoryPtr != nullptr)
     {
-        currentMemoryPtr += blockSize;
-        blockSize = ReadSizeFromMemory(currentMemoryPtr);
-
+        size_t blockSize = ReadSizeFromMemory(currentMemoryPtr);
         EXCEPTION(blockSize <= 0, "Read block size <= 0.");
+
+        currentMemoryPtr += blockSize;
+        EXCEPTION(currentMemoryPtr > totalMemoryEndPtr,
+                  "Read block size bigger than the distance to the memories end.");
+    }
+
+    // Start again at the beginning and traverse all blocks
+    currentMemoryPtr = mMemory.get();
+    while (currentMemoryPtr != totalMemoryEndPtr && currentMemoryPtr != nullptr)
+    {
+        size_t blockSize = ReadSizeFromMemory(currentMemoryPtr);
+        EXCEPTION(blockSize <= 0, "Read block size <= 0.");
+
+        currentMemoryPtr += blockSize;
         EXCEPTION(currentMemoryPtr > totalMemoryEndPtr,
                   "Read block size bigger than the distance to the memories end.");
     }
@@ -130,12 +154,37 @@ void GeneralPurposeMemory::Deallocate(void* address)
 {
     std::lock_guard<std::mutex> lock{mMutex};
 
+    // Get original ponter address
+    U8* addressPtr = static_cast<U8*>(address);
+    U8 alignmentCorrection = addressPtr[-1];
+    addressPtr -= alignmentCorrection + sizeof(size_t);
+
+    U8* nextFreeBlock = mFirstFreeMemoryPtr;
+    U8* prevFreeBlock = nullptr;
+
     // find previous and next free memory block of freed address. Therefore the free memory blocks is traversed until
     // the both enclosing blocks are found (special case before the first element and behind the last)
+    while (nextFreeBlock < addressPtr && nextFreeBlock != nullptr)
+    {
+        prevFreeBlock = nextFreeBlock;
+        nextFreeBlock = ReadAddressFromMemory(nextFreeBlock + sizeof(size_t));
+    }
 
     // Merge the freed block with its enclosing blocks if possible.
 
     // Update pointer of previous block (or lastFree elementPointer) if necessary
+    if (prevFreeBlock == nullptr)
+        mFirstFreeMemoryPtr = addressPtr;
+    else
+        WriteAddressToMemory(prevFreeBlock + sizeof(size_t), addressPtr);
+    if (nextFreeBlock == nullptr)
+    {
+        mLastFreeMemoryPtr = addressPtr;
+    }
+
+    WriteAddressToMemory(addressPtr + sizeof(size_t), nextFreeBlock);
+
+    int a = 0;
 }
 
 void GeneralPurposeMemory::Deinitialize()
