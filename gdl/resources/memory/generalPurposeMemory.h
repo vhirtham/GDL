@@ -51,18 +51,35 @@ public:
     void Initialize();
 
 private:
+    void AddToWrittenSize(void* positionInMemory, const size_t value);
+
+    void* AlignAllocatedMemory(U8* currentMemoryPtr, size_t alignment);
+
     //! @brief Checks if the general purpose memory is constructed with valid parameters. Throws if not.
     void CheckConstructionParameters() const;
 
+
+    void FindEnclosingFreeMemoryBlocks(U8*& currentMemoryPtr, U8*& prevFreeMemoryPtr, U8*& nextFreeMemoryPtr) const;
+
+    void FindFreeMemoryBlock(U8*& currentMemoryPtr, U8*& prevFreeMemoryPtr, U8*& nextFreeMemoryPtr,
+                             size_t& freeMemorySize, size_t totalAllocationSize) const;
 
     //! @brief Returns if the general purpose memory is initialized
     //! @return TRUE / FALSE
     bool IsInitialized() const;
 
+    void MergeUpdateLinkedListDeallocation(U8*& currentMemoryPtr, U8*& prevFreeMemoryPtr, U8*& nextFreeMemoryPtr);
+
+    U8* RestoreAllocatedPtr(U8* currentMemoryPtr);
+
+    void UpdateLinkedListAllocation(U8*& currentMemoryPtr, U8*& prevFreeMemoryPtr, U8*& nextFreeMemoryPtr,
+                                    size_t freeMemorySize, size_t& totalAllocationSize);
+
     //! @brief Reads an address at the given position in memory and returns a pointer to that address
     //! @param positionInMemory: Position in memory where the address should be read.
     //! @return Pointer to read address
     inline U8* ReadAddressFromMemory(const U8* positionInMemory) const;
+
 
     //! @brief Reads a value of size_t at the given position in memory and returns it
     //! @param positionInMemory: Position in memory where the value should be read.

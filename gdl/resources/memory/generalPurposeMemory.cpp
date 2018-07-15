@@ -28,8 +28,9 @@ void* GeneralPurposeMemory::Allocate(size_t size, size_t alignment)
 {
     std::lock_guard<std::mutex> lock{mMutex};
 
-    EXCEPTION(mFirstFreeMemoryPtr == nullptr, "No more memory left");
+    DEV_EXCEPTION(mMemory.get() == nullptr, "General purpose memory is not initialized.");
     DEV_EXCEPTION(alignment > 255, "Alignment must be smaller than 256");
+    EXCEPTION(mFirstFreeMemoryPtr == nullptr, "No more memory left");
 
     // Data from first free memory block - maybe collect them in a private struct
     U8* currentMemoryPtr = mFirstFreeMemoryPtr;
@@ -39,64 +40,17 @@ void* GeneralPurposeMemory::Allocate(size_t size, size_t alignment)
 
     size_t totalAllocationSize = size + alignment + sizeof(size_t);
 
-    while (freeMemorySize < totalAllocationSize)
-    {
-        EXCEPTION(nextFreeMemoryPtr == nullptr, "No properly sized memory block available.");
 
-        // Traverse to next memory block
-        prevFreeMemoryPtr = currentMemoryPtr;
-        currentMemoryPtr = nextFreeMemoryPtr;
-        nextFreeMemoryPtr = ReadAddressFromMemory(currentMemoryPtr + sizeof(size_t));
-        freeMemorySize = ReadSizeFromMemory(currentMemoryPtr);
-    }
+    FindFreeMemoryBlock(currentMemoryPtr, prevFreeMemoryPtr, nextFreeMemoryPtr, freeMemorySize, totalAllocationSize);
+
+    UpdateLinkedListAllocation(currentMemoryPtr, prevFreeMemoryPtr, nextFreeMemoryPtr, freeMemorySize,
+                               totalAllocationSize);
 
 
-    // Adjust allocation size if not enough space for a free memory header is left and update pointer of previous free
-    // memory header
-    size_t leftMemorySize = freeMemorySize - totalAllocationSize;
-    if (leftMemorySize < sizeof(size_t) + sizeof(void*))
-    {
-        totalAllocationSize = freeMemorySize;
-        leftMemorySize = 0;
-        if (prevFreeMemoryPtr != nullptr)
-        {
-            WriteAddressToMemory(prevFreeMemoryPtr + sizeof(size_t), nextFreeMemoryPtr);
-        }
-        else if (nextFreeMemoryPtr == nullptr)
-            mLastFreeMemoryPtr = nullptr;
-        mFirstFreeMemoryPtr = nextFreeMemoryPtr;
-    }
-    else
-    {
-        U8* leftFreeMemoryPtr = currentMemoryPtr + totalAllocationSize;
-        WriteSizeToMemory(leftFreeMemoryPtr, leftMemorySize);
-        WriteAddressToMemory(leftFreeMemoryPtr + sizeof(size_t), nextFreeMemoryPtr);
-
-        if (prevFreeMemoryPtr == nullptr)
-            mFirstFreeMemoryPtr = leftFreeMemoryPtr;
-        else
-            WriteAddressToMemory(prevFreeMemoryPtr + sizeof(size_t), leftFreeMemoryPtr);
-
-        if (nextFreeMemoryPtr == nullptr)
-            mLastFreeMemoryPtr = leftFreeMemoryPtr;
-    }
-
-
-    // Store allocation size in memory in front of returned pointer. This is needed for deallocation
     WriteSizeToMemory(currentMemoryPtr, totalAllocationSize);
     currentMemoryPtr += sizeof(size_t);
 
-    // Align memory and store alignment correction in preceding byte
-    size_t misalignment = Misalignment(currentMemoryPtr, alignment);
-    size_t correction = alignment - misalignment;
-    U8* allocatedMemoryPtr = currentMemoryPtr + correction;
-    allocatedMemoryPtr[-1] = static_cast<U8>(correction);
-
-
-    std::cout << (void*)allocatedMemoryPtr << std::endl;
-
-    // return pointer
-    return allocatedMemoryPtr;
+    return AlignAllocatedMemory(currentMemoryPtr, alignment);
 }
 
 
@@ -150,54 +104,38 @@ void GeneralPurposeMemory::CheckMemoryConsistency() const
     }
 }
 
+
+
 void GeneralPurposeMemory::Deallocate(void* address)
 {
     std::lock_guard<std::mutex> lock{mMutex};
 
-    // Get original ponter address
-    U8* addressPtr = static_cast<U8*>(address);
-    U8 alignmentCorrection = addressPtr[-1];
-    addressPtr -= alignmentCorrection + sizeof(size_t);
+    DEV_EXCEPTION(mMemory.get() == nullptr, "General purpose memory is not initialized.");
 
-    U8* nextFreeBlock = mFirstFreeMemoryPtr;
-    U8* prevFreeBlock = nullptr;
+    U8* currentMemoryPtr = RestoreAllocatedPtr(static_cast<U8*>(address));
+    U8* nextFreeMemoryPtr = mFirstFreeMemoryPtr;
+    U8* prevFreeMemoryPtr = nullptr;
 
-    // find previous and next free memory block of freed address. Therefore the free memory blocks is traversed until
-    // the both enclosing blocks are found (special case before the first element and behind the last)
-    while (nextFreeBlock < addressPtr && nextFreeBlock != nullptr)
-    {
-        prevFreeBlock = nextFreeBlock;
-        nextFreeBlock = ReadAddressFromMemory(nextFreeBlock + sizeof(size_t));
-    }
+    FindEnclosingFreeMemoryBlocks(currentMemoryPtr, prevFreeMemoryPtr, nextFreeMemoryPtr);
 
-    // Merge the freed block with its enclosing blocks if possible.
-
-    // Update pointer of previous block (or lastFree elementPointer) if necessary
-    if (prevFreeBlock == nullptr)
-        mFirstFreeMemoryPtr = addressPtr;
-    else
-        WriteAddressToMemory(prevFreeBlock + sizeof(size_t), addressPtr);
-    if (nextFreeBlock == nullptr)
-    {
-        mLastFreeMemoryPtr = addressPtr;
-    }
-
-    WriteAddressToMemory(addressPtr + sizeof(size_t), nextFreeBlock);
-
-    int a = 0;
+    MergeUpdateLinkedListDeallocation(currentMemoryPtr, prevFreeMemoryPtr, nextFreeMemoryPtr);
 }
+
+
 
 void GeneralPurposeMemory::Deinitialize()
 {
     std::lock_guard<std::mutex> lock{mMutex};
 
     EXCEPTION(!IsInitialized(), "General purpose memory is already deinitialized.");
-    EXCEPTION(mNumAllocations != 0, "Can't deinitialize. Memory still in use.");
+    EXCEPTION(ReadSizeFromMemory(mMemory.get()) != mMemorySize, "Can't deinitialize. Memory still in use.");
 
     mFirstFreeMemoryPtr = nullptr;
     mLastFreeMemoryPtr = nullptr;
     mMemory.reset(nullptr);
 }
+
+
 
 void GeneralPurposeMemory::Initialize()
 {
@@ -214,15 +152,250 @@ void GeneralPurposeMemory::Initialize()
     WriteAddressToMemory(mFirstFreeMemoryPtr + sizeof(size_t), nullptr);
 }
 
+
+
+void GeneralPurposeMemory::AddToWrittenSize(void* positionInMemory, const size_t value)
+{
+    size_t* valuePtr = static_cast<size_t*>(positionInMemory);
+    *valuePtr += value;
+}
+
+
+
+void* GeneralPurposeMemory::AlignAllocatedMemory(U8* currentMemoryPtr, size_t alignment)
+{
+    size_t misalignment = Misalignment(currentMemoryPtr, alignment);
+    size_t correction = alignment - misalignment;
+
+    currentMemoryPtr += correction;
+    currentMemoryPtr[-1] = static_cast<U8>(correction);
+
+    return currentMemoryPtr;
+}
+
+
+
 void GeneralPurposeMemory::CheckConstructionParameters() const
 {
     EXCEPTION(mMemorySize < 1, "Memory size must be bigger than 1");
 }
 
+
+
+void GeneralPurposeMemory::FindEnclosingFreeMemoryBlocks(U8*& currentMemoryPtr, U8*& prevFreeMemoryPtr,
+                                                         U8*& nextFreeMemoryPtr) const
+{
+    while (nextFreeMemoryPtr != nullptr && nextFreeMemoryPtr < currentMemoryPtr)
+    {
+        prevFreeMemoryPtr = nextFreeMemoryPtr;
+        nextFreeMemoryPtr = ReadAddressFromMemory(nextFreeMemoryPtr + sizeof(size_t));
+    }
+}
+
+
+
+void GeneralPurposeMemory::FindFreeMemoryBlock(U8*& currentMemoryPtr, U8*& prevFreeMemoryPtr, U8*& nextFreeMemoryPtr,
+                                               size_t& freeMemorySize, size_t totalAllocationSize) const
+{
+    while (freeMemorySize < totalAllocationSize)
+    {
+        EXCEPTION(nextFreeMemoryPtr == nullptr, "No properly sized memory block available.");
+
+        // Traverse to next memory block
+        prevFreeMemoryPtr = currentMemoryPtr;
+        currentMemoryPtr = nextFreeMemoryPtr;
+        nextFreeMemoryPtr = ReadAddressFromMemory(currentMemoryPtr + sizeof(size_t));
+        freeMemorySize = ReadSizeFromMemory(currentMemoryPtr);
+    }
+}
+
+
+
 bool GeneralPurposeMemory::IsInitialized() const
 {
     return mMemory != nullptr;
 }
+
+
+
+void GeneralPurposeMemory::MergeUpdateLinkedListDeallocation(U8*& currentMemoryPtr, U8*& prevFreeMemoryPtr,
+                                                             U8*& nextFreeMemoryPtr)
+{
+    if (prevFreeMemoryPtr == nullptr)
+    {
+        mFirstFreeMemoryPtr = currentMemoryPtr;
+        if (nextFreeMemoryPtr != nullptr)
+        {
+            size_t freedMemorySize = ReadSizeFromMemory(currentMemoryPtr);
+
+            // Mergeable with next?
+            if (currentMemoryPtr + freedMemorySize == nextFreeMemoryPtr)
+            {
+                size_t nextFreeMemorySize = ReadSizeFromMemory(nextFreeMemoryPtr);
+                nextFreeMemoryPtr = ReadAddressFromMemory(nextFreeMemoryPtr + sizeof(size_t));
+                AddToWrittenSize(currentMemoryPtr, nextFreeMemorySize);
+                WriteAddressToMemory(currentMemoryPtr + sizeof(size_t), nextFreeMemoryPtr);
+
+                if (nextFreeMemoryPtr == nullptr)
+                    mLastFreeMemoryPtr = currentMemoryPtr;
+            }
+            else
+            {
+                WriteAddressToMemory(currentMemoryPtr + sizeof(size_t), nextFreeMemoryPtr);
+            }
+        }
+        else
+        {
+            WriteAddressToMemory(currentMemoryPtr + sizeof(size_t), nextFreeMemoryPtr);
+            mLastFreeMemoryPtr = currentMemoryPtr;
+        }
+    }
+    else
+    {
+        // is new last?
+        if (nextFreeMemoryPtr == nullptr)
+        {
+            size_t prevFreeMemorySize = ReadSizeFromMemory(prevFreeMemoryPtr);
+            // Mergeable with previous?
+            if (prevFreeMemoryPtr + prevFreeMemorySize == currentMemoryPtr)
+            {
+                size_t freedMemorySize = ReadSizeFromMemory(currentMemoryPtr);
+                AddToWrittenSize(prevFreeMemoryPtr, freedMemorySize);
+            }
+            else
+            {
+                WriteAddressToMemory(prevFreeMemoryPtr + sizeof(size_t), currentMemoryPtr);
+                WriteAddressToMemory(currentMemoryPtr + sizeof(size_t), nextFreeMemoryPtr);
+                mLastFreeMemoryPtr = currentMemoryPtr;
+            }
+        }
+        else
+        {
+            size_t freedMemorySize = ReadSizeFromMemory(currentMemoryPtr);
+            size_t prevFreeMemorySize = ReadSizeFromMemory(prevFreeMemoryPtr);
+
+            // Mergeable with next?
+            if (currentMemoryPtr + freedMemorySize == nextFreeMemoryPtr)
+            {
+                // Mergeable with previous?
+                if (prevFreeMemoryPtr + prevFreeMemorySize == currentMemoryPtr)
+                {
+                    size_t nextFreeMemorySize = ReadSizeFromMemory(nextFreeMemoryPtr);
+                    nextFreeMemoryPtr = ReadAddressFromMemory(nextFreeMemoryPtr + sizeof(size_t));
+                    AddToWrittenSize(prevFreeMemoryPtr, freedMemorySize + nextFreeMemorySize);
+                    WriteAddressToMemory(prevFreeMemoryPtr + sizeof(size_t), nextFreeMemoryPtr);
+                    if (nextFreeMemoryPtr == nullptr)
+                        mLastFreeMemoryPtr = prevFreeMemoryPtr;
+                }
+                else
+                {
+                    size_t nextFreeMemorySize = ReadSizeFromMemory(nextFreeMemoryPtr);
+                    nextFreeMemoryPtr = ReadAddressFromMemory(nextFreeMemoryPtr + sizeof(size_t));
+                    AddToWrittenSize(currentMemoryPtr, nextFreeMemorySize);
+                    WriteAddressToMemory(currentMemoryPtr + sizeof(size_t), nextFreeMemoryPtr);
+                    WriteAddressToMemory(prevFreeMemoryPtr + sizeof(size_t), currentMemoryPtr);
+                    if (nextFreeMemoryPtr == nullptr)
+                        mLastFreeMemoryPtr = currentMemoryPtr;
+                }
+            }
+            else
+            {
+                // Mergeable with previous?
+                if (prevFreeMemoryPtr + prevFreeMemorySize == currentMemoryPtr)
+                {
+                    AddToWrittenSize(prevFreeMemoryPtr, freedMemorySize);
+                }
+                else
+                {
+                    WriteAddressToMemory(prevFreeMemoryPtr + sizeof(size_t), currentMemoryPtr);
+                    WriteAddressToMemory(currentMemoryPtr + sizeof(size_t), nextFreeMemoryPtr);
+                }
+            }
+        }
+    }
+}
+
+
+
+void GeneralPurposeMemory::UpdateLinkedListAllocation(U8*& currentMemoryPtr, U8*& prevFreeMemoryPtr,
+                                                      U8*& nextFreeMemoryPtr, size_t freeMemorySize,
+                                                      size_t& totalAllocationSize)
+{
+    constexpr size_t minimalFreeBlockSize = sizeof(size_t) + sizeof(void*);
+
+    size_t leftMemorySize = freeMemorySize - totalAllocationSize;
+
+    if (leftMemorySize < minimalFreeBlockSize)
+    {
+        totalAllocationSize = freeMemorySize;
+
+        if (currentMemoryPtr == mFirstFreeMemoryPtr)
+        {
+            if (nextFreeMemoryPtr == nullptr)
+            {
+                mFirstFreeMemoryPtr = nullptr;
+                mLastFreeMemoryPtr = nullptr;
+            }
+            else
+            {
+                mFirstFreeMemoryPtr = nextFreeMemoryPtr;
+            }
+        }
+        else
+        {
+            if (nextFreeMemoryPtr == nullptr)
+            {
+                WriteAddressToMemory(prevFreeMemoryPtr + sizeof(size_t), nullptr);
+                mLastFreeMemoryPtr = prevFreeMemoryPtr;
+            }
+            else
+            {
+                WriteAddressToMemory(prevFreeMemoryPtr + sizeof(size_t), nextFreeMemoryPtr);
+            }
+        }
+    }
+    else
+    {
+        if (currentMemoryPtr == mFirstFreeMemoryPtr)
+        {
+            if (nextFreeMemoryPtr == nullptr)
+            {
+                U8* leftFreeMemoryPtr = currentMemoryPtr + totalAllocationSize;
+                WriteSizeToMemory(leftFreeMemoryPtr, leftMemorySize);
+                WriteAddressToMemory(leftFreeMemoryPtr + sizeof(size_t), nullptr);
+                mFirstFreeMemoryPtr = leftFreeMemoryPtr;
+                mLastFreeMemoryPtr = leftFreeMemoryPtr;
+            }
+            else
+            {
+                U8* leftFreeMemoryPtr = currentMemoryPtr + totalAllocationSize;
+                WriteSizeToMemory(leftFreeMemoryPtr, leftMemorySize);
+                WriteAddressToMemory(leftFreeMemoryPtr + sizeof(size_t), nextFreeMemoryPtr);
+                mFirstFreeMemoryPtr = leftFreeMemoryPtr;
+            }
+        }
+        else
+        {
+            if (nextFreeMemoryPtr == nullptr)
+            {
+                U8* leftFreeMemoryPtr = currentMemoryPtr + totalAllocationSize;
+                WriteSizeToMemory(leftFreeMemoryPtr, leftMemorySize);
+                WriteAddressToMemory(leftFreeMemoryPtr + sizeof(size_t), nullptr);
+                WriteAddressToMemory(prevFreeMemoryPtr + sizeof(size_t), leftFreeMemoryPtr);
+                mLastFreeMemoryPtr = leftFreeMemoryPtr;
+            }
+            else
+            {
+                U8* leftFreeMemoryPtr = currentMemoryPtr + totalAllocationSize;
+                WriteSizeToMemory(leftFreeMemoryPtr, leftMemorySize);
+                WriteAddressToMemory(leftFreeMemoryPtr + sizeof(size_t), nextFreeMemoryPtr);
+                WriteAddressToMemory(prevFreeMemoryPtr + sizeof(size_t), leftFreeMemoryPtr);
+            }
+        }
+    }
+}
+
+
 
 U8* GeneralPurposeMemory::ReadAddressFromMemory(const U8* positionInMemory) const
 {
@@ -230,6 +403,16 @@ U8* GeneralPurposeMemory::ReadAddressFromMemory(const U8* positionInMemory) cons
     std::memcpy(&address, positionInMemory, sizeof(void*));
     return address;
 }
+
+
+
+U8* GeneralPurposeMemory::RestoreAllocatedPtr(U8* currentMemoryPtr)
+{
+    U8 alignmentCorrection = currentMemoryPtr[-1];
+    return currentMemoryPtr - (alignmentCorrection + sizeof(size_t));
+}
+
+
 
 size_t GeneralPurposeMemory::ReadSizeFromMemory(const void* positionInMemory) const
 {
