@@ -37,8 +37,13 @@ public:
     //! @return Pointer to memory
     void* Allocate(size_t size, size_t alignment = 1);
 
-    //! @brief Checks the internal consistency of the general purpose memory
-    void CheckMemoryConsistency() const;
+    //! @brief Counts and returns the number of allocated memory blocks
+    //! @return Number of allocated memory blocks
+    U32 CountAllocatedMemoryBlocks() const;
+
+    //! @brief Counts and returns the number of free memory blocks
+    //! @return Number of free memory blocks
+    U32 CountFreeMemoryBlocks() const;
 
     //! @brief Deallocates memory at the passed address
     //! @param address: Adress that should be freed

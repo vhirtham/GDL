@@ -55,53 +55,57 @@ void* GeneralPurposeMemory::Allocate(size_t size, size_t alignment)
 
 
 
-void GeneralPurposeMemory::CheckMemoryConsistency() const
+U32 GeneralPurposeMemory::CountAllocatedMemoryBlocks() const
+{
+    U8* currentMemoryPtr = mMemory.get();
+    U8* totalMemoryEndPtr = mMemory.get() + mMemorySize;
+    U32 numTotalBlocks = 0;
+    while (currentMemoryPtr != totalMemoryEndPtr && currentMemoryPtr != nullptr)
+    {
+        ++numTotalBlocks;
+        size_t blockSize = ReadSizeFromMemory(currentMemoryPtr);
+        EXCEPTION(blockSize <= 0, "Read block size <= 0.");
+
+        currentMemoryPtr += blockSize;
+        EXCEPTION(currentMemoryPtr > totalMemoryEndPtr,
+                  "Read block size bigger than the distance to the memories end.");
+    }
+
+    return numTotalBlocks - CountFreeMemoryBlocks();
+}
+
+
+
+U32 GeneralPurposeMemory::CountFreeMemoryBlocks() const
 {
     U8* currentMemoryPtr = mFirstFreeMemoryPtr;
     U8* nextFreeMemoryPtr = nullptr;
 
+    U32 numFreeMemoryBlocks = 0;
+
     // Memory not full
     if (currentMemoryPtr != nullptr)
-        ReadAddressFromMemory(currentMemoryPtr + sizeof(size_t));
-
-    U8* totalMemoryEndPtr = mMemory.get() + mMemorySize;
+    {
+        nextFreeMemoryPtr = ReadAddressFromMemory(currentMemoryPtr + sizeof(size_t));
+        ++numFreeMemoryBlocks;
+    }
 
     // Traverse free memory blocks to the last one
     while (nextFreeMemoryPtr != nullptr)
     {
         EXCEPTION(nextFreeMemoryPtr <= currentMemoryPtr, "Internal linked list of free memory blocks is not ordered.");
 
-        U8* currentMemoryPtr = nextFreeMemoryPtr;
-        U8* nextFreeMemoryPtr = ReadAddressFromMemory(currentMemoryPtr + sizeof(size_t));
+        ++numFreeMemoryBlocks;
+        currentMemoryPtr = nextFreeMemoryPtr;
+        nextFreeMemoryPtr = ReadAddressFromMemory(currentMemoryPtr + sizeof(size_t));
 
         EXCEPTION(nextFreeMemoryPtr != nullptr &&
-                          (nextFreeMemoryPtr < mMemory.get() || nextFreeMemoryPtr > totalMemoryEndPtr),
+                          (nextFreeMemoryPtr < mMemory.get() || nextFreeMemoryPtr > mMemory.get() + mMemorySize),
                   "Internal linked list of free memory blocks points to a value that is not inside the managed memory "
                   "section.");
     }
 
-    // Traverse occupied memory blocks at the end, if there are some
-    while (currentMemoryPtr != totalMemoryEndPtr && currentMemoryPtr != nullptr)
-    {
-        size_t blockSize = ReadSizeFromMemory(currentMemoryPtr);
-        EXCEPTION(blockSize <= 0, "Read block size <= 0.");
-
-        currentMemoryPtr += blockSize;
-        EXCEPTION(currentMemoryPtr > totalMemoryEndPtr,
-                  "Read block size bigger than the distance to the memories end.");
-    }
-
-    // Start again at the beginning and traverse all blocks
-    currentMemoryPtr = mMemory.get();
-    while (currentMemoryPtr != totalMemoryEndPtr && currentMemoryPtr != nullptr)
-    {
-        size_t blockSize = ReadSizeFromMemory(currentMemoryPtr);
-        EXCEPTION(blockSize <= 0, "Read block size <= 0.");
-
-        currentMemoryPtr += blockSize;
-        EXCEPTION(currentMemoryPtr > totalMemoryEndPtr,
-                  "Read block size bigger than the distance to the memories end.");
-    }
+    return numFreeMemoryBlocks;
 }
 
 

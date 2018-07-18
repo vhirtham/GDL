@@ -52,6 +52,7 @@ int main()
         std::map<I32, I32, std::less<I32>, MyAlloc<std::pair<I32, I32>>> m;
 
         m.insert(std::pair<I32, I32>(1, 1));
+        // m.emplace(1,1);
         v.push_back(42);
         v2.push_back(3.14);
         v.push_back(56);
