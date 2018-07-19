@@ -317,70 +317,22 @@ void GeneralPurposeMemory::UpdateLinkedListAllocation(U8*& currentMemoryPtr, U8*
 
     size_t leftMemorySize = freeMemorySize - totalAllocationSize;
 
+    // Create new free memory block if enough memory is left
     if (leftMemorySize < minimalFreeBlockSize)
-    {
         totalAllocationSize = freeMemorySize;
-
-        if (currentMemoryPtr == mFirstFreeMemoryPtr)
-        {
-            if (nextFreeMemoryPtr == nullptr)
-            {
-                mFirstFreeMemoryPtr = nullptr;
-            }
-            else
-            {
-                mFirstFreeMemoryPtr = nextFreeMemoryPtr;
-            }
-        }
-        else
-        {
-            if (nextFreeMemoryPtr == nullptr)
-            {
-                WriteLinkToNextFreeBlock(prevFreeMemoryPtr, nullptr);
-            }
-            else
-            {
-                WriteLinkToNextFreeBlock(prevFreeMemoryPtr, nextFreeMemoryPtr);
-            }
-        }
-    }
     else
     {
-        if (currentMemoryPtr == mFirstFreeMemoryPtr)
-        {
-            if (nextFreeMemoryPtr == nullptr)
-            {
-                U8* leftFreeMemoryPtr = currentMemoryPtr + totalAllocationSize;
-                WriteSizeToMemory(leftFreeMemoryPtr, leftMemorySize);
-                WriteLinkToNextFreeBlock(leftFreeMemoryPtr, nullptr);
-                mFirstFreeMemoryPtr = leftFreeMemoryPtr;
-            }
-            else
-            {
-                U8* leftFreeMemoryPtr = currentMemoryPtr + totalAllocationSize;
-                WriteSizeToMemory(leftFreeMemoryPtr, leftMemorySize);
-                WriteLinkToNextFreeBlock(leftFreeMemoryPtr, nextFreeMemoryPtr);
-                mFirstFreeMemoryPtr = leftFreeMemoryPtr;
-            }
-        }
-        else
-        {
-            if (nextFreeMemoryPtr == nullptr)
-            {
-                U8* leftFreeMemoryPtr = currentMemoryPtr + totalAllocationSize;
-                WriteSizeToMemory(leftFreeMemoryPtr, leftMemorySize);
-                WriteLinkToNextFreeBlock(leftFreeMemoryPtr, nullptr);
-                WriteLinkToNextFreeBlock(prevFreeMemoryPtr, leftFreeMemoryPtr);
-            }
-            else
-            {
-                U8* leftFreeMemoryPtr = currentMemoryPtr + totalAllocationSize;
-                WriteSizeToMemory(leftFreeMemoryPtr, leftMemorySize);
-                WriteLinkToNextFreeBlock(leftFreeMemoryPtr, nextFreeMemoryPtr);
-                WriteLinkToNextFreeBlock(prevFreeMemoryPtr, leftFreeMemoryPtr);
-            }
-        }
+        U8* leftFreeMemoryPtr = currentMemoryPtr + totalAllocationSize;
+        WriteSizeToMemory(leftFreeMemoryPtr, leftMemorySize);
+        WriteLinkToNextFreeBlock(leftFreeMemoryPtr, nextFreeMemoryPtr);
+        nextFreeMemoryPtr = leftFreeMemoryPtr;
     }
+
+    // Update previous list entry
+    if (currentMemoryPtr == mFirstFreeMemoryPtr)
+        mFirstFreeMemoryPtr = nextFreeMemoryPtr;
+    else
+        WriteLinkToNextFreeBlock(prevFreeMemoryPtr, nextFreeMemoryPtr);
 }
 
 
