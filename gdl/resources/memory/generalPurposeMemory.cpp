@@ -222,88 +222,35 @@ bool GeneralPurposeMemory::IsInitialized() const
 void GeneralPurposeMemory::MergeUpdateLinkedListDeallocation(U8*& currentMemoryPtr, U8*& prevFreeMemoryPtr,
                                                              U8*& nextFreeMemoryPtr)
 {
-    if (prevFreeMemoryPtr == nullptr)
-    {
-        mFirstFreeMemoryPtr = currentMemoryPtr;
-        if (nextFreeMemoryPtr != nullptr)
-        {
-            size_t freedMemorySize = ReadSizeFromMemory(currentMemoryPtr);
+    size_t freedMemorySize = ReadSizeFromMemory(currentMemoryPtr);
 
-            // Mergeable with next?
-            if (currentMemoryPtr + freedMemorySize == nextFreeMemoryPtr)
-            {
-                size_t nextFreeMemorySize = ReadSizeFromMemory(nextFreeMemoryPtr);
-                nextFreeMemoryPtr = ReadLinkToNextFreeBlock(nextFreeMemoryPtr);
-                AddToWrittenSize(currentMemoryPtr, nextFreeMemorySize);
-                WriteLinkToNextFreeBlock(currentMemoryPtr, nextFreeMemoryPtr);
-            }
-            else
-            {
-                WriteLinkToNextFreeBlock(currentMemoryPtr, nextFreeMemoryPtr);
-            }
-        }
-        else
+    // Mergeable with previous?
+    if (prevFreeMemoryPtr != nullptr && prevFreeMemoryPtr + ReadSizeFromMemory(prevFreeMemoryPtr) == currentMemoryPtr)
+    {
+        // Mergeable with next?
+        if (currentMemoryPtr + freedMemorySize == nextFreeMemoryPtr) // Also fails if nextFreeMemoryPtr == nullptr
         {
-            WriteLinkToNextFreeBlock(currentMemoryPtr, nextFreeMemoryPtr);
+            freedMemorySize += ReadSizeFromMemory(nextFreeMemoryPtr);
+            WriteLinkToNextFreeBlock(prevFreeMemoryPtr, ReadLinkToNextFreeBlock(nextFreeMemoryPtr));
         }
+
+        AddToWrittenSize(prevFreeMemoryPtr, freedMemorySize);
     }
     else
     {
-        // is new last?
-        if (nextFreeMemoryPtr == nullptr)
+        // Mergeable with next?
+        if (currentMemoryPtr + freedMemorySize == nextFreeMemoryPtr) // Also fails if nextFreeMemoryPtr == nullptr
         {
-            size_t prevFreeMemorySize = ReadSizeFromMemory(prevFreeMemoryPtr);
-            // Mergeable with previous?
-            if (prevFreeMemoryPtr + prevFreeMemorySize == currentMemoryPtr)
-            {
-                size_t freedMemorySize = ReadSizeFromMemory(currentMemoryPtr);
-                AddToWrittenSize(prevFreeMemoryPtr, freedMemorySize);
-            }
-            else
-            {
-                WriteLinkToNextFreeBlock(prevFreeMemoryPtr, currentMemoryPtr);
-                WriteLinkToNextFreeBlock(currentMemoryPtr, nextFreeMemoryPtr);
-            }
+            AddToWrittenSize(currentMemoryPtr, ReadSizeFromMemory(nextFreeMemoryPtr));
+            nextFreeMemoryPtr = ReadLinkToNextFreeBlock(nextFreeMemoryPtr);
         }
-        else
-        {
-            size_t freedMemorySize = ReadSizeFromMemory(currentMemoryPtr);
-            size_t prevFreeMemorySize = ReadSizeFromMemory(prevFreeMemoryPtr);
 
-            // Mergeable with next?
-            if (currentMemoryPtr + freedMemorySize == nextFreeMemoryPtr)
-            {
-                // Mergeable with previous?
-                if (prevFreeMemoryPtr + prevFreeMemorySize == currentMemoryPtr)
-                {
-                    size_t nextFreeMemorySize = ReadSizeFromMemory(nextFreeMemoryPtr);
-                    nextFreeMemoryPtr = ReadLinkToNextFreeBlock(nextFreeMemoryPtr);
-                    AddToWrittenSize(prevFreeMemoryPtr, freedMemorySize + nextFreeMemorySize);
-                    WriteLinkToNextFreeBlock(prevFreeMemoryPtr, nextFreeMemoryPtr);
-                }
-                else
-                {
-                    size_t nextFreeMemorySize = ReadSizeFromMemory(nextFreeMemoryPtr);
-                    nextFreeMemoryPtr = ReadLinkToNextFreeBlock(nextFreeMemoryPtr);
-                    AddToWrittenSize(currentMemoryPtr, nextFreeMemorySize);
-                    WriteLinkToNextFreeBlock(currentMemoryPtr, nextFreeMemoryPtr);
-                    WriteLinkToNextFreeBlock(prevFreeMemoryPtr, currentMemoryPtr);
-                }
-            }
-            else
-            {
-                // Mergeable with previous?
-                if (prevFreeMemoryPtr + prevFreeMemorySize == currentMemoryPtr)
-                {
-                    AddToWrittenSize(prevFreeMemoryPtr, freedMemorySize);
-                }
-                else
-                {
-                    WriteLinkToNextFreeBlock(prevFreeMemoryPtr, currentMemoryPtr);
-                    WriteLinkToNextFreeBlock(currentMemoryPtr, nextFreeMemoryPtr);
-                }
-            }
-        }
+        WriteLinkToNextFreeBlock(currentMemoryPtr, nextFreeMemoryPtr);
+
+        if (prevFreeMemoryPtr == nullptr)
+            mFirstFreeMemoryPtr = currentMemoryPtr;
+        else
+            WriteLinkToNextFreeBlock(prevFreeMemoryPtr, currentMemoryPtr);
     }
 }
 
