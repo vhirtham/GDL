@@ -34,7 +34,7 @@ void* GeneralPurposeMemory::Allocate(size_t size, size_t alignment)
     // Data from first free memory block - maybe collect them in a private struct
     U8* currentMemoryPtr = mFirstFreeMemoryPtr;
     U8* prevFreeMemoryPtr = nullptr;
-    U8* nextFreeMemoryPtr = ReadAddressFromMemory(currentMemoryPtr + sizeof(size_t));
+    U8* nextFreeMemoryPtr = ReadLinkToNextFreeBlock(currentMemoryPtr);
     size_t freeMemorySize = ReadSizeFromMemory(currentMemoryPtr);
 
     size_t totalAllocationSize = size + alignment + sizeof(size_t);
@@ -85,7 +85,7 @@ U32 GeneralPurposeMemory::CountFreeMemoryBlocks() const
     // Memory not full
     if (currentMemoryPtr != nullptr)
     {
-        nextFreeMemoryPtr = ReadAddressFromMemory(currentMemoryPtr + sizeof(size_t));
+        nextFreeMemoryPtr = ReadLinkToNextFreeBlock(currentMemoryPtr);
         ++numFreeMemoryBlocks;
     }
 
@@ -96,7 +96,7 @@ U32 GeneralPurposeMemory::CountFreeMemoryBlocks() const
 
         ++numFreeMemoryBlocks;
         currentMemoryPtr = nextFreeMemoryPtr;
-        nextFreeMemoryPtr = ReadAddressFromMemory(currentMemoryPtr + sizeof(size_t));
+        nextFreeMemoryPtr = ReadLinkToNextFreeBlock(currentMemoryPtr);
 
         EXCEPTION(nextFreeMemoryPtr != nullptr &&
                           (nextFreeMemoryPtr < mMemory.get() || nextFreeMemoryPtr > mMemory.get() + mMemorySize),
@@ -150,7 +150,7 @@ void GeneralPurposeMemory::Initialize()
     mFirstFreeMemoryPtr = mMemory.get();
 
     WriteSizeToMemory(mFirstFreeMemoryPtr, mMemorySize);
-    WriteAddressToMemory(mFirstFreeMemoryPtr + sizeof(size_t), nullptr);
+    WriteLinkToNextFreeBlock(mFirstFreeMemoryPtr, nullptr);
 }
 
 
@@ -189,7 +189,7 @@ void GeneralPurposeMemory::FindEnclosingFreeMemoryBlocks(U8*& currentMemoryPtr, 
     while (nextFreeMemoryPtr != nullptr && nextFreeMemoryPtr < currentMemoryPtr)
     {
         prevFreeMemoryPtr = nextFreeMemoryPtr;
-        nextFreeMemoryPtr = ReadAddressFromMemory(nextFreeMemoryPtr + sizeof(size_t));
+        nextFreeMemoryPtr = ReadLinkToNextFreeBlock(nextFreeMemoryPtr);
     }
 }
 
@@ -205,7 +205,7 @@ void GeneralPurposeMemory::FindFreeMemoryBlock(U8*& currentMemoryPtr, U8*& prevF
         // Traverse to next memory block
         prevFreeMemoryPtr = currentMemoryPtr;
         currentMemoryPtr = nextFreeMemoryPtr;
-        nextFreeMemoryPtr = ReadAddressFromMemory(currentMemoryPtr + sizeof(size_t));
+        nextFreeMemoryPtr = ReadLinkToNextFreeBlock(currentMemoryPtr);
         freeMemorySize = ReadSizeFromMemory(currentMemoryPtr);
     }
 }
@@ -233,18 +233,18 @@ void GeneralPurposeMemory::MergeUpdateLinkedListDeallocation(U8*& currentMemoryP
             if (currentMemoryPtr + freedMemorySize == nextFreeMemoryPtr)
             {
                 size_t nextFreeMemorySize = ReadSizeFromMemory(nextFreeMemoryPtr);
-                nextFreeMemoryPtr = ReadAddressFromMemory(nextFreeMemoryPtr + sizeof(size_t));
+                nextFreeMemoryPtr = ReadLinkToNextFreeBlock(nextFreeMemoryPtr);
                 AddToWrittenSize(currentMemoryPtr, nextFreeMemorySize);
-                WriteAddressToMemory(currentMemoryPtr + sizeof(size_t), nextFreeMemoryPtr);
+                WriteLinkToNextFreeBlock(currentMemoryPtr, nextFreeMemoryPtr);
             }
             else
             {
-                WriteAddressToMemory(currentMemoryPtr + sizeof(size_t), nextFreeMemoryPtr);
+                WriteLinkToNextFreeBlock(currentMemoryPtr, nextFreeMemoryPtr);
             }
         }
         else
         {
-            WriteAddressToMemory(currentMemoryPtr + sizeof(size_t), nextFreeMemoryPtr);
+            WriteLinkToNextFreeBlock(currentMemoryPtr, nextFreeMemoryPtr);
         }
     }
     else
@@ -261,8 +261,8 @@ void GeneralPurposeMemory::MergeUpdateLinkedListDeallocation(U8*& currentMemoryP
             }
             else
             {
-                WriteAddressToMemory(prevFreeMemoryPtr + sizeof(size_t), currentMemoryPtr);
-                WriteAddressToMemory(currentMemoryPtr + sizeof(size_t), nextFreeMemoryPtr);
+                WriteLinkToNextFreeBlock(prevFreeMemoryPtr, currentMemoryPtr);
+                WriteLinkToNextFreeBlock(currentMemoryPtr, nextFreeMemoryPtr);
             }
         }
         else
@@ -277,17 +277,17 @@ void GeneralPurposeMemory::MergeUpdateLinkedListDeallocation(U8*& currentMemoryP
                 if (prevFreeMemoryPtr + prevFreeMemorySize == currentMemoryPtr)
                 {
                     size_t nextFreeMemorySize = ReadSizeFromMemory(nextFreeMemoryPtr);
-                    nextFreeMemoryPtr = ReadAddressFromMemory(nextFreeMemoryPtr + sizeof(size_t));
+                    nextFreeMemoryPtr = ReadLinkToNextFreeBlock(nextFreeMemoryPtr);
                     AddToWrittenSize(prevFreeMemoryPtr, freedMemorySize + nextFreeMemorySize);
-                    WriteAddressToMemory(prevFreeMemoryPtr + sizeof(size_t), nextFreeMemoryPtr);
+                    WriteLinkToNextFreeBlock(prevFreeMemoryPtr, nextFreeMemoryPtr);
                 }
                 else
                 {
                     size_t nextFreeMemorySize = ReadSizeFromMemory(nextFreeMemoryPtr);
-                    nextFreeMemoryPtr = ReadAddressFromMemory(nextFreeMemoryPtr + sizeof(size_t));
+                    nextFreeMemoryPtr = ReadLinkToNextFreeBlock(nextFreeMemoryPtr);
                     AddToWrittenSize(currentMemoryPtr, nextFreeMemorySize);
-                    WriteAddressToMemory(currentMemoryPtr + sizeof(size_t), nextFreeMemoryPtr);
-                    WriteAddressToMemory(prevFreeMemoryPtr + sizeof(size_t), currentMemoryPtr);
+                    WriteLinkToNextFreeBlock(currentMemoryPtr, nextFreeMemoryPtr);
+                    WriteLinkToNextFreeBlock(prevFreeMemoryPtr, currentMemoryPtr);
                 }
             }
             else
@@ -299,8 +299,8 @@ void GeneralPurposeMemory::MergeUpdateLinkedListDeallocation(U8*& currentMemoryP
                 }
                 else
                 {
-                    WriteAddressToMemory(prevFreeMemoryPtr + sizeof(size_t), currentMemoryPtr);
-                    WriteAddressToMemory(currentMemoryPtr + sizeof(size_t), nextFreeMemoryPtr);
+                    WriteLinkToNextFreeBlock(prevFreeMemoryPtr, currentMemoryPtr);
+                    WriteLinkToNextFreeBlock(currentMemoryPtr, nextFreeMemoryPtr);
                 }
             }
         }
@@ -336,11 +336,11 @@ void GeneralPurposeMemory::UpdateLinkedListAllocation(U8*& currentMemoryPtr, U8*
         {
             if (nextFreeMemoryPtr == nullptr)
             {
-                WriteAddressToMemory(prevFreeMemoryPtr + sizeof(size_t), nullptr);
+                WriteLinkToNextFreeBlock(prevFreeMemoryPtr, nullptr);
             }
             else
             {
-                WriteAddressToMemory(prevFreeMemoryPtr + sizeof(size_t), nextFreeMemoryPtr);
+                WriteLinkToNextFreeBlock(prevFreeMemoryPtr, nextFreeMemoryPtr);
             }
         }
     }
@@ -352,14 +352,14 @@ void GeneralPurposeMemory::UpdateLinkedListAllocation(U8*& currentMemoryPtr, U8*
             {
                 U8* leftFreeMemoryPtr = currentMemoryPtr + totalAllocationSize;
                 WriteSizeToMemory(leftFreeMemoryPtr, leftMemorySize);
-                WriteAddressToMemory(leftFreeMemoryPtr + sizeof(size_t), nullptr);
+                WriteLinkToNextFreeBlock(leftFreeMemoryPtr, nullptr);
                 mFirstFreeMemoryPtr = leftFreeMemoryPtr;
             }
             else
             {
                 U8* leftFreeMemoryPtr = currentMemoryPtr + totalAllocationSize;
                 WriteSizeToMemory(leftFreeMemoryPtr, leftMemorySize);
-                WriteAddressToMemory(leftFreeMemoryPtr + sizeof(size_t), nextFreeMemoryPtr);
+                WriteLinkToNextFreeBlock(leftFreeMemoryPtr, nextFreeMemoryPtr);
                 mFirstFreeMemoryPtr = leftFreeMemoryPtr;
             }
         }
@@ -369,15 +369,15 @@ void GeneralPurposeMemory::UpdateLinkedListAllocation(U8*& currentMemoryPtr, U8*
             {
                 U8* leftFreeMemoryPtr = currentMemoryPtr + totalAllocationSize;
                 WriteSizeToMemory(leftFreeMemoryPtr, leftMemorySize);
-                WriteAddressToMemory(leftFreeMemoryPtr + sizeof(size_t), nullptr);
-                WriteAddressToMemory(prevFreeMemoryPtr + sizeof(size_t), leftFreeMemoryPtr);
+                WriteLinkToNextFreeBlock(leftFreeMemoryPtr, nullptr);
+                WriteLinkToNextFreeBlock(prevFreeMemoryPtr, leftFreeMemoryPtr);
             }
             else
             {
                 U8* leftFreeMemoryPtr = currentMemoryPtr + totalAllocationSize;
                 WriteSizeToMemory(leftFreeMemoryPtr, leftMemorySize);
-                WriteAddressToMemory(leftFreeMemoryPtr + sizeof(size_t), nextFreeMemoryPtr);
-                WriteAddressToMemory(prevFreeMemoryPtr + sizeof(size_t), leftFreeMemoryPtr);
+                WriteLinkToNextFreeBlock(leftFreeMemoryPtr, nextFreeMemoryPtr);
+                WriteLinkToNextFreeBlock(prevFreeMemoryPtr, leftFreeMemoryPtr);
             }
         }
     }
@@ -390,6 +390,11 @@ U8* GeneralPurposeMemory::ReadAddressFromMemory(const U8* positionInMemory) cons
     U8* address = nullptr;
     std::memcpy(&address, positionInMemory, sizeof(void*));
     return address;
+}
+
+U8* GeneralPurposeMemory::ReadLinkToNextFreeBlock(U8* currentFreeBlockPtr) const
+{
+    return ReadAddressFromMemory(currentFreeBlockPtr + sizeof(size_t));
 }
 
 
@@ -405,6 +410,11 @@ U8* GeneralPurposeMemory::RestoreAllocatedPtr(U8* currentMemoryPtr)
 size_t GeneralPurposeMemory::ReadSizeFromMemory(const void* positionInMemory) const
 {
     return *static_cast<const size_t*>(positionInMemory);
+}
+
+void GeneralPurposeMemory::WriteLinkToNextFreeBlock(U8* currentFreeBlockPtr, const void* nextFreeBlockPtr)
+{
+    WriteAddressToMemory(currentFreeBlockPtr + sizeof(size_t), nextFreeBlockPtr);
 }
 
 void GeneralPurposeMemory::WriteAddressToMemory(U8* positionInMemory, const void* addressToWrite)

@@ -84,6 +84,8 @@ private:
     //! @return Pointer to read address
     inline U8* ReadAddressFromMemory(const U8* positionInMemory) const;
 
+    inline U8* ReadLinkToNextFreeBlock(U8* currentFreeBlockPtr) const;
+
 
     //! @brief Reads a value of size_t at the given position in memory and returns it
     //! @param positionInMemory: Position in memory where the value should be read.
@@ -91,6 +93,7 @@ private:
     inline size_t ReadSizeFromMemory(const void* positionInMemory) const;
 
 
+    inline void WriteLinkToNextFreeBlock(U8* currentFreeBlockPtr, const void* nextFreeBlockPtr);
 
     //! @brief Writes a pointer address into the memory at the passed position. This is used to traverse between all
     //! free memory blocks.
