@@ -14,7 +14,6 @@ GeneralPurposeMemory::GeneralPurposeMemory(size_t memorySize)
     : mMemorySize{memorySize}
     , mNumAllocations{0}
     , mFirstFreeMemoryPtr{nullptr}
-    , mLastFreeMemoryPtr{nullptr}
     , mMemory{nullptr}
 {
     CheckConstructionParameters();
@@ -135,7 +134,6 @@ void GeneralPurposeMemory::Deinitialize()
     EXCEPTION(ReadSizeFromMemory(mMemory.get()) != mMemorySize, "Can't deinitialize. Memory still in use.");
 
     mFirstFreeMemoryPtr = nullptr;
-    mLastFreeMemoryPtr = nullptr;
     mMemory.reset(nullptr);
 }
 
@@ -150,7 +148,6 @@ void GeneralPurposeMemory::Initialize()
     mMemory.reset(new U8[mMemorySize]);
     mNumAllocations = 0;
     mFirstFreeMemoryPtr = mMemory.get();
-    mLastFreeMemoryPtr = mFirstFreeMemoryPtr;
 
     WriteSizeToMemory(mFirstFreeMemoryPtr, mMemorySize);
     WriteAddressToMemory(mFirstFreeMemoryPtr + sizeof(size_t), nullptr);
@@ -239,9 +236,6 @@ void GeneralPurposeMemory::MergeUpdateLinkedListDeallocation(U8*& currentMemoryP
                 nextFreeMemoryPtr = ReadAddressFromMemory(nextFreeMemoryPtr + sizeof(size_t));
                 AddToWrittenSize(currentMemoryPtr, nextFreeMemorySize);
                 WriteAddressToMemory(currentMemoryPtr + sizeof(size_t), nextFreeMemoryPtr);
-
-                if (nextFreeMemoryPtr == nullptr)
-                    mLastFreeMemoryPtr = currentMemoryPtr;
             }
             else
             {
@@ -251,7 +245,6 @@ void GeneralPurposeMemory::MergeUpdateLinkedListDeallocation(U8*& currentMemoryP
         else
         {
             WriteAddressToMemory(currentMemoryPtr + sizeof(size_t), nextFreeMemoryPtr);
-            mLastFreeMemoryPtr = currentMemoryPtr;
         }
     }
     else
@@ -270,7 +263,6 @@ void GeneralPurposeMemory::MergeUpdateLinkedListDeallocation(U8*& currentMemoryP
             {
                 WriteAddressToMemory(prevFreeMemoryPtr + sizeof(size_t), currentMemoryPtr);
                 WriteAddressToMemory(currentMemoryPtr + sizeof(size_t), nextFreeMemoryPtr);
-                mLastFreeMemoryPtr = currentMemoryPtr;
             }
         }
         else
@@ -288,8 +280,6 @@ void GeneralPurposeMemory::MergeUpdateLinkedListDeallocation(U8*& currentMemoryP
                     nextFreeMemoryPtr = ReadAddressFromMemory(nextFreeMemoryPtr + sizeof(size_t));
                     AddToWrittenSize(prevFreeMemoryPtr, freedMemorySize + nextFreeMemorySize);
                     WriteAddressToMemory(prevFreeMemoryPtr + sizeof(size_t), nextFreeMemoryPtr);
-                    if (nextFreeMemoryPtr == nullptr)
-                        mLastFreeMemoryPtr = prevFreeMemoryPtr;
                 }
                 else
                 {
@@ -298,8 +288,6 @@ void GeneralPurposeMemory::MergeUpdateLinkedListDeallocation(U8*& currentMemoryP
                     AddToWrittenSize(currentMemoryPtr, nextFreeMemorySize);
                     WriteAddressToMemory(currentMemoryPtr + sizeof(size_t), nextFreeMemoryPtr);
                     WriteAddressToMemory(prevFreeMemoryPtr + sizeof(size_t), currentMemoryPtr);
-                    if (nextFreeMemoryPtr == nullptr)
-                        mLastFreeMemoryPtr = currentMemoryPtr;
                 }
             }
             else
@@ -338,7 +326,6 @@ void GeneralPurposeMemory::UpdateLinkedListAllocation(U8*& currentMemoryPtr, U8*
             if (nextFreeMemoryPtr == nullptr)
             {
                 mFirstFreeMemoryPtr = nullptr;
-                mLastFreeMemoryPtr = nullptr;
             }
             else
             {
@@ -350,7 +337,6 @@ void GeneralPurposeMemory::UpdateLinkedListAllocation(U8*& currentMemoryPtr, U8*
             if (nextFreeMemoryPtr == nullptr)
             {
                 WriteAddressToMemory(prevFreeMemoryPtr + sizeof(size_t), nullptr);
-                mLastFreeMemoryPtr = prevFreeMemoryPtr;
             }
             else
             {
@@ -368,7 +354,6 @@ void GeneralPurposeMemory::UpdateLinkedListAllocation(U8*& currentMemoryPtr, U8*
                 WriteSizeToMemory(leftFreeMemoryPtr, leftMemorySize);
                 WriteAddressToMemory(leftFreeMemoryPtr + sizeof(size_t), nullptr);
                 mFirstFreeMemoryPtr = leftFreeMemoryPtr;
-                mLastFreeMemoryPtr = leftFreeMemoryPtr;
             }
             else
             {
@@ -386,7 +371,6 @@ void GeneralPurposeMemory::UpdateLinkedListAllocation(U8*& currentMemoryPtr, U8*
                 WriteSizeToMemory(leftFreeMemoryPtr, leftMemorySize);
                 WriteAddressToMemory(leftFreeMemoryPtr + sizeof(size_t), nullptr);
                 WriteAddressToMemory(prevFreeMemoryPtr + sizeof(size_t), leftFreeMemoryPtr);
-                mLastFreeMemoryPtr = leftFreeMemoryPtr;
             }
             else
             {

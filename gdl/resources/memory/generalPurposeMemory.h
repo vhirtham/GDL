@@ -14,7 +14,6 @@ class GeneralPurposeMemory
     size_t mMemorySize;
     U32 mNumAllocations;
     U8* mFirstFreeMemoryPtr;
-    U8* mLastFreeMemoryPtr;
     std::unique_ptr<U8[]> mMemory;
     mutable std::mutex mMutex;
 
@@ -90,6 +89,8 @@ private:
     //! @param positionInMemory: Position in memory where the value should be read.
     //! @return Read value
     inline size_t ReadSizeFromMemory(const void* positionInMemory) const;
+
+
 
     //! @brief Writes a pointer address into the memory at the passed position. This is used to traverse between all
     //! free memory blocks.
