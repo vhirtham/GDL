@@ -17,7 +17,7 @@ void AssertIncreasingAddresses(std::array<void*, 10> addresses)
         assert(addresses[i - 1] < addresses[i] && "Addresses not in ascending order");
 }
 
-BOOST_AUTO_TEST_CASE(Construction_destruction)
+BOOST_AUTO_TEST_CASE(Construction_Destruction)
 {
     BOOST_CHECK_NO_THROW(GeneralPurposeMemory(100));
 
@@ -50,7 +50,7 @@ BOOST_AUTO_TEST_CASE(Initialization_Deinitialization)
     GDL_CHECK_THROW_DEV_DISABLE(gpm.Deallocate(address), Exception);
 }
 
-
+//! @brief Helper function which tests if the intial state for each deallocation test edge case is correct.
 void CheckDeallocationTestSetup(const GeneralPurposeMemory& gpm, std::array<void*, 10> addresses)
 {
     BOOST_CHECK(gpm.CountAllocatedMemoryBlocks() == 10);
@@ -59,6 +59,7 @@ void CheckDeallocationTestSetup(const GeneralPurposeMemory& gpm, std::array<void
 }
 
 
+//! @brief Tests if the deallocation function updates the internal linked list. All possible edge cases are tested.
 BOOST_AUTO_TEST_CASE(Deallocation)
 {
     constexpr U32 numAllocations = 10;
@@ -403,7 +404,8 @@ BOOST_AUTO_TEST_CASE(Deallocation)
 }
 
 
-
+//! @brief Tests if the allocation function updates the internal linked list and returns the pointer to the expected
+//! free memory block. All possible edge cases are tested.
 BOOST_AUTO_TEST_CASE(Allocation)
 {
     // TODO Check pointer addresses
@@ -419,6 +421,7 @@ BOOST_AUTO_TEST_CASE(Allocation)
 
     GeneralPurposeMemory gpm{memorySize};
     std::array<void*, numAllocations> addresses;
+    std::array<void*, numAllocations> expectedAddresses;
 
     // GDL_CHECK_THROW_DEV_DISABLE(gpm.Allocate(10), Exception);
     gpm.Initialize();
@@ -430,8 +433,17 @@ BOOST_AUTO_TEST_CASE(Allocation)
     // |- | - memory allocation might leave some free memory depending on the allocation size
 
 
-    for (U32 i = 0; i < numAllocations - 2; ++i)
+    for (U32 i = 0; i < numAllocations; ++i)
+    {
         addresses[i] = gpm.Allocate(allocationSize);
+        expectedAddresses[i] = addresses[i];
+    }
+    AssertIncreasingAddresses(expectedAddresses);
+
+    gpm.Deallocate(addresses[8]);
+    gpm.Deallocate(addresses[9]);
+    addresses[8] = nullptr;
+    addresses[9] = nullptr;
     BOOST_CHECK(gpm.CountAllocatedMemoryBlocks() == 8);
     BOOST_CHECK(gpm.CountFreeMemoryBlocks() == 1);
 
@@ -441,13 +453,19 @@ BOOST_AUTO_TEST_CASE(Allocation)
     // |xx|xx|xx|xx|xx|xx|xx|xx|--|- |
 
     addresses[8] = gpm.Allocate(doubleAllocationSize - freeHeaderSize);
+    BOOST_CHECK(expectedAddresses[8] == addresses[8]);
     BOOST_CHECK(gpm.CountAllocatedMemoryBlocks() == 9);
     BOOST_CHECK(gpm.CountFreeMemoryBlocks() == 1);
     gpm.Deallocate(addresses[8]);
+    addresses[8] = nullptr;
+
     addresses[8] = gpm.Allocate(doubleAllocationSize - freeHeaderSize + 1);
+    BOOST_CHECK(expectedAddresses[8] == addresses[8]);
     BOOST_CHECK(gpm.CountAllocatedMemoryBlocks() == 9);
     BOOST_CHECK(gpm.CountFreeMemoryBlocks() == 0);
     gpm.Deallocate(addresses[8]);
+    addresses[8] = nullptr;
+
     BOOST_CHECK(gpm.CountAllocatedMemoryBlocks() == 8);
     BOOST_CHECK(gpm.CountFreeMemoryBlocks() == 1);
 
@@ -457,17 +475,24 @@ BOOST_AUTO_TEST_CASE(Allocation)
     // |xx|xx|  |xx|xx|xx|xx|xx|--|- |
 
     gpm.Deallocate(addresses[2]);
+    addresses[2] = nullptr;
     BOOST_CHECK(gpm.CountAllocatedMemoryBlocks() == 7);
     BOOST_CHECK(gpm.CountFreeMemoryBlocks() == 2);
 
     addresses[8] = gpm.Allocate(doubleAllocationSize - freeHeaderSize);
+    BOOST_CHECK(expectedAddresses[8] == addresses[8]);
     BOOST_CHECK(gpm.CountAllocatedMemoryBlocks() == 8);
     BOOST_CHECK(gpm.CountFreeMemoryBlocks() == 2);
     gpm.Deallocate(addresses[8]);
+    addresses[8] = nullptr;
+
     addresses[8] = gpm.Allocate(doubleAllocationSize - freeHeaderSize + 1);
+    BOOST_CHECK(expectedAddresses[8] == addresses[8]);
     BOOST_CHECK(gpm.CountAllocatedMemoryBlocks() == 8);
     BOOST_CHECK(gpm.CountFreeMemoryBlocks() == 1);
     gpm.Deallocate(addresses[8]);
+    addresses[8] = nullptr;
+
     BOOST_CHECK(gpm.CountAllocatedMemoryBlocks() == 7);
     BOOST_CHECK(gpm.CountFreeMemoryBlocks() == 2);
 
@@ -476,17 +501,24 @@ BOOST_AUTO_TEST_CASE(Allocation)
     // |xx|xx|--|- |xx|xx|xx|xx|  |  |
 
     gpm.Deallocate(addresses[3]);
+    addresses[3] = nullptr;
     BOOST_CHECK(gpm.CountAllocatedMemoryBlocks() == 6);
     BOOST_CHECK(gpm.CountFreeMemoryBlocks() == 2);
 
     addresses[2] = gpm.Allocate(doubleAllocationSize - freeHeaderSize);
+    BOOST_CHECK(expectedAddresses[2] == addresses[2]);
     BOOST_CHECK(gpm.CountAllocatedMemoryBlocks() == 7);
     BOOST_CHECK(gpm.CountFreeMemoryBlocks() == 2);
     gpm.Deallocate(addresses[2]);
+    addresses[2] = nullptr;
+
     addresses[2] = gpm.Allocate(doubleAllocationSize - freeHeaderSize + 1);
+    BOOST_CHECK(expectedAddresses[2] == addresses[2]);
     BOOST_CHECK(gpm.CountAllocatedMemoryBlocks() == 7);
     BOOST_CHECK(gpm.CountFreeMemoryBlocks() == 1);
     gpm.Deallocate(addresses[2]);
+    addresses[2] = nullptr;
+
     BOOST_CHECK(gpm.CountAllocatedMemoryBlocks() == 6);
     BOOST_CHECK(gpm.CountFreeMemoryBlocks() == 2);
 
@@ -502,13 +534,19 @@ BOOST_AUTO_TEST_CASE(Allocation)
     BOOST_CHECK(gpm.CountFreeMemoryBlocks() == 3);
 
     addresses[5] = gpm.Allocate(doubleAllocationSize - freeHeaderSize);
+    BOOST_CHECK(expectedAddresses[5] == addresses[5]);
     BOOST_CHECK(gpm.CountAllocatedMemoryBlocks() == 6);
     BOOST_CHECK(gpm.CountFreeMemoryBlocks() == 3);
     gpm.Deallocate(addresses[5]);
+    addresses[5] = nullptr;
+
     addresses[5] = gpm.Allocate(doubleAllocationSize - freeHeaderSize + 1);
+    BOOST_CHECK(expectedAddresses[5] == addresses[5]);
     BOOST_CHECK(gpm.CountAllocatedMemoryBlocks() == 6);
     BOOST_CHECK(gpm.CountFreeMemoryBlocks() == 2);
     gpm.Deallocate(addresses[5]);
+    addresses[5] = nullptr;
+
     BOOST_CHECK(gpm.CountAllocatedMemoryBlocks() == 5);
     BOOST_CHECK(gpm.CountFreeMemoryBlocks() == 3);
 
@@ -520,6 +558,8 @@ BOOST_AUTO_TEST_CASE(Allocation)
     addresses[8] = gpm.Allocate(allocationSize);
     addresses[9] = gpm.Allocate(allocationSize);
 
+    AssertIncreasingAddresses(addresses);
+
     for (U32 i = 0; i < numAllocations; ++i)
         gpm.Deallocate(addresses[i]);
 
@@ -530,24 +570,18 @@ BOOST_AUTO_TEST_CASE(Allocation)
     BOOST_CHECK(gpm.CountAllocatedMemoryBlocks() == 0);
     BOOST_CHECK(gpm.CountFreeMemoryBlocks() == 1);
 
-    AssertIncreasingAddresses(addresses);
 
     gpm.Deinitialize();
 }
 
-// BOOST_AUTO_TEST_CASE(Alignment)
-//{
-//    struct alignas(32) AlignMe
-//    {
-//        float myVar;
-//    };
+BOOST_AUTO_TEST_CASE(Allocation_Exceptions)
+{
+}
 
-//    std::vector<AlignMe> test;
-//    test.emplace_back();
-//    test.emplace_back();
-//    test.emplace_back();
-//    std::cout << alignof(AlignMe) << std::endl;
-//    std::cout << is_aligned(&test[0], 32) << std::endl;
-//    std::cout << is_aligned(&test[1], 32) << std::endl;
-//    std::cout << is_aligned(&test[2], 32) << std::endl;
-//}
+BOOST_AUTO_TEST_CASE(Deallocation_Exceptions)
+{
+}
+
+BOOST_AUTO_TEST_CASE(Alignment)
+{
+}
