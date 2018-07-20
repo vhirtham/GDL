@@ -31,7 +31,6 @@ BOOST_AUTO_TEST_CASE(Initialization_Deinitialization)
 
     GeneralPurposeMemory gpm{memorySize};
 
-    GDL_CHECK_THROW_DEV_DISABLE(gpm.Allocate(10), Exception);
     gpm.Initialize();
 
     // already initialized
@@ -574,8 +573,74 @@ BOOST_AUTO_TEST_CASE(Allocation)
     gpm.Deinitialize();
 }
 
+
+
+//! @brief Tests all possible exceptions that can be thrown during allocation
 BOOST_AUTO_TEST_CASE(Allocation_Exceptions)
 {
+    constexpr U32 numAllocations = 10;
+    constexpr size_t alignment = 1;
+    constexpr size_t headerSize = sizeof(size_t) + alignment;
+    constexpr size_t totalAllocationSize = 20;
+    constexpr size_t allocationSize = totalAllocationSize - headerSize;
+    constexpr size_t doubleAllocationSize = totalAllocationSize * 2 - headerSize;
+    constexpr size_t memorySize = numAllocations * (totalAllocationSize);
+
+    GeneralPurposeMemory gpm{memorySize};
+    std::array<void*, numAllocations> addresses;
+
+
+    // not initialized
+    GDL_CHECK_THROW_DEV_DISABLE(gpm.Allocate(allocationSize), Exception);
+
+    gpm.Initialize();
+
+
+
+    for (U32 i = 0; i < numAllocations; ++i)
+        addresses[i] = gpm.Allocate(allocationSize);
+    AssertIncreasingAddresses(addresses);
+
+    // no more memory left
+    BOOST_CHECK_THROW(gpm.Allocate(allocationSize), Exception);
+
+
+
+    // create some gaps
+    // |xx| - used memory
+    // |  | - free memory
+    // |  |xx|  |xx|  |xx|  |xx|  |xx|
+
+    for (U32 i = 0; i < numAllocations; i += 2)
+    {
+        gpm.Deallocate(addresses[i]);
+        addresses[i] = nullptr;
+    }
+
+    // no fitting memory block available because of fragmentation
+    BOOST_CHECK_THROW(gpm.Allocate(doubleAllocationSize), Exception);
+
+    // size is 0
+    GDL_CHECK_THROW_DEV_DISABLE(gpm.Allocate(0), Exception);
+
+
+    // clear memory
+    for (U32 i = 1; i < numAllocations; i += 2)
+    {
+        gpm.Deallocate(addresses[i]);
+        addresses[i] = nullptr;
+    }
+
+
+    // alignment is not power of 2
+    GDL_CHECK_THROW_DEV_DISABLE(gpm.Allocate(allocationSize, 5), Exception);
+
+
+    // alignment is bigger than maximum alignment (128)
+    GDL_CHECK_THROW_DEV_DISABLE(gpm.Allocate(allocationSize, 512), Exception);
+
+
+    gpm.Deinitialize();
 }
 
 BOOST_AUTO_TEST_CASE(Deallocation_Exceptions)

@@ -2,6 +2,7 @@
 
 #include "gdl/base/Exception.h"
 #include "gdl/base/SSESupportFunctions.h"
+#include "gdl/base/functions/isPowerOf2.h"
 
 #include <cstring>
 #include <iostream>
@@ -27,9 +28,12 @@ void* GeneralPurposeMemory::Allocate(size_t size, size_t alignment)
 {
     std::lock_guard<std::mutex> lock{mMutex};
 
-    DEV_EXCEPTION(mMemory.get() == nullptr, "General purpose memory is not initialized.");
-    DEV_EXCEPTION(alignment > 255, "Alignment must be smaller than 256");
+    DEV_EXCEPTION(size == 0, "Allocated memory size is 0.");
+    DEV_EXCEPTION(!IsInitialized(), "General purpose memory is not initialized.");
+    DEV_EXCEPTION(!IsPowerOf2(alignment), "Alignment must be a power of 2.");
+    DEV_EXCEPTION(alignment > 255, "Maximum alignment is 128");
     EXCEPTION(mFirstFreeMemoryPtr == nullptr, "No more memory left");
+
 
     // Data from first free memory block - maybe collect them in a private struct
     U8* currentMemoryPtr = mFirstFreeMemoryPtr;
