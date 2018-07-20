@@ -4,6 +4,7 @@
 #include "gdl/base/SSESupportFunctions.h"
 #include "gdl/base/functions/isPowerOf2.h"
 
+#include <cassert>
 #include <cstring>
 #include <iostream>
 
@@ -34,26 +35,16 @@ void* GeneralPurposeMemory::Allocate(size_t size, size_t alignment)
     DEV_EXCEPTION(alignment > 255, "Maximum alignment is 128");
     EXCEPTION(mFirstFreeMemoryPtr == nullptr, "No more memory left");
 
+    AllocationData allocationData{*this, size, alignment};
 
-    // Data from first free memory block - maybe collect them in a private struct
-    U8* currentMemoryPtr = mFirstFreeMemoryPtr;
-    U8* prevFreeMemoryPtr = nullptr;
-    U8* nextFreeMemoryPtr = ReadLinkToNextFreeBlock(currentMemoryPtr);
-    size_t freeMemorySize = ReadSizeFromMemory(currentMemoryPtr);
+    FindFreeMemoryBlock(&allocationData);
 
-    size_t totalAllocationSize = size + alignment + sizeof(size_t);
+    UpdateLinkedListAllocation(&allocationData);
 
+    WriteSizeToMemory(allocationData.currentMemoryPtr, allocationData.totalAllocationSize);
+    allocationData.currentMemoryPtr += sizeof(size_t);
 
-    FindFreeMemoryBlock(currentMemoryPtr, prevFreeMemoryPtr, nextFreeMemoryPtr, freeMemorySize, totalAllocationSize);
-
-    UpdateLinkedListAllocation(currentMemoryPtr, prevFreeMemoryPtr, nextFreeMemoryPtr, freeMemorySize,
-                               totalAllocationSize);
-
-
-    WriteSizeToMemory(currentMemoryPtr, totalAllocationSize);
-    currentMemoryPtr += sizeof(size_t);
-
-    return AlignAllocatedMemory(currentMemoryPtr, alignment);
+    return AlignAllocatedMemory(allocationData.currentMemoryPtr, alignment);
 }
 
 
@@ -199,18 +190,19 @@ void GeneralPurposeMemory::FindEnclosingFreeMemoryBlocks(U8*& currentMemoryPtr, 
 
 
 
-void GeneralPurposeMemory::FindFreeMemoryBlock(U8*& currentMemoryPtr, U8*& prevFreeMemoryPtr, U8*& nextFreeMemoryPtr,
-                                               size_t& freeMemorySize, size_t totalAllocationSize) const
+void GeneralPurposeMemory::FindFreeMemoryBlock(AllocationData* data) const
 {
-    while (freeMemorySize < totalAllocationSize)
+    assert(data != nullptr);
+
+    while (data->freeMemorySize < data->totalAllocationSize)
     {
-        EXCEPTION(nextFreeMemoryPtr == nullptr, "No properly sized memory block available.");
+        EXCEPTION(data->nextFreeMemoryPtr == nullptr, "No properly sized memory block available.");
 
         // Traverse to next memory block
-        prevFreeMemoryPtr = currentMemoryPtr;
-        currentMemoryPtr = nextFreeMemoryPtr;
-        nextFreeMemoryPtr = ReadLinkToNextFreeBlock(currentMemoryPtr);
-        freeMemorySize = ReadSizeFromMemory(currentMemoryPtr);
+        data->prevFreeMemoryPtr = data->currentMemoryPtr;
+        data->currentMemoryPtr = data->nextFreeMemoryPtr;
+        data->nextFreeMemoryPtr = ReadLinkToNextFreeBlock(data->currentMemoryPtr);
+        data->freeMemorySize = ReadSizeFromMemory(data->currentMemoryPtr);
     }
 }
 
@@ -260,30 +252,30 @@ void GeneralPurposeMemory::MergeUpdateLinkedListDeallocation(U8*& currentMemoryP
 
 
 
-void GeneralPurposeMemory::UpdateLinkedListAllocation(U8*& currentMemoryPtr, U8*& prevFreeMemoryPtr,
-                                                      U8*& nextFreeMemoryPtr, size_t freeMemorySize,
-                                                      size_t& totalAllocationSize)
+void GeneralPurposeMemory::UpdateLinkedListAllocation(AllocationData* data)
 {
+    assert(data != nullptr);
+
     constexpr size_t minimalFreeBlockSize = sizeof(size_t) + sizeof(void*);
 
-    size_t leftMemorySize = freeMemorySize - totalAllocationSize;
+    size_t leftMemorySize = data->freeMemorySize - data->totalAllocationSize;
 
     // Create new free memory block if enough memory is left
     if (leftMemorySize < minimalFreeBlockSize)
-        totalAllocationSize = freeMemorySize;
+        data->totalAllocationSize = data->freeMemorySize;
     else
     {
-        U8* leftFreeMemoryPtr = currentMemoryPtr + totalAllocationSize;
+        U8* leftFreeMemoryPtr = data->currentMemoryPtr + data->totalAllocationSize;
         WriteSizeToMemory(leftFreeMemoryPtr, leftMemorySize);
-        WriteLinkToNextFreeBlock(leftFreeMemoryPtr, nextFreeMemoryPtr);
-        nextFreeMemoryPtr = leftFreeMemoryPtr;
+        WriteLinkToNextFreeBlock(leftFreeMemoryPtr, data->nextFreeMemoryPtr);
+        data->nextFreeMemoryPtr = leftFreeMemoryPtr;
     }
 
     // Update previous list entry
-    if (currentMemoryPtr == mFirstFreeMemoryPtr)
-        mFirstFreeMemoryPtr = nextFreeMemoryPtr;
+    if (data->currentMemoryPtr == mFirstFreeMemoryPtr)
+        mFirstFreeMemoryPtr = data->nextFreeMemoryPtr;
     else
-        WriteLinkToNextFreeBlock(prevFreeMemoryPtr, nextFreeMemoryPtr);
+        WriteLinkToNextFreeBlock(data->prevFreeMemoryPtr, data->nextFreeMemoryPtr);
 }
 
 
@@ -329,6 +321,15 @@ void GeneralPurposeMemory::WriteSizeToMemory(void* positionInMemory, const size_
 {
     size_t* valuePtr = static_cast<size_t*>(positionInMemory);
     *valuePtr = value;
+}
+
+GeneralPurposeMemory::AllocationData::AllocationData(GeneralPurposeMemory& gpm, size_t allocationSize, size_t alignment)
+    : currentMemoryPtr{gpm.mFirstFreeMemoryPtr}
+    , prevFreeMemoryPtr{nullptr}
+    , nextFreeMemoryPtr{gpm.ReadLinkToNextFreeBlock(currentMemoryPtr)}
+    , freeMemorySize{gpm.ReadSizeFromMemory(currentMemoryPtr)}
+    , totalAllocationSize{allocationSize + alignment + sizeof(size_t)}
+{
 }
 
 } // namespace GDL

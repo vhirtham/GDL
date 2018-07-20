@@ -11,6 +11,22 @@ namespace GDL
 
 class GeneralPurposeMemory
 {
+    //! @brief Stores all data which is needed during allocation
+    struct AllocationData
+    {
+        U8* currentMemoryPtr;
+        U8* prevFreeMemoryPtr;
+        U8* nextFreeMemoryPtr;
+        size_t freeMemorySize;
+        size_t totalAllocationSize;
+
+        //! @brief ctor
+        //! @param gpm: General purpose memory reference
+        //! @param allocationSize: Allocation size
+        //! @param alignment: Allocation alignment
+        AllocationData(GeneralPurposeMemory& gpm, size_t allocationSize, size_t alignment);
+    };
+
     size_t mMemorySize;
     U32 mNumAllocations;
     U8* mFirstFreeMemoryPtr;
@@ -65,8 +81,7 @@ private:
 
     void FindEnclosingFreeMemoryBlocks(U8*& currentMemoryPtr, U8*& prevFreeMemoryPtr, U8*& nextFreeMemoryPtr) const;
 
-    void FindFreeMemoryBlock(U8*& currentMemoryPtr, U8*& prevFreeMemoryPtr, U8*& nextFreeMemoryPtr,
-                             size_t& freeMemorySize, size_t totalAllocationSize) const;
+    void FindFreeMemoryBlock(AllocationData* data) const;
 
     //! @brief Returns if the general purpose memory is initialized
     //! @return TRUE / FALSE
@@ -76,8 +91,7 @@ private:
 
     U8* RestoreAllocatedPtr(U8* currentMemoryPtr);
 
-    void UpdateLinkedListAllocation(U8*& currentMemoryPtr, U8*& prevFreeMemoryPtr, U8*& nextFreeMemoryPtr,
-                                    size_t freeMemorySize, size_t& totalAllocationSize);
+    void UpdateLinkedListAllocation(AllocationData* data);
 
     //! @brief Reads an address at the given position in memory and returns a pointer to that address
     //! @param positionInMemory: Position in memory where the address should be read.
