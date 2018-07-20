@@ -37,9 +37,9 @@ void* GeneralPurposeMemory::Allocate(size_t size, size_t alignment)
 
     AllocationData allocationData{*this, size, alignment};
 
-    FindFreeMemoryBlock(&allocationData);
+    FindFreeMemoryBlock(allocationData);
 
-    UpdateLinkedListAllocation(&allocationData);
+    UpdateLinkedListAllocation(allocationData);
 
     WriteSizeToMemory(allocationData.currentMemoryPtr, allocationData.totalAllocationSize);
     allocationData.currentMemoryPtr += sizeof(size_t);
@@ -190,19 +190,17 @@ void GeneralPurposeMemory::FindEnclosingFreeMemoryBlocks(U8*& currentMemoryPtr, 
 
 
 
-void GeneralPurposeMemory::FindFreeMemoryBlock(AllocationData* data) const
+void GeneralPurposeMemory::FindFreeMemoryBlock(AllocationData& data) const
 {
-    assert(data != nullptr);
-
-    while (data->freeMemorySize < data->totalAllocationSize)
+    while (data.freeMemorySize < data.totalAllocationSize)
     {
-        EXCEPTION(data->nextFreeMemoryPtr == nullptr, "No properly sized memory block available.");
+        EXCEPTION(data.nextFreeMemoryPtr == nullptr, "No properly sized memory block available.");
 
         // Traverse to next memory block
-        data->prevFreeMemoryPtr = data->currentMemoryPtr;
-        data->currentMemoryPtr = data->nextFreeMemoryPtr;
-        data->nextFreeMemoryPtr = ReadLinkToNextFreeBlock(data->currentMemoryPtr);
-        data->freeMemorySize = ReadSizeFromMemory(data->currentMemoryPtr);
+        data.prevFreeMemoryPtr = data.currentMemoryPtr;
+        data.currentMemoryPtr = data.nextFreeMemoryPtr;
+        data.nextFreeMemoryPtr = ReadLinkToNextFreeBlock(data.currentMemoryPtr);
+        data.freeMemorySize = ReadSizeFromMemory(data.currentMemoryPtr);
     }
 }
 
@@ -252,30 +250,28 @@ void GeneralPurposeMemory::MergeUpdateLinkedListDeallocation(U8*& currentMemoryP
 
 
 
-void GeneralPurposeMemory::UpdateLinkedListAllocation(AllocationData* data)
+void GeneralPurposeMemory::UpdateLinkedListAllocation(AllocationData& data)
 {
-    assert(data != nullptr);
-
     constexpr size_t minimalFreeBlockSize = sizeof(size_t) + sizeof(void*);
 
-    size_t leftMemorySize = data->freeMemorySize - data->totalAllocationSize;
+    size_t leftMemorySize = data.freeMemorySize - data.totalAllocationSize;
 
     // Create new free memory block if enough memory is left
     if (leftMemorySize < minimalFreeBlockSize)
-        data->totalAllocationSize = data->freeMemorySize;
+        data.totalAllocationSize = data.freeMemorySize;
     else
     {
-        U8* leftFreeMemoryPtr = data->currentMemoryPtr + data->totalAllocationSize;
+        U8* leftFreeMemoryPtr = data.currentMemoryPtr + data.totalAllocationSize;
         WriteSizeToMemory(leftFreeMemoryPtr, leftMemorySize);
-        WriteLinkToNextFreeBlock(leftFreeMemoryPtr, data->nextFreeMemoryPtr);
-        data->nextFreeMemoryPtr = leftFreeMemoryPtr;
+        WriteLinkToNextFreeBlock(leftFreeMemoryPtr, data.nextFreeMemoryPtr);
+        data.nextFreeMemoryPtr = leftFreeMemoryPtr;
     }
 
     // Update previous list entry
-    if (data->currentMemoryPtr == mFirstFreeMemoryPtr)
-        mFirstFreeMemoryPtr = data->nextFreeMemoryPtr;
+    if (data.currentMemoryPtr == mFirstFreeMemoryPtr)
+        mFirstFreeMemoryPtr = data.nextFreeMemoryPtr;
     else
-        WriteLinkToNextFreeBlock(data->prevFreeMemoryPtr, data->nextFreeMemoryPtr);
+        WriteLinkToNextFreeBlock(data.prevFreeMemoryPtr, data.nextFreeMemoryPtr);
 }
 
 

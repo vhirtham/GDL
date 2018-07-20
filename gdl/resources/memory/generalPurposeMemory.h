@@ -81,7 +81,7 @@ private:
 
     void FindEnclosingFreeMemoryBlocks(U8*& currentMemoryPtr, U8*& prevFreeMemoryPtr, U8*& nextFreeMemoryPtr) const;
 
-    void FindFreeMemoryBlock(AllocationData* data) const;
+    void FindFreeMemoryBlock(AllocationData& data) const;
 
     //! @brief Returns if the general purpose memory is initialized
     //! @return TRUE / FALSE
@@ -91,7 +91,7 @@ private:
 
     U8* RestoreAllocatedPtr(U8* currentMemoryPtr);
 
-    void UpdateLinkedListAllocation(AllocationData* data);
+    void UpdateLinkedListAllocation(AllocationData& data);
 
     //! @brief Reads an address at the given position in memory and returns a pointer to that address
     //! @param positionInMemory: Position in memory where the address should be read.
