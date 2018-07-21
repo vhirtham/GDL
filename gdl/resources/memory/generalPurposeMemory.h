@@ -24,7 +24,19 @@ class GeneralPurposeMemory
         //! @param gpm: General purpose memory reference
         //! @param allocationSize: Allocation size
         //! @param alignment: Allocation alignment
-        AllocationData(GeneralPurposeMemory& gpm, size_t allocationSize, size_t alignment);
+        AllocationData(const GeneralPurposeMemory& gpm, size_t allocationSize, size_t alignment);
+    };
+
+    //! @brief Stores all data which is needed during deallocation
+    struct DeallocationData
+    {
+        U8* currentMemoryPtr;
+        U8* prevFreeMemoryPtr;
+        U8* nextFreeMemoryPtr;
+
+        //! @brief ctor
+        //! @param gpm: General purpose memory reference
+        DeallocationData(const GeneralPurposeMemory& gpm, void* address);
     };
 
     size_t mMemorySize;
@@ -79,7 +91,7 @@ private:
     void CheckConstructionParameters() const;
 
 
-    void FindEnclosingFreeMemoryBlocks(U8*& currentMemoryPtr, U8*& prevFreeMemoryPtr, U8*& nextFreeMemoryPtr) const;
+    void FindEnclosingFreeMemoryBlocks(DeallocationData& data) const;
 
     void FindFreeMemoryBlock(AllocationData& data) const;
 
@@ -87,9 +99,9 @@ private:
     //! @return TRUE / FALSE
     bool IsInitialized() const;
 
-    void MergeUpdateLinkedListDeallocation(U8*& currentMemoryPtr, U8*& prevFreeMemoryPtr, U8*& nextFreeMemoryPtr);
+    void MergeUpdateLinkedListDeallocation(DeallocationData& data);
 
-    U8* RestoreAllocatedPtr(U8* currentMemoryPtr);
+    U8* RestoreAllocatedPtr(U8* currentMemoryPtr) const;
 
     void UpdateLinkedListAllocation(AllocationData& data);
 

@@ -110,13 +110,11 @@ void GeneralPurposeMemory::Deallocate(void* address)
 
     DEV_EXCEPTION(mMemory.get() == nullptr, "General purpose memory is not initialized.");
 
-    U8* currentMemoryPtr = RestoreAllocatedPtr(static_cast<U8*>(address));
-    U8* nextFreeMemoryPtr = mFirstFreeMemoryPtr;
-    U8* prevFreeMemoryPtr = nullptr;
+    DeallocationData deallocationData(*this, address);
 
-    FindEnclosingFreeMemoryBlocks(currentMemoryPtr, prevFreeMemoryPtr, nextFreeMemoryPtr);
+    FindEnclosingFreeMemoryBlocks(deallocationData);
 
-    MergeUpdateLinkedListDeallocation(currentMemoryPtr, prevFreeMemoryPtr, nextFreeMemoryPtr);
+    MergeUpdateLinkedListDeallocation(deallocationData);
 }
 
 
@@ -178,13 +176,12 @@ void GeneralPurposeMemory::CheckConstructionParameters() const
 
 
 
-void GeneralPurposeMemory::FindEnclosingFreeMemoryBlocks(U8*& currentMemoryPtr, U8*& prevFreeMemoryPtr,
-                                                         U8*& nextFreeMemoryPtr) const
+void GeneralPurposeMemory::FindEnclosingFreeMemoryBlocks(DeallocationData& data) const
 {
-    while (nextFreeMemoryPtr != nullptr && nextFreeMemoryPtr < currentMemoryPtr)
+    while (data.nextFreeMemoryPtr != nullptr && data.nextFreeMemoryPtr < data.currentMemoryPtr)
     {
-        prevFreeMemoryPtr = nextFreeMemoryPtr;
-        nextFreeMemoryPtr = ReadLinkToNextFreeBlock(nextFreeMemoryPtr);
+        data.prevFreeMemoryPtr = data.nextFreeMemoryPtr;
+        data.nextFreeMemoryPtr = ReadLinkToNextFreeBlock(data.nextFreeMemoryPtr);
     }
 }
 
@@ -213,38 +210,38 @@ bool GeneralPurposeMemory::IsInitialized() const
 
 
 
-void GeneralPurposeMemory::MergeUpdateLinkedListDeallocation(U8*& currentMemoryPtr, U8*& prevFreeMemoryPtr,
-                                                             U8*& nextFreeMemoryPtr)
+void GeneralPurposeMemory::MergeUpdateLinkedListDeallocation(DeallocationData& data)
 {
-    size_t freedMemorySize = ReadSizeFromMemory(currentMemoryPtr);
+    size_t freedMemorySize = ReadSizeFromMemory(data.currentMemoryPtr);
 
     // Mergeable with previous?
-    if (prevFreeMemoryPtr != nullptr && prevFreeMemoryPtr + ReadSizeFromMemory(prevFreeMemoryPtr) == currentMemoryPtr)
+    if (data.prevFreeMemoryPtr != nullptr &&
+        data.prevFreeMemoryPtr + ReadSizeFromMemory(data.prevFreeMemoryPtr) == data.currentMemoryPtr)
     {
-        // Mergeable with next?
-        if (currentMemoryPtr + freedMemorySize == nextFreeMemoryPtr) // Also fails if nextFreeMemoryPtr == nullptr
+        // Mergeable with next? ---> Also fails if nextFreeMemoryPtr == nullptr (last free block)
+        if (data.currentMemoryPtr + freedMemorySize == data.nextFreeMemoryPtr)
         {
-            freedMemorySize += ReadSizeFromMemory(nextFreeMemoryPtr);
-            WriteLinkToNextFreeBlock(prevFreeMemoryPtr, ReadLinkToNextFreeBlock(nextFreeMemoryPtr));
+            freedMemorySize += ReadSizeFromMemory(data.nextFreeMemoryPtr);
+            WriteLinkToNextFreeBlock(data.prevFreeMemoryPtr, ReadLinkToNextFreeBlock(data.nextFreeMemoryPtr));
         }
 
-        AddToWrittenSize(prevFreeMemoryPtr, freedMemorySize);
+        AddToWrittenSize(data.prevFreeMemoryPtr, freedMemorySize);
     }
     else
     {
-        // Mergeable with next?
-        if (currentMemoryPtr + freedMemorySize == nextFreeMemoryPtr) // Also fails if nextFreeMemoryPtr == nullptr
+        // Mergeable with next? ---> Also fails if nextFreeMemoryPtr == nullptr (last free block)
+        if (data.currentMemoryPtr + freedMemorySize == data.nextFreeMemoryPtr)
         {
-            AddToWrittenSize(currentMemoryPtr, ReadSizeFromMemory(nextFreeMemoryPtr));
-            nextFreeMemoryPtr = ReadLinkToNextFreeBlock(nextFreeMemoryPtr);
+            AddToWrittenSize(data.currentMemoryPtr, ReadSizeFromMemory(data.nextFreeMemoryPtr));
+            data.nextFreeMemoryPtr = ReadLinkToNextFreeBlock(data.nextFreeMemoryPtr);
         }
 
-        WriteLinkToNextFreeBlock(currentMemoryPtr, nextFreeMemoryPtr);
+        WriteLinkToNextFreeBlock(data.currentMemoryPtr, data.nextFreeMemoryPtr);
 
-        if (prevFreeMemoryPtr == nullptr)
-            mFirstFreeMemoryPtr = currentMemoryPtr;
+        if (data.prevFreeMemoryPtr == nullptr)
+            mFirstFreeMemoryPtr = data.currentMemoryPtr;
         else
-            WriteLinkToNextFreeBlock(prevFreeMemoryPtr, currentMemoryPtr);
+            WriteLinkToNextFreeBlock(data.prevFreeMemoryPtr, data.currentMemoryPtr);
     }
 }
 
@@ -283,6 +280,8 @@ U8* GeneralPurposeMemory::ReadAddressFromMemory(const U8* positionInMemory) cons
     return address;
 }
 
+
+
 U8* GeneralPurposeMemory::ReadLinkToNextFreeBlock(U8* currentFreeBlockPtr) const
 {
     return ReadAddressFromMemory(currentFreeBlockPtr + sizeof(size_t));
@@ -290,7 +289,7 @@ U8* GeneralPurposeMemory::ReadLinkToNextFreeBlock(U8* currentFreeBlockPtr) const
 
 
 
-U8* GeneralPurposeMemory::RestoreAllocatedPtr(U8* currentMemoryPtr)
+U8* GeneralPurposeMemory::RestoreAllocatedPtr(U8* currentMemoryPtr) const
 {
     U8 alignmentCorrection = currentMemoryPtr[-1];
     return currentMemoryPtr - (alignmentCorrection + sizeof(size_t));
@@ -303,15 +302,21 @@ size_t GeneralPurposeMemory::ReadSizeFromMemory(const void* positionInMemory) co
     return *static_cast<const size_t*>(positionInMemory);
 }
 
+
+
 void GeneralPurposeMemory::WriteLinkToNextFreeBlock(U8* currentFreeBlockPtr, const void* nextFreeBlockPtr)
 {
     WriteAddressToMemory(currentFreeBlockPtr + sizeof(size_t), nextFreeBlockPtr);
 }
 
+
+
 void GeneralPurposeMemory::WriteAddressToMemory(U8* positionInMemory, const void* addressToWrite)
 {
     std::memcpy(positionInMemory, &addressToWrite, sizeof(void*));
 }
+
+
 
 void GeneralPurposeMemory::WriteSizeToMemory(void* positionInMemory, const size_t value)
 {
@@ -319,12 +324,24 @@ void GeneralPurposeMemory::WriteSizeToMemory(void* positionInMemory, const size_
     *valuePtr = value;
 }
 
-GeneralPurposeMemory::AllocationData::AllocationData(GeneralPurposeMemory& gpm, size_t allocationSize, size_t alignment)
+
+
+GeneralPurposeMemory::AllocationData::AllocationData(const GeneralPurposeMemory& gpm, size_t allocationSize,
+                                                     size_t alignment)
     : currentMemoryPtr{gpm.mFirstFreeMemoryPtr}
     , prevFreeMemoryPtr{nullptr}
     , nextFreeMemoryPtr{gpm.ReadLinkToNextFreeBlock(currentMemoryPtr)}
     , freeMemorySize{gpm.ReadSizeFromMemory(currentMemoryPtr)}
     , totalAllocationSize{allocationSize + alignment + sizeof(size_t)}
+{
+}
+
+
+
+GeneralPurposeMemory::DeallocationData::DeallocationData(const GeneralPurposeMemory& gpm, void* address)
+    : currentMemoryPtr{gpm.RestoreAllocatedPtr(static_cast<U8*>(address))}
+    , prevFreeMemoryPtr{nullptr}
+    , nextFreeMemoryPtr{gpm.mFirstFreeMemoryPtr}
 {
 }
 
