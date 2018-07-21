@@ -229,8 +229,8 @@ bool GeneralPurposeMemory::IsDeallocatedAddressValid(const GeneralPurposeMemory:
     {
 
         U8* nextFreeMemoryPtr = ReadLinkToNextFreeBlock(currentTraversalPtr);
-        EXCEPTION(nextFreeMemoryPtr <= currentTraversalPtr && nextFreeMemoryPtr != nullptr,
-                  "Internal linked list of free memory blocks is not ordered.");
+        DEV_EXCEPTION(nextFreeMemoryPtr <= currentTraversalPtr && nextFreeMemoryPtr != nullptr,
+                      "Internal linked list of free memory blocks is not ordered.");
         currentTraversalPtr = nextFreeMemoryPtr;
     }
     // Block is a free block
@@ -242,7 +242,7 @@ bool GeneralPurposeMemory::IsDeallocatedAddressValid(const GeneralPurposeMemory:
     while (currentTraversalPtr < data.currentMemoryPtr)
     {
         size_t blockSize = ReadSizeFromMemory(currentTraversalPtr);
-        EXCEPTION(blockSize <= 0, "Read block size <= 0. Internal structure corrupted");
+        DEV_EXCEPTION(blockSize <= 0, "Read block size <= 0. Internal structure corrupted");
         currentTraversalPtr += blockSize;
     }
     // memory pointer is not a valid memory block
