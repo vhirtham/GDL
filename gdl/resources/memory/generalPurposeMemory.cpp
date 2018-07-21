@@ -108,9 +108,15 @@ void GeneralPurposeMemory::Deallocate(void* address)
 {
     std::lock_guard<std::mutex> lock{mMutex};
 
-    DEV_EXCEPTION(mMemory.get() == nullptr, "General purpose memory is not initialized.");
+    DEV_EXCEPTION(!IsInitialized(), "General purpose memory is not initialized.");
+    DEV_EXCEPTION(address == nullptr, "Can't free a nullptr");
+    DEV_EXCEPTION(static_cast<U8*>(address) < mMemory.get() || static_cast<U8*>(address) > mMemory.get() + mMemorySize,
+                  "Memory address is not part of the general purpose memory");
 
     DeallocationData deallocationData(*this, address);
+
+    DEV_EXCEPTION(!IsDeallocatedAddressValid(deallocationData),
+                  "Deallocated address is not an allocated memory block or was already freed");
 
     FindEnclosingFreeMemoryBlocks(deallocationData);
 
@@ -210,6 +216,44 @@ bool GeneralPurposeMemory::IsInitialized() const
 
 
 
+bool GeneralPurposeMemory::IsDeallocatedAddressValid(const GeneralPurposeMemory::DeallocationData& data) const
+{
+    // restored address is out of bounds
+    if (data.currentMemoryPtr < mMemory.get() || data.currentMemoryPtr > mMemory.get() + mMemorySize)
+        return false;
+
+
+    // Traverse free memory blocks
+    U8* currentTraversalPtr = mFirstFreeMemoryPtr;
+    while (currentTraversalPtr != nullptr && currentTraversalPtr < data.currentMemoryPtr)
+    {
+
+        U8* nextFreeMemoryPtr = ReadLinkToNextFreeBlock(currentTraversalPtr);
+        EXCEPTION(nextFreeMemoryPtr <= currentTraversalPtr && nextFreeMemoryPtr != nullptr,
+                  "Internal linked list of free memory blocks is not ordered.");
+        currentTraversalPtr = nextFreeMemoryPtr;
+    }
+    // Block is a free block
+    if (currentTraversalPtr == data.currentMemoryPtr)
+        return false;
+
+    // Traverse all blocks
+    currentTraversalPtr = mMemory.get();
+    while (currentTraversalPtr < data.currentMemoryPtr)
+    {
+        size_t blockSize = ReadSizeFromMemory(currentTraversalPtr);
+        EXCEPTION(blockSize <= 0, "Read block size <= 0. Internal structure corrupted");
+        currentTraversalPtr += blockSize;
+    }
+    // memory pointer is not a valid memory block
+    if (currentTraversalPtr > data.currentMemoryPtr)
+        return false;
+
+    return true;
+}
+
+
+
 void GeneralPurposeMemory::MergeUpdateLinkedListDeallocation(DeallocationData& data)
 {
     size_t freedMemorySize = ReadSizeFromMemory(data.currentMemoryPtr);
@@ -292,6 +336,7 @@ U8* GeneralPurposeMemory::ReadLinkToNextFreeBlock(U8* currentFreeBlockPtr) const
 U8* GeneralPurposeMemory::RestoreAllocatedPtr(U8* currentMemoryPtr) const
 {
     U8 alignmentCorrection = currentMemoryPtr[-1];
+    DEV_EXCEPTION(alignmentCorrection < 1 || alignmentCorrection > 128, "Invalid alignment correction read");
     return currentMemoryPtr - (alignmentCorrection + sizeof(size_t));
 }
 

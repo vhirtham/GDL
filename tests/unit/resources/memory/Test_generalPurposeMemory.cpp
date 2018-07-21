@@ -645,6 +645,59 @@ BOOST_AUTO_TEST_CASE(Allocation_Exceptions)
 
 BOOST_AUTO_TEST_CASE(Deallocation_Exceptions)
 {
+    constexpr U32 numAllocations = 10;
+    constexpr size_t alignment = 1;
+    constexpr size_t headerSize = sizeof(size_t) + alignment;
+    constexpr size_t totalAllocationSize = 20;
+    constexpr size_t allocationSize = totalAllocationSize - headerSize;
+    constexpr size_t memorySize = numAllocations * (totalAllocationSize);
+
+    GeneralPurposeMemory gpm{memorySize};
+    void* address = nullptr;
+    void* address2 = nullptr;
+
+    gpm.Initialize();
+
+    address = gpm.Allocate(allocationSize, alignment);
+    address2 = gpm.Allocate(allocationSize, alignment);
+
+    // nullptr
+    GDL_CHECK_THROW_DEV_DISABLE(gpm.Deallocate(nullptr), Exception);
+
+    // out of bounds
+    GDL_CHECK_THROW_DEV_DISABLE(gpm.Deallocate(static_cast<U8*>(address) - memorySize), Exception);
+    GDL_CHECK_THROW_DEV_DISABLE(gpm.Deallocate(static_cast<U8*>(address) + memorySize), Exception);
+
+    //    invalid address inside valid boundaries. To test all edge cases some wrong alignment values need to be written
+    //    into memory at a position which does not currupt the internal structure
+
+    // alignment correction creates a pointer in front of the memories start
+    U8* wrongAddress = static_cast<U8*>(address2) + 32;
+    wrongAddress[-1] = 128;
+    GDL_CHECK_THROW_DEV_DISABLE(gpm.Deallocate(wrongAddress), Exception);
+
+    wrongAddress[-1] = 11;
+    GDL_CHECK_THROW_DEV_DISABLE(gpm.Deallocate(wrongAddress), Exception);
+
+
+    gpm.Deallocate(address2);
+
+    // already freed - since freeing a block might overwright the value of the original alignment byte (link to next
+    // free block) there are two possible exceptions that can be triggered. The read alignment byte might have an
+    // invalid value or the block is a free block. Both cases are checked. Deallocating address2 will write a nullptr to
+    // free memory, since it is joined with the last free memory block. Because of the chosen alignment (1) the
+    // alignment byte is overwritten with 0 and causing an invalid alignment exception. The second test simply writes an
+    // alignment value to a unused piece of memory so that freeing the corresponding address will point to the already
+    // freed address.
+    GDL_CHECK_THROW_DEV_DISABLE(gpm.Deallocate(address2), Exception);
+    wrongAddress[-1] = 33;
+    GDL_CHECK_THROW_DEV_DISABLE(gpm.Deallocate(wrongAddress), Exception);
+
+    gpm.Deallocate(address);
+    gpm.Deinitialize();
+
+    // not initialized
+    GDL_CHECK_THROW_DEV_DISABLE(gpm.Deallocate(address), Exception);
 }
 
 BOOST_AUTO_TEST_CASE(Alignment)

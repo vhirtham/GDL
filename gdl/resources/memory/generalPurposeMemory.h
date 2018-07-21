@@ -99,6 +99,13 @@ private:
     //! @return TRUE / FALSE
     bool IsInitialized() const;
 
+    //! @brief Checks if the deallocated address is a valid allocated memory block.
+    //! @return True / false
+    //! @remark There is a rare case where the function might return true, even if the address passed to the
+    //! deallocation function was never returned by the allocation function. This is the case if the read byte in front
+    //! of the address is a valid alignment value and will correct the pointer to a valid allocated memory block.
+    bool IsDeallocatedAddressValid(const DeallocationData& data) const;
+
     void MergeUpdateLinkedListDeallocation(DeallocationData& data);
 
     U8* RestoreAllocatedPtr(U8* currentMemoryPtr) const;
