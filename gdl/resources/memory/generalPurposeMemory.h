@@ -40,7 +40,6 @@ class GeneralPurposeMemory
     };
 
     size_t mMemorySize;
-    U32 mNumAllocations;
     U8* mFirstFreeMemoryPtr;
     std::unique_ptr<U8[]> mMemory;
     mutable std::mutex mMutex;
@@ -91,20 +90,48 @@ private:
     void CheckConstructionParameters() const;
 
 
+    U32 CountMemoryBlocks(U8* currentMemoryPtr) const;
+
+    //! @brief Counts and returns the number of allocated memory blocks
+    //! @return Number of allocated memory blocks
+    U32 CountAllocatedMemoryBlocksPrivate() const;
+
+    U32 CountFreeMemoryBlocksPrivate() const;
+
     void FindEnclosingFreeMemoryBlocks(DeallocationData& data) const;
 
     void FindFreeMemoryBlock(AllocationData& data) const;
 
+
+    //! @brief Returns a pointer to the end of the managed memory
+    //! @return Pointer to the end of the managed memory
+    //! @remark The function is marked as const, but the returned pointer can still be modified afterwards. This is
+    //! intentional, since this function is only meant meant to improve readability.
+    inline U8* GetEndOfMemory() const;
+
+    //! @brief Returns a pointer to the start of the managed memory
+    //! @return Pointer to the start of the managed memory
+    //! @remark The function is marked as const, but the returned pointer can still be modified afterwards. This is
+    //! intentional, since this function is only meant to improve readability.
+    inline U8* GetStartOfMemory() const;
+
     //! @brief Returns if the general purpose memory is initialized
     //! @return TRUE / FALSE
     bool IsInitialized() const;
+
+    inline bool IsAddressInsideMemory(U8* address) const;
+
+    bool IsAddressStartOfFreeMemoryBlock(U8* address) const;
+
+    bool IsAddressStartOfMemoryBlock(U8* address) const;
+
 
     //! @brief Checks if the deallocated address is a valid allocated memory block.
     //! @return True / false
     //! @remark There is a rare case where the function might return true, even if the address passed to the
     //! deallocation function was never returned by the allocation function. This is the case if the read byte in front
     //! of the address is a valid alignment value and will correct the pointer to a valid allocated memory block.
-    bool IsDeallocatedAddressValid(const DeallocationData& data) const;
+    bool IsDeallocatedAddressValid(U8* address) const;
 
     void MergeUpdateLinkedListDeallocation(DeallocationData& data);
 

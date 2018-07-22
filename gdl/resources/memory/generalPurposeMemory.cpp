@@ -14,16 +14,20 @@ namespace GDL
 
 GeneralPurposeMemory::GeneralPurposeMemory(size_t memorySize)
     : mMemorySize{memorySize}
-    , mNumAllocations{0}
     , mFirstFreeMemoryPtr{nullptr}
     , mMemory{nullptr}
 {
     CheckConstructionParameters();
 }
 
+
+
 GeneralPurposeMemory::~GeneralPurposeMemory()
 {
+    assert(!IsInitialized());
 }
+
+
 
 void* GeneralPurposeMemory::Allocate(size_t size, size_t alignment)
 {
@@ -51,55 +55,18 @@ void* GeneralPurposeMemory::Allocate(size_t size, size_t alignment)
 
 U32 GeneralPurposeMemory::CountAllocatedMemoryBlocks() const
 {
-    U8* currentMemoryPtr = mMemory.get();
-    U8* totalMemoryEndPtr = mMemory.get() + mMemorySize;
-    U32 numTotalBlocks = 0;
-    while (currentMemoryPtr != totalMemoryEndPtr && currentMemoryPtr != nullptr)
-    {
-        ++numTotalBlocks;
-        size_t blockSize = ReadSizeFromMemory(currentMemoryPtr);
-        EXCEPTION(blockSize <= 0, "Read block size <= 0.");
+    std::lock_guard<std::mutex> lock{mMutex};
 
-        currentMemoryPtr += blockSize;
-        EXCEPTION(currentMemoryPtr > totalMemoryEndPtr,
-                  "Read block size bigger than the distance to the memories end.");
-    }
-
-    return numTotalBlocks - CountFreeMemoryBlocks();
+    return CountAllocatedMemoryBlocksPrivate();
 }
 
 
 
 U32 GeneralPurposeMemory::CountFreeMemoryBlocks() const
 {
-    U8* currentMemoryPtr = mFirstFreeMemoryPtr;
-    U8* nextFreeMemoryPtr = nullptr;
+    std::lock_guard<std::mutex> lock{mMutex};
 
-    U32 numFreeMemoryBlocks = 0;
-
-    // Memory not full
-    if (currentMemoryPtr != nullptr)
-    {
-        nextFreeMemoryPtr = ReadLinkToNextFreeBlock(currentMemoryPtr);
-        ++numFreeMemoryBlocks;
-    }
-
-    // Traverse free memory blocks to the last one
-    while (nextFreeMemoryPtr != nullptr)
-    {
-        EXCEPTION(nextFreeMemoryPtr <= currentMemoryPtr, "Internal linked list of free memory blocks is not ordered.");
-
-        ++numFreeMemoryBlocks;
-        currentMemoryPtr = nextFreeMemoryPtr;
-        nextFreeMemoryPtr = ReadLinkToNextFreeBlock(currentMemoryPtr);
-
-        EXCEPTION(nextFreeMemoryPtr != nullptr &&
-                          (nextFreeMemoryPtr < mMemory.get() || nextFreeMemoryPtr > mMemory.get() + mMemorySize),
-                  "Internal linked list of free memory blocks points to a value that is not inside the managed memory "
-                  "section.");
-    }
-
-    return numFreeMemoryBlocks;
+    return CountFreeMemoryBlocksPrivate();
 }
 
 
@@ -110,12 +77,12 @@ void GeneralPurposeMemory::Deallocate(void* address)
 
     DEV_EXCEPTION(!IsInitialized(), "General purpose memory is not initialized.");
     DEV_EXCEPTION(address == nullptr, "Can't free a nullptr");
-    DEV_EXCEPTION(static_cast<U8*>(address) < mMemory.get() || static_cast<U8*>(address) > mMemory.get() + mMemorySize,
+    DEV_EXCEPTION(!IsAddressInsideMemory(static_cast<U8*>(address)),
                   "Memory address is not part of the general purpose memory");
 
     DeallocationData deallocationData(*this, address);
 
-    DEV_EXCEPTION(!IsDeallocatedAddressValid(deallocationData),
+    DEV_EXCEPTION(!IsDeallocatedAddressValid(deallocationData.currentMemoryPtr),
                   "Deallocated address is not an allocated memory block or was already freed");
 
     FindEnclosingFreeMemoryBlocks(deallocationData);
@@ -130,8 +97,9 @@ void GeneralPurposeMemory::Deinitialize()
     std::lock_guard<std::mutex> lock{mMutex};
 
     EXCEPTION(!IsInitialized(), "General purpose memory is already deinitialized.");
-    EXCEPTION(ReadSizeFromMemory(mMemory.get()) != mMemorySize, "Can't deinitialize. Memory still in use.");
+    EXCEPTION(CountAllocatedMemoryBlocksPrivate() != 0, "Can't deinitialize. Memory still in use.");
 
+    mMemorySize = 0;
     mFirstFreeMemoryPtr = nullptr;
     mMemory.reset(nullptr);
 }
@@ -145,8 +113,7 @@ void GeneralPurposeMemory::Initialize()
     EXCEPTION(IsInitialized(), "General purpose memory is already initialized.");
 
     mMemory.reset(new U8[mMemorySize]);
-    mNumAllocations = 0;
-    mFirstFreeMemoryPtr = mMemory.get();
+    mFirstFreeMemoryPtr = GetStartOfMemory();
 
     WriteSizeToMemory(mFirstFreeMemoryPtr, mMemorySize);
     WriteLinkToNextFreeBlock(mFirstFreeMemoryPtr, nullptr);
@@ -156,6 +123,8 @@ void GeneralPurposeMemory::Initialize()
 
 void GeneralPurposeMemory::AddToWrittenSize(void* positionInMemory, const size_t value)
 {
+    assert(positionInMemory != nullptr);
+
     size_t* valuePtr = static_cast<size_t*>(positionInMemory);
     *valuePtr += value;
 }
@@ -164,6 +133,9 @@ void GeneralPurposeMemory::AddToWrittenSize(void* positionInMemory, const size_t
 
 void* GeneralPurposeMemory::AlignAllocatedMemory(U8* currentMemoryPtr, size_t alignment)
 {
+    assert(currentMemoryPtr != nullptr);
+    assert(alignment > 0);
+
     size_t misalignment = Misalignment(currentMemoryPtr, alignment);
     size_t correction = alignment - misalignment;
 
@@ -182,10 +154,64 @@ void GeneralPurposeMemory::CheckConstructionParameters() const
 
 
 
+U32 GeneralPurposeMemory::CountFreeMemoryBlocksPrivate() const
+{
+    U8* currentMemoryPtr = mFirstFreeMemoryPtr;
+    U32 numFreeMemoryBlocks = 0;
+
+    while (currentMemoryPtr != nullptr)
+    {
+        assert(IsAddressInsideMemory(currentMemoryPtr));
+        assert(IsAddressStartOfMemoryBlock(currentMemoryPtr));
+
+        U8* nextFreeMemoryPtr = ReadLinkToNextFreeBlock(currentMemoryPtr);
+        assert(nextFreeMemoryPtr > currentMemoryPtr || nextFreeMemoryPtr == nullptr);
+
+        ++numFreeMemoryBlocks;
+        currentMemoryPtr = nextFreeMemoryPtr;
+    }
+
+    return numFreeMemoryBlocks;
+}
+
+
+
+U32 GeneralPurposeMemory::CountMemoryBlocks(U8* currentMemoryPtr) const
+{
+    assert(currentMemoryPtr != nullptr);
+
+    const U8* const endOfMemoryPtr = GetEndOfMemory();
+
+    U32 numBlocks = 0;
+    while (currentMemoryPtr != endOfMemoryPtr)
+    {
+        assert(ReadSizeFromMemory(currentMemoryPtr) > 0);
+        assert(currentMemoryPtr < endOfMemoryPtr);
+
+        ++numBlocks;
+        currentMemoryPtr += ReadSizeFromMemory(currentMemoryPtr);
+    }
+
+    return numBlocks;
+}
+
+
+
+U32 GeneralPurposeMemory::CountAllocatedMemoryBlocksPrivate() const
+{
+    return CountMemoryBlocks(GetStartOfMemory()) - CountFreeMemoryBlocksPrivate();
+}
+
+
+
 void GeneralPurposeMemory::FindEnclosingFreeMemoryBlocks(DeallocationData& data) const
 {
+    assert(data.currentMemoryPtr != nullptr);
+
     while (data.nextFreeMemoryPtr != nullptr && data.nextFreeMemoryPtr < data.currentMemoryPtr)
     {
+        assert(data.prevFreeMemoryPtr < data.nextFreeMemoryPtr);
+
         data.prevFreeMemoryPtr = data.nextFreeMemoryPtr;
         data.nextFreeMemoryPtr = ReadLinkToNextFreeBlock(data.nextFreeMemoryPtr);
     }
@@ -197,6 +223,7 @@ void GeneralPurposeMemory::FindFreeMemoryBlock(AllocationData& data) const
 {
     while (data.freeMemorySize < data.totalAllocationSize)
     {
+        assert(data.prevFreeMemoryPtr < data.nextFreeMemoryPtr || data.nextFreeMemoryPtr == nullptr);
         EXCEPTION(data.nextFreeMemoryPtr == nullptr, "No properly sized memory block available.");
 
         // Traverse to next memory block
@@ -209,6 +236,20 @@ void GeneralPurposeMemory::FindFreeMemoryBlock(AllocationData& data) const
 
 
 
+U8* GeneralPurposeMemory::GetEndOfMemory() const
+{
+    return mMemory.get() + mMemorySize;
+}
+
+
+
+U8* GeneralPurposeMemory::GetStartOfMemory() const
+{
+    return mMemory.get();
+}
+
+
+
 bool GeneralPurposeMemory::IsInitialized() const
 {
     return mMemory != nullptr;
@@ -216,40 +257,61 @@ bool GeneralPurposeMemory::IsInitialized() const
 
 
 
-bool GeneralPurposeMemory::IsDeallocatedAddressValid(const GeneralPurposeMemory::DeallocationData& data) const
+bool GeneralPurposeMemory::IsAddressInsideMemory(U8* address) const
 {
-    // restored address is out of bounds
-    if (data.currentMemoryPtr < mMemory.get() || data.currentMemoryPtr > mMemory.get() + mMemorySize)
+    if (address < GetStartOfMemory() || address > GetEndOfMemory())
         return false;
+    return true;
+}
 
 
-    // Traverse free memory blocks
-    U8* currentTraversalPtr = mFirstFreeMemoryPtr;
-    while (currentTraversalPtr != nullptr && currentTraversalPtr < data.currentMemoryPtr)
+
+bool GeneralPurposeMemory::IsAddressStartOfFreeMemoryBlock(U8* address) const
+{
+    assert(address != nullptr);
+
+    U8* currentMemoryPtr = mFirstFreeMemoryPtr;
+    while (currentMemoryPtr != nullptr && currentMemoryPtr < address)
     {
 
-        U8* nextFreeMemoryPtr = ReadLinkToNextFreeBlock(currentTraversalPtr);
-        DEV_EXCEPTION(nextFreeMemoryPtr <= currentTraversalPtr && nextFreeMemoryPtr != nullptr,
-                      "Internal linked list of free memory blocks is not ordered.");
-        currentTraversalPtr = nextFreeMemoryPtr;
+        U8* nextFreeMemoryPtr = ReadLinkToNextFreeBlock(currentMemoryPtr);
+        assert(IsAddressStartOfMemoryBlock(currentMemoryPtr));
+        assert(nextFreeMemoryPtr > currentMemoryPtr || nextFreeMemoryPtr == nullptr);
+
+        currentMemoryPtr = nextFreeMemoryPtr;
     }
     // Block is a free block
-    if (currentTraversalPtr == data.currentMemoryPtr)
-        return false;
+    if (currentMemoryPtr == address)
+        return true;
+    return false;
+}
 
-    // Traverse all blocks
-    currentTraversalPtr = mMemory.get();
-    while (currentTraversalPtr < data.currentMemoryPtr)
+
+
+bool GeneralPurposeMemory::IsAddressStartOfMemoryBlock(U8* address) const
+{
+    assert(address != nullptr);
+
+    U8* currentMemoryPtr = GetStartOfMemory();
+    while (currentMemoryPtr < address)
     {
-        size_t blockSize = ReadSizeFromMemory(currentTraversalPtr);
-        DEV_EXCEPTION(blockSize <= 0, "Read block size <= 0. Internal structure corrupted");
-        currentTraversalPtr += blockSize;
-    }
-    // memory pointer is not a valid memory block
-    if (currentTraversalPtr > data.currentMemoryPtr)
-        return false;
+        size_t blockSize = ReadSizeFromMemory(currentMemoryPtr);
+        assert(blockSize > 0);
 
+        currentMemoryPtr += blockSize;
+    }
+
+    if (currentMemoryPtr > address)
+        return false;
     return true;
+}
+
+
+
+bool GeneralPurposeMemory::IsDeallocatedAddressValid(U8* address) const
+{
+    return IsAddressInsideMemory(address) && !IsAddressStartOfFreeMemoryBlock(address) &&
+           IsAddressStartOfMemoryBlock(address);
 }
 
 
@@ -257,6 +319,7 @@ bool GeneralPurposeMemory::IsDeallocatedAddressValid(const GeneralPurposeMemory:
 void GeneralPurposeMemory::MergeUpdateLinkedListDeallocation(DeallocationData& data)
 {
     size_t freedMemorySize = ReadSizeFromMemory(data.currentMemoryPtr);
+    assert(freedMemorySize > 0);
 
     // Mergeable with previous?
     if (data.prevFreeMemoryPtr != nullptr &&
