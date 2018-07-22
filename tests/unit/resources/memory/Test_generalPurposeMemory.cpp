@@ -701,7 +701,7 @@ BOOST_AUTO_TEST_CASE(Deallocation_Exceptions)
 BOOST_AUTO_TEST_CASE(Alignment)
 {
     constexpr U32 numAllocations = 8;
-    constexpr std::array<U32, numAllocations> alignmentValues{1, 2, 4, 8, 16, 32, 64, 128};
+    constexpr std::array<U32, numAllocations> alignmentValues{{1, 2, 4, 8, 16, 32, 64, 128}};
     constexpr size_t maxHeaderSize = sizeof(size_t) + alignmentValues[numAllocations - 1];
     constexpr size_t totalAllocationSize = 200;
     constexpr size_t allocationSize = totalAllocationSize - maxHeaderSize;
