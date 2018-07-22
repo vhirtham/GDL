@@ -24,7 +24,6 @@ GeneralPurposeMemory::GeneralPurposeMemory(size_t memorySize)
 
 GeneralPurposeMemory::~GeneralPurposeMemory()
 {
-    assert(!IsInitialized());
 }
 
 
@@ -99,7 +98,6 @@ void GeneralPurposeMemory::Deinitialize()
     EXCEPTION(!IsInitialized(), "General purpose memory is already deinitialized.");
     EXCEPTION(CountAllocatedMemoryBlocksPrivate() != 0, "Can't deinitialize. Memory still in use.");
 
-    mMemorySize = 0;
     mFirstFreeMemoryPtr = nullptr;
     mMemory.reset(nullptr);
 }
