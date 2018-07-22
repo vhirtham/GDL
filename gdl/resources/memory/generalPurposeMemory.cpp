@@ -3,9 +3,9 @@
 #include "gdl/base/Exception.h"
 #include "gdl/base/SSESupportFunctions.h"
 #include "gdl/base/functions/isPowerOf2.h"
+#include "gdl/resources/memory/sharedFunctions.h"
 
 #include <cassert>
-#include <cstring>
 #include <iostream>
 
 
@@ -380,15 +380,6 @@ void GeneralPurposeMemory::UpdateLinkedListAllocation(AllocationData& data)
 
 
 
-U8* GeneralPurposeMemory::ReadAddressFromMemory(const U8* positionInMemory) const
-{
-    U8* address = nullptr;
-    std::memcpy(&address, positionInMemory, sizeof(void*));
-    return address;
-}
-
-
-
 U8* GeneralPurposeMemory::ReadLinkToNextFreeBlock(U8* currentFreeBlockPtr) const
 {
     return ReadAddressFromMemory(currentFreeBlockPtr + sizeof(size_t));
@@ -405,31 +396,9 @@ U8* GeneralPurposeMemory::RestoreAllocatedPtr(U8* currentMemoryPtr) const
 
 
 
-size_t GeneralPurposeMemory::ReadSizeFromMemory(const void* positionInMemory) const
-{
-    return *static_cast<const size_t*>(positionInMemory);
-}
-
-
-
 void GeneralPurposeMemory::WriteLinkToNextFreeBlock(U8* currentFreeBlockPtr, const void* nextFreeBlockPtr)
 {
     WriteAddressToMemory(currentFreeBlockPtr + sizeof(size_t), nextFreeBlockPtr);
-}
-
-
-
-void GeneralPurposeMemory::WriteAddressToMemory(U8* positionInMemory, const void* addressToWrite)
-{
-    std::memcpy(positionInMemory, &addressToWrite, sizeof(void*));
-}
-
-
-
-void GeneralPurposeMemory::WriteSizeToMemory(void* positionInMemory, const size_t value)
-{
-    size_t* valuePtr = static_cast<size_t*>(positionInMemory);
-    *valuePtr = value;
 }
 
 
@@ -439,7 +408,7 @@ GeneralPurposeMemory::AllocationData::AllocationData(const GeneralPurposeMemory&
     : currentMemoryPtr{gpm.mFirstFreeMemoryPtr}
     , prevFreeMemoryPtr{nullptr}
     , nextFreeMemoryPtr{gpm.ReadLinkToNextFreeBlock(currentMemoryPtr)}
-    , freeMemorySize{gpm.ReadSizeFromMemory(currentMemoryPtr)}
+    , freeMemorySize{ReadSizeFromMemory(currentMemoryPtr)}
     , totalAllocationSize{allocationSize + alignment + sizeof(size_t)}
 {
 }

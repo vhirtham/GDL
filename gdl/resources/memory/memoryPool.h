@@ -83,19 +83,8 @@ private:
     //! @return Memory size without the extra alignment bytes
     size_t MemorySize() const;
 
-    //! @brief Reads the value of the internal free memory list at the given position and returns the pointer to the
-    //! next element.
-    //! @param addressToRead: Adress where the internal free memory list should be read.
-    //! @return Pointer to next free memory block (nullptr if there is no free memory)
-    U8* ReadListEntry(const U8* addressToRead) const;
-
     //! @brief Returns the memory size including the extra alignment bytes
     //! @return Memory size including the extra alignment bytes
     size_t TotalMemorySize() const;
-
-    //! @brief Writes a new entry to the free memory list
-    //! @param positionInMemory: Position in memory where the value should be written
-    //! @param addressToWrite: Address to next element that should be written to the current position
-    void WriteListEntry(U8* positionInMemory, const void* addressToWrite);
 };
 }

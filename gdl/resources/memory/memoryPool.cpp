@@ -3,6 +3,7 @@
 
 #include "gdl/base/Exception.h"
 #include "gdl/base/functions/isPowerOf2.h"
+#include "gdl/resources/memory/sharedFunctions.h"
 
 #include <cassert>
 #include <cstring>
@@ -45,7 +46,7 @@ void* MemoryPool::Allocate(size_t size)
 
     void* allocatedMemoryPtr = mFirstFreeElement;
 
-    mFirstFreeElement = ReadListEntry(mFirstFreeElement);
+    mFirstFreeElement = ReadAddressFromMemory(mFirstFreeElement);
 
     // no more memory left, so here is no last free either
     if (mFirstFreeElement == nullptr)
@@ -66,12 +67,12 @@ void MemoryPool::Deallocate(void* address)
 #endif
 
     if (mLastFreeElement != nullptr)
-        WriteListEntry(mLastFreeElement, address);
+        WriteAddressToMemory(mLastFreeElement, address);
     else
         mFirstFreeElement = static_cast<U8*>(address);
 
     mLastFreeElement = static_cast<U8*>(address);
-    WriteListEntry(mLastFreeElement, nullptr);
+    WriteAddressToMemory(mLastFreeElement, nullptr);
     ++mNumFreeElements;
 }
 
@@ -138,7 +139,7 @@ void MemoryPool::CheckDeallocation(void* address) const
     while (currentPosition != nullptr)
     {
         DEBUG_EXCEPTION(static_cast<U8*>(address) == currentPosition, "Memory block already freed.");
-        currentPosition = ReadListEntry(currentPosition);
+        currentPosition = ReadAddressFromMemory(currentPosition);
     }
 #endif
 }
@@ -154,7 +155,7 @@ void MemoryPool::CheckMemoryConsistencyLockFree() const
 
     while (currentPosition != nullptr)
     {
-        currentPosition = ReadListEntry(currentPosition);
+        currentPosition = ReadAddressFromMemory(currentPosition);
         ++freeElementsCount;
         EXCEPTION(freeElementsCount > mNumFreeElements, "Found more free elements than expected. Check for loops in "
                                                         "the list of free elements or if the free memory counter is "
@@ -207,13 +208,6 @@ void MemoryPool::Deinitialize()
 
 
 
-U8* MemoryPool::ReadListEntry(const U8* addressToRead) const
-{
-    U8* entry = nullptr;
-    std::memcpy(&entry, addressToRead, sizeof(void*));
-    return entry;
-}
-
 void MemoryPool::InitializeFreeMemoryList()
 {
     mFirstFreeElement = mMemoryStart;
@@ -224,18 +218,11 @@ void MemoryPool::InitializeFreeMemoryList()
     for (U32 i = 0; i < mNumElements - 1; ++i)
     {
         void* nextAddressPtr = static_cast<void*>(currentPosition + mElementSize);
-        WriteListEntry(currentPosition, nextAddressPtr);
+        WriteAddressToMemory(currentPosition, nextAddressPtr);
         currentPosition += mElementSize;
     }
 
     mLastFreeElement = currentPosition;
-    WriteListEntry(mLastFreeElement, nullptr);
-}
-
-
-
-void MemoryPool::WriteListEntry(U8* positionInMemory, const void* addressToWrite)
-{
-    std::memcpy(positionInMemory, &addressToWrite, sizeof(void*));
+    WriteAddressToMemory(mLastFreeElement, nullptr);
 }
 }
