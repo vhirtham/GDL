@@ -9,6 +9,8 @@
 namespace GDL
 {
 
+//! @brief Class which manages a piece of memory. It is capable of returning meory blocks of arbitrary size and
+//! alignment. For implementation details visit: https://github.com/vhirtham/GDL/issues/4
 class GeneralPurposeMemory
 {
     //! @brief Stores all data which is needed during allocation
@@ -82,26 +84,41 @@ public:
     void Initialize();
 
 private:
+    //! @brief Increases a size_t value written in memory at the passed position.
+    //! @param positionInMemory: Position in memory where the value is located
+    //! @param value: Value that should be added
     void AddToWrittenSize(void* positionInMemory, const size_t value);
 
+    //! @brief Aligns the passed address, writes the correction value to the preceding byte and returns the aligned
+    //! address
+    //! @param currentMemoryPtr: Address that should be aligned
+    //! @param alignment: Alignment value
+    //! @return Aligned address
     void* AlignAllocatedMemory(U8* currentMemoryPtr, size_t alignment);
 
     //! @brief Checks if the general purpose memory is constructed with valid parameters. Throws if not.
     void CheckConstructionParameters() const;
 
-
-    U32 CountMemoryBlocks(U8* currentMemoryPtr) const;
+    //! Counts the total number of memory blocks (allocated and free ones)
+    //! @return Number of memory blocks
+    U32 CountMemoryBlocks() const;
 
     //! @brief Counts and returns the number of allocated memory blocks
     //! @return Number of allocated memory blocks
     U32 CountAllocatedMemoryBlocksPrivate() const;
 
+    //! Counts the number of free memory blocks
+    //! @return Number of free memory blocks
     U32 CountFreeMemoryBlocksPrivate() const;
 
+    //! @brief Finds the addresses of the free memory blocks which enclose the address that should be freed. The passed
+    //! data is modified to store the results.
+    //! @param data: Deallocation data which will be modified by the function
     void FindEnclosingFreeMemoryBlocks(DeallocationData& data) const;
 
+    //! @brief Finds a free memory block for the current allocation. The passed data is modified to store the results.
+    //! @param data: Allocation data which will be modified by the function
     void FindFreeMemoryBlock(AllocationData& data) const;
-
 
     //! @brief Returns a pointer to the end of the managed memory
     //! @return Pointer to the end of the managed memory
@@ -119,12 +136,20 @@ private:
     //! @return TRUE / FALSE
     bool IsInitialized() const;
 
+    //! @brief Returns if the passed address is inside the boundaries of the menaged memory
+    //! @param: address: Address that should be checked
+    //! @return TRUE / FALSE
     inline bool IsAddressInsideMemory(U8* address) const;
 
+    //! @brief Checks if the passed address points to a valid free memory block
+    //! @param: address: Address that should be checked
+    //! @return TRUE / FALSE
     bool IsAddressStartOfFreeMemoryBlock(U8* address) const;
 
+    //! @brief Checks if the passed address points to a valid memory block
+    //! @param: address: Address that should be checked
+    //! @return TRUE / FALSE
     bool IsAddressStartOfMemoryBlock(U8* address) const;
-
 
     //! @brief Checks if the deallocated address is a valid allocated memory block.
     //! @return True / false
@@ -133,10 +158,17 @@ private:
     //! of the address is a valid alignment value and will correct the pointer to a valid allocated memory block.
     bool IsDeallocatedAddressValid(U8* address) const;
 
+    //! @brief Updates the internal linked list during deallocation
+    //! @param data: Deallocation data
     void MergeUpdateLinkedListDeallocation(DeallocationData& data);
 
+    //! Reads the alignment byte and restores the start of the allocated memory block
+    //! @param currentMemoryPtr: Pointer which was returned during allocation
+    //! @return Pointer to the start of the allocated memory block
     U8* RestoreAllocatedPtr(U8* currentMemoryPtr) const;
 
+    //! @brief Updates the internal linked list during allocation
+    //! @param data: Allocation data
     void UpdateLinkedListAllocation(AllocationData& data);
 
     //! @brief Reads an address at the given position in memory and returns a pointer to that address
@@ -144,15 +176,19 @@ private:
     //! @return Pointer to read address
     inline U8* ReadAddressFromMemory(const U8* positionInMemory) const;
 
+    //! @brief Returns the address of the next free memory block
+    //! @param currentFreeBlockPtr: Pointer to a free memory block
+    //! @return Address of the next free memory block
     inline U8* ReadLinkToNextFreeBlock(U8* currentFreeBlockPtr) const;
-
 
     //! @brief Reads a value of size_t at the given position in memory and returns it
     //! @param positionInMemory: Position in memory where the value should be read.
     //! @return Read value
     inline size_t ReadSizeFromMemory(const void* positionInMemory) const;
 
-
+    //! @brief Writes the address of the next free memory block to memory
+    //! @param currentFreeBlockPtr: Pointer to a free memory block
+    //! @param nextFreeBlockPtr: Address of the next free memory block
     inline void WriteLinkToNextFreeBlock(U8* currentFreeBlockPtr, const void* nextFreeBlockPtr);
 
     //! @brief Writes a pointer address into the memory at the passed position. This is used to traverse between all

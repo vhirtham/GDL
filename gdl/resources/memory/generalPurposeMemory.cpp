@@ -176,9 +176,9 @@ U32 GeneralPurposeMemory::CountFreeMemoryBlocksPrivate() const
 
 
 
-U32 GeneralPurposeMemory::CountMemoryBlocks(U8* currentMemoryPtr) const
+U32 GeneralPurposeMemory::CountMemoryBlocks() const
 {
-    assert(currentMemoryPtr != nullptr);
+    U8* currentMemoryPtr = GetStartOfMemory();
 
     const U8* const endOfMemoryPtr = GetEndOfMemory();
 
@@ -199,7 +199,7 @@ U32 GeneralPurposeMemory::CountMemoryBlocks(U8* currentMemoryPtr) const
 
 U32 GeneralPurposeMemory::CountAllocatedMemoryBlocksPrivate() const
 {
-    return CountMemoryBlocks(GetStartOfMemory()) - CountFreeMemoryBlocksPrivate();
+    return CountMemoryBlocks() - CountFreeMemoryBlocksPrivate();
 }
 
 
