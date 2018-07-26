@@ -252,6 +252,9 @@ BOOST_AUTO_TEST_CASE(Thread_Safety)
                 {
                     for (U32 k = 0; k < numThreadAllocs; ++k)
                         addresses[k] = mp.Allocate(elementSize);
+
+                    mp.CheckMemoryConsistency();
+
                     for (U32 k = 0; k < numThreadAllocs; ++k)
                     {
                         mp.Deallocate(addresses[k]);

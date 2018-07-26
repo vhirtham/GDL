@@ -6,8 +6,9 @@
 #include "gdl/resources/memory/generalPurposeMemory.h"
 
 #include <array>
+#include <atomic>
+#include <thread>
 
-#include <iostream>
 
 using namespace GDL;
 
@@ -755,6 +756,79 @@ BOOST_AUTO_TEST_CASE(Multiple_Initialization)
     }
 }
 
+
+//! @brief Checks if the public functions of the general purpose memory are thread safe
+//! @remark Initialize and deinitialize are not tested, since I didn't find a good test
 BOOST_AUTO_TEST_CASE(Thread_Safety)
 {
+    constexpr U32 numThreadAllocations = 10;
+    constexpr U32 numAllocationRuns = 10;
+    constexpr U32 numThreads = 4;
+    constexpr size_t alignment = 1;
+    constexpr size_t headerSize = sizeof(size_t) + alignment;
+    constexpr size_t totalAllocationSize = 20;
+    constexpr size_t allocationSize = totalAllocationSize - headerSize;
+    constexpr size_t doubleAllocationSize = totalAllocationSize * 2 - headerSize;
+    constexpr size_t tripleAllocationSize = totalAllocationSize * 3 - headerSize;
+    constexpr size_t memorySize =
+            numThreads * numThreadAllocations * (tripleAllocationSize)*2; // *2 As a safety factor agains fragmentation
+
+    std::atomic_bool kickoff = false;
+    std::atomic_bool exceptionThrown = false;
+
+    GeneralPurposeMemory gpm{memorySize};
+    gpm.Initialize();
+
+
+    std::vector<std::thread> threads;
+    for (U32 i = 0; i < numThreads; ++i)
+        threads.emplace_back([&]() {
+            try
+            {
+                std::array<void*, numThreadAllocations> addresses;
+                addresses.fill(nullptr);
+                while (!kickoff)
+                    std::this_thread::yield();
+                for (U32 j = 0; j < numAllocationRuns; ++j)
+                {
+
+                    for (U32 k = 0; k < numThreadAllocations; ++k)
+                        switch (k % 3)
+                        {
+                        case 0:
+                            addresses[k] = gpm.Allocate(allocationSize);
+                            break;
+                        case 1:
+                            addresses[k] = gpm.Allocate(doubleAllocationSize);
+                            break;
+                        case 2:
+                            addresses[k] = gpm.Allocate(tripleAllocationSize);
+                            break;
+                        }
+
+                    gpm.CountAllocatedMemoryBlocks();
+                    gpm.CountFreeMemoryBlocks();
+
+                    for (U32 k = 0; k < numThreadAllocations; ++k)
+                    {
+                        gpm.Deallocate(addresses[k]);
+                        addresses[k] = nullptr;
+                    }
+                }
+            }
+            catch (...)
+            {
+
+                exceptionThrown = true;
+            }
+        });
+
+    kickoff = true;
+
+    for (U32 i = 0; i < threads.size(); ++i)
+        threads[i].join();
+
+
+    BOOST_CHECK(exceptionThrown == false);
+    BOOST_CHECK_NO_THROW(gpm.Deinitialize());
 }
