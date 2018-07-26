@@ -1,9 +1,6 @@
 addTest(Allocator)
 
 
-addTest(allocators
-    resources/memory/memoryManager.cpp
-    )
 addTest(globalNewCounter)
 
 addTest(generalPurposeMemory
@@ -14,4 +11,9 @@ addTest(memoryPool
     )
 addTest(memoryStack
     resources/memory/memoryStack.cpp
+    )
+
+addTest(memoryManager
+    resources/memory/generalPurposeMemory.cpp
+    resources/memory/memoryManager.cpp
     )

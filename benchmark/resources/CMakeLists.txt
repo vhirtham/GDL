@@ -1,5 +1,5 @@
 addBenchmark(allocators
-    resources/memory/memoryManager.cpp
+    resources/memory/memoryManager_old.cpp
     )
 
 addBenchmark(threadPool
