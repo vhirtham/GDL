@@ -8,6 +8,15 @@
 namespace GDL
 {
 
+enum class EMemoryModel
+{
+    GENERAL_PURPOSE,
+    POOL,
+    STACK,
+    STD
+};
+
+
 class MemoryManager
 {
     std::unique_ptr<GeneralPurposeMemory> mGeneralPurposeMemory;
@@ -29,6 +38,8 @@ public:
     void Deinitialize();
 
     void Initialize();
+
+    GeneralPurposeMemory& GetGeneralPurposeMemory();
 
     void CreateGeneralPurposeMemory(size_t memorySize);
 };

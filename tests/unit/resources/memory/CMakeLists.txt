@@ -17,3 +17,8 @@ addTest(memoryManager
     resources/memory/generalPurposeMemory.cpp
     resources/memory/memoryManager.cpp
     )
+
+addTest(allocator
+    resources/memory/generalPurposeMemory.cpp
+    resources/memory/memoryManager.cpp
+    )
