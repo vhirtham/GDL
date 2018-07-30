@@ -2,6 +2,7 @@
 
 
 #include "gdl/GDLTypedefs.h"
+#include "gdl/resources/memory/memoryInterface.h"
 
 #include <memory>
 #include <mutex>
@@ -11,7 +12,7 @@ namespace GDL
 
 //! @brief Class which manages a piece of memory. It is capable of returning meory blocks of arbitrary size and
 //! alignment. For implementation details visit: https://github.com/vhirtham/GDL/issues/4
-class GeneralPurposeMemory
+class GeneralPurposeMemory : public MemoryInterface
 {
     //! @brief Stores all data which is needed during allocation
     struct AllocationData
@@ -63,7 +64,7 @@ public:
     //! @param size: Size of the memory that should be allocated
     //! @param alignment: Memory alignment
     //! @return Pointer to memory
-    void* Allocate(size_t size, size_t alignment = 1);
+    virtual void* Allocate(size_t size, size_t alignment = 1) override;
 
     //! @brief Counts and returns the number of allocated memory blocks
     //! @return Number of allocated memory blocks
@@ -75,7 +76,7 @@ public:
 
     //! @brief Deallocates memory at the passed address
     //! @param address: Adress that should be freed
-    void Deallocate(void* address);
+    virtual void Deallocate(void* address) override;
 
     //! @brief Deinitializes the general purpose memory
     void Deinitialize();
