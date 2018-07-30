@@ -32,7 +32,6 @@ void MemoryManager::Deinitialize()
 
 GeneralPurposeMemory& GDL::MemoryManager::GetGeneralPurposeMemory()
 {
-    EXCEPTION(mGeneralPurposeMemory == nullptr, "No general purpose memory added to memory manager.");
     return *mGeneralPurposeMemory;
 }
 

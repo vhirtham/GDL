@@ -5,30 +5,36 @@
 namespace GDL
 {
 
-template<class _type>
+template <class _type>
 GeneralPurposeAllocator<_type>::GeneralPurposeAllocator() noexcept
 {
 }
 
-template<class _type>
-template<class _typeOther>
+template <class _type>
+template <class _typeOther>
 GeneralPurposeAllocator<_type>::GeneralPurposeAllocator(const GeneralPurposeAllocator<_typeOther>&) noexcept
 {
 }
 
 
-template<class _type>
+template <class _type>
 _type* GeneralPurposeAllocator<_type>::allocate(std::size_t n)
 {
-    static GeneralPurposeMemory& memory = MemoryManager::Instance().GetGeneralPurposeMemory();
-    return static_cast<_type*>(memory.Allocate(n * sizeof(_type), alignof(_type)));
+    static GeneralPurposeMemory* memory = &MemoryManager::Instance().GetGeneralPurposeMemory();
+    if (memory == nullptr)
+        return std::allocator<_type>().allocate(n);
+
+    return static_cast<_type*>(memory->Allocate(n * sizeof(_type), alignof(_type)));
 }
 
-template<class _type>
-void GeneralPurposeAllocator<_type>::deallocate(_type *p, std::size_t n)
+template <class _type>
+void GeneralPurposeAllocator<_type>::deallocate(_type* p, std::size_t n)
 {
-    static GeneralPurposeMemory& memory = MemoryManager::Instance().GetGeneralPurposeMemory();
-    memory.Deallocate(p);
+    static GeneralPurposeMemory* memory = &MemoryManager::Instance().GetGeneralPurposeMemory();
+    if (memory == nullptr)
+        std::allocator<_type>().deallocate(p, n);
+    else
+        memory->Deallocate(p);
 }
 
 
