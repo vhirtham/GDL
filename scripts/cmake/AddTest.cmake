@@ -3,6 +3,7 @@ This function does all the necessary steps to set up a unit test
 #]==]
 
 function(addTest TestName)
+    set(TestNameWithoutPrefix ${TestName})
     ### Add prefix "Test_" to avoid target naming conflicts (for example with benchmarks or other GDL targets)
     set(TestName "Test_${TestName}")
 
@@ -45,6 +46,6 @@ function(addTest TestName)
         relpath ${CMAKE_CURRENT_SOURCE_DIR})
     string(REPLACE "/" "::"
         TestPrefix ${relpath})
-    add_test("${TestPrefix}::${TestName}" ${TestName})
+    add_test("${TestPrefix}::${TestNameWithoutPrefix}" ${TestName})
 
 endfunction()
