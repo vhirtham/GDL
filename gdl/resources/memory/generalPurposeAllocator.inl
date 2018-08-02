@@ -2,6 +2,7 @@
 
 #include "gdl/resources/memory/generalPurposeAllocator.h"
 
+
 namespace GDL
 {
 
@@ -20,17 +21,16 @@ GeneralPurposeAllocator<_type>::GeneralPurposeAllocator(const GeneralPurposeAllo
 template <class _type>
 _type* GeneralPurposeAllocator<_type>::allocate(std::size_t n)
 {
-    static GeneralPurposeMemory* memory = &MemoryManager::Instance().GetGeneralPurposeMemory();
+    static MemoryInterface* memory = MemoryManager::Instance().GetGeneralPurposeMemory();
     if (memory == nullptr)
         return std::allocator<_type>().allocate(n);
-
     return static_cast<_type*>(memory->Allocate(n * sizeof(_type), alignof(_type)));
 }
 
 template <class _type>
 void GeneralPurposeAllocator<_type>::deallocate(_type* p, std::size_t n)
 {
-    static GeneralPurposeMemory* memory = &MemoryManager::Instance().GetGeneralPurposeMemory();
+    static MemoryInterface* memory = MemoryManager::Instance().GetGeneralPurposeMemory();
     if (memory == nullptr)
         std::allocator<_type>().deallocate(p, n);
     else

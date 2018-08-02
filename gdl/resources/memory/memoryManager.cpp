@@ -30,14 +30,21 @@ void MemoryManager::Deinitialize()
         mGeneralPurposeMemory->Deinitialize();
 }
 
-GeneralPurposeMemory& GDL::MemoryManager::GetGeneralPurposeMemory()
+MemoryInterface* GDL::MemoryManager::GetGeneralPurposeMemory() const
 {
-    return *mGeneralPurposeMemory;
+    return mGeneralPurposeMemory.get();
 }
 
 void MemoryManager::CreateGeneralPurposeMemory(size_t memorySize)
 {
     DEV_EXCEPTION(mGeneralPurposeMemory != nullptr, "Genaral purpose memory already created");
     mGeneralPurposeMemory.reset(new GeneralPurposeMemory{memorySize});
+}
+
+bool MemoryManager::IsInitialized()
+{
+    //    bool generalPurposeMemoryDeinitialized = true;
+    //    if(mGeneralPurposeMemory!=nullptr)
+    //        generalPurposeMemoryDeinitialized = mGeneralPurposeMemory.
 }
 }

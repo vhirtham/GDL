@@ -6,10 +6,31 @@
 using namespace GDL;
 
 
+//! @brief Adds memory systems to the memory manager
+//! @return Memory manager
+MemoryManager& SetupMemoryManager()
+{
+    MemoryManager& memoryManager = MemoryManager::Instance();
+#ifndef NO_GENERAL_PURPOSE_MEMORY
+    memoryManager.CreateGeneralPurposeMemory(1024 * 1024);
+#endif
+    return memoryManager;
+}
+
+
+//! @brief Helper function which gets the memory menager and ensures it is only set up once
+//! @return Memory manager
+MemoryManager& GetMemoryManager()
+{
+    static MemoryManager& memoryManager = SetupMemoryManager();
+    return memoryManager;
+}
+
+
 BOOST_AUTO_TEST_CASE(Initialize_Deinitialize)
 {
-    MemoryManager& mM = MemoryManager::Instance();
-    mM.CreateGeneralPurposeMemory(1000);
-    mM.Initialize();
-    mM.Deinitialize();
+    MemoryManager& memoryManager = GetMemoryManager();
+
+    memoryManager.Initialize();
+    memoryManager.Deinitialize();
 }

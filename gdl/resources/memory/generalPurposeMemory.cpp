@@ -6,7 +6,6 @@
 #include "gdl/resources/memory/sharedFunctions.h"
 
 #include <cassert>
-#include <iostream>
 
 
 namespace GDL
