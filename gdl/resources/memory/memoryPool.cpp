@@ -5,7 +5,6 @@
 #include "gdl/base/functions/isPowerOf2.h"
 #include "gdl/resources/memory/sharedFunctions.h"
 
-#include <cassert>
 #include <cstring>
 
 
@@ -30,9 +29,6 @@ MemoryPool::MemoryPool(size_t elementSize, U32 numElements, size_t alignment)
 
 MemoryPool::~MemoryPool()
 {
-    std::lock_guard<std::mutex> lock(mMutex);
-    assert(IsInitialized() == false &&
-           "Deinitialize the memory pool before destruction - If you did, there might have been an exception");
 }
 
 

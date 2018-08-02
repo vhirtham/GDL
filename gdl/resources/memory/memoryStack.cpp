@@ -5,8 +5,6 @@
 #include "gdl/base/functions/isPowerOf2.h"
 #include "gdl/base/SSESupportFunctions.h"
 
-#include <cassert>
-
 
 namespace GDL
 {
@@ -35,8 +33,6 @@ memoryStackTemplate<false>::memoryStackTemplate(size_t memorySize)
 template <bool _ThreadPrivate>
 memoryStackTemplate<_ThreadPrivate>::~memoryStackTemplate()
 {
-    assert(IsInitialized() == false && "Deinitialize the thread private memory stack before destruction - If you did, "
-                                       "there might have been an exception");
 }
 
 
