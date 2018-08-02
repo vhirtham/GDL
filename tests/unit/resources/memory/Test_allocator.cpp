@@ -2,8 +2,9 @@
 
 #include "gdl/GDLTypedefs.h"
 #include "gdl/resources/memory/generalPurposeAllocator.h"
-#include "gdl/resources/memory/memoryManager.h"
 
+
+#include "memoryManagerSetup.h"
 
 #include <iostream>
 #include <vector>
@@ -26,8 +27,7 @@ using namespace GDL;
 
 BOOST_AUTO_TEST_CASE(Vector)
 {
-    auto& mM = MemoryManager::Instance();
-    mM.CreateGeneralPurposeMemory(4096);
+    auto& mM = GetMemoryManager();
     mM.Initialize();
 
     std::vector<F32, GeneralPurposeAllocator<F32>> vec;
