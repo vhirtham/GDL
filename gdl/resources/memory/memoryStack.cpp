@@ -47,7 +47,7 @@ void* memoryStackTemplate<true>::Allocate(size_t size, size_t alignment)
     DEV_EXCEPTION(mMutexOrThreadId != std::this_thread::get_id(),
                   "Thread private memory stack can only be accessed by owning thread");
 
-    return AllocateInternal(size, alignment);
+    return AllocatePrivate(size, alignment);
 }
 
 
@@ -56,7 +56,7 @@ template <>
 void* memoryStackTemplate<false>::Allocate(size_t size, size_t alignment)
 {
     std::lock_guard<std::mutex> lock(mMutexOrThreadId);
-    return AllocateInternal(size, alignment);
+    return AllocatePrivate(size, alignment);
 }
 
 
@@ -67,7 +67,7 @@ void memoryStackTemplate<true>::Deallocate(void* address)
     DEV_EXCEPTION(mMutexOrThreadId != std::this_thread::get_id(),
                   "Thread private memory stack can only be accessed by owning thread");
 
-    DeallocateInternal(address);
+    DeallocatePrivate(address);
 }
 
 
@@ -76,7 +76,7 @@ template <>
 void memoryStackTemplate<false>::Deallocate(void* address)
 {
     std::lock_guard<std::mutex> lock(mMutexOrThreadId);
-    DeallocateInternal(address);
+    DeallocatePrivate(address);
 }
 
 
@@ -87,7 +87,7 @@ void memoryStackTemplate<true>::Deinitialize()
     EXCEPTION(mMutexOrThreadId != std::this_thread::get_id(),
               "Thread private memory stack can only be accessed by owning thread");
 
-    DeinitializeInternal();
+    DeinitializePrivate();
 }
 
 
@@ -96,7 +96,7 @@ template <>
 void memoryStackTemplate<false>::Deinitialize()
 {
     std::lock_guard<std::mutex> lock(mMutexOrThreadId);
-    DeinitializeInternal();
+    DeinitializePrivate();
 }
 
 
@@ -107,7 +107,7 @@ void memoryStackTemplate<true>::Initialize()
     EXCEPTION(mMutexOrThreadId != std::this_thread::get_id(),
               "Thread private memory stack can only be accessed by owning thread");
 
-    InitializeInternal();
+    InitializePrivate();
 }
 
 
@@ -116,12 +116,12 @@ template <>
 void memoryStackTemplate<false>::Initialize()
 {
     std::lock_guard<std::mutex> lock(mMutexOrThreadId);
-    InitializeInternal();
+    InitializePrivate();
 }
 
 
 template <bool _ThreadPrivate>
-void* memoryStackTemplate<_ThreadPrivate>::AllocateInternal(size_t size, size_t alignment)
+void* memoryStackTemplate<_ThreadPrivate>::AllocatePrivate(size_t size, size_t alignment)
 {
     size_t misalignment = Misalignment(mCurrentMemoryPtr, alignment);
     size_t correction = ((misalignment + alignment - 1) / alignment) * alignment - misalignment;
@@ -141,7 +141,7 @@ void* memoryStackTemplate<_ThreadPrivate>::AllocateInternal(size_t size, size_t 
 }
 
 template <bool _ThreadPrivate>
-void memoryStackTemplate<_ThreadPrivate>::DeallocateInternal(void* address)
+void memoryStackTemplate<_ThreadPrivate>::DeallocatePrivate(void* address)
 {
     DEV_EXCEPTION(address == nullptr, "Can't free a nullptr");
     DEV_EXCEPTION(static_cast<U8*>(address) < mMemory.get() || static_cast<U8*>(address) > mMemory.get() + mMemorySize,
@@ -154,7 +154,7 @@ void memoryStackTemplate<_ThreadPrivate>::DeallocateInternal(void* address)
 }
 
 template <bool _ThreadPrivate>
-void memoryStackTemplate<_ThreadPrivate>::DeinitializeInternal()
+void memoryStackTemplate<_ThreadPrivate>::DeinitializePrivate()
 {
 
     EXCEPTION(IsInitialized() == false, "Memory pool already deinitialized.");
@@ -165,7 +165,7 @@ void memoryStackTemplate<_ThreadPrivate>::DeinitializeInternal()
 }
 
 template <bool _ThreadPrivate>
-void memoryStackTemplate<_ThreadPrivate>::InitializeInternal()
+void memoryStackTemplate<_ThreadPrivate>::InitializePrivate()
 {
     EXCEPTION(IsInitialized(), "Memory stack is already initialized");
 

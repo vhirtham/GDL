@@ -81,7 +81,7 @@ void MemoryPool::Deallocate(void* address)
 void MemoryPool::CheckMemoryConsistency() const
 {
     std::lock_guard<std::mutex> lock(mMutex);
-    CheckMemoryConsistencyLockFree();
+    CheckMemoryConsistencyPrivate();
 }
 
 
@@ -146,7 +146,7 @@ void MemoryPool::CheckDeallocation(void* address) const
 
 
 
-void MemoryPool::CheckMemoryConsistencyLockFree() const
+void MemoryPool::CheckMemoryConsistencyPrivate() const
 {
     EXCEPTION(IsInitialized() == false, "Memory pool not initialized");
 
@@ -197,7 +197,7 @@ void MemoryPool::Deinitialize()
     EXCEPTION(IsInitialized() == false, "Memory pool already deinitialized.");
     EXCEPTION(mNumElements != mNumFreeElements, "Can't deinitialize. Memory still in use.");
 
-    CheckMemoryConsistencyLockFree();
+    CheckMemoryConsistencyPrivate();
 
     // reset internal variables and free memory
     mMemoryStart = nullptr;

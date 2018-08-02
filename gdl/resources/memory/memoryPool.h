@@ -70,7 +70,7 @@ private:
     //! @brief Checks the internal consistency of the memory pool
     //! @remark In contrast to the public CheckConsistency, this version does not aquire a lock. This way it can be used
     //! in functions that already aquiered a lock without introducing any further locking complexity.
-    void CheckMemoryConsistencyLockFree() const;
+    void CheckMemoryConsistencyPrivate() const;
 
     //! @brief Returns if the memory pool is initialized
     //! @return TRUE / FALSE

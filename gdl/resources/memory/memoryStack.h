@@ -61,20 +61,20 @@ private:
     //! @param size: Size of the memory that should be allocated
     //! @return Pointer to memory
     //! @param alignment: Memory alignment
-    void* AllocateInternal(size_t size, size_t alignment);
+    void* AllocatePrivate(size_t size, size_t alignment);
 
     //! @brief Checks if the memory stack is constructed with valid parameters. Throws if not.
     void CheckConstructionParameters() const;
 
     //! @brief Class internal function which does the deallocation
     //! @param address: Adress that should be freed
-    void DeallocateInternal(void* address);
+    void DeallocatePrivate(void* address);
 
     //! @brief Class internal function that deinitializes the memory stack
-    void DeinitializeInternal();
+    void DeinitializePrivate();
 
     //! @brief Class internal function that initializes the memory stack
-    void InitializeInternal();
+    void InitializePrivate();
 
     //! @brief Returns if the memory stack is initialized
     //! @return TRUE / FALSE
