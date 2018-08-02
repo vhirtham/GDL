@@ -23,7 +23,10 @@ _type* GeneralPurposeAllocator<_type>::allocate(std::size_t n)
 {
     static MemoryInterface* memory = MemoryManager::Instance().GetGeneralPurposeMemory();
     if (memory == nullptr)
-        return std::allocator<_type>().allocate(n);
+    {
+        static std::allocator<_type> stdAlloc;
+        return stdAlloc.allocate(n);
+    }
     return static_cast<_type*>(memory->Allocate(n * sizeof(_type), alignof(_type)));
 }
 
@@ -32,7 +35,10 @@ void GeneralPurposeAllocator<_type>::deallocate(_type* p, std::size_t n)
 {
     static MemoryInterface* memory = MemoryManager::Instance().GetGeneralPurposeMemory();
     if (memory == nullptr)
-        std::allocator<_type>().deallocate(p, n);
+    {
+        static std::allocator<_type> stdAlloc;
+        stdAlloc.deallocate(p, n);
+    }
     else
         memory->Deallocate(p);
 }

@@ -2,18 +2,22 @@
 
 #include "gdl/resources/memory/generalPurposeMemory.h"
 
-
 #include <atomic>
 #include <memory>
+#include <mutex>
 
 namespace GDL
 {
 
 class MemoryManager
 {
-    std::atomic_bool mNewUsed = false;
-
+    std::atomic_bool mInitialized;
+    mutable std::mutex mMutex;
+    mutable bool mSetupFinished;
+    mutable bool mMemoryRequestedUninitialized;
     std::unique_ptr<GeneralPurposeMemory> mGeneralPurposeMemory;
+
+
 
     //! @brief Private ctor since this class should only be used as a singleton
     MemoryManager();
@@ -24,6 +28,8 @@ public:
     MemoryManager& operator=(const MemoryManager&) = delete;
     MemoryManager& operator=(MemoryManager&&) = delete;
     ~MemoryManager() = default;
+
+
 
     //! @brief Gets the memory manager instance
     //! @return Memory manager Instance
@@ -43,8 +49,5 @@ public:
     //! @brief Creates a general purpose memory
     //! @param memorySize: Size of the general purpose memory
     void CreateGeneralPurposeMemory(size_t memorySize);
-
-private:
-    bool IsInitialized();
 };
 }
