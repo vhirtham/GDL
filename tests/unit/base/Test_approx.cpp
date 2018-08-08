@@ -60,8 +60,8 @@ void TestApproxZero()
             BOOST_CHECK(scaledEps * (scale + 1) != ApproxZero<_type>(base, scale));
         }
 
-        GDL_CHECK_THROW_DEV(ApproxZero<_type>(0, 1), Exception);
-        GDL_CHECK_THROW_DEV(ApproxZero<_type>(1, 0), Exception);
+        GDL_CHECK_THROW_DEV_DISABLE(ApproxZero<_type>(0, 1), Exception);
+        GDL_CHECK_THROW_DEV_DISABLE(ApproxZero<_type>(1, 0), Exception);
     }
 
 

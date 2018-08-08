@@ -1,5 +1,3 @@
-addTest(Allocator)
-
 
 addTest(globalNewCounter)
 
