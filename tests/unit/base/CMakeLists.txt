@@ -1,3 +1,4 @@
+addTest(approx)
 addTest(freeFunctions)
-addTest(timer)
 addTest(outputFile)
+addTest(timer)

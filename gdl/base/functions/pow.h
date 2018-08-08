@@ -13,7 +13,7 @@ namespace GDL
 //! @tparam _type: Type of the base
 //! @return 1;
 //! @remark: std::integral_constant is used for recursive function overloading
-template <class _type>
+template <typename _type>
 inline constexpr _type Pow(const _type, std::integral_constant<U32, 0>)
 {
     return 1;
@@ -24,7 +24,7 @@ inline constexpr _type Pow(const _type, std::integral_constant<U32, 0>)
 //! @param base: Base
 //! @return Base;
 //! @remark: std::integral_constant is used for recursive function overloading
-template <class _type>
+template <typename _type>
 inline constexpr _type Pow(const _type base, std::integral_constant<U32, 1>)
 {
     return base;
@@ -36,7 +36,7 @@ inline constexpr _type Pow(const _type base, std::integral_constant<U32, 1>)
 //! @param base: Base
 //! @return Power of the passed value;
 //! @remark: std::integral_constant is used for recursive function overloading
-template <class _type, U32 _exponent>
+template <typename _type, U32 _exponent>
 inline constexpr _type Pow(const _type base, std::integral_constant<U32, _exponent>)
 {
     return Pow(base, std::integral_constant<U32, _exponent - 1>()) * base;
@@ -48,7 +48,7 @@ inline constexpr _type Pow(const _type base, std::integral_constant<U32, _expone
 //! @tparam _type: Type of the base
 //! @param base: Base
 //! @return Power of the passed value;
-template <U32 _exponent, class _type>
+template <U32 _exponent, typename _type>
 inline constexpr _type Pow(const _type base)
 {
     return Pow(base, std::integral_constant<U32, _exponent>());
@@ -60,7 +60,7 @@ inline constexpr _type Pow(const _type base)
 //! @param base: Base
 //! @param exponent: Exponent
 //! @return Power of the passed value;
-template<class _type>
+template<typename _type>
 inline constexpr _type Pow(const _type base, const U32 exponent)
 {
     return (exponent == 0) ? 1 : (exponent == 1) ? base : (base * Pow(base, exponent-1));
@@ -71,7 +71,7 @@ inline constexpr _type Pow(const _type base, const U32 exponent)
 //! @tparam _type: Type of the base
 //! @param base: Value which should be squared
 //! @return Squared value;
-template <class _type>
+template <typename _type>
 inline constexpr _type Square(const _type base)
 {
     return Pow<2>(base);
@@ -79,7 +79,7 @@ inline constexpr _type Square(const _type base)
 
 // Alternative Implementation 2 -------------------------------------------------------------------
 
-//template <class _type, U32 _exponent>
+//template <typename _type, U32 _exponent>
 //struct Power
 //{
 //    static constexpr _type Pow(const _type base)
@@ -88,7 +88,7 @@ inline constexpr _type Square(const _type base)
 //    }
 //};
 
-//template <class _type>
+//template <typename _type>
 //struct Power<_type, 1>
 //{
 //    static constexpr _type Pow(const _type base)
@@ -97,7 +97,7 @@ inline constexpr _type Square(const _type base)
 //    }
 //};
 
-//template <class _type>
+//template <typename _type>
 //struct Power<_type, 0>
 //{
 //    static constexpr _type Pow(const _type)
@@ -112,7 +112,7 @@ inline constexpr _type Square(const _type base)
 //    return Power<_type, _exponent>::Pow(base);
 //}
 
-//template <class _type>
+//template <typename _type>
 //inline constexpr _type Square(const _type base)
 //{
 //    return Pow<2>(base);

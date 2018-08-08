@@ -7,7 +7,6 @@
 
 using namespace GDL;
 
-#include <iostream>
 
 BOOST_AUTO_TEST_CASE(Power_Functions)
 {
@@ -20,6 +19,8 @@ BOOST_AUTO_TEST_CASE(Power_Functions)
     BOOST_CHECK(Square(5) == 25);
     BOOST_CHECK(Square(5.f) == 25.f);
 }
+
+
 
 BOOST_AUTO_TEST_CASE(IsPowerOf2_Function)
 {
