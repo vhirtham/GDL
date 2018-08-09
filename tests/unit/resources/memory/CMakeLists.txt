@@ -20,3 +20,9 @@ addTest(allocator
     resources/memory/generalPurposeMemory.cpp
     resources/memory/memoryManager.cpp
     )
+
+addTest(allocator-no_custom_memory_model
+    resources/memory/generalPurposeMemory.cpp
+    resources/memory/memoryManager.cpp
+    -DNO_GENERAL_PURPOSE_MEMORY
+    )

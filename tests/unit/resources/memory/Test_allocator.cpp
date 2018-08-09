@@ -31,12 +31,11 @@ void VectorTest()
 
 BOOST_AUTO_TEST_CASE(Vector)
 {
-    auto& mM = GetMemoryManager();
-    mM.Initialize();
+    InitializeMemoryManager();
 
     BOOST_CHECK_NO_THROW(VectorTest<GeneralPurposeAllocator>());
 
-    mM.Deinitialize();
+    DeinitializeMemoryManager();
 }
 
 
@@ -63,10 +62,9 @@ void MapTest()
 
 BOOST_AUTO_TEST_CASE(Map)
 {
-    auto& mM = GetMemoryManager();
-    mM.Initialize();
+    InitializeMemoryManager();
 
     BOOST_CHECK_NO_THROW(MapTest<GeneralPurposeAllocator>());
 
-    mM.Deinitialize();
+    DeinitializeMemoryManager();
 }

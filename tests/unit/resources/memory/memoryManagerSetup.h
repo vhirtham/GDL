@@ -22,3 +22,18 @@ MemoryManager& GetMemoryManager()
     static MemoryManager& memoryManager = SetupMemoryManager();
     return memoryManager;
 }
+
+
+void InitializeMemoryManager()
+{
+#ifndef NO_GENERAL_PURPOSE_MEMORY
+    GetMemoryManager().Initialize();
+#endif
+}
+
+void DeinitializeMemoryManager()
+{
+#ifndef NO_GENERAL_PURPOSE_MEMORY
+    GetMemoryManager().Deinitialize();
+#endif
+}
