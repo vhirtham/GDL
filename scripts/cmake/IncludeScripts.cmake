@@ -1,5 +1,7 @@
 include(AddBenchmark)
+include(AddExecutable)
 include(AddTest)
 include(AddGDLLib)
 include(ExternalDependencies)
+include(SeparateInputs)
 include(TargetDefaultBuildSetup)

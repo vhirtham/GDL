@@ -16,55 +16,34 @@ function(addTest TestName)
         string(SUBSTRING ${TestFileName} 0 ${findHyphenResult} TestFileName)
     endif()
 
-    ### Separate sources, libs and definitions
-    if(ARGN)
-        foreach(input ${ARGN})
-            string(FIND "${input}" ".cpp" findCppResult)
-            if(${findCppResult} EQUAL "-1")
-                string(FIND ${input} "-" findDefResult)
-                if(NOT ${findDefResult} EQUAL "-1")
-                    set(AdditionalDefines
-                        "${AdditionalDefines};${input}")
-                else()
-                    set(AdditionalLibs
-                        "${AdditionalLibs};${input}")
-                endif()
-            else()
-                set(AdditionalSources
-                    "${AdditionalSources};${GDL_SOURCE_DIR}/gdl/${input}")
-            endif()
-        endforeach()
-    endif()
+    ### Separate passed inputs
+    SeparateInputs("${ARGN}")
 
-    ### Create executable
-    add_executable(${TestName}
-        "${TestFileName}.cpp"
-        ${AdditionalSources})
+    ### Add inputs which are relevant for tests
+    set(Sources
+        ${TestFileName}.cpp
+        ${Sources})
 
-    ### Link necessary libs
-    target_link_Libraries(${TestName}
+    set(Libraries
         Boost::unit_test_framework
-        ${AdditionalLibs}
-        )
+        ${Libraries})
 
-    target_compile_definitions(${TestName}
-        PUBLIC
-            ${AdditionalDefines})
-
-    TargetDefaultBuildSetup(${TestName})
-
-    ### Add necessary definitions
-    target_compile_definitions(${TestName}
+    set(Definitions
         PRIVATE
             -DBOOST_TEST_MODULE=${TestName}
-            -DBOOST_TEST_DYN_LINK)
+            -DBOOST_TEST_DYN_LINK
+        ${Definitions})
+
+
+    AddExecutable(${TestName} "${Sources}" "${Libraries}" "${Definitions}")
+    TargetDefaultBuildSetup(${TestName})
 
 
     ### Create Test
     string(REPLACE "${GDL_SOURCE_DIR}/tests/" ""
-        relpath ${CMAKE_CURRENT_SOURCE_DIR})
+        Relpath ${CMAKE_CURRENT_SOURCE_DIR})
     string(REPLACE "/" "::"
-        TestPrefix ${relpath})
+        TestPrefix ${Relpath})
     add_test("${TestPrefix}::${TestNameWithoutPrefix}" ${TestName})
 
 endfunction()
