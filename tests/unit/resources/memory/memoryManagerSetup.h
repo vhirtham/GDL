@@ -31,14 +31,14 @@ MemoryManager& GetMemoryManager()
 
 void InitializeMemoryManager()
 {
-#ifndef NO_GENERAL_PURPOSE_MEMORY
+#if !(defined(NO_GENERAL_PURPOSE_MEMORY) && defined(NO_MEMORY_POOL))
     GetMemoryManager().Initialize();
 #endif
 }
 
 void DeinitializeMemoryManager()
 {
-#ifndef NO_GENERAL_PURPOSE_MEMORY
+#if !(defined(NO_GENERAL_PURPOSE_MEMORY) && defined(NO_MEMORY_POOL))
     GetMemoryManager().Deinitialize();
 #endif
 }
