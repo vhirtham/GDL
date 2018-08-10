@@ -1,7 +1,6 @@
 #pragma once
 
-#include "gdl/resources/memory/generalPurposeMemory.h"
-#include "gdl/resources/memory/memoryManager.h"
+
 
 #include <memory>
 

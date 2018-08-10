@@ -1,7 +1,8 @@
 #pragma once
 
 #include "gdl/resources/memory/generalPurposeAllocator.h"
-
+#include "gdl/resources/memory/memoryInterface.h"
+#include "gdl/resources/memory/memoryManager.h"
 
 namespace GDL
 {

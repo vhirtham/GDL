@@ -3,6 +3,7 @@
 #include "gdl/GDLTypedefs.h"
 #include "gdl/base/SSESupportFunctions.h"
 #include "gdl/resources/memory/generalPurposeAllocator.h"
+#include "gdl/resources/memory/poolAllocator.h"
 
 
 #include "memoryManagerSetup.h"
@@ -92,6 +93,7 @@ BOOST_AUTO_TEST_CASE(Map)
     InitializeMemoryManager();
 
     BOOST_CHECK_NO_THROW(MapTest<GeneralPurposeAllocator>());
+    BOOST_CHECK_NO_THROW(MapTest<PoolAllocator>());
 
     DeinitializeMemoryManager();
 }

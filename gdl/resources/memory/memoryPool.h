@@ -58,6 +58,14 @@ public:
     //! @brief Initializes the memory pool and sets up the internal linked list of free memory blocks
     void Initialize();
 
+    //! @brief Gets the memory alignment value
+    //! @return Memory alignment value
+    size_t GetAlignment() const;
+
+    //! @brief Gets the element size
+    //! @return Element size
+    size_t GetElementSize() const;
+
 private:
     //! @brief Aligns the memory.
     void AlignMemory();

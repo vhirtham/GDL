@@ -186,6 +186,18 @@ void MemoryPool::Initialize()
     mNumFreeElements = mNumElements;
 }
 
+size_t MemoryPool::GetAlignment() const
+{
+    std::lock_guard<std::mutex> lock(mMutex);
+    return mAlignment;
+}
+
+size_t MemoryPool::GetElementSize() const
+{
+    std::lock_guard<std::mutex> lock(mMutex);
+    return mElementSize;
+}
+
 
 
 void MemoryPool::Deinitialize()

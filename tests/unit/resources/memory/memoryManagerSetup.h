@@ -11,6 +11,11 @@ MemoryManager& SetupMemoryManager()
 #ifndef NO_GENERAL_PURPOSE_MEMORY
     memoryManager.CreateGeneralPurposeMemory(1024 * 1024);
 #endif
+#ifndef NO_MEMORY_POOL
+    memoryManager.CreateMemoryPool(32, 1000);
+    memoryManager.CreateMemoryPool(64, 1000);
+    memoryManager.CreateMemoryPool(128, 1000);
+#endif
     return memoryManager;
 }
 
