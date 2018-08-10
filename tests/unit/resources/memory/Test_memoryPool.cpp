@@ -195,7 +195,22 @@ BOOST_AUTO_TEST_CASE(Alignment)
     for (U32 i = 0; i < addresses.size(); ++i)
         BOOST_CHECK_NO_THROW(mp.Deallocate(addresses[i]));
 
-    // alignment must be power of 2
+    // allocation alignment must be smaller than memory alignment
+    void* address = nullptr;
+    BOOST_CHECK_NO_THROW(address = mp.Allocate(elementSize, 1));
+    mp.Deallocate(address);
+    BOOST_CHECK_NO_THROW(address = mp.Allocate(elementSize, 16));
+    mp.Deallocate(address);
+    BOOST_CHECK_NO_THROW(address = mp.Allocate(elementSize, alignment));
+    mp.Deallocate(address);
+
+    GDL_CHECK_THROW_DEV_DISABLE(mp.Allocate(elementSize, alignment * 2), Exception);
+
+    // alignment must be power of 2 (Allocation)
+    GDL_CHECK_THROW_DEV_DISABLE(mp.Allocate(elementSize, 3), Exception);
+
+
+    // alignment must be power of 2 (Construction)
     BOOST_CHECK_THROW(MemoryPool(16, 5, 5), Exception);
 
     // element size must be a multiple of alignment

@@ -33,9 +33,11 @@ MemoryPool::~MemoryPool()
 
 
 
-void* MemoryPool::Allocate(size_t size)
+void* MemoryPool::Allocate(size_t size, size_t alignment)
 {
     std::lock_guard<std::mutex> lock(mMutex);
+    DEV_EXCEPTION(!IsPowerOf2(alignment), "Alignment must be a power of 2.");
+    DEV_EXCEPTION((alignment - 1) / mAlignment > 0, "Alignment must be a power of 2.");
     DEV_EXCEPTION(IsInitialized() == false, "Memory pool not initialized");
     DEV_EXCEPTION(size > mElementSize, "Allocation size is larger than a pool element.");
     EXCEPTION(mFirstFreeElement == nullptr, "No more memory available.");

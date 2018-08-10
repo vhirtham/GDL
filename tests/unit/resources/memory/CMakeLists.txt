@@ -16,12 +16,12 @@ addTest(memoryManager
     resources/memory/memoryManager.cpp
     )
 
-addTest(allocator
+addTest(allocators
     resources/memory/generalPurposeMemory.cpp
     resources/memory/memoryManager.cpp
     )
 
-addTest(allocator-no_custom_memory_model
+addTest(allocators-no_custom_memory_model
     resources/memory/generalPurposeMemory.cpp
     resources/memory/memoryManager.cpp
     -DNO_GENERAL_PURPOSE_MEMORY

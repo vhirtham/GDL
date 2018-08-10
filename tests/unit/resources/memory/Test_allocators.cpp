@@ -1,16 +1,29 @@
 #include <boost/test/unit_test.hpp>
 
 #include "gdl/GDLTypedefs.h"
+#include "gdl/base/SSESupportFunctions.h"
 #include "gdl/resources/memory/generalPurposeAllocator.h"
 
 
 #include "memoryManagerSetup.h"
 
 #include <iostream>
+#include <array>
 #include <vector>
 
 using namespace GDL;
 
+constexpr U32 alignment = 32;
+struct alignas(alignment) AlignedStruct
+{
+    AlignedStruct(I32 val)
+        : mMember{val}
+    {
+    }
+    I32 mMember;
+};
+
+// Vector -----------------------------------------------------------------------------------------
 
 template <template <typename> class _allocator>
 void VectorTest()
@@ -24,8 +37,14 @@ void VectorTest()
     for (U32 i = 0; i < numElements; ++i)
         BOOST_CHECK(v[i] == static_cast<I32>(i) * 2);
 
-    v.clear();
-    v.shrink_to_fit();
+
+
+    // Alignment test
+    std::vector<AlignedStruct, _allocator<AlignedStruct>> v2;
+    for (U32 i = 0; i < numElements; ++i)
+        v.push_back(static_cast<I32>(i) * 2);
+    for (U32 i = 0; i < numElements; ++i)
+        BOOST_CHECK(is_aligned(&v2[i], alignment));
 }
 
 
@@ -39,6 +58,8 @@ BOOST_AUTO_TEST_CASE(Vector)
 }
 
 
+
+// Map --------------------------------------------------------------------------------------------
 
 template <template <typename> class _allocator>
 void MapTest()
@@ -57,7 +78,13 @@ void MapTest()
         BOOST_CHECK(entry->second == static_cast<I32>(i));
     }
 
-    m.clear();
+
+    // Alignment
+    std::map<U32, AlignedStruct, std::less<U32>, _allocator<std::pair<const U32, AlignedStruct>>> m2;
+    for (U32 i = 0; i < numElements; ++i)
+        m2.emplace(i, static_cast<I32>(i));
+    for (const auto& it : m2)
+        BOOST_CHECK(is_aligned(&it.second, alignment));
 }
 
 BOOST_AUTO_TEST_CASE(Map)

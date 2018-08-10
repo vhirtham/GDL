@@ -1,6 +1,7 @@
 #pragma once
 
 #include "gdl/GDLTypedefs.h"
+#include "gdl/resources/memory/memoryInterface.h"
 
 #include <memory>
 #include <mutex>
@@ -12,7 +13,7 @@ namespace GDL
 
 //! @brief Memory system that stores equally sized memory blocks. Free memory blocks are used to keep a linked list
 //! of free elements. This way allocations and deallocations are constant time operations.
-class MemoryPool
+class MemoryPool : public MemoryInterface
 {
     size_t mElementSize;
     size_t mAlignment;
@@ -40,15 +41,16 @@ public:
 
     //! @brief Allocates memory
     //! @param size: Size of the memory that should be allocated
+    //! @param alignment: Alignment of the memory that should be allocated
     //! @return Pointer to memory
-    void* Allocate(size_t size);
+    virtual void* Allocate(size_t size, size_t alignment = 1) override;
 
     //! @brief Checks the internal consistency of the memory pool
     void CheckMemoryConsistency() const;
 
     //! @brief Deallocates memory at the passed address
     //! @param address: Adress that should be freed
-    void Deallocate(void* address);
+    virtual void Deallocate(void* address) override;
 
     //! @brief Deinitializes the memory pool
     void Deinitialize();
