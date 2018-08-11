@@ -12,14 +12,6 @@
 
 using namespace GDL;
 
-// Aligned versions
-
-
-template <typename _type>
-void TestNewDelete()
-{
-}
-
 
 BOOST_AUTO_TEST_CASE(New_Delete_Unaligned)
 {

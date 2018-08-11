@@ -75,12 +75,10 @@ void VectorTest()
     v.clear();
     v.shrink_to_fit();
 
-
-
     // Alignment test
     std::vector<AlignedStruct, _allocator<AlignedStruct>> v2;
     for (U32 i = 0; i < numElements; ++i)
-        v.push_back(static_cast<I32>(i) * 2);
+        v2.push_back(static_cast<I32>(i));
     for (U32 i = 0; i < numElements; ++i)
         BOOST_CHECK(is_aligned(&v2[i], alignment));
 
