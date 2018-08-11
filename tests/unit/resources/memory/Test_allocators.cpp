@@ -4,6 +4,8 @@
 #include "gdl/base/SSESupportFunctions.h"
 #include "gdl/resources/memory/generalPurposeAllocator.h"
 #include "gdl/resources/memory/poolAllocator.h"
+#include "gdl/resources/memory/utility/globalNewCounter.h"
+
 
 
 #include "memoryManagerSetup.h"
@@ -13,6 +15,9 @@
 #include <vector>
 
 using namespace GDL;
+
+
+// Helper structs and functions -------------------------------------------------------------------
 
 constexpr U32 alignment = 32;
 struct alignas(alignment) AlignedStruct
@@ -24,11 +29,40 @@ struct alignas(alignment) AlignedStruct
     I32 mMember;
 };
 
+template <template <typename> class _allocator>
+void CheckNoAllocations([[maybe_unused]] const GlobalNewCounter& gnc)
+{
+    EXCEPTION(true, "Default version should not be used.");
+}
+
+template <>
+void CheckNoAllocations<GeneralPurposeAllocator>(const GlobalNewCounter& gnc)
+{
+#ifndef NO_GENERAL_PURPOSE_MEMORY
+    BOOST_CHECK(gnc.CheckNumCallsExpected(0, 0));
+#else
+    BOOST_CHECK(!gnc.CheckNumCallsExpected(0, 0));
+#endif
+}
+
+template <>
+void CheckNoAllocations<PoolAllocator>(const GlobalNewCounter& gnc)
+{
+#if !(defined(NO_GENERAL_PURPOSE_MEMORY) && defined(NO_MEMORY_POOL))
+    BOOST_CHECK(gnc.CheckNumCallsExpected(0, 0));
+#else
+    BOOST_CHECK(!gnc.CheckNumCallsExpected(0, 0));
+#endif
+}
+
+
 // Vector -----------------------------------------------------------------------------------------
 
 template <template <typename> class _allocator>
 void VectorTest()
 {
+
+    GlobalNewCounter gnc;
     constexpr U32 numElements = 100;
 
     std::vector<I32, _allocator<I32>> v;
@@ -46,6 +80,8 @@ void VectorTest()
         v.push_back(static_cast<I32>(i) * 2);
     for (U32 i = 0; i < numElements; ++i)
         BOOST_CHECK(is_aligned(&v2[i], alignment));
+
+    CheckNoAllocations<_allocator>(gnc);
 }
 
 
@@ -65,6 +101,7 @@ BOOST_AUTO_TEST_CASE(Vector)
 template <template <typename> class _allocator>
 void MapTest()
 {
+    GlobalNewCounter gnc;
     constexpr U32 numElements = 100;
 
     std::map<U32, I32, std::less<U32>, _allocator<std::pair<const U32, I32>>> m;
@@ -86,6 +123,8 @@ void MapTest()
         m2.emplace(i, static_cast<I32>(i));
     for (const auto& it : m2)
         BOOST_CHECK(is_aligned(&it.second, alignment));
+
+    CheckNoAllocations<_allocator>(gnc);
 }
 
 BOOST_AUTO_TEST_CASE(Map)
