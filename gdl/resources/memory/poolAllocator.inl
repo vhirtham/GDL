@@ -1,7 +1,6 @@
 #pragma once
 
 #include "gdl/resources/memory/poolAllocator.h"
-#include "gdl/resources/memory/memoryInterface.h"
 #include "gdl/resources/memory/memoryManager.h"
 #include "gdl/base/Exception.h"
 
@@ -24,7 +23,7 @@ template <class _type>
 _type* PoolAllocator<_type>::allocate(std::size_t n)
 {
     DEV_EXCEPTION(n > 1, "Pool allocator is not compatible with array like data types");
-    static MemoryInterface* memory = MemoryManager::Instance().GetMemoryPool(sizeof(_type), alignof(_type));
+    static MemoryInterface* memory = GetMemoryModel();
     if (memory == nullptr)
     {
         static std::allocator<_type> stdAlloc;
@@ -37,7 +36,7 @@ template <class _type>
 void PoolAllocator<_type>::deallocate(_type* p, std::size_t n)
 {
     DEV_EXCEPTION(n > 1, "Pool allocator is not compatible with array like data types");
-    static MemoryInterface* memory = MemoryManager::Instance().GetMemoryPool(sizeof(_type), alignof(_type));
+    static MemoryInterface* memory = GetMemoryModel();
     if (memory == nullptr)
     {
         static std::allocator<_type> stdAlloc;
@@ -45,6 +44,15 @@ void PoolAllocator<_type>::deallocate(_type* p, std::size_t n)
     }
     else
         memory->Deallocate(p);
+}
+
+template <class _type>
+MemoryInterface* PoolAllocator<_type>::GetMemoryModel()
+{
+    MemoryInterface* memory = MemoryManager::Instance().GetMemoryPool(sizeof(_type), alignof(_type));
+    if(memory ==nullptr)
+        return MemoryManager::Instance().GetGeneralPurposeMemory();
+    return memory;
 }
 
 

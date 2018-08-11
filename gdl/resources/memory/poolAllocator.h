@@ -1,5 +1,7 @@
 #pragma once
 
+#include "gdl/resources/memory/memoryInterface.h"
+
 #include <memory>
 
 namespace GDL
@@ -17,6 +19,9 @@ struct PoolAllocator
     _type* allocate(std::size_t n);
 
     void deallocate(_type* p, std::size_t n);
+
+private:
+    static MemoryInterface* GetMemoryModel();
 };
 
 template <class _type, class _typeOther>

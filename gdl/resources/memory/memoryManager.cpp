@@ -79,7 +79,7 @@ MemoryInterface* MemoryManager::GetMemoryPool(size_t elementSize, size_t alignme
         if (it.second.GetElementSize() >= elementSize && it.second.GetAlignment() >= alignment)
             return &const_cast<MemoryPool&>(it.second);
 
-    return mGeneralPurposeMemory.get();
+    return nullptr;
 }
 
 
