@@ -12,9 +12,16 @@
 
 using namespace GDL;
 
+// Aligned versions
 
 
-BOOST_AUTO_TEST_CASE(New_Delete)
+template <typename _type>
+void TestNewDelete()
+{
+}
+
+
+BOOST_AUTO_TEST_CASE(New_Delete_Unaligned)
 {
     GlobalNewCounter gnc;
     BOOST_CHECK(gnc.GetNumNewCalls() == 0);
@@ -91,7 +98,7 @@ BOOST_AUTO_TEST_CASE(New_Delete)
         BOOST_CHECK(false);
         delete f;
     }
-    catch (std::exception& e)
+    catch (std::exception&)
     {
         BOOST_CHECK(gnc.GetNumNewCalls() == 6);
         BOOST_CHECK(gnc.GetNumDeleteCalls() == 6);
@@ -103,13 +110,97 @@ BOOST_AUTO_TEST_CASE(New_Delete)
         BOOST_CHECK(false);
         delete[] g;
     }
-    catch (std::exception& e)
+    catch (std::exception&)
     {
         BOOST_CHECK(gnc.GetNumNewCalls() == 7);
         BOOST_CHECK(gnc.GetNumDeleteCalls() == 7);
     }
 }
 
+BOOST_AUTO_TEST_CASE(New_Delete_Aligned)
+{
+    struct alignas(32) AlignedStruct
+    {
+        I32 mMember = 0;
+    };
+
+    GlobalNewCounter gnc;
+    BOOST_CHECK(gnc.GetNumNewCalls() == 0);
+    BOOST_CHECK(gnc.GetNumDeleteCalls() == 0);
+
+    AlignedStruct* a = new AlignedStruct;
+
+    BOOST_CHECK(gnc.GetNumNewCalls() == 1);
+    BOOST_CHECK(gnc.GetNumDeleteCalls() == 0);
+
+    delete a;
+
+    BOOST_CHECK(gnc.GetNumNewCalls() == 1);
+    BOOST_CHECK(gnc.GetNumDeleteCalls() == 1);
+
+    AlignedStruct* b = new AlignedStruct[12];
+
+    BOOST_CHECK(gnc.GetNumNewCalls() == 2);
+    BOOST_CHECK(gnc.GetNumDeleteCalls() == 1);
+
+    delete[] b;
+
+    BOOST_CHECK(gnc.GetNumNewCalls() == 2);
+    BOOST_CHECK(gnc.GetNumDeleteCalls() == 2);
+
+
+    AlignedStruct* c = new (std::nothrow) AlignedStruct;
+
+    BOOST_CHECK(gnc.GetNumNewCalls() == 3);
+    BOOST_CHECK(gnc.GetNumDeleteCalls() == 2);
+
+    delete c;
+
+    BOOST_CHECK(gnc.GetNumNewCalls() == 3);
+    BOOST_CHECK(gnc.GetNumDeleteCalls() == 3);
+
+    AlignedStruct* d = new AlignedStruct[12];
+
+    BOOST_CHECK(gnc.GetNumNewCalls() == 4);
+    BOOST_CHECK(gnc.GetNumDeleteCalls() == 3);
+
+    delete[] d;
+
+    BOOST_CHECK(gnc.GetNumNewCalls() == 4);
+    BOOST_CHECK(gnc.GetNumDeleteCalls() == 4);
+
+    struct alignas(32) ThrowOnNew
+    {
+        ThrowOnNew()
+        {
+            throw std::exception();
+        }
+    };
+
+    try
+    {
+        ThrowOnNew* f = new (std::nothrow) ThrowOnNew();
+        BOOST_CHECK(false);
+        delete f;
+    }
+    catch (std::exception&)
+    {
+        BOOST_CHECK(gnc.GetNumNewCalls() == 5);
+        BOOST_CHECK(gnc.GetNumDeleteCalls() == 5);
+    }
+
+    try
+    {
+        ThrowOnNew* g = new (std::nothrow) ThrowOnNew[12];
+        BOOST_CHECK(false);
+        delete[] g;
+    }
+    catch (std::exception&)
+    {
+        BOOST_CHECK(gnc.GetNumNewCalls() == 6);
+        BOOST_CHECK(gnc.GetNumDeleteCalls() == 6);
+    }
+}
 
 BOOST_AUTO_TEST_CASE(STL_Container)
 {
