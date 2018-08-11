@@ -72,6 +72,9 @@ void VectorTest()
     for (U32 i = 0; i < numElements; ++i)
         BOOST_CHECK(v[i] == static_cast<I32>(i) * 2);
 
+    v.clear();
+    v.shrink_to_fit();
+
 
 
     // Alignment test
@@ -80,6 +83,9 @@ void VectorTest()
         v.push_back(static_cast<I32>(i) * 2);
     for (U32 i = 0; i < numElements; ++i)
         BOOST_CHECK(is_aligned(&v2[i], alignment));
+
+    v2.clear();
+    v2.shrink_to_fit();
 
     CheckNoAllocations<_allocator>(gnc);
 }
@@ -116,6 +122,7 @@ void MapTest()
         BOOST_CHECK(entry->second == static_cast<I32>(i));
     }
 
+    m.clear();
 
     // Alignment
     std::map<U32, AlignedStruct, std::less<U32>, _allocator<std::pair<const U32, AlignedStruct>>> m2;
@@ -123,6 +130,8 @@ void MapTest()
         m2.emplace(i, static_cast<I32>(i));
     for (const auto& it : m2)
         BOOST_CHECK(is_aligned(&it.second, alignment));
+
+    m2.clear();
 
     CheckNoAllocations<_allocator>(gnc);
 }
