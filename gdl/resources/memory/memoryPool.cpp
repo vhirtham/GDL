@@ -11,7 +11,7 @@
 namespace GDL
 {
 
-MemoryPool::MemoryPool(size_t elementSize, U32 numElements, size_t alignment)
+MemoryPool::MemoryPool(MemorySize elementSize, U32 numElements, size_t alignment)
     : mElementSize{elementSize}
     , mAlignment{alignment}
     , mNumElements{numElements}
@@ -89,7 +89,8 @@ void MemoryPool::AlignMemory()
     void* memoryStartBefAlign = mMemory.get();
     size_t memorySizeBefAlign = TotalMemorySize();
 
-    mMemoryStart = static_cast<U8*>(std::align(mAlignment, MemorySize(), memoryStartBefAlign, memorySizeBefAlign));
+    mMemoryStart =
+            static_cast<U8*>(std::align(mAlignment, EffectiveMemorySize(), memoryStartBefAlign, memorySizeBefAlign));
 
     EXCEPTION(mMemoryStart == nullptr, "Memory alignment failed.");
 }
@@ -98,14 +99,14 @@ void MemoryPool::AlignMemory()
 
 size_t MemoryPool::TotalMemorySize() const
 {
-    return MemorySize() + mAlignment;
+    return EffectiveMemorySize() + mAlignment;
 }
 
 
 
-size_t MemoryPool::MemorySize() const
+size_t MemoryPool::EffectiveMemorySize() const
 {
-    return mNumElements * mElementSize;
+    return mNumElements * mElementSize.GetNumBytes();
 }
 
 
@@ -117,7 +118,7 @@ void MemoryPool::CheckConstructionParameters() const
               "Element size must be " + std::to_string(minimalElementSize) + " or higher.");
     EXCEPTION(mNumElements == 0, "Number of elements must be larger than 0");
     EXCEPTION(!IsPowerOf2(mAlignment), "Alignment must be a power of 2");
-    EXCEPTION(mElementSize % mAlignment > 0, "Pool element size must be a multiple of alignment");
+    EXCEPTION(mElementSize.GetNumBytes() % mAlignment > 0, "Pool element size must be a multiple of alignment");
 }
 
 
@@ -126,9 +127,10 @@ void MemoryPool::CheckDeallocation(void* address) const
 {
     DEV_EXCEPTION(IsInitialized() == false, "memory pool not initialized");
     DEV_EXCEPTION(address == nullptr, "Can't free a nullptr");
-    DEV_EXCEPTION(static_cast<U8*>(address) < mMemoryStart || static_cast<U8*>(address) > mMemoryStart + MemorySize(),
+    DEV_EXCEPTION(static_cast<U8*>(address) < mMemoryStart ||
+                          static_cast<U8*>(address) > mMemoryStart + EffectiveMemorySize(),
                   "Memory address is not part of the pool allocators memory");
-    DEV_EXCEPTION((static_cast<U8*>(address) - mMemoryStart) % mElementSize > 0,
+    DEV_EXCEPTION(static_cast<size_t>(static_cast<U8*>(address) - mMemoryStart) % mElementSize.GetNumBytes() > 0,
                   "Memory address is not start of a valid memory block");
 
 // Only in debug mode, since it is expensive
@@ -192,7 +194,7 @@ size_t MemoryPool::GetAlignment() const
     return mAlignment;
 }
 
-size_t MemoryPool::GetElementSize() const
+MemorySize MemoryPool::GetElementSize() const
 {
     std::lock_guard<std::mutex> lock(mMutex);
     return mElementSize;
@@ -227,9 +229,9 @@ void MemoryPool::InitializeFreeMemoryList()
     // Set up linked list in free memory
     for (U32 i = 0; i < mNumElements - 1; ++i)
     {
-        void* nextAddressPtr = static_cast<void*>(currentPosition + mElementSize);
+        void* nextAddressPtr = static_cast<void*>(currentPosition + mElementSize.GetNumBytes());
         WriteAddressToMemory(currentPosition, nextAddressPtr);
-        currentPosition += mElementSize;
+        currentPosition += mElementSize.GetNumBytes();
     }
 
     mLastFreeElement = currentPosition;

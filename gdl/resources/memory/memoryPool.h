@@ -2,6 +2,7 @@
 
 #include "gdl/GDLTypedefs.h"
 #include "gdl/resources/memory/memoryInterface.h"
+#include "gdl/resources/memory/memorySize.h"
 
 #include <memory>
 #include <mutex>
@@ -15,7 +16,7 @@ namespace GDL
 //! of free elements. This way allocations and deallocations are constant time operations.
 class MemoryPool : public MemoryInterface
 {
-    size_t mElementSize;
+    MemorySize mElementSize;
     size_t mAlignment;
     U32 mNumElements;
     U32 mNumFreeElements;
@@ -30,7 +31,7 @@ public:
     //! @param elementSize: Size of a single element
     //! @param numElements: Number of elements that can be stored
     //! @param alignment: Memory alignment
-    MemoryPool(size_t elementSize, U32 numElements, size_t alignment = 1);
+    MemoryPool(MemorySize elementSize, U32 numElements, size_t alignment = 1);
 
     MemoryPool() = delete;
     MemoryPool(const MemoryPool&) = delete;
@@ -65,7 +66,7 @@ public:
 
     //! @brief Gets the element size
     //! @return Element size
-    size_t GetElementSize() const;
+    MemorySize GetElementSize() const;
 
 private:
     //! @brief Aligns the memory.
@@ -92,7 +93,7 @@ private:
 
     //! @brief Returns the memory size without the extra alignment bytes
     //! @return Memory size without the extra alignment bytes
-    size_t MemorySize() const;
+    size_t EffectiveMemorySize() const;
 
     //! @brief Returns the memory size including the extra alignment bytes
     //! @return Memory size including the extra alignment bytes

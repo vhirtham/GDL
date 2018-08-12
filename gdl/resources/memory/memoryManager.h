@@ -79,6 +79,6 @@ public:
     //! @param numElements: Number of elements that can be stored in the memory pool
     //! @param alignment: Alignment of the memory pool (default: alignment=elementSize)
     //! @remark If the alignment value is set to 0, the alignment is set to the element size
-    void CreateMemoryPool(size_t elementSize, U32 numElements, size_t alignment = 0);
+    void CreateMemoryPool(MemorySize elementSize, U32 numElements, size_t alignment = 0);
 };
 }

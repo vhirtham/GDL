@@ -150,16 +150,16 @@ void MemoryManager::CreateMemoryStack(size_t memorySize)
 
 
 
-void MemoryManager::CreateMemoryPool(size_t elementSize, U32 numElements, size_t alignment)
+void MemoryManager::CreateMemoryPool(MemorySize elementSize, U32 numElements, size_t alignment)
 {
     std::lock_guard<std::mutex> lock(mMutex);
     if (alignment == 0)
-        alignment = elementSize;
+        alignment = elementSize.GetNumBytes();
     EXCEPTION(mSetupFinished == true, "Setup process already finished.");
-    EXCEPTION(mMemoryPools.find(elementSize) != mMemoryPools.end(),
-              "There already is a memory pool with size " + std::to_string(elementSize));
+    EXCEPTION(mMemoryPools.find(elementSize.GetNumBytes()) != mMemoryPools.end(),
+              "There already is a memory pool with size " + std::to_string(elementSize.GetNumBytes()));
 
-    mMemoryPools.emplace(std::piecewise_construct, std::forward_as_tuple(elementSize),
+    mMemoryPools.emplace(std::piecewise_construct, std::forward_as_tuple(elementSize.GetNumBytes()),
                          std::forward_as_tuple(elementSize, numElements, alignment));
 }
 }

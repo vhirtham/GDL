@@ -13,9 +13,9 @@ MemoryManager& SetupMemoryManager()
     memoryManager.CreateGeneralPurposeMemory(1_MiB);
 #endif
 #ifndef NO_MEMORY_POOL
-    memoryManager.CreateMemoryPool((32_B).GetNumBytes(), 1000);
-    memoryManager.CreateMemoryPool((64_B).GetNumBytes(), 1000);
-    memoryManager.CreateMemoryPool((128_B).GetNumBytes(), 1000);
+    memoryManager.CreateMemoryPool(32_B, 1000);
+    memoryManager.CreateMemoryPool(64_B, 1000);
+    memoryManager.CreateMemoryPool(128_B, 1000);
 #endif
 #ifndef NO_MEMORY_STACK
     memoryManager.CreateMemoryStack((1_MiB).GetNumBytes());
