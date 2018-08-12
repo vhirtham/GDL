@@ -4,7 +4,7 @@
 #include "gdl/base/SSESupportFunctions.h"
 #include "gdl/resources/memory/generalPurposeAllocator.h"
 #include "gdl/resources/memory/poolAllocator.h"
-#include "gdl/resources/memory/utility/globalNewCounter.h"
+#include "gdl/resources/memory/utility/heapAllocationCounter.h"
 
 
 
@@ -15,6 +15,12 @@
 #include <vector>
 
 using namespace GDL;
+
+
+
+//! Uncomment next line if this test shoul be run with valgrind
+// #define DISABLE_HEAP_ALLOCATION_COUNTER
+
 
 
 // Helper structs and functions -------------------------------------------------------------------
@@ -30,13 +36,13 @@ struct alignas(alignment) AlignedStruct
 };
 
 template <template <typename> class _allocator>
-void CheckNoAllocations([[maybe_unused]] const GlobalNewCounter& gnc)
+void CheckNoAllocations([[maybe_unused]] const HeapAllocationCounter& gnc)
 {
     EXCEPTION(true, "Default version should not be used.");
 }
 
 template <>
-void CheckNoAllocations<GeneralPurposeAllocator>(const GlobalNewCounter& gnc)
+void CheckNoAllocations<GeneralPurposeAllocator>(const HeapAllocationCounter& gnc)
 {
 #ifndef NO_GENERAL_PURPOSE_MEMORY
     BOOST_CHECK(gnc.CheckNumCallsExpected(0, 0));
@@ -46,7 +52,7 @@ void CheckNoAllocations<GeneralPurposeAllocator>(const GlobalNewCounter& gnc)
 }
 
 template <>
-void CheckNoAllocations<PoolAllocator>(const GlobalNewCounter& gnc)
+void CheckNoAllocations<PoolAllocator>(const HeapAllocationCounter& gnc)
 {
 #if !(defined(NO_GENERAL_PURPOSE_MEMORY) && defined(NO_MEMORY_POOL))
     BOOST_CHECK(gnc.CheckNumCallsExpected(0, 0));
@@ -61,8 +67,7 @@ void CheckNoAllocations<PoolAllocator>(const GlobalNewCounter& gnc)
 template <template <typename> class _allocator>
 void VectorTest()
 {
-
-    GlobalNewCounter gnc;
+    HeapAllocationCounter gnc;
     constexpr U32 numElements = 100;
 
     std::vector<I32, _allocator<I32>> v;
@@ -105,7 +110,7 @@ BOOST_AUTO_TEST_CASE(Vector)
 template <template <typename> class _allocator>
 void MapTest()
 {
-    GlobalNewCounter gnc;
+    HeapAllocationCounter gnc;
     constexpr U32 numElements = 100;
 
     std::map<U32, I32, std::less<U32>, _allocator<std::pair<const U32, I32>>> m;

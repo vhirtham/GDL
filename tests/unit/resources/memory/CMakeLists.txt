@@ -1,5 +1,5 @@
 
-addTest(globalNewCounter)
+addTest(heapAllocationCounter)
 
 addTest(generalPurposeMemory
     resources/memory/generalPurposeMemory.cpp

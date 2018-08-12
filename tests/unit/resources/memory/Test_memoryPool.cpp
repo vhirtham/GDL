@@ -300,7 +300,7 @@ BOOST_AUTO_TEST_CASE(Thread_Safety)
 // will throw a lot of errors. Find a solution for this. Until then, remove the test when using valgrind in release
 
 
-#include "gdl/resources/memory/utility/globalNewCounter.h"
+#include "gdl/resources/memory/utility/heapAllocationCounter.h"
 
 //! @brief This test checks if the number of allocations is as expected
 //! @remark The exceptions in the other tests call new due to the internal usage of strings. This makes it hard to
@@ -310,7 +310,7 @@ BOOST_AUTO_TEST_CASE(No_hidden_allocations)
     constexpr size_t elementSize = 16;
     constexpr U32 numElements = 5;
 
-    GlobalNewCounter gnc;
+    HeapAllocationCounter gnc;
 
     void* address = nullptr;
 

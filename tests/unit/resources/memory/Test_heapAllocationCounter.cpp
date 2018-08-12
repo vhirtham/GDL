@@ -2,7 +2,7 @@
 
 
 #include "gdl/GDLTypedefs.h"
-#include "gdl/resources/memory/utility/globalNewCounter.h"
+#include "gdl/resources/memory/utility/heapAllocationCounter.h"
 
 
 
@@ -15,7 +15,7 @@ using namespace GDL;
 
 BOOST_AUTO_TEST_CASE(New_Delete_Unaligned)
 {
-    GlobalNewCounter gnc;
+    HeapAllocationCounter gnc;
     BOOST_CHECK(gnc.GetNumNewCalls() == 0);
     BOOST_CHECK(gnc.GetNumDeleteCalls() == 0);
 
@@ -116,7 +116,7 @@ BOOST_AUTO_TEST_CASE(New_Delete_Aligned)
         I32 mMember = 0;
     };
 
-    GlobalNewCounter gnc;
+    HeapAllocationCounter gnc;
     BOOST_CHECK(gnc.GetNumNewCalls() == 0);
     BOOST_CHECK(gnc.GetNumDeleteCalls() == 0);
 
@@ -196,7 +196,7 @@ BOOST_AUTO_TEST_CASE(New_Delete_Aligned)
 
 BOOST_AUTO_TEST_CASE(STL_Container)
 {
-    GlobalNewCounter gnc;
+    HeapAllocationCounter gnc;
     BOOST_CHECK(gnc.GetNumNewCalls() == 0);
     BOOST_CHECK(gnc.GetNumDeleteCalls() == 0);
 
