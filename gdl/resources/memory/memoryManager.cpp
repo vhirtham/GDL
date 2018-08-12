@@ -1,6 +1,7 @@
 #include "gdl/resources/memory/memoryManager.h"
 
 #include "gdl/base/Exception.h"
+#include "gdl/resources/memory/heapMemory.h"
 
 
 namespace GDL
@@ -63,6 +64,20 @@ MemoryInterface* GDL::MemoryManager::GetGeneralPurposeMemory() const
         mMemoryRequestedUninitialized = true;
     }
     return mGeneralPurposeMemory.get();
+}
+
+MemoryInterface* MemoryManager::GetHeapMemory() const
+{
+    std::lock_guard<std::mutex> lock(mMutex);
+
+    if (mInitialized == false)
+    {
+        mSetupFinished = true;
+        mMemoryRequestedUninitialized = true;
+    }
+
+    static HeapMemory memory;
+    return &memory;
 }
 
 

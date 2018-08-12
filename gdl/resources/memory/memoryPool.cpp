@@ -56,7 +56,7 @@ void* MemoryPool::Allocate(size_t size, size_t alignment)
 
 
 
-void MemoryPool::Deallocate(void* address)
+void MemoryPool::Deallocate(void* address, [[maybe_unused]] size_t alignment)
 {
     std::lock_guard<std::mutex> lock(mMutex);
 

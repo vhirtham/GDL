@@ -19,7 +19,7 @@ using namespace GDL;
 
 
 //! Uncomment next line if this test shoul be run with valgrind
-// #define DISABLE_HEAP_ALLOCATION_COUNTER
+//#define DISABLE_HEAP_ALLOCATION_COUNTER
 
 
 

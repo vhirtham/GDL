@@ -48,7 +48,8 @@ public:
 
     //! @brief Deallocates memory at the passed address
     //! @param address: Adress that should be freed
-    void Deallocate(void* address);
+    //! @param alignment: Memory alignment
+    void Deallocate(void* address, size_t alignment = 1);
 
     //! @brief Deinitializes the memory stack
     void Deinitialize();

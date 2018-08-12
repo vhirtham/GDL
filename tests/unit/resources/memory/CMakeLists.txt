@@ -11,29 +11,29 @@ addTest(memoryStack
     resources/memory/memoryStack.cpp
     )
 
-addTest(memoryManager
+set(MemoryManagerSources
     resources/memory/generalPurposeMemory.cpp
+    resources/memory/heapMemory.cpp
     resources/memory/memoryManager.cpp
     resources/memory/memoryPool.cpp
+    resources/memory/memoryStack.cpp
+    )
+
+addTest(memoryManager
+    ${MemoryManagerSources}
     )
 
 addTest(allocators
-    resources/memory/generalPurposeMemory.cpp
-    resources/memory/memoryManager.cpp
-    resources/memory/memoryPool.cpp
+    ${MemoryManagerSources}
     )
 
 addTest(allocators-no_pool_memory
-    resources/memory/generalPurposeMemory.cpp
-    resources/memory/memoryManager.cpp
-    resources/memory/memoryPool.cpp
+    ${MemoryManagerSources}
     -DNO_MEMORY_POOL
     )
 
 addTest(allocators-no_custom_memory_model
-    resources/memory/generalPurposeMemory.cpp
-    resources/memory/memoryManager.cpp
-    resources/memory/memoryPool.cpp
+    ${MemoryManagerSources}
     -DNO_GENERAL_PURPOSE_MEMORY
     -DNO_MEMORY_POOL
     )

@@ -48,6 +48,12 @@ public:
     //! @return Pointer to the general purpose memory if it exists. Otherwise nullptr
     MemoryInterface* GetGeneralPurposeMemory() const;
 
+
+    //! @brief Returns an memory interface pointer to the heap memory
+    //! @return Pointer to the heap memory
+    MemoryInterface* GetHeapMemory() const;
+
+
     //! @brief Returns an memory interface pointer to a fitting memory pool. If no fitting memory pool is found, the
     //! funtion returns the general purpose memory or a nullptr.
     //! @param elementSize: Size of the data type which should fit into the memory pool.

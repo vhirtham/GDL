@@ -50,7 +50,8 @@ public:
 
     //! @brief Deallocates memory at the passed address
     //! @param address: Adress that should be freed
-    virtual void Deallocate(void* address) override;
+    //! @param alignment: Alignment of the memory that should be deallocated
+    virtual void Deallocate(void* address, size_t alignment = 1) override;
 
     //! @brief Deinitializes the memory pool
     void Deinitialize();

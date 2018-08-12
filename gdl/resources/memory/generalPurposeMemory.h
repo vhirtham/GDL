@@ -75,8 +75,9 @@ public:
     U32 CountFreeMemoryBlocks() const;
 
     //! @brief Deallocates memory at the passed address
+    //! @param alignment: Memory alignment
     //! @param address: Adress that should be freed
-    virtual void Deallocate(void* address) override;
+    virtual void Deallocate(void* address, size_t alignment = 1) override;
 
     //! @brief Deinitializes the general purpose memory
     void Deinitialize();

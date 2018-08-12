@@ -58,7 +58,7 @@ void* memoryStackTemplate<false>::Allocate(size_t size, size_t alignment)
 
 
 template <>
-void memoryStackTemplate<true>::Deallocate(void* address)
+void memoryStackTemplate<true>::Deallocate(void* address, [[maybe_unused]] size_t alignment)
 {
     DEV_EXCEPTION(mMutexOrThreadId != std::this_thread::get_id(),
                   "Thread private memory stack can only be accessed by owning thread");
@@ -69,7 +69,7 @@ void memoryStackTemplate<true>::Deallocate(void* address)
 
 
 template <>
-void memoryStackTemplate<false>::Deallocate(void* address)
+void memoryStackTemplate<false>::Deallocate(void* address, [[maybe_unused]] size_t alignment)
 {
     std::lock_guard<std::mutex> lock(mMutexOrThreadId);
     DeallocatePrivate(address);

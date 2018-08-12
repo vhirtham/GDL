@@ -69,7 +69,7 @@ U32 GeneralPurposeMemory::CountFreeMemoryBlocks() const
 
 
 
-void GeneralPurposeMemory::Deallocate(void* address)
+void GeneralPurposeMemory::Deallocate(void* address, [[maybe_unused]] size_t alignment)
 {
     std::lock_guard<std::mutex> lock{mMutex};
 
