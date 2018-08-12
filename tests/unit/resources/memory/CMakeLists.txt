@@ -9,7 +9,7 @@ addTest(memoryPool
 addTest(memoryStack
     resources/memory/memoryStack.cpp)
 
-addTest(memorySizeLiterals)
+addTest(memorySize)
 
 set(MemoryManagerSources
     resources/memory/generalPurposeMemory.cpp
