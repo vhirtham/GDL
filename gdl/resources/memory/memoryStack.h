@@ -2,6 +2,7 @@
 
 
 #include "gdl/GDLTypedefs.h"
+#include "gdl/resources/memory/memoryInterface.h"
 
 #include <memory>
 #include <mutex>
@@ -16,7 +17,7 @@ namespace GDL
 //! @tparam _ThreadPrivate: TRUE if the memory stack can only be accessed by a single thread. FALSE if the memory stack
 //! is accessable by multiple threads and needs to be protected by a mutex
 template <bool _ThreadPrivate>
-class memoryStackTemplate
+class memoryStackTemplate : public MemoryInterface
 {
 
     typedef typename std::conditional<_ThreadPrivate, std::thread::id, std::mutex>::type MutexOrThreadId;
@@ -44,12 +45,12 @@ public:
     //! @param size: Size of the memory that should be allocated
     //! @param alignment: Memory alignment
     //! @return Pointer to memory
-    void* Allocate(size_t size, size_t alignment = 1);
+    virtual void* Allocate(size_t size, size_t alignment = 1) override;
 
     //! @brief Deallocates memory at the passed address
     //! @param address: Adress that should be freed
     //! @param alignment: Memory alignment
-    void Deallocate(void* address, size_t alignment = 1);
+    virtual void Deallocate(void* address, size_t alignment = 1) override;
 
     //! @brief Deinitializes the memory stack
     void Deinitialize();

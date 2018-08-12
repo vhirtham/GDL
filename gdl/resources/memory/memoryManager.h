@@ -2,6 +2,7 @@
 
 #include "gdl/resources/memory/generalPurposeMemory.h"
 #include "gdl/resources/memory/memoryPool.h"
+#include "gdl/resources/memory/memoryStack.h"
 
 #include <atomic>
 #include <map>
@@ -19,6 +20,7 @@ class MemoryManager
     mutable bool mMemoryRequestedUninitialized;
 
     std::unique_ptr<GeneralPurposeMemory> mGeneralPurposeMemory;
+    std::unique_ptr<memoryStack> mMemoryStack;
     std::map<size_t, MemoryPool> mMemoryPools;
 
 
@@ -53,17 +55,23 @@ public:
     //! @return Pointer to the heap memory
     MemoryInterface* GetHeapMemory() const;
 
+    //! @brief Returns an memory interface pointer to the memory stack
+    //! @return Pointer to the memory stack if it exists. Otherwise nullptr
+    MemoryInterface* GetMemoryStack() const;
 
-    //! @brief Returns an memory interface pointer to a fitting memory pool. If no fitting memory pool is found, the
-    //! funtion returns the general purpose memory or a nullptr.
+    //! @brief Returns an memory interface pointer to a fitting memory pool.
     //! @param elementSize: Size of the data type which should fit into the memory pool.
     //! @param alignment: Alignment of the data type which should fit into the memory pool.
-    //! @return Pointer to a fitting memory pool or the general purpose memory if existing. Otherwise nullptr
+    //! @return Pointer to a fitting memory pool if it exist. Otherwise nullptr
     MemoryInterface* GetMemoryPool(size_t elementSize, size_t alignment) const;
 
     //! @brief Creates a general purpose memory
     //! @param memorySize: Size of the general purpose memory
     void CreateGeneralPurposeMemory(size_t memorySize);
+
+    //! @brief Creates a memory stack
+    //! @param memorySize: Size of the memory stack
+    void CreateMemoryStack(size_t memorySize);
 
     //! @brief Creates a memory pool
     //! @param elementSize: Size of a single element of the memory pool

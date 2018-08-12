@@ -27,13 +27,20 @@ addTest(allocators
     ${MemoryManagerSources}
     )
 
-addTest(allocators-no_pool_memory
+addTest(allocators-no_memory_pool_no_memory_stack
     ${MemoryManagerSources}
     -DNO_MEMORY_POOL
+    -DNO_MEMORY_STACK
     )
 
-addTest(allocators-no_custom_memory_model
+addTest(allocators-no_general_purpose_memory
+    ${MemoryManagerSources}
+    -DNO_GENERAL_PURPOSE_MEMORY
+    )
+
+addTest(allocators-only_heap_allocation
     ${MemoryManagerSources}
     -DNO_GENERAL_PURPOSE_MEMORY
     -DNO_MEMORY_POOL
+    -DNO_MEMORY_STACK
     )

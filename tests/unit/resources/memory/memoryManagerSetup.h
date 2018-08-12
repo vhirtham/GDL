@@ -16,6 +16,9 @@ MemoryManager& SetupMemoryManager()
     memoryManager.CreateMemoryPool(64, 1000);
     memoryManager.CreateMemoryPool(128, 1000);
 #endif
+#ifndef NO_MEMORY_STACK
+    memoryManager.CreateMemoryStack(1024 * 1024);
+#endif
     return memoryManager;
 }
 
@@ -31,14 +34,14 @@ MemoryManager& GetMemoryManager()
 
 void InitializeMemoryManager()
 {
-#if !(defined(NO_GENERAL_PURPOSE_MEMORY) && defined(NO_MEMORY_POOL))
+#if !(defined(NO_GENERAL_PURPOSE_MEMORY) && defined(NO_MEMORY_POOL) && defined(NO_MEMORY_STACK))
     GetMemoryManager().Initialize();
 #endif
 }
 
 void DeinitializeMemoryManager()
 {
-#if !(defined(NO_GENERAL_PURPOSE_MEMORY) && defined(NO_MEMORY_POOL))
+#if !(defined(NO_GENERAL_PURPOSE_MEMORY) && defined(NO_MEMORY_POOL) && defined(NO_MEMORY_STACK))
     GetMemoryManager().Deinitialize();
 #endif
 }

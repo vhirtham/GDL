@@ -124,7 +124,7 @@ BOOST_AUTO_TEST_CASE(Exception_handling)
 //! @remark This test didn't catch a bug were the CloseThreads function caused all threads to leave its main loop
 //! instead of just the specified number of threads. This is still the case, but the LIFO test will fail/deadlock
 //! in this case.
-BOOST_AUTO_TEST_CASE(Start_and_Close_Threads)
+BOOST_AUTO_TEST_CASE(Start_and_Close_Threads) // Deadlock timer triggered on travis
 {
     DeadlockTerminationTimer dtt;
 

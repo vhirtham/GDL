@@ -15,6 +15,8 @@ MemoryManager::MemoryManager()
 {
 }
 
+
+
 void MemoryManager::Initialize()
 {
     std::lock_guard<std::mutex> lock(mMutex);
@@ -30,15 +32,22 @@ void MemoryManager::Initialize()
     for (auto& memoryPool : mMemoryPools)
         memoryPool.second.Initialize();
 
+    if (mMemoryStack != nullptr)
+        mMemoryStack->Initialize();
+
     mSetupFinished = true;
     mInitialized = true;
 }
+
+
 
 MemoryManager& MemoryManager::Instance()
 {
     static MemoryManager memoryManager;
     return memoryManager;
 }
+
+
 
 void MemoryManager::Deinitialize()
 {
@@ -52,8 +61,13 @@ void MemoryManager::Deinitialize()
     for (auto& memoryPool : mMemoryPools)
         memoryPool.second.Deinitialize();
 
+    if (mMemoryStack != nullptr)
+        mMemoryStack->Deinitialize();
+
     mInitialized = false;
 }
+
+
 
 MemoryInterface* GDL::MemoryManager::GetGeneralPurposeMemory() const
 {
@@ -65,6 +79,8 @@ MemoryInterface* GDL::MemoryManager::GetGeneralPurposeMemory() const
     }
     return mGeneralPurposeMemory.get();
 }
+
+
 
 MemoryInterface* MemoryManager::GetHeapMemory() const
 {
@@ -78,6 +94,17 @@ MemoryInterface* MemoryManager::GetHeapMemory() const
 
     static HeapMemory memory;
     return &memory;
+}
+
+MemoryInterface* MemoryManager::GetMemoryStack() const
+{
+    std::lock_guard<std::mutex> lock(mMutex);
+    if (mInitialized == false)
+    {
+        mSetupFinished = true;
+        mMemoryRequestedUninitialized = true;
+    }
+    return mMemoryStack.get();
 }
 
 
@@ -108,6 +135,20 @@ void MemoryManager::CreateGeneralPurposeMemory(size_t memorySize)
 
     mGeneralPurposeMemory.reset(new GeneralPurposeMemory{memorySize});
 }
+
+
+
+void MemoryManager::CreateMemoryStack(size_t memorySize)
+{
+    std::lock_guard<std::mutex> lock(mMutex);
+
+    EXCEPTION(mSetupFinished == true, "Setup process already finished.");
+    EXCEPTION(mMemoryStack != nullptr, "Memory stack already created");
+
+    mMemoryStack.reset(new memoryStack{memorySize});
+}
+
+
 
 void MemoryManager::CreateMemoryPool(size_t elementSize, U32 numElements, size_t alignment)
 {
