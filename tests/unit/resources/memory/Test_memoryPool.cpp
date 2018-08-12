@@ -5,6 +5,7 @@
 #include "gdl/base/Exception.h"
 #include "gdl/base/SSESupportFunctions.h"
 #include "gdl/resources/memory/memoryPool.h"
+#include "gdl/resources/memory/utility/heapAllocationCounter.h"
 
 
 #include <atomic>
@@ -12,6 +13,13 @@
 #include <cstring>
 #include <thread>
 #include <vector>
+
+
+
+//! Uncomment next line if this test shoul be run with valgrind
+//#define DISABLE_HEAP_ALLOCATION_COUNTER
+
+
 
 using namespace GDL;
 
@@ -294,13 +302,6 @@ BOOST_AUTO_TEST_CASE(Thread_Safety)
 }
 
 
-
-// ################################################################################################
-// Valgrind conflicts with the global new counter because it overrides global new. If tested on release builds, valgrind
-// will throw a lot of errors. Find a solution for this. Until then, remove the test when using valgrind in release
-
-
-#include "gdl/resources/memory/utility/heapAllocationCounter.h"
 
 //! @brief This test checks if the number of allocations is as expected
 //! @remark The exceptions in the other tests call new due to the internal usage of strings. This makes it hard to
