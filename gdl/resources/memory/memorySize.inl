@@ -34,6 +34,89 @@ constexpr bool MemorySize::operator!=(const MemorySize& rhs) const
 
 
 
+constexpr bool MemorySize::operator<(size_t rhs) const
+{
+    return mNumBytes < rhs;
+}
+
+
+
+constexpr bool operator<(size_t lhs, const MemorySize& rhs)
+{
+    return rhs > lhs;
+}
+
+
+
+constexpr bool MemorySize::operator>(size_t rhs) const
+{
+    return mNumBytes > rhs;
+}
+
+
+
+constexpr bool operator>(size_t lhs, const MemorySize& rhs)
+{
+    return rhs < lhs;
+}
+
+
+
+constexpr bool MemorySize::operator<=(size_t rhs) const
+{
+    return mNumBytes <= rhs;
+}
+
+
+
+constexpr bool operator<=(size_t lhs, const MemorySize& rhs)
+{
+    return rhs >= lhs;
+}
+
+
+
+constexpr bool MemorySize::operator>=(size_t rhs) const
+{
+    return mNumBytes >= rhs;
+}
+
+
+
+constexpr bool operator>=(size_t lhs, const MemorySize& rhs)
+{
+    return rhs <= lhs;
+}
+
+
+
+constexpr bool MemorySize::operator<(const MemorySize& rhs) const
+{
+    return mNumBytes < rhs.mNumBytes;
+}
+
+
+
+constexpr bool MemorySize::operator>(const MemorySize& rhs) const
+{
+    return mNumBytes > rhs.mNumBytes;
+}
+
+
+constexpr bool MemorySize::operator<=(const MemorySize& rhs) const
+{
+    return mNumBytes <= rhs.mNumBytes;
+}
+
+
+
+constexpr bool MemorySize::operator>=(const MemorySize& rhs) const
+{
+    return mNumBytes >= rhs.mNumBytes;
+}
+
+
+
 constexpr MemorySize MemorySize::operator*(size_t rhs) const
 {
     return MemorySize(mNumBytes * rhs);
@@ -55,9 +138,23 @@ constexpr bool MemorySize::operator==(size_t rhs) const
 
 
 
+constexpr bool operator==(size_t lhs, const MemorySize& rhs)
+{
+    return rhs == lhs;
+}
+
+
+
 constexpr bool MemorySize::operator!=(size_t rhs) const
 {
     return !(*this == rhs);
+}
+
+
+
+constexpr bool operator!=(size_t lhs, const MemorySize& rhs)
+{
+    return rhs != lhs;
 }
 
 

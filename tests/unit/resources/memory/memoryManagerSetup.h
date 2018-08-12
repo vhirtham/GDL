@@ -10,7 +10,7 @@ MemoryManager& SetupMemoryManager()
 {
     MemoryManager& memoryManager = MemoryManager::Instance();
 #ifndef NO_GENERAL_PURPOSE_MEMORY
-    memoryManager.CreateGeneralPurposeMemory((1_MiB).GetNumBytes());
+    memoryManager.CreateGeneralPurposeMemory(1_MiB);
 #endif
 #ifndef NO_MEMORY_POOL
     memoryManager.CreateMemoryPool((32_B).GetNumBytes(), 1000);

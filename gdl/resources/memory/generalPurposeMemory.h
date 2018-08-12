@@ -3,6 +3,7 @@
 
 #include "gdl/GDLTypedefs.h"
 #include "gdl/resources/memory/memoryInterface.h"
+#include "gdl/resources/memory/memorySize.h"
 
 #include <memory>
 #include <mutex>
@@ -42,7 +43,7 @@ class GeneralPurposeMemory : public MemoryInterface
         DeallocationData(const GeneralPurposeMemory& gpm, void* address);
     };
 
-    size_t mMemorySize;
+    MemorySize mMemorySize;
     U8* mFirstFreeMemoryPtr;
     std::unique_ptr<U8[]> mMemory;
     mutable std::mutex mMutex;
@@ -50,7 +51,7 @@ class GeneralPurposeMemory : public MemoryInterface
 public:
     //! @brief Creates the general purpose memory with <memorySize> bytes of memory
     //! @param memorySize: total amount of memory
-    GeneralPurposeMemory(size_t memorySize);
+    GeneralPurposeMemory(MemorySize memorySize);
 
     GeneralPurposeMemory() = delete;
     GeneralPurposeMemory(const GeneralPurposeMemory&) = delete;

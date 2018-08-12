@@ -28,8 +28,36 @@ BOOST_AUTO_TEST_CASE(Operators)
     MemorySize b = 2_MB;
 
     BOOST_CHECK(a != b);
-    BOOST_CHECK(a * 4 == 2 * b); // Test both multiplication operator versions
+    BOOST_CHECK(4 * a == b * 2); // Test both multiplication operator versions
 
+    BOOST_CHECK(a < b);
+    BOOST_CHECK(3 * a > b);
+    BOOST_CHECK(a <= b);
+    BOOST_CHECK(3 * a >= b);
+
+    BOOST_CHECK(4 * a <= b * 2);
+    BOOST_CHECK(4 * a >= b * 2);
+
+
+
+    // size_t comparisons
     BOOST_CHECK(a == 1000000);
     BOOST_CHECK(b != 1000000);
+    BOOST_CHECK(1000000 == a);
+    BOOST_CHECK(1000000 != b);
+
+    BOOST_CHECK(1000000 < b);
+    BOOST_CHECK(3000000 > b);
+    BOOST_CHECK(b > 1000000);
+    BOOST_CHECK(b < 3000000);
+
+    BOOST_CHECK(1000000 <= b);
+    BOOST_CHECK(3000000 >= b);
+    BOOST_CHECK(b >= 1000000);
+    BOOST_CHECK(b <= 3000000);
+
+    BOOST_CHECK(2000000 <= b);
+    BOOST_CHECK(2000000 >= b);
+    BOOST_CHECK(b <= 2000000);
+    BOOST_CHECK(b >= 2000000);
 }

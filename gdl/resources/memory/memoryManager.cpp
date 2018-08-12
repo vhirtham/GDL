@@ -126,7 +126,7 @@ MemoryInterface* MemoryManager::GetMemoryPool(size_t elementSize, size_t alignme
 
 
 
-void MemoryManager::CreateGeneralPurposeMemory(size_t memorySize)
+void MemoryManager::CreateGeneralPurposeMemory(MemorySize memorySize)
 {
     std::lock_guard<std::mutex> lock(mMutex);
 

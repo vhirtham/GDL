@@ -20,15 +20,15 @@ void AssertIncreasingAddresses(std::array<void*, 10> addresses)
 
 BOOST_AUTO_TEST_CASE(Construction_Destruction)
 {
-    BOOST_CHECK_NO_THROW(GeneralPurposeMemory(100));
+    BOOST_CHECK_NO_THROW(GeneralPurposeMemory(100_B));
 
-    BOOST_CHECK_THROW(GeneralPurposeMemory(0), Exception);
+    BOOST_CHECK_THROW(GeneralPurposeMemory(0_B), Exception);
 }
 
 
 BOOST_AUTO_TEST_CASE(Initialization_Deinitialization)
 {
-    constexpr size_t memorySize = 100;
+    constexpr MemorySize memorySize = 100_B;
 
     GeneralPurposeMemory gpm{memorySize};
 
@@ -69,7 +69,7 @@ BOOST_AUTO_TEST_CASE(Deallocation)
     constexpr size_t allocationSize = totalAllocationSize - headerSize;
     constexpr size_t doubleAllocationSize = totalAllocationSize * 2 - headerSize;
     constexpr size_t tripleAllocationSize = totalAllocationSize * 3 - headerSize;
-    constexpr size_t memorySize = numAllocations * (totalAllocationSize);
+    constexpr MemorySize memorySize = numAllocations * totalAllocationSize * 1_B;
 
     GeneralPurposeMemory gpm{memorySize};
     std::array<void*, numAllocations> addresses;
@@ -415,7 +415,7 @@ BOOST_AUTO_TEST_CASE(Allocation)
     constexpr size_t totalAllocationSize = 20;
     constexpr size_t allocationSize = totalAllocationSize - headerSize;
     constexpr size_t doubleAllocationSize = totalAllocationSize * 2 - headerSize;
-    constexpr size_t memorySize = numAllocations * (headerSize + allocationSize);
+    constexpr MemorySize memorySize = numAllocations * (headerSize + allocationSize) * 1_B;
 
     GeneralPurposeMemory gpm{memorySize};
     std::array<void*, numAllocations> addresses;
@@ -583,7 +583,7 @@ BOOST_AUTO_TEST_CASE(Allocation_Exceptions)
     constexpr size_t totalAllocationSize = 20;
     constexpr size_t allocationSize = totalAllocationSize - headerSize;
     constexpr size_t doubleAllocationSize = totalAllocationSize * 2 - headerSize;
-    constexpr size_t memorySize = numAllocations * (totalAllocationSize);
+    constexpr MemorySize memorySize = numAllocations * totalAllocationSize * 1_B;
 
     GeneralPurposeMemory gpm{memorySize};
     std::array<void*, numAllocations> addresses;
@@ -649,9 +649,9 @@ BOOST_AUTO_TEST_CASE(Deallocation_Exceptions)
     constexpr size_t headerSize = sizeof(size_t) + alignment;
     constexpr size_t totalAllocationSize = 20;
     constexpr size_t allocationSize = totalAllocationSize - headerSize;
-    constexpr size_t memorySize = numAllocations * (totalAllocationSize);
+    constexpr size_t memorySize = numAllocations * totalAllocationSize;
 
-    GeneralPurposeMemory gpm{memorySize};
+    GeneralPurposeMemory gpm{memorySize * 1_B};
     void* address = nullptr;
     void* address2 = nullptr;
 
@@ -706,7 +706,7 @@ BOOST_AUTO_TEST_CASE(Alignment)
     constexpr size_t maxHeaderSize = sizeof(size_t) + alignmentValues[numAllocations - 1];
     constexpr size_t totalAllocationSize = 200;
     constexpr size_t allocationSize = totalAllocationSize - maxHeaderSize;
-    constexpr size_t memorySize = numAllocations * (maxHeaderSize + allocationSize);
+    constexpr MemorySize memorySize = numAllocations * (maxHeaderSize + allocationSize) * 1_B;
 
     GeneralPurposeMemory gpm{memorySize};
     std::array<void*, numAllocations> addresses;
@@ -732,7 +732,7 @@ BOOST_AUTO_TEST_CASE(Multiple_Initialization)
     constexpr size_t headerSize = sizeof(size_t) + alignment;
     constexpr size_t totalAllocationSize = 20;
     constexpr size_t allocationSize = totalAllocationSize - headerSize;
-    constexpr size_t memorySize = numAllocations * (totalAllocationSize);
+    constexpr MemorySize memorySize = numAllocations * totalAllocationSize * 1_B;
 
     GeneralPurposeMemory gpm{memorySize};
     std::array<void*, numAllocations> addresses;
@@ -770,8 +770,8 @@ BOOST_AUTO_TEST_CASE(Thread_Safety)
     constexpr size_t allocationSize = totalAllocationSize - headerSize;
     constexpr size_t doubleAllocationSize = totalAllocationSize * 2 - headerSize;
     constexpr size_t tripleAllocationSize = totalAllocationSize * 3 - headerSize;
-    constexpr size_t memorySize =
-            numThreads * numThreadAllocations * (tripleAllocationSize)*2; // *2 As a safety factor agains fragmentation
+    constexpr MemorySize memorySize = numThreads * numThreadAllocations *
+                                      (tripleAllocationSize)*2_B; // *2 As a safety factor agains fragmentation
 
     std::atomic_bool kickoff = false;
     std::atomic_bool exceptionThrown = false;

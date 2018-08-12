@@ -55,15 +55,91 @@ public:
     //! @return TRUE / FALSE
     constexpr bool operator!=(const MemorySize& rhs) const;
 
+    //! @brief Comparison operator for two instances of the class
+    //! @param rhs: Rhs instance
+    //! @return TRUE / FALSE
+    constexpr bool operator<(const MemorySize& rhs) const;
+
+    //! @brief Comparison operator for two instances of the class
+    //! @param rhs: Rhs instance
+    //! @return TRUE / FALSE
+    constexpr bool operator>(const MemorySize& rhs) const;
+
+    //! @brief Comparison operator for two instances of the class
+    //! @param rhs: Rhs instance
+    //! @return TRUE / FALSE
+    constexpr bool operator<=(const MemorySize& rhs) const;
+
+    //! @brief Comparison operator for two instances of the class
+    //! @param rhs: Rhs instance
+    //! @return TRUE / FALSE
+    constexpr bool operator>=(const MemorySize& rhs) const;
+
     //! @brief Comparison operator for comparison with a size_t
     //! @param rhs: Rhs
     //! @return TRUE / FALSE
     constexpr bool operator==(size_t rhs) const;
 
     //! @brief Comparison operator for comparison with a size_t
+    //! @param lhs: Lhs
+    //! @param rhs: Rhs
+    //! @return TRUE / FALSE
+    friend constexpr bool operator==(size_t lhs, const MemorySize& rhs);
+
+    //! @brief Comparison operator for comparison with a size_t
     //! @param rhs: Rhs
     //! @return TRUE / FALSE
     constexpr bool operator!=(size_t rhs) const;
+
+    //! @brief Comparison operator for comparison with a size_t
+    //! @param lhs: Lhs
+    //! @param rhs: Rhs
+    //! @return TRUE / FALSE
+    friend constexpr bool operator!=(size_t lhs, const MemorySize& rhs);
+
+    //! @brief Comparison operator for comparison with a size_t
+    //! @param rhs: Rhs
+    //! @return TRUE / FALSE
+    constexpr bool operator<(size_t rhs) const;
+
+    //! @brief Comparison operator for comparison with a size_t
+    //! @param lhs: Lhs
+    //! @param rhs: Rhs
+    //! @return TRUE / FALSE
+    friend constexpr bool operator<(size_t lhs, const MemorySize& rhs);
+
+    //! @brief Comparison operator for comparison with a size_t
+    //! @param rhs: Rhs
+    //! @return TRUE / FALSE
+    constexpr bool operator>(size_t rhs) const;
+
+    //! @brief Comparison operator for comparison with a size_t
+    //! @param lhs: Lhs
+    //! @param rhs: Rhs
+    //! @return TRUE / FALSE
+    friend constexpr bool operator>(size_t lhs, const MemorySize& rhs);
+
+    //! @brief Comparison operator for comparison with a size_t
+    //! @param rhs: Rhs
+    //! @return TRUE / FALSE
+    constexpr bool operator<=(size_t rhs) const;
+
+    //! @brief Comparison operator for comparison with a size_t
+    //! @param lhs: Lhs
+    //! @param rhs: Rhs
+    //! @return TRUE / FALSE
+    friend constexpr bool operator<=(size_t lhs, const MemorySize& rhs);
+
+    //! @brief Comparison operator for comparison with a size_t
+    //! @param rhs: Rhs
+    //! @return TRUE / FALSE
+    constexpr bool operator>=(size_t rhs) const;
+
+    //! @brief Comparison operator for comparison with a size_t
+    //! @param lhs: Lhs
+    //! @param rhs: Rhs
+    //! @return TRUE / FALSE
+    friend constexpr bool operator>=(size_t lhs, const MemorySize& rhs);
 
     //! @brief Multiplication operator
     //! @param rhs: Rhs

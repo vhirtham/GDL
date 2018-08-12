@@ -2,6 +2,7 @@
 
 #include "gdl/resources/memory/generalPurposeMemory.h"
 #include "gdl/resources/memory/memoryPool.h"
+#include "gdl/resources/memory/memorySize.h"
 #include "gdl/resources/memory/memoryStack.h"
 
 #include <atomic>
@@ -67,7 +68,7 @@ public:
 
     //! @brief Creates a general purpose memory
     //! @param memorySize: Size of the general purpose memory
-    void CreateGeneralPurposeMemory(size_t memorySize);
+    void CreateGeneralPurposeMemory(MemorySize memorySize);
 
     //! @brief Creates a memory stack
     //! @param memorySize: Size of the memory stack

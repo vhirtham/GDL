@@ -11,7 +11,7 @@
 namespace GDL
 {
 
-GeneralPurposeMemory::GeneralPurposeMemory(size_t memorySize)
+GeneralPurposeMemory::GeneralPurposeMemory(MemorySize memorySize)
     : mMemorySize{memorySize}
     , mFirstFreeMemoryPtr{nullptr}
     , mMemory{nullptr}
@@ -109,10 +109,10 @@ void GeneralPurposeMemory::Initialize()
 
     EXCEPTION(IsInitialized(), "General purpose memory is already initialized.");
 
-    mMemory.reset(new U8[mMemorySize]);
+    mMemory.reset(new U8[mMemorySize.GetNumBytes()]);
     mFirstFreeMemoryPtr = GetStartOfMemory();
 
-    WriteSizeToMemory(mFirstFreeMemoryPtr, mMemorySize);
+    WriteSizeToMemory(mFirstFreeMemoryPtr, mMemorySize.GetNumBytes());
     WriteLinkToNextFreeBlock(mFirstFreeMemoryPtr, nullptr);
 }
 
@@ -235,7 +235,7 @@ void GeneralPurposeMemory::FindFreeMemoryBlock(AllocationData& data) const
 
 U8* GeneralPurposeMemory::GetEndOfMemory() const
 {
-    return mMemory.get() + mMemorySize;
+    return mMemory.get() + mMemorySize.GetNumBytes();
 }
 
 
