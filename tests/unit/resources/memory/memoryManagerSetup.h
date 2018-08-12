@@ -1,4 +1,5 @@
 #include "gdl/resources/memory/memoryManager.h"
+#include "gdl/resources/memory/memorySizeLiterals.h"
 
 using namespace GDL;
 
@@ -9,15 +10,15 @@ MemoryManager& SetupMemoryManager()
 {
     MemoryManager& memoryManager = MemoryManager::Instance();
 #ifndef NO_GENERAL_PURPOSE_MEMORY
-    memoryManager.CreateGeneralPurposeMemory(1024 * 1024);
+    memoryManager.CreateGeneralPurposeMemory(1_MB);
 #endif
 #ifndef NO_MEMORY_POOL
-    memoryManager.CreateMemoryPool(32, 1000);
-    memoryManager.CreateMemoryPool(64, 1000);
-    memoryManager.CreateMemoryPool(128, 1000);
+    memoryManager.CreateMemoryPool(32_B, 1000);
+    memoryManager.CreateMemoryPool(64_B, 1000);
+    memoryManager.CreateMemoryPool(128_B, 1000);
 #endif
 #ifndef NO_MEMORY_STACK
-    memoryManager.CreateMemoryStack(1024 * 1024);
+    memoryManager.CreateMemoryStack(1_MB);
 #endif
     return memoryManager;
 }
