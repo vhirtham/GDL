@@ -138,7 +138,7 @@ void MemoryManager::CreateGeneralPurposeMemory(MemorySize memorySize)
 
 
 
-void MemoryManager::CreateMemoryStack(size_t memorySize)
+void MemoryManager::CreateMemoryStack(MemorySize memorySize)
 {
     std::lock_guard<std::mutex> lock(mMutex);
 

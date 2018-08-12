@@ -15,9 +15,9 @@ using namespace GDL;
 template <bool _ThreadPrivate>
 void ConstructionDestructionTest()
 {
-    BOOST_CHECK_NO_THROW(memoryStackTemplate<_ThreadPrivate>(100));
+    BOOST_CHECK_NO_THROW(memoryStackTemplate<_ThreadPrivate>(100_B));
 
-    BOOST_CHECK_THROW(memoryStackTemplate<_ThreadPrivate>(0), Exception);
+    BOOST_CHECK_THROW(memoryStackTemplate<_ThreadPrivate>(0_B), Exception);
 }
 
 BOOST_AUTO_TEST_CASE(Construction_destruction)
@@ -30,7 +30,7 @@ BOOST_AUTO_TEST_CASE(Construction_destruction)
 template <bool _ThreadPrivate>
 void InitializationDeinitializationExceptions()
 {
-    constexpr U32 memorySize = 128;
+    constexpr MemorySize memorySize = 128_B;
     memoryStackTemplate<_ThreadPrivate> ms{memorySize};
 
 
@@ -66,7 +66,7 @@ void AllocationDeallocation()
 {
     constexpr U32 numAllocations = 5;
     constexpr U32 allocationSize = 10;
-    constexpr U32 memorySize = allocationSize * numAllocations;
+    constexpr MemorySize memorySize = allocationSize * numAllocations * 1_B;
     memoryStackTemplate<_ThreadPrivate> ms{memorySize};
 
     std::array<void*, numAllocations> addresses;
@@ -115,7 +115,7 @@ void MultipleInitialization()
 {
     constexpr U32 numAllocations = 5;
     constexpr U32 allocationSize = 10;
-    constexpr U32 memorySize = allocationSize * numAllocations;
+    constexpr MemorySize memorySize = allocationSize * numAllocations * 1_B;
     memoryStackTemplate<_ThreadPrivate> ms{memorySize};
 
     std::array<void*, numAllocations> addresses;
@@ -152,7 +152,7 @@ template <bool _ThreadPrivate>
 void AlignedAllocation()
 {
     constexpr U32 alignment = 128;
-    constexpr U32 memorySize = alignment * 5;
+    constexpr MemorySize memorySize = alignment * 5_B;
     memoryStackTemplate<_ThreadPrivate> ms{memorySize};
     std::array<void*, 3> addresses{{nullptr, nullptr, nullptr}};
 
@@ -196,7 +196,7 @@ BOOST_AUTO_TEST_CASE(Thread_safety_thread_private)
     void* address = nullptr;
 
     std::thread thread{[&]() {
-        ms.reset(new threadPrivateMemoryStack{100});
+        ms.reset(new threadPrivateMemoryStack{100_B});
         constructed = true;
 
         while (!initialize)
@@ -236,7 +236,7 @@ BOOST_AUTO_TEST_CASE(Thread_safety_non_thread_private)
     constexpr U32 numAllocations = 500;
     constexpr U32 allocationSize = sizeof(I32);
     constexpr U32 numThreads = 4;
-    constexpr U32 memorySize = allocationSize * numAllocations * numThreads;
+    constexpr MemorySize memorySize = allocationSize * numAllocations * numThreads * 1_B;
 
     memoryStack ms{memorySize};
     ms.Initialize();

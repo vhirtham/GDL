@@ -3,6 +3,7 @@
 
 #include "gdl/GDLTypedefs.h"
 #include "gdl/resources/memory/memoryInterface.h"
+#include "gdl/resources/memory/memorySize.h"
 
 #include <memory>
 #include <mutex>
@@ -22,7 +23,7 @@ class memoryStackTemplate : public MemoryInterface
 
     typedef typename std::conditional<_ThreadPrivate, std::thread::id, std::mutex>::type MutexOrThreadId;
 
-    size_t mMemorySize;
+    MemorySize mMemorySize;
     U32 mNumAllocations;
     U8* mCurrentMemoryPtr;
     std::unique_ptr<U8[]> mMemory;
@@ -31,7 +32,7 @@ class memoryStackTemplate : public MemoryInterface
 public:
     //! @brief Creates the thread private memory stack with <memorySize> bytes of memory
     //! @param memorySize: total amount of memory
-    memoryStackTemplate(size_t memorySize);
+    memoryStackTemplate(MemorySize memorySize);
 
     memoryStackTemplate() = delete;
     memoryStackTemplate(const memoryStackTemplate&) = delete;

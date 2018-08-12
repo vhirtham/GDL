@@ -10,7 +10,7 @@ namespace GDL
 {
 
 template <>
-memoryStackTemplate<true>::memoryStackTemplate(size_t memorySize)
+memoryStackTemplate<true>::memoryStackTemplate(MemorySize memorySize)
     : mMemorySize{memorySize}
     , mNumAllocations{0}
     , mCurrentMemoryPtr{nullptr}
@@ -21,7 +21,7 @@ memoryStackTemplate<true>::memoryStackTemplate(size_t memorySize)
 }
 
 template <>
-memoryStackTemplate<false>::memoryStackTemplate(size_t memorySize)
+memoryStackTemplate<false>::memoryStackTemplate(MemorySize memorySize)
     : mMemorySize{memorySize}
     , mNumAllocations{0}
     , mCurrentMemoryPtr{nullptr}
@@ -125,9 +125,9 @@ void* memoryStackTemplate<_ThreadPrivate>::AllocatePrivate(size_t size, size_t a
     U8* allocatedMemoryPtr = mCurrentMemoryPtr + correction;
 
     DEV_EXCEPTION(size == 0, "Allocated memory size is 0.");
-    DEV_EXCEPTION(!IsInitialized(), "Memory pool not initialized.");
+    DEV_EXCEPTION(!IsInitialized(), "Memory stack not initialized.");
     DEV_EXCEPTION(!IsPowerOf2(alignment), "Alignment must be a power of 2.");
-    EXCEPTION(allocatedMemoryPtr + size > mMemory.get() + mMemorySize, "No more memory available.");
+    EXCEPTION(allocatedMemoryPtr + size > mMemory.get() + mMemorySize.GetNumBytes(), "No more memory available.");
 
     mCurrentMemoryPtr = allocatedMemoryPtr + size;
 
@@ -140,8 +140,9 @@ template <bool _ThreadPrivate>
 void memoryStackTemplate<_ThreadPrivate>::DeallocatePrivate(void* address)
 {
     DEV_EXCEPTION(address == nullptr, "Can't free a nullptr");
-    DEV_EXCEPTION(static_cast<U8*>(address) < mMemory.get() || static_cast<U8*>(address) > mMemory.get() + mMemorySize,
-                  "Memory address is not part of the pool allocators memory");
+    DEV_EXCEPTION(static_cast<U8*>(address) < mMemory.get() ||
+                          static_cast<U8*>(address) > mMemory.get() + mMemorySize.GetNumBytes(),
+                  "Memory address is not part of the stack allocators memory");
     DEV_EXCEPTION(mNumAllocations == 0, "No memory allocated that can be deallocated");
 
     --mNumAllocations;
@@ -153,7 +154,7 @@ template <bool _ThreadPrivate>
 void memoryStackTemplate<_ThreadPrivate>::DeinitializePrivate()
 {
 
-    EXCEPTION(IsInitialized() == false, "Memory pool already deinitialized.");
+    EXCEPTION(IsInitialized() == false, "Memory stack already deinitialized.");
     EXCEPTION(mNumAllocations != 0, "Can't deinitialize. Memory still in use.");
 
     mMemory.reset(nullptr);
@@ -165,7 +166,7 @@ void memoryStackTemplate<_ThreadPrivate>::InitializePrivate()
 {
     EXCEPTION(IsInitialized(), "Memory stack is already initialized");
 
-    mMemory.reset(new U8[mMemorySize]);
+    mMemory.reset(new U8[mMemorySize.GetNumBytes()]);
     mNumAllocations = 0;
     mCurrentMemoryPtr = mMemory.get();
 }

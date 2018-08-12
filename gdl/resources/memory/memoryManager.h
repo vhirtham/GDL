@@ -72,7 +72,7 @@ public:
 
     //! @brief Creates a memory stack
     //! @param memorySize: Size of the memory stack
-    void CreateMemoryStack(size_t memorySize);
+    void CreateMemoryStack(MemorySize memorySize);
 
     //! @brief Creates a memory pool
     //! @param elementSize: Size of a single element of the memory pool

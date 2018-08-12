@@ -18,7 +18,7 @@ MemoryManager& SetupMemoryManager()
     memoryManager.CreateMemoryPool(128_B, 1000);
 #endif
 #ifndef NO_MEMORY_STACK
-    memoryManager.CreateMemoryStack((1_MiB).GetNumBytes());
+    memoryManager.CreateMemoryStack(1_MiB);
 #endif
     return memoryManager;
 }
