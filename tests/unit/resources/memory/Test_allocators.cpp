@@ -5,6 +5,7 @@
 #include "gdl/resources/memory/generalPurposeAllocator.h"
 #include "gdl/resources/memory/poolAllocator.h"
 #include "gdl/resources/memory/stackAllocator.h"
+#include "gdl/resources/memory/threadPrivateStackAllocator.h"
 #include "gdl/resources/memory/utility/heapAllocationCounter.h"
 
 
@@ -73,6 +74,15 @@ void CheckNoAllocations<StackAllocator>(const HeapAllocationCounter& gnc)
 #endif
 }
 
+template <>
+void CheckNoAllocations<ThreadPrivateStackAllocator>(const HeapAllocationCounter& gnc)
+{
+#if !(defined(NO_GENERAL_PURPOSE_MEMORY) && defined(NO_THREAD_PRIVATE_MEMORY_STACK))
+    BOOST_CHECK(gnc.CheckNumCallsExpected(0, 0));
+#else
+    BOOST_CHECK(!gnc.CheckNumCallsExpected(0, 0));
+#endif
+}
 // Vector -----------------------------------------------------------------------------------------
 
 template <template <typename> class _allocator>
@@ -111,7 +121,7 @@ BOOST_AUTO_TEST_CASE(Vector)
 
     BOOST_CHECK_NO_THROW(VectorTest<GeneralPurposeAllocator>());
     BOOST_CHECK_NO_THROW(VectorTest<StackAllocator>());
-
+    BOOST_CHECK_NO_THROW(VectorTest<ThreadPrivateStackAllocator>());
     DeinitializeMemoryManager();
 }
 
@@ -158,6 +168,7 @@ BOOST_AUTO_TEST_CASE(Map)
     BOOST_CHECK_NO_THROW(MapTest<GeneralPurposeAllocator>());
     BOOST_CHECK_NO_THROW(MapTest<PoolAllocator>());
     BOOST_CHECK_NO_THROW(MapTest<StackAllocator>());
+    BOOST_CHECK_NO_THROW(MapTest<ThreadPrivateStackAllocator>());
 
     DeinitializeMemoryManager();
 }

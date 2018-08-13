@@ -15,9 +15,9 @@ using namespace GDL;
 template <bool _ThreadPrivate>
 void ConstructionDestructionTest()
 {
-    BOOST_CHECK_NO_THROW(memoryStackTemplate<_ThreadPrivate>(100_B));
+    BOOST_CHECK_NO_THROW(MemoryStackTemplate<_ThreadPrivate>(100_B));
 
-    BOOST_CHECK_THROW(memoryStackTemplate<_ThreadPrivate>(0_B), Exception);
+    BOOST_CHECK_THROW(MemoryStackTemplate<_ThreadPrivate>(0_B), Exception);
 }
 
 BOOST_AUTO_TEST_CASE(Construction_destruction)
@@ -31,7 +31,7 @@ template <bool _ThreadPrivate>
 void InitializationDeinitializationExceptions()
 {
     constexpr MemorySize memorySize = 128_B;
-    memoryStackTemplate<_ThreadPrivate> ms{memorySize};
+    MemoryStackTemplate<_ThreadPrivate> ms{memorySize};
 
 
     GDL_CHECK_THROW_DEV_DISABLE(ms.Allocate(10), Exception);
@@ -67,7 +67,7 @@ void AllocationDeallocation()
     constexpr U32 numAllocations = 5;
     constexpr U32 allocationSize = 10;
     constexpr MemorySize memorySize = allocationSize * numAllocations * 1_B;
-    memoryStackTemplate<_ThreadPrivate> ms{memorySize};
+    MemoryStackTemplate<_ThreadPrivate> ms{memorySize};
 
     std::array<void*, numAllocations> addresses;
     addresses.fill(nullptr);
@@ -116,7 +116,7 @@ void MultipleInitialization()
     constexpr U32 numAllocations = 5;
     constexpr U32 allocationSize = 10;
     constexpr MemorySize memorySize = allocationSize * numAllocations * 1_B;
-    memoryStackTemplate<_ThreadPrivate> ms{memorySize};
+    MemoryStackTemplate<_ThreadPrivate> ms{memorySize};
 
     std::array<void*, numAllocations> addresses;
     addresses.fill(nullptr);
@@ -153,7 +153,7 @@ void AlignedAllocation()
 {
     constexpr U32 alignment = 128;
     constexpr MemorySize memorySize = alignment * 5_B;
-    memoryStackTemplate<_ThreadPrivate> ms{memorySize};
+    MemoryStackTemplate<_ThreadPrivate> ms{memorySize};
     std::array<void*, 3> addresses{{nullptr, nullptr, nullptr}};
 
     ms.Initialize();
@@ -192,11 +192,11 @@ BOOST_AUTO_TEST_CASE(Thread_safety_thread_private)
     std::atomic_bool allocated = false;
     std::atomic_bool deinitialize = false;
 
-    std::unique_ptr<threadPrivateMemoryStack> ms{nullptr};
+    std::unique_ptr<ThreadPrivateMemoryStack> ms{nullptr};
     void* address = nullptr;
 
     std::thread thread{[&]() {
-        ms.reset(new threadPrivateMemoryStack{100_B});
+        ms.reset(new ThreadPrivateMemoryStack{100_B});
         constructed = true;
 
         while (!initialize)
@@ -214,7 +214,7 @@ BOOST_AUTO_TEST_CASE(Thread_safety_thread_private)
     while (!constructed)
         std::this_thread::yield();
 
-    threadPrivateMemoryStack& msRef = *ms;
+    ThreadPrivateMemoryStack& msRef = *ms;
 
     BOOST_CHECK_THROW(msRef.Initialize(), Exception);
     initialize = true;
@@ -238,7 +238,7 @@ BOOST_AUTO_TEST_CASE(Thread_safety_non_thread_private)
     constexpr U32 numThreads = 4;
     constexpr MemorySize memorySize = allocationSize * numAllocations * numThreads * 1_B;
 
-    memoryStack ms{memorySize};
+    MemoryStack ms{memorySize};
     ms.Initialize();
 
     std::array<std::atomic_bool, numThreads> threadReady;

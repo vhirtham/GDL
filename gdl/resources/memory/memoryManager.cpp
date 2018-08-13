@@ -9,9 +9,11 @@ namespace GDL
 
 MemoryManager::MemoryManager()
     : mInitialized{false}
+    , mThreadPrivateMemoryEnabled{false}
     , mSetupFinished{false}
     , mMemoryRequestedUninitialized{false}
     , mGeneralPurposeMemory{nullptr}
+    , mMemoryStack{nullptr}
 {
 }
 
@@ -41,6 +43,23 @@ void MemoryManager::Initialize()
 
 
 
+void MemoryManager::EnableThreadPrivateMemory()
+{
+    std::lock_guard<std::mutex> lock(mMutex);
+
+    EXCEPTION(mSetupFinished == true, "Setup process already finished.");
+    EXCEPTION(mThreadPrivateMemoryEnabled, "Thread private memory is already enabled.");
+
+    mThreadPrivateMemoryEnabled = true;
+}
+
+bool MemoryManager::IsThreadPrivateMemoryEnabled() const
+{
+    return mThreadPrivateMemoryEnabled;
+}
+
+
+
 MemoryManager& MemoryManager::Instance()
 {
     static MemoryManager memoryManager;
@@ -54,6 +73,8 @@ void MemoryManager::Deinitialize()
     std::lock_guard<std::mutex> lock(mMutex);
 
     EXCEPTION(mInitialized == false, "Can't deinitialize. Memory manager was not initialized.");
+    EXCEPTION(mThreadPrivateMemoryEnabled && !mThreadPrivateMemoryStacks.empty(),
+              "Can't deinitialize. All thread private memory needs to be deleted first.");
 
     if (mGeneralPurposeMemory != nullptr)
         mGeneralPurposeMemory->Deinitialize();
@@ -124,6 +145,38 @@ MemoryInterface* MemoryManager::GetMemoryPool(size_t elementSize, size_t alignme
     return nullptr;
 }
 
+MemoryInterface* MemoryManager::GetThreadPrivateMemoryStack() const
+{
+    std::lock_guard<std::mutex> lock(mMutex);
+    if (mInitialized == false)
+    {
+        mSetupFinished = true;
+        mMemoryRequestedUninitialized = true;
+    }
+
+    auto it = mThreadPrivateMemoryStacks.find(std::this_thread::get_id());
+    if (it != mThreadPrivateMemoryStacks.end())
+        return &const_cast<ThreadPrivateMemoryStack&>(it->second);
+    return nullptr;
+}
+
+
+
+void MemoryManager::CreatePrivateMemoryStackForThisThread(MemorySize memorySize)
+{
+    std::lock_guard<std::mutex> lock(mMutex);
+    EXCEPTION(mInitialized == false, "Memory manager needs to be initialized to add thread private memory.");
+    EXCEPTION(mThreadPrivateMemoryEnabled == false,
+              "Thread private memory needs to be enabled during setup of the memory manager.");
+    EXCEPTION(mThreadPrivateMemoryStacks.find(std::this_thread::get_id()) != mThreadPrivateMemoryStacks.end(),
+              "Current thread already has a thread private memory stack.");
+
+    auto[it, success] = mThreadPrivateMemoryStacks.emplace(std::this_thread::get_id(), memorySize);
+
+    EXCEPTION(success == false, "Thread private memory stack could not be inserted into map.");
+    it->second.Initialize();
+}
+
 
 
 void MemoryManager::CreateGeneralPurposeMemory(MemorySize memorySize)
@@ -145,7 +198,7 @@ void MemoryManager::CreateMemoryStack(MemorySize memorySize)
     EXCEPTION(mSetupFinished == true, "Setup process already finished.");
     EXCEPTION(mMemoryStack != nullptr, "Memory stack already created");
 
-    mMemoryStack.reset(new memoryStack{memorySize});
+    mMemoryStack.reset(new MemoryStack{memorySize});
 }
 
 
@@ -162,4 +215,23 @@ void MemoryManager::CreateMemoryPool(MemorySize elementSize, U32 numElements, si
     mMemoryPools.emplace(std::piecewise_construct, std::forward_as_tuple(elementSize.GetNumBytes()),
                          std::forward_as_tuple(elementSize, numElements, alignment));
 }
+
+
+
+void MemoryManager::DeletePrivateMemoryStackForThisThread()
+{
+    std::lock_guard<std::mutex> lock(mMutex);
+
+    auto it = mThreadPrivateMemoryStacks.find(std::this_thread::get_id());
+
+    EXCEPTION(mInitialized == false, "Memory manager needs to be initialized to delete thread private memory.");
+    EXCEPTION(mThreadPrivateMemoryEnabled == false,
+              "Thread private memory needs to be enabled during setup of the memory manager.");
+    EXCEPTION(it == mThreadPrivateMemoryStacks.end(),
+              "There is no thread private memory stack for the current thread.");
+
+    it->second.Deinitialize();
+    mThreadPrivateMemoryStacks.erase(std::this_thread::get_id());
 }
+
+} // namespace GDL

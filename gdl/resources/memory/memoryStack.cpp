@@ -10,7 +10,7 @@ namespace GDL
 {
 
 template <>
-memoryStackTemplate<true>::memoryStackTemplate(MemorySize memorySize)
+MemoryStackTemplate<true>::MemoryStackTemplate(MemorySize memorySize)
     : mMemorySize{memorySize}
     , mNumAllocations{0}
     , mCurrentMemoryPtr{nullptr}
@@ -21,7 +21,7 @@ memoryStackTemplate<true>::memoryStackTemplate(MemorySize memorySize)
 }
 
 template <>
-memoryStackTemplate<false>::memoryStackTemplate(MemorySize memorySize)
+MemoryStackTemplate<false>::MemoryStackTemplate(MemorySize memorySize)
     : mMemorySize{memorySize}
     , mNumAllocations{0}
     , mCurrentMemoryPtr{nullptr}
@@ -31,14 +31,14 @@ memoryStackTemplate<false>::memoryStackTemplate(MemorySize memorySize)
 }
 
 template <bool _ThreadPrivate>
-memoryStackTemplate<_ThreadPrivate>::~memoryStackTemplate()
+MemoryStackTemplate<_ThreadPrivate>::~MemoryStackTemplate()
 {
 }
 
 
 
 template <>
-void* memoryStackTemplate<true>::Allocate(size_t size, size_t alignment)
+void* MemoryStackTemplate<true>::Allocate(size_t size, size_t alignment)
 {
     DEV_EXCEPTION(mMutexOrThreadId != std::this_thread::get_id(),
                   "Thread private memory stack can only be accessed by owning thread");
@@ -49,7 +49,7 @@ void* memoryStackTemplate<true>::Allocate(size_t size, size_t alignment)
 
 
 template <>
-void* memoryStackTemplate<false>::Allocate(size_t size, size_t alignment)
+void* MemoryStackTemplate<false>::Allocate(size_t size, size_t alignment)
 {
     std::lock_guard<std::mutex> lock(mMutexOrThreadId);
     return AllocatePrivate(size, alignment);
@@ -58,7 +58,7 @@ void* memoryStackTemplate<false>::Allocate(size_t size, size_t alignment)
 
 
 template <>
-void memoryStackTemplate<true>::Deallocate(void* address, [[maybe_unused]] size_t alignment)
+void MemoryStackTemplate<true>::Deallocate(void* address, [[maybe_unused]] size_t alignment)
 {
     DEV_EXCEPTION(mMutexOrThreadId != std::this_thread::get_id(),
                   "Thread private memory stack can only be accessed by owning thread");
@@ -69,7 +69,7 @@ void memoryStackTemplate<true>::Deallocate(void* address, [[maybe_unused]] size_
 
 
 template <>
-void memoryStackTemplate<false>::Deallocate(void* address, [[maybe_unused]] size_t alignment)
+void MemoryStackTemplate<false>::Deallocate(void* address, [[maybe_unused]] size_t alignment)
 {
     std::lock_guard<std::mutex> lock(mMutexOrThreadId);
     DeallocatePrivate(address);
@@ -78,7 +78,7 @@ void memoryStackTemplate<false>::Deallocate(void* address, [[maybe_unused]] size
 
 
 template <>
-void memoryStackTemplate<true>::Deinitialize()
+void MemoryStackTemplate<true>::Deinitialize()
 {
     EXCEPTION(mMutexOrThreadId != std::this_thread::get_id(),
               "Thread private memory stack can only be accessed by owning thread");
@@ -89,7 +89,7 @@ void memoryStackTemplate<true>::Deinitialize()
 
 
 template <>
-void memoryStackTemplate<false>::Deinitialize()
+void MemoryStackTemplate<false>::Deinitialize()
 {
     std::lock_guard<std::mutex> lock(mMutexOrThreadId);
     DeinitializePrivate();
@@ -98,7 +98,7 @@ void memoryStackTemplate<false>::Deinitialize()
 
 
 template <>
-void memoryStackTemplate<true>::Initialize()
+void MemoryStackTemplate<true>::Initialize()
 {
     EXCEPTION(mMutexOrThreadId != std::this_thread::get_id(),
               "Thread private memory stack can only be accessed by owning thread");
@@ -109,7 +109,7 @@ void memoryStackTemplate<true>::Initialize()
 
 
 template <>
-void memoryStackTemplate<false>::Initialize()
+void MemoryStackTemplate<false>::Initialize()
 {
     std::lock_guard<std::mutex> lock(mMutexOrThreadId);
     InitializePrivate();
@@ -117,7 +117,7 @@ void memoryStackTemplate<false>::Initialize()
 
 
 template <bool _ThreadPrivate>
-void* memoryStackTemplate<_ThreadPrivate>::AllocatePrivate(size_t size, size_t alignment)
+void* MemoryStackTemplate<_ThreadPrivate>::AllocatePrivate(size_t size, size_t alignment)
 {
     size_t misalignment = Misalignment(mCurrentMemoryPtr, alignment);
     size_t correction = ((misalignment + alignment - 1) / alignment) * alignment - misalignment;
@@ -137,7 +137,7 @@ void* memoryStackTemplate<_ThreadPrivate>::AllocatePrivate(size_t size, size_t a
 }
 
 template <bool _ThreadPrivate>
-void memoryStackTemplate<_ThreadPrivate>::DeallocatePrivate(void* address)
+void MemoryStackTemplate<_ThreadPrivate>::DeallocatePrivate(void* address)
 {
     DEV_EXCEPTION(address == nullptr, "Can't free a nullptr");
     DEV_EXCEPTION(static_cast<U8*>(address) < mMemory.get() ||
@@ -151,7 +151,7 @@ void memoryStackTemplate<_ThreadPrivate>::DeallocatePrivate(void* address)
 }
 
 template <bool _ThreadPrivate>
-void memoryStackTemplate<_ThreadPrivate>::DeinitializePrivate()
+void MemoryStackTemplate<_ThreadPrivate>::DeinitializePrivate()
 {
 
     EXCEPTION(IsInitialized() == false, "Memory stack already deinitialized.");
@@ -162,7 +162,7 @@ void memoryStackTemplate<_ThreadPrivate>::DeinitializePrivate()
 }
 
 template <bool _ThreadPrivate>
-void memoryStackTemplate<_ThreadPrivate>::InitializePrivate()
+void MemoryStackTemplate<_ThreadPrivate>::InitializePrivate()
 {
     EXCEPTION(IsInitialized(), "Memory stack is already initialized");
 
@@ -174,7 +174,7 @@ void memoryStackTemplate<_ThreadPrivate>::InitializePrivate()
 
 
 template <bool _ThreadPrivate>
-void memoryStackTemplate<_ThreadPrivate>::CheckConstructionParameters() const
+void MemoryStackTemplate<_ThreadPrivate>::CheckConstructionParameters() const
 {
     EXCEPTION(mMemorySize < 1, "Memory size must be bigger than 0");
 }
@@ -182,14 +182,14 @@ void memoryStackTemplate<_ThreadPrivate>::CheckConstructionParameters() const
 
 
 template <bool _ThreadPrivate>
-bool memoryStackTemplate<_ThreadPrivate>::IsInitialized() const
+bool MemoryStackTemplate<_ThreadPrivate>::IsInitialized() const
 {
     return mMemory != nullptr;
 }
 
 
 
-template class memoryStackTemplate<true>;
-template class memoryStackTemplate<false>;
+template class MemoryStackTemplate<true>;
+template class MemoryStackTemplate<false>;
 
 } // namespace GDL

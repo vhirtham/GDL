@@ -18,7 +18,7 @@ namespace GDL
 //! @tparam _ThreadPrivate: TRUE if the memory stack can only be accessed by a single thread. FALSE if the memory stack
 //! is accessable by multiple threads and needs to be protected by a mutex
 template <bool _ThreadPrivate>
-class memoryStackTemplate : public MemoryInterface
+class MemoryStackTemplate : public MemoryInterface
 {
 
     typedef typename std::conditional<_ThreadPrivate, std::thread::id, std::mutex>::type MutexOrThreadId;
@@ -32,14 +32,14 @@ class memoryStackTemplate : public MemoryInterface
 public:
     //! @brief Creates the thread private memory stack with <memorySize> bytes of memory
     //! @param memorySize: total amount of memory
-    memoryStackTemplate(MemorySize memorySize);
+    MemoryStackTemplate(MemorySize memorySize);
 
-    memoryStackTemplate() = delete;
-    memoryStackTemplate(const memoryStackTemplate&) = delete;
-    memoryStackTemplate(memoryStackTemplate&&) = delete;
-    memoryStackTemplate& operator=(const memoryStackTemplate&) = delete;
-    memoryStackTemplate& operator=(memoryStackTemplate&&) = delete;
-    ~memoryStackTemplate();
+    MemoryStackTemplate() = delete;
+    MemoryStackTemplate(const MemoryStackTemplate&) = delete;
+    MemoryStackTemplate(MemoryStackTemplate&&) = delete;
+    MemoryStackTemplate& operator=(const MemoryStackTemplate&) = delete;
+    MemoryStackTemplate& operator=(MemoryStackTemplate&&) = delete;
+    ~MemoryStackTemplate();
 
 
     //! @brief Allocates memory
@@ -85,7 +85,7 @@ private:
 };
 
 
-using threadPrivateMemoryStack = memoryStackTemplate<true>;
-using memoryStack = memoryStackTemplate<false>;
+using ThreadPrivateMemoryStack = MemoryStackTemplate<true>;
+using MemoryStack = MemoryStackTemplate<false>;
 
 } // namespace GDL

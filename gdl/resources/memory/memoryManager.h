@@ -9,6 +9,7 @@
 #include <map>
 #include <memory>
 #include <mutex>
+#include <thread>
 
 namespace GDL
 {
@@ -16,14 +17,15 @@ namespace GDL
 class MemoryManager
 {
     std::atomic_bool mInitialized;
+    std::atomic_bool mThreadPrivateMemoryEnabled;
     mutable std::mutex mMutex;
     mutable bool mSetupFinished;
     mutable bool mMemoryRequestedUninitialized;
 
     std::unique_ptr<GeneralPurposeMemory> mGeneralPurposeMemory;
-    std::unique_ptr<memoryStack> mMemoryStack;
+    std::unique_ptr<MemoryStack> mMemoryStack;
     std::map<size_t, MemoryPool> mMemoryPools;
-
+    std::map<std::thread::id, ThreadPrivateMemoryStack> mThreadPrivateMemoryStacks;
 
     //! @brief Private ctor since this class should only be used as a singleton
     MemoryManager();
@@ -47,10 +49,16 @@ public:
     //! @brief Initializes the memory manager
     void Initialize();
 
+    //! @brief Enables the use of thread private memory stacks;
+    void EnableThreadPrivateMemory();
+
+    //! @brief Returns if thread private memory is enabled
+    //! TRUE / FALSE
+    bool IsThreadPrivateMemoryEnabled() const;
+
     //! @brief Returns an memory interface pointer to the general purpose memory
     //! @return Pointer to the general purpose memory if it exists. Otherwise nullptr
     MemoryInterface* GetGeneralPurposeMemory() const;
-
 
     //! @brief Returns an memory interface pointer to the heap memory
     //! @return Pointer to the heap memory
@@ -66,6 +74,14 @@ public:
     //! @return Pointer to a fitting memory pool if it exist. Otherwise nullptr
     MemoryInterface* GetMemoryPool(size_t elementSize, size_t alignment) const;
 
+    //! @brief Returns an memory interface pointer to the threads private memory stack
+    //! @return Pointer to the threads private memory stack if it exists. Otherwise nullptr
+    MemoryInterface* GetThreadPrivateMemoryStack() const;
+
+    //! @brief Creates a thread private memory stack for this thread
+    //! @param memorySize: Size of the memory stack
+    void CreatePrivateMemoryStackForThisThread(MemorySize memorySize);
+
     //! @brief Creates a general purpose memory
     //! @param memorySize: Size of the general purpose memory
     void CreateGeneralPurposeMemory(MemorySize memorySize);
@@ -80,5 +96,8 @@ public:
     //! @param alignment: Alignment of the memory pool (default: alignment=elementSize)
     //! @remark If the alignment value is set to 0, the alignment is set to the element size
     void CreateMemoryPool(MemorySize elementSize, U32 numElements, size_t alignment = 0);
+
+    //! @brief Deletes the thread private memory stack for this thread
+    void DeletePrivateMemoryStackForThisThread();
 };
 }

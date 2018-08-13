@@ -20,6 +20,9 @@ MemoryManager& SetupMemoryManager()
 #ifndef NO_MEMORY_STACK
     memoryManager.CreateMemoryStack(1_MiB);
 #endif
+#ifndef NO_THREAD_PRIVATE_MEMORY_STACK
+    memoryManager.EnableThreadPrivateMemory();
+#endif
     return memoryManager;
 }
 
@@ -35,14 +38,27 @@ MemoryManager& GetMemoryManager()
 
 void InitializeMemoryManager()
 {
-#if !(defined(NO_GENERAL_PURPOSE_MEMORY) && defined(NO_MEMORY_POOL) && defined(NO_MEMORY_STACK))
+#if !(defined(NO_GENERAL_PURPOSE_MEMORY) && defined(NO_MEMORY_POOL) && defined(NO_MEMORY_STACK) &&                     \
+      defined(NO_THREAD_PRIVATE_MEMORY_STACK))
+
     GetMemoryManager().Initialize();
+
+#ifndef NO_THREAD_PRIVATE_MEMORY_STACK
+    GetMemoryManager().CreatePrivateMemoryStackForThisThread(1_MB);
+#endif
+
 #endif
 }
 
 void DeinitializeMemoryManager()
 {
-#if !(defined(NO_GENERAL_PURPOSE_MEMORY) && defined(NO_MEMORY_POOL) && defined(NO_MEMORY_STACK))
+#ifndef NO_THREAD_PRIVATE_MEMORY_STACK
+    GetMemoryManager().DeletePrivateMemoryStackForThisThread();
+#endif
+
+
+#if !(defined(NO_GENERAL_PURPOSE_MEMORY) && defined(NO_MEMORY_POOL) && defined(NO_MEMORY_STACK) &&                     \
+      defined(NO_THREAD_PRIVATE_MEMORY_STACK))
     GetMemoryManager().Deinitialize();
 #endif
 }

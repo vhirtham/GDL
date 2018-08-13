@@ -27,7 +27,8 @@ addTest(allocators
 addTest(allocators-no_memory_pool_no_memory_stack
     ${MemoryManagerSources}
     -DNO_MEMORY_POOL
-    -DNO_MEMORY_STACK)
+    -DNO_MEMORY_STACK
+    -DNO_THREAD_PRIVATE_MEMORY_STACK)
 
 addTest(allocators-no_general_purpose_memory
     ${MemoryManagerSources}
@@ -37,4 +38,5 @@ addTest(allocators-only_heap_allocation
     ${MemoryManagerSources}
     -DNO_GENERAL_PURPOSE_MEMORY
     -DNO_MEMORY_POOL
-    -DNO_MEMORY_STACK)
+    -DNO_MEMORY_STACK
+    -DNO_THREAD_PRIVATE_MEMORY_STACK)
