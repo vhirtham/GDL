@@ -47,9 +47,11 @@ MemoryInterface* PoolAllocator<_type>::GetMemoryModel()
 {
     MemoryInterface* memory = MemoryManager::Instance().GetMemoryPool(sizeof(_type), alignof(_type));
     if (memory == nullptr)
+    {
         memory = MemoryManager::Instance().GetGeneralPurposeMemory();
-    if (memory == nullptr)
-        return MemoryManager::Instance().GetHeapMemory();
+        if (memory == nullptr)
+            return MemoryManager::Instance().GetHeapMemory();
+    }
     return memory;
 }
 

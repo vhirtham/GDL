@@ -45,9 +45,11 @@ MemoryInterface* StackAllocator<_type>::GetMemoryModel()
 {
     MemoryInterface* memory = MemoryManager::Instance().GetMemoryStack();
     if (memory == nullptr)
+    {
         memory = MemoryManager::Instance().GetGeneralPurposeMemory();
-    if (memory == nullptr)
-        return MemoryManager::Instance().GetHeapMemory();
+        if (memory == nullptr)
+            return MemoryManager::Instance().GetHeapMemory();
+    }
     return memory;
 }
 

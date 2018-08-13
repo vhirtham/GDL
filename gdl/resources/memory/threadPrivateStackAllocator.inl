@@ -42,12 +42,14 @@ template <class _type>
 MemoryInterface* ThreadPrivateStackAllocator<_type>::GetMemoryModel()
 {
     MemoryInterface* memory = MemoryManager::Instance().GetThreadPrivateMemoryStack();
-    DEV_EXCEPTION(memory == nullptr && MemoryManager::Instance().IsThreadPrivateMemoryEnabled(),
-                  "No thread private memory created for the calling thread.");
     if (memory == nullptr)
+    {
+        DEV_EXCEPTION(MemoryManager::Instance().IsThreadPrivateMemoryEnabled(),
+                      "No thread private memory created for the calling thread.");
         memory = MemoryManager::Instance().GetGeneralPurposeMemory();
-    if (memory == nullptr)
-        return MemoryManager::Instance().GetHeapMemory();
+        if (memory == nullptr)
+            return MemoryManager::Instance().GetHeapMemory();
+    }
     return memory;
 }
 
