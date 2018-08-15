@@ -23,34 +23,42 @@ ThreadPrivateStackAllocator<_type>::ThreadPrivateStackAllocator(const ThreadPriv
 
 
 template <class _type>
-_type* ThreadPrivateStackAllocator<_type>::allocate(std::size_t n)
+_type* ThreadPrivateStackAllocator<_type>::allocate(std::size_t numInstances)
 {
-    return static_cast<_type*>(GetMemoryModel()->Allocate(n * sizeof(_type), alignof(_type)));
+    return static_cast<_type*>(GetMemoryAllocationPattern()->Allocate(numInstances * sizeof(_type), alignof(_type)));
 }
 
 
 
 template <class _type>
-void ThreadPrivateStackAllocator<_type>::deallocate(_type* p, [[maybe_unused]] std::size_t n)
+void ThreadPrivateStackAllocator<_type>::deallocate(_type* pointer, std::size_t)
 {
-    GetMemoryModel()->Deallocate(p, alignof(_type));
+    GetMemoryAllocationPattern()->Deallocate(pointer, alignof(_type));
 }
 
 
 
 template <class _type>
-MemoryInterface* ThreadPrivateStackAllocator<_type>::GetMemoryModel()
+MemoryInterface* ThreadPrivateStackAllocator<_type>::GetMemoryAllocationPattern()
 {
-    MemoryInterface* memory = MemoryManager::Instance().GetThreadPrivateMemoryStack();
-    if (memory == nullptr)
+    MemoryInterface* memoryAP = MemoryManager::Instance().GetThreadPrivateMemoryStack();
+    if (memoryAP == nullptr)
     {
         DEV_EXCEPTION(MemoryManager::Instance().IsThreadPrivateMemoryEnabled(),
                       "No thread private memory created for the calling thread.");
-        memory = MemoryManager::Instance().GetGeneralPurposeMemory();
-        if (memory == nullptr)
-            return MemoryManager::Instance().GetHeapMemory();
+        static MemoryInterface* alternativeMemoryAP = InitializeAlternativeMemoryAllocationPattern();
+        return alternativeMemoryAP;
     }
-    return memory;
+    return memoryAP;
+}
+
+template<class _type>
+MemoryInterface *ThreadPrivateStackAllocator<_type>::InitializeAlternativeMemoryAllocationPattern()
+{
+    MemoryInterface* memoryAP = MemoryManager::Instance().GetGeneralPurposeMemory();
+    if (memoryAP == nullptr)
+        return MemoryManager::Instance().GetHeapMemory();
+    return memoryAP;
 }
 
 

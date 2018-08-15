@@ -23,34 +23,41 @@ StackAllocator<_type>::StackAllocator(const StackAllocator<_typeOther>&) noexcep
 
 
 template <class _type>
-_type* StackAllocator<_type>::allocate(std::size_t n)
+_type* StackAllocator<_type>::allocate(std::size_t numInstances)
 {
-    static MemoryInterface* memory = GetMemoryModel();
-    return static_cast<_type*>(memory->Allocate(n * sizeof(_type), alignof(_type)));
+    return static_cast<_type*>(GetMemoryAllocationPattern()->Allocate(numInstances * sizeof(_type), alignof(_type)));
 }
 
 
 
 template <class _type>
-void StackAllocator<_type>::deallocate(_type* p, [[maybe_unused]] std::size_t n)
+void StackAllocator<_type>::deallocate(_type* pointer, std::size_t)
 {
-    static MemoryInterface* memory = GetMemoryModel();
-    memory->Deallocate(p, alignof(_type));
+    GetMemoryAllocationPattern()->Deallocate(pointer, alignof(_type));
 }
 
 
 
 template <class _type>
-MemoryInterface* StackAllocator<_type>::GetMemoryModel()
+MemoryInterface* StackAllocator<_type>::GetMemoryAllocationPattern()
 {
-    MemoryInterface* memory = MemoryManager::Instance().GetMemoryStack();
-    if (memory == nullptr)
+    static MemoryInterface* memoryAP = InitializeMemoryAllocationPattern();
+    return memoryAP;
+}
+
+
+
+template <class _type>
+MemoryInterface* StackAllocator<_type>::InitializeMemoryAllocationPattern()
+{
+    MemoryInterface* memoryAP = MemoryManager::Instance().GetMemoryStack();
+    if (memoryAP == nullptr)
     {
-        memory = MemoryManager::Instance().GetGeneralPurposeMemory();
-        if (memory == nullptr)
+        memoryAP = MemoryManager::Instance().GetGeneralPurposeMemory();
+        if (memoryAP == nullptr)
             return MemoryManager::Instance().GetHeapMemory();
     }
-    return memory;
+    return memoryAP;
 }
 
 

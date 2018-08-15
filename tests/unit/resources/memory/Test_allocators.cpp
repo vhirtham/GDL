@@ -11,6 +11,7 @@
 
 
 #include "memoryManagerSetup.h"
+#include "tests/tools/ExceptionChecks.h"
 
 #include <iostream>
 #include <array>
@@ -172,3 +173,21 @@ BOOST_AUTO_TEST_CASE(Map)
 
     DeinitializeMemoryManager();
 }
+
+
+// Pool Alloctor specific tests -------------------------------------------------------------------
+
+#ifndef NO_MEMORY_POOL
+BOOST_AUTO_TEST_CASE(Pool_throw_on_array_allocation)
+{
+    InitializeMemoryManager();
+
+    std::vector<F32, PoolAllocator<F32>> v;
+    GDL_CHECK_THROW_DEV(v.reserve(3), Exception);
+
+    v.clear();
+    v.shrink_to_fit();
+
+    DeinitializeMemoryManager();
+}
+#endif

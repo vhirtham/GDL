@@ -23,36 +23,40 @@ PoolAllocator<_type>::PoolAllocator(const PoolAllocator<_typeOther>&) noexcept
 
 
 template <class _type>
-_type* PoolAllocator<_type>::allocate(std::size_t n)
+_type* PoolAllocator<_type>::allocate(std::size_t numInstances)
 {
-    DEV_EXCEPTION(n > 1, "Pool allocator is not compatible with array like data types");
-    static MemoryInterface* memory = GetMemoryModel();
-    return static_cast<_type*>(memory->Allocate(n * sizeof(_type), alignof(_type)));
+    DEV_EXCEPTION(numInstances > 1, "Pool allocator is not compatible with array like data types");
+    return static_cast<_type*>(GetMemoryAllocationPattern()->Allocate(numInstances * sizeof(_type), alignof(_type)));
 }
 
 
 
 template <class _type>
-void PoolAllocator<_type>::deallocate(_type* p, [[maybe_unused]] std::size_t n)
+void PoolAllocator<_type>::deallocate(_type* p, std::size_t)
 {
-    DEV_EXCEPTION(n > 1, "Pool allocator is not compatible with array like data types");
-    static MemoryInterface* memory = GetMemoryModel();
-    memory->Deallocate(p, alignof(_type));
+    GetMemoryAllocationPattern()->Deallocate(p, alignof(_type));
+}
+
+template <class _type>
+MemoryInterface* PoolAllocator<_type>::GetMemoryAllocationPattern()
+{
+    static MemoryInterface* memoryAP = InitializeMemoryAllocationPattern();
+    return memoryAP;
 }
 
 
 
 template <class _type>
-MemoryInterface* PoolAllocator<_type>::GetMemoryModel()
+MemoryInterface* PoolAllocator<_type>::InitializeMemoryAllocationPattern()
 {
-    MemoryInterface* memory = MemoryManager::Instance().GetMemoryPool(sizeof(_type), alignof(_type));
-    if (memory == nullptr)
+    MemoryInterface* memoryAP = MemoryManager::Instance().GetMemoryPool(sizeof(_type), alignof(_type));
+    if (memoryAP == nullptr)
     {
-        memory = MemoryManager::Instance().GetGeneralPurposeMemory();
-        if (memory == nullptr)
+        memoryAP = MemoryManager::Instance().GetGeneralPurposeMemory();
+        if (memoryAP == nullptr)
             return MemoryManager::Instance().GetHeapMemory();
     }
-    return memory;
+    return memoryAP;
 }
 
 

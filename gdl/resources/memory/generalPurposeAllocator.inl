@@ -22,31 +22,40 @@ GeneralPurposeAllocator<_type>::GeneralPurposeAllocator(const GeneralPurposeAllo
 
 
 template <class _type>
-_type* GeneralPurposeAllocator<_type>::allocate(std::size_t n)
+_type* GeneralPurposeAllocator<_type>::allocate(std::size_t numInstances)
 {
-    static MemoryInterface* memory = GetMemoryModel();
-    return static_cast<_type*>(memory->Allocate(n * sizeof(_type), alignof(_type)));
+    return static_cast<_type*>(GetMemoryAllocationPattern()->Allocate(numInstances * sizeof(_type), alignof(_type)));
+}
+
+
+
+
+template <class _type>
+void GeneralPurposeAllocator<_type>::deallocate(_type* pointer, std::size_t)
+{
+    GetMemoryAllocationPattern()->Deallocate(pointer, alignof(_type));
 }
 
 
 
 template <class _type>
-void GeneralPurposeAllocator<_type>::deallocate(_type* p, [[maybe_unused]] std::size_t n)
+MemoryInterface* GeneralPurposeAllocator<_type>::GetMemoryAllocationPattern()
 {
-    static MemoryInterface* memory = GetMemoryModel();
-    memory->Deallocate(p, alignof(_type));
+    static MemoryInterface* memoryAP = InitializeMemoryAllocationPattern();
+    return memoryAP;
 }
 
 
 
-template <class _type>
-MemoryInterface* GeneralPurposeAllocator<_type>::GetMemoryModel()
+template<class _type>
+MemoryInterface *GeneralPurposeAllocator<_type>::InitializeMemoryAllocationPattern()
 {
-    MemoryInterface* memory = MemoryManager::Instance().GetGeneralPurposeMemory();
-    if (memory == nullptr)
+    MemoryInterface* memoryAP = MemoryManager::Instance().GetGeneralPurposeMemory();
+    if (memoryAP == nullptr)
         return MemoryManager::Instance().GetHeapMemory();
-    return memory;
+    return memoryAP;
 }
+
 
 
 
