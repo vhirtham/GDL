@@ -1,6 +1,6 @@
 #include "gdl/resources/memory/memoryManager.h"
 
-#include "gdl/base/Exception.h"
+#include "gdl/base/exception.h"
 #include "gdl/resources/memory/heapMemory.h"
 
 

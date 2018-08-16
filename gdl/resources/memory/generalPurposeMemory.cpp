@@ -1,6 +1,6 @@
 #include "gdl/resources/memory/generalPurposeMemory.h"
 
-#include "gdl/base/Exception.h"
+#include "gdl/base/exception.h"
 #include "gdl/base/SSESupportFunctions.h"
 #include "gdl/base/functions/isPowerOf2.h"
 #include "gdl/resources/memory/sharedFunctions.h"

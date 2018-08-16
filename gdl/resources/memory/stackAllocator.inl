@@ -2,7 +2,7 @@
 
 #include "gdl/resources/memory/stackAllocator.h"
 #include "gdl/resources/memory/memoryManager.h"
-#include "gdl/base/Exception.h"
+#include "gdl/base/exception.h"
 
 namespace GDL
 {

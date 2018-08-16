@@ -1,7 +1,7 @@
 #include "gdl/resources/memory/memoryStack.h"
 
 
-#include "gdl/base/Exception.h"
+#include "gdl/base/exception.h"
 #include "gdl/base/functions/isPowerOf2.h"
 #include "gdl/base/SSESupportFunctions.h"
 

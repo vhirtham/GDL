@@ -1,7 +1,7 @@
 #include "programDataManagerGL.h"
 
 
-#include "gdl/base/Exception.h"
+#include "gdl/base/exception.h"
 
 #include <memory>
 

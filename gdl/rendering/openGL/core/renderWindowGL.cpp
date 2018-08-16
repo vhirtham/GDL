@@ -1,5 +1,5 @@
 #include "renderWindowGL.h"
-#include "gdl/base/Exception.h"
+#include "gdl/base/exception.h"
 
 #include <GL/glew.h>
 #include <GL/freeglut.h>

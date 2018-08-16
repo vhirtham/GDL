@@ -2,7 +2,7 @@
 #include "tests/tools/ExceptionChecks.h"
 
 #include "gdl/GDLTypedefs.h"
-#include "gdl/base/Exception.h"
+#include "gdl/base/exception.h"
 #include "gdl/base/SSESupportFunctions.h"
 #include "gdl/resources/memory/memoryPool.h"
 #include "gdl/resources/memory/utility/heapAllocationCounter.h"

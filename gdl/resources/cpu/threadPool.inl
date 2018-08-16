@@ -3,7 +3,7 @@
 #include "gdl/resources/cpu/threadPool.h"
 
 
-#include "gdl/base/Exception.h"
+#include "gdl/base/exception.h"
 
 
 #include <cassert>

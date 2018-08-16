@@ -1,7 +1,7 @@
 #include <boost/test/unit_test.hpp>
 #include "tests/tools/ExceptionChecks.h"
 
-#include "gdl/base/Exception.h"
+#include "gdl/base/exception.h"
 #include "gdl/base/SSESupportFunctions.h"
 #include "gdl/resources/memory/memoryStack.h"
 

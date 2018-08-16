@@ -1,6 +1,6 @@
 #pragma once
 
-#include "gdl/base/Exception.h"
+#include "gdl/base/exception.h"
 #include "gdl/rendering/openGL/management/uniformBlockVariableGL.h"
 
 #include <GL/glew.h>

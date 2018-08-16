@@ -1,6 +1,6 @@
 #include <boost/test/unit_test.hpp>
 
-#include "gdl/base/Exception.h"
+#include "gdl/base/exception.h"
 #include "gdl/resources/cpu/threadPool.h"
 #include "gdl/resources/cpu/utility/deadlockTerminationTimer.h"
 #include <iostream>

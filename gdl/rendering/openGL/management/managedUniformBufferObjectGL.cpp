@@ -1,7 +1,7 @@
 #include "gdl/rendering/openGL/management/managedUniformBufferObjectGL.h"
 
 
-#include "gdl/base/Exception.h"
+#include "gdl/base/exception.h"
 
 
 #include <cassert>

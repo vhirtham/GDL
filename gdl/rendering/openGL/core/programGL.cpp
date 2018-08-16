@@ -1,6 +1,6 @@
 #include "programGL.h"
 
-#include "gdl/base/Exception.h"
+#include "gdl/base/exception.h"
 #include "gdl/math/mat4.inl"
 #include "gdl/rendering/openGL/core/shaderGL.h"
 
