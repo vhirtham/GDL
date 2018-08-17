@@ -2,6 +2,7 @@
 
 #include "gdl/GDLTypedefs.h"
 #include "gdl/base/SSESupportFunctions.h"
+#include "gdl/resources/cpu/utility/deadlockTerminationTimer.h"
 #include "gdl/resources/memory/generalPurposeAllocator.h"
 #include "gdl/resources/memory/poolAllocator.h"
 #include "gdl/resources/memory/stackAllocator.h"
@@ -190,6 +191,8 @@ BOOST_AUTO_TEST_CASE(Map)
 template <template <typename> class _allocator>
 void ThreadSafetyTest()
 {
+    DeadlockTerminationTimer dtm;
+
     constexpr U32 numThreads = 4;
     constexpr U32 numInsertionsPerThread = 100;
 
