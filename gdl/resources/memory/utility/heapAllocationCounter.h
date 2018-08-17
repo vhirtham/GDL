@@ -2,9 +2,11 @@
 
 #include "gdl/GDLTypedefs.h"
 
+#include <atomic>
 #include <cstdlib>
 #include <iostream>
 #include <new>
+
 
 namespace GDL
 {
@@ -33,11 +35,11 @@ class HeapAllocationCounter
     friend void ::operator delete[](void* ptr, std::align_val_t al, const std::nothrow_t& tag) noexcept;
 #endif // DISABLE_HEAP_ALLOCATION_COUNTER
 
-    I32 mNewCallsInstance = -1;
-    I32 mDeleteCallsInstance = -1;
+    std::atomic<I32> mNewCallsInstance = -1;
+    std::atomic<I32> mDeleteCallsInstance = -1;
 
-    static I32 mTotalNewCalls;
-    static I32 mTotalDeleteCalls;
+    static std::atomic<I32> mTotalNewCalls;
+    static std::atomic<I32> mTotalDeleteCalls;
 
 public:
     HeapAllocationCounter(const HeapAllocationCounter&) = default;
@@ -48,8 +50,8 @@ public:
 
     //! @brief ctor
     HeapAllocationCounter()
-        : mNewCallsInstance(mTotalNewCalls)
-        , mDeleteCallsInstance(mTotalDeleteCalls)
+        : mNewCallsInstance(mTotalNewCalls.load())
+        , mDeleteCallsInstance(mTotalDeleteCalls.load())
     {
     }
 
@@ -135,7 +137,8 @@ private:
     }
 
 
-    //! @brief Helper function which returns the passed value if DISABLE_HEAP_ALLOCATION_COUNTER is not defined. Otherwise it
+    //! @brief Helper function which returns the passed value if DISABLE_HEAP_ALLOCATION_COUNTER is not defined.
+    //! Otherwise it
     //! returns -1.
     //! @param value: Value to return
     //! @return Passed value or -1
@@ -149,8 +152,8 @@ private:
     }
 };
 
-I32 HeapAllocationCounter::mTotalNewCalls = 0;
-I32 HeapAllocationCounter::mTotalDeleteCalls = 0;
+std::atomic<I32> HeapAllocationCounter::mTotalNewCalls = 0;
+std::atomic<I32> HeapAllocationCounter::mTotalDeleteCalls = 0;
 } // namespace GDL
 
 

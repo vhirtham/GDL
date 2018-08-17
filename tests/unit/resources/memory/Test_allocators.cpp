@@ -13,8 +13,11 @@
 #include "memoryManagerSetup.h"
 #include "tests/tools/ExceptionChecks.h"
 
-#include <iostream>
 #include <array>
+#include <atomic>
+#include <map>
+#include <set>
+#include <thread>
 #include <vector>
 
 using namespace GDL;
@@ -39,49 +42,50 @@ struct alignas(alignment) AlignedStruct
 };
 
 template <template <typename> class _allocator>
-void CheckNoAllocations([[maybe_unused]] const HeapAllocationCounter& gnc)
+void CheckNoAllocations([[maybe_unused]] const HeapAllocationCounter& hac)
 {
     EXCEPTION(true, "Default version should not be used.");
 }
 
 template <>
-void CheckNoAllocations<GeneralPurposeAllocator>(const HeapAllocationCounter& gnc)
+void CheckNoAllocations<GeneralPurposeAllocator>(const HeapAllocationCounter& hac)
 {
 #ifndef NO_GENERAL_PURPOSE_MEMORY
-    BOOST_CHECK(gnc.CheckNumCallsExpected(0, 0));
+    BOOST_CHECK(hac.CheckNumCallsExpected(0, 0));
 #else
-    BOOST_CHECK(!gnc.CheckNumCallsExpected(0, 0));
+    BOOST_CHECK(!hac.CheckNumCallsExpected(0, 0));
 #endif
 }
 
 template <>
-void CheckNoAllocations<PoolAllocator>(const HeapAllocationCounter& gnc)
+void CheckNoAllocations<PoolAllocator>(const HeapAllocationCounter& hac)
 {
-#if !(defined(NO_GENERAL_PURPOSE_MEMORY) && defined(NO_MEMORY_POOL))
-    BOOST_CHECK(gnc.CheckNumCallsExpected(0, 0));
+#if !(defined(NO_GENERAL_PURPOSE_MEMORY) && defined(NO_MEMORY_POOL) && defined(NO_MEMORY_STACK) &&                     \
+      defined(NO_THREAD_PRIVATE_MEMORY_STACK))
+    BOOST_CHECK(hac.CheckNumCallsExpected(0, 0));
 #else
-    BOOST_CHECK(!gnc.CheckNumCallsExpected(0, 0));
+    BOOST_CHECK(!hac.CheckNumCallsExpected(0, 0));
 #endif
 }
 
 
 template <>
-void CheckNoAllocations<StackAllocator>(const HeapAllocationCounter& gnc)
+void CheckNoAllocations<StackAllocator>(const HeapAllocationCounter& hac)
 {
 #if !(defined(NO_GENERAL_PURPOSE_MEMORY) && defined(NO_MEMORY_STACK))
-    BOOST_CHECK(gnc.CheckNumCallsExpected(0, 0));
+    BOOST_CHECK(hac.CheckNumCallsExpected(0, 0));
 #else
-    BOOST_CHECK(!gnc.CheckNumCallsExpected(0, 0));
+    BOOST_CHECK(!hac.CheckNumCallsExpected(0, 0));
 #endif
 }
 
 template <>
-void CheckNoAllocations<ThreadPrivateStackAllocator>(const HeapAllocationCounter& gnc)
+void CheckNoAllocations<ThreadPrivateStackAllocator>(const HeapAllocationCounter& hac)
 {
 #if !(defined(NO_GENERAL_PURPOSE_MEMORY) && defined(NO_THREAD_PRIVATE_MEMORY_STACK))
-    BOOST_CHECK(gnc.CheckNumCallsExpected(0, 0));
+    BOOST_CHECK(hac.CheckNumCallsExpected(0, 0));
 #else
-    BOOST_CHECK(!gnc.CheckNumCallsExpected(0, 0));
+    BOOST_CHECK(!hac.CheckNumCallsExpected(0, 0));
 #endif
 }
 // Vector -----------------------------------------------------------------------------------------
@@ -89,7 +93,7 @@ void CheckNoAllocations<ThreadPrivateStackAllocator>(const HeapAllocationCounter
 template <template <typename> class _allocator>
 void VectorTest()
 {
-    HeapAllocationCounter gnc;
+    HeapAllocationCounter hac;
     constexpr U32 numElements = 100;
 
     std::vector<I32, _allocator<I32>> v;
@@ -112,7 +116,7 @@ void VectorTest()
     v2.clear();
     v2.shrink_to_fit();
 
-    CheckNoAllocations<_allocator>(gnc);
+    CheckNoAllocations<_allocator>(hac);
 }
 
 
@@ -133,7 +137,7 @@ BOOST_AUTO_TEST_CASE(Vector)
 template <template <typename> class _allocator>
 void MapTest()
 {
-    HeapAllocationCounter gnc;
+    HeapAllocationCounter hac;
     constexpr U32 numElements = 100;
 
     std::map<U32, I32, std::less<U32>, _allocator<std::pair<const U32, I32>>> m;
@@ -159,7 +163,7 @@ void MapTest()
 
     m2.clear();
 
-    CheckNoAllocations<_allocator>(gnc);
+    CheckNoAllocations<_allocator>(hac);
 }
 
 BOOST_AUTO_TEST_CASE(Map)
@@ -170,6 +174,111 @@ BOOST_AUTO_TEST_CASE(Map)
     BOOST_CHECK_NO_THROW(MapTest<PoolAllocator>());
     BOOST_CHECK_NO_THROW(MapTest<StackAllocator>());
     BOOST_CHECK_NO_THROW(MapTest<ThreadPrivateStackAllocator>());
+
+    DeinitializeMemoryManager();
+}
+
+
+// Thread safety ----------------------------------------------------------------------------------
+
+
+//! @brief This test creates a specified number of threads. Each thread waits until the main threads gives the signal to
+//! start. After the signal is given, each thread creates a set with the template types allocator and inserts a given
+//! number of U64 elements. After insertion, the sum of all members is calculated and added to a global sum. The result
+//! is compared to an expected value
+
+template <template <typename> class _allocator>
+void ThreadSafetyTest()
+{
+    constexpr U32 numThreads = 4;
+    constexpr U32 numInsertionsPerThread = 100;
+
+    std::atomic_bool startTest = false;
+    std::atomic_bool closeThreads = false;
+    std::atomic_bool exceptionInThreads = false;
+    std::atomic<U32> threadsReady = 0;
+    std::atomic<U32> threadsFinished = 0;
+    std::atomic<U64> sumOfAllSetValues = 0;
+
+    std::vector<std::thread> threads;
+
+
+
+    // Create threads
+    for (U32 i = 0; i < numThreads; ++i)
+        threads.emplace_back([&]() {
+            try
+            {
+#ifndef NO_THREAD_PRIVATE_MEMORY_STACK
+                GetMemoryManager().CreatePrivateMemoryStackForThisThread(1_MB);
+#endif
+                ++threadsReady;
+                while (startTest == false)
+                    std::this_thread::yield();
+
+                std::set<U64, std::less<U64>, _allocator<U64>> s;
+                for (U32 i = 1; i <= numInsertionsPerThread; ++i)
+                    s.emplace(static_cast<U64>(i));
+
+                U64 sum = 0;
+                for (auto val : s)
+                    sum += val;
+
+                sumOfAllSetValues += sum;
+
+                s.clear();
+                ++threadsFinished;
+
+                while (closeThreads == false)
+                    std::this_thread::yield();
+
+#ifndef NO_THREAD_PRIVATE_MEMORY_STACK
+                GetMemoryManager().DeletePrivateMemoryStackForThisThread();
+#endif
+            }
+            catch (Exception&)
+            {
+                exceptionInThreads = true;
+            }
+        });
+
+
+    while (threadsReady != numThreads)
+        std::this_thread::yield();
+
+    // Start the test
+    startTest = true;
+    HeapAllocationCounter hac;
+
+    while (threadsFinished != numThreads)
+        std::this_thread::yield();
+
+    U64 expectedResult = (numInsertionsPerThread * numInsertionsPerThread + numInsertionsPerThread) / 2 * numThreads;
+    BOOST_CHECK(sumOfAllSetValues == expectedResult);
+    BOOST_CHECK(exceptionInThreads == false);
+    CheckNoAllocations<_allocator>(hac);
+
+    // Close all threads
+    closeThreads = true;
+
+    for (U32 i = 0; i < numThreads; ++i)
+        threads[i].join();
+
+
+
+    threads.clear();
+    threads.shrink_to_fit();
+}
+
+
+BOOST_AUTO_TEST_CASE(Thread_Safety)
+{
+    InitializeMemoryManager();
+
+    BOOST_CHECK_NO_THROW(ThreadSafetyTest<GeneralPurposeAllocator>());
+    BOOST_CHECK_NO_THROW(ThreadSafetyTest<PoolAllocator>());
+    BOOST_CHECK_NO_THROW(ThreadSafetyTest<StackAllocator>());
+    BOOST_CHECK_NO_THROW(ThreadSafetyTest<ThreadPrivateStackAllocator>());
 
     DeinitializeMemoryManager();
 }

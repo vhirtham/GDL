@@ -263,7 +263,7 @@ BOOST_AUTO_TEST_CASE(Thread_safety_non_thread_private)
             for (U32 j = 0; j < numAllocations; ++j)
             {
                 values[j] = static_cast<I32*>(ms.Allocate(allocationSize));
-                *(values[j]) = j + 1;
+                *(values[j]) = static_cast<I32>(j) + 1;
             }
             for (U32 j = 0; j < numAllocations; ++j)
                 sum[i] += *(values[j]);

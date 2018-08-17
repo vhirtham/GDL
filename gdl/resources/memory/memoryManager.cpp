@@ -97,6 +97,7 @@ MemoryInterface* GDL::MemoryManager::GetGeneralPurposeMemory() const
     {
         mSetupFinished = true;
         mMemoryRequestedUninitialized = true;
+        return nullptr;
     }
     return mGeneralPurposeMemory.get();
 }
@@ -124,6 +125,7 @@ MemoryInterface* MemoryManager::GetMemoryStack() const
     {
         mSetupFinished = true;
         mMemoryRequestedUninitialized = true;
+        return nullptr;
     }
     return mMemoryStack.get();
 }
@@ -137,6 +139,7 @@ MemoryInterface* MemoryManager::GetMemoryPool(size_t elementSize, size_t alignme
     {
         mSetupFinished = true;
         mMemoryRequestedUninitialized = true;
+        return nullptr;
     }
     for (auto& it : mMemoryPools)
         if (it.second.GetElementSize() >= elementSize && it.second.GetAlignment() >= alignment)
@@ -152,6 +155,7 @@ MemoryInterface* MemoryManager::GetThreadPrivateMemoryStack() const
     {
         mSetupFinished = true;
         mMemoryRequestedUninitialized = true;
+        return nullptr;
     }
 
     auto it = mThreadPrivateMemoryStacks.find(std::this_thread::get_id());
