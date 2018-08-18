@@ -1,11 +1,14 @@
 #include <boost/test/unit_test.hpp>
 
 #include "gdl/base/exception.h"
-#include "memoryManagerSetup.h"
 
 
 using namespace GDL;
 
+#ifndef TEST_THREAD_SAFETY
+
+
+#include "memoryManagerSetup.h"
 
 BOOST_AUTO_TEST_CASE(General)
 {
@@ -100,3 +103,103 @@ BOOST_AUTO_TEST_CASE(General)
     BOOST_CHECK_THROW(memoryManager.CreateMemoryPool(32_B, 100), Exception);
     BOOST_CHECK_THROW(memoryManager.EnableThreadPrivateMemory(), Exception);
 }
+
+#else // TEST_THREAD_SAFETY
+
+#include "gdl/GDLTypedefs.h"
+#include "gdl/resources/cpu/utility/deadlockTerminationTimer.h"
+#include "gdl/resources/memory/memoryManager.h"
+
+#include <atomic>
+#include <iostream>
+#include <thread>
+#include <vector>
+
+
+struct SynchronizationData
+{
+    std::atomic<U32> startTestCounter = 0;
+    std::atomic<U32> threadReadyCounter = 0;
+    std::atomic<U32> exceptionCounter = 0;
+};
+
+
+
+template <U32 _testNumber, typename _functionType>
+void MemoryManagerFunctionTest(_functionType function, SynchronizationData& sd)
+{
+    while (sd.startTestCounter != _testNumber)
+        std::this_thread::yield();
+    try
+    {
+        function();
+    }
+    catch (Exception&)
+    {
+        ++sd.exceptionCounter;
+    }
+    ++sd.threadReadyCounter;
+}
+
+
+
+BOOST_AUTO_TEST_CASE(Thread_Safety)
+{
+    DeadlockTerminationTimer dtt;
+    MemoryManager& mm = MemoryManager::Instance();
+
+    constexpr U32 numThreads = 10;
+    constexpr U32 numTestedFunctions = 6;
+
+    SynchronizationData sd;
+
+    std::vector<std::thread> threads;
+
+    // Add threads
+    for (U32 i = 0; i < numThreads; ++i)
+        threads.emplace_back([&]() {
+
+            ++sd.threadReadyCounter;
+
+            MemoryManagerFunctionTest<1>([&]() { mm.CreateGeneralPurposeMemory(1_MB); }, sd);
+            MemoryManagerFunctionTest<2>([&]() { mm.CreateMemoryStack(1_MB); }, sd);
+            MemoryManagerFunctionTest<3>([&]() { mm.CreateMemoryPool(32_B, 100); }, sd);
+            MemoryManagerFunctionTest<4>([&]() { mm.EnableThreadPrivateMemory(); }, sd);
+            MemoryManagerFunctionTest<5>([&]() { mm.Initialize(); }, sd);
+            MemoryManagerFunctionTest<6>([&]() { mm.Deinitialize(); }, sd);
+
+            // the thread private memory stack creation and destruction is already tested in the allocator test
+
+        });
+
+
+
+    // Wait until all threads are ready for the first test
+    while (sd.threadReadyCounter != numThreads)
+        std::this_thread::yield();
+
+
+
+    for (U32 i = 0; i < numTestedFunctions; ++i)
+    {
+        // start next test
+        sd.threadReadyCounter = 0;
+        ++sd.startTestCounter;
+
+        // wait until test is finished
+        while (sd.threadReadyCounter != numThreads)
+            std::this_thread::yield();
+
+        // Check test that only one thread succeeded. The others should throw
+        BOOST_CHECK(sd.exceptionCounter == numThreads - 1);
+        if (sd.exceptionCounter != numThreads - 1)
+            std::cout << "Failed test number = " << std::to_string(i + 1) << std::endl;
+        sd.exceptionCounter = 0;
+    }
+
+
+    for (U32 i = 0; i < numThreads; ++i)
+        threads[i].join();
+}
+
+#endif // TEST_THREAD_SAFETY

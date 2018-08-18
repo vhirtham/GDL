@@ -39,6 +39,14 @@ addTest(memoryManager-only_heap_allocation
     -DNO_MEMORY_STACK
     -DNO_THREAD_PRIVATE_MEMORY_STACK)
 
+addTest(memoryManager-thread_safety
+    ${MemoryManagerSources}
+    -DTEST_THREAD_SAFETY
+    -DNO_GENERAL_PURPOSE_MEMORY
+    -DNO_MEMORY_POOL
+    -DNO_MEMORY_STACK
+    -DNO_THREAD_PRIVATE_MEMORY_STACK)
+
 
 addTest(allocators
     ${MemoryManagerSources})

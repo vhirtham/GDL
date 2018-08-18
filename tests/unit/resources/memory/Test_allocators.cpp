@@ -30,7 +30,7 @@ using namespace GDL;
 
 
 
-// Helper structs and functions -------------------------------------------------------------------
+// Helper structs and functions ---------------------------------------------------------------------------------------
 
 constexpr U32 alignment = 32;
 struct alignas(alignment) AlignedStruct
@@ -89,7 +89,10 @@ void CheckNoAllocations<ThreadPrivateStackAllocator>(const HeapAllocationCounter
     BOOST_CHECK(!hac.CheckNumCallsExpected(0, 0));
 #endif
 }
-// Vector -----------------------------------------------------------------------------------------
+
+
+
+// Vector -------------------------------------------------------------------------------------------------------------
 
 template <template <typename> class _allocator>
 void VectorTest()
@@ -133,7 +136,7 @@ BOOST_AUTO_TEST_CASE(Vector)
 
 
 
-// Map --------------------------------------------------------------------------------------------
+// Map ----------------------------------------------------------------------------------------------------------------
 
 template <template <typename> class _allocator>
 void MapTest()
@@ -180,7 +183,8 @@ BOOST_AUTO_TEST_CASE(Map)
 }
 
 
-// Thread safety ----------------------------------------------------------------------------------
+
+// Thread safety ------------------------------------------------------------------------------------------------------
 
 
 //! @brief This test creates a specified number of threads. Each thread waits until the main threads gives the signal to
@@ -287,7 +291,7 @@ BOOST_AUTO_TEST_CASE(Thread_Safety)
 }
 
 
-// Pool Alloctor specific tests -------------------------------------------------------------------
+// Pool Alloctor specific tests ---------------------------------------------------------------------------------------
 
 #ifndef NO_MEMORY_POOL
 BOOST_AUTO_TEST_CASE(Pool_throw_on_array_allocation)
