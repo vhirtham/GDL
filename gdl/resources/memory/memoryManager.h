@@ -8,7 +8,7 @@
 #include <atomic>
 #include <map>
 #include <memory>
-#include <mutex>
+#include <shared_mutex>
 #include <thread>
 
 namespace GDL
@@ -18,9 +18,9 @@ class MemoryManager
 {
     std::atomic_bool mInitialized;
     std::atomic_bool mThreadPrivateMemoryEnabled;
-    mutable std::mutex mMutex;
-    mutable bool mSetupFinished;
-    mutable bool mMemoryRequestedUninitialized;
+    mutable std::atomic_bool mSetupFinished;
+    mutable std::atomic_bool mMemoryRequestedUninitialized;
+    mutable std::shared_mutex mMutex;
 
     std::unique_ptr<GeneralPurposeMemory> mGeneralPurposeMemory;
     std::unique_ptr<MemoryStack> mMemoryStack;

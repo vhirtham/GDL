@@ -21,7 +21,7 @@ MemoryManager::MemoryManager()
 
 void MemoryManager::Initialize()
 {
-    std::lock_guard<std::mutex> lock(mMutex);
+    std::lock_guard<std::shared_mutex> lock(mMutex);
 
     EXCEPTION(mMemoryRequestedUninitialized,
               "Can't initialize. There was a request for memory before the initialization.");
@@ -45,7 +45,7 @@ void MemoryManager::Initialize()
 
 void MemoryManager::EnableThreadPrivateMemory()
 {
-    std::lock_guard<std::mutex> lock(mMutex);
+    std::lock_guard<std::shared_mutex> lock(mMutex);
 
     EXCEPTION(mSetupFinished == true, "Setup process already finished.");
     EXCEPTION(mThreadPrivateMemoryEnabled, "Thread private memory is already enabled.");
@@ -70,7 +70,7 @@ MemoryManager& MemoryManager::Instance()
 
 void MemoryManager::Deinitialize()
 {
-    std::lock_guard<std::mutex> lock(mMutex);
+    std::lock_guard<std::shared_mutex> lock(mMutex);
 
     EXCEPTION(mInitialized == false, "Can't deinitialize. Memory manager was not initialized.");
     EXCEPTION(mThreadPrivateMemoryEnabled && !mThreadPrivateMemoryStacks.empty(),
@@ -92,7 +92,7 @@ void MemoryManager::Deinitialize()
 
 MemoryInterface* GDL::MemoryManager::GetGeneralPurposeMemory() const
 {
-    std::lock_guard<std::mutex> lock(mMutex);
+    std::shared_lock<std::shared_mutex> lock(mMutex);
     if (mInitialized == false)
     {
         mSetupFinished = true;
@@ -106,7 +106,7 @@ MemoryInterface* GDL::MemoryManager::GetGeneralPurposeMemory() const
 
 MemoryInterface* MemoryManager::GetHeapMemory() const
 {
-    std::lock_guard<std::mutex> lock(mMutex);
+    std::shared_lock<std::shared_mutex> lock(mMutex);
 
     if (mInitialized == false)
     {
@@ -120,7 +120,7 @@ MemoryInterface* MemoryManager::GetHeapMemory() const
 
 MemoryInterface* MemoryManager::GetMemoryStack() const
 {
-    std::lock_guard<std::mutex> lock(mMutex);
+    std::shared_lock<std::shared_mutex> lock(mMutex);
     if (mInitialized == false)
     {
         mSetupFinished = true;
@@ -134,7 +134,7 @@ MemoryInterface* MemoryManager::GetMemoryStack() const
 
 MemoryInterface* MemoryManager::GetMemoryPool(size_t elementSize, size_t alignment) const
 {
-    std::lock_guard<std::mutex> lock(mMutex);
+    std::shared_lock<std::shared_mutex> lock(mMutex);
     if (mInitialized == false)
     {
         mSetupFinished = true;
@@ -150,7 +150,7 @@ MemoryInterface* MemoryManager::GetMemoryPool(size_t elementSize, size_t alignme
 
 MemoryInterface* MemoryManager::GetThreadPrivateMemoryStack() const
 {
-    std::lock_guard<std::mutex> lock(mMutex);
+    std::shared_lock<std::shared_mutex> lock(mMutex);
     if (mInitialized == false)
     {
         mSetupFinished = true;
@@ -168,7 +168,7 @@ MemoryInterface* MemoryManager::GetThreadPrivateMemoryStack() const
 
 void MemoryManager::CreatePrivateMemoryStackForThisThread(MemorySize memorySize)
 {
-    std::lock_guard<std::mutex> lock(mMutex);
+    std::lock_guard<std::shared_mutex> lock(mMutex);
     EXCEPTION(mInitialized == false, "Memory manager needs to be initialized to add thread private memory.");
     EXCEPTION(mThreadPrivateMemoryEnabled == false,
               "Thread private memory needs to be enabled during setup of the memory manager.");
@@ -185,7 +185,7 @@ void MemoryManager::CreatePrivateMemoryStackForThisThread(MemorySize memorySize)
 
 void MemoryManager::CreateGeneralPurposeMemory(MemorySize memorySize)
 {
-    std::lock_guard<std::mutex> lock(mMutex);
+    std::lock_guard<std::shared_mutex> lock(mMutex);
 
     EXCEPTION(mSetupFinished == true, "Setup process already finished.");
     EXCEPTION(mGeneralPurposeMemory != nullptr, "Genaral purpose memory already created");
@@ -197,7 +197,7 @@ void MemoryManager::CreateGeneralPurposeMemory(MemorySize memorySize)
 
 void MemoryManager::CreateMemoryStack(MemorySize memorySize)
 {
-    std::lock_guard<std::mutex> lock(mMutex);
+    std::lock_guard<std::shared_mutex> lock(mMutex);
 
     EXCEPTION(mSetupFinished == true, "Setup process already finished.");
     EXCEPTION(mMemoryStack != nullptr, "Memory stack already created");
@@ -209,7 +209,7 @@ void MemoryManager::CreateMemoryStack(MemorySize memorySize)
 
 void MemoryManager::CreateMemoryPool(MemorySize elementSize, U32 numElements, size_t alignment)
 {
-    std::lock_guard<std::mutex> lock(mMutex);
+    std::lock_guard<std::shared_mutex> lock(mMutex);
     if (alignment == 0)
         alignment = elementSize.GetNumBytes();
     EXCEPTION(mSetupFinished == true, "Setup process already finished.");
@@ -224,7 +224,7 @@ void MemoryManager::CreateMemoryPool(MemorySize elementSize, U32 numElements, si
 
 void MemoryManager::DeletePrivateMemoryStackForThisThread()
 {
-    std::lock_guard<std::mutex> lock(mMutex);
+    std::lock_guard<std::shared_mutex> lock(mMutex);
 
     auto it = mThreadPrivateMemoryStacks.find(std::this_thread::get_id());
 
