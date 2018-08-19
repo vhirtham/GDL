@@ -149,7 +149,7 @@ BOOST_AUTO_TEST_CASE(Thread_Safety)
     MemoryManager& mm = MemoryManager::Instance();
 
     constexpr U32 numThreads = 10;
-    constexpr U32 numTestedFunctions = 6;
+    constexpr U32 numTestedFunctions = 8;
 
     SynchronizationData sd;
 
@@ -166,7 +166,9 @@ BOOST_AUTO_TEST_CASE(Thread_Safety)
             MemoryManagerFunctionTest<3>([&]() { mm.CreateMemoryPool(32_B, 100); }, sd);
             MemoryManagerFunctionTest<4>([&]() { mm.EnableThreadPrivateMemory(); }, sd);
             MemoryManagerFunctionTest<5>([&]() { mm.Initialize(); }, sd);
-            MemoryManagerFunctionTest<6>([&]() { mm.Deinitialize(); }, sd);
+            MemoryManagerFunctionTest<6>([&]() { mm.CreatePrivateMemoryStackForThisThread(1_MB); }, sd);
+            MemoryManagerFunctionTest<7>([&]() { mm.DeletePrivateMemoryStackForThisThread(); }, sd);
+            MemoryManagerFunctionTest<8>([&]() { mm.Deinitialize(); }, sd);
 
             // the thread private memory stack creation and destruction is already tested in the allocator test
 
@@ -180,7 +182,7 @@ BOOST_AUTO_TEST_CASE(Thread_Safety)
 
 
 
-    for (U32 i = 0; i < numTestedFunctions; ++i)
+    for (U32 i = 1; i <= numTestedFunctions; ++i)
     {
         // start next test
         sd.threadReadyCounter = 0;
@@ -190,10 +192,16 @@ BOOST_AUTO_TEST_CASE(Thread_Safety)
         while (sd.threadReadyCounter != numThreads)
             std::this_thread::yield();
 
-        // Check test that only one thread succeeded. The others should throw
-        BOOST_CHECK(sd.exceptionCounter == numThreads - 1);
-        if (sd.exceptionCounter != numThreads - 1)
-            std::cout << "Failed test number = " << std::to_string(i + 1) << std::endl;
+
+        // Check test that only one thread succeeded. The others should throw. Only the thread privaqte stack tests
+        // should not throw
+        U32 numExpectedException = numThreads - 1;
+        if (i == 6 || i == 7)
+            numExpectedException = 0;
+
+        BOOST_CHECK(sd.exceptionCounter == numExpectedException);
+        if (sd.exceptionCounter != numExpectedException)
+            std::cout << "Failed test number = " << std::to_string(i) << std::endl;
         sd.exceptionCounter = 0;
     }
 
