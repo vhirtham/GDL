@@ -12,7 +12,6 @@ class Timer
     std::chrono::time_point<std::chrono::high_resolution_clock> mReferenceTime;
 
 public:
-
     //! @brief Default ctor which start the internal clock.
     Timer()
         : mReferenceTime{std::chrono::high_resolution_clock::now()}
@@ -37,8 +36,23 @@ public:
     template <typename _ReturnType = U32>
     _ReturnType GetMilliseconds() const
     {
-        std::chrono::time_point<std::chrono::high_resolution_clock> currentTime{std::chrono::high_resolution_clock::now()};
-        std::chrono::duration<_ReturnType,std::milli> duration{std::chrono::duration_cast<std::chrono::milliseconds> (currentTime-mReferenceTime)};
+        std::chrono::time_point<std::chrono::high_resolution_clock> currentTime{
+                std::chrono::high_resolution_clock::now()};
+        std::chrono::duration<_ReturnType, std::milli> duration{
+                std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - mReferenceTime)};
+        return duration.count();
+    }
+
+    //! @brief Gets the number of milliseconds that have past
+    //! @tparam _ReturnType: Return type of the function
+    //! @return The number of milliseconds that have past
+    template <typename _ReturnType = U32>
+    _ReturnType GetMicroseconds() const
+    {
+        std::chrono::time_point<std::chrono::high_resolution_clock> currentTime{
+                std::chrono::high_resolution_clock::now()};
+        std::chrono::duration<_ReturnType, std::micro> duration{
+                std::chrono::duration_cast<std::chrono::microseconds>(currentTime - mReferenceTime)};
         return duration.count();
     }
 };
