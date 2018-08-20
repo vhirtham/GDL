@@ -3,7 +3,7 @@
 
 #include "gdl/GDLTypedefs.h"
 #include "gdl/base/exception.h"
-#include "gdl/base/SSESupportFunctions.h"
+#include "gdl/base/functions/alignment.h"
 #include "gdl/resources/memory/memoryPool.h"
 #include "gdl/resources/memory/utility/heapAllocationCounter.h"
 
@@ -198,7 +198,7 @@ BOOST_AUTO_TEST_CASE(Alignment)
     for (U32 i = 0; i < addresses.size(); ++i)
     {
         BOOST_CHECK_NO_THROW(addresses[i] = mp.Allocate(elementSize.GetNumBytes()));
-        BOOST_CHECK(is_aligned(addresses[i], alignment));
+        BOOST_CHECK(IsAligned(addresses[i], alignment));
     }
 
     for (U32 i = 0; i < addresses.size(); ++i)

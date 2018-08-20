@@ -2,7 +2,7 @@
 #include "tests/tools/ExceptionChecks.h"
 
 #include "gdl/base/exception.h"
-#include "gdl/base/SSESupportFunctions.h"
+#include "gdl/base/functions/alignment.h"
 #include "gdl/resources/memory/generalPurposeMemory.h"
 
 #include <array>
@@ -749,7 +749,7 @@ BOOST_AUTO_TEST_CASE(Alignment)
     for (U32 i = 0; i < numAllocations; ++i)
     {
         addresses[i] = gpm.Allocate(allocationSize, alignmentValues[i]);
-        BOOST_CHECK(is_aligned(addresses[i], alignmentValues[i]));
+        BOOST_CHECK(IsAligned(addresses[i], alignmentValues[i]));
     }
     for (U32 i = 0; i < numAllocations; ++i)
         gpm.Deallocate(addresses[i]);

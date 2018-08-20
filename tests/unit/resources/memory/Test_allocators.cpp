@@ -1,7 +1,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include "gdl/GDLTypedefs.h"
-#include "gdl/base/SSESupportFunctions.h"
+#include "gdl/base/functions/alignment.h"
 #include "gdl/resources/cpu/utility/deadlockTerminationTimer.h"
 #include "gdl/resources/memory/generalPurposeAllocator.h"
 #include "gdl/resources/memory/poolAllocator.h"
@@ -115,7 +115,7 @@ void VectorTest()
     for (U32 i = 0; i < numElements; ++i)
         v2.push_back(static_cast<I32>(i));
     for (U32 i = 0; i < numElements; ++i)
-        BOOST_CHECK(is_aligned(&v2[i], alignment));
+        BOOST_CHECK(IsAligned(&v2[i], alignment));
 
     v2.clear();
     v2.shrink_to_fit();
@@ -163,7 +163,7 @@ void MapTest()
     for (U32 i = 0; i < numElements; ++i)
         m2.emplace(i, static_cast<I32>(i));
     for (const auto& it : m2)
-        BOOST_CHECK(is_aligned(&it.second, alignment));
+        BOOST_CHECK(IsAligned(&it.second, alignment));
 
     m2.clear();
 

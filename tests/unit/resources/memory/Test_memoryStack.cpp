@@ -2,7 +2,7 @@
 #include "tests/tools/ExceptionChecks.h"
 
 #include "gdl/base/exception.h"
-#include "gdl/base/SSESupportFunctions.h"
+#include "gdl/base/functions/alignment.h"
 #include "gdl/resources/memory/memoryStack.h"
 
 #include <array>
@@ -169,7 +169,7 @@ void AlignedAllocation()
     addresses[2] = ms.Allocate(alignment, alignment);
 
     for (U32 i = 0; i < addresses.size(); ++i)
-        BOOST_CHECK(is_aligned(addresses[i], alignment));
+        BOOST_CHECK(IsAligned(addresses[i], alignment));
 
     for (U32 i = 0; i < addresses.size(); ++i)
         ms.Deallocate(addresses[i]);

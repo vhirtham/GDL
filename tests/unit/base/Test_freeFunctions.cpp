@@ -2,11 +2,27 @@
 
 #include "gdl/GDLTypedefs.h"
 
+#include "gdl/base/functions/alignment.h"
 #include "gdl/base/functions/isPowerOf2.h"
 #include "gdl/base/functions/pow.h"
 
 using namespace GDL;
 
+
+BOOST_AUTO_TEST_CASE(Alignment_Functions)
+{
+    constexpr size_t alignment = alignof(U32);
+    U32 val = 0;
+
+    BOOST_CHECK(Misalignment(&val, alignment) == 0);
+    BOOST_CHECK(IsAligned(&val, alignment));
+
+    U8* misAlignedPointer = reinterpret_cast<U8*>(&val);
+    misAlignedPointer += 2;
+
+    BOOST_CHECK(Misalignment(misAlignedPointer, alignment) == 2);
+    BOOST_CHECK(IsAligned(misAlignedPointer, alignment) == false);
+}
 
 BOOST_AUTO_TEST_CASE(Power_Functions)
 {

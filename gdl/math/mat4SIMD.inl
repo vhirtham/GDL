@@ -2,7 +2,7 @@
 #include "mat4SIMD.h"
 
 #include "gdl/base/exception.h"
-
+#include "gdl/base/functions/alignment.h"
 
 #include <cassert>
 #include <cstring>
@@ -12,7 +12,7 @@ GDL::mat4SIMD::mat4SIMD()
     : mData({{{_mm_set1_ps(0.)}, {_mm_set1_ps(0.)}, {_mm_set1_ps(0.)}, {_mm_set1_ps(0.)}}})
 {
 #ifndef NDEBUG
-    if (!(is_aligned(&mData[0], 16) && is_aligned(&mData[1], 16) && is_aligned(&mData[2], 16) && is_aligned(&mData[3], 16)))
+    if (!(IsAligned(&mData[0], 16) && IsAligned(&mData[1], 16) && IsAligned(&mData[2], 16) && IsAligned(&mData[3], 16)))
         throw Exception(__PRETTY_FUNCTION__, "One or more registers of mat4SIMD are not 16 byte aligned");
 #endif
 }
@@ -25,7 +25,7 @@ GDL::mat4SIMD::mat4SIMD(F32 v0, F32 v1, F32 v2, F32 v3, F32 v4, F32 v5, F32 v6, 
               {_mm_setr_ps(v12, v13, v14, v15)}}})
 {
 #ifndef NDEBUG
-    if (!(is_aligned(&mData[0], 16) && is_aligned(&mData[1], 16) && is_aligned(&mData[2], 16) && is_aligned(&mData[3], 16)))
+    if (!(IsAligned(&mData[0], 16) && IsAligned(&mData[1], 16) && IsAligned(&mData[2], 16) && IsAligned(&mData[3], 16)))
         throw Exception(__PRETTY_FUNCTION__, "One or more registers of mat4SIMD are not 16 byte aligned");
 #endif
 }
@@ -34,7 +34,7 @@ GDL::mat4SIMD::mat4SIMD(__m128 col0, __m128 col1, __m128 col2, __m128 col3)
     : mData({{col0,col1,col2,col3}})
 {
 #ifndef NDEBUG
-    if (!(is_aligned(&mData[0], 16) && is_aligned(&mData[1], 16) && is_aligned(&mData[2], 16) && is_aligned(&mData[3], 16)))
+    if (!(IsAligned(&mData[0], 16) && IsAligned(&mData[1], 16) && IsAligned(&mData[2], 16) && IsAligned(&mData[3], 16)))
         throw Exception(__PRETTY_FUNCTION__, "One or more registers of mat4SIMD are not 16 byte aligned");
 #endif
 }
@@ -43,7 +43,7 @@ GDL::mat4SIMD::mat4SIMD(const GDL::mat4SIMD& other)
     : mData(other.mData)
 {
 #ifndef NDEBUG
-    if (!(is_aligned(&mData[0], 16) && is_aligned(&mData[1], 16) && is_aligned(&mData[2], 16) && is_aligned(&mData[3], 16)))
+    if (!(IsAligned(&mData[0], 16) && IsAligned(&mData[1], 16) && IsAligned(&mData[2], 16) && IsAligned(&mData[3], 16)))
         throw Exception(__PRETTY_FUNCTION__, "One or more registers of mat4SIMD are not 16 byte aligned");
 #endif
 }

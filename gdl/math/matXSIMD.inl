@@ -2,6 +2,8 @@
 
 #include "matXSIMD.h"
 
+#include "gdl/base/functions/alignment.h"
+
 #include <algorithm>
 #include <cassert>
 #include <cstring>
@@ -107,7 +109,7 @@ void GDL::matXSIMD<T, tRows, tCols>::ConstructionChecks() const
     assert(sizeof(mData) == sizeof(__mx) * mData.size()); // Array needs to be compact
 #ifndef NDEBUG
     for (const auto& iRegister : mData)
-        if (!is_aligned(&iRegister, 16))
+        if (!IsAligned(&iRegister, 16))
             throw Exception(__PRETTY_FUNCTION__, "One or more registers of mat4SIMD are not 16 byte aligned");
 #endif
 }
