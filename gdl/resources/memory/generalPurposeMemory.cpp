@@ -408,6 +408,9 @@ GeneralPurposeMemory::AllocationData::AllocationData(const GeneralPurposeMemory&
     , freeMemorySize{ReadSizeFromMemory(currentMemoryPtr)}
     , totalAllocationSize{allocationSize + alignment + sizeof(size_t)}
 {
+    // total allocation size must be large enough to write free memory block data
+    if (totalAllocationSize < 2 * sizeof(size_t))
+        totalAllocationSize = 2 * sizeof(size_t);
 }
 
 

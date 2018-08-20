@@ -42,8 +42,8 @@ void PrintAndResetResults(size_t allocationSize, std::array<std::pair<U32, U32>,
         }
 
         U32 total = results[i].first + results[i].second;
-        std::cout << results[i].first << " | " << results[i].second << " | " << results[i].first << " | " << total
-                  << " | " << static_cast<F32>(total) / static_cast<F32>(totalSTD) << std::endl;
+        std::cout << results[i].first << " | " << results[i].second << " | " << total << " | "
+                  << static_cast<F32>(total) / static_cast<F32>(totalSTD) << std::endl;
 
         results[i].first = 0;
         results[i].second = 0;
@@ -55,7 +55,7 @@ void PrintAndResetResults(size_t allocationSize, std::array<std::pair<U32, U32>,
 template <template <typename> class _allocator, typename _type, U32 _numAllocations>
 std::pair<U32, U32> AllocationBenchmark1()
 {
-    constexpr U32 numRuns = 10;
+    constexpr U32 numRuns = 1;
     Timer timer;
     std::array<_type*, _numAllocations> objects;
 
@@ -69,12 +69,12 @@ std::pair<U32, U32> AllocationBenchmark1()
         timer.Reset();
         for (U32 i = 0; i < _numAllocations; ++i)
             objects[i] = allocator.allocate(1);
-        allocationTime += timer.GetMicroseconds();
+        allocationTime += timer.GetNanoseconds();
 
         timer.Reset();
         for (U32 i = 0; i < _numAllocations; ++i)
             allocator.deallocate(objects[i], 1);
-        deallocationTime += timer.GetMicroseconds();
+        deallocationTime += timer.GetNanoseconds();
     }
 
     return std::pair<U32, U32>{allocationTime, deallocationTime};
@@ -97,7 +97,7 @@ std::pair<U32, U32> AllocationBenchmark2()
         timer.Reset();
         for (U32 i = 0; i < _numAllocations; ++i)
             objects[run][i] = allocator.allocate(1);
-        allocationTime += timer.GetMicroseconds();
+        allocationTime += timer.GetNanoseconds();
     }
 
     for (U32 run = 0; run < numRuns; ++run)
@@ -105,7 +105,7 @@ std::pair<U32, U32> AllocationBenchmark2()
         timer.Reset();
         for (U32 i = 0; i < _numAllocations; ++i)
             allocator.deallocate(objects[run][i], 1);
-        deallocationTime += timer.GetMicroseconds();
+        deallocationTime += timer.GetNanoseconds();
     }
 
     return std::pair<U32, U32>{allocationTime, deallocationTime};
@@ -128,19 +128,41 @@ std::pair<U32, U32> AllocationBenchmark3()
         objects[i] = allocator.allocate(1);
 
 
+    //    allocator.deallocate(objects[0], 1);
+    //    allocator.deallocate(objects[2], 1);
+    //    allocator.deallocate(objects[4], 1);
+    //    allocator.deallocate(objects[6], 1);
+    //    allocator.deallocate(objects[8], 1);
+    //    allocator.deallocate(objects[10], 1);
+    //    allocator.deallocate(objects[12], 1);
+    //    allocator.deallocate(objects[14], 1);
+    //    allocator.deallocate(objects[16], 1);
+    //    allocator.deallocate(objects[18], 1);
+
     for (U32 run = 0; run < numRuns; ++run)
     {
         timer.Reset();
-        for (U32 i = 0; i < _numAllocations; i += 100)
+        for (U32 i = 20; i < _numAllocations; ++i)
             allocator.deallocate(objects[i], 1);
-        deallocationTime += timer.GetMicroseconds();
+        deallocationTime += timer.GetNanoseconds();
 
         timer.Reset();
-        for (U32 i = 0; i < _numAllocations; i += 100)
+        for (U32 i = 20; i < _numAllocations; ++i)
             objects[i] = allocator.allocate(1);
-        allocationTime += timer.GetMicroseconds();
+        allocationTime += timer.GetNanoseconds();
     }
 
+
+    //    objects[0] = allocator.allocate(1);
+    //    objects[2] = allocator.allocate(1);
+    //    objects[4] = allocator.allocate(1);
+    //    objects[6] = allocator.allocate(1);
+    //    objects[8] = allocator.allocate(1);
+    //    objects[10] = allocator.allocate(1);
+    //    objects[12] = allocator.allocate(1);
+    //    objects[14] = allocator.allocate(1);
+    //    objects[16] = allocator.allocate(1);
+    //    objects[18] = allocator.allocate(1);
 
     for (U32 i = 0; i < _numAllocations; ++i)
         allocator.deallocate(objects[i], 1);
@@ -194,28 +216,32 @@ void RunAllocationBenchmarks3()
 
 int main()
 {
+    constexpr U32 maxNumAllocations = 10000;
+
     MemoryManager& mm = MemoryManager::Instance();
-    mm.CreateGeneralPurposeMemory(1000_MB);
-    mm.CreateMemoryPool(32_B, 1000000);
-    mm.CreateMemoryPool(64_B, 1000000);
-    mm.CreateMemoryPool(128_B, 1000000);
-    mm.CreateMemoryPool(256_B, 1000000);
-    mm.CreateMemoryPool(512_B, 1000000);
-    mm.CreateMemoryStack(1000_MB);
+    mm.CreateGeneralPurposeMemory(200_MB);
+    mm.CreateMemoryPool(32_B, maxNumAllocations);
+    mm.CreateMemoryPool(64_B, maxNumAllocations);
+    mm.CreateMemoryPool(128_B, maxNumAllocations);
+    mm.CreateMemoryPool(256_B, maxNumAllocations);
+    mm.CreateMemoryPool(512_B, maxNumAllocations);
+    mm.CreateMemoryStack(200_MB);
     mm.EnableThreadPrivateMemory();
     mm.Initialize();
-    mm.CreatePrivateMemoryStackForThisThread(1000_MB);
+    mm.CreatePrivateMemoryStackForThisThread(200_MB);
 
 
-    RunAllocationBenchmarks1<F32, 100000>();
-    RunAllocationBenchmarks1<std::array<F32, 8>, 100000>();
-    RunAllocationBenchmarks1<std::array<F32, 16>, 100000>();
-    RunAllocationBenchmarks1<std::array<F32, 32>, 100000>();
-    RunAllocationBenchmarks1<std::array<F32, 64>, 100000>();
-    RunAllocationBenchmarks1<std::array<F32, 128>, 100000>();
-    RunAllocationBenchmarks1<std::array<F32, 256>, 100000>();
-    RunAllocationBenchmarks1<std::array<F32, 512>, 100000>();
-    RunAllocationBenchmarks1<std::array<F32, 1024>, 100000>();
+    RunAllocationBenchmarks1<std::array<U8, 256>, maxNumAllocations>();
+    //    RunAllocationBenchmarks1<std::array<U8, 8>, maxNumAllocations>();
+    //    RunAllocationBenchmarks1<std::array<U8, 16>, maxNumAllocations>();
+    //    RunAllocationBenchmarks1<std::array<U8, 32>, maxNumAllocations>();
+    //    RunAllocationBenchmarks1<std::array<U8, 64>, maxNumAllocations>();
+    //    RunAllocationBenchmarks1<std::array<U8, 128>, maxNumAllocations>();
+    //    RunAllocationBenchmarks1<std::array<U8, 256>, maxNumAllocations>();
+    //    RunAllocationBenchmarks1<std::array<U8, 512>, maxNumAllocations>();
+    //    RunAllocationBenchmarks1<std::array<U8, 1024>, maxNumAllocations>();
+    //    RunAllocationBenchmarks1<std::array<U8, 2048>, maxNumAllocations>();
+    //    RunAllocationBenchmarks1<std::array<U8, 4096>, maxNumAllocations>();
 
 
     //    RunAllocationBenchmarks3<F32, 10000>();

@@ -43,9 +43,9 @@ public:
         return duration.count();
     }
 
-    //! @brief Gets the number of milliseconds that have past
+    //! @brief Gets the number of microseconds that have past
     //! @tparam _ReturnType: Return type of the function
-    //! @return The number of milliseconds that have past
+    //! @return The number of microseconds that have past
     template <typename _ReturnType = U32>
     _ReturnType GetMicroseconds() const
     {
@@ -53,6 +53,19 @@ public:
                 std::chrono::high_resolution_clock::now()};
         std::chrono::duration<_ReturnType, std::micro> duration{
                 std::chrono::duration_cast<std::chrono::microseconds>(currentTime - mReferenceTime)};
+        return duration.count();
+    }
+
+    //! @brief Gets the number of nanoseconds that have past
+    //! @tparam _ReturnType: Return type of the function
+    //! @return The number of nanoseconds that have past
+    template <typename _ReturnType = U32>
+    _ReturnType GetNanoseconds() const
+    {
+        std::chrono::time_point<std::chrono::high_resolution_clock> currentTime{
+                std::chrono::high_resolution_clock::now()};
+        std::chrono::duration<_ReturnType, std::nano> duration{
+                std::chrono::duration_cast<std::chrono::nanoseconds>(currentTime - mReferenceTime)};
         return duration.count();
     }
 };
