@@ -1,7 +1,7 @@
 #include <boost/test/unit_test.hpp>
 
 
-#include "gdl/GDLTypedefs.h"
+#include "gdl/base/fundamentalTypes.h"
 #include "gdl/rendering/openGL/core/renderWindowGL.h"
 #include "gdl/rendering/openGL/core/uniformBufferObjectGL.h"
 #include "gdl/rendering/openGL/management/uniformBlockGL.h"

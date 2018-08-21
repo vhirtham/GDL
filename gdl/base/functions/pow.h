@@ -1,10 +1,11 @@
 #pragma once
 
-#include "gdl/GDLTypedefs.h"
+#include "gdl/base/fundamentalTypes.h"
 
 #include <type_traits>
 
-//Source: https://stackoverflow.com/questions/16443682/c-power-of-integer-template-meta-programming#comment23585816_16443823
+// Source:
+// https://stackoverflow.com/questions/16443682/c-power-of-integer-template-meta-programming#comment23585816_16443823
 
 namespace GDL
 {
@@ -60,10 +61,10 @@ inline constexpr _type Pow(const _type base)
 //! @param base: Base
 //! @param exponent: Exponent
 //! @return Power of the passed value;
-template<typename _type>
+template <typename _type>
 inline constexpr _type Pow(const _type base, const U32 exponent)
 {
-    return (exponent == 0) ? 1 : (exponent == 1) ? base : (base * Pow(base, exponent-1));
+    return (exponent == 0) ? 1 : (exponent == 1) ? base : (base * Pow(base, exponent - 1));
 }
 
 
@@ -79,8 +80,8 @@ inline constexpr _type Square(const _type base)
 
 // Alternative Implementation 2 -------------------------------------------------------------------
 
-//template <typename _type, U32 _exponent>
-//struct Power
+// template <typename _type, U32 _exponent>
+// struct Power
 //{
 //    static constexpr _type Pow(const _type base)
 //    {
@@ -88,8 +89,8 @@ inline constexpr _type Square(const _type base)
 //    }
 //};
 
-//template <typename _type>
-//struct Power<_type, 1>
+// template <typename _type>
+// struct Power<_type, 1>
 //{
 //    static constexpr _type Pow(const _type base)
 //    {
@@ -97,8 +98,8 @@ inline constexpr _type Square(const _type base)
 //    }
 //};
 
-//template <typename _type>
-//struct Power<_type, 0>
+// template <typename _type>
+// struct Power<_type, 0>
 //{
 //    static constexpr _type Pow(const _type)
 //    {
@@ -106,16 +107,16 @@ inline constexpr _type Square(const _type base)
 //    }
 //};
 
-//template <U32 _exponent, typename _type>
-//inline _type Pow(_type base)
+// template <U32 _exponent, typename _type>
+// inline _type Pow(_type base)
 //{
 //    return Power<_type, _exponent>::Pow(base);
 //}
 
-//template <typename _type>
-//inline constexpr _type Square(const _type base)
+// template <typename _type>
+// inline constexpr _type Square(const _type base)
 //{
 //    return Pow<2>(base);
 //}
 
-}// namespace GDL
+} // namespace GDL

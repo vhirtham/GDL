@@ -1,7 +1,7 @@
 #include <boost/test/unit_test.hpp>
 
-#include "gdl/GDLTypedefs.h"
 
+#include "gdl/base/fundamentalTypes.h"
 #include "gdl/base/functions/alignment.h"
 #include "gdl/base/functions/isPowerOf2.h"
 #include "gdl/base/functions/pow.h"

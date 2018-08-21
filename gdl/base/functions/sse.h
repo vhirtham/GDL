@@ -5,8 +5,8 @@
 #pragma GCC diagnostic ignored "-Wignored-attributes"
 #endif
 
-#include "gdl/GDLTypedefs.h"
 #include "gdl/base/exception.h"
+#include "gdl/base/fundamentalTypes.h"
 
 #include <x86intrin.h>
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "gdl/GDLTypedefs.h"
+#include "gdl/base/fundamentalTypes.h"
 #include "gdl/rendering/openGL/core/bufferObjectGL.h"
 #include <GL/glew.h>
 

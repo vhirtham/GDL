@@ -1,7 +1,7 @@
 #pragma once
 
 
-#include "gdl/GDLTypedefs.h"
+#include "gdl/base/fundamentalTypes.h"
 #include "gdl/resources/memory/memoryInterface.h"
 #include "gdl/resources/memory/memorySize.h"
 

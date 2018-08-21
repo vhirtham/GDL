@@ -1,7 +1,7 @@
 #pragma once
 
-#include "gdl/GDLTypedefs.h"
 #include "gdl/base/exception.h"
+#include "gdl/base/fundamentalTypes.h"
 
 #include <cassert>
 #include <cmath>

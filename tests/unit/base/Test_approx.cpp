@@ -1,7 +1,7 @@
 #include <boost/test/unit_test.hpp>
 
-#include "gdl/GDLTypedefs.h"
 #include "gdl/base/approx.h"
+#include "gdl/base/fundamentalTypes.h"
 #include "gdl/base/functions/pow.h"
 
 #include "tests/tools/ExceptionChecks.h"

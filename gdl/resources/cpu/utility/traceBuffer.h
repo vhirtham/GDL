@@ -1,6 +1,6 @@
 #pragma once
 
-#include "gdl/GDLTypedefs.h"
+#include "gdl/base/fundamentalTypes.h"
 #include "gdl/base/outputFile.h"
 #include "gdl/base/timer.h"
 #include "gdl/resources/cpu/thread.h"

@@ -106,7 +106,7 @@ BOOST_AUTO_TEST_CASE(General)
 
 #else // TEST_THREAD_SAFETY
 
-#include "gdl/GDLTypedefs.h"
+#include "gdl/base/fundamentalTypes.h"
 #include "gdl/resources/cpu/utility/deadlockTerminationTimer.h"
 #include "gdl/resources/memory/memoryManager.h"
 

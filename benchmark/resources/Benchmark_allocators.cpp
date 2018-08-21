@@ -1,6 +1,4 @@
-#include "gdl/GDLTypedefs.h"
-
-#include "gdl/GDLTypedefs.h"
+#include "gdl/base/fundamentalTypes.h"
 #include "gdl/base/timer.h"
 #include "gdl/resources/memory/memoryManager.h"
 #include "gdl/resources/memory/generalPurposeAllocator.h"

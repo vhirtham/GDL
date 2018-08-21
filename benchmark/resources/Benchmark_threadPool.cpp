@@ -1,4 +1,4 @@
-#include "gdl/GDLTypedefs.h"
+#include "gdl/base/fundamentalTypes.h"
 #include "gdl/base/timer.h"
 #include "gdl/resources/cpu/threadPool.h"
 
