@@ -1,7 +1,7 @@
 #pragma once
 
 #include "gdl/GDLTypedefs.h"
-#include "gdl/base/SSESupportFunctions.h"
+#include "gdl/base/functions/sse.h"
 
 #include <x86intrin.h>
 #include <array>

@@ -2,7 +2,7 @@
 
 #include "gdl/GDLTypedefs.h"
 #include "gdl/base/exception.h"
-#include "gdl/base/SSESupportFunctions.h"
+#include "gdl/base/functions/sse.h"
 
 #include <array>
 #include <type_traits>
