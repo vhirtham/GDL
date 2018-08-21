@@ -1,6 +1,7 @@
 #pragma once
 
 #include "gdl/base/fundamentalTypes.h"
+#include "gdl/base/time.h"
 #include "gdl/base/timer.h"
 
 #include <iostream>
@@ -31,7 +32,7 @@ public:
         , mThread{[this]() {
             while (!mStopTerminationTimer)
             {
-                if (mTimer.GetMilliseconds() > mMillisecondsUntilTermination)
+                if (mTimer.GetElapsedTime<Milliseconds>().count() > mMillisecondsUntilTermination)
                 {
                     // LCOV_EXCL_START
                     std::cout << "Deadlock timer idle time expired. Possible deadlock. Terminating application..."
@@ -41,7 +42,7 @@ public:
                     // LCOV_EXCL_STOP
                 }
                 // no busy waiting ---> valgrind
-                std::this_thread::sleep_for(std::chrono::milliseconds(1));
+                std::this_thread::yield();
             }
         }}
     {

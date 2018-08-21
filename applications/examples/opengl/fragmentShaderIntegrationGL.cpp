@@ -1,6 +1,7 @@
 
 // Tutorials to go on: http://openglbook.com/chapter-1-getting-started.html
 
+#include "gdl/base/time.h"
 #include "gdl/rendering/openGL/core/bufferObjectGL.h"
 #include "gdl/rendering/openGL/core/programGL.h"
 #include "gdl/rendering/openGL/core/renderWindowGL.h"
@@ -271,18 +272,18 @@ int main(int argc, char* argv[])
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     // glutShowWindow();
-    std::chrono::system_clock::time_point prevTime = std::chrono::system_clock::now();
-    std::chrono::system_clock::time_point currTime = std::chrono::system_clock::now();
+    TimePoint prevTime = CurrentTime();
+    TimePoint currTime = CurrentTime();
     F32 frequency = 1.0;
     F32 factor = 1.;
     while (KeepRunning())
     {
-        currTime = std::chrono::system_clock::now();
-        F32 delta_t = std::chrono::duration_cast<std::chrono::microseconds>(currTime - prevTime).count();
-        frequency += factor * delta_t / (10.e3 * 4);
-        if (frequency > 120.)
+        currTime = CurrentTime();
+        F32 delta_t = std::chrono::duration_cast<Microseconds>(currTime - prevTime).count();
+        frequency += factor * delta_t / (10.e3f * 4.f);
+        if (frequency > 120.f)
             factor = -1.0;
-        if (frequency < 1.)
+        if (frequency < 1.f)
             factor = 1.0;
         programDM.SetUniform<GL_FLOAT>("frequency", frequency);
         glutMainLoopEvent();

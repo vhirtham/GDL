@@ -1,4 +1,5 @@
 #include "gdl/base/fundamentalTypes.h"
+#include "gdl/base/time.h"
 #include "gdl/base/timer.h"
 #include "gdl/resources/memory/memoryManager.h"
 #include "gdl/resources/memory/generalPurposeAllocator.h"
@@ -11,13 +12,14 @@
 #include <memory>
 
 using namespace GDL;
+using namespace std::chrono_literals;
 
-void PrintAndResetResults(size_t allocationSize, std::array<std::pair<U32, U32>, 5>& results)
+void PrintAndResetResults(size_t allocationSize, std::array<std::pair<Nanoseconds, Nanoseconds>, 5>& results)
 {
     std::cout << "Allocation size: " << allocationSize << " Bytes" << std::endl;
     std::cout << "Allocator | Allocation | Deallocation | Total | Ratio" << std::endl;
 
-    U32 totalSTD = results[0].first + results[0].second;
+    Nanoseconds totalSTD = results[0].first + results[0].second;
     for (U32 i = 0; i < 5; ++i)
     {
         switch (i)
@@ -39,19 +41,16 @@ void PrintAndResetResults(size_t allocationSize, std::array<std::pair<U32, U32>,
             break;
         }
 
-        U32 total = results[i].first + results[i].second;
-        std::cout << results[i].first << " | " << results[i].second << " | " << total << " | "
-                  << static_cast<F32>(total) / static_cast<F32>(totalSTD) << std::endl;
-
-        results[i].first = 0;
-        results[i].second = 0;
+        Nanoseconds total = results[i].first + results[i].second;
+        std::cout << results[i].first.count() << " | " << results[i].second.count() << " | " << total.count() << " | "
+                  << static_cast<F32>(total.count()) / static_cast<F32>(totalSTD.count()) << std::endl;
     }
 
     std::cout << std::endl;
 }
 
 template <template <typename> class _allocator, typename _type, U32 _numAllocations>
-std::pair<U32, U32> AllocationBenchmark1()
+std::pair<Nanoseconds, Nanoseconds> AllocationBenchmark1()
 {
     constexpr U32 numRuns = 1;
     Timer timer;
@@ -59,27 +58,28 @@ std::pair<U32, U32> AllocationBenchmark1()
 
     _allocator<_type> allocator;
 
-    U32 allocationTime = 0;
-    U32 deallocationTime = 0;
+    Nanoseconds allocationTime = 0ns;
+    Nanoseconds deallocationTime = 0ns;
 
     for (U32 run = 0; run < numRuns; ++run)
     {
         timer.Reset();
         for (U32 i = 0; i < _numAllocations; ++i)
             objects[i] = allocator.allocate(1);
-        allocationTime += timer.GetNanoseconds();
+        allocationTime += timer.GetElapsedTime<Nanoseconds>();
 
         timer.Reset();
         for (U32 i = 0; i < _numAllocations; ++i)
             allocator.deallocate(objects[i], 1);
-        deallocationTime += timer.GetNanoseconds();
+        deallocationTime += timer.GetElapsedTime<Nanoseconds>();
     }
 
-    return std::pair<U32, U32>{allocationTime, deallocationTime};
+    std::cout << allocationTime.count() << std::endl;
+    return std::pair<Nanoseconds, Nanoseconds>{allocationTime, deallocationTime};
 }
 
 template <template <typename> class _allocator, typename _type, U32 _numAllocations>
-std::pair<U32, U32> AllocationBenchmark2()
+std::pair<Nanoseconds, Nanoseconds> AllocationBenchmark2()
 {
     constexpr U32 numRuns = 100;
     Timer timer;
@@ -87,15 +87,15 @@ std::pair<U32, U32> AllocationBenchmark2()
 
     _allocator<_type> allocator;
 
-    U32 allocationTime = 0;
-    U32 deallocationTime = 0;
+    Nanoseconds allocationTime = 0ns;
+    Nanoseconds deallocationTime = 0ns;
 
     for (U32 run = 0; run < numRuns; ++run)
     {
         timer.Reset();
         for (U32 i = 0; i < _numAllocations; ++i)
             objects[run][i] = allocator.allocate(1);
-        allocationTime += timer.GetNanoseconds();
+        allocationTime += timer.GetElapsedTime<Nanoseconds>();
     }
 
     for (U32 run = 0; run < numRuns; ++run)
@@ -103,14 +103,14 @@ std::pair<U32, U32> AllocationBenchmark2()
         timer.Reset();
         for (U32 i = 0; i < _numAllocations; ++i)
             allocator.deallocate(objects[run][i], 1);
-        deallocationTime += timer.GetNanoseconds();
+        deallocationTime += timer.GetElapsedTime<Nanoseconds>();
     }
 
-    return std::pair<U32, U32>{allocationTime, deallocationTime};
+    return std::pair<Nanoseconds, Nanoseconds>{allocationTime, deallocationTime};
 }
 
 template <template <typename> class _allocator, typename _type, U32 _numAllocations>
-std::pair<U32, U32> AllocationBenchmark3()
+std::pair<Nanoseconds, Nanoseconds> AllocationBenchmark3()
 {
     constexpr U32 numRuns = 100;
     Timer timer;
@@ -118,8 +118,8 @@ std::pair<U32, U32> AllocationBenchmark3()
 
     _allocator<_type> allocator;
 
-    U32 allocationTime = 0;
-    U32 deallocationTime = 0;
+    Nanoseconds allocationTime = 0ns;
+    Nanoseconds deallocationTime = 0ns;
 
 
     for (U32 i = 0; i < _numAllocations; ++i)
@@ -142,12 +142,12 @@ std::pair<U32, U32> AllocationBenchmark3()
         timer.Reset();
         for (U32 i = 20; i < _numAllocations; ++i)
             allocator.deallocate(objects[i], 1);
-        deallocationTime += timer.GetNanoseconds();
+        deallocationTime += timer.GetElapsedTime<Nanoseconds>();
 
         timer.Reset();
         for (U32 i = 20; i < _numAllocations; ++i)
             objects[i] = allocator.allocate(1);
-        allocationTime += timer.GetNanoseconds();
+        allocationTime += timer.GetElapsedTime<Nanoseconds>();
     }
 
 
@@ -166,13 +166,13 @@ std::pair<U32, U32> AllocationBenchmark3()
         allocator.deallocate(objects[i], 1);
 
 
-    return std::pair<U32, U32>{allocationTime, deallocationTime};
+    return std::pair<Nanoseconds, Nanoseconds>{allocationTime, deallocationTime};
 }
 
 template <typename _type, U32 _numAllocations>
 void RunAllocationBenchmarks1()
 {
-    std::array<std::pair<U32, U32>, 5> allocatorResults;
+    std::array<std::pair<Nanoseconds, Nanoseconds>, 5> allocatorResults;
 
     allocatorResults[0] = AllocationBenchmark1<std::allocator, _type, _numAllocations>();
     allocatorResults[1] = AllocationBenchmark1<GeneralPurposeAllocator, _type, _numAllocations>();
@@ -186,7 +186,7 @@ void RunAllocationBenchmarks1()
 template <typename _type, U32 _numAllocations>
 void RunAllocationBenchmarks2()
 {
-    std::array<std::pair<U32, U32>, 5> allocatorResults;
+    std::array<std::pair<Nanoseconds, Nanoseconds>, 5> allocatorResults;
 
     allocatorResults[0] = AllocationBenchmark2<std::allocator, _type, _numAllocations>();
     allocatorResults[1] = AllocationBenchmark2<GeneralPurposeAllocator, _type, _numAllocations>();
@@ -201,7 +201,7 @@ void RunAllocationBenchmarks2()
 template <typename _type, U32 _numAllocations>
 void RunAllocationBenchmarks3()
 {
-    std::array<std::pair<U32, U32>, 5> allocatorResults;
+    std::array<std::pair<Nanoseconds, Nanoseconds>, 5> allocatorResults;
 
     allocatorResults[0] = AllocationBenchmark3<std::allocator, _type, _numAllocations>();
     allocatorResults[1] = AllocationBenchmark3<GeneralPurposeAllocator, _type, _numAllocations>();

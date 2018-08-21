@@ -6,6 +6,7 @@
 // https://doc.lagout.org/programmation/OpenGL/OpenGL%204%20Shading%20Language%20Cookbook%20%282nd%20ed.%29%20%5BWolff%202013-12-24%5D.pdf
 
 
+#include "gdl/base/time.h"
 #include "gdl/math/mat4.inl"
 #include "gdl/rendering/openGL/core/bufferObjectGL.h"
 #include "gdl/rendering/openGL/core/programGL.h"
@@ -141,9 +142,9 @@ int main(int argc, char* argv[])
 
     // Constant rotation setup ##################
 
-    using namespace std::chrono_literals;
-    std::chrono::system_clock::time_point prevTime = std::chrono::system_clock::now();
-    std::chrono::system_clock::time_point currTime = std::chrono::system_clock::now();
+    TimePoint prevTime = CurrentTime();
+    TimePoint currTime = CurrentTime();
+
     F32 angle = 0.;
 
     // Uncomment for fullscreen #################
@@ -153,10 +154,10 @@ int main(int argc, char* argv[])
     while (RunProgramm)
     {
         prevTime = currTime;
-        currTime = std::chrono::system_clock::now();
-        angle += 3.14 * std::chrono::duration_cast<std::chrono::microseconds>(currTime - prevTime).count() / 1.e6;
+        currTime = CurrentTime();
+        angle += 3.14 * std::chrono::duration_cast<Microseconds>(currTime - prevTime).count() / 1.e6;
 
-        program.SetUniform(uniformLocation, Mat4f::RotationMatrixZ(angle));
+        program.SetUniform(static_cast<I32>(uniformLocation), Mat4f::RotationMatrixZ(angle));
 
         glDrawArrays(GL_TRIANGLES, 0, 3);
         glutMainLoopEvent();

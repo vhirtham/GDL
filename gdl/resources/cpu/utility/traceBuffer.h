@@ -2,6 +2,7 @@
 
 #include "gdl/base/fundamentalTypes.h"
 #include "gdl/base/outputFile.h"
+#include "gdl/base/time.h"
 #include "gdl/base/timer.h"
 #include "gdl/resources/cpu/thread.h"
 
@@ -131,7 +132,8 @@ public:
         if (mLog[index].mWriteToFile)
             throw Exception(__PRETTY_FUNCTION__, "Trace buffer full! Messages are logged faster as they are written to "
                                                  "file. Adjust buffer size or delay events.");
-        mLog[index] = EventLog(std::this_thread::get_id(), mTimer.GetMilliseconds(), eventMessage, mWriteToLogfile);
+        mLog[index] = EventLog(std::this_thread::get_id(), mTimer.GetElapsedTime<Milliseconds>().count(), eventMessage,
+                               mWriteToLogfile);
     }
 
     //! @brief Closes the log file

@@ -1,11 +1,15 @@
 #include <boost/test/unit_test.hpp>
 
 #include "gdl/base/exception.h"
+#include "gdl/base/time.h"
 #include "gdl/resources/cpu/threadPool.h"
 #include "gdl/resources/cpu/utility/deadlockTerminationTimer.h"
+
+#include <chrono>
 #include <iostream>
 
 using namespace GDL;
+using namespace std::chrono_literals;
 
 
 // Helper functions %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -16,7 +20,7 @@ void ParentOnlyTask(U32& counter, std::thread::id& parentThreadID, ThreadPool<1>
         ++counter;
     else
         threadPool.Submit([&] { ParentOnlyTask(counter, parentThreadID, threadPool); });
-    std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    std::this_thread::sleep_for(1ms);
 }
 
 void MemberOnlyTask(std::atomic<U32>& counter, std::thread::id& parentThreadID, ThreadPool<1>& threadPool)
@@ -25,7 +29,7 @@ void MemberOnlyTask(std::atomic<U32>& counter, std::thread::id& parentThreadID, 
         ++counter;
     else
         threadPool.Submit([&] { MemberOnlyTask(counter, parentThreadID, threadPool); });
-    std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    std::this_thread::sleep_for(1ms);
 }
 
 
@@ -51,13 +55,13 @@ BOOST_AUTO_TEST_CASE(Deadlock_submit_notification_missing)
 
     // Possible deadlock if queue is empty and all threads are waiting. Deadlock occurs if notification is missing
     // during submit call
-    std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    std::this_thread::sleep_for(1ms);
 
     for (U32 i = 0; i < 8; ++i)
-        tp.Submit([]() { std::this_thread::sleep_for(std::chrono::milliseconds(1)); });
+        tp.Submit([]() { std::this_thread::sleep_for(1ms); });
 
     while (tp.HasTasks())
-        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+        std::this_thread::sleep_for(1ms);
 }
 
 
@@ -67,7 +71,7 @@ BOOST_AUTO_TEST_CASE(Destruction_with_non_empty_queue)
     DeadlockTerminationTimer dtt;
     ThreadPool tp(4);
     for (U32 i = 0; i < 1000; ++i)
-        tp.Submit([]() { std::this_thread::sleep_for(std::chrono::milliseconds(100)); });
+        tp.Submit([]() { std::this_thread::sleep_for(100ms); });
 }
 
 
@@ -105,7 +109,7 @@ BOOST_AUTO_TEST_CASE(Exception_handling)
 
     tp.Submit([&] { throw Exception(__PRETTY_FUNCTION__, "test"); });
     while (tp.ExceptionLogSize() == 0)
-        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+        std::this_thread::sleep_for(1ms);
 
     BOOST_CHECK_THROW(tp.PropagateExceptions(), Exception);
 
@@ -113,7 +117,7 @@ BOOST_AUTO_TEST_CASE(Exception_handling)
     BOOST_CHECK_NO_THROW(tp.PropagateExceptions());
 
     tp.Submit([&] { throw int{1}; });
-    std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    std::this_thread::sleep_for(10ms);
 
     BOOST_CHECK_THROW(tp.Deinitialize(), Exception);
 
@@ -139,12 +143,12 @@ BOOST_AUTO_TEST_CASE(Start_and_Close_Threads) // Deadlock timer triggered on tra
     BOOST_CHECK(tp.GetNumThreads() == 0);
 
     for (U32 i = 0; i < 1000; ++i)
-        tp.Submit([]() { std::this_thread::sleep_for(std::chrono::milliseconds(1)); });
+        tp.Submit([]() { std::this_thread::sleep_for(1ms); });
 
     tp.StartThreads(1);
     tp.StartThreads(2);
     tp.StartThreads(3);
-    std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    std::this_thread::sleep_for(1ms);
     BOOST_CHECK(tp.GetNumThreads() == 6);
     BOOST_CHECK(tp.GetNumTasks() > 0);
 
@@ -174,13 +178,13 @@ BOOST_AUTO_TEST_CASE(Start_Thread_With_Custom_Main_Loop)
     ThreadPool tp(0);
 
     for (U32 i = 0; i < 100; ++i)
-        tp.Submit([]() { std::this_thread::sleep_for(std::chrono::microseconds(1)); });
+        tp.Submit([]() { std::this_thread::sleep_for(1ms); });
 
     // Reproduce default behaviour %%%%%%%%%%%%%%
     tp.StartThreads(3, [&] { tp.TryExecuteTaskWait(); });
 
     while (tp.HasTasks())
-        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+        std::this_thread::sleep_for(1ms);
 
     tp.CloseAllThreads();
     BOOST_CHECK(tp.GetNumThreads() == 0);
@@ -206,10 +210,10 @@ BOOST_AUTO_TEST_CASE(Start_Thread_With_Custom_Main_Loop)
 
 
     for (U32 i = 0; i < numSubmits; ++i)
-        tp.Submit([]() { std::this_thread::sleep_for(std::chrono::microseconds(1)); });
+        tp.Submit([]() { std::this_thread::sleep_for(1ms); });
 
     while (tp.HasTasks() || ML_Counter_0 + ML_Counter_1 + ML_Counter_2 < numSubmits)
-        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+        std::this_thread::sleep_for(1ms);
 
 
     BOOST_CHECK(ML_Counter_0 > 0);
@@ -253,10 +257,7 @@ BOOST_AUTO_TEST_CASE(Exceptions_in_Initialization_and_Deinitialization_functions
     std::atomic_bool deinit = false;
 
     tp.StartThreads(1, [&]() { tp.TryExecuteTask(); },
-                    [&]() {
-                        throw Exception(__PRETTY_FUNCTION__, "You shall not initialize!");
-                        init = true;
-                    },
+                    [&]() { throw Exception(__PRETTY_FUNCTION__, "You shall not initialize!"); },
                     [&]() { deinit = true; });
 
     tp.Submit([&]() { mainLoopRun = true; });
@@ -273,10 +274,7 @@ BOOST_AUTO_TEST_CASE(Exceptions_in_Initialization_and_Deinitialization_functions
 
     deinit = false;
     tp.StartThreads(1, [&]() { tp.TryExecuteTask(); }, [&]() { init = true; },
-                    [&]() {
-                        throw Exception(__PRETTY_FUNCTION__, "You shall not deinitialize!");
-                        deinit = true;
-                    });
+                    [&]() { throw Exception(__PRETTY_FUNCTION__, "You shall not deinitialize!"); });
 
     while (tp.HasTasks())
         std::this_thread::yield();
@@ -311,15 +309,15 @@ BOOST_AUTO_TEST_CASE(MultiQueue_Submit_And_Process)
     constexpr U32 numQueues = 3;
     ThreadPool<numQueues> tp(2);
 
-    std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    std::this_thread::sleep_for(1ms);
 
     for (U32 i = 0; i < numQueues; ++i)
     {
         for (U32 j = 0; j < 8; ++j)
-            tp.SubmitToQueue(i, []() { std::this_thread::sleep_for(std::chrono::milliseconds(1)); });
+            tp.SubmitToQueue(static_cast<I32>(i), []() { std::this_thread::sleep_for(1ms); });
 
         while (tp.HasTasks())
-            std::this_thread::sleep_for(std::chrono::milliseconds(1));
+            std::this_thread::sleep_for(1ms);
     }
 }
 
@@ -332,11 +330,11 @@ BOOST_AUTO_TEST_CASE(MultiQueue_Submit_And_Process_Specific_Queues)
     constexpr U32 numQueues = 3;
     ThreadPool<numQueues> tp(0);
 
-    tp.SubmitToQueue(2, []() { std::this_thread::sleep_for(std::chrono::milliseconds(1)); });
+    tp.SubmitToQueue(2, []() { std::this_thread::sleep_for(1ms); });
     for (U32 i = 0; i < 2; ++i)
-        tp.SubmitToQueue(0, []() { std::this_thread::sleep_for(std::chrono::milliseconds(1)); });
+        tp.SubmitToQueue(0, []() { std::this_thread::sleep_for(1ms); });
     for (U32 i = 0; i < 3; ++i)
-        tp.SubmitToQueue(1, []() { std::this_thread::sleep_for(std::chrono::milliseconds(1)); });
+        tp.SubmitToQueue(1, []() { std::this_thread::sleep_for(1ms); });
 
     BOOST_CHECK(tp.GetNumTasks(0) == 2);
     BOOST_CHECK(tp.GetNumTasks(1) == 3);
@@ -345,7 +343,7 @@ BOOST_AUTO_TEST_CASE(MultiQueue_Submit_And_Process_Specific_Queues)
 
     tp.StartThreads(1, [&tp]() { tp.TryExecuteTask(1); });
     while (tp.HasTasks(1))
-        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+        std::this_thread::sleep_for(1ms);
     BOOST_CHECK(tp.GetNumTasks(0) == 2);
     BOOST_CHECK(tp.GetNumTasks(1) == 0);
     BOOST_CHECK(tp.GetNumTasks(2) == 1);
@@ -354,7 +352,7 @@ BOOST_AUTO_TEST_CASE(MultiQueue_Submit_And_Process_Specific_Queues)
 
     tp.StartThreads(1, [&tp]() { tp.TryExecuteTask(0); });
     while (tp.HasTasks(0))
-        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+        std::this_thread::sleep_for(1ms);
     BOOST_CHECK(tp.GetNumTasks(0) == 0);
     BOOST_CHECK(tp.GetNumTasks(1) == 0);
     BOOST_CHECK(tp.GetNumTasks(2) == 1);
@@ -362,11 +360,11 @@ BOOST_AUTO_TEST_CASE(MultiQueue_Submit_And_Process_Specific_Queues)
     tp.CloseAllThreads();
 
     for (U32 i = 0; i < 3; ++i)
-        tp.SubmitToQueue(1, []() { std::this_thread::sleep_for(std::chrono::milliseconds(1)); });
+        tp.SubmitToQueue(1, []() { std::this_thread::sleep_for(1ms); });
 
     tp.StartThreads(1);
     while (tp.HasTasks())
-        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+        std::this_thread::sleep_for(1ms);
 
     BOOST_CHECK(tp.GetNumTasks(0) == 0);
     BOOST_CHECK(tp.GetNumTasks(1) == 0);
@@ -384,28 +382,28 @@ BOOST_AUTO_TEST_CASE(MultiQueue_LIFO_ThreadDestruction)
     ThreadPool<numQueues> tp(0);
 
     for (U32 i = 0; i < numQueues; ++i)
-        tp.StartThreads(1, [&tp, i]() { tp.TryExecuteTask(i); });
+        tp.StartThreads(1, [&tp, i]() { tp.TryExecuteTask(static_cast<I32>(i)); });
 
     for (U32 i = 0; i < numQueues; ++i)
-        tp.SubmitToQueue(i, []() { std::this_thread::sleep_for(std::chrono::milliseconds(1)); });
+        tp.SubmitToQueue(static_cast<I32>(i), []() { std::this_thread::sleep_for(1ms); });
 
     while (tp.GetNumTasks() > 0)
-        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+        std::this_thread::sleep_for(1ms);
 
     for (U32 i = 0; i < numQueues; ++i)
-        BOOST_CHECK(tp.GetNumTasks(i) == 0);
+        BOOST_CHECK(tp.GetNumTasks(static_cast<I32>(i)) == 0);
 
 
 
     tp.CloseThreads(1);
     for (U32 i = 0; i < numQueues; ++i)
-        tp.SubmitToQueue(i, []() { std::this_thread::sleep_for(std::chrono::milliseconds(1)); });
+        tp.SubmitToQueue(static_cast<I32>(i), []() { std::this_thread::sleep_for(1ms); });
 
     while (tp.GetNumTasks() > 1)
-        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+        std::this_thread::sleep_for(1ms);
 
     for (U32 i = 0; i < numQueues - 1; ++i)
-        BOOST_CHECK(tp.GetNumTasks(i) == 0);
+        BOOST_CHECK(tp.GetNumTasks(static_cast<I32>(i)) == 0);
 
     BOOST_CHECK(tp.GetNumTasks(numQueues - 1) == 1);
 
@@ -413,13 +411,13 @@ BOOST_AUTO_TEST_CASE(MultiQueue_LIFO_ThreadDestruction)
 
     tp.CloseThreads(2);
     for (U32 i = 0; i < numQueues; ++i)
-        tp.SubmitToQueue(i, []() { std::this_thread::sleep_for(std::chrono::milliseconds(1)); });
+        tp.SubmitToQueue(static_cast<I32>(i), []() { std::this_thread::sleep_for(1ms); });
 
     while (tp.GetNumTasks() > 4)
-        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+        std::this_thread::sleep_for(1ms);
 
     for (U32 i = 0; i < numQueues - 3; ++i)
-        BOOST_CHECK(tp.GetNumTasks(i) == 0);
+        BOOST_CHECK(tp.GetNumTasks(static_cast<I32>(i)) == 0);
     for (U32 i = numQueues - 1; i > 0; --i)
         BOOST_CHECK(tp.GetNumTasks(numQueues - 1) > 0);
     BOOST_CHECK(tp.GetNumTasks() == 4);

@@ -5,8 +5,6 @@
 #include <cstdint>
 #include <limits.h>
 
-// rename header to numeric types
-
 namespace GDL
 {
 

@@ -9,6 +9,7 @@
 
 
 using namespace GDL;
+using namespace std::chrono_literals;
 
 
 //! @brief Checks if the trace buffer works as expected with only a single thread
@@ -112,7 +113,7 @@ BOOST_AUTO_TEST_CASE(traceBuffer_LogFile_Write)
     tb.OpenLogFile(fileName);
 
     // Give writer thread some time to start
-    std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    std::this_thread::sleep_for(10ms);
 
 
     std::vector<std::thread> threads;
@@ -128,7 +129,7 @@ BOOST_AUTO_TEST_CASE(traceBuffer_LogFile_Write)
         threads[i].join();
     threads.clear();
 
-    std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    std::this_thread::sleep_for(1ms);
 
     for (U32 i = 0; i < numThreads; ++i)
     {
@@ -142,7 +143,7 @@ BOOST_AUTO_TEST_CASE(traceBuffer_LogFile_Write)
     threads.clear();
 
     // Wait for file to be written
-    std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    std::this_thread::sleep_for(1ms);
 
     // Check File content
     std::ifstream inputFile;
