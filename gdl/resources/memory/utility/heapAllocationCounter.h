@@ -78,6 +78,32 @@ public:
     }
 
 
+    //! @brief Checks if the new and delete calls since the construction of the class match the passed numbers. Prints
+    //! the values if there is a mismatch. If custom allocation is enabled the first two numbers are relevant for the
+    //! test, otherwise the last two numbers.
+    //! @param expectedNewCalls: Expected number of new calls if custom allocation is enabled
+    //! @param expectedDeleteCalls: Expected number of delete calls if custom allocation is enabled
+    //! @param expectedNewCallsSTDAlloc: Expected number of new calls if custom allocation is disabled
+    //! @param expectedDeleteCallsSTDAlloc: Expected number of delete calls if custom allocation is disabled
+    //! @return TRUE if the expected numbers match the real count. FALSE otherwise
+    //! @remark Returns always TRUE if DISABLE_HEAP_ALLOCATION_COUNTER is defined. Also always returns TRUE if
+    //! USE_STD_ALLOCATOR is defined and expectedNewCallsSTDAlloc and expectedDeleteCallsSTDAlloc are both set to -1.
+    bool CheckNumCallsExpectedCustomAllocation([[maybe_unused]] I32 expectedNewCalls,
+                                               [[maybe_unused]] I32 expectedDeleteCalls,
+                                               [[maybe_unused]] I32 expectedNewCallsSTDAlloc = -1,
+                                               [[maybe_unused]] I32 expectedDeleteCallsSTDAlloc = -1) const
+    {
+#ifdef USE_STD_ALLOCATOR
+
+        if (expectedNewCallsSTDAlloc == -1 && expectedDeleteCallsSTDAlloc == -1)
+            return true;
+        return CheckNumCallsExpected(expectedNewCallsSTDAlloc, expectedDeleteCallsSTDAlloc);
+
+#else // USE_STD_ALLOCATOR
+        return CheckNumCallsExpected(expectedNewCalls, expectedDeleteCalls);
+#endif // USE_STD_ALLOCATOR
+    }
+
     //! @brief Gets the number of new calls since the construction of the instance
     //! @return Number of new calls since the construction of the instance
     I32 GetNumNewCalls() const

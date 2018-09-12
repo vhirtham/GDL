@@ -11,10 +11,11 @@ using namespace GDL;
 
 BOOST_AUTO_TEST_CASE(To_String)
 {
-
+#ifndef USE_STD_ALLOCATOR
     MemoryManager& mm = MemoryManager::Instance();
     mm.CreateGeneralPurposeMemory(1_MB);
     mm.Initialize();
+#endif
     HeapAllocationCounter hac;
     {
         // floating point types
@@ -59,10 +60,11 @@ BOOST_AUTO_TEST_CASE(To_String)
         U64 u64 = 3207927512116994732;
         BOOST_CHECK(ToString(u64).compare("3207927512116994732") == 0);
 
-        std::cout << ToString(i64) << ";" << std::endl;
-
         std::to_string(2);
     }
-    hac.PrintCalls();
+    BOOST_CHECK(hac.CheckNumCallsExpectedCustomAllocation(0, 0));
+
+#ifndef USE_STD_ALLOCATOR
     mm.Deinitialize();
+#endif
 }
