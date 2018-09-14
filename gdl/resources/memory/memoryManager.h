@@ -1,6 +1,7 @@
 #pragma once
 
 #include "gdl/resources/memory/generalPurposeMemory.h"
+#include "gdl/resources/memory/heapMemory.h"
 #include "gdl/resources/memory/memoryPool.h"
 #include "gdl/resources/memory/memorySize.h"
 #include "gdl/resources/memory/memoryStack.h"
@@ -58,25 +59,25 @@ public:
 
     //! @brief Returns an memory interface pointer to the general purpose memory
     //! @return Pointer to the general purpose memory if it exists. Otherwise nullptr
-    MemoryInterface* GetGeneralPurposeMemory() const;
+    GeneralPurposeMemory* GetGeneralPurposeMemory() const;
 
     //! @brief Returns an memory interface pointer to the heap memory
     //! @return Pointer to the heap memory
-    MemoryInterface* GetHeapMemory() const;
+    HeapMemory* GetHeapMemory() const;
 
     //! @brief Returns an memory interface pointer to the memory stack
     //! @return Pointer to the memory stack if it exists. Otherwise nullptr
-    MemoryInterface* GetMemoryStack() const;
+    MemoryStack* GetMemoryStack() const;
 
     //! @brief Returns an memory interface pointer to a fitting memory pool.
     //! @param elementSize: Size of the data type which should fit into the memory pool.
     //! @param alignment: Alignment of the data type which should fit into the memory pool.
     //! @return Pointer to a fitting memory pool if it exist. Otherwise nullptr
-    MemoryInterface* GetMemoryPool(size_t elementSize, size_t alignment) const;
+    MemoryPool* GetMemoryPool(size_t elementSize, size_t alignment) const;
 
     //! @brief Returns an memory interface pointer to the threads private memory stack
     //! @return Pointer to the threads private memory stack if it exists. Otherwise nullptr
-    MemoryInterface* GetThreadPrivateMemoryStack() const;
+    ThreadPrivateMemoryStack* GetThreadPrivateMemoryStack() const;
 
     //! @brief Creates a thread private memory stack for this thread
     //! @param memorySize: Size of the memory stack

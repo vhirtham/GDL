@@ -1,7 +1,6 @@
 #include "gdl/resources/memory/memoryManager.h"
 
 #include "gdl/base/exception.h"
-#include "gdl/resources/memory/heapMemory.h"
 
 
 namespace GDL
@@ -90,7 +89,7 @@ void MemoryManager::Deinitialize()
 
 
 
-MemoryInterface* GDL::MemoryManager::GetGeneralPurposeMemory() const
+GeneralPurposeMemory* GDL::MemoryManager::GetGeneralPurposeMemory() const
 {
     std::shared_lock<std::shared_mutex> lock(mMutex);
     if (mInitialized == false)
@@ -104,7 +103,7 @@ MemoryInterface* GDL::MemoryManager::GetGeneralPurposeMemory() const
 
 
 
-MemoryInterface* MemoryManager::GetHeapMemory() const
+HeapMemory* MemoryManager::GetHeapMemory() const
 {
     std::shared_lock<std::shared_mutex> lock(mMutex);
 
@@ -118,7 +117,7 @@ MemoryInterface* MemoryManager::GetHeapMemory() const
     return &memory;
 }
 
-MemoryInterface* MemoryManager::GetMemoryStack() const
+MemoryStack* MemoryManager::GetMemoryStack() const
 {
     std::shared_lock<std::shared_mutex> lock(mMutex);
     if (mInitialized == false)
@@ -132,7 +131,7 @@ MemoryInterface* MemoryManager::GetMemoryStack() const
 
 
 
-MemoryInterface* MemoryManager::GetMemoryPool(size_t elementSize, size_t alignment) const
+MemoryPool* MemoryManager::GetMemoryPool(size_t elementSize, size_t alignment) const
 {
     std::shared_lock<std::shared_mutex> lock(mMutex);
     if (mInitialized == false)
@@ -148,7 +147,7 @@ MemoryInterface* MemoryManager::GetMemoryPool(size_t elementSize, size_t alignme
     return nullptr;
 }
 
-MemoryInterface* MemoryManager::GetThreadPrivateMemoryStack() const
+ThreadPrivateMemoryStack* MemoryManager::GetThreadPrivateMemoryStack() const
 {
     std::shared_lock<std::shared_mutex> lock(mMutex);
     if (mInitialized == false)
