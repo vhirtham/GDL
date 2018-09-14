@@ -170,7 +170,7 @@ void* MemoryStackTemplate<_ThreadPrivate>::AllocatePrivate(size_t size, size_t a
     DEV_EXCEPTION(size == 0, "Allocated memory size is 0.");
     DEV_EXCEPTION(!IsInitialized(), "Memory stack not initialized.");
     DEV_EXCEPTION(!IsPowerOf2(alignment), "Alignment must be a power of 2.");
-    EXCEPTION(allocatedMemoryPtr + size > mMemory.get() + mMemorySize.GetNumBytes(), "No more memory available.");
+    BAD_ALLOC(allocatedMemoryPtr + size > mMemory.get() + mMemorySize.GetNumBytes());
 
     mCurrentMemoryPtr = allocatedMemoryPtr + size;
 

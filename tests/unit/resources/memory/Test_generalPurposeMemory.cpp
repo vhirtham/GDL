@@ -601,7 +601,7 @@ BOOST_AUTO_TEST_CASE(Allocation_Exceptions)
     AssertIncreasingAddresses(addresses);
 
     // no more memory left
-    BOOST_CHECK_THROW(gpm.Allocate(allocationSize), Exception);
+    BOOST_CHECK_THROW(gpm.Allocate(allocationSize), std::bad_alloc);
 
 
 
@@ -617,7 +617,7 @@ BOOST_AUTO_TEST_CASE(Allocation_Exceptions)
     }
 
     // no fitting memory block available because of fragmentation
-    BOOST_CHECK_THROW(gpm.Allocate(doubleAllocationSize), Exception);
+    BOOST_CHECK_THROW(gpm.Allocate(doubleAllocationSize), std::bad_alloc);
 
     // size is 0
     GDL_CHECK_THROW_DEV_DISABLE(gpm.Allocate(0), Exception);

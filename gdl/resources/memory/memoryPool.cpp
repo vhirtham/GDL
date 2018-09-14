@@ -40,7 +40,7 @@ void* MemoryPool::Allocate(size_t size, size_t alignment)
     DEV_EXCEPTION((alignment - 1) / mAlignment > 0, "Alignment must be a power of 2.");
     DEV_EXCEPTION(IsInitialized() == false, "Memory pool not initialized");
     DEV_EXCEPTION(size > mElementSize, "Allocation size is larger than a pool element.");
-    EXCEPTION(mFirstFreeElement == nullptr, "No more memory available.");
+    BAD_ALLOC(mFirstFreeElement == nullptr);
 
     void* allocatedMemoryPtr = mFirstFreeElement;
 

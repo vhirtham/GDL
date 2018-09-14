@@ -12,6 +12,10 @@
     throw GDL::Exception(__PRETTY_FUNCTION__, message)
 
 
+#define BAD_ALLOC(condition)                                                                                           \
+    if (condition)                                                                                                     \
+    throw std::bad_alloc()
+
 // Debug exceptions are turned off in release mode like assertions. In contrast to assertions, debug exceptions can be
 // tessted to be triggered in unit tests.
 #ifndef NDEBUG
