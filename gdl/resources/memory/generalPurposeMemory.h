@@ -2,11 +2,12 @@
 
 
 #include "gdl/base/fundamentalTypes.h"
+#include "gdl/resources/cpu/spinlock.h"
 #include "gdl/resources/memory/memoryInterface.h"
 #include "gdl/resources/memory/memorySize.h"
 
 #include <memory>
-#include <mutex>
+
 
 namespace GDL
 {
@@ -46,7 +47,7 @@ class GeneralPurposeMemory : public MemoryInterface
     MemorySize mMemorySize;
     U8* mFirstFreeMemoryPtr;
     std::unique_ptr<U8[]> mMemory;
-    mutable std::mutex mMutex;
+    mutable SpinLock mSpinLock;
 
 public:
     //! @brief Creates the general purpose memory with <memorySize> bytes of memory

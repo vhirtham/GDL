@@ -229,7 +229,7 @@ int main()
     mm.CreatePrivateMemoryStackForThisThread(200_MB);
 
 
-    RunAllocationBenchmarks1<std::array<U8, 256>, maxNumAllocations>();
+    RunAllocationBenchmarks1<std::array<U8, 32>, maxNumAllocations>();
     //    RunAllocationBenchmarks1<std::array<U8, 8>, maxNumAllocations>();
     //    RunAllocationBenchmarks1<std::array<U8, 16>, maxNumAllocations>();
     //    RunAllocationBenchmarks1<std::array<U8, 32>, maxNumAllocations>();

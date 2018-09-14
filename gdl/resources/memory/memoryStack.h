@@ -2,11 +2,10 @@
 
 
 #include "gdl/base/fundamentalTypes.h"
+#include "gdl/resources/cpu/spinlock.h"
 #include "gdl/resources/memory/memoryInterface.h"
 #include "gdl/resources/memory/memorySize.h"
-
 #include <memory>
-#include <mutex>
 #include <thread>
 
 namespace GDL
@@ -21,7 +20,7 @@ template <bool _ThreadPrivate>
 class MemoryStackTemplate : public MemoryInterface
 {
 
-    typedef typename std::conditional<_ThreadPrivate, std::thread::id, std::mutex>::type MutexOrThreadId;
+    typedef typename std::conditional<_ThreadPrivate, std::thread::id, SpinLock>::type SpinlockOrThreadId;
 
 
 
@@ -53,7 +52,7 @@ class MemoryStackTemplate : public MemoryInterface
     U32 mNumAllocations;
     U8* mCurrentMemoryPtr;
     std::unique_ptr<U8[]> mMemory;
-    MutexOrThreadId mMutexOrThreadId;
+    SpinlockOrThreadId mSpinlockOrThreadId;
 
 public:
     //! @brief Creates the thread private memory stack with <memorySize> bytes of memory

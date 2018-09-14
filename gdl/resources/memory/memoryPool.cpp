@@ -6,7 +6,7 @@
 #include "gdl/resources/memory/sharedFunctions.h"
 
 #include <cstring>
-
+#include <mutex>
 
 namespace GDL
 {
@@ -21,7 +21,7 @@ MemoryPool::MemoryPool(MemorySize elementSize, U32 numElements, size_t alignment
     , mLastFreeElement{nullptr}
     , mMemory{nullptr}
 {
-    std::lock_guard<std::mutex> lock(mMutex);
+    std::lock_guard<SpinLock> lock(mSpinLock);
     CheckConstructionParameters();
 }
 
@@ -35,7 +35,7 @@ MemoryPool::~MemoryPool()
 
 void* MemoryPool::Allocate(size_t size, size_t alignment)
 {
-    std::lock_guard<std::mutex> lock(mMutex);
+    std::lock_guard<SpinLock> lock(mSpinLock);
     DEV_EXCEPTION(!IsPowerOf2(alignment), "Alignment must be a power of 2.");
     DEV_EXCEPTION((alignment - 1) / mAlignment > 0, "Alignment must be a power of 2.");
     DEV_EXCEPTION(IsInitialized() == false, "Memory pool not initialized");
@@ -58,7 +58,7 @@ void* MemoryPool::Allocate(size_t size, size_t alignment)
 
 void MemoryPool::Deallocate(void* address, [[maybe_unused]] size_t alignment)
 {
-    std::lock_guard<std::mutex> lock(mMutex);
+    std::lock_guard<SpinLock> lock(mSpinLock);
 
 #if !(defined(NDEBUG) && defined(NDEVEXCEPTION))
     CheckDeallocation(address);
@@ -78,7 +78,7 @@ void MemoryPool::Deallocate(void* address, [[maybe_unused]] size_t alignment)
 
 void MemoryPool::CheckMemoryConsistency() const
 {
-    std::lock_guard<std::mutex> lock(mMutex);
+    std::lock_guard<SpinLock> lock(mSpinLock);
     CheckMemoryConsistencyPrivate();
 }
 
@@ -177,7 +177,7 @@ bool MemoryPool::IsInitialized() const
 
 void MemoryPool::Initialize()
 {
-    std::lock_guard<std::mutex> lock(mMutex);
+    std::lock_guard<SpinLock> lock(mSpinLock);
 
     EXCEPTION(IsInitialized(), "Memory pool is already initialized.");
 
@@ -190,13 +190,13 @@ void MemoryPool::Initialize()
 
 size_t MemoryPool::GetAlignment() const
 {
-    std::lock_guard<std::mutex> lock(mMutex);
+    std::lock_guard<SpinLock> lock(mSpinLock);
     return mAlignment;
 }
 
 MemorySize MemoryPool::GetElementSize() const
 {
-    std::lock_guard<std::mutex> lock(mMutex);
+    std::lock_guard<SpinLock> lock(mSpinLock);
     return mElementSize;
 }
 
@@ -204,7 +204,7 @@ MemorySize MemoryPool::GetElementSize() const
 
 void MemoryPool::Deinitialize()
 {
-    std::lock_guard<std::mutex> lock(mMutex);
+    std::lock_guard<SpinLock> lock(mSpinLock);
 
     EXCEPTION(IsInitialized() == false, "Memory pool already deinitialized.");
     EXCEPTION(mNumElements != mNumFreeElements, "Can't deinitialize. Memory still in use.");

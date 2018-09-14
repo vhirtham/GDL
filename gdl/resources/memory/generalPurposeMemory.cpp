@@ -6,7 +6,7 @@
 #include "gdl/resources/memory/sharedFunctions.h"
 
 #include <cassert>
-
+#include <mutex>
 
 namespace GDL
 {
@@ -29,7 +29,7 @@ GeneralPurposeMemory::~GeneralPurposeMemory()
 
 void* GeneralPurposeMemory::Allocate(size_t size, size_t alignment)
 {
-    std::lock_guard<std::mutex> lock{mMutex};
+    std::lock_guard<SpinLock> lock{mSpinLock};
 
     DEV_EXCEPTION(size == 0, "Allocated memory size is 0.");
     DEV_EXCEPTION(!IsInitialized(), "General purpose memory is not initialized.");
@@ -53,7 +53,7 @@ void* GeneralPurposeMemory::Allocate(size_t size, size_t alignment)
 
 U32 GeneralPurposeMemory::CountAllocatedMemoryBlocks() const
 {
-    std::lock_guard<std::mutex> lock{mMutex};
+    std::lock_guard<SpinLock> lock{mSpinLock};
 
     return CountAllocatedMemoryBlocksPrivate();
 }
@@ -62,7 +62,7 @@ U32 GeneralPurposeMemory::CountAllocatedMemoryBlocks() const
 
 U32 GeneralPurposeMemory::CountFreeMemoryBlocks() const
 {
-    std::lock_guard<std::mutex> lock{mMutex};
+    std::lock_guard<SpinLock> lock{mSpinLock};
 
     return CountFreeMemoryBlocksPrivate();
 }
@@ -71,7 +71,7 @@ U32 GeneralPurposeMemory::CountFreeMemoryBlocks() const
 
 void GeneralPurposeMemory::Deallocate(void* address, [[maybe_unused]] size_t alignment)
 {
-    std::lock_guard<std::mutex> lock{mMutex};
+    std::lock_guard<SpinLock> lock{mSpinLock};
 
     DEV_EXCEPTION(!IsInitialized(), "General purpose memory is not initialized.");
     DEV_EXCEPTION(address == nullptr, "Can't free a nullptr");
@@ -92,7 +92,7 @@ void GeneralPurposeMemory::Deallocate(void* address, [[maybe_unused]] size_t ali
 
 void GeneralPurposeMemory::Deinitialize()
 {
-    std::lock_guard<std::mutex> lock{mMutex};
+    std::lock_guard<SpinLock> lock{mSpinLock};
 
     EXCEPTION(!IsInitialized(), "General purpose memory is already deinitialized.");
     EXCEPTION(CountAllocatedMemoryBlocksPrivate() != 0, "Can't deinitialize. Memory still in use.");
@@ -105,7 +105,7 @@ void GeneralPurposeMemory::Deinitialize()
 
 void GeneralPurposeMemory::Initialize()
 {
-    std::lock_guard<std::mutex> lock{mMutex};
+    std::lock_guard<SpinLock> lock{mSpinLock};
 
     EXCEPTION(IsInitialized(), "General purpose memory is already initialized.");
 
