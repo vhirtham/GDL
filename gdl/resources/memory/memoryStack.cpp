@@ -57,6 +57,50 @@ void* MemoryStackTemplate<false>::Allocate(size_t size, size_t alignment)
 
 
 template <>
+MemoryStackTemplate<false>::MemoryStackDeallocator MemoryStackTemplate<false>::CreateMemoryStackDeallocator()
+{
+    std::lock_guard<std::mutex> lock(mMutexOrThreadId);
+
+    return MemoryStackDeallocator{*this};
+}
+
+
+
+template <>
+MemoryStackTemplate<true>::MemoryStackDeallocator MemoryStackTemplate<true>::CreateMemoryStackDeallocator()
+{
+    DEV_EXCEPTION(mMutexOrThreadId != std::this_thread::get_id(),
+                  "Thread private memory stack can only be accessed by owning thread");
+
+    return MemoryStackDeallocator{*this};
+}
+
+
+
+template <>
+void MemoryStackTemplate<false>::SetState(U32 numAllocations, U8* memoryPointer)
+{
+    std::lock_guard<std::mutex> lock(mMutexOrThreadId);
+
+    mNumAllocations = numAllocations;
+    mCurrentMemoryPtr = memoryPointer;
+}
+
+
+
+template <>
+void MemoryStackTemplate<true>::SetState(U32 numAllocations, U8* memoryPointer)
+{
+    DEV_EXCEPTION(mMutexOrThreadId != std::this_thread::get_id(),
+                  "Thread private memory stack can only be accessed by owning thread");
+
+    mNumAllocations = numAllocations;
+    mCurrentMemoryPtr = memoryPointer;
+}
+
+
+
+template <>
 void MemoryStackTemplate<true>::Deallocate(void* address, [[maybe_unused]] size_t alignment)
 {
     DEV_EXCEPTION(mMutexOrThreadId != std::this_thread::get_id(),
@@ -184,6 +228,24 @@ template <bool _ThreadPrivate>
 bool MemoryStackTemplate<_ThreadPrivate>::IsInitialized() const
 {
     return mMemory != nullptr;
+}
+
+
+
+template <bool _ThreadPrivate>
+MemoryStackTemplate<_ThreadPrivate>::MemoryStackDeallocator::MemoryStackDeallocator(MemoryStackTemplate& memoryStack)
+    : mMemoryStack{memoryStack}
+    , mStoredNumAllocations{memoryStack.mNumAllocations}
+    , mStoredPointer{memoryStack.mCurrentMemoryPtr}
+{
+}
+
+
+
+template <bool _ThreadPrivate>
+MemoryStackTemplate<_ThreadPrivate>::MemoryStackDeallocator::~MemoryStackDeallocator()
+{
+    mMemoryStack.SetState(mStoredNumAllocations, mStoredPointer);
 }
 
 

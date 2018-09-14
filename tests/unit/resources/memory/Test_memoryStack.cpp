@@ -297,3 +297,50 @@ BOOST_AUTO_TEST_CASE(Thread_safety_non_thread_private)
 
     ms.Deinitialize();
 }
+
+
+template <bool _ThreadPrivate>
+void StackDeallocator()
+{
+    constexpr U32 numAllocations = 5;
+    constexpr U32 allocationSize = 10;
+    constexpr MemorySize memorySize = allocationSize * numAllocations * 1_B;
+    MemoryStackTemplate<_ThreadPrivate> ms{memorySize};
+
+    std::array<void*, numAllocations> addresses;
+    addresses.fill(nullptr);
+
+    ms.Initialize();
+
+    addresses[0] = ms.Allocate(allocationSize);
+    {
+        auto stackDeallocator = ms.CreateMemoryStackDeallocator();
+        for (U32 i = 1; i < numAllocations; ++i)
+            addresses[i] = ms.Allocate(allocationSize);
+
+
+        for (U32 i = 1; i < numAllocations; ++i)
+            ms.Deallocate(addresses[i]);
+
+        BOOST_CHECK_THROW(ms.Allocate(allocationSize), Exception);
+    }
+
+    for (U32 i = 1; i < numAllocations; ++i)
+        addresses[i] = ms.Allocate(allocationSize);
+
+
+    for (U32 i = 0; i < numAllocations; ++i)
+        ms.Deallocate(addresses[i]);
+
+    GDL_CHECK_THROW_DEV_DISABLE(ms.Deallocate(addresses[0]), Exception);
+
+
+
+    ms.Deinitialize();
+}
+
+BOOST_AUTO_TEST_CASE(Stack_Deallocator)
+{
+    StackDeallocator<true>();
+    StackDeallocator<false>();
+}

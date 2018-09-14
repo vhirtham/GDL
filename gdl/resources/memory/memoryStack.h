@@ -23,6 +23,32 @@ class MemoryStackTemplate : public MemoryInterface
 
     typedef typename std::conditional<_ThreadPrivate, std::thread::id, std::mutex>::type MutexOrThreadId;
 
+
+
+    //! @brief Class which stores the current state of the memory stack and restores it when the object is destroyed
+    class MemoryStackDeallocator
+    {
+        friend class MemoryStackTemplate<_ThreadPrivate>;
+
+        MemoryStackTemplate& mMemoryStack;
+        U32 mStoredNumAllocations = 0;
+        U8* mStoredPointer = nullptr;
+
+        //! @brief Ctor
+        //! @param memoryStack: Memory stack that should be restored after destruction of an instance of this class
+        MemoryStackDeallocator(MemoryStackTemplate& memoryStack);
+
+    public:
+        MemoryStackDeallocator() = delete;
+        MemoryStackDeallocator(const MemoryStackDeallocator&) = delete;
+        MemoryStackDeallocator(MemoryStackDeallocator&&) = delete;
+        MemoryStackDeallocator& operator=(const MemoryStackDeallocator&) = delete;
+        MemoryStackDeallocator& operator=(MemoryStackDeallocator&&) = delete;
+        ~MemoryStackDeallocator();
+    };
+
+
+
     MemorySize mMemorySize;
     U32 mNumAllocations;
     U8* mCurrentMemoryPtr;
@@ -59,6 +85,10 @@ public:
     //! @brief Initializes the memory stack
     void Initialize();
 
+    //! @brief Creates a memory stack deallocator for the memory stack
+    //! @return New memory stack allocator instance
+    MemoryStackDeallocator CreateMemoryStackDeallocator();
+
 private:
     //! @brief Class internal function which does the memory allocation
     //! @param size: Size of the memory that should be allocated
@@ -82,6 +112,12 @@ private:
     //! @brief Returns if the memory stack is initialized
     //! @return TRUE / FALSE
     bool IsInitialized() const;
+
+    //! @brief Sets the number of allocations and the current memory pointer
+    //! @param numAllocations: New number of allocations
+    //! @param memoryPointer: New position of the memory pointer
+    //! @remark This function is only ment to be used by the stack deallocator class
+    void SetState(U32 numAllocations, U8* memoryPointer);
 };
 
 
