@@ -100,7 +100,7 @@ BOOST_AUTO_TEST_CASE(Allocation_and_Deallocation)
         BOOST_CHECK(addresses[i] == refAddresses[i]);
 
     // Memory full
-    BOOST_CHECK_THROW(mp.Allocate(elementSize.GetNumBytes()), std::bad_alloc);
+    BOOST_CHECK_THROW(mp.Allocate(elementSize.GetNumBytes()), Exception);
 
     for (U32 i = 0; i < addresses.size(); ++i)
         BOOST_CHECK_NO_THROW(mp.Deallocate(addresses[i]));

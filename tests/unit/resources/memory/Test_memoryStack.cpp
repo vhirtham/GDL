@@ -91,7 +91,7 @@ void AllocationDeallocation()
 
     ms.Deallocate(addresses[0]);
     // memory full --->  memory is only freed if all allocated memory is deallocated
-    BOOST_CHECK_THROW(addresses[0] = ms.Allocate(1), std::bad_alloc);
+    BOOST_CHECK_THROW(addresses[0] = ms.Allocate(1), Exception);
 
     for (U32 i = 1; i < numAllocations; ++i)
         ms.Deallocate(addresses[i]);
@@ -322,7 +322,7 @@ void StackDeallocator()
         for (U32 i = 1; i < numAllocations; ++i)
             ms.Deallocate(addresses[i]);
 
-        BOOST_CHECK_THROW(ms.Allocate(allocationSize), std::bad_alloc);
+        BOOST_CHECK_THROW(ms.Allocate(allocationSize), Exception);
     }
 
     for (U32 i = 1; i < numAllocations; ++i)

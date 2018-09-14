@@ -35,7 +35,7 @@ void* GeneralPurposeMemory::Allocate(size_t size, size_t alignment)
     DEV_EXCEPTION(!IsInitialized(), "General purpose memory is not initialized.");
     DEV_EXCEPTION(!IsPowerOf2(alignment), "Alignment must be a power of 2.");
     DEV_EXCEPTION(alignment > 255, "Maximum alignment is 128");
-    BAD_ALLOC(mFirstFreeMemoryPtr == nullptr);
+    EXCEPTION(mFirstFreeMemoryPtr == nullptr, "No more memory left");
 
     AllocationData allocationData{*this, size, alignment};
 
@@ -221,7 +221,7 @@ void GeneralPurposeMemory::FindFreeMemoryBlock(AllocationData& data) const
     while (data.freeMemorySize < data.totalAllocationSize)
     {
         assert(data.prevFreeMemoryPtr < data.nextFreeMemoryPtr || data.nextFreeMemoryPtr == nullptr);
-        BAD_ALLOC(data.nextFreeMemoryPtr == nullptr);
+        EXCEPTION(data.nextFreeMemoryPtr == nullptr, "No properly sized memory block available.");
 
         // Traverse to next memory block
         data.prevFreeMemoryPtr = data.currentMemoryPtr;
