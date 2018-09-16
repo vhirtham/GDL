@@ -341,7 +341,7 @@ void ThreadPool<_NumQueues>::PropagateExceptions() const
 {
     std::lock_guard<std::mutex> lock(mMutexExceptionLog);
     if (!mExceptionLog.empty())
-        throw Exception(__PRETTY_FUNCTION__, mExceptionLog);
+        throw Exception(__PRETTY_FUNCTION__, mExceptionLog.c_str());
 }
 
 } // namespace GDL

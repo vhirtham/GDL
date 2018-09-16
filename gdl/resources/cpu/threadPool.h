@@ -1,13 +1,14 @@
 #pragma once
 
+#include "gdl/base/container/deque.h"
 #include "gdl/base/fundamentalTypes.h"
+#include "gdl/base/string.h"
 #include "gdl/resources/cpu/task.h"
 #include "gdl/resources/cpu/taskBase.h"
 #include "gdl/resources/cpu/threadPoolQueue.h"
 
 #include <array>
 #include <condition_variable>
-#include <deque>
 #include <functional>
 #include <mutex>
 #include <thread>
@@ -88,9 +89,9 @@ class ThreadPool
 
     mutable std::mutex mMutexThreads;
     mutable std::mutex mMutexExceptionLog;
-    std::string mExceptionLog;
+    String mExceptionLog;
 
-    std::deque<Thread> mThreads;
+    Deque<Thread> mThreads;
     QueueArray mQueue;
 
 

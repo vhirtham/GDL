@@ -1,10 +1,10 @@
 #pragma once
 
 #include "gdl/base/fundamentalTypes.h"
+#include "gdl/base/container/queue.h"
 
 #include <atomic>
 #include <mutex>
-#include <queue>
 
 
 namespace GDL
@@ -13,7 +13,7 @@ template <typename T>
 class ThreadPoolQueue
 {
     mutable std::mutex mMutex; //!< Mutex to protect internal data from data races
-    std::queue<T> mQueue; //!< Queue filled with tasks
+    Queue<T> mQueue; //!< Queue filled with tasks
 
 
 public:
