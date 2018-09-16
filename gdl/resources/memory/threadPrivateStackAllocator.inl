@@ -9,6 +9,7 @@ namespace GDL
 
 template <class _type>
 ThreadPrivateStackAllocator<_type>::ThreadPrivateStackAllocator() noexcept
+    : mMemoryAllocationPattern{*GetMemoryAllocationPattern()}
 {
 }
 
@@ -16,7 +17,9 @@ ThreadPrivateStackAllocator<_type>::ThreadPrivateStackAllocator() noexcept
 
 template <class _type>
 template <class _typeOther>
-ThreadPrivateStackAllocator<_type>::ThreadPrivateStackAllocator(const ThreadPrivateStackAllocator<_typeOther>&) noexcept
+ThreadPrivateStackAllocator<_type>::ThreadPrivateStackAllocator(
+        const ThreadPrivateStackAllocator<_typeOther>& other) noexcept
+    : mMemoryAllocationPattern{other.mMemoryAllocationPattern}
 {
 }
 
@@ -25,7 +28,7 @@ ThreadPrivateStackAllocator<_type>::ThreadPrivateStackAllocator(const ThreadPriv
 template <class _type>
 _type* ThreadPrivateStackAllocator<_type>::allocate(std::size_t numInstances)
 {
-    return static_cast<_type*>(GetMemoryAllocationPattern()->Allocate(numInstances * sizeof(_type), alignof(_type)));
+    return static_cast<_type*>(mMemoryAllocationPattern.Allocate(numInstances * sizeof(_type), alignof(_type)));
 }
 
 
@@ -33,7 +36,7 @@ _type* ThreadPrivateStackAllocator<_type>::allocate(std::size_t numInstances)
 template <class _type>
 void ThreadPrivateStackAllocator<_type>::deallocate(_type* pointer, std::size_t)
 {
-    GetMemoryAllocationPattern()->Deallocate(pointer, alignof(_type));
+    mMemoryAllocationPattern.Deallocate(pointer, alignof(_type));
 }
 
 
@@ -52,8 +55,8 @@ MemoryInterface* ThreadPrivateStackAllocator<_type>::GetMemoryAllocationPattern(
     return memoryAP;
 }
 
-template<class _type>
-MemoryInterface *ThreadPrivateStackAllocator<_type>::InitializeAlternativeMemoryAllocationPattern()
+template <class _type>
+MemoryInterface* ThreadPrivateStackAllocator<_type>::InitializeAlternativeMemoryAllocationPattern()
 {
     MemoryInterface* memoryAP = MemoryManager::Instance().GetGeneralPurposeMemory();
     if (memoryAP == nullptr)

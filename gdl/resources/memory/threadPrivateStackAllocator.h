@@ -11,8 +11,11 @@ namespace GDL
 //! If not, general purpose memory or heap memory is used.
 //! @tparam _type: Type of the allocated objects
 template <class _type>
-struct ThreadPrivateStackAllocator
+class ThreadPrivateStackAllocator
 {
+    MemoryInterface& mMemoryAllocationPattern;
+
+public:
     typedef _type value_type;
 
     //! @brief Ctor
@@ -20,7 +23,7 @@ struct ThreadPrivateStackAllocator
 
     //! @brief Copy ctor
     template <class _typeOther>
-    ThreadPrivateStackAllocator(const ThreadPrivateStackAllocator<_typeOther>&) noexcept;
+    ThreadPrivateStackAllocator(const ThreadPrivateStackAllocator<_typeOther>& other) noexcept;
 
     //! @brief Allocates memory for a given number of instances of the allocators template type
     //! @param numInstances: Scales the allocated memory in a way that the given number of instances of the allocators
