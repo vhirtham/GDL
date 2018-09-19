@@ -138,7 +138,7 @@ public:
     //! @param function: Alternative main loop function
     //! @param initFunction: Initialization function
     //! @param deinitFunction: Deinitialization function
-    //! @remark The  signature of all passed functions should always be void()
+    //! @remark The signature of all passed functions should always be void()
     template <typename _Func, typename _InitFunction, typename _DeinitFunction>
     void StartThreads(U32 numThreads, _Func&& function, _InitFunction&& initFunction, _DeinitFunction&& deinitFunction);
 

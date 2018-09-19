@@ -17,9 +17,12 @@
 #include <array>
 #include <atomic>
 #include <map>
+#include <memory>
 #include <set>
 #include <thread>
 #include <vector>
+
+#include "gdl/base/uniquePtr.h"
 
 using namespace GDL;
 
@@ -307,3 +310,25 @@ BOOST_AUTO_TEST_CASE(Pool_throw_on_array_allocation)
     DeinitializeMemoryManager();
 }
 #endif
+
+void TestDeleter(U32* p)
+{
+    GeneralPurposeAllocator<U32>().deallocate(p, 1);
+}
+
+
+BOOST_AUTO_TEST_CASE(Unique_ptr)
+{
+    InitializeMemoryManager();
+    HeapAllocationCounter hac;
+    {
+        UniquePtr<U32> uptr = MakeUnique<U32>(123);
+        BOOST_CHECK(*uptr == 123);
+    }
+#ifndef USE_STD_ALLOCATOR
+    CheckNoAllocations<GeneralPurposeAllocator>(hac);
+#else
+    BOOST_CHECK(hac.CheckNumCallsExpected(1, 1));
+#endif
+    DeinitializeMemoryManager();
+}

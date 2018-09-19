@@ -38,6 +38,16 @@ void GeneralPurposeAllocator<_type>::deallocate(_type* pointer, std::size_t)
 
 
 
+
+template <class _type>
+void GeneralPurposeAllocator<_type>::Deleter(_type* pointer)
+{
+    GetMemoryAllocationPattern()->Deallocate(pointer, alignof(_type));
+}
+
+
+
+
 template <class _type>
 MemoryInterface* GeneralPurposeAllocator<_type>::GetMemoryAllocationPattern()
 {
