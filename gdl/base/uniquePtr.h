@@ -20,6 +20,9 @@ using UniquePtrP = std::unique_ptr<_type, decltype(&PoolAllocator<_type>::Delete
 template <typename _type>
 using UniquePtrS = std::unique_ptr<_type, decltype(&StackAllocator<_type>::Deleter)>;
 
+template <typename _type>
+using UniquePtrTPS = std::unique_ptr<_type, Deleter<_type>>;
+
 } // namespace GDL
 
 #else
@@ -102,6 +105,22 @@ inline UniquePtrS<_type> MakeUniqueS(_args&&... args)
 
 
 
+//! @brief Creates a new unique pointer which uses the thread private memory stack
+//! @tparam _type: Type of the pointer
+//! @tparam _args: Parameter pack of the arguments that should be passed to the managed types constructor
+//! @param args: Arguments that should be passed to the types constructor
+//! @return Unique pointer which uses the thread private memory stack
+template <typename _type, typename... _args>
+inline UniquePtrTPS<_type> MakeUniqueTPS(_args&&... args)
+{
+    ThreadPrivateStackAllocator<_type> Allocator;
+    _type* ptr = Allocator.allocate(1);
+    *ptr = _type(std::forward<_args>(args)...);
+    return UniquePtrTPS<_type>(ptr, Allocator.GetDeleter());
+}
+
+
+
 #else
 
 //! @brief Creates a new unique pointer
@@ -137,6 +156,19 @@ inline UniquePtrP<_type> MakeUniqueP(_args&&... args)
 //! @return Unique pointer
 template <typename _type, typename... _args>
 inline UniquePtrS<_type> MakeUniqueS(_args&&... args)
+{
+    return std::make_unique<_type>(std::forward<_args>(args)...);
+}
+
+
+
+//! @brief Creates a new unique pointer
+//! @tparam _type: Type of the pointer
+//! @tparam _args: Parameter pack of the arguments that should be passed to the managed types constructor
+//! @param args: Arguments that should be passed to the types constructor
+//! @return Unique pointer
+template <typename _type, typename... _args>
+inline UniquePtrTPS<_type> MakeUniqueTPS(_args&&... args)
 {
     return std::make_unique<_type>(std::forward<_args>(args)...);
 }

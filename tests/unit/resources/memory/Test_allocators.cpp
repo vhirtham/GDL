@@ -312,8 +312,7 @@ BOOST_AUTO_TEST_CASE(Pool_throw_on_array_allocation)
 #endif
 
 
-
-BOOST_AUTO_TEST_CASE(Unique_ptr)
+BOOST_AUTO_TEST_CASE(Unique_Ptr)
 {
     InitializeMemoryManager();
     HeapAllocationCounter hac;
@@ -326,11 +325,14 @@ BOOST_AUTO_TEST_CASE(Unique_ptr)
 
         UniquePtrS<U32> uptrS = MakeUniqueS<U32>(314);
         BOOST_CHECK(*uptrS == 314);
+
+        UniquePtrTPS<U32> uptrTPS = MakeUniqueTPS<U32>(666);
+        BOOST_CHECK(*uptrTPS == 666);
     }
 #ifndef USE_STD_ALLOCATOR
     CheckNoAllocations<GeneralPurposeAllocator>(hac);
 #else
-    BOOST_CHECK(hac.CheckNumCallsExpected(3, 3));
+    BOOST_CHECK(hac.CheckNumCallsExpected(4, 4));
 #endif
     DeinitializeMemoryManager();
 }

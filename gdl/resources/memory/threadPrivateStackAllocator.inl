@@ -41,6 +41,15 @@ void ThreadPrivateStackAllocator<_type>::deallocate(_type* pointer, std::size_t)
 
 
 
+
+template<class _type>
+Deleter<_type> ThreadPrivateStackAllocator<_type>::GetDeleter() const
+{
+    return Deleter<_type>(mMemoryAllocationPattern);
+}
+
+
+
 template <class _type>
 MemoryInterface* ThreadPrivateStackAllocator<_type>::GetMemoryAllocationPattern()
 {
@@ -81,5 +90,6 @@ constexpr bool operator!=(const ThreadPrivateStackAllocator<_type>&,
 {
     return false;
 }
+
 
 } // namespace GDL

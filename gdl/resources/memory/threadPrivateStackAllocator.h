@@ -1,5 +1,6 @@
 #pragma once
 
+#include "gdl/resources/memory/deleter.h"
 #include "gdl/resources/memory/memoryInterface.h"
 
 #include <memory>
@@ -34,6 +35,10 @@ public:
     //! @brief Deallocates the memory starting at the passed pointers address
     //! @param pointer: Pointer to the first element of a memory block which should be deallocated
     void deallocate(_type* pointer, std::size_t);
+
+    //! @brief Gets a deleter for smart pointers
+    //! @return Deleter for smart pointers
+    Deleter<_type> GetDeleter() const;
 
 private:
     //! @brief If thread private stacks are enabled at the memory manager, this function returns the current threads
