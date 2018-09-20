@@ -5,29 +5,22 @@
 #ifndef USE_STD_ALLOCATOR
 
 #include "gdl/resources/memory/generalPurposeAllocator.h"
+#include "gdl/resources/memory/poolAllocator.h"
 #include "gdl/resources/memory/stackAllocator.h"
 #include "gdl/resources/memory/threadPrivateStackAllocator.h"
 
 namespace GDL
 {
 template <typename _type>
-using UniquePtr = std::unique_ptr<_type, decltype (&GeneralPurposeAllocator<_type>::Deleter)>;
+using UniquePtr = std::unique_ptr<_type, decltype(&GeneralPurposeAllocator<_type>::Deleter)>;
 
+template <typename _type>
+using UniquePtrP = std::unique_ptr<_type, decltype(&PoolAllocator<_type>::Deleter)>;
 
-//! @brief Creates a new unique pointer which uses the general purpose memory
-//! @tparam _type: Type of the pointer
-//! @tparam _args: Parameter pack of the arguments that should be passed to the managed types constructor
-//! @param args: Arguments that should be passed to the types constructor
-//! @return Unique pointer which uses the general purpose memory
-template <typename _type,typename... _args>
-inline UniquePtr<_type> MakeUnique(_args&&... args)
-{
-    static GeneralPurposeAllocator<_type> Allocator;
-    _type* ptr = Allocator.allocate(1);
-    *ptr = _type(std::forward<_args>(args)...);
-    return UniquePtr<_type>(ptr,&GeneralPurposeAllocator<_type>::Deleter);
-}
-}
+template <typename _type>
+using UniquePtrS = std::unique_ptr<_type, decltype(&StackAllocator<_type>::Deleter)>;
+
+} // namespace GDL
 
 #else
 
@@ -37,20 +30,116 @@ namespace GDL
 template <typename _type>
 using UniquePtr = std::unique_ptr<_type>;
 
+template <typename _type>
+using UniquePtrP = std::unique_ptr<_type>;
+
+template <typename _type>
+using UniquePtrS = std::unique_ptr<_type>;
+
+template <typename _type>
+using UniquePtrTPS = std::unique_ptr<_type>;
+
+} // namespace GDL
+
+
+
+#endif
+
+
+// MakeUnique functions -----------------------------------------------------------------------------------------------
+
+namespace GDL
+{
+
+#ifndef USE_STD_ALLOCATOR
+
+
+//! @brief Creates a new unique pointer which uses the general purpose memory
+//! @tparam _type: Type of the pointer
+//! @tparam _args: Parameter pack of the arguments that should be passed to the managed types constructor
+//! @param args: Arguments that should be passed to the types constructor
+//! @return Unique pointer which uses the general purpose memory
+template <typename _type, typename... _args>
+inline UniquePtr<_type> MakeUnique(_args&&... args)
+{
+    static GeneralPurposeAllocator<_type> Allocator;
+    _type* ptr = Allocator.allocate(1);
+    *ptr = _type(std::forward<_args>(args)...);
+    return UniquePtr<_type>(ptr, &GeneralPurposeAllocator<_type>::Deleter);
+}
+
+
+
+//! @brief Creates a new unique pointer which uses the pool memory
+//! @tparam _type: Type of the pointer
+//! @tparam _args: Parameter pack of the arguments that should be passed to the managed types constructor
+//! @param args: Arguments that should be passed to the types constructor
+//! @return Unique pointer which uses the pool memory
+template <typename _type, typename... _args>
+inline UniquePtrP<_type> MakeUniqueP(_args&&... args)
+{
+    static PoolAllocator<_type> Allocator;
+    _type* ptr = Allocator.allocate(1);
+    *ptr = _type(std::forward<_args>(args)...);
+    return UniquePtrP<_type>(ptr, &PoolAllocator<_type>::Deleter);
+}
+
+
+
+//! @brief Creates a new unique pointer which uses the memory stack
+//! @tparam _type: Type of the pointer
+//! @tparam _args: Parameter pack of the arguments that should be passed to the managed types constructor
+//! @param args: Arguments that should be passed to the types constructor
+//! @return Unique pointer which uses the memory stack
+template <typename _type, typename... _args>
+inline UniquePtrS<_type> MakeUniqueS(_args&&... args)
+{
+    static StackAllocator<_type> Allocator;
+    _type* ptr = Allocator.allocate(1);
+    *ptr = _type(std::forward<_args>(args)...);
+    return UniquePtrS<_type>(ptr, &StackAllocator<_type>::Deleter);
+}
+
+
+
+#else
 
 //! @brief Creates a new unique pointer
 //! @tparam _type: Type of the pointer
 //! @tparam _args: Parameter pack of the arguments that should be passed to the managed types constructor
 //! @param args: Arguments that should be passed to the types constructor
 //! @return Unique pointer
-template <typename _type,typename... _args>
+template <typename _type, typename... _args>
 inline UniquePtr<_type> MakeUnique(_args&&... args)
 {
     return std::make_unique<_type>(std::forward<_args>(args)...);
 }
 
+
+
+//! @brief Creates a new unique pointer
+//! @tparam _type: Type of the pointer
+//! @tparam _args: Parameter pack of the arguments that should be passed to the managed types constructor
+//! @param args: Arguments that should be passed to the types constructor
+//! @return Unique pointer
+template <typename _type, typename... _args>
+inline UniquePtrP<_type> MakeUniqueP(_args&&... args)
+{
+    return std::make_unique<_type>(std::forward<_args>(args)...);
 }
 
 
 
+//! @brief Creates a new unique pointer
+//! @tparam _type: Type of the pointer
+//! @tparam _args: Parameter pack of the arguments that should be passed to the managed types constructor
+//! @param args: Arguments that should be passed to the types constructor
+//! @return Unique pointer
+template <typename _type, typename... _args>
+inline UniquePtrS<_type> MakeUniqueS(_args&&... args)
+{
+    return std::make_unique<_type>(std::forward<_args>(args)...);
+}
 #endif
+
+} // namespace GDL

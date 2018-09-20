@@ -32,6 +32,10 @@ struct PoolAllocator
     //! @param pointer: Pointer to the first element of a memory block which should be deallocated
     void deallocate(_type* p, std::size_t);
 
+    //! @brief Deleter for smart pointers
+    //! @param pointer: Pointer to the first element of a memory block which should be deallocated
+    static void Deleter(_type* pointer);
+
 private:
     //! @brief Gets the memory allocation pattern. This is initialized once and stored as a static variable. Have a look
     //! at the InitializeMemoryAllocationPattern for further explanation.

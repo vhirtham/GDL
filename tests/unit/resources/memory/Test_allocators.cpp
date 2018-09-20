@@ -1,5 +1,6 @@
 #include <boost/test/unit_test.hpp>
 
+#include "gdl/base/uniquePtr.h"
 #include "gdl/base/fundamentalTypes.h"
 #include "gdl/base/functions/alignment.h"
 #include "gdl/resources/cpu/utility/deadlockTerminationTimer.h"
@@ -22,7 +23,6 @@
 #include <thread>
 #include <vector>
 
-#include "gdl/base/uniquePtr.h"
 
 using namespace GDL;
 
@@ -311,10 +311,6 @@ BOOST_AUTO_TEST_CASE(Pool_throw_on_array_allocation)
 }
 #endif
 
-void TestDeleter(U32* p)
-{
-    GeneralPurposeAllocator<U32>().deallocate(p, 1);
-}
 
 
 BOOST_AUTO_TEST_CASE(Unique_ptr)
@@ -324,11 +320,17 @@ BOOST_AUTO_TEST_CASE(Unique_ptr)
     {
         UniquePtr<U32> uptr = MakeUnique<U32>(123);
         BOOST_CHECK(*uptr == 123);
+
+        UniquePtrP<U32> uptrP = MakeUniqueP<U32>(888);
+        BOOST_CHECK(*uptrP == 888);
+
+        UniquePtrS<U32> uptrS = MakeUniqueS<U32>(314);
+        BOOST_CHECK(*uptrS == 314);
     }
 #ifndef USE_STD_ALLOCATOR
     CheckNoAllocations<GeneralPurposeAllocator>(hac);
 #else
-    BOOST_CHECK(hac.CheckNumCallsExpected(1, 1));
+    BOOST_CHECK(hac.CheckNumCallsExpected(3, 3));
 #endif
     DeinitializeMemoryManager();
 }
