@@ -317,6 +317,9 @@ BOOST_AUTO_TEST_CASE(Unique_Ptr)
     InitializeMemoryManager();
     HeapAllocationCounter hac;
     {
+
+        UniquePtr<U32> test = DefaultConstructUnique<U32>();
+
         UniquePtr<U32> uptr = MakeUnique<U32>(123);
         BOOST_CHECK(*uptr == 123);
 

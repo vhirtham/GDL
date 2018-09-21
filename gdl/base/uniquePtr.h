@@ -57,6 +57,13 @@ namespace GDL
 #ifndef USE_STD_ALLOCATOR
 
 
+template <typename _type>
+inline UniquePtr<_type> DefaultConstructUnique()
+{
+    return UniquePtr<_type>(nullptr, &GeneralPurposeAllocator<_type>::Deleter);
+}
+
+
 //! @brief Creates a new unique pointer which uses the general purpose memory
 //! @tparam _type: Type of the pointer
 //! @tparam _args: Parameter pack of the arguments that should be passed to the managed types constructor
@@ -66,9 +73,8 @@ template <typename _type, typename... _args>
 inline UniquePtr<_type> MakeUnique(_args&&... args)
 {
     static GeneralPurposeAllocator<_type> Allocator;
-    _type* ptr = Allocator.allocate(1);
-    *ptr = _type(std::forward<_args>(args)...);
-    return UniquePtr<_type>(ptr, &GeneralPurposeAllocator<_type>::Deleter);
+    return UniquePtr<_type>(new (Allocator.allocate(1)) _type(std::forward<_args>(args)...),
+                            &GeneralPurposeAllocator<_type>::Deleter);
 }
 
 
@@ -122,6 +128,13 @@ inline UniquePtrTPS<_type> MakeUniqueTPS(_args&&... args)
 
 
 #else
+
+template <typename _type>
+inline UniquePtr<_type> DefaultConstructUnique()
+{
+    return UniquePtr<_type>{nullptr};
+}
+
 
 //! @brief Creates a new unique pointer
 //! @tparam _type: Type of the pointer

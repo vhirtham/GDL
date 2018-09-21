@@ -11,7 +11,7 @@ public:
     TaskBase(TaskBase&& other) = default;
     TaskBase& operator=(const TaskBase& other) = delete;
     TaskBase& operator=(TaskBase&& other) = default;
-    ~TaskBase() = default;
+    virtual ~TaskBase() = default;
 
     //! @brief Executes the stored callable object.
     virtual void execute() = 0;

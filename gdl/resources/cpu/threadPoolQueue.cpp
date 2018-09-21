@@ -1,7 +1,8 @@
 #include "gdl/resources/cpu/threadPoolQueue.h"
+
+#include "gdl/base/uniquePtr.h"
 #include "gdl/resources/cpu/taskBase.h"
 
-#include <memory>
 
 namespace GDL
 {
@@ -57,5 +58,5 @@ U32 ThreadPoolQueue<T>::GetSize() const
 }
 
 
-template class ThreadPoolQueue<std::unique_ptr<TaskBase>>;
+template class ThreadPoolQueue<UniquePtr<TaskBase>>;
 }

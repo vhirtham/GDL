@@ -3,6 +3,7 @@
 #include "gdl/base/container/deque.h"
 #include "gdl/base/fundamentalTypes.h"
 #include "gdl/base/string.h"
+#include "gdl/base/uniquePtr.h"
 #include "gdl/resources/cpu/task.h"
 #include "gdl/resources/cpu/taskBase.h"
 #include "gdl/resources/cpu/threadPoolQueue.h"
@@ -13,7 +14,6 @@
 #include <mutex>
 #include <thread>
 
-#include <iostream>
 
 namespace GDL
 {
@@ -27,7 +27,7 @@ class ThreadPool
 {
     static_assert(_NumQueues > 0, "The threadpool needs at least 1 queue");
 
-    using QueueArray = std::array<ThreadPoolQueue<std::unique_ptr<TaskBase>>, _NumQueues>;
+    using QueueArray = std::array<ThreadPoolQueue<UniquePtr<TaskBase>>, _NumQueues>;
 
     class Thread
     {
