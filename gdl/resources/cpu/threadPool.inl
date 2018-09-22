@@ -256,7 +256,7 @@ U32 ThreadPool<_NumQueues>::GetNumTasks(I32 queueNum) const
 template <int _NumQueues>
 void ThreadPool<_NumQueues>::TryExecuteTask()
 {
-    UniquePtr<TaskBase> task = DefaultConstructUnique<TaskBase>();
+    UniquePtr<TaskBase> task{nullptr};
     for (U32 i = 0; i < mQueue.size(); ++i)
         if (mQueue[i].tryPop(task))
         {
@@ -269,7 +269,7 @@ template <int _NumQueues>
 void ThreadPool<_NumQueues>::TryExecuteTask(I32 queueNum)
 {
     assert(queueNum < _NumQueues && queueNum >= 0);
-    UniquePtr<TaskBase> task = DefaultConstructUnique<TaskBase>();
+    UniquePtr<TaskBase> task{nullptr};
     if (mQueue[queueNum].tryPop(task))
         task->execute();
 }
@@ -314,11 +314,8 @@ void ThreadPool<_NumQueues>::SubmitToQueue(I32 queueNum, _F&& function, _Args&&.
     assert(queueNum < _NumQueues && queueNum >= 0);
 
 
-    // This section needs some rework, but it depends on the behaviour of std::unique ptr with custom deleters
-    UniquePtr<TaskBase> uptr = DefaultConstructUnique<TaskBase>();
-    uptr.reset(MakeUnique<TaskType>(std::bind(std::forward<_F>(function), std::forward<_Args>(args)...)).release());
-
-    mQueue[queueNum].Push(std::move(uptr));
+    mQueue[queueNum].Push(
+            MakeUnique<TaskBase, TaskType>(std::bind(std::forward<_F>(function), std::forward<_Args>(args)...)));
     mConditionThreads.notify_one();
 }
 

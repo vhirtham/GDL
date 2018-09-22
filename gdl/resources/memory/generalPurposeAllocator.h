@@ -7,12 +7,16 @@
 namespace GDL
 {
 
+
 //! @brief Allocator which allocates memory from general purpose memory if it is available at the memory manager. If
 //! not, heap memory is used.
 //! @tparam _type: Type of the allocated objects
 template <class _type>
 struct GeneralPurposeAllocator
 {
+    template <typename _type2>
+    friend class GeneralPurposeDeleter;
+
     typedef _type value_type;
 
     //! @brief Ctor
@@ -31,10 +35,6 @@ struct GeneralPurposeAllocator
     //! @brief Deallocates the memory starting at the passed pointers address
     //! @param pointer: Pointer to the first element of a memory block which should be deallocated
     void deallocate(_type* pointer, std::size_t);
-
-    //! @brief Deleter for smart pointers
-    //! @param pointer: Pointer to the first element of a memory block which should be deallocated
-    static void Deleter(_type* pointer);
 
 private:
     //! @brief Gets the memory allocation pattern. This is initialized once and stored as a static variable. Have a look

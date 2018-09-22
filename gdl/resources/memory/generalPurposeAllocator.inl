@@ -29,22 +29,11 @@ _type* GeneralPurposeAllocator<_type>::allocate(std::size_t numInstances)
 
 
 
-
 template <class _type>
 void GeneralPurposeAllocator<_type>::deallocate(_type* pointer, std::size_t)
 {
     GetMemoryAllocationPattern()->Deallocate(pointer, alignof(_type));
 }
-
-
-
-
-template <class _type>
-void GeneralPurposeAllocator<_type>::Deleter(_type* pointer)
-{
-    GetMemoryAllocationPattern()->Deallocate(pointer, alignof(_type));
-}
-
 
 
 
@@ -57,15 +46,14 @@ MemoryInterface* GeneralPurposeAllocator<_type>::GetMemoryAllocationPattern()
 
 
 
-template<class _type>
-MemoryInterface *GeneralPurposeAllocator<_type>::InitializeMemoryAllocationPattern()
+template <class _type>
+MemoryInterface* GeneralPurposeAllocator<_type>::InitializeMemoryAllocationPattern()
 {
     MemoryInterface* memoryAP = MemoryManager::Instance().GetGeneralPurposeMemory();
     if (memoryAP == nullptr)
         return MemoryManager::Instance().GetHeapMemory();
     return memoryAP;
 }
-
 
 
 
