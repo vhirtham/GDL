@@ -8,27 +8,31 @@ namespace GDL
 {
 
 //! @brief GeneralPurposeDeleter class for smart pointers.
-//! @tparam _type: Data type of the pointer
+//! @tparam _type: Data type of the object that should be deleted
 template <typename _type>
 class GeneralPurposeDeleter
 {
 
 public:
     GeneralPurposeDeleter() = default;
-    GeneralPurposeDeleter(const GeneralPurposeDeleter&) = default;
-    GeneralPurposeDeleter(GeneralPurposeDeleter&&) = default;
-    GeneralPurposeDeleter& operator=(const GeneralPurposeDeleter&) = default;
-    GeneralPurposeDeleter& operator=(GeneralPurposeDeleter&&) = default;
+    template <typename _typeOther>
+    GeneralPurposeDeleter(const GeneralPurposeDeleter<_typeOther>&);
+    template <typename _typeOther>
+    GeneralPurposeDeleter(GeneralPurposeDeleter<_typeOther>&&);
+    template <typename _typeOther>
+    GeneralPurposeDeleter& operator=(const GeneralPurposeDeleter<_typeOther>&);
+    template <typename _typeOther>
+    GeneralPurposeDeleter& operator=(GeneralPurposeDeleter<_typeOther>&&);
     ~GeneralPurposeDeleter() = default;
 
 
-    //! @brief Deallocates the passed pointer and destroys the corresponding object
-    //! @param pointer: Pointer that should be deallocated
-    void operator()(_type* pointer)
-    {
-        pointer->~_type();
-        GeneralPurposeAllocator<_type>::GetMemoryAllocationPattern()->Deallocate(pointer, alignof(_type));
-    }
+
+    //! @brief Destroys the passed opject and deallocates the memory
+    //! @param pointer: Pointer to object that should be destroyed
+    void operator()(_type* pointer);
 };
 
 } // namespace GDL
+
+
+#include "gdl/resources/memory/generalPurposeDeleter.inl"

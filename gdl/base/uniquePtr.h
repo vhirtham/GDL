@@ -59,15 +59,14 @@ namespace GDL
 
 //! @brief Creates a new unique pointer which uses the general purpose memory
 //! @tparam _type: Type of the unique pointer
-//! @tparam _type2: Type of the constructed object (necessary to create derived objects in a base class)
 //! @tparam _args: Parameter pack of the arguments that should be passed to the managed types constructor
 //! @param args: Arguments that should be passed to the types constructor
 //! @return Unique pointer which uses the general purpose memory
-template <typename _type, typename _type2 = _type, typename... _args>
+template <typename _type, typename... _args>
 inline UniquePtr<_type> MakeUnique(_args&&... args)
 {
-    static GeneralPurposeAllocator<_type2> Allocator;
-    return UniquePtr<_type>(new (Allocator.allocate(1)) _type2(std::forward<_args>(args)...));
+    static GeneralPurposeAllocator<_type> Allocator;
+    return UniquePtr<_type>(new (Allocator.allocate(1)) _type(std::forward<_args>(args)...));
 }
 
 
@@ -124,14 +123,13 @@ inline UniquePtrTPS<_type> MakeUniqueTPS(_args&&... args)
 
 //! @brief Creates a new unique pointer
 //! @tparam _type: Type of the pointer
-//! @tparam _type2: Type of the constructed object (necessary to create derived objects with custom allocators)
 //! @tparam _args: Parameter pack of the arguments that should be passed to the managed types constructor
 //! @param args: Arguments that should be passed to the types constructor
 //! @return Unique pointer
-template <typename _type, typename _type2 = _type, typename... _args>
+template <typename _type, typename... _args>
 inline UniquePtr<_type> MakeUnique(_args&&... args)
 {
-    return std::make_unique<_type2>(std::forward<_args>(args)...);
+    return std::make_unique<_type>(std::forward<_args>(args)...);
 }
 
 

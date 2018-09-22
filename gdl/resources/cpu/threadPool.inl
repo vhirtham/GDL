@@ -315,7 +315,7 @@ void ThreadPool<_NumQueues>::SubmitToQueue(I32 queueNum, _F&& function, _Args&&.
 
 
     mQueue[queueNum].Push(
-            MakeUnique<TaskBase, TaskType>(std::bind(std::forward<_F>(function), std::forward<_Args>(args)...)));
+            MakeUnique<TaskType>(std::bind(std::forward<_F>(function), std::forward<_Args>(args)...)));
     mConditionThreads.notify_one();
 }
 
