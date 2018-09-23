@@ -258,7 +258,7 @@ void ThreadPool<_NumQueues>::TryExecuteTask()
 {
     UniquePtr<TaskBase> task{nullptr};
     for (U32 i = 0; i < mQueue.size(); ++i)
-        if (mQueue[i].tryPop(task))
+        if (mQueue[i].TryPop(task))
         {
             task->execute();
             break;
@@ -270,7 +270,7 @@ void ThreadPool<_NumQueues>::TryExecuteTask(I32 queueNum)
 {
     assert(queueNum < _NumQueues && queueNum >= 0);
     UniquePtr<TaskBase> task{nullptr};
-    if (mQueue[queueNum].tryPop(task))
+    if (mQueue[queueNum].TryPop(task))
         task->execute();
 }
 

@@ -29,7 +29,7 @@ void ThreadPoolQueue<T>::Push(T value)
 }
 
 template <typename T>
-bool ThreadPoolQueue<T>::tryPop(T& out)
+bool ThreadPoolQueue<T>::TryPop(T& out)
 {
     std::lock_guard<std::mutex> lock(mMutex);
     if (mQueue.empty())

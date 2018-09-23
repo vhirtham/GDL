@@ -34,7 +34,7 @@ public:
     //! @brief Tries to get the next value of the queue
     //! @param out: reference to a variable that stores fetched value
     //! @return TRUE if the operation was successful, FALSE if not
-    bool tryPop(T& out);
+    bool TryPop(T& out);
 
 
     //! @brief Returns if the queue is empty or not
