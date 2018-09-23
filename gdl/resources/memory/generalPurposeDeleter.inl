@@ -1,6 +1,8 @@
 #pragma once
 
 #include "gdl/resources/memory/generalPurposeDeleter.h"
+#include "gdl/resources/memory/generalPurposeAllocator.h"
+
 
 namespace GDL
 

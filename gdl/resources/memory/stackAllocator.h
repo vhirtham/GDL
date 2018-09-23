@@ -12,6 +12,9 @@ namespace GDL
 template <class _type>
 struct StackAllocator
 {
+    template <typename _type2>
+    friend class StackDeleter;
+
     typedef _type value_type;
 
     //! @brief Ctor
