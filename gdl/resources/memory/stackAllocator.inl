@@ -37,12 +37,6 @@ void StackAllocator<_type>::deallocate(_type* pointer, std::size_t)
 }
 
 
-template <class _type>
-void StackAllocator<_type>::Deleter(_type* pointer)
-{
-    GetMemoryAllocationPattern()->Deallocate(pointer, alignof(_type));
-}
-
 
 template <class _type>
 MemoryInterface* StackAllocator<_type>::GetMemoryAllocationPattern()

@@ -319,7 +319,7 @@ BOOST_AUTO_TEST_CASE(Unique_Ptr)
     {
 
         UniquePtr<U32> uptrDefaultConstructed{nullptr};
-
+        UniquePtrP<U32> uptrPDefaultConstructed{nullptr};
         UniquePtrS<U32> uptrSDefaultConstructed{nullptr};
 
         UniquePtr<U32> uptr = MakeUnique<U32>(123);

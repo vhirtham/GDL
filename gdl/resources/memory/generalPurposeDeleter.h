@@ -4,7 +4,7 @@
 namespace GDL
 {
 
-//! @brief GeneralPurposeDeleter class for smart pointers.
+//! @brief Deleter class for smart pointers which use the general purpose memory.
 //! @tparam _type: Data type of the object that should be deleted
 template <typename _type>
 class GeneralPurposeDeleter

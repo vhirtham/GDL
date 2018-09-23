@@ -40,13 +40,6 @@ void PoolAllocator<_type>::deallocate(_type* p, std::size_t)
 
 
 template <class _type>
-void PoolAllocator<_type>::Deleter(_type* p)
-{
-    GetMemoryAllocationPattern()->Deallocate(p, alignof(_type));
-}
-
-
-template <class _type>
 MemoryInterface* PoolAllocator<_type>::GetMemoryAllocationPattern()
 {
     static MemoryInterface* memoryAP = InitializeMemoryAllocationPattern();

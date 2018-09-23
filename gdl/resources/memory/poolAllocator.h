@@ -13,6 +13,9 @@ namespace GDL
 template <class _type>
 struct PoolAllocator
 {
+    template <typename _type2>
+    friend class PoolDeleter;
+
     typedef _type value_type;
 
     //! @brief Ctor
@@ -31,10 +34,6 @@ struct PoolAllocator
     //! @brief Deallocates the memory starting at the passed pointers address
     //! @param pointer: Pointer to the first element of a memory block which should be deallocated
     void deallocate(_type* p, std::size_t);
-
-    //! @brief Deleter for smart pointers
-    //! @param pointer: Pointer to the first element of a memory block which should be deallocated
-    static void Deleter(_type* pointer);
 
 private:
     //! @brief Gets the memory allocation pattern. This is initialized once and stored as a static variable. Have a look

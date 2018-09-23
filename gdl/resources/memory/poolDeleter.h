@@ -4,23 +4,23 @@
 namespace GDL
 {
 
-//! @brief Deleter class for smart pointers which use the memory stack.
+//! @brief Deleter class for smart pointers which use the memory pool.
 //! @tparam _type: Data type of the object that should be deleted
 template <typename _type>
-class StackDeleter
+class PoolDeleter
 {
 
 public:
-    StackDeleter() = default;
+    PoolDeleter() = default;
     template <typename _typeOther>
-    StackDeleter(const StackDeleter<_typeOther>&);
+    PoolDeleter(const PoolDeleter<_typeOther>&);
     template <typename _typeOther>
-    StackDeleter(StackDeleter<_typeOther>&&);
+    PoolDeleter(PoolDeleter<_typeOther>&&);
     template <typename _typeOther>
-    StackDeleter& operator=(const StackDeleter<_typeOther>&);
+    PoolDeleter& operator=(const PoolDeleter<_typeOther>&);
     template <typename _typeOther>
-    StackDeleter& operator=(StackDeleter<_typeOther>&&);
-    ~StackDeleter() = default;
+    PoolDeleter& operator=(PoolDeleter<_typeOther>&&);
+    ~PoolDeleter() = default;
 
 
 
@@ -32,4 +32,4 @@ public:
 } // namespace GDL
 
 
-#include "gdl/resources/memory/stackDeleter.inl"
+#include "gdl/resources/memory/poolDeleter.inl"
