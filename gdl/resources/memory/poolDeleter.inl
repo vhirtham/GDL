@@ -12,6 +12,8 @@ template <typename _type>
 template <typename _typeOther>
 PoolDeleter<_type>::PoolDeleter(const PoolDeleter<_typeOther>&)
 {
+    static_assert(std::is_same<_type, _typeOther>::value || std::is_base_of<_type, _typeOther>::value,
+                  "Types are not compatible.");
 }
 
 
@@ -20,6 +22,8 @@ template <typename _type>
 template <typename _typeOther>
 PoolDeleter<_type>::PoolDeleter(PoolDeleter<_typeOther>&&)
 {
+    static_assert(std::is_same<_type, _typeOther>::value || std::is_base_of<_type, _typeOther>::value,
+                  "Types are not compatible.");
 }
 
 
@@ -28,6 +32,8 @@ template <typename _type>
 template <typename _typeOther>
 PoolDeleter<_type>& PoolDeleter<_type>::operator=(const PoolDeleter<_typeOther>&)
 {
+    static_assert(std::is_same<_type, _typeOther>::value || std::is_base_of<_type, _typeOther>::value,
+                  "Types are not compatible.");
     return *this;
 }
 
@@ -37,6 +43,8 @@ template <typename _type>
 template <typename _typeOther>
 PoolDeleter<_type>& PoolDeleter<_type>::operator=(PoolDeleter<_typeOther>&&)
 {
+    static_assert(std::is_same<_type, _typeOther>::value || std::is_base_of<_type, _typeOther>::value,
+                  "Types are not compatible.");
     return *this;
 }
 

@@ -7,7 +7,7 @@
 #include "gdl/resources/memory/generalPurposeDeleter.h"
 #include "gdl/resources/memory/poolDeleter.h"
 #include "gdl/resources/memory/stackDeleter.h"
-#include "gdl/resources/memory/threadPrivateStackAllocator.h"
+#include "gdl/resources/memory/threadPrivateStackDeleter.h"
 
 namespace GDL
 {
@@ -21,7 +21,7 @@ template <typename _type>
 using UniquePtrS = std::unique_ptr<_type, StackDeleter<_type>>;
 
 template <typename _type>
-using UniquePtrTPS = std::unique_ptr<_type, Deleter<_type>>;
+using UniquePtrTPS = std::unique_ptr<_type, ThreadPrivateStackDeleter<_type>>;
 
 } // namespace GDL
 
@@ -108,9 +108,7 @@ template <typename _type, typename... _args>
 inline UniquePtrTPS<_type> MakeUniqueTPS(_args&&... args)
 {
     ThreadPrivateStackAllocator<_type> Allocator;
-    _type* ptr = Allocator.allocate(1);
-    *ptr = _type(std::forward<_args>(args)...);
-    return UniquePtrTPS<_type>(ptr, Allocator.GetDeleter());
+    return UniquePtrTPS<_type>(new (Allocator.allocate(1)) _type(std::forward<_args>(args)...), Allocator);
 }
 
 

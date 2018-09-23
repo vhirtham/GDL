@@ -321,6 +321,7 @@ BOOST_AUTO_TEST_CASE(Unique_Ptr)
         UniquePtr<U32> uptrDefaultConstructed{nullptr};
         UniquePtrP<U32> uptrPDefaultConstructed{nullptr};
         UniquePtrS<U32> uptrSDefaultConstructed{nullptr};
+        UniquePtrTPS<U32> uptrTPSDefaultConstructed{nullptr};
 
         UniquePtr<U32> uptr = MakeUnique<U32>(123);
         BOOST_CHECK(*uptr == 123);
