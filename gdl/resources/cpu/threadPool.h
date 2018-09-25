@@ -169,15 +169,18 @@ public:
     U32 GetNumTasks(I32 queueNum) const;
 
     //! @brief Tries to fetch and execute a task from one of the thread pools queue
-    void TryExecuteTask();
+    //! @return TRUE if task was executed, FALSe if not
+    bool TryExecuteTask();
 
     //! @brief Tries to fetch and execute a task from a specific queue
     //! @param queueNum: Array number of the queue
-    void TryExecuteTask(I32 queueNum);
+    //! @return TRUE if task was executed, FALSe if not
+    bool TryExecuteTask(I32 queueNum);
 
     //! @brief Tries to fetch and execute a task from the thread pools queue. If no tasks are available, the current
     //! thread waits until new tasks are submitted
-    void TryExecuteTaskWait();
+    //! @return TRUE if task was executed, FALSe if not
+    bool TryExecuteTaskWait();
 
     //! @brief Submits a task to main queue ([0]) of the thread pool
     //! @tparam _F: Function or functor type

@@ -254,33 +254,38 @@ U32 ThreadPool<_NumQueues>::GetNumTasks(I32 queueNum) const
 
 
 template <int _NumQueues>
-void ThreadPool<_NumQueues>::TryExecuteTask()
+bool ThreadPool<_NumQueues>::TryExecuteTask()
 {
     UniquePtr<TaskBase> task{nullptr};
     for (U32 i = 0; i < mQueue.size(); ++i)
         if (mQueue[i].TryPop(task))
         {
             task->execute();
-            break;
+            return true;
         }
+    return false;
 }
 
 template <int _NumQueues>
-void ThreadPool<_NumQueues>::TryExecuteTask(I32 queueNum)
+bool ThreadPool<_NumQueues>::TryExecuteTask(I32 queueNum)
 {
     assert(queueNum < _NumQueues && queueNum >= 0);
     UniquePtr<TaskBase> task{nullptr};
     if (mQueue[queueNum].TryPop(task))
+    {
         task->execute();
+        return true;
+    }
+    return false;
 }
 
 
 
 template <int _NumQueues>
-void ThreadPool<_NumQueues>::TryExecuteTaskWait()
+bool ThreadPool<_NumQueues>::TryExecuteTaskWait()
 {
     WaitForTask();
-    TryExecuteTask();
+    return TryExecuteTask();
 }
 
 
