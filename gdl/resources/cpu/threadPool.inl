@@ -319,8 +319,7 @@ void ThreadPool<_NumQueues>::SubmitToQueue(I32 queueNum, _F&& function, _Args&&.
     assert(queueNum < _NumQueues && queueNum >= 0);
 
 
-    mQueue[queueNum].Push(
-            MakeUnique<TaskType>(std::bind(std::forward<_F>(function), std::forward<_Args>(args)...)));
+    mQueue[queueNum].Push(MakeUnique<TaskType>(std::bind(std::forward<_F>(function), std::forward<_Args>(args)...)));
     mConditionThreads.notify_one();
 }
 
