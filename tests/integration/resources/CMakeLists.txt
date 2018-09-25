@@ -1,0 +1,2 @@
+addTest(resourceManagement
+        GDL::Resources)

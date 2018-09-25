@@ -62,8 +62,9 @@ externalDependencies()
 
 # SUBDIRECTORIES
 # --------------
-add_subdirectory(applications)
 add_subdirectory(gdl)
+
+add_subdirectory(applications)
 if(ENABLE_TESTS)
     add_subdirectory(tests)
 endif()

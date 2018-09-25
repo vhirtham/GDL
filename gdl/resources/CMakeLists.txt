@@ -1,4 +1,4 @@
-AddGDLLib(Recources
+AddGDLLib(Resources
     cpu/threadPoolQueue.cpp
     memory/generalPurposeMemory.cpp
     memory/heapMemory.cpp

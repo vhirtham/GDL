@@ -33,7 +33,6 @@ function(AddGDLLib libName)
 
     TargetDefaultBuildSetup(${gdlLibName})
 
-
     ### Set alias
     add_library(GDL::${libName} ALIAS ${gdlLibName})
 
