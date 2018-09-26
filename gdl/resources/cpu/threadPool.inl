@@ -11,16 +11,16 @@
 namespace GDL
 {
 
-template <I32 _NumQueues>
-ThreadPool<_NumQueues>::~ThreadPool()
+template <I32 _numQueues>
+ThreadPool<_numQueues>::~ThreadPool()
 {
     Deinitialize();
 }
 
 
 
-template <I32 _NumQueues>
-ThreadPool<_NumQueues>::ThreadPool(U32 numThreads)
+template <I32 _numQueues>
+ThreadPool<_numQueues>::ThreadPool(U32 numThreads)
 {
     Initialize();
     StartThreads(numThreads);
@@ -28,8 +28,8 @@ ThreadPool<_NumQueues>::ThreadPool(U32 numThreads)
 
 
 
-template <I32 _NumQueues>
-void ThreadPool<_NumQueues>::Deinitialize()
+template <I32 _numQueues>
+void ThreadPool<_numQueues>::Deinitialize()
 {
     CloseAllThreads();
     PropagateExceptions();
@@ -37,8 +37,8 @@ void ThreadPool<_NumQueues>::Deinitialize()
 
 
 
-template <I32 _NumQueues>
-void ThreadPool<_NumQueues>::Initialize()
+template <I32 _numQueues>
+void ThreadPool<_numQueues>::Initialize()
 {
     std::lock_guard<std::mutex> lock(mMutexExceptionLog);
     mExceptionLog.reserve(200);
@@ -46,8 +46,8 @@ void ThreadPool<_NumQueues>::Initialize()
 
 
 
-template <I32 _NumQueues>
-U32 ThreadPool<_NumQueues>::GetNumThreads() const
+template <I32 _numQueues>
+U32 ThreadPool<_numQueues>::GetNumThreads() const
 {
     std::lock_guard<std::mutex> lock(mMutexThreads);
     return mThreads.size();
@@ -55,26 +55,26 @@ U32 ThreadPool<_NumQueues>::GetNumThreads() const
 
 
 
-template <I32 _NumQueues>
-void ThreadPool<_NumQueues>::StartThreads(U32 numThreads)
+template <I32 _numQueues>
+void ThreadPool<_numQueues>::StartThreads(U32 numThreads)
 {
     StartThreads(numThreads, [this] { TryExecuteTaskWait(); });
 }
 
 
 
-template <I32 _NumQueues>
+template <I32 _numQueues>
 template <typename _Func>
-void ThreadPool<_NumQueues>::StartThreads(U32 numThreads, _Func&& function)
+void ThreadPool<_numQueues>::StartThreads(U32 numThreads, _Func&& function)
 {
     StartThreads(numThreads, function, []() {}, []() {});
 }
 
 
 
-template <I32 _NumQueues>
+template <I32 _numQueues>
 template <typename _Func, typename _InitFunction, typename _DeinitFunction>
-void ThreadPool<_NumQueues>::StartThreads(U32 numThreads, _Func&& function, _InitFunction&& initFunction,
+void ThreadPool<_numQueues>::StartThreads(U32 numThreads, _Func&& function, _InitFunction&& initFunction,
                                           _DeinitFunction&& deinitFunction)
 {
     static_assert(std::is_same<void, std::result_of_t<decltype(function)()>>::value,
@@ -91,8 +91,8 @@ void ThreadPool<_NumQueues>::StartThreads(U32 numThreads, _Func&& function, _Ini
 
 
 
-template <I32 _NumQueues>
-void ThreadPool<_NumQueues>::CloseThreads(I32 numThreadsToClose)
+template <I32 _numQueues>
+void ThreadPool<_numQueues>::CloseThreads(I32 numThreadsToClose)
 {
     std::lock_guard<std::mutex> lock(mMutexThreads);
     mCloseThreads = true;
@@ -123,16 +123,16 @@ void ThreadPool<_NumQueues>::CloseThreads(I32 numThreadsToClose)
 }
 
 
-template <I32 _NumQueues>
-void ThreadPool<_NumQueues>::CloseAllThreads()
+template <I32 _numQueues>
+void ThreadPool<_numQueues>::CloseAllThreads()
 {
     CloseThreads(-1);
 }
 
 
 
-template <I32 _NumQueues>
-bool ThreadPool<_NumQueues>::HasTasks() const
+template <I32 _numQueues>
+bool ThreadPool<_numQueues>::HasTasks() const
 {
     for (U32 i = 0; i < mQueue.size(); ++i)
         if (!mQueue[i].IsEmpty())
@@ -140,17 +140,17 @@ bool ThreadPool<_NumQueues>::HasTasks() const
     return false;
 }
 
-template <I32 _NumQueues>
-bool ThreadPool<_NumQueues>::HasTasks(I32 queueNum) const
+template <I32 _numQueues>
+bool ThreadPool<_numQueues>::HasTasks(I32 queueNum) const
 {
-    assert(queueNum < _NumQueues && queueNum >= 0);
+    assert(queueNum < _numQueues && queueNum >= 0);
     return !mQueue[queueNum].IsEmpty();
 }
 
 
 
-template <I32 _NumQueues>
-U32 ThreadPool<_NumQueues>::GetNumTasks() const
+template <I32 _numQueues>
+U32 ThreadPool<_numQueues>::GetNumTasks() const
 {
     U32 numTasks = 0;
     for (U32 i = 0; i < mQueue.size(); ++i)
@@ -158,17 +158,17 @@ U32 ThreadPool<_NumQueues>::GetNumTasks() const
     return numTasks;
 }
 
-template <I32 _NumQueues>
-U32 ThreadPool<_NumQueues>::GetNumTasks(I32 queueNum) const
+template <I32 _numQueues>
+U32 ThreadPool<_numQueues>::GetNumTasks(I32 queueNum) const
 {
-    assert(queueNum < _NumQueues && queueNum >= 0);
+    assert(queueNum < _numQueues && queueNum >= 0);
     return mQueue[queueNum].GetSize();
 }
 
 
 
-template <I32 _NumQueues>
-bool ThreadPool<_NumQueues>::TryExecuteTask()
+template <I32 _numQueues>
+bool ThreadPool<_numQueues>::TryExecuteTask()
 {
     UniquePtr<TaskBase> task{nullptr};
     for (U32 i = 0; i < mQueue.size(); ++i)
@@ -180,10 +180,10 @@ bool ThreadPool<_NumQueues>::TryExecuteTask()
     return false;
 }
 
-template <I32 _NumQueues>
-bool ThreadPool<_NumQueues>::TryExecuteTask(I32 queueNum)
+template <I32 _numQueues>
+bool ThreadPool<_numQueues>::TryExecuteTask(I32 queueNum)
 {
-    assert(queueNum < _NumQueues && queueNum >= 0);
+    assert(queueNum < _numQueues && queueNum >= 0);
     UniquePtr<TaskBase> task{nullptr};
     if (mQueue[queueNum].TryPop(task))
     {
@@ -195,8 +195,8 @@ bool ThreadPool<_NumQueues>::TryExecuteTask(I32 queueNum)
 
 
 
-template <I32 _NumQueues>
-bool ThreadPool<_NumQueues>::TryExecuteTaskWait()
+template <I32 _numQueues>
+bool ThreadPool<_numQueues>::TryExecuteTaskWait()
 {
     WaitForTask();
     return TryExecuteTask();
@@ -204,8 +204,8 @@ bool ThreadPool<_NumQueues>::TryExecuteTaskWait()
 
 
 
-template <I32 _NumQueues>
-void ThreadPool<_NumQueues>::WaitForTask()
+template <I32 _numQueues>
+void ThreadPool<_numQueues>::WaitForTask()
 {
     std::unique_lock<std::mutex> lock(mMutexCondition);
     mConditionThreads.wait(lock, [this] { return HasTasks() || mCloseThreads; });
@@ -213,24 +213,24 @@ void ThreadPool<_NumQueues>::WaitForTask()
 
 
 
-template <I32 _NumQueues>
+template <I32 _numQueues>
 template <typename _F, typename... _Args>
-void ThreadPool<_NumQueues>::Submit(_F&& function, _Args&&... args)
+void ThreadPool<_numQueues>::Submit(_F&& function, _Args&&... args)
 {
     SubmitToQueue(0, function, args...);
 }
 
 
-template <I32 _NumQueues>
+template <I32 _numQueues>
 template <typename _F, typename... _Args>
-void ThreadPool<_NumQueues>::SubmitToQueue(I32 queueNum, _F&& function, _Args&&... args)
+void ThreadPool<_numQueues>::SubmitToQueue(I32 queueNum, _F&& function, _Args&&... args)
 {
     using ResultType =
             std::result_of_t<decltype(std::bind(std::forward<_F>(function), std::forward<_Args>(args)...))()>;
     using TaskType = Task<decltype(std::bind(std::forward<_F>(function), std::forward<_Args>(args)...))>;
 
     static_assert(std::is_same<void, ResultType>::value, "Used submit() with non void function!");
-    assert(queueNum < _NumQueues && queueNum >= 0);
+    assert(queueNum < _numQueues && queueNum >= 0);
 
 
     mQueue[queueNum].Push(MakeUnique<TaskType>(std::bind(std::forward<_F>(function), std::forward<_Args>(args)...)));
@@ -239,15 +239,15 @@ void ThreadPool<_NumQueues>::SubmitToQueue(I32 queueNum, _F&& function, _Args&&.
 
 
 
-template <I32 _NumQueues>
-void ThreadPool<_NumQueues>::ClearExceptionLog()
+template <I32 _numQueues>
+void ThreadPool<_numQueues>::ClearExceptionLog()
 {
     std::lock_guard<std::mutex> lock(mMutexExceptionLog);
     mExceptionLog.clear();
 }
 
-template <I32 _NumQueues>
-U32 ThreadPool<_NumQueues>::ExceptionLogSize() const
+template <I32 _numQueues>
+U32 ThreadPool<_numQueues>::ExceptionLogSize() const
 {
     std::lock_guard<std::mutex> lock(mMutexExceptionLog);
     return mExceptionLog.size();
@@ -255,8 +255,8 @@ U32 ThreadPool<_NumQueues>::ExceptionLogSize() const
 
 
 
-template <I32 _NumQueues>
-void ThreadPool<_NumQueues>::PropagateExceptions() const
+template <I32 _numQueues>
+void ThreadPool<_numQueues>::PropagateExceptions() const
 {
     std::lock_guard<std::mutex> lock(mMutexExceptionLog);
     if (!mExceptionLog.empty())

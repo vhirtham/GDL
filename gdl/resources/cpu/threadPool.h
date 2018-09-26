@@ -26,15 +26,15 @@ class ThreadPoolThread;
 //! @remark Worker thread exceptions are caught and the messages are stored in an exception message buffer that can be
 //! checked. This pool does not use futures to avoid an additional source of dedlocks. If you need to wait for results
 //! use self submitting (when result is not ready) proceed funtions.
-template <I32 _NumQueues = 1>
+template <I32 _numQueues = 1>
 class ThreadPool
 {
-    static_assert(_NumQueues > 0, "The threadpool needs at least 1 queue");
+    static_assert(_numQueues > 0, "The threadpool needs at least 1 queue");
 
     template <I32>
     friend class ThreadPoolThread;
 
-    using QueueArray = std::array<ThreadPoolQueue<UniquePtr<TaskBase>>, _NumQueues>;
+    using QueueArray = std::array<ThreadPoolQueue<UniquePtr<TaskBase>>, _numQueues>;
 
 
     //!@brief As long as this variable is true, threads won't wait for empty queues to be filled. This avoids deadlocks
@@ -48,7 +48,7 @@ class ThreadPool
     mutable std::mutex mMutexExceptionLog;
     String mExceptionLog;
 
-    Deque<ThreadPoolThread<_NumQueues>> mThreads;
+    Deque<ThreadPoolThread<_numQueues>> mThreads;
     QueueArray mQueue;
 
 
