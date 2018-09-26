@@ -7,6 +7,7 @@
 #include "gdl/resources/cpu/task.h"
 #include "gdl/resources/cpu/taskBase.h"
 #include "gdl/resources/cpu/threadPoolQueue.h"
+#include "gdl/resources/cpu/threadPoolThread.h"
 
 #include <array>
 #include <condition_variable>
@@ -25,6 +26,9 @@ namespace GDL
 template <int _NumQueues = 1>
 class ThreadPool
 {
+    template <int>
+    friend class ThreadPoolThread;
+
     static_assert(_NumQueues > 0, "The threadpool needs at least 1 queue");
 
     using QueueArray = std::array<ThreadPoolQueue<UniquePtr<TaskBase>>, _NumQueues>;
@@ -91,7 +95,7 @@ class ThreadPool
     mutable std::mutex mMutexExceptionLog;
     String mExceptionLog;
 
-    Deque<Thread> mThreads;
+    Deque<ThreadPoolThread<_NumQueues>> mThreads;
     QueueArray mQueue;
 
 
@@ -219,4 +223,5 @@ private:
 };
 }
 
+#include "gdl/resources/cpu/threadPoolThread.inl"
 #include "gdl/resources/cpu/threadPool.inl"
