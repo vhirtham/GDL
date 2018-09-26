@@ -5,14 +5,10 @@
 #include "gdl/base/string.h"
 #include "gdl/base/uniquePtr.h"
 #include "gdl/resources/cpu/task.h"
-#include "gdl/resources/cpu/taskBase.h"
 #include "gdl/resources/cpu/threadPoolQueue.h"
 
 
 #include <array>
-#include <atomic>
-#include <condition_variable>
-#include <functional>
 #include <mutex>
 #include <thread>
 
@@ -38,17 +34,9 @@ class ThreadPool
     using QueueArray = std::array<ThreadPoolQueue<UniquePtr<TaskBase>>, _numQueues>;
 
 
-    //!@brief As long as this variable is true, threads won't wait for empty queues to be filled. This avoids deadlocks
-    //! due to waiting for threads to close which are currently waiting for tasks.
-    std::atomic<bool> mCloseThreads = false;
-
-    std::condition_variable mConditionThreads;
-    std::mutex mMutexCondition;
-
     mutable std::mutex mMutexThreads;
     mutable std::mutex mMutexExceptionLog;
     String mExceptionLog;
-
     Deque<ThreadPoolThread<_numQueues>> mThreads;
     QueueArray mQueue;
 
@@ -68,9 +56,6 @@ public:
     //! @brief Deinitializes the thread pool
     void Deinitialize();
 
-    //! @brief Initializes the thread pool
-    void Initialize();
-
     //! @brief Gets the current number of threads
     //! @return Current number of threads
     U32 GetNumThreads() const;
@@ -80,25 +65,26 @@ public:
     void StartThreads(U32 numThreads);
 
     //! @brief Starts a specified number of thread with a alternative main loop function
-    //! @tparam _Func: Alternative main loop function type
+    //! @tparam _function: Alternative main loop function type
     //! @param numThreads: Number of threads that should be started
     //! @param function: Alternative main loop function
     //! @remark The function signature should always be void()
-    template <typename _Func>
-    void StartThreads(U32 numThreads, _Func&& function);
+    template <typename _function>
+    void StartThreads(U32 numThreads, _function&& function);
 
 
     //! @brief Starts a specified number of thread with a alternative main loop function
-    //! @tparam _Func: Alternative main loop function type
-    //! @tparam _InitFunction: Type of the initialization function
-    //! @tparam _DeinitFunction: Type of the deinitialization function
+    //! @tparam _function: Alternative main loop function type
+    //! @tparam _initFunction: Type of the initialization function
+    //! @tparam _deinitFunction: Type of the deinitialization function
     //! @param numThreads: Number of threads that should be started
     //! @param function: Alternative main loop function
     //! @param initFunction: Initialization function
     //! @param deinitFunction: Deinitialization function
     //! @remark The signature of all passed functions should always be void()
-    template <typename _Func, typename _InitFunction, typename _DeinitFunction>
-    void StartThreads(U32 numThreads, _Func&& function, _InitFunction&& initFunction, _DeinitFunction&& deinitFunction);
+    template <typename _function, typename _initFunction, typename _deinitFunction>
+    void StartThreads(U32 numThreads, _function&& function, _initFunction&& initFunction,
+                      _deinitFunction&& deinitFunction);
 
     //! @brief Closes a specified number of thread
     //! @param numThreadsToClose: Number of threads that should be closed
@@ -136,21 +122,21 @@ public:
     bool TryExecuteTask(I32 queueNum);
 
     //! @brief Submits a task to main queue ([0]) of the thread pool
-    //! @tparam _F: Function or functor type
-    //! @tparam _Args: Parameter pack of the functions argument types
+    //! @tparam _function: Function or functor type
+    //! @tparam _args: Parameter pack of the functions argument types
     //! @param function: Function that should be executed
     //! @param args: Function arguments
-    template <typename _F, typename... _Args>
-    void Submit(_F&& function, _Args&&... args);
+    template <typename _function, typename... _args>
+    void Submit(_function&& function, _args&&... args);
 
     //! @brief Submits a task to a certain queue of the thread pool
-    //! @tparam _F: Function or functor type
-    //! @tparam _Args: Parameter pack of the functions argument types
+    //! @tparam _function: Function or functor type
+    //! @tparam _args: Parameter pack of the functions argument types
     //! @param queueNum: Array number of the queue that should store the task
     //! @param function: Function that should be executed
     //! @param args: Function arguments
-    template <typename _F, typename... _Args>
-    void SubmitToQueue(I32 queueNum, _F&& function, _Args&&... args);
+    template <typename _function, typename... _args>
+    void SubmitToQueue(I32 queueNum, _function&& function, _args&&... args);
 
     //! @brief Clears the exception log
     void ClearExceptionLog();
