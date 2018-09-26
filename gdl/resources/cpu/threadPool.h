@@ -7,7 +7,7 @@
 #include "gdl/resources/cpu/task.h"
 #include "gdl/resources/cpu/taskBase.h"
 #include "gdl/resources/cpu/threadPoolQueue.h"
-#include "gdl/resources/cpu/threadPoolThread.h"
+
 
 #include <array>
 #include <condition_variable>
@@ -19,70 +19,23 @@
 namespace GDL
 {
 
+template <I32>
+class ThreadPoolThread;
+
 //! @brief Class that manages multiple worker threads.
 //! @remark Worker thread exceptions are caught and the messages are stored in an exception message buffer that can be
 //! checked. This pool does not use futures to avoid an additional source of dedlocks. If you need to wait for results
 //! use self submitting (when result is not ready) proceed funtions.
-template <int _NumQueues = 1>
+template <I32 _NumQueues = 1>
 class ThreadPool
 {
-    template <int>
-    friend class ThreadPoolThread;
-
     static_assert(_NumQueues > 0, "The threadpool needs at least 1 queue");
+
+    template <I32>
+    friend class ThreadPoolThread;
 
     using QueueArray = std::array<ThreadPoolQueue<UniquePtr<TaskBase>>, _NumQueues>;
 
-    class Thread
-    {
-
-        std::atomic_bool mClose;
-        std::atomic_bool mFinished = false;
-        ThreadPool& mThreadPool;
-        std::thread mThread; // <--- Always last member (initialization problems may occur if not)
-
-    public:
-        Thread() = delete;
-        Thread(const Thread&) = delete;
-        Thread(Thread&&) = delete;
-        Thread& operator=(const Thread&) = delete;
-        Thread& operator=(Thread&&) = delete;
-        ~Thread();
-
-        //! @brief Constructor that takes a function that should be run in a while loop until the tread is closed
-        //! @tparam _Func: Function type
-        //! @tparam _InitFunction: Type of the initialization function
-        //! @tparam _DeinitFunction: Type of the deinitialization function
-        //! @param threadPool: The threads thread pool
-        //! @param function: Function that should be run
-        //! @param initFunction: Initialization function
-        //! @param deinitFunction: Deinitialization function
-        template <typename _Func, typename _InitFunction, typename _DeinitFunction>
-        Thread(ThreadPool& threadPool, _Func&& function, _InitFunction&& initFunction,
-               _DeinitFunction&& deinitFunction);
-
-        //! @brief Stops the threads while loop
-        void Close();
-
-        //! @brief Returns if the thread has left its while loop
-        //! @return True/false
-        bool HasFinished() const;
-
-        //! @param The threads main function which runs until Close() is called or the thread pool is closed. All
-        //! exceptions are caught and written to the thread pools exception log
-        //! @tparam _Func: Type of the function which is executed in the threads main loop
-        //! @param function: Function which is executed in the threads main loop
-        template <typename _Func, typename _InitFunction, typename _DeinitFunction>
-        void Run(_Func&& function, _InitFunction&& initFunction, _DeinitFunction&& deinitFunction);
-
-    private:
-        template <typename _Func>
-        void HandleExceptions(_Func&& function);
-    };
-
-
-
-    // Member Variables --------------------------------------------------
 
     //!@brief As long as this variable is true, threads won't wait for empty queues to be filled. This avoids deadlocks
     //! due to waiting for threads to close which are currently waiting for tasks.
@@ -109,7 +62,7 @@ public:
 
     //! @brief Constructs the thread pool and starts the passed number of threads
     //! @param numThreads: Number of threads that should be started
-    explicit ThreadPool(const U32 numThreads);
+    explicit ThreadPool(U32 numThreads);
 
     //! @brief Deinitializes the thread pool
     void Deinitialize();
@@ -223,5 +176,5 @@ private:
 };
 }
 
-#include "gdl/resources/cpu/threadPoolThread.inl"
+#include "gdl/resources/cpu/threadPoolThread.h"
 #include "gdl/resources/cpu/threadPool.inl"

@@ -9,7 +9,7 @@ namespace GDL
 {
 
 
-template <int _numThreadPoolQueues>
+template <I32 _numThreadPoolQueues>
 ThreadPoolThread<_numThreadPoolQueues>::~ThreadPoolThread()
 {
     mThread.join();
@@ -17,7 +17,7 @@ ThreadPoolThread<_numThreadPoolQueues>::~ThreadPoolThread()
 
 
 
-template <int _numThreadPoolQueues>
+template <I32 _numThreadPoolQueues>
 template <typename _Func, typename _InitFunction, typename _DeinitFunction>
 ThreadPoolThread<_numThreadPoolQueues>::ThreadPoolThread(ThreadPool<_numThreadPoolQueues>& threadPool, _Func&& function,
                                                          _InitFunction&& initFunction, _DeinitFunction&& deinitFunction)
@@ -31,7 +31,7 @@ ThreadPoolThread<_numThreadPoolQueues>::ThreadPoolThread(ThreadPool<_numThreadPo
 
 
 
-template <int _numThreadPoolQueues>
+template <I32 _numThreadPoolQueues>
 void ThreadPoolThread<_numThreadPoolQueues>::Close()
 {
     mClose = true;
@@ -39,7 +39,7 @@ void ThreadPoolThread<_numThreadPoolQueues>::Close()
 
 
 
-template <int _numThreadPoolQueues>
+template <I32 _numThreadPoolQueues>
 bool ThreadPoolThread<_numThreadPoolQueues>::HasFinished() const
 {
     return mFinished;
@@ -47,7 +47,7 @@ bool ThreadPoolThread<_numThreadPoolQueues>::HasFinished() const
 
 
 
-template <int _numThreadPoolQueues>
+template <I32 _numThreadPoolQueues>
 template <typename _Func, typename _InitFunction, typename _DeinitFunction>
 void ThreadPoolThread<_numThreadPoolQueues>::Run(_Func&& function, _InitFunction&& initFunction,
                                                  _DeinitFunction&& deinitFunction)
@@ -69,7 +69,7 @@ void ThreadPoolThread<_numThreadPoolQueues>::Run(_Func&& function, _InitFunction
 
 
 
-template <int _numThreadPoolQueues>
+template <I32 _numThreadPoolQueues>
 template <typename _Func>
 void ThreadPoolThread<_numThreadPoolQueues>::HandleExceptions(_Func&& function)
 {

@@ -1,15 +1,20 @@
 #pragma once
 
+#include <gdl/base/fundamentalTypes.h>
+
 #include <atomic>
 #include <thread>
 
 namespace GDL
 {
 
-template <int>
+template <I32>
 class ThreadPool;
 
-template <int _numThreadPoolQueues>
+//! @brief Class for worker threads of the thread pool
+//! @tparam _numThreadPoolQueues: Number of queues used by the thread pool. Necessary since there is no common base
+//! class of all thread pools and this class needs to store a reference to the thread pool
+template <I32 _numThreadPoolQueues>
 class ThreadPoolThread
 {
 
@@ -57,3 +62,5 @@ private:
     void HandleExceptions(_Func&& function);
 };
 } // namespace GDL
+
+#include "gdl/resources/cpu/threadPoolThread.inl"
