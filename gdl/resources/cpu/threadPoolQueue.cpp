@@ -8,28 +8,28 @@ namespace GDL
 {
 
 
-template <typename T>
-ThreadPoolQueue<T>::ThreadPoolQueue()
+template <typename _type>
+ThreadPoolQueue<_type>::ThreadPoolQueue()
     : mMutex{}
 {
 }
 
-template <typename T>
-ThreadPoolQueue<T>::~ThreadPoolQueue()
+template <typename _type>
+ThreadPoolQueue<_type>::~ThreadPoolQueue()
 {
 }
 
 
 
-template <typename T>
-void ThreadPoolQueue<T>::Push(T value)
+template <typename _type>
+void ThreadPoolQueue<_type>::Push(_type value)
 {
     std::lock_guard<std::mutex> lock(mMutex);
     mQueue.push(std::move(value));
 }
 
-template <typename T>
-bool ThreadPoolQueue<T>::TryPop(T& out)
+template <typename _type>
+bool ThreadPoolQueue<_type>::TryPop(_type& out)
 {
     std::lock_guard<std::mutex> lock(mMutex);
     if (mQueue.empty())
@@ -43,15 +43,15 @@ bool ThreadPoolQueue<T>::TryPop(T& out)
 
 
 
-template <typename T>
-bool ThreadPoolQueue<T>::IsEmpty() const
+template <typename _type>
+bool ThreadPoolQueue<_type>::IsEmpty() const
 {
     std::lock_guard<std::mutex> lockGuard(mMutex);
     return mQueue.empty();
 }
 
-template <typename T>
-U32 ThreadPoolQueue<T>::GetSize() const
+template <typename _type>
+U32 ThreadPoolQueue<_type>::GetSize() const
 {
     std::lock_guard<std::mutex> lockGuard(mMutex);
     return mQueue.size();

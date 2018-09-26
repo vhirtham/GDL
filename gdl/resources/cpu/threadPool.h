@@ -156,8 +156,6 @@ public:
     template <typename _F, typename... _Args>
     void SubmitToQueue(I32 queueNum, _F&& function, _Args&&... args);
 
-
-
     //! @brief Clears the exception log
     void ClearExceptionLog();
 

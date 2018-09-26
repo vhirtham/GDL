@@ -3,17 +3,16 @@
 #include "gdl/base/fundamentalTypes.h"
 #include "gdl/base/container/queue.h"
 
-#include <atomic>
 #include <mutex>
 
 
 namespace GDL
 {
-template <typename T>
+template <typename _type>
 class ThreadPoolQueue
 {
     mutable std::mutex mMutex; //!< Mutex to protect internal data from data races
-    Queue<T> mQueue; //!< Queue filled with tasks
+    Queue<_type> mQueue; //!< Queue filled with tasks
 
 
 public:
@@ -28,13 +27,13 @@ public:
 
     //! @brief Pushes a new value into the queue and informs a waiting thread
     //! @param value New value
-    void Push(T value);
+    void Push(_type value);
 
 
     //! @brief Tries to get the next value of the queue
     //! @param out: reference to a variable that stores fetched value
     //! @return TRUE if the operation was successful, FALSE if not
-    bool TryPop(T& out);
+    bool TryPop(_type& out);
 
 
     //! @brief Returns if the queue is empty or not
