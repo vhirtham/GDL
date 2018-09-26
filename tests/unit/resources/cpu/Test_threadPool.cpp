@@ -181,7 +181,7 @@ BOOST_AUTO_TEST_CASE(Start_Thread_With_Custom_Main_Loop)
         tp.Submit([]() { std::this_thread::sleep_for(1ms); });
 
     // Reproduce default behaviour %%%%%%%%%%%%%%
-    tp.StartThreads(3, [&] { tp.TryExecuteTaskWait(); });
+    tp.StartThreads(3, [&] { tp.TryExecuteTask(); });
 
     while (tp.HasTasks())
         std::this_thread::sleep_for(1ms);
@@ -200,7 +200,7 @@ BOOST_AUTO_TEST_CASE(Start_Thread_With_Custom_Main_Loop)
     U32 ML_Counter_2 = 0;
 
     auto ML_function = [&tp](U32& counter) {
-        tp.TryExecuteTaskWait();
+        tp.TryExecuteTask();
         ++counter;
     };
 

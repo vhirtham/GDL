@@ -58,7 +58,7 @@ U32 ThreadPool<_numQueues>::GetNumThreads() const
 template <I32 _numQueues>
 void ThreadPool<_numQueues>::StartThreads(U32 numThreads)
 {
-    StartThreads(numThreads, [this] { TryExecuteTaskWait(); });
+    StartThreads(numThreads, [this] { TryExecuteTask(); });
 }
 
 
@@ -195,21 +195,8 @@ bool ThreadPool<_numQueues>::TryExecuteTask(I32 queueNum)
 
 
 
-template <I32 _numQueues>
-bool ThreadPool<_numQueues>::TryExecuteTaskWait()
-{
-    WaitForTask();
-    return TryExecuteTask();
-}
 
 
-
-template <I32 _numQueues>
-void ThreadPool<_numQueues>::WaitForTask()
-{
-    std::unique_lock<std::mutex> lock(mMutexCondition);
-    mConditionThreads.wait(lock, [this] { return HasTasks() || mCloseThreads; });
-}
 
 
 

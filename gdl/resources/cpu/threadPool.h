@@ -10,6 +10,7 @@
 
 
 #include <array>
+#include <atomic>
 #include <condition_variable>
 #include <functional>
 #include <mutex>
@@ -134,11 +135,6 @@ public:
     //! @return TRUE if task was executed, FALSe if not
     bool TryExecuteTask(I32 queueNum);
 
-    //! @brief Tries to fetch and execute a task from the thread pools queue. If no tasks are available, the current
-    //! thread waits until new tasks are submitted
-    //! @return TRUE if task was executed, FALSe if not
-    bool TryExecuteTaskWait();
-
     //! @brief Submits a task to main queue ([0]) of the thread pool
     //! @tparam _F: Function or functor type
     //! @tparam _Args: Parameter pack of the functions argument types
@@ -165,12 +161,6 @@ public:
 
     //! @brief Checks if a worker thread has caught an exception and rethrows it.
     void PropagateExceptions() const;
-
-
-
-private:
-    //! @brief Lets the current thread wait until there are tasks in the queue
-    void WaitForTask();
 };
 }
 
