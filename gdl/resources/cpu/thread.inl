@@ -5,8 +5,8 @@
 namespace GDL
 {
 
-template <typename _Func>
-Thread::Thread(_Func&& function)
+template <typename _function>
+Thread::Thread(_function&& function)
     : mThread{function}
 {
 }

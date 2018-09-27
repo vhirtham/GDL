@@ -4,19 +4,20 @@
 #include <memory>
 
 
-namespace GDL {
+namespace GDL
+{
 
 
 class Thread
 {
     std::thread mThread;
-public:
 
+public:
     //! Ctor which starts a thread with the provided function
-    //! @tparam _Func: Function type
+    //! @tparam _function: Function type
     //! @param function: Function that should be run by the thread
-    template <typename _Func>
-    Thread(_Func&& function);
+    template <typename _function>
+    Thread(_function&& function);
 
     Thread() = delete;
     Thread(const Thread&) = delete;
