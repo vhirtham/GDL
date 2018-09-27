@@ -8,11 +8,11 @@ namespace GDL
 {
 //! @brief This class stores a callable object that should be executed when the corresponding member function is called.
 //! Due to the template, any callable object (functors, std::functions) can be used.
-//! @tparam F: Callable object
-template <typename F>
+//! @tparam _function: Callable object
+template <typename _function>
 class Task : public TaskBase
 {
-    F mFunction; //!< Stored callable object
+    _function mFunction; //!< Stored callable object
 
 public:
     //! @brief Constructor
@@ -39,7 +39,7 @@ public:
 
     //! @brief Constructor which moves the provided callable object to the tasks internal variable
     //! @param function: Callable object that should be executed by the task
-    Task(F&& function)
+    Task(_function&& function)
         : mFunction(std::move(function))
     {
     }
