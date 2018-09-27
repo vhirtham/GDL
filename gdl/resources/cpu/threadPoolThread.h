@@ -32,16 +32,16 @@ public:
     ~ThreadPoolThread();
 
     //! @brief Constructor that takes a function that should be run in a while loop until the tread is closed
-    //! @tparam _Func: Function type
-    //! @tparam _InitFunction: Type of the initialization function
-    //! @tparam _DeinitFunction: Type of the deinitialization function
+    //! @tparam _function: Function type
+    //! @tparam _initFunction: Type of the initialization function
+    //! @tparam _deinitFunction: Type of the deinitialization function
     //! @param threadPool: The threads thread pool
     //! @param function: Function that should be run
     //! @param initFunction: Initialization function
     //! @param deinitFunction: Deinitialization function
-    template <typename _Func, typename _InitFunction, typename _DeinitFunction>
-    ThreadPoolThread(ThreadPool<_numThreadPoolQueues>& threadPool, _Func&& function, _InitFunction&& initFunction,
-                     _DeinitFunction&& deinitFunction);
+    template <typename _function, typename _initFunction, typename _deinitFunction>
+    ThreadPoolThread(ThreadPool<_numThreadPoolQueues>& threadPool, _function&& function, _initFunction&& initFunction,
+                     _deinitFunction&& deinitFunction);
 
     //! @brief Stops the threads while loop
     void Close();
@@ -52,14 +52,17 @@ public:
 
     //! @param The threads main function which runs until Close() is called or the thread pool is closed. All
     //! exceptions are caught and written to the thread pools exception log
-    //! @tparam _Func: Type of the function which is executed in the threads main loop
+    //! @tparam _function: Type of the function which is executed in the threads main loop
     //! @param function: Function which is executed in the threads main loop
-    template <typename _Func, typename _InitFunction, typename _DeinitFunction>
-    void Run(_Func&& function, _InitFunction&& initFunction, _DeinitFunction&& deinitFunction);
+    template <typename _function, typename _initFunction, typename _deinitFunction>
+    void Run(_function&& function, _initFunction&& initFunction, _deinitFunction&& deinitFunction);
 
 private:
-    template <typename _Func>
-    void HandleExceptions(_Func&& function);
+    //! @brief Wraps a try catch block around the passed function and handles occurring exceptions
+    //! @tparam _function: Type of the passed function
+    //! @param function: Function that needs exception handling
+    template <typename _function>
+    void HandleExceptions(_function&& function);
 };
 } // namespace GDL
 

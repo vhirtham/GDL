@@ -18,13 +18,14 @@ ThreadPoolThread<_numThreadPoolQueues>::~ThreadPoolThread()
 
 
 template <I32 _numThreadPoolQueues>
-template <typename _Func, typename _InitFunction, typename _DeinitFunction>
-ThreadPoolThread<_numThreadPoolQueues>::ThreadPoolThread(ThreadPool<_numThreadPoolQueues>& threadPool, _Func&& function,
-                                                         _InitFunction&& initFunction, _DeinitFunction&& deinitFunction)
+template <typename _function, typename _initFunction, typename _DeinitFunction>
+ThreadPoolThread<_numThreadPoolQueues>::ThreadPoolThread(ThreadPool<_numThreadPoolQueues>& threadPool,
+                                                         _function&& function, _initFunction&& initFunction,
+                                                         _DeinitFunction&& deinitFunction)
     : mClose{false}
     , mFinished{false}
     , mThreadPool(threadPool)
-    , mThread(&ThreadPoolThread::Run<_Func, _InitFunction, _DeinitFunction>, this, function, initFunction,
+    , mThread(&ThreadPoolThread::Run<_function, _initFunction, _DeinitFunction>, this, function, initFunction,
               deinitFunction)
 {
 }
@@ -48,8 +49,8 @@ bool ThreadPoolThread<_numThreadPoolQueues>::HasFinished() const
 
 
 template <I32 _numThreadPoolQueues>
-template <typename _Func, typename _InitFunction, typename _DeinitFunction>
-void ThreadPoolThread<_numThreadPoolQueues>::Run(_Func&& function, _InitFunction&& initFunction,
+template <typename _function, typename _initFunction, typename _DeinitFunction>
+void ThreadPoolThread<_numThreadPoolQueues>::Run(_function&& function, _initFunction&& initFunction,
                                                  _DeinitFunction&& deinitFunction)
 {
     // Initialization
@@ -70,8 +71,8 @@ void ThreadPoolThread<_numThreadPoolQueues>::Run(_Func&& function, _InitFunction
 
 
 template <I32 _numThreadPoolQueues>
-template <typename _Func>
-void ThreadPoolThread<_numThreadPoolQueues>::HandleExceptions(_Func&& function)
+template <typename _function>
+void ThreadPoolThread<_numThreadPoolQueues>::HandleExceptions(_function&& function)
 {
     try
     {
