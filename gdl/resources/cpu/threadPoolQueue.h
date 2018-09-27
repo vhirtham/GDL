@@ -2,6 +2,7 @@
 
 #include "gdl/base/fundamentalTypes.h"
 #include "gdl/base/container/queue.h"
+#include "gdl/resources/cpu/spinlock.h"
 
 #include <mutex>
 
@@ -11,7 +12,7 @@ namespace GDL
 template <typename _type>
 class ThreadPoolQueue
 {
-    mutable std::mutex mMutex; //!< Mutex to protect internal data from data races
+    mutable SpinLock mSpinLock; //!< Spinlock to protect internal data from data races
     Queue<_type> mQueue; //!< Queue filled with tasks
 
 
