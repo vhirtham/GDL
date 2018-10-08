@@ -86,7 +86,7 @@ public:
 
     //! @brief Creates a memory stack deallocator for the memory stack
     //! @return New memory stack allocator instance
-    MemoryStackDeallocator CreateMemoryStackDeallocator();
+    [[nodiscard]] MemoryStackDeallocator CreateMemoryStackDeallocator();
 
 private:
     //! @brief Class internal function which does the memory allocation
