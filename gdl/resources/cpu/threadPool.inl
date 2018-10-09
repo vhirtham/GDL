@@ -201,8 +201,7 @@ template <I32 _numQueues>
 void ThreadPool<_numQueues>::PropagateExceptions() const
 {
     std::lock_guard<std::mutex> lock(mMutexExceptionLog);
-    if (!mExceptionLog.empty())
-        throw Exception(__PRETTY_FUNCTION__, mExceptionLog.c_str());
+    EXCEPTION(!mExceptionLog.empty(), mExceptionLog.c_str());
 }
 
 } // namespace GDL
