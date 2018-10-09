@@ -15,7 +15,7 @@ namespace GDL
 template <I32 _numQueues>
 ThreadPool<_numQueues>::~ThreadPool()
 {
-    Deinitialize();
+    CloseAllThreads();
 }
 
 
