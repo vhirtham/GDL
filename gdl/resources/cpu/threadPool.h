@@ -94,32 +94,20 @@ public:
     //! @brief Closes all threads
     void CloseAllThreads();
 
-    //! @brief Returns true if the thread pool has tasks in one or more queues
-    //! @return true/false
-    bool HasTasks() const;
-
     //! @brief Returns true if the thread pool has tasks in the specified queue
     //! @param queueNum: Array number of the queue
     //! @return true/false
-    bool HasTasks(I32 queueNum) const;
-
-    //! @brief Gets the total number of tasks in all queues
-    //! @return Number of tasks in all queues
-    U32 GetNumTasks() const;
+    bool HasTasks(I32 queueNum = 0) const;
 
     //! @brief Gets the number of tasks in the specified queue
     //! @param queueNum: Array number of the queue
     //! @return Number of tasks in the queue
-    U32 GetNumTasks(I32 queueNum) const;
-
-    //! @brief Tries to fetch and execute a task from one of the thread pools queue
-    //! @return TRUE if task was executed, FALSe if not
-    bool TryExecuteTask();
+    U32 GetNumTasks(I32 queueNum = 0) const;
 
     //! @brief Tries to fetch and execute a task from a specific queue
     //! @param queueNum: Array number of the queue
     //! @return TRUE if task was executed, FALSe if not
-    bool TryExecuteTask(I32 queueNum);
+    bool TryExecuteTask(I32 queueNum = 0);
 
     //! @brief Submits a task to a certain queue of the thread pool
     //! @tparam _function: Function or functor type

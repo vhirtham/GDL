@@ -119,17 +119,6 @@ void ThreadPool<_numQueues>::CloseAllThreads()
 
 
 template <I32 _numQueues>
-bool ThreadPool<_numQueues>::HasTasks() const
-{
-    for (U32 i = 0; i < mQueue.size(); ++i)
-        if (!mQueue[i].IsEmpty())
-            return true;
-    return false;
-}
-
-
-
-template <I32 _numQueues>
 bool ThreadPool<_numQueues>::HasTasks(I32 queueNum) const
 {
     assert(queueNum < _numQueues && queueNum >= 0);
@@ -139,36 +128,10 @@ bool ThreadPool<_numQueues>::HasTasks(I32 queueNum) const
 
 
 template <I32 _numQueues>
-U32 ThreadPool<_numQueues>::GetNumTasks() const
-{
-    U32 numTasks = 0;
-    for (U32 i = 0; i < mQueue.size(); ++i)
-        numTasks += mQueue[i].GetSize();
-    return numTasks;
-}
-
-
-
-template <I32 _numQueues>
 U32 ThreadPool<_numQueues>::GetNumTasks(I32 queueNum) const
 {
     assert(queueNum < _numQueues && queueNum >= 0);
     return mQueue[queueNum].GetSize();
-}
-
-
-
-template <I32 _numQueues>
-bool ThreadPool<_numQueues>::TryExecuteTask()
-{
-    UniquePtr<TaskBase> task{nullptr};
-    for (U32 i = 0; i < mQueue.size(); ++i)
-        if (mQueue[i].TryPop(task))
-        {
-            task->execute();
-            return true;
-        }
-    return false;
 }
 
 
