@@ -314,7 +314,7 @@ BOOST_AUTO_TEST_CASE(MultiQueue_Submit_And_Process)
     for (U32 i = 0; i < numQueues; ++i)
     {
         for (U32 j = 0; j < 8; ++j)
-            tp.SubmitToQueue(static_cast<I32>(i), []() { std::this_thread::sleep_for(1ms); });
+            tp.Submit(static_cast<I32>(i), []() { std::this_thread::sleep_for(1ms); });
 
         while (tp.HasTasks())
             std::this_thread::sleep_for(1ms);
@@ -330,11 +330,11 @@ BOOST_AUTO_TEST_CASE(MultiQueue_Submit_And_Process_Specific_Queues)
     constexpr U32 numQueues = 3;
     ThreadPool<numQueues> tp(0);
 
-    tp.SubmitToQueue(2, []() { std::this_thread::sleep_for(1ms); });
+    tp.Submit(2, []() { std::this_thread::sleep_for(1ms); });
     for (U32 i = 0; i < 2; ++i)
-        tp.SubmitToQueue(0, []() { std::this_thread::sleep_for(1ms); });
+        tp.Submit(0, []() { std::this_thread::sleep_for(1ms); });
     for (U32 i = 0; i < 3; ++i)
-        tp.SubmitToQueue(1, []() { std::this_thread::sleep_for(1ms); });
+        tp.Submit(1, []() { std::this_thread::sleep_for(1ms); });
 
     BOOST_CHECK(tp.GetNumTasks(0) == 2);
     BOOST_CHECK(tp.GetNumTasks(1) == 3);
@@ -360,7 +360,7 @@ BOOST_AUTO_TEST_CASE(MultiQueue_Submit_And_Process_Specific_Queues)
     tp.CloseAllThreads();
 
     for (U32 i = 0; i < 3; ++i)
-        tp.SubmitToQueue(1, []() { std::this_thread::sleep_for(1ms); });
+        tp.Submit(1, []() { std::this_thread::sleep_for(1ms); });
 
     tp.StartThreads(1);
     while (tp.HasTasks())
@@ -385,7 +385,7 @@ BOOST_AUTO_TEST_CASE(MultiQueue_LIFO_ThreadDestruction)
         tp.StartThreads(1, [&tp, i]() { tp.TryExecuteTask(static_cast<I32>(i)); });
 
     for (U32 i = 0; i < numQueues; ++i)
-        tp.SubmitToQueue(static_cast<I32>(i), []() { std::this_thread::sleep_for(1ms); });
+        tp.Submit(static_cast<I32>(i), []() { std::this_thread::sleep_for(1ms); });
 
     while (tp.GetNumTasks() > 0)
         std::this_thread::sleep_for(1ms);
@@ -397,7 +397,7 @@ BOOST_AUTO_TEST_CASE(MultiQueue_LIFO_ThreadDestruction)
 
     tp.CloseThreads(1);
     for (U32 i = 0; i < numQueues; ++i)
-        tp.SubmitToQueue(static_cast<I32>(i), []() { std::this_thread::sleep_for(1ms); });
+        tp.Submit(static_cast<I32>(i), []() { std::this_thread::sleep_for(1ms); });
 
     while (tp.GetNumTasks() > 1)
         std::this_thread::sleep_for(1ms);
@@ -411,7 +411,7 @@ BOOST_AUTO_TEST_CASE(MultiQueue_LIFO_ThreadDestruction)
 
     tp.CloseThreads(2);
     for (U32 i = 0; i < numQueues; ++i)
-        tp.SubmitToQueue(static_cast<I32>(i), []() { std::this_thread::sleep_for(1ms); });
+        tp.Submit(static_cast<I32>(i), []() { std::this_thread::sleep_for(1ms); });
 
     while (tp.GetNumTasks() > 4)
         std::this_thread::sleep_for(1ms);

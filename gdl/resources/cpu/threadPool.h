@@ -121,14 +121,6 @@ public:
     //! @return TRUE if task was executed, FALSe if not
     bool TryExecuteTask(I32 queueNum);
 
-    //! @brief Submits a task to main queue ([0]) of the thread pool
-    //! @tparam _function: Function or functor type
-    //! @tparam _args: Parameter pack of the functions argument types
-    //! @param function: Function that should be executed
-    //! @param args: Function arguments
-    template <typename _function, typename... _args>
-    void Submit(_function&& function, _args&&... args);
-
     //! @brief Submits a task to a certain queue of the thread pool
     //! @tparam _function: Function or functor type
     //! @tparam _args: Parameter pack of the functions argument types
@@ -136,7 +128,15 @@ public:
     //! @param function: Function that should be executed
     //! @param args: Function arguments
     template <typename _function, typename... _args>
-    void SubmitToQueue(I32 queueNum, _function&& function, _args&&... args);
+    void Submit(I32 queueNum, _function&& function, _args&&... args);
+
+    //! @brief Submits a task to main queue ([0]) of the thread pool
+    //! @tparam _function: Function or functor type
+    //! @tparam _args: Parameter pack of the functions argument types
+    //! @param function: Function that should be executed
+    //! @param args: Function arguments
+    template <typename _function, typename... _args>
+    void Submit(_function&& function, _args&&... args);
 
     //! @brief Clears the exception log
     void ClearExceptionLog();

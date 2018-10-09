@@ -190,16 +190,7 @@ bool ThreadPool<_numQueues>::TryExecuteTask(I32 queueNum)
 
 template <I32 _numQueues>
 template <typename _function, typename... _args>
-void ThreadPool<_numQueues>::Submit(_function&& function, _args&&... args)
-{
-    SubmitToQueue(0, function, args...);
-}
-
-
-
-template <I32 _numQueues>
-template <typename _function, typename... _args>
-void ThreadPool<_numQueues>::SubmitToQueue(I32 queueNum, _function&& function, _args&&... args)
+void ThreadPool<_numQueues>::Submit(I32 queueNum, _function&& function, _args&&... args)
 {
     using ResultType =
             std::result_of_t<decltype(std::bind(std::forward<_function>(function), std::forward<_args>(args)...))()>;
@@ -212,6 +203,15 @@ void ThreadPool<_numQueues>::SubmitToQueue(I32 queueNum, _function&& function, _
 
     mQueue[queueNum].Push(
             MakeUnique<TaskType>(std::bind(std::forward<_function>(function), std::forward<_args>(args)...)));
+}
+
+
+
+template <I32 _numQueues>
+template <typename _function, typename... _args>
+void ThreadPool<_numQueues>::Submit(_function&& function, _args&&... args)
+{
+    Submit(0, function, args...);
 }
 
 

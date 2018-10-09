@@ -86,7 +86,7 @@ void WorkerThreadSumWithVectorTPS(ThreadPool<2>& tp, U32 numValues)
     for (auto value : vec)
         sum += value;
 
-    tp.SubmitToQueue(0, &MainThreadAddToTotalSum, sum);
+    tp.Submit(0, &MainThreadAddToTotalSum, sum);
 }
 
 
@@ -111,7 +111,7 @@ void MainLoop()
 
 
         for (U32 i = 0; i < numSubmits; ++i)
-            tp.SubmitToQueue(1, &WorkerThreadSumWithVectorTPS, std::ref(tp), numIterationsPerSubmit);
+            tp.Submit(1, &WorkerThreadSumWithVectorTPS, std::ref(tp), numIterationsPerSubmit);
 
         U32 numResults = 0;
         GetCurrentTotalSum() = 0;
