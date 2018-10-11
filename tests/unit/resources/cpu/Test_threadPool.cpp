@@ -296,7 +296,14 @@ BOOST_AUTO_TEST_CASE(Exceptions_in_Initialization_and_Deinitialization_functions
 BOOST_AUTO_TEST_CASE(MultiQueue_Construction_And_Deinitialization)
 {
     DeadlockTerminationTimer dtt;
-    ThreadPool<4> tp(100);
+    constexpr I32 numQueues = 4;
+
+    ThreadPool<numQueues> tp;
+    tp.StartThreads(100, [&]() {
+        for (I32 i = 0; i < numQueues; ++i)
+            if (tp.TryExecuteTask(i))
+                continue;
+    });
 }
 
 
@@ -307,7 +314,7 @@ BOOST_AUTO_TEST_CASE(MultiQueue_Submit_And_Process)
 {
     DeadlockTerminationTimer dtt;
     constexpr I32 numQueues = 3;
-    ThreadPool<numQueues> tp(0);
+    ThreadPool<numQueues> tp;
 
     tp.StartThreads(2, [&]() {
         for (I32 i = 0; i < numQueues; ++i)
@@ -334,7 +341,7 @@ BOOST_AUTO_TEST_CASE(MultiQueue_Submit_And_Process_Specific_Queues)
 {
     DeadlockTerminationTimer dtt;
     constexpr U32 numQueues = 3;
-    ThreadPool<numQueues> tp(0);
+    ThreadPool<numQueues> tp;
 
     tp.Submit(2, []() { std::this_thread::sleep_for(1ms); });
     for (U32 i = 0; i < 2; ++i)
@@ -379,7 +386,7 @@ BOOST_AUTO_TEST_CASE(MultiQueue_LIFO_ThreadDestruction)
 {
     DeadlockTerminationTimer dtt;
     constexpr U32 numQueues = 4;
-    ThreadPool<numQueues> tp(0);
+    ThreadPool<numQueues> tp;
 
     for (U32 i = 0; i < numQueues; ++i)
         tp.StartThreads(1, [&tp, i]() { tp.TryExecuteTask(static_cast<I32>(i)); });

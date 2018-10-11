@@ -99,7 +99,7 @@ void MainLoop()
     constexpr Seconds testDuration{1};
 
     HeapAllocationCounter hac;
-    ThreadPool<2> tp(0);
+    ThreadPool<2> tp;
     tp.StartThreads(numThreads, [&] { tp.TryExecuteTask(1); }, &WorkerThreadInitializeFunction,
                     &WorkerThreadDeinitializeFunction);
 

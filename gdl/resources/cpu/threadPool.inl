@@ -23,6 +23,9 @@ ThreadPool<_numQueues>::~ThreadPool()
 template <I32 _numQueues>
 ThreadPool<_numQueues>::ThreadPool(U32 numThreads)
 {
+    static_assert(_numQueues == 1, "This thread pool has multiple queues. Can't start threads. There is no default "
+                                   "main loop for this case. Use the default constructor and add threads with a "
+                                   "specific main loop function ---> \"StartThreads(numThreads, function)\".");
     StartThreads(numThreads);
 }
 
@@ -49,6 +52,10 @@ U32 ThreadPool<_numQueues>::GetNumThreads() const
 template <I32 _numQueues>
 void ThreadPool<_numQueues>::StartThreads(U32 numThreads)
 {
+    static_assert(_numQueues == 1, "This thread pool has multiple queues. Can't start threads. There is no default "
+                                   "main loop for this case. Use \"StartThreads(numThreads, function)\" and provide a "
+                                   "main loop function.");
+
     StartThreads(numThreads, [this] { TryExecuteTask(); });
 }
 
@@ -119,7 +126,17 @@ void ThreadPool<_numQueues>::CloseAllThreads()
 
 
 template <I32 _numQueues>
-bool ThreadPool<_numQueues>::HasTasks(I32 queueNum) const
+bool ThreadPool<_numQueues>::HasTasks() const
+{
+    static_assert(_numQueues == 1, "This thread pool has multiple queues. Use the corresponding function overload to "
+                                   "specify which one you want to use.");
+    return !mQueue[0].IsEmpty();
+}
+
+
+
+template <I32 _numQueues>
+bool ThreadPool<_numQueues>::HasTasks(const I32 queueNum) const
 {
     assert(queueNum < _numQueues && queueNum >= 0);
     return !mQueue[queueNum].IsEmpty();
@@ -128,7 +145,17 @@ bool ThreadPool<_numQueues>::HasTasks(I32 queueNum) const
 
 
 template <I32 _numQueues>
-U32 ThreadPool<_numQueues>::GetNumTasks(I32 queueNum) const
+U32 ThreadPool<_numQueues>::GetNumTasks() const
+{
+    static_assert(_numQueues == 1, "This thread pool has multiple queues. Use the corresponding function overload to "
+                                   "specify which one you want to use.");
+    return mQueue[0].GetSize();
+}
+
+
+
+template <I32 _numQueues>
+U32 ThreadPool<_numQueues>::GetNumTasks(const I32 queueNum) const
 {
     assert(queueNum < _numQueues && queueNum >= 0);
     return mQueue[queueNum].GetSize();
@@ -137,7 +164,17 @@ U32 ThreadPool<_numQueues>::GetNumTasks(I32 queueNum) const
 
 
 template <I32 _numQueues>
-bool ThreadPool<_numQueues>::TryExecuteTask(I32 queueNum)
+bool ThreadPool<_numQueues>::TryExecuteTask()
+{
+    static_assert(_numQueues == 1, "This thread pool has multiple queues. Use the corresponding function overload to "
+                                   "specify which one you want to use.");
+    return TryExecuteTask(0);
+}
+
+
+
+template <I32 _numQueues>
+bool ThreadPool<_numQueues>::TryExecuteTask(const I32 queueNum)
 {
     assert(queueNum < _numQueues && queueNum >= 0);
     UniquePtr<TaskBase> task{nullptr};
@@ -153,7 +190,7 @@ bool ThreadPool<_numQueues>::TryExecuteTask(I32 queueNum)
 
 template <I32 _numQueues>
 template <typename _function, typename... _args>
-void ThreadPool<_numQueues>::Submit(I32 queueNum, _function&& function, _args&&... args)
+void ThreadPool<_numQueues>::Submit(const I32 queueNum, _function&& function, _args&&... args)
 {
     using ResultType =
             std::result_of_t<decltype(std::bind(std::forward<_function>(function), std::forward<_args>(args)...))()>;
@@ -174,6 +211,8 @@ template <I32 _numQueues>
 template <typename _function, typename... _args>
 void ThreadPool<_numQueues>::Submit(_function&& function, _args&&... args)
 {
+    static_assert(_numQueues == 1, "This thread pool has multiple queues. Use the corresponding function overload to "
+                                   "specify which one you want to use.");
     Submit(0, function, args...);
 }
 

@@ -21,8 +21,8 @@ class ThreadPoolThread;
 
 //! @brief Class that manages multiple worker threads.
 //! @remark Worker thread exceptions are caught and the messages are stored in an exception message buffer that can be
-//! checked. This pool does not use futures to avoid an additional source of dedlocks. If you need to wait for results
-//! use self submitting (when result is not ready) proceed funtions.
+//! checked. This pool does not use futures to avoid an additional source of deadlocks. If you need to wait for results,
+//! resubmit the function until the necessary value is ready.
 template <I32 _numQueues = 1>
 class ThreadPool
 {
@@ -42,15 +42,17 @@ class ThreadPool
 
 
 public:
-    ThreadPool() = delete;
+    ThreadPool() = default;
     ThreadPool(const ThreadPool&) = delete;
     ThreadPool(ThreadPool&&) = delete;
     ThreadPool& operator=(const ThreadPool&) = delete;
     ThreadPool& operator=(ThreadPool&&) = delete;
     ~ThreadPool();
 
-    //! @brief Constructs the thread pool and starts the passed number of threads
+    //! @brief Constructs the thread pool and starts the passed number of threads which try to fetch tasks from the
+    //! queue
     //! @param numThreads: Number of threads that should be started
+    //! @remark This function can only be used by thread pools with a single queue.
     explicit ThreadPool(U32 numThreads);
 
     //! @brief Deinitializes the thread pool
@@ -60,8 +62,9 @@ public:
     //! @return Current number of threads
     U32 GetNumThreads() const;
 
-    //! @brief Starts a specified number of thread
+    //! @brief Starts a specified number of threads that try to fetch tasks from the queue
     //! @param numThreads: Number of threads that should be started
+    //! @remark This function can only be used by thread pools with a single queue.
     void StartThreads(U32 numThreads);
 
     //! @brief Starts a specified number of thread with a alternative main loop function
@@ -97,17 +100,32 @@ public:
     //! @brief Returns true if the thread pool has tasks in the specified queue
     //! @param queueNum: Array number of the queue
     //! @return true/false
-    bool HasTasks(I32 queueNum = 0) const;
+    bool HasTasks(const I32 queueNum) const;
+
+    //! @brief Returns true if the thread pool has tasks
+    //! @return true/false
+    //! @remark This function can only be used by thread pools with a single queue.
+    bool HasTasks() const;
 
     //! @brief Gets the number of tasks in the specified queue
     //! @param queueNum: Array number of the queue
     //! @return Number of tasks in the queue
-    U32 GetNumTasks(I32 queueNum = 0) const;
+    U32 GetNumTasks(const I32 queueNum) const;
+
+    //! @brief Gets the number of tasks in the queue
+    //! @return Number of tasks in the queue
+    //! @remark This function can only be used by thread pools with a single queue.
+    U32 GetNumTasks() const;
 
     //! @brief Tries to fetch and execute a task from a specific queue
     //! @param queueNum: Array number of the queue
     //! @return TRUE if task was executed, FALSe if not
-    bool TryExecuteTask(I32 queueNum = 0);
+    bool TryExecuteTask(const I32 queueNum);
+
+    //! @brief Tries to fetch and execute a task from the queue
+    //! @return TRUE if task was executed, FALSe if not
+    //! @remark This function can only be used by thread pools with a single queue.
+    bool TryExecuteTask();
 
     //! @brief Submits a task to a certain queue of the thread pool
     //! @tparam _function: Function or functor type
@@ -116,13 +134,14 @@ public:
     //! @param function: Function that should be executed
     //! @param args: Function arguments
     template <typename _function, typename... _args>
-    void Submit(I32 queueNum, _function&& function, _args&&... args);
+    void Submit(const I32 queueNum, _function&& function, _args&&... args);
 
-    //! @brief Submits a task to main queue ([0]) of the thread pool
+    //! @brief Submits a task to the queue of the thread pool
     //! @tparam _function: Function or functor type
     //! @tparam _args: Parameter pack of the functions argument types
     //! @param function: Function that should be executed
     //! @param args: Function arguments
+    //! @remark This function can only be used by thread pools with a single queue.
     template <typename _function, typename... _args>
     void Submit(_function&& function, _args&&... args);
 
