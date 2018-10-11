@@ -95,24 +95,18 @@ void ThreadPool<_numQueues>::CloseThreads(I32 numThreadsToClose)
     std::lock_guard<std::mutex> lock(mMutexThreads);
 
     const I32 numRunningThreads = static_cast<I32>(mThreads.size());
-    if (numRunningThreads < numThreadsToClose || numThreadsToClose < 0)
-        numThreadsToClose = numRunningThreads;
-    assert(numRunningThreads >= numThreadsToClose);
 
+    if (numRunningThreads < numThreadsToClose)
+        numThreadsToClose = numRunningThreads;
+    assert(numRunningThreads >= numThreadsToClose && numThreadsToClose > 0);
 
     // Notify threads to exit main loop
     for (I32 i = numRunningThreads; i > numRunningThreads - numThreadsToClose; --i)
         mThreads[i - 1].Close();
 
-
     // Pop threads from the back of the container
     for (I32 i = 0; i < numThreadsToClose; ++i)
-    {
-        while (!mThreads.back().HasFinished())
-            std::this_thread::yield();
-
         mThreads.pop_back();
-    }
 }
 
 
@@ -120,7 +114,11 @@ void ThreadPool<_numQueues>::CloseThreads(I32 numThreadsToClose)
 template <I32 _numQueues>
 void ThreadPool<_numQueues>::CloseAllThreads()
 {
-    CloseThreads(-1);
+    std::lock_guard<std::mutex> lock(mMutexThreads);
+
+    for (auto& thread : mThreads)
+        thread.Close();
+    mThreads.clear();
 }
 
 
