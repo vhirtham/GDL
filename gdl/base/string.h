@@ -40,22 +40,32 @@ namespace GDL
 
 // Append -------------------------------------------------------------------------------------------------------------
 
-template <typename _stringType, typename _appendType>
-void AppendToString(_stringType& string, const _appendType& appendedText)
+template <typename _stringType, typename _appendedType>
+void AppendToString(_stringType& string, const _appendedType& appendedText)
 {
     string.append(appendedText);
 }
 
 
 
-template <typename _stringType, typename _appendType, typename... _args>
-void AppendToString(_stringType& string, const _appendType& appendedText, const _args&... args)
+template <typename _stringType, typename _appendedType, typename... _args>
+void AppendToString(_stringType& string, const _appendedType& appendedText, const _args&... args)
 {
     string.append(appendedText);
     AppendToString(string, args...);
 }
 
 
+
+// Make string ---------------------------------------------------------------------------------------------------------
+
+template <typename _stringType = String, typename... _args>
+_stringType MakeString(const _args&... args)
+{
+    _stringType string;
+    AppendToString(string, args...);
+    return string;
+}
 
 // ToString functions -------------------------------------------------------------------------------------------------
 

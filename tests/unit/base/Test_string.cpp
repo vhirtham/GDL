@@ -8,12 +8,79 @@
 
 using namespace GDL;
 
+template <typename _stringType>
+void TestAppendToString()
+{
+    _stringType s1{"This"};
+    _stringType s2{"whole"};
+
+    AppendToString(s1, " is the ", s2, " text.");
+    BOOST_CHECK(s1.compare("This is the whole text.") == 0);
+}
+
+
+BOOST_AUTO_TEST_CASE(Append_to_string)
+{
+#ifndef USE_STD_ALLOCATOR
+    MemoryManager& mm = MemoryManager::Instance();
+    mm.CreateGeneralPurposeMemory(1_MB);
+    mm.CreateMemoryStack(1_MB);
+    mm.EnableThreadPrivateMemory();
+    mm.Initialize();
+    mm.CreatePrivateMemoryStackForThisThread(1_MB);
+#endif
+
+    TestAppendToString<std::string>();
+    TestAppendToString<String>();
+    TestAppendToString<StringS>();
+    TestAppendToString<StringTPS>();
+
+
+#ifndef USE_STD_ALLOCATOR
+    mm.DeletePrivateMemoryStackForThisThread();
+    mm.Deinitialize();
+#endif
+}
+
+
+
+template <typename _stringType>
+void TestMakeString()
+{
+    _stringType s2{"whole"};
+
+    _stringType s1 = MakeString<_stringType>("This is the ", s2, " text.");
+    BOOST_CHECK(s1.compare("This is the whole text.") == 0);
+}
+
+
+
+BOOST_AUTO_TEST_CASE(Make_string)
+{
+#ifndef USE_STD_ALLOCATOR
+    MemoryManager& mm = MemoryManager::Instance();
+    mm.Initialize();
+    mm.CreatePrivateMemoryStackForThisThread(1_MB);
+#endif
+
+    TestMakeString<std::string>();
+    TestMakeString<String>();
+    TestMakeString<StringS>();
+    TestMakeString<StringTPS>();
+
+
+#ifndef USE_STD_ALLOCATOR
+    mm.DeletePrivateMemoryStackForThisThread();
+    mm.Deinitialize();
+#endif
+}
+
+
 
 BOOST_AUTO_TEST_CASE(To_String)
 {
 #ifndef USE_STD_ALLOCATOR
     MemoryManager& mm = MemoryManager::Instance();
-    mm.CreateGeneralPurposeMemory(1_MB);
     mm.Initialize();
 #endif
     HeapAllocationCounter hac;
