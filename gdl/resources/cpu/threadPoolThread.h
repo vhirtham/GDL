@@ -19,7 +19,6 @@ class ThreadPoolThread
 {
 
     std::atomic_bool mClose;
-    std::atomic_bool mFinished = false;
     ThreadPool<_numThreadPoolQueues>& mThreadPool;
     std::thread mThread; // <--- Always last member (initialization problems may occur if not)
 
@@ -45,10 +44,6 @@ public:
 
     //! @brief Stops the threads while loop
     void Close();
-
-    //! @brief Returns if the thread has left its while loop
-    //! @return True/false
-    bool HasFinished() const;
 
     //! @param The threads main function which runs until Close() is called or the thread pool is closed. All
     //! exceptions are caught and written to the thread pools exception log

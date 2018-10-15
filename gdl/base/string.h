@@ -38,6 +38,24 @@ using StringTPS = std::basic_string<char>;
 namespace GDL
 {
 
+// Append -------------------------------------------------------------------------------------------------------------
+
+template <typename _stringType, typename _appendType>
+void AppendToString(_stringType& string, const _appendType& appendedText)
+{
+    string.append(appendedText);
+}
+
+
+
+template <typename _stringType, typename _appendType, typename... _args>
+void AppendToString(_stringType& string, const _appendType& appendedText, const _args&... args)
+{
+    string.append(appendedText);
+    AppendToString(string, args...);
+}
+
+
 
 // ToString functions -------------------------------------------------------------------------------------------------
 

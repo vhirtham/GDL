@@ -1,7 +1,7 @@
 #pragma once
 
 #include "gdl/resources/cpu/threadPoolThread.h"
-
+#include "gdl/base/string.h"
 #include <mutex>
 
 
@@ -23,7 +23,6 @@ ThreadPoolThread<_numThreadPoolQueues>::ThreadPoolThread(ThreadPool<_numThreadPo
                                                          _function&& function, _initFunction&& initFunction,
                                                          _DeinitFunction&& deinitFunction)
     : mClose{false}
-    , mFinished{false}
     , mThreadPool(threadPool)
     , mThread(&ThreadPoolThread::Run<_function, _initFunction, _DeinitFunction>, this, function, initFunction,
               deinitFunction)
@@ -41,20 +40,15 @@ void ThreadPoolThread<_numThreadPoolQueues>::Close()
 
 
 template <I32 _numThreadPoolQueues>
-bool ThreadPoolThread<_numThreadPoolQueues>::HasFinished() const
-{
-    return mFinished;
-}
-
-
-
-template <I32 _numThreadPoolQueues>
 template <typename _function, typename _initFunction, typename _DeinitFunction>
 void ThreadPoolThread<_numThreadPoolQueues>::Run(_function&& function, _initFunction&& initFunction,
                                                  _DeinitFunction&& deinitFunction)
 {
+    // INFO:
+    // The 3 functions have individual exception handling to ensure that the deinitialize function is called
+
     // Initialization
-    HandleExceptions([&]() { initFunction(); });
+    HandleExceptions(initFunction);
 
     // Main loop
     HandleExceptions([&]() {
@@ -63,9 +57,7 @@ void ThreadPoolThread<_numThreadPoolQueues>::Run(_function&& function, _initFunc
     });
 
     // Deinitialization
-    HandleExceptions([&]() { deinitFunction(); });
-
-    mFinished = true;
+    HandleExceptions(deinitFunction);
 }
 
 
@@ -81,18 +73,13 @@ void ThreadPoolThread<_numThreadPoolQueues>::HandleExceptions(_function&& functi
     catch (const std::exception& e)
     {
         std::lock_guard<std::mutex> lock(mThreadPool.mMutexExceptionLog);
-        mThreadPool.mExceptionLog.append("\n");
-        mThreadPool.mExceptionLog.append("Thread caught the following Excption:\n");
-        mThreadPool.mExceptionLog.append(e.what());
-        mThreadPool.mExceptionLog.append("\n");
+        AppendToString(mThreadPool.mExceptionLog,"\nThread caught the following Excption:\n",e.what(),"\n");
         mClose = true;
     }
     catch (...)
     {
         std::lock_guard<std::mutex> lock(mThreadPool.mMutexExceptionLog);
-        mThreadPool.mExceptionLog.append("\n");
-        mThreadPool.mExceptionLog.append("Thread caught UNKNOWN exception");
-        mThreadPool.mExceptionLog.append("\n");
+        mThreadPool.mExceptionLog.append("\nThread caught UNKNOWN exception\n");
         mClose = true;
     }
 }
