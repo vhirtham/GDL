@@ -154,6 +154,13 @@ public:
 
     //! @brief Checks if a worker thread has caught an exception and rethrows it.
     void PropagateExceptions() const;
+
+private:
+    //! @brief Adds a new message to the exception log
+    //! @tparam _args: Parameter pack for variable number of parameters of different types
+    //! @param args: The new message is constructed from all the passed arguments.
+    template <typename... _args>
+    void AddMessageToExceptionLog(const _args&... args);
 };
 }
 

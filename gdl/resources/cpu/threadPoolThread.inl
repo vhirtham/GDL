@@ -72,14 +72,12 @@ void ThreadPoolThread<_numThreadPoolQueues>::HandleExceptions(_function&& functi
     }
     catch (const std::exception& e)
     {
-        std::lock_guard<std::mutex> lock(mThreadPool.mMutexExceptionLog);
-        AppendToString(mThreadPool.mExceptionLog,"\nThread caught the following Excption:\n",e.what(),"\n");
+        mThreadPool.AddMessageToExceptionLog("Thread caught the following Excption:\n", e.what());
         mClose = true;
     }
     catch (...)
     {
-        std::lock_guard<std::mutex> lock(mThreadPool.mMutexExceptionLog);
-        mThreadPool.mExceptionLog.append("\nThread caught UNKNOWN exception\n");
+        mThreadPool.AddMessageToExceptionLog("Thread caught UNKNOWN exception.");
         mClose = true;
     }
 }

@@ -241,4 +241,14 @@ void ThreadPool<_numQueues>::PropagateExceptions() const
     EXCEPTION(!mExceptionLog.empty(), mExceptionLog.c_str());
 }
 
+
+
+template <I32 _numQueues>
+template <typename... _args>
+void ThreadPool<_numQueues>::AddMessageToExceptionLog(const _args&... args)
+{
+    std::lock_guard<std::mutex> lock(mMutexExceptionLog);
+    AppendToString(mExceptionLog, args..., "\n\n");
+}
+
 } // namespace GDL
