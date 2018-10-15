@@ -115,7 +115,7 @@ public:
     //! @brief Gets the number of tasks in the queue
     //! @return Number of tasks in the queue
     //! @remark This function can only be used by thread pools with a single queue.
-    U32 GetNumTasks() const;
+    U64 GetNumTasks() const;
 
     //! @brief Tries to fetch and execute a task from a specific queue
     //! @param queueNum: Array number of the queue

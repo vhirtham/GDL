@@ -43,6 +43,6 @@ public:
 
     //! @brief Gets the size of the queue
     //! @return Size
-    U32 GetSize() const;
+    U64 GetSize() const;
 };
 }

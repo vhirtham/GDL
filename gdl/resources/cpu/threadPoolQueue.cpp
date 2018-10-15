@@ -51,7 +51,7 @@ bool ThreadPoolQueue<_type>::IsEmpty() const
 }
 
 template <typename _type>
-U32 ThreadPoolQueue<_type>::GetSize() const
+U64 ThreadPoolQueue<_type>::GetSize() const
 {
     std::lock_guard<SpinLock> lockGuard(mSpinLock);
     return mQueue.size();

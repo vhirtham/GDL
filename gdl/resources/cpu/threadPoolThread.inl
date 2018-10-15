@@ -1,7 +1,6 @@
 #pragma once
 
 #include "gdl/resources/cpu/threadPoolThread.h"
-#include "gdl/base/string.h"
 #include <mutex>
 
 

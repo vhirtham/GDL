@@ -143,7 +143,7 @@ bool ThreadPool<_numQueues>::HasTasks(const I32 queueNum) const
 
 
 template <I32 _numQueues>
-U32 ThreadPool<_numQueues>::GetNumTasks() const
+U64 ThreadPool<_numQueues>::GetNumTasks() const
 {
     static_assert(_numQueues == 1, "This thread pool has multiple queues. Use the corresponding function overload to "
                                    "specify which one you want to use.");
