@@ -57,7 +57,7 @@ private:
     //! @tparam _function: Type of the passed function
     //! @param function: Function that needs exception handling
     template <typename _function>
-    void HandleExceptions(_function&& function);
+    inline void HandleExceptions(_function&& function);
 };
 } // namespace GDL
 
