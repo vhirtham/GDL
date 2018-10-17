@@ -1,6 +1,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include "gdl/base/timer.h"
+#include "gdl/base/container/map.h"
 #include "gdl/base/container/vector.h"
 #include "gdl/resources/cpu/threadPool.h"
 #include "gdl/resources/memory/memoryManager.h"
@@ -54,6 +55,10 @@ void WorkerThreadDeinitializeFunction()
 
 // Tasks and helper functions -----------------------------------------------------------------------------------------
 
+constexpr U32 CalculateExpectedResult(U32 value)
+{
+    return (value * value - value) / 2;
+}
 
 //! @brief Gets a reference to a static sum variable
 //! @return Reference to a static sum variable
@@ -90,10 +95,29 @@ void WorkerThreadSumWithVectorTPS(ThreadPool<2>& tp, U32 numValues)
 }
 
 
+//! @brief Fills a thread private vector with numbers from 0 until numIterations and calculates the sum. Enques a task
+//! to add the result to the global sum into the main thread exclusive queue.
+//! @param tp: Reference to thread pool
+//! @param numValues: Number of values that should be added to the vector
+void WorkerThreadSumWithMap(ThreadPool<2>& tp, U32 numValues)
+{
+    Map<U32, U32> map;
+    for (U32 i = 0; i < numValues; ++i)
+        map.emplace(i, i);
+
+    U32 sum = 0;
+    for (auto[key, value] : map)
+        sum += (key + value) / 2;
+
+    tp.Submit(0, &MainThreadAddToTotalSum, sum);
+}
+
+
 //! @brief The tests main loop. Have a lok at the test description above the BOOST_AUTO_TEST_CASE macro for more details
 void MainLoop()
 {
-    constexpr U32 numIterationsPerSubmit = 10000;
+    constexpr U32 numIterationsPerSubmitVector = 10000;
+    constexpr U32 numIterationsPerSubmitMap = 100;
     constexpr U32 numSubmits = 100;
     constexpr U32 numThreads = 3;
     constexpr Seconds testDuration{1};
@@ -106,16 +130,20 @@ void MainLoop()
 
 
     Timer timer;
+    U32 numMainLoopIterations = 0;
     while (timer.GetElapsedTime<Milliseconds>() < testDuration)
     {
-
+        ++numMainLoopIterations;
 
         for (U32 i = 0; i < numSubmits; ++i)
-            tp.Submit(1, &WorkerThreadSumWithVectorTPS, std::ref(tp), numIterationsPerSubmit);
+        {
+            tp.Submit(1, &WorkerThreadSumWithVectorTPS, std::ref(tp), numIterationsPerSubmitVector);
+            tp.Submit(1, &WorkerThreadSumWithMap, std::ref(tp), numIterationsPerSubmitMap);
+        }
 
         U32 numResults = 0;
         GetCurrentTotalSum() = 0;
-        while (numResults != numSubmits)
+        while (numResults != numSubmits * 2)
         {
             if (tp.TryExecuteTask(0))
             {
@@ -127,9 +155,9 @@ void MainLoop()
             tp.PropagateExceptions();
         }
 
-        constexpr U32 expectedSumSubmit =
-                (numIterationsPerSubmit * numIterationsPerSubmit - numIterationsPerSubmit) / 2;
-        constexpr U32 expectedTotalSum = expectedSumSubmit * numSubmits;
+        constexpr U32 expectedSumSubmitVector = CalculateExpectedResult(numIterationsPerSubmitVector);
+        constexpr U32 expectedSumSubmitMap = CalculateExpectedResult(numIterationsPerSubmitMap);
+        constexpr U32 expectedTotalSum = (expectedSumSubmitVector + expectedSumSubmitMap) * numSubmits;
         BOOST_CHECK(GetCurrentTotalSum() == expectedTotalSum);
     }
 
@@ -138,6 +166,8 @@ void MainLoop()
 
     // New calls per thread: 1 create thread - 1 create thread private memory - 1 add thread private memory into map
     constexpr U32 expectedAllocs = 3 * numThreads;
+
+    std::cout << "Test accomplished " << numMainLoopIterations << " main loop iterations." << std::endl;
     BOOST_CHECK(hac.CheckNumCallsExpectedCustomAllocation(expectedAllocs, expectedAllocs));
 }
 
