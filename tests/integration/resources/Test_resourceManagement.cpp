@@ -1,8 +1,9 @@
 #include <boost/test/unit_test.hpp>
 
 #include "gdl/base/timer.h"
-#include "gdl/base/container/queue.h"
 #include "gdl/base/container/map.h"
+#include "gdl/base/container/queue.h"
+#include "gdl/base/container/set.h"
 #include "gdl/base/container/vector.h"
 #include "gdl/resources/cpu/threadPool.h"
 #include "gdl/resources/memory/memoryManager.h"
@@ -85,8 +86,8 @@ void MainThreadAddToTotalSum(U32 val)
 
 
 
-//! @brief Fills a thread private vector with numbers from 0 until numIterations and calculates the sum. Enques a task
-//! to add the result to the global sum into the main thread exclusive queue.
+//! @brief Fills a vector (thread private stack) with numbers from 0 until numIterations and calculates the sum. Enques
+//! a task to add the result to the global sum into the main thread exclusive queue.
 //! @param tp: Reference to thread pool
 //! @param numValues: Number of values that should be added to the vector
 void WorkerThreadSumWithVectorTPS(ThreadPool<2>& tp, U32 numValues)
@@ -146,13 +147,34 @@ void WorkerThreadSumWithMap(ThreadPool<2>& tp, U32 numValues)
 
 
 
+//! @brief Fills a set (memory pool) with numbers from 0 until numIterations and calculates the sum. Enques a task to
+//! add the result to the global sum into the main thread exclusive queue.
+//! @param tp: Reference to thread pool
+//! @param numValues: Number of values that should be added to the set
+void WorkerThreadSumWithSet(ThreadPool<2>& tp, U32 numValues)
+{
+    Set<U32> set;
+    for (U32 i = 0; i < numValues; ++i)
+        set.emplace(i);
+
+    U32 sum = 0;
+    for (auto value : set)
+        sum += value;
+
+    tp.Submit(0, &MainThreadAddToTotalSum, sum);
+}
+
+
+
 //! @brief The tests main loop. Have a lok at the test description above the BOOST_AUTO_TEST_CASE macro for more details
 void MainLoop()
 {
+    constexpr U32 numIterationsPerSubmitMap = 50;
+    constexpr U32 numIterationsPerSubmitQueue = 50;
+    constexpr U32 numIterationsPerSubmitSet = 50;
     constexpr U32 numIterationsPerSubmitVector = 10000;
-    constexpr U32 numIterationsPerSubmitMap = 100;
-    constexpr U32 numIterationsPerSubmitQueue = 100;
     constexpr U32 numSubmits = 100;
+    constexpr U32 totalNumSubmits = numSubmits * 4;
     constexpr U32 numThreads = 3;
     constexpr Seconds testDuration{1};
 
@@ -171,14 +193,15 @@ void MainLoop()
 
         for (U32 i = 0; i < numSubmits; ++i)
         {
-            tp.Submit(1, &WorkerThreadSumWithVectorTPS, std::ref(tp), numIterationsPerSubmitVector);
             tp.Submit(1, &WorkerThreadSumWithMap, std::ref(tp), numIterationsPerSubmitMap);
             tp.Submit(1, &WorkerThreadSumWithQueue, std::ref(tp), numIterationsPerSubmitQueue);
+            tp.Submit(1, &WorkerThreadSumWithSet, std::ref(tp), numIterationsPerSubmitSet);
+            tp.Submit(1, &WorkerThreadSumWithVectorTPS, std::ref(tp), numIterationsPerSubmitVector);
         }
 
         U32 numResults = 0;
         GetCurrentTotalSum() = 0;
-        while (numResults != numSubmits * 3)
+        while (numResults != totalNumSubmits)
         {
             if (tp.TryExecuteTask(0))
             {
@@ -190,11 +213,13 @@ void MainLoop()
             tp.PropagateExceptions();
         }
 
-        constexpr U32 expectedSumSubmitVector = CalculateExpectedResult(numIterationsPerSubmitVector);
         constexpr U32 expectedSumSubmitMap = CalculateExpectedResult(numIterationsPerSubmitMap);
         constexpr U32 expectedSumSubmitQueue = CalculateExpectedResult(numIterationsPerSubmitQueue);
+        constexpr U32 expectedSumSubmitSet = CalculateExpectedResult(numIterationsPerSubmitSet);
+        constexpr U32 expectedSumSubmitVector = CalculateExpectedResult(numIterationsPerSubmitVector);
         constexpr U32 expectedTotalSum =
-                (expectedSumSubmitVector + expectedSumSubmitMap + expectedSumSubmitQueue) * numSubmits;
+                (expectedSumSubmitMap + expectedSumSubmitQueue + expectedSumSubmitSet + expectedSumSubmitVector) *
+                numSubmits;
         BOOST_CHECK(GetCurrentTotalSum() == expectedTotalSum);
     }
 
