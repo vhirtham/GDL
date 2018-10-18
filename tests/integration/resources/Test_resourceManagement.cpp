@@ -1,6 +1,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include "gdl/base/timer.h"
+#include "gdl/base/container/queue.h"
 #include "gdl/base/container/map.h"
 #include "gdl/base/container/vector.h"
 #include "gdl/resources/cpu/threadPool.h"
@@ -55,10 +56,15 @@ void WorkerThreadDeinitializeFunction()
 
 // Tasks and helper functions -----------------------------------------------------------------------------------------
 
-constexpr U32 CalculateExpectedResult(U32 value)
+//! @brief Calculates the expected result. This is basically the gaussian formula, but since 0 is part of the
+//! summation, we had to substract numValues from the original formula.
+//! @param numValues: Number of Values that are summed up
+constexpr U32 CalculateExpectedResult(U32 numValues)
 {
-    return (value * value - value) / 2;
+    return (numValues * numValues - numValues) / 2;
 }
+
+
 
 //! @brief Gets a reference to a static sum variable
 //! @return Reference to a static sum variable
@@ -69,12 +75,14 @@ U32& GetCurrentTotalSum()
 }
 
 
+
 //! @brief Adds a value to the total sum;
 //! @param val: Value that is added
 void MainThreadAddToTotalSum(U32 val)
 {
     GetCurrentTotalSum() += val;
 }
+
 
 
 //! @brief Fills a thread private vector with numbers from 0 until numIterations and calculates the sum. Enques a task
@@ -95,10 +103,34 @@ void WorkerThreadSumWithVectorTPS(ThreadPool<2>& tp, U32 numValues)
 }
 
 
-//! @brief Fills a thread private vector with numbers from 0 until numIterations and calculates the sum. Enques a task
-//! to add the result to the global sum into the main thread exclusive queue.
+
+//! @brief Fills a queue ( general purpose memory) with numbers from 0 until numIterations and calculates the sum.
+//! Enques a task to
+//! add the result to the global sum into the main thread exclusive queue.
 //! @param tp: Reference to thread pool
-//! @param numValues: Number of values that should be added to the vector
+//! @param numValues: Number of values that should be added to the queue
+void WorkerThreadSumWithQueue(ThreadPool<2>& tp, U32 numValues)
+{
+    Queue<U32> queue;
+    for (U32 i = 0; i < numValues; ++i)
+        queue.emplace(i);
+
+    U32 sum = 0;
+    for (U32 i = 0; i < numValues; ++i)
+    {
+        sum += queue.front();
+        queue.pop();
+    }
+
+    tp.Submit(0, &MainThreadAddToTotalSum, sum);
+}
+
+
+
+//! @brief Fills a map (memory pool) with numbers from 0 until numIterations and calculates the sum. Enques a task to
+//! add the result to the global sum into the main thread exclusive queue.
+//! @param tp: Reference to thread pool
+//! @param numValues: Number of values that should be added to the map
 void WorkerThreadSumWithMap(ThreadPool<2>& tp, U32 numValues)
 {
     Map<U32, U32> map;
@@ -113,11 +145,13 @@ void WorkerThreadSumWithMap(ThreadPool<2>& tp, U32 numValues)
 }
 
 
+
 //! @brief The tests main loop. Have a lok at the test description above the BOOST_AUTO_TEST_CASE macro for more details
 void MainLoop()
 {
     constexpr U32 numIterationsPerSubmitVector = 10000;
     constexpr U32 numIterationsPerSubmitMap = 100;
+    constexpr U32 numIterationsPerSubmitQueue = 100;
     constexpr U32 numSubmits = 100;
     constexpr U32 numThreads = 3;
     constexpr Seconds testDuration{1};
@@ -139,11 +173,12 @@ void MainLoop()
         {
             tp.Submit(1, &WorkerThreadSumWithVectorTPS, std::ref(tp), numIterationsPerSubmitVector);
             tp.Submit(1, &WorkerThreadSumWithMap, std::ref(tp), numIterationsPerSubmitMap);
+            tp.Submit(1, &WorkerThreadSumWithQueue, std::ref(tp), numIterationsPerSubmitQueue);
         }
 
         U32 numResults = 0;
         GetCurrentTotalSum() = 0;
-        while (numResults != numSubmits * 2)
+        while (numResults != numSubmits * 3)
         {
             if (tp.TryExecuteTask(0))
             {
@@ -157,7 +192,9 @@ void MainLoop()
 
         constexpr U32 expectedSumSubmitVector = CalculateExpectedResult(numIterationsPerSubmitVector);
         constexpr U32 expectedSumSubmitMap = CalculateExpectedResult(numIterationsPerSubmitMap);
-        constexpr U32 expectedTotalSum = (expectedSumSubmitVector + expectedSumSubmitMap) * numSubmits;
+        constexpr U32 expectedSumSubmitQueue = CalculateExpectedResult(numIterationsPerSubmitQueue);
+        constexpr U32 expectedTotalSum =
+                (expectedSumSubmitVector + expectedSumSubmitMap + expectedSumSubmitQueue) * numSubmits;
         BOOST_CHECK(GetCurrentTotalSum() == expectedTotalSum);
     }
 
