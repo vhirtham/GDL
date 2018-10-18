@@ -3,6 +3,8 @@
 #include "gdl/base/uniquePtr.h"
 #include "gdl/resources/cpu/taskBase.h"
 
+#include <mutex>
+
 
 namespace GDL
 {

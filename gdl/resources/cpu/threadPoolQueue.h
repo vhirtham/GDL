@@ -4,8 +4,6 @@
 #include "gdl/base/container/queue.h"
 #include "gdl/resources/cpu/spinlock.h"
 
-#include <mutex>
-
 
 namespace GDL
 {
