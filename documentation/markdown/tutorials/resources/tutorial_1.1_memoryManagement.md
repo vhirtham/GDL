@@ -57,7 +57,7 @@ This will allocate the necessary memory for all memory systems and prohibit any 
 memoryManager.Deinitialize();
 ~~~
 
-This function checks if any memory system is still in use or if the internal memory is corrupted. If this is the case it will throw an exception. Otherwise it releases the occupied heap memory. Using this function will help you to find bugs related to dynamic memory usage early.
+This function checks if any memory system is still in use or if the internal memory is corrupted. If this is the case it will throw an exception. Otherwise it releases the occupied heap memory. Using this function will help you to find bugs related to dynamic memory usage.
 
 While it is possible to initialize and deinitialize the memory manager multiple times, you can only modify the memory manager before the first initialization. Before we continue, here is the complete program we have created so far:
 
@@ -86,7 +86,71 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
 
 ## Memory allocation
 
-### STL
+### Container and smart pointers
+
+If you are already using STL containers, there is not much you need to learn. You will find a GDL version of most of the STL containers in the directory
+
+~~~
+gdl/base/container
+~~~
+
+The headers of smart pointers and the string class are located at
+
+~~~
+gdl/base
+~~~
+
+To use a vector, we have to include its header:
+
+~~~ cpp
+#include "gdl/base/container/vector.h"
+~~~
+
+Then we add:
+
+~~~ cpp
+Vector<U32> myVec;
+~~~
+
+Now you can use it excactly the same as a `std::vector`. 
+
+~~~ cpp
+myVec.push_back(1);
+myVec.clear();
+myVec.shrink_to_fit();
+~~~
+
+
+This is because all those classes are typedefs of the STL version with the `std::allocator` exchanged by a GDL allocator. Depending on the container type, the employed default allocator gets its memory from the memory pool or the general purpose memory. If you want to use a specific memory system, that is not the default one, just add a corresponding suffix to the containers name. There are the suffixes P for the memory Pool, S for the memory stack and TPS for the thread private memory stack. You can create a vector that uses the memory stack as follows:
+
+~~~ cpp
+VectorS<U32> myVecS;
+~~~
+
+Since using the the memory pool with contigous memory containers does not make much sense (the block size is usually to small), you won't find a `VectorP`.
+
+It is important to know, that all the allocators are implemented in a way, that they will also work if the corresponding memory system was not added to the memory manager. If you don't have a memory stack, a stack allocator will try to get its memory from the general purpose memory instead. If there is no general purpose memory either, it will get its memory from the heap. This fallback mechanism does not come with a performance penalty, since a reference to the used memory system is stored in a static variable during the first allocation.
+
+Please keep in mind that all the GDL containers will free their memory during destruction, if you did not do it manually before. If you wan't to deinitialize the memory manager, all memory has to be freed, otherwise you will get an exception. So make sure that all containers have been destroyed or freed their memory, before you call the deinitialize function. As we said before, there is no need to call deinitialize, but it is strongly recommanded.
+
+All the things we discussed for containers also apply to smart pointers. However, there is one little difference here. During construction of a `UniquePtr` you provide a pointer that should be freed during the destruction of the smart pointer. The type of the smart pointer specifies where the memory should be freed. A `UniquePtrP` will free the memory from the memory pool or its fallback memory systems. This does not prevent you from passing a pointer that was allocated on the memory stack. To avoid problems concerning this issue, we recommand to always use the corresponding `MakeUnique` function. Here is an example for memory allocated on the memory pool:
+
+~~~ cpp
+UniquePtrP<U32> myPtr = MakeUniqueP<U32>(5);
+myPtr.reset(MakeUniqueP<U32>(77).release());
+myPtr.reset(nullptr);
+~~~
+
+The `MakeUnique` functions allocate the memory from the corresponding memory system and construct the managed object. You can not construct a `UniquePtrP` with  any other `MakeUnique` function than `MakeUniqueP`. However, if you reset the pointer like in the second line above, you can still mess things up. Something like this will compile:
+
+~~~ cpp
+UniquePtrP<U32> myPtr = MakeUniqueP<U32>(5);
+myPtr.reset(MakeUniqueS<U32>(2).release());
+myPtr.reset(nullptr);
+~~~
+
+An exception for releasing a pointer from the wrong memory system is only thrown in debug mode. If you used the `Deinitialize` function of the memory manager, you will at least get an exception from the memory stack because there is some memory left that was not freed. So be careful when resetting smart pointers.
+
 
 ### Manual allocation
 
@@ -95,7 +159,8 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
 - thread private memory stack
 - thread safety
 - memory usage due to alignment and internal information that needs to be stored
-
+- typedef to use std::allocator
+- heap allocation counter
 
 
 
