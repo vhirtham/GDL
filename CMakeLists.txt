@@ -10,7 +10,6 @@ set(GDL_COMPILE_DEFINITIONS )
 # COMPILER SETUP
 # --------------
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-long-long -pedantic -pthread -D_REENTRANT")
-#set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS} -O3")
 
 # Options
 # -------

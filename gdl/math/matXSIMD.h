@@ -13,21 +13,21 @@ namespace GDL
 
 
 //! @brief Matrix of arbitrary size with SIMD support
-//! @tparam tRows: Number of rows
-//! @tparam tCols: Number of columns
-template <typename T, I32 tRows, I32 tCols>
+//! @tparam _rows: Number of rows
+//! @tparam _cols: Number of columns
+template <typename _type, I32 _rows, I32 _cols>
 class alignas(AlignmentBytes<__m128>) matXSIMD
 // TODO: if register is a template parameter set corresponding alignment in the row above!
 {
-    typedef typename std::conditional<std::is_same<T, F32>::value, __m128, __m128d>::type __mx;
-    constexpr static U32 mNumRegisterEntries = GetNumRegisterEntries<__mx, T>();
-    constexpr static U32 mNumRegistersPerCol = CalcMinNumArrayRegisters(tRows, mNumRegisterEntries);
-    constexpr static U32 mNumRegisters = tCols * mNumRegistersPerCol;
+    typedef typename std::conditional<std::is_same<_type, F32>::value, __m128, __m128d>::type __mx;
+    constexpr static U32 mNumRegisterEntries = GetNumRegisterEntries<__mx, _type>();
+    constexpr static U32 mNumRegistersPerCol = CalcMinNumArrayRegisters(_rows, mNumRegisterEntries);
+    constexpr static U32 mNumRegisters = _cols * mNumRegistersPerCol;
 
 
     alignas(AlignmentBytes<__mx>) std::array<__mx, mNumRegisters> mData;
 
-    template <typename T2, I32 tRows2, I32 tCols2>
+    template <typename _typeOther, I32 _rowsOther, I32 _colsOther>
     friend class matXSIMD;
 
 public:
@@ -36,22 +36,22 @@ public:
 
     //! @brief Constructor to set the whole matrix
     //! @param args: Values (column major)
-    //! @tparam Args: Variadic data type
-    template <typename... Args>
-    explicit matXSIMD(Args... args);
+    //! @tparam _args: Variadic data type
+    template <typename... _args>
+    explicit matXSIMD(_args... args);
 
 
     //! @brief Constructor to set the whole matrix
     //! @brief Array with values (column major)
-    explicit matXSIMD(const std::array<T, tRows * tCols>& data);
+    explicit matXSIMD(const std::array<_type, _rows * _cols>& data);
 
     //! @brief Matrix - matrix multiplication
-    //! @tparam tRowsRhs: Rhs matrix number of rows
-    //! @tparam tColsRhs: Rhs matrix number of columns
+    //! @tparam _rowsRhs: Rhs matrix number of rows
+    //! @tparam _colsRhs: Rhs matrix number of columns
     //! @param rhs: Rhs matrix
     //! @return Result of the multiplication
-    template <I32 tRowsRhs, I32 tColsRhs>
-    inline matXSIMD<T, tRows, tColsRhs> operator*(const matXSIMD<T, tRowsRhs, tColsRhs>& rhs) const;
+    template <I32 _rowsRhs, I32 _colsRhs>
+    inline matXSIMD<_type, _rows, _colsRhs> operator*(const matXSIMD<_type, _rowsRhs, _colsRhs>& rhs) const;
 
     //! @brief Matrix - matrix addition
     //! @param rhs: Rhs matrix
@@ -62,7 +62,7 @@ public:
     //! @param row: Row of the accessed value
     //! @param col: Column of the accessed value
     //! @return Accessed value
-    inline T operator()(const U32 row, const U32 col) const;
+    inline _type operator()(const U32 row, const U32 col) const;
 
     //! @brief Gets the number of rows
     //! @return Number of rows
@@ -77,7 +77,7 @@ public:
 
     //! @brief Gets the data array in column major ordering
     //! @return Data
-    inline const std::array<T, tRows * tCols> Data() const;
+    inline const std::array<_type, _rows * _cols> Data() const;
 
 private:
     void ConstructionChecks() const;

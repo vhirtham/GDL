@@ -7,104 +7,119 @@
 #include <algorithm>
 #include <cassert>
 #include <cstring>
-#ifndef NDEBUG
 #include <iostream>
-#endif
 
-template <typename T, GDL::I32 tRows, GDL::I32 tCols>
-GDL::matXSIMD<T, tRows, tCols>::matXSIMD()
+namespace GDL
+{
+
+
+
+template <typename _type, I32 _rows, I32 _cols>
+matXSIMD<_type, _rows, _cols>::matXSIMD()
 {
     ConstructionChecks();
 }
 
 
-template <typename T, GDL::I32 tRows, GDL::I32 tCols>
-template <typename... Args>
-GDL::matXSIMD<T, tRows, tCols>::matXSIMD(Args... args)
+
+template <typename _type, I32 _rows, I32 _cols>
+template <typename... _args>
+matXSIMD<_type, _rows, _cols>::matXSIMD(_args... args)
 {
-    assert(sizeof...(args) == tRows * tCols);
-    *this = matXSIMD(std::array<T, tRows * tCols>{{static_cast<T>(args)...}});
+    assert(sizeof...(args) == _rows * _cols);
+    *this = matXSIMD(std::array<_type, _rows * _cols>{{static_cast<_type>(args)...}});
 }
 
-template <typename T, GDL::I32 tRows, GDL::I32 tCols>
-GDL::matXSIMD<T, tRows, tCols>::matXSIMD(const std::array<T, tRows * tCols>& data)
+
+
+template <typename _type, I32 _rows, I32 _cols>
+matXSIMD<_type, _rows, _cols>::matXSIMD(const std::array<_type, _rows * _cols>& data)
 {
-    if (tRows % mNumRegisterEntries == 0)
+    if (_rows % mNumRegisterEntries == 0)
     {
         assert(sizeof(mData) == sizeof(data));
         std::memcpy(&mData, &data, sizeof(data));
     }
     else
     {
-        for (U32 i = 0; i < tCols; ++i)
+        for (U32 i = 0; i < _cols; ++i)
         {
             // Set last column register to zero
             std::memset((&mData[(i + 1) * mNumRegistersPerCol - 1]), 0, sizeof(__mx));
             // Copy data into column
-            std::memcpy(&mData[i * mNumRegistersPerCol], &data[i * tRows], sizeof(T) * tRows);
+            std::memcpy(&mData[i * mNumRegistersPerCol], &data[i * _rows], sizeof(_type) * _rows);
         }
     }
 
     ConstructionChecks();
 }
 
-template <typename T, GDL::I32 tRows, GDL::I32 tCols>
-GDL::matXSIMD<T, tRows, tCols>& GDL::matXSIMD<T, tRows, tCols>::operator+=(const GDL::matXSIMD<T, tRows, tCols>& rhs)
+
+
+template <typename _type, I32 _rows, I32 _cols>
+matXSIMD<_type, _rows, _cols>& matXSIMD<_type, _rows, _cols>::operator+=(const matXSIMD<_type, _rows, _cols>& rhs)
 {
     for (U32 i = 0; i < mData.size(); ++i)
-        mData[i] = _mmx_add_p<T>(rhs.mData[i], mData[i]);
+        mData[i] = _mmx_add_p<_type>(rhs.mData[i], mData[i]);
     return *this;
 }
 
-template <typename T, GDL::I32 tRows, GDL::I32 tCols>
-T GDL::matXSIMD<T, tRows, tCols>::operator()(const GDL::U32 row, const GDL::U32 col) const
+
+
+template <typename _type, I32 _rows, I32 _cols>
+_type matXSIMD<_type, _rows, _cols>::operator()(const U32 row, const U32 col) const
 {
-    assert(row < tRows && col < tCols);
+    assert(row < _rows && col < _cols);
     return mData[row / mNumRegisterEntries + col * mNumRegistersPerCol][row % mNumRegisterEntries];
 }
 
-template <typename T, GDL::I32 tRows, GDL::I32 tCols>
-GDL::U32 GDL::matXSIMD<T, tRows, tCols>::Rows() const
-{
-    return tRows;
-}
 
 
-template <typename T, GDL::I32 tRows, GDL::I32 tCols>
-GDL::U32 GDL::matXSIMD<T, tRows, tCols>::Cols() const
+template <typename _type, I32 _rows, I32 _cols>
+U32 matXSIMD<_type, _rows, _cols>::Rows() const
 {
-    return tCols;
-}
-
-template <typename T, GDL::I32 tRows, GDL::I32 tCols>
-void GDL::matXSIMD<T, tRows, tCols>::SetZero()
-{
-    mData.fill(_mmx_set1_p<T, __mx>(0.));
+    return _rows;
 }
 
 
 
-template <typename T, GDL::I32 tRows, GDL::I32 tCols>
-const std::array<T, tRows * tCols> GDL::matXSIMD<T, tRows, tCols>::Data() const
+template <typename _type, I32 _rows, I32 _cols>
+U32 matXSIMD<_type, _rows, _cols>::Cols() const
 {
-    std::array<T, tRows * tCols> data;
-    if (tRows % mNumRegisterEntries == 0)
+    return _cols;
+}
+
+
+
+template <typename _type, I32 _rows, I32 _cols>
+void matXSIMD<_type, _rows, _cols>::SetZero()
+{
+    mData.fill(_mmx_set1_p<_type, __mx>(0.));
+}
+
+
+
+template <typename _type, I32 _rows, I32 _cols>
+const std::array<_type, _rows * _cols> matXSIMD<_type, _rows, _cols>::Data() const
+{
+    std::array<_type, _rows * _cols> data;
+    if (_rows % mNumRegisterEntries == 0)
     {
         assert(sizeof(mData) == sizeof(data));
         std::memcpy(&data, &mData, sizeof(data));
     }
     else
     {
-        for (U32 i = 0; i < tCols; ++i)
+        for (U32 i = 0; i < _cols; ++i)
         {
-            std::memcpy(&data[i * tRows], &mData[i * mNumRegistersPerCol], sizeof(T) * tRows);
+            std::memcpy(&data[i * _rows], &mData[i * mNumRegistersPerCol], sizeof(_type) * _rows);
         }
     }
     return data;
 }
 
-template <typename T, GDL::I32 tRows, GDL::I32 tCols>
-void GDL::matXSIMD<T, tRows, tCols>::ConstructionChecks() const
+template <typename _type, I32 _rows, I32 _cols>
+void matXSIMD<_type, _rows, _cols>::ConstructionChecks() const
 {
     assert(sizeof(mData) == sizeof(__mx) * mData.size()); // Array needs to be compact
 #ifndef NDEBUG
@@ -115,16 +130,17 @@ void GDL::matXSIMD<T, tRows, tCols>::ConstructionChecks() const
 }
 
 
-template <typename T, GDL::I32 tRows, GDL::I32 tCols>
-template <GDL::I32 tRowsRhs, GDL::I32 tColsRhs>
-GDL::matXSIMD<T, tRows, tColsRhs> GDL::matXSIMD<T, tRows, tCols>::
-operator*(const matXSIMD<T, tRowsRhs, tColsRhs>& rhs) const
+
+template <typename _type, I32 _rows, I32 _cols>
+template <I32 _rowsRhs, I32 _colsRhs>
+matXSIMD<_type, _rows, _colsRhs> matXSIMD<_type, _rows, _cols>::
+operator*(const matXSIMD<_type, _rowsRhs, _colsRhs>& rhs) const
 {
-    static_assert(tCols == tRowsRhs, "Lhs cols != Rhs rows - Matrix multiplication not possible!");
+    static_assert(_cols == _rowsRhs, "Lhs cols != Rhs rows - Matrix multiplication not possible!");
 
-    constexpr U32 registersPerColRhs = CalcMinNumArrayRegisters(tRowsRhs, mNumRegisterEntries);
+    constexpr U32 registersPerColRhs = CalcMinNumArrayRegisters(_rowsRhs, mNumRegisterEntries);
 
-    matXSIMD<T, tRows, tColsRhs> result;
+    matXSIMD<_type, _rows, _colsRhs> result;
     result.SetZero();
 
 
@@ -133,15 +149,15 @@ operator*(const matXSIMD<T, tRowsRhs, tColsRhs>& rhs) const
         constexpr(mNumRegisterEntries == 4)
         {
             // loop over RHS rows (column registers)
-            for (U32 j = 0; j < tRowsRhs / mNumRegisterEntries; ++j)
+            for (U32 j = 0; j < _rowsRhs / mNumRegisterEntries; ++j)
                 // loop over every RHS Col
-                for (U32 i = 0; i < tColsRhs; ++i)
+                for (U32 i = 0; i < _colsRhs; ++i)
                 {
                     const U32 registerNumRhs = i * registersPerColRhs + j;
-                    __mx tmp0 = _mmx_set1_p<T, __mx>(rhs.mData[registerNumRhs][0]);
-                    __mx tmp1 = _mmx_set1_p<T, __mx>(rhs.mData[registerNumRhs][1]);
-                    __mx tmp2 = _mmx_set1_p<T, __mx>(rhs.mData[registerNumRhs][2]);
-                    __mx tmp3 = _mmx_set1_p<T, __mx>(rhs.mData[registerNumRhs][3]);
+                    __mx tmp0 = _mmx_set1_p<_type, __mx>(rhs.mData[registerNumRhs][0]);
+                    __mx tmp1 = _mmx_set1_p<_type, __mx>(rhs.mData[registerNumRhs][1]);
+                    __mx tmp2 = _mmx_set1_p<_type, __mx>(rhs.mData[registerNumRhs][2]);
+                    __mx tmp3 = _mmx_set1_p<_type, __mx>(rhs.mData[registerNumRhs][3]);
                     // loop over LHS rows (column registers)
                     for (U32 k = 0; k < mNumRegistersPerCol; ++k)
                     {
@@ -155,12 +171,12 @@ operator*(const matXSIMD<T, tRowsRhs, tColsRhs>& rhs) const
                                                           _mmx_fmadd_p(mData[currentBlockLhs + 3 * mNumRegistersPerCol],
                                                                        tmp3, result.mData[registerNumResult]))));
 #else
-                        result.mData[registerNumResult] = _mmx_add_p<T>(
-                                _mmx_add_p<T>(
-                                        _mmx_add_p<T>(
+                        result.mData[registerNumResult] = _mmx_add_p<_type>(
+                                _mmx_add_p<_type>(
+                                        _mmx_add_p<_type>(
                                                 _mmx_mul_p(mData[currentBlockLhs + 0 * mNumRegistersPerCol], tmp0),
                                                 _mmx_mul_p(mData[currentBlockLhs + 1 * mNumRegistersPerCol], tmp1)),
-                                        _mmx_add_p<T>(
+                                        _mmx_add_p<_type>(
                                                 _mmx_mul_p(mData[currentBlockLhs + 2 * mNumRegistersPerCol], tmp2),
                                                 _mmx_mul_p(mData[currentBlockLhs + 3 * mNumRegistersPerCol], tmp3))),
                                 result.mData[registerNumResult]);
@@ -168,16 +184,16 @@ operator*(const matXSIMD<T, tRowsRhs, tColsRhs>& rhs) const
 #endif
                     }
                 }
-            if (tRowsRhs % mNumRegisterEntries == 3)
+            if (_rowsRhs % mNumRegisterEntries == 3)
             {
-                U32 j = tRowsRhs / mNumRegisterEntries;
+                U32 j = _rowsRhs / mNumRegisterEntries;
                 // loop over every RHS Col
-                for (U32 i = 0; i < tColsRhs; ++i)
+                for (U32 i = 0; i < _colsRhs; ++i)
                 {
                     const U32 registerNumRhs = i * registersPerColRhs + j;
-                    __mx tmp0 = _mmx_set1_p<T, __mx>(rhs.mData[registerNumRhs][0]);
-                    __mx tmp1 = _mmx_set1_p<T, __mx>(rhs.mData[registerNumRhs][1]);
-                    __mx tmp2 = _mmx_set1_p<T, __mx>(rhs.mData[registerNumRhs][2]);
+                    __mx tmp0 = _mmx_set1_p<_type, __mx>(rhs.mData[registerNumRhs][0]);
+                    __mx tmp1 = _mmx_set1_p<_type, __mx>(rhs.mData[registerNumRhs][1]);
+                    __mx tmp2 = _mmx_set1_p<_type, __mx>(rhs.mData[registerNumRhs][2]);
                     // loop over LHS rows (column registers)
                     for (U32 k = 0; k < mNumRegistersPerCol; ++k)
                     {
@@ -190,25 +206,25 @@ operator*(const matXSIMD<T, tRowsRhs, tColsRhs>& rhs) const
                                                           _mmx_fmadd_p(mData[currentBlockLhs + 2 * mNumRegistersPerCol],
                                                                        tmp2, result.mData[registerNumResult])));
 #else
-                        result.mData[registerNumResult] = _mmx_add_p<T>(
-                                _mmx_add_p<T>(_mmx_mul_p(mData[currentBlockLhs + 0 * mNumRegistersPerCol], tmp0),
-                                              _mmx_mul_p(mData[currentBlockLhs + 1 * mNumRegistersPerCol], tmp1)),
-                                _mmx_add_p<T>(_mmx_mul_p(mData[currentBlockLhs + 2 * mNumRegistersPerCol], tmp2),
-                                              result.mData[registerNumResult]));
+                        result.mData[registerNumResult] = _mmx_add_p<_type>(
+                                _mmx_add_p<_type>(_mmx_mul_p(mData[currentBlockLhs + 0 * mNumRegistersPerCol], tmp0),
+                                                  _mmx_mul_p(mData[currentBlockLhs + 1 * mNumRegistersPerCol], tmp1)),
+                                _mmx_add_p<_type>(_mmx_mul_p(mData[currentBlockLhs + 2 * mNumRegistersPerCol], tmp2),
+                                                  result.mData[registerNumResult]));
 
 #endif
                     }
                 }
             }
-            if (tRowsRhs % mNumRegisterEntries == 2)
+            if (_rowsRhs % mNumRegisterEntries == 2)
             {
-                U32 j = tRowsRhs / mNumRegisterEntries;
+                U32 j = _rowsRhs / mNumRegisterEntries;
                 // loop over every RHS Col
-                for (U32 i = 0; i < tColsRhs; ++i)
+                for (U32 i = 0; i < _colsRhs; ++i)
                 {
                     const U32 registerNumRhs = i * registersPerColRhs + j;
-                    __mx tmp0 = _mmx_set1_p<T, __mx>(rhs.mData[registerNumRhs][0]);
-                    __mx tmp1 = _mmx_set1_p<T, __mx>(rhs.mData[registerNumRhs][1]);
+                    __mx tmp0 = _mmx_set1_p<_type, __mx>(rhs.mData[registerNumRhs][0]);
+                    __mx tmp1 = _mmx_set1_p<_type, __mx>(rhs.mData[registerNumRhs][1]);
                     // loop over LHS rows (column registers)
                     for (U32 k = 0; k < mNumRegistersPerCol; ++k)
                     {
@@ -220,23 +236,23 @@ operator*(const matXSIMD<T, tRowsRhs, tColsRhs>& rhs) const
                                              _mmx_fmadd_p(mData[currentBlockLhs + 1 * mNumRegistersPerCol], tmp1,
                                                           result.mData[registerNumResult]));
 #else
-                        result.mData[registerNumResult] = _mmx_add_p<T>(
-                                _mmx_add_p<T>(_mmx_mul_p(mData[currentBlockLhs + 0 * mNumRegistersPerCol], tmp0),
-                                              _mmx_mul_p(mData[currentBlockLhs + 1 * mNumRegistersPerCol], tmp1)),
+                        result.mData[registerNumResult] = _mmx_add_p<_type>(
+                                _mmx_add_p<_type>(_mmx_mul_p(mData[currentBlockLhs + 0 * mNumRegistersPerCol], tmp0),
+                                                  _mmx_mul_p(mData[currentBlockLhs + 1 * mNumRegistersPerCol], tmp1)),
                                 result.mData[registerNumResult]);
 
 #endif
                     }
                 }
             }
-            if (tRowsRhs % mNumRegisterEntries == 1)
+            if (_rowsRhs % mNumRegisterEntries == 1)
             {
-                U32 j = tRowsRhs / mNumRegisterEntries;
+                U32 j = _rowsRhs / mNumRegisterEntries;
                 // loop over every RHS Col
-                for (U32 i = 0; i < tColsRhs; ++i)
+                for (U32 i = 0; i < _colsRhs; ++i)
                 {
                     const U32 registerNumRhs = i * registersPerColRhs + j;
-                    __mx tmp0 = _mmx_set1_p<T, __mx>(rhs.mData[registerNumRhs][0]);
+                    __mx tmp0 = _mmx_set1_p<_type, __mx>(rhs.mData[registerNumRhs][0]);
                     // loop over LHS rows (column registers)
                     for (U32 k = 0; k < mNumRegistersPerCol; ++k)
                     {
@@ -247,8 +263,8 @@ operator*(const matXSIMD<T, tRowsRhs, tColsRhs>& rhs) const
                                 _mmx_fmadd_p(mData[currentBlockLhs], tmp0, result.mData[registerNumResult]);
 #else
                         result.mData[registerNumResult] =
-                                _mmx_add_p<T>(_mmx_mul_p(mData[currentBlockLhs + 0 * mNumRegistersPerCol], tmp0),
-                                              result.mData[registerNumResult]);
+                                _mmx_add_p<_type>(_mmx_mul_p(mData[currentBlockLhs + 0 * mNumRegistersPerCol], tmp0),
+                                                  result.mData[registerNumResult]);
 
 #endif
                     }
@@ -262,13 +278,13 @@ operator*(const matXSIMD<T, tRowsRhs, tColsRhs>& rhs) const
         constexpr(mNumRegisterEntries == 2)
         {
             // loop over RHS rows (column registers)
-            for (U32 j = 0; j < tRowsRhs / mNumRegisterEntries; ++j)
+            for (U32 j = 0; j < _rowsRhs / mNumRegisterEntries; ++j)
                 // loop over every RHS Col
-                for (U32 i = 0; i < tColsRhs; ++i)
+                for (U32 i = 0; i < _colsRhs; ++i)
                 {
                     const U32 registerNumRhs = i * registersPerColRhs + j;
-                    __mx tmp0 = _mmx_set1_p<T, __mx>(rhs.mData[registerNumRhs][0]);
-                    __mx tmp1 = _mmx_set1_p<T, __mx>(rhs.mData[registerNumRhs][1]);
+                    __mx tmp0 = _mmx_set1_p<_type, __mx>(rhs.mData[registerNumRhs][0]);
+                    __mx tmp1 = _mmx_set1_p<_type, __mx>(rhs.mData[registerNumRhs][1]);
                     // loop over LHS rows (column registers)
                     for (U32 k = 0; k < mNumRegistersPerCol; ++k)
                     {
@@ -280,23 +296,23 @@ operator*(const matXSIMD<T, tRowsRhs, tColsRhs>& rhs) const
                                              _mmx_fmadd_p(mData[currentBlockLhs + 1 * mNumRegistersPerCol], tmp1,
                                                           result.mData[registerNumResult]));
 #else
-                        result.mData[registerNumResult] = _mmx_add_p<T>(
+                        result.mData[registerNumResult] = _mmx_add_p<_type>(
 
-                                _mmx_add_p<T>(_mmx_mul_p(mData[currentBlockLhs + 0 * mNumRegistersPerCol], tmp0),
-                                              _mmx_mul_p(mData[currentBlockLhs + 1 * mNumRegistersPerCol], tmp1)),
+                                _mmx_add_p<_type>(_mmx_mul_p(mData[currentBlockLhs + 0 * mNumRegistersPerCol], tmp0),
+                                                  _mmx_mul_p(mData[currentBlockLhs + 1 * mNumRegistersPerCol], tmp1)),
 
                                 result.mData[registerNumResult]);
 
 #endif
                     }
                 }
-            if (tRowsRhs % mNumRegisterEntries == 1)
+            if (_rowsRhs % mNumRegisterEntries == 1)
             {
-                U32 j = tRowsRhs / mNumRegisterEntries;
-                for (U32 i = 0; i < tColsRhs; ++i)
+                U32 j = _rowsRhs / mNumRegisterEntries;
+                for (U32 i = 0; i < _colsRhs; ++i)
                 {
                     const U32 registerNumRhs = i * registersPerColRhs + j;
-                    __mx tmp0 = _mmx_set1_p<T, __mx>(rhs.mData[registerNumRhs][0]);
+                    __mx tmp0 = _mmx_set1_p<_type, __mx>(rhs.mData[registerNumRhs][0]);
                     // loop over LHS rows (column registers)
                     for (U32 k = 0; k < mNumRegistersPerCol; ++k)
                     {
@@ -307,8 +323,8 @@ operator*(const matXSIMD<T, tRowsRhs, tColsRhs>& rhs) const
                                 _mmx_fmadd_p(mData[currentBlockLhs], tmp0, result.mData[registerNumResult]);
 #else
                         result.mData[registerNumResult] =
-                                _mmx_add_p<T>(_mmx_mul_p(mData[currentBlockLhs + 0 * mNumRegistersPerCol], tmp0),
-                                              result.mData[registerNumResult]);
+                                _mmx_add_p<_type>(_mmx_mul_p(mData[currentBlockLhs + 0 * mNumRegistersPerCol], tmp0),
+                                                  result.mData[registerNumResult]);
 
 #endif
                     }
@@ -321,18 +337,19 @@ operator*(const matXSIMD<T, tRowsRhs, tColsRhs>& rhs) const
 
 
 
-#ifndef NDEBUG
-template <typename T, GDL::I32 tRows2, GDL::I32 tCols2>
-std::ostream& operator<<(std::ostream& os, const GDL::matXSIMD<T, tRows2, tCols2>& mat)
+template <typename _type, I32 _rowsOther, I32 _colsOther>
+std::ostream& operator<<(std::ostream& os, const matXSIMD<_type, _rowsOther, _colsOther>& mat)
 {
     using namespace GDL;
-    for (U32 i = 0; i < tRows2; ++i)
+    for (U32 i = 0; i < _rowsOther; ++i)
     {
         os << "| ";
-        for (U32 j = 0; j < tCols2; ++j)
+        for (U32 j = 0; j < _colsOther; ++j)
             os << mat(i, j) << " ";
         os << "|" << std::endl;
     }
     return os;
 }
-#endif
+
+
+} // namespace GDL
