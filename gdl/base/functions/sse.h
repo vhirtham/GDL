@@ -32,7 +32,8 @@ constexpr const U32 AlignmentBytes<__m256> = 32;
 template <>
 constexpr const U32 AlignmentBytes<__m512> = 64;
 
-template <typename DataType, typename RegisterType>
+
+template <typename _registerType>
 constexpr const U32 GetNumRegisterEntries()
 {
     throw Exception(__PRETTY_FUNCTION__, "No number of entries known for given combination.");
@@ -40,37 +41,37 @@ constexpr const U32 GetNumRegisterEntries()
 }
 
 template <>
-constexpr const U32 GetNumRegisterEntries<__m128, F32>()
+constexpr const U32 GetNumRegisterEntries<__m128>()
 {
     return 4;
 }
 
 template <>
-constexpr const U32 GetNumRegisterEntries<__m256, F32>()
+constexpr const U32 GetNumRegisterEntries<__m256>()
 {
     return 8;
 }
 
 template <>
-constexpr const U32 GetNumRegisterEntries<__m512, F32>()
+constexpr const U32 GetNumRegisterEntries<__m512>()
 {
     return 16;
 }
 
 template <>
-constexpr const U32 GetNumRegisterEntries<__m128d, F64>()
+constexpr const U32 GetNumRegisterEntries<__m128d>()
 {
     return 2;
 }
 
 template <>
-constexpr const U32 GetNumRegisterEntries<__m256d, F64>()
+constexpr const U32 GetNumRegisterEntries<__m256d>()
 {
     return 4;
 }
 
 template <>
-constexpr const U32 GetNumRegisterEntries<__m512d, F64>()
+constexpr const U32 GetNumRegisterEntries<__m512d>()
 {
     return 8;
 }

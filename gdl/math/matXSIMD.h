@@ -20,7 +20,8 @@ class alignas(AlignmentBytes<__m128>) matXSIMD
 // TODO: if register is a template parameter set corresponding alignment in the row above!
 {
     typedef typename std::conditional<std::is_same<_type, F32>::value, __m128, __m128d>::type __mx;
-    constexpr static U32 mNumRegisterEntries = GetNumRegisterEntries<__mx, _type>();
+    constexpr static U32 mAlignment = AlignmentBytes<__mx>;
+    constexpr static U32 mNumRegisterEntries = GetNumRegisterEntries<__mx>();
     constexpr static U32 mNumRegistersPerCol = CalcMinNumArrayRegisters(_rows, mNumRegisterEntries);
     constexpr static U32 mNumRegisters = _cols * mNumRegistersPerCol;
 
@@ -80,6 +81,30 @@ public:
     inline const std::array<_type, _rows * _cols> Data() const;
 
 private:
+    //! @brief Helps to create a temporary array that is needed during matrix-matrix multiplication.
+    //! @tparam _arraySize: Size of the array
+    //! @tparam _count: Internal counter
+    //! @tparam _args: Additional arguments. Don't provide one. They are used during recursive function calls.
+    //! @param data: Register that provides the values for the array
+    //! @param args: Additional arguments. Don't provide one. They are used during recursive function calls.
+    //! @return Array that is needed during matrix-matrix multiplication.
+    template <U32 _arraySize = mNumRegisterEntries, U32 _count = 0, typename... _args>
+    static std::array<__mx, _arraySize> CreateRHSRegisterArray(const __mx& data, const _args&... args);
+
+
+    //! @brief This function helps with the generalization of matrix-matrix multiplication. It calculates some in
+    //! between values that depend on the number of values in the used register and adds them to the current solution.
+    //! @tparam _numOperations: Number of recursive function calls.
+    //! @tparam _count: Internal counter to keep track of the number of recursive function calls.
+    //! @param values: Array of registers which should be multiplied and added to the result.
+    //! @param currentValue: Current value in the result register
+    //! @param currentBlockIndex: Index of the currently used register of the lhs matrix.
+    //! @return Updated solution register
+    template <U32 _numOperations = mNumRegisterEntries, U32 _count = 0>
+    inline __mx MultiplyRegisters(const std::array<__mx, _numOperations>& values, const __mx currentValue,
+                                  const U32 currentBlockIndex) const;
+
+    //! @brief Checks if the matrix was constructed as expected
     void ConstructionChecks() const;
 };
 } // namespace GDL
