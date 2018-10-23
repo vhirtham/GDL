@@ -4,9 +4,8 @@
 
 #include <algorithm>
 #include <cassert>
-#ifndef NDEBUG
 #include <iostream>
-#endif
+
 
 template <typename T, GDL::I32 tRows, GDL::I32 tCols>
 GDL::matXSingle<T, tRows, tCols>::matXSingle()
@@ -101,7 +100,7 @@ void GDL::matXSingle<T, tRows, tCols>::SetZero()
 //    return colMaj;
 //}
 
-#ifndef NDEBUG
+
 template <typename T2, GDL::I32 tRows2, GDL::I32 tCols2>
 std::ostream& operator<<(std::ostream& os, const GDL::matXSingle<T2, tRows2, tCols2>& mat)
 {
@@ -115,4 +114,4 @@ std::ostream& operator<<(std::ostream& os, const GDL::matXSingle<T2, tRows2, tCo
     }
     return os;
 }
-#endif
+

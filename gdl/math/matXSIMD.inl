@@ -139,7 +139,7 @@ template <I32 _rowsRhs, I32 _colsRhs>
 matXSIMD<_type, _rows, _colsRhs> matXSIMD<_type, _rows, _cols>::
 operator*(const matXSIMD<_type, _rowsRhs, _colsRhs>& rhs) const
 {
-    static_assert(_cols == _rowsRhs, "Lhs cols != Rhs rows - Matrix multiplication not possible!");
+    static_assert(_cols == _rowsRhs, "Lhs cols != Rhs rows");
 
     constexpr U32 registersPerColRhs = CalcMinNumArrayRegisters<__mx>(_rowsRhs);
 
@@ -147,190 +147,46 @@ operator*(const matXSIMD<_type, _rowsRhs, _colsRhs>& rhs) const
     result.SetZero();
 
 
-    // Registers with 4 data entries %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    if
-        constexpr(mNumRegisterEntries == 4)
+
+    // loop over RHS rows (column registers)
+    for (U32 j = 0; j < _rowsRhs / mNumRegisterEntries; ++j)
+        // loop over every RHS Col
+        for (U32 i = 0; i < _colsRhs; ++i)
         {
-            // loop over RHS rows (column registers)
-            for (U32 j = 0; j < _rowsRhs / mNumRegisterEntries; ++j)
-                // loop over every RHS Col
-                for (U32 i = 0; i < _colsRhs; ++i)
-                {
-                    const U32 registerNumRhs = i * registersPerColRhs + j;
-                    alignas(mAlignment) std::array<__mx, mNumRegisterEntries> tmp =
-                            CreateRHSRegisterArray(rhs.mData[registerNumRhs]);
+            const U32 registerNumRhs = i * registersPerColRhs + j;
+            alignas(mAlignment) std::array<__mx, mNumRegisterEntries> tmp =
+                    MultiplicationCreateRHSArray(rhs.mData[registerNumRhs]);
 
-                    // loop over LHS rows (column registers)
-                    for (U32 k = 0; k < mNumRegistersPerCol; ++k)
-                    {
-                        const U32 registerNumResult = i * mNumRegistersPerCol + k;
-                        const U32 currentBlockLhs = j * mNumRegisterEntries * mNumRegistersPerCol + k;
-#ifdef ENABLE_SSE4
-                        result.mData[registerNumResult] = MultiplyRegisters<mNumRegisterEntries>(
-                                tmp, result.mData[registerNumResult], currentBlockLhs);
-#else
-                        result.mData[registerNumResult] = _mmx_add_p<_type>(
-                                _mmx_add_p<_type>(
-                                        _mmx_add_p<_type>(
-                                                _mmx_mul_p(mData[currentBlockLhs + 0 * mNumRegistersPerCol], tmp[0]),
-                                                _mmx_mul_p(mData[currentBlockLhs + 1 * mNumRegistersPerCol], tmp[1])),
-                                        _mmx_add_p<_type>(
-                                                _mmx_mul_p(mData[currentBlockLhs + 2 * mNumRegistersPerCol], tmp[2]),
-                                                _mmx_mul_p(mData[currentBlockLhs + 3 * mNumRegistersPerCol], tmp[3]))),
-                                result.mData[registerNumResult]);
-
-#endif
-                    }
-                }
-
-            constexpr U32 remainder = _rowsRhs % mNumRegisterEntries;
-            if
-                constexpr(remainder == 3)
-                {
-                    U32 j = _rowsRhs / mNumRegisterEntries;
-                    // loop over every RHS Col
-                    for (U32 i = 0; i < _colsRhs; ++i)
-                    {
-                        const U32 registerNumRhs = i * registersPerColRhs + j;
-                        alignas(mAlignment) std::array<__mx, remainder> tmp =
-                                CreateRHSRegisterArray<remainder>(rhs.mData[registerNumRhs]);
-                        // loop over LHS rows (column registers)
-                        for (U32 k = 0; k < mNumRegistersPerCol; ++k)
-                        {
-                            const U32 registerNumResult = i * mNumRegistersPerCol + k;
-                            const U32 currentBlockLhs = j * mNumRegisterEntries * mNumRegistersPerCol + k;
-#ifdef ENABLE_SSE4
-                            result.mData[registerNumResult] =
-                                    MultiplyRegisters<remainder>(tmp, result.mData[registerNumResult], currentBlockLhs);
-#else
-                            result.mData[registerNumResult] = _mmx_add_p<_type>(
-                                    _mmx_add_p<_type>(
-                                            _mmx_mul_p(mData[currentBlockLhs + 0 * mNumRegistersPerCol], tmp[0]),
-                                            _mmx_mul_p(mData[currentBlockLhs + 1 * mNumRegistersPerCol], tmp[1])),
-                                    _mmx_add_p<_type>(
-                                            _mmx_mul_p(mData[currentBlockLhs + 2 * mNumRegistersPerCol], tmp[2]),
-                                            result.mData[registerNumResult]));
-
-#endif
-                        }
-                    }
-                }
-            if
-                constexpr(remainder == 2)
-                {
-                    U32 j = _rowsRhs / mNumRegisterEntries;
-                    // loop over every RHS Col
-                    for (U32 i = 0; i < _colsRhs; ++i)
-                    {
-                        const U32 registerNumRhs = i * registersPerColRhs + j;
-                        __mx tmp0 = _mmx_set1_p<_type, __mx>(rhs.mData[registerNumRhs][0]);
-                        __mx tmp1 = _mmx_set1_p<_type, __mx>(rhs.mData[registerNumRhs][1]);
-                        // loop over LHS rows (column registers)
-                        for (U32 k = 0; k < mNumRegistersPerCol; ++k)
-                        {
-                            const U32 registerNumResult = i * mNumRegistersPerCol + k;
-                            const U32 currentBlockLhs = j * mNumRegisterEntries * mNumRegistersPerCol + k;
-#ifdef ENABLE_SSE4
-                            result.mData[registerNumResult] =
-                                    _mmx_fmadd_p(mData[currentBlockLhs], tmp0,
-                                                 _mmx_fmadd_p(mData[currentBlockLhs + 1 * mNumRegistersPerCol], tmp1,
-                                                              result.mData[registerNumResult]));
-#else
-                            result.mData[registerNumResult] = _mmx_add_p<_type>(
-                                    _mmx_add_p<_type>(
-                                            _mmx_mul_p(mData[currentBlockLhs + 0 * mNumRegistersPerCol], tmp0),
-                                            _mmx_mul_p(mData[currentBlockLhs + 1 * mNumRegistersPerCol], tmp1)),
-                                    result.mData[registerNumResult]);
-
-#endif
-                        }
-                    }
-                }
-            if
-                constexpr(remainder == 1)
-                {
-                    U32 j = _rowsRhs / mNumRegisterEntries;
-                    // loop over every RHS Col
-                    for (U32 i = 0; i < _colsRhs; ++i)
-                    {
-                        const U32 registerNumRhs = i * registersPerColRhs + j;
-                        alignas(mAlignment) std::array<__mx, remainder> tmp =
-                                CreateRHSRegisterArray<remainder>(rhs.mData[registerNumRhs]);
-                        // loop over LHS rows (column registers)
-                        for (U32 k = 0; k < mNumRegistersPerCol; ++k)
-                        {
-                            const U32 registerNumResult = i * mNumRegistersPerCol + k;
-                            const U32 currentBlockLhs = j * mNumRegisterEntries * mNumRegistersPerCol + k;
-#ifdef ENABLE_SSE4
-                            result.mData[registerNumResult] =
-                                    MultiplyRegisters<remainder>(tmp, result.mData[registerNumResult], currentBlockLhs);
-#else
-                            result.mData[registerNumResult] = _mmx_add_p<_type>(
-                                    _mmx_mul_p(mData[currentBlockLhs + 0 * mNumRegistersPerCol], tmp[0]),
-                                    result.mData[registerNumResult]);
-
-#endif
-                        }
-                    }
-                }
+            // loop over LHS rows (column registers)
+            for (U32 k = 0; k < mNumRegistersPerCol; ++k)
+            {
+                const U32 registerNumResult = i * mNumRegistersPerCol + k;
+                const U32 currentBlockLhs = j * mNumRegisterEntries * mNumRegistersPerCol + k;
+                result.mData[registerNumResult] =
+                        MultiplyRegisters<mNumRegisterEntries>(tmp, result.mData[registerNumResult], currentBlockLhs);
+            }
         }
 
-
-    // Registers with 2 data entries %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    constexpr U32 remainder = _rowsRhs % mNumRegisterEntries;
     if
-        constexpr(mNumRegisterEntries == 2)
+        constexpr(remainder > 0)
         {
-            // loop over RHS rows (column registers)
-            for (U32 j = 0; j < _rowsRhs / mNumRegisterEntries; ++j)
-                // loop over every RHS Col
-                for (U32 i = 0; i < _colsRhs; ++i)
+            U32 j = _rowsRhs / mNumRegisterEntries;
+            // loop over every RHS Col
+            for (U32 i = 0; i < _colsRhs; ++i)
+            {
+                const U32 registerNumRhs = i * registersPerColRhs + j;
+                alignas(mAlignment) std::array<__mx, remainder> tmp =
+                        MultiplicationCreateRHSArray<remainder>(rhs.mData[registerNumRhs]);
+                // loop over LHS rows (column registers)
+                for (U32 k = 0; k < mNumRegistersPerCol; ++k)
                 {
-                    const U32 registerNumRhs = i * registersPerColRhs + j;
-                    std::array<__mx, mNumRegisterEntries> tmp = CreateRHSRegisterArray(rhs.mData[registerNumRhs]);
-                    // loop over LHS rows (column registers)
-                    for (U32 k = 0; k < mNumRegistersPerCol; ++k)
-                    {
-                        const U32 registerNumResult = i * mNumRegistersPerCol + k;
-                        const U32 currentBlockLhs = j * mNumRegisterEntries * mNumRegistersPerCol + k;
-#ifdef ENABLE_SSE4
-                        result.mData[registerNumResult] = MultiplyRegisters<mNumRegisterEntries>(
-                                tmp, result.mData[registerNumResult], currentBlockLhs);
-#else
-                        result.mData[registerNumResult] = _mmx_add_p<_type>(
-
-                                _mmx_add_p<_type>(_mmx_mul_p(mData[currentBlockLhs + 0 * mNumRegistersPerCol], tmp[0]),
-                                                  _mmx_mul_p(mData[currentBlockLhs + 1 * mNumRegistersPerCol], tmp[1])),
-
-                                result.mData[registerNumResult]);
-
-#endif
-                    }
+                    const U32 registerNumResult = i * mNumRegistersPerCol + k;
+                    const U32 currentBlockLhs = j * mNumRegisterEntries * mNumRegistersPerCol + k;
+                    result.mData[registerNumResult] =
+                            MultiplyRegisters<remainder>(tmp, result.mData[registerNumResult], currentBlockLhs);
                 }
-            if
-                constexpr(_rowsRhs % mNumRegisterEntries == 1)
-                {
-                    U32 j = _rowsRhs / mNumRegisterEntries;
-                    for (U32 i = 0; i < _colsRhs; ++i)
-                    {
-                        const U32 registerNumRhs = i * registersPerColRhs + j;
-                        __mx tmp0 = _mmx_set1_p<__mx>(rhs.mData[registerNumRhs][0]);
-                        // loop over LHS rows (column registers)
-                        for (U32 k = 0; k < mNumRegistersPerCol; ++k)
-                        {
-                            const U32 registerNumResult = i * mNumRegistersPerCol + k;
-                            const U32 currentBlockLhs = j * mNumRegisterEntries * mNumRegistersPerCol + k;
-#ifdef ENABLE_SSE4
-                            result.mData[registerNumResult] =
-                                    _mmx_fmadd_p(mData[currentBlockLhs], tmp0, result.mData[registerNumResult]);
-#else
-                            result.mData[registerNumResult] = _mmx_add_p<_type>(
-                                    _mmx_mul_p(mData[currentBlockLhs + 0 * mNumRegistersPerCol], tmp0),
-                                    result.mData[registerNumResult]);
-
-#endif
-                        }
-                    }
-                }
+            }
         }
 
     return result;
@@ -361,7 +217,7 @@ matXSIMD<_type, _rows, _cols>::MultiplyRegisters(const std::array<__mx, _numOper
 template <typename _type, I32 _rows, I32 _cols>
 template <U32 _arraySize, U32 _count, typename... _args>
 std::array<typename matXSIMD<_type, _rows, _cols>::__mx, _arraySize>
-matXSIMD<_type, _rows, _cols>::CreateRHSRegisterArray(const __mx& data, const _args&... args)
+matXSIMD<_type, _rows, _cols>::MultiplicationCreateRHSArray(const __mx& data, const _args&... args)
 {
     static_assert(_arraySize <= GetNumRegisterEntries<__mx>() && _arraySize > 0, "Invalid array size.");
 
@@ -369,7 +225,7 @@ matXSIMD<_type, _rows, _cols>::CreateRHSRegisterArray(const __mx& data, const _a
     if constexpr(_arraySize == _count)
         return std::array<__mx, _arraySize>{{args...}};
     else
-        return CreateRHSRegisterArray<_arraySize, _count + 1>(data, args..., _mmx_set1_p<__mx>(data[_count]));
+        return MultiplicationCreateRHSArray<_arraySize, _count + 1>(data, args..., _mmx_set1_p<__mx>(data[_count]));
     // clang-format on
 }
 

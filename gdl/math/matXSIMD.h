@@ -81,7 +81,7 @@ public:
     inline const std::array<_type, _rows * _cols> Data() const;
 
 private:
-    //! @brief Helps to create a temporary array that is needed during matrix-matrix multiplication.
+    //! @brief Creates a temporary array that is needed during matrix-matrix multiplication.
     //! @tparam _arraySize: Size of the array
     //! @tparam _count: Internal counter
     //! @tparam _args: Additional arguments. Don't provide one. They are used during recursive function calls.
@@ -89,7 +89,7 @@ private:
     //! @param args: Additional arguments. Don't provide one. They are used during recursive function calls.
     //! @return Array that is needed during matrix-matrix multiplication.
     template <U32 _arraySize = mNumRegisterEntries, U32 _count = 0, typename... _args>
-    static std::array<__mx, _arraySize> CreateRHSRegisterArray(const __mx& data, const _args&... args);
+    static std::array<__mx, _arraySize> MultiplicationCreateRHSArray(const __mx& data, const _args&... args);
 
 
     //! @brief This function helps with the generalization of matrix-matrix multiplication. It calculates some in

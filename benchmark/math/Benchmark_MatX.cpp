@@ -7,7 +7,7 @@
 #endif
 using namespace GDL;
 
-constexpr U32 N = 12;
+constexpr U32 N = 32;
 constexpr U32 M = N - 1;
 
 

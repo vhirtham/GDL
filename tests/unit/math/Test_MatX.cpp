@@ -56,6 +56,8 @@ struct Fixture
     matrix<T, 4, 4> B1 = matrix<T, 4, 4>(8., 11., 6., 2., 5., 4., 9., 3., 3., 7., 5., 2., 6., 8., 2., 6.);
     matrix<T, 3, 5> A2 = matrix<T, 3, 5>(0., 5., 10., 1., 6., 11., 2., 7., 12., 3., 8., 13., 4., 9., 14.);
     matrix<T, 5, 3> B2 = matrix<T, 5, 3>(8., 11., 6., 2., 5., 4., 9., 3., 3., 7., 5., 2., 6., 8., 2.);
+    matrix<T, 2, 6> A3 = matrix<T, 2, 6>(1., 7., 2., 8., 3., 9., 4., 10., 5., 11., 6., 12.);
+    matrix<T, 6, 2> B3 = matrix<T, 6, 2>(24., 12., 6., 0., 1., 8., 23., 5., 33., 6., 72., 9.);
 };
 
 
@@ -186,6 +188,16 @@ void MultiplicationTest()
                           120., 134., 97., 138., 153., 135., 147., 111.);
     matrix<T, 5, 5> D2 = f.B2 * f.A2;
     BOOST_CHECK(checkCloseMat(D2, expD2));
+
+    matrix<T, 2, 2> expC3(119, 425, 570, 1458);
+    matrix<T, 2, 2> C3 = f.A3 * f.B3;
+    BOOST_CHECK(checkCloseMat(C3, expC3));
+
+
+    matrix<T, 6, 6> expD3(185, 47, 237, 42, 505, 71, 232, 64, 276, 48, 578, 88, 279, 81, 315, 54, 651, 105, 326, 98,
+                          354, 60, 724, 122, 373, 115, 393, 66, 797, 139, 420, 132, 432, 72, 870, 156);
+    matrix<T, 6, 6> D3 = f.B3 * f.A3;
+    BOOST_CHECK(checkCloseMat(D3, expD3));
 }
 
 BOOST_AUTO_TEST_CASE(Multiplication_Single)

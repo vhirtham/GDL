@@ -51,7 +51,7 @@ GDL::mat4SIMD::mat4SIMD(const GDL::mat4SIMD& other)
 
 GDL::mat4SIMD GDL::mat4SIMD::operator*(const GDL::mat4SIMD& other) const
 {
-#ifdef ENABLE_SSE4
+#ifdef __FMA__
     __attribute__((aligned(16))) __m128 Col0 =
             _mm_fmadd_ps(_mm_set1_ps(other.mData[0][0]), mData[0],
                          _mm_fmadd_ps(_mm_set1_ps(other.mData[0][1]), mData[1],
