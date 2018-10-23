@@ -23,7 +23,7 @@ option(ENABLE_TESTS "Enables the testfiles" TRUE)
 option(ENABLE_VULKAN "Enables Vulkan API" FALSE)
 
 if(ENABLE_ADVANCED_SSE)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -march=native -mavx2 ") #Definition needed to replace pure AVX classes by backup versions
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -march=native") #Definition needed to replace pure AVX classes by backup versions
     add_definitions(-DENABLE_SSE4)
     add_definitions(-DENABLE_AVX)
 endif()

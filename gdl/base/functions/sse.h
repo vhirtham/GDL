@@ -13,175 +13,410 @@
 namespace GDL
 {
 
-constexpr const U32 CalcMinNumArrayRegisters(U32 numElements, U32 registerSize)
-{
-    return (numElements / registerSize) + ((numElements % registerSize > 0) ? 1 : 0);
-}
 
-template <typename _Register>
+
+// AlignmentBytes -----------------------------------------------------------------------------------------------------
+
+template <typename _registerType>
 constexpr const U32 AlignmentBytes = 0;
 
 template <>
 constexpr const U32 AlignmentBytes<__m128> = 16;
+
 template <>
 constexpr const U32 AlignmentBytes<__m128d> = 16;
 
 template <>
+constexpr const U32 AlignmentBytes<__m128i> = 16;
+
+#ifdef __AVX2__
+template <>
 constexpr const U32 AlignmentBytes<__m256> = 32;
 
 template <>
+constexpr const U32 AlignmentBytes<__m256d> = 32;
+
+template <>
+constexpr const U32 AlignmentBytes<__m256i> = 32;
+
+#ifdef __AVX512F__
+template <>
 constexpr const U32 AlignmentBytes<__m512> = 64;
 
+template <>
+constexpr const U32 AlignmentBytes<__m512d> = 64;
 
+template <>
+constexpr const U32 AlignmentBytes<__m512i> = 64;
+#endif // __AVX512F__
+#endif // __AVX2__
+
+
+
+// GetNumRegisterEntries ----------------------------------------------------------------------------------------------
+
+//! @brief Gets the number of values that can be stored in the register
+//! @tparam _registerType: Register type
+//! @return Number of values that can be stored in the register
 template <typename _registerType>
-constexpr const U32 GetNumRegisterEntries()
+constexpr U32 GetNumRegisterEntries()
 {
-    throw Exception(__PRETTY_FUNCTION__, "No number of entries known for given combination.");
+    throw Exception(__PRETTY_FUNCTION__, "No number of entries known for given register type");
     return 0;
 }
 
 template <>
-constexpr const U32 GetNumRegisterEntries<__m128>()
+constexpr U32 GetNumRegisterEntries<__m128>()
 {
     return 4;
 }
 
 template <>
-constexpr const U32 GetNumRegisterEntries<__m256>()
-{
-    return 8;
-}
-
-template <>
-constexpr const U32 GetNumRegisterEntries<__m512>()
-{
-    return 16;
-}
-
-template <>
-constexpr const U32 GetNumRegisterEntries<__m128d>()
+constexpr U32 GetNumRegisterEntries<__m128d>()
 {
     return 2;
 }
 
 template <>
-constexpr const U32 GetNumRegisterEntries<__m256d>()
+constexpr U32 GetNumRegisterEntries<__m128i>()
+{
+    return 4;
+}
+
+#ifdef __AVX2__
+template <>
+constexpr U32 GetNumRegisterEntries<__m256>()
+{
+    return 8;
+}
+
+template <>
+constexpr U32 GetNumRegisterEntries<__m256d>()
 {
     return 4;
 }
 
 template <>
-constexpr const U32 GetNumRegisterEntries<__m512d>()
+constexpr U32 GetNumRegisterEntries<__m256i>()
 {
     return 8;
 }
 
-
-template <typename T, typename TReg>
-inline TReg _mmx_add_p(TReg a, TReg b)
+#ifdef __AVX512F__
+template <>
+constexpr U32 GetNumRegisterEntries<__m512>()
 {
-    throw Exception(__PRETTY_FUNCTION__, "Not defined for selected register type");
-    return TReg();
+    return 16;
 }
 
 template <>
-inline __m128 _mmx_add_p<F32>(__m128 a, __m128 b)
+constexpr U32 GetNumRegisterEntries<__m512d>()
 {
-    return _mm_add_ps(a, b);
+    return 8;
 }
 
 template <>
-inline __m128d _mmx_add_p<F64>(__m128d a, __m128d b)
+constexpr U32 GetNumRegisterEntries<__m512i>()
 {
-    return _mm_add_pd(a, b);
+    return 16;
 }
-
-#ifdef ENABLE_AVX
-template <>
-inline __m256 _mmx_add_p<__m256>(__m256 a, __m256 b)
-{
-    return _mm256_add_ps(a, b);
-}
-#endif
+#endif // __AVX512F__
+#endif // __AVX2__
 
 
 
-template <typename T>
-inline T _mmx_mul_p(T a, T b)
+// CalcMinNumArrayRegisters -------------------------------------------------------------------------------------------
+
+//! @brief Calculates the minimal number of registers to store a certain number of values
+//! @tparam _registerType: Register type
+//! @param numValues: Number of values that should be stored
+//! @return Minimal number of registers
+template <typename _registerType>
+constexpr U32 CalcMinNumArrayRegisters(U32 numValues)
 {
-    throw Exception(__PRETTY_FUNCTION__, "Not defined for selected register type");
-    return 0;
+    constexpr U32 registerSize = GetNumRegisterEntries<_registerType>();
+    return (numValues / registerSize) + ((numValues % registerSize > 0) ? 1 : 0);
 }
 
-template <>
-inline __m128 _mmx_mul_p<__m128>(__m128 a, __m128 b)
-{
-    return _mm_mul_ps(a, b);
-}
-template <>
-inline __m128d _mmx_mul_p<__m128d>(__m128d a, __m128d b)
-{
-    return _mm_mul_pd(a, b);
-}
-#ifdef ENABLE_AVX
-template <>
-inline __m256 _mmx_mul_p<__m256>(__m256 a, __m256 b)
-{
-    return _mm256_mul_ps(a, b);
-}
-#endif
 
-template <typename T>
-inline T _mmx_fmadd_p(T a, T b, T c)
-{
-    throw Exception(__PRETTY_FUNCTION__, "Not defined for selected register type");
-    return 0;
-}
 
-template <>
-inline __m128 _mmx_fmadd_p<__m128>(__m128 a, __m128 b, __m128 c)
-{
-    return _mm_fmadd_ps(a, b, c);
-}
+// _mmx_set1_p --------------------------------------------------------------------------------------------------------
 
-template <>
-inline __m128d _mmx_fmadd_p<__m128d>(__m128d a, __m128d b, __m128d c)
-{
-    return _mm_fmadd_pd(a, b, c);
-}
-
-#ifdef ENABLE_AVX
-template <>
-inline __m256 _mmx_fmadd_p<__m256>(__m256 a, __m256 b, __m256 c)
-{
-    return _mm256_fmadd_ps(a, b, c);
-}
-#endif
-
-template <typename T, typename TReg>
-inline TReg _mmx_set1_p(T f)
+//! @brief Template to create a register with all entries set to the same value
+//! @tparam _registerType: Register type
+//! @tparam _type: Type of the value
+//! @param value: Value that should be set
+//! @return Register with all entries set to the same value
+template <typename _registerType, typename _type>
+inline _registerType _mmx_set1_p([[maybe_unused]] _type value)
 {
     throw Exception(__PRETTY_FUNCTION__, "Not defined for selected combination of register type and data type");
-    return 0;
 }
 
 template <>
-inline __m128 _mmx_set1_p(F32 f)
+inline __m128 _mmx_set1_p(F32 value)
 {
-    return _mm_set1_ps(f);
+    return _mm_set1_ps(value);
 }
 
 template <>
-inline __m128d _mmx_set1_p(F64 f)
+inline __m128d _mmx_set1_p(F64 value)
 {
-    return _mm_set1_pd(f);
+    return _mm_set1_pd(value);
 }
 
-#ifdef ENABLE_AVX
 template <>
-inline __m256 _mmx_set1_p(F32 f)
+inline __m128i _mmx_set1_p(I32 value)
 {
-    return _mm256_set1_ps(f);
+    return _mm_set1_epi32(value);
 }
-#endif
+
+#ifdef __AVX2__
+template <>
+inline __m256 _mmx_set1_p(F32 value)
+{
+    return _mm256_set1_ps(value);
 }
+
+template <>
+inline __m256d _mmx_set1_p(F64 value)
+{
+    return _mm256_set1_pd(value);
+}
+
+template <>
+inline __m256i _mmx_set1_p(I32 value)
+{
+    return _mm256_set1_epi32(value);
+}
+
+#ifdef __AVX512F__
+template <>
+inline __m512 _mmx_set1_p(F32 value)
+{
+    return _mm512_set1_ps(value);
+}
+
+template <>
+inline __m512d _mmx_set1_p(F64 value)
+{
+    return _mm512_set1_pd(value);
+}
+
+template <>
+inline __m512i _mmx_set1_p(I32 value)
+{
+    return _mm512_set1_epi32(value);
+}
+#endif // __AVX512F__
+#endif // __AVX2__
+
+
+
+// _mmx_add_p ---------------------------------------------------------------------------------------------------------
+
+//! @brief Template for register addition
+//! @tparam _registerType: Register type
+//! @param lhs: Left hand side value
+//! @param rhs: Right hand side value
+//! @return Result of the addition
+template <typename _registerType>
+inline _registerType _mmx_add_p([[maybe_unused]] _registerType lhs, [[maybe_unused]] _registerType rhs)
+{
+    throw Exception(__PRETTY_FUNCTION__, "Not defined for selected register type");
+}
+
+template <>
+inline __m128 _mmx_add_p(__m128 lhs, __m128 rhs)
+{
+    return _mm_add_ps(lhs, rhs);
+}
+
+template <>
+inline __m128d _mmx_add_p(__m128d lhs, __m128d rhs)
+{
+    return _mm_add_pd(lhs, rhs);
+}
+
+template <>
+inline __m128i _mmx_add_p(__m128i lhs, __m128i rhs)
+{
+    return _mm_add_epi32(lhs, rhs);
+}
+
+#ifdef __AVX2__
+template <>
+inline __m256 _mmx_add_p(__m256 lhs, __m256 rhs)
+{
+    return _mm256_add_ps(lhs, rhs);
+}
+
+template <>
+inline __m256d _mmx_add_p(__m256d lhs, __m256d rhs)
+{
+    return _mm256_add_pd(lhs, rhs);
+}
+
+template <>
+inline __m256i _mmx_add_p(__m256i lhs, __m256i rhs)
+{
+    return _mm256_add_epi32(lhs, rhs);
+}
+
+#ifdef __AVX512F__
+template <>
+inline __m512 _mmx_add_p(__m512 lhs, __m512 rhs)
+{
+    return _mm512_add_ps(lhs, rhs);
+}
+
+template <>
+inline __m512d _mmx_add_p(__m512d lhs, __m512d rhs)
+{
+    return _mm512_add_pd(lhs, rhs);
+}
+
+template <>
+inline __m512i _mmx_add_p(__m512i lhs, __m512i rhs)
+{
+    return _mm512_add_epi32(lhs, rhs);
+}
+#endif // __AVX512F__
+#endif // __AVX2__
+
+
+
+// _mmx_mul_p ---------------------------------------------------------------------------------------------------------
+
+//! @brief Template for register multiplication
+//! @tparam _registerType: Register type
+//! @param lhs: Left hand side value
+//! @param rhs: Right hand side value
+//! @return Result of the multiplication
+template <typename _registerType>
+inline _registerType _mmx_mul_p([[maybe_unused]] _registerType lhs, [[maybe_unused]] _registerType rhs)
+{
+    throw Exception(__PRETTY_FUNCTION__, "Not defined for selected register type");
+}
+
+template <>
+inline __m128 _mmx_mul_p(__m128 lhs, __m128 rhs)
+{
+    return _mm_mul_ps(lhs, rhs);
+}
+
+template <>
+inline __m128d _mmx_mul_p(__m128d lhs, __m128d rhs)
+{
+    return _mm_mul_pd(lhs, rhs);
+}
+
+template <>
+inline __m128i _mmx_mul_p(__m128i lhs, __m128i rhs)
+{
+    return _mm_mul_epi32(lhs, rhs);
+}
+
+#ifdef __AVX2__
+template <>
+inline __m256 _mmx_mul_p(__m256 lhs, __m256 rhs)
+{
+    return _mm256_mul_ps(lhs, rhs);
+}
+
+template <>
+inline __m256d _mmx_mul_p(__m256d lhs, __m256d rhs)
+{
+    return _mm256_mul_pd(lhs, rhs);
+}
+
+template <>
+inline __m256i _mmx_mul_p(__m256i lhs, __m256i rhs)
+{
+    return _mm256_mul_epi32(lhs, rhs);
+}
+
+#ifdef __AVX512F__
+template <>
+inline __m512 _mmx_mul_p(__m512 lhs, __m512 rhs)
+{
+    return _mm512_mul_ps(lhs, rhs);
+}
+
+template <>
+inline __m512d _mmx_mul_p(__m512d lhs, __m512d rhs)
+{
+    return _mm512_mul_pd(lhs, rhs);
+}
+
+template <>
+inline __m512i _mmx_mul_p(__m512i lhs, __m512i rhs)
+{
+    return _mm512_mul_epi32(lhs, rhs);
+}
+#endif // __AVX512F__
+#endif // __AVX2__
+
+
+
+// _mmx_fmadd_p -------------------------------------------------------------------------------------------------------
+
+//! @brief Template for multiplication of two registers with subsequent addition of a third register (fused multiply
+//! add)
+//! @tparam _registerType: Register type
+//! @param lhsM: Left hand side value of the multiplication
+//! @param rhsM: Right hand side value of the multiplication
+//! @param add: Value that is added to the result of the multiplication
+//! @return Result of the operation
+//! @remark If fmadd intrinsics are not available the function still works. It performs the necessary operations
+//! seperately.
+template <typename _registerType>
+inline _registerType _mmx_fmadd_p(_registerType lhsM, _registerType rhsM, _registerType add)
+{
+    return _mmx_add_p(_mmx_mul_p(lhsM, rhsM), add);
+}
+
+#ifdef __FMA__
+template <>
+inline __m128 _mmx_fmadd_p(__m128 lhsM, __m128 rhsM, __m128 add)
+{
+    return _mm_fmadd_ps(lhsM, rhsM, add);
+}
+
+template <>
+inline __m128d _mmx_fmadd_p(__m128d lhsM, __m128d rhsM, __m128d add)
+{
+    return _mm_fmadd_pd(lhsM, rhsM, add);
+}
+
+#ifdef __AVX2__
+template <>
+inline __m256 _mmx_fmadd_p(__m256 lhsM, __m256 rhsM, __m256 add)
+{
+    return _mm256_fmadd_ps(lhsM, rhsM, add);
+}
+
+template <>
+inline __m256d _mmx_fmadd_p(__m256d lhsM, __m256d rhsM, __m256d add)
+{
+    return _mm256_fmadd_pd(lhsM, rhsM, add);
+}
+
+#ifdef __AVX512F__
+template <>
+inline __m512 _mmx_fmadd_p(__m512 lhsM, __m512 rhsM, __m512 add)
+{
+    return _mm512_fmadd_ps(lhsM, rhsM, add);
+}
+
+template <>
+inline __m512d _mmx_fmadd_p(__m512d lhsM, __m512d rhsM, __m512d add)
+{
+    return _mm512_fmadd_pd(lhsM, b, add);
+}
+
+#endif // __FMA__
+#endif // __AVX512F__
+#endif // __AVX2__
+
+} // namespace GDL

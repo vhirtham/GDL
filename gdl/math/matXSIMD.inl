@@ -60,7 +60,7 @@ template <typename _type, I32 _rows, I32 _cols>
 matXSIMD<_type, _rows, _cols>& matXSIMD<_type, _rows, _cols>::operator+=(const matXSIMD<_type, _rows, _cols>& rhs)
 {
     for (U32 i = 0; i < mData.size(); ++i)
-        mData[i] = _mmx_add_p<_type>(rhs.mData[i], mData[i]);
+        mData[i] = _mmx_add_p(rhs.mData[i], mData[i]);
     return *this;
 }
 
@@ -94,7 +94,7 @@ U32 matXSIMD<_type, _rows, _cols>::Cols() const
 template <typename _type, I32 _rows, I32 _cols>
 void matXSIMD<_type, _rows, _cols>::SetZero()
 {
-    mData.fill(_mmx_set1_p<_type, __mx>(0.));
+    mData.fill(_mmx_set1_p<__mx>(static_cast<_type>(0)));
 }
 
 
@@ -134,23 +134,6 @@ void matXSIMD<_type, _rows, _cols>::ConstructionChecks() const
 
 
 
-// template <typename _type, typename _registerType, U32 _arraySize = GetNumRegisterEntries<_registerType>(),
-//          U32 _count = 0, typename... _args>
-// std::array<_registerType, _arraySize> CreateRHSRegisterArray(const _registerType& data, const _args&... args)
-//{
-//    static_assert(_arraySize <= GetNumRegisterEntries<_registerType>() && _arraySize > 0, "Invalid array size.");
-
-//    // clang-format off
-//    if constexpr(_arraySize == _count)
-//        return std::array<_registerType, _arraySize>{{args...}};
-//    else
-//        return CreateRHSRegisterArray<_type, _registerType, _arraySize, _count + 1>
-//                                     (data, args..., _mmx_set1_p<_type, _registerType>(data[_count]));
-//    // clang-format on
-//}
-
-
-
 template <typename _type, I32 _rows, I32 _cols>
 template <I32 _rowsRhs, I32 _colsRhs>
 matXSIMD<_type, _rows, _colsRhs> matXSIMD<_type, _rows, _cols>::
@@ -158,7 +141,7 @@ operator*(const matXSIMD<_type, _rowsRhs, _colsRhs>& rhs) const
 {
     static_assert(_cols == _rowsRhs, "Lhs cols != Rhs rows - Matrix multiplication not possible!");
 
-    constexpr U32 registersPerColRhs = CalcMinNumArrayRegisters(_rowsRhs, mNumRegisterEntries);
+    constexpr U32 registersPerColRhs = CalcMinNumArrayRegisters<__mx>(_rowsRhs);
 
     matXSIMD<_type, _rows, _colsRhs> result;
     result.SetZero();
@@ -303,8 +286,7 @@ operator*(const matXSIMD<_type, _rowsRhs, _colsRhs>& rhs) const
                 for (U32 i = 0; i < _colsRhs; ++i)
                 {
                     const U32 registerNumRhs = i * registersPerColRhs + j;
-                    std::array<__mx, mNumRegisterEntries> tmp =
-                            CreateRHSRegisterArray(rhs.mData[registerNumRhs]);
+                    std::array<__mx, mNumRegisterEntries> tmp = CreateRHSRegisterArray(rhs.mData[registerNumRhs]);
                     // loop over LHS rows (column registers)
                     for (U32 k = 0; k < mNumRegistersPerCol; ++k)
                     {
@@ -331,7 +313,7 @@ operator*(const matXSIMD<_type, _rowsRhs, _colsRhs>& rhs) const
                     for (U32 i = 0; i < _colsRhs; ++i)
                     {
                         const U32 registerNumRhs = i * registersPerColRhs + j;
-                        __mx tmp0 = _mmx_set1_p<_type, __mx>(rhs.mData[registerNumRhs][0]);
+                        __mx tmp0 = _mmx_set1_p<__mx>(rhs.mData[registerNumRhs][0]);
                         // loop over LHS rows (column registers)
                         for (U32 k = 0; k < mNumRegistersPerCol; ++k)
                         {
@@ -387,7 +369,7 @@ matXSIMD<_type, _rows, _cols>::CreateRHSRegisterArray(const __mx& data, const _a
     if constexpr(_arraySize == _count)
         return std::array<__mx, _arraySize>{{args...}};
     else
-        return CreateRHSRegisterArray<_arraySize, _count + 1>(data, args..., _mmx_set1_p<_type, __mx>(data[_count]));
+        return CreateRHSRegisterArray<_arraySize, _count + 1>(data, args..., _mmx_set1_p<__mx>(data[_count]));
     // clang-format on
 }
 

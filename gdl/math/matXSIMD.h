@@ -22,7 +22,7 @@ class alignas(AlignmentBytes<__m128>) matXSIMD
     typedef typename std::conditional<std::is_same<_type, F32>::value, __m128, __m128d>::type __mx;
     constexpr static U32 mAlignment = AlignmentBytes<__mx>;
     constexpr static U32 mNumRegisterEntries = GetNumRegisterEntries<__mx>();
-    constexpr static U32 mNumRegistersPerCol = CalcMinNumArrayRegisters(_rows, mNumRegisterEntries);
+    constexpr static U32 mNumRegistersPerCol = CalcMinNumArrayRegisters<__mx>(_rows);
     constexpr static U32 mNumRegisters = _cols * mNumRegistersPerCol;
 
 
