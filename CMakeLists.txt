@@ -9,11 +9,10 @@ set(GDL_COMPILE_DEFINITIONS )
 
 # COMPILER SETUP
 # --------------
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-long-long -pedantic -pthread -D_REENTRANT")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native -Wall -Wno-long-long -pedantic -pthread -D_REENTRANT")
 
 # Options
 # -------
-option(ENABLE_ADVANCED_SSE "Enables advanced vector extensions (SIMD) like _m256 and _m512 registers" FALSE)
 option(ENABLE_ALLOCATORS "Enable allocators which replace the std::allocator for all GDL containers" TRUE)
 option(ENABLE_BENCHMARKS "Enables the benchmarks" FALSE)
 option(ENABLE_CUSTOM_APPS "Enables applications that are located in the applications/custom directory" FALSE)
@@ -22,11 +21,7 @@ option(ENABLE_OPENGL "Enables OpenGL API" FALSE)
 option(ENABLE_TESTS "Enables the testfiles" TRUE)
 option(ENABLE_VULKAN "Enables Vulkan API" FALSE)
 
-if(ENABLE_ADVANCED_SSE)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -march=native") #Definition needed to replace pure AVX classes by backup versions
-    add_definitions(-DENABLE_SSE4)
-    add_definitions(-DENABLE_AVX)
-endif()
+
 
 if(NOT ENABLE_ALLOCATORS)
     set(GDL_COMPILE_DEFINITIONS -DUSE_STD_ALLOCATOR ${GDL_COMPILE_DEFINITIONS})
