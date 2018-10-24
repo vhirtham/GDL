@@ -101,7 +101,7 @@ BENCHMARK_F(SIMD, Construction_Val_non_full_registers)(benchmark::State& state)
 BENCHMARK_F(Single, Construction_Val_Variadic_12x12)(benchmark::State& state)
 {
     for (auto _ : state)
-        benchmark::DoNotOptimize(matXSingle<F32, N, N>(
+        benchmark::DoNotOptimize(matXSingle<F32, 12, 12>(
                 1., 2., 3., 4., 5., 6., 7., 8., 9., 10., 11., 12., 1., 2., 3., 4., 5., 6., 7., 8., 9., 10., 11., 12.,
                 1., 2., 3., 4., 5., 6., 7., 8., 9., 10., 11., 12., 1., 2., 3., 4., 5., 6., 7., 8., 9., 10., 11., 12.,
                 1., 2., 3., 4., 5., 6., 7., 8., 9., 10., 11., 12., 1., 2., 3., 4., 5., 6., 7., 8., 9., 10., 11., 12.,
@@ -113,7 +113,7 @@ BENCHMARK_F(Single, Construction_Val_Variadic_12x12)(benchmark::State& state)
 BENCHMARK_F(SIMD, Construction_Val_Variadic_12x12)(benchmark::State& state)
 {
     for (auto _ : state)
-        benchmark::DoNotOptimize(matXSIMD<F32, N, N>(
+        benchmark::DoNotOptimize(matXSIMD<F32, 12, 12>(
                 1., 2., 3., 4., 5., 6., 7., 8., 9., 10., 11., 12., 1., 2., 3., 4., 5., 6., 7., 8., 9., 10., 11., 12.,
                 1., 2., 3., 4., 5., 6., 7., 8., 9., 10., 11., 12., 1., 2., 3., 4., 5., 6., 7., 8., 9., 10., 11., 12.,
                 1., 2., 3., 4., 5., 6., 7., 8., 9., 10., 11., 12., 1., 2., 3., 4., 5., 6., 7., 8., 9., 10., 11., 12.,

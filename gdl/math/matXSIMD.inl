@@ -2,6 +2,7 @@
 
 #include "matXSIMD.h"
 
+#include "gdl/base/exception.h"
 #include "gdl/base/functions/alignment.h"
 
 #include <algorithm>
@@ -125,10 +126,10 @@ template <typename _type, I32 _rows, I32 _cols>
 void matXSIMD<_type, _rows, _cols>::ConstructionChecks() const
 {
     assert(sizeof(mData) == sizeof(__mx) * mData.size()); // Array needs to be compact
-#ifndef NDEBUG
+#ifndef NDEVEXCEPTION
     for (const auto& iRegister : mData)
-        if (!IsAligned(&iRegister, 16))
-            throw Exception(__PRETTY_FUNCTION__, "One or more registers of mat4SIMD are not 16 byte aligned");
+        DEV_EXCEPTION(!IsAligned(&iRegister, AlignmentBytes<__mx>),
+                      "One or more registers of the matrix are not aligned correctly");
 #endif
 }
 
@@ -141,53 +142,19 @@ operator*(const matXSIMD<_type, _rowsRhs, _colsRhs>& rhs) const
 {
     static_assert(_cols == _rowsRhs, "Lhs cols != Rhs rows");
 
-    constexpr U32 registersPerColRhs = CalcMinNumArrayRegisters<__mx>(_rowsRhs);
-
     matXSIMD<_type, _rows, _colsRhs> result;
     result.SetZero();
 
-
-
     // loop over RHS rows (column registers)
     for (U32 j = 0; j < _rowsRhs / mNumRegisterEntries; ++j)
-        // loop over every RHS Col
-        for (U32 i = 0; i < _colsRhs; ++i)
-        {
-            const U32 registerNumRhs = i * registersPerColRhs + j;
-            alignas(mAlignment) std::array<__mx, mNumRegisterEntries> tmp =
-                    MultiplicationCreateRHSArray(rhs.mData[registerNumRhs]);
+        MultiplicationInnerLoops<_rowsRhs, _colsRhs, mNumRegisterEntries>(result, rhs, j);
 
-            // loop over LHS rows (column registers)
-            for (U32 k = 0; k < mNumRegistersPerCol; ++k)
-            {
-                const U32 registerNumResult = i * mNumRegistersPerCol + k;
-                const U32 currentBlockLhs = j * mNumRegisterEntries * mNumRegistersPerCol + k;
-                result.mData[registerNumResult] =
-                        MultiplyRegisters<mNumRegisterEntries>(tmp, result.mData[registerNumResult], currentBlockLhs);
-            }
-        }
 
+    // clang-format off
     constexpr U32 remainder = _rowsRhs % mNumRegisterEntries;
-    if
-        constexpr(remainder > 0)
-        {
-            U32 j = _rowsRhs / mNumRegisterEntries;
-            // loop over every RHS Col
-            for (U32 i = 0; i < _colsRhs; ++i)
-            {
-                const U32 registerNumRhs = i * registersPerColRhs + j;
-                alignas(mAlignment) std::array<__mx, remainder> tmp =
-                        MultiplicationCreateRHSArray<remainder>(rhs.mData[registerNumRhs]);
-                // loop over LHS rows (column registers)
-                for (U32 k = 0; k < mNumRegistersPerCol; ++k)
-                {
-                    const U32 registerNumResult = i * mNumRegistersPerCol + k;
-                    const U32 currentBlockLhs = j * mNumRegisterEntries * mNumRegistersPerCol + k;
-                    result.mData[registerNumResult] =
-                            MultiplyRegisters<remainder>(tmp, result.mData[registerNumResult], currentBlockLhs);
-                }
-            }
-        }
+    if constexpr(remainder > 0)
+        MultiplicationInnerLoops<_rowsRhs, _colsRhs, remainder>(result, rhs, _rowsRhs / mNumRegisterEntries);
+    // clang-format on
 
     return result;
 }
@@ -195,20 +162,46 @@ operator*(const matXSIMD<_type, _rowsRhs, _colsRhs>& rhs) const
 
 
 template <typename _type, I32 _rows, I32 _cols>
+template <I32 _rowsRhs, I32 _colsRhs, U32 _numMultipliedRegisters>
+inline void matXSIMD<_type, _rows, _cols>::MultiplicationInnerLoops(matXSIMD<_type, _rows, _colsRhs>& result,
+                                                                    const matXSIMD<_type, _rowsRhs, _colsRhs>& rhs,
+                                                                    U32 j) const
+{
+    constexpr U32 registersPerColRhs = CalcMinNumArrayRegisters<__mx>(_rowsRhs);
+    // loop over every RHS Col
+    for (U32 i = 0; i < _colsRhs; ++i)
+    {
+        const U32 registerNumRhs = i * registersPerColRhs + j;
+        alignas(mAlignment) std::array<__mx, _numMultipliedRegisters> tmp =
+                MultiplicationCreateRHSArray<_numMultipliedRegisters>(rhs.mData[registerNumRhs]);
+
+        // loop over LHS rows (column registers)
+        for (U32 k = 0; k < mNumRegistersPerCol; ++k)
+        {
+            const U32 registerNumResult = i * mNumRegistersPerCol + k;
+            const U32 currentBlockLhs = j * mNumRegisterEntries * mNumRegistersPerCol + k;
+            result.mData[registerNumResult] = MultiplyAddRegisters<_numMultipliedRegisters>(
+                    tmp, result.mData[registerNumResult], currentBlockLhs);
+        }
+    }
+}
+
+
+
+template <typename _type, I32 _rows, I32 _cols>
 template <U32 _numOperations, U32 _count>
 typename matXSIMD<_type, _rows, _cols>::__mx
-matXSIMD<_type, _rows, _cols>::MultiplyRegisters(const std::array<__mx, _numOperations>& values,
-                                                 const __mx currentValue, const U32 currentBlockIndex) const
+matXSIMD<_type, _rows, _cols>::MultiplyAddRegisters(const std::array<__mx, _numOperations>& values,
+                                                    const __mx currentValue, const U32 currentBlockIndex) const
 {
     static_assert(_numOperations <= mNumRegisterEntries && _numOperations > 0, "Invalid number of operations.");
 
     // clang-format off
-    if
-        constexpr(_count + 1 == _numOperations) return _mmx_fmadd_p(
-                mData[currentBlockIndex + _count * mNumRegistersPerCol], values[_count], currentValue);
+    if constexpr(_count + 1 == _numOperations)
+        return _mmx_fmadd_p(mData[currentBlockIndex + _count * mNumRegistersPerCol], values[_count], currentValue);
     else
         return _mmx_fmadd_p(mData[currentBlockIndex + _count * mNumRegistersPerCol], values[_count],
-                            MultiplyRegisters<_numOperations, _count + 1>(values, currentValue, currentBlockIndex));
+                            MultiplyAddRegisters<_numOperations, _count + 1>(values, currentValue, currentBlockIndex));
     // clang-format on
 }
 

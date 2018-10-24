@@ -1,6 +1,5 @@
 #pragma once
 
-#include "gdl/base/exception.h"
 #include "gdl/base/fundamentalTypes.h"
 #include "gdl/base/functions/sse.h"
 
@@ -81,6 +80,17 @@ public:
     inline const std::array<_type, _rows * _cols> Data() const;
 
 private:
+    //! @brief Processes the inner two loops of matrix-matrix multiplication.
+    //! @tparam _rowsRhs: Rhs matrix number of rows
+    //! @tparam _colsRhs: Rhs matrix number of columns
+    //! @tparam _numMultipliedRegisters Number of registers that are multiplied and added to the result
+    //! @param result: Reference to the result matrix
+    //! @param rhs: Rhs matrix
+    //! @param j: Current outer loop value
+    template <I32 _rowsRhs, I32 _colsRhs, U32 _numMultipliedRegisters = mNumRegisterEntries>
+    inline void MultiplicationInnerLoops(matXSIMD<_type, _rows, _colsRhs>& result,
+                                         const matXSIMD<_type, _rowsRhs, _colsRhs>& rhs, U32 j) const;
+
     //! @brief Creates a temporary array that is needed during matrix-matrix multiplication.
     //! @tparam _arraySize: Size of the array
     //! @tparam _count: Internal counter
@@ -101,8 +111,8 @@ private:
     //! @param currentBlockIndex: Index of the currently used register of the lhs matrix.
     //! @return Updated solution register
     template <U32 _numOperations = mNumRegisterEntries, U32 _count = 0>
-    inline __mx MultiplyRegisters(const std::array<__mx, _numOperations>& values, const __mx currentValue,
-                                  const U32 currentBlockIndex) const;
+    inline __mx MultiplyAddRegisters(const std::array<__mx, _numOperations>& values, const __mx currentValue,
+                                     const U32 currentBlockIndex) const;
 
     //! @brief Checks if the matrix was constructed as expected
     void ConstructionChecks() const;
