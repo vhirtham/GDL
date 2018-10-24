@@ -18,11 +18,11 @@ namespace GDL
 template <typename _type>
 class Approx
 {
-    static_assert(std::is_same<_type, F32>::value || std::is_same<_type, F64>::value,
-                  "Approx can only be used with floating point types.");
+    static_assert(std::is_floating_point<_type>::value, "Approx can only be used with floating point types.");
 
 
     const _type mValue;
+    const _type mBaseZero;
     const I32 mFactor;
 
 public:
@@ -37,113 +37,89 @@ public:
 
     //! @brief ctor
     //! @param value: Value that should be compared to other values
-    //! @param factor: Factor to scale the tolerance. The tolerance is the minimal increment (epsilon) of the bigger of
-    //! the two compared values.
-    explicit constexpr Approx(_type value, I32 factor = 3)
+    //! @param factor: During a comparison the minimal increment (epsilon) of the larger of both values is calculated.
+    //! The factor is multiplied with the epsilon to determine the tolerance of the comparison. A value of 3 means, that
+    //! both values can only differ by 3 minimal increments of the larger value to be treated as equal.
+    //! @param minimalBase: If both values of the comparison are smaller than this value, it will be used to calculate
+    //! the epsilon instead of the maximum of both values. This is important if one of the values is 0 or close to 0.
+    //! Without this value a comparison to 0 would be impossible.
+    explicit constexpr Approx(const _type value, const I32 factor = 3, const _type minimalBase = static_cast<_type>(1))
         : mValue{value}
+        , mBaseZero{std::abs(minimalBase)}
         , mFactor{factor}
     {
         DEV_EXCEPTION(factor < 1, "Scaling factor must be bigger than 0.");
-        DEV_EXCEPTION(std::abs(mValue) == static_cast<_type>(0),
-                      "Can't use Approx with a value of 0. Use ApproxZero instead.");
+        DEV_EXCEPTION(mBaseZero <= static_cast<_type>(0), "Minimal base can't be 0.");
     }
+
 
     //! @brief Checks if two compared values are equal within a certain tolerance, which depends on the values sizes and
     //! a prescribed scaling factor.
-    //! @tparam _typeLhs: Type of the lhs value
-    //! @param lhs: Left hand side of the comparison
     //! @param rhs: Right hand side of the comparison
     //! @return TRUE / FALSE
-    template <typename _typeLhs>
-    friend constexpr bool operator==(const _typeLhs lhs, const Approx& rhs)
+    constexpr bool operator==(const _type rhs) const
     {
         constexpr _type epsilon = std::numeric_limits<_type>::epsilon();
-        const _type lhsConv = static_cast<_type>(lhs);
 
-        return std::abs(lhsConv - rhs.mValue) <
-               static_cast<_type>(rhs.mFactor) * epsilon * (std::max(std::abs(lhsConv), std::abs(rhs.mValue)));
+        return std::abs(rhs - mValue) <=
+               static_cast<_type>(mFactor) * epsilon * (std::max({std::abs(rhs), std::abs(mValue), mBaseZero}));
     }
+
 
     //! @brief Checks if two compared values are NOT equal within a certain tolerance, which depends on the values sizes
     //! and a prescribed scaling factor.
-    //! @tparam _typeLhs: Type of the lhs value
-    //! @param lhs: Left hand side of the comparison
     //! @param rhs: Right hand side of the comparison
     //! @return TRUE / FALSE
-    template <typename _typeLhs>
-    friend constexpr bool operator!=(const _typeLhs lhs, const Approx& rhs)
+    constexpr bool operator!=(const _type rhs) const
     {
-        return !(lhs == rhs);
+        return !(*this == rhs);
     }
 };
 
 
 
-using Approx32 = Approx<F32>;
-using Approx64 = Approx<F64>;
-
-
-
-//! @brief Class which enables helps checking if a floating point value is close to 0
-//! @tparam _type: Value type
-template <typename _type>
-class ApproxZero
+//! @brief Checks if two compared values are equal within a certain tolerance, which depends on the values sizes and
+//! a prescribed scaling factor.
+//! @tparam _typeLhs: Type of the lhs value
+//! @tparam _typeApprox: Type of the Approx class
+//! @param lhs: Left hand side of the comparison
+//! @param rhs: Right hand side of the comparison
+//! @return TRUE / FALSE
+template <typename _typeLhs, typename _typeApprox>
+constexpr bool operator==(const _typeLhs lhs, const Approx<_typeApprox>& rhs)
 {
-    static_assert(std::is_same<_type, F32>::value || std::is_same<_type, F64>::value,
-                  "Approx can only be used with floating point types.");
+    static_assert(std::is_floating_point<_typeLhs>::value || std::is_integral<_typeLhs>::value,
+                  "Lhs type must be an integral or floating point type.");
+    return rhs == static_cast<_typeApprox>(lhs);
+}
 
 
-    const _type mTolerance;
-
-public:
-    ApproxZero() = delete;
-    ApproxZero(const ApproxZero&) = default;
-    ApproxZero(ApproxZero&&) = default;
-    ApproxZero& operator=(const ApproxZero&) = default;
-    ApproxZero& operator=(ApproxZero&&) = default;
-    ~ApproxZero() = default;
-
-
-    //! @brief ctor
-    //! @param base: Value that should be compared to other values
-    //! @param factor: Factor to scale the tolerance. The tolerance is the minimal increment (epsilon) of the given
-    //! base.
-    constexpr ApproxZero(_type base = static_cast<_type>(1), I32 factor = 3)
-        : mTolerance{std::abs(std::numeric_limits<_type>::epsilon() * base * static_cast<_type>(factor))}
-    {
-        DEV_EXCEPTION(factor < 1, "Scaling factor must be bigger than 0.");
-        DEV_EXCEPTION(std::abs(base) <= static_cast<_type>(0), "Base can't be 0.");
-        assert(mTolerance > static_cast<_type>(0));
-    }
-
-    //! @brief Checks if a value is 0 within a certain tolerance
-    //! @tparam _typeLhs: Type of the lhs value
-    //! @param lhs: Left hand side of the comparison
-    //! @param rhs: Right hand side of the comparison
-    //! @return TRUE / FALSE
-    template <typename _typeLhs>
-    friend constexpr bool operator==(const _typeLhs lhs, const ApproxZero& rhs)
-    {
-        const _type lhsConv = static_cast<_type>(lhs);
-
-        return std::abs(lhsConv) < rhs.mTolerance;
-    }
-
-    //! @brief Checks if a value is NOT 0 within a certain tolerance
-    //! @tparam _typeLhs: Type of the lhs value
-    //! @param lhs: Left hand side of the comparison
-    //! @param rhs: Right hand side of the comparison
-    //! @return TRUE / FALSE
-    template <typename _typeLhs>
-    friend constexpr bool operator!=(const _typeLhs lhs, const ApproxZero& rhs)
-    {
-        return !(lhs == rhs);
-    }
-};
+//! @brief Checks if two compared values are NOT equal within a certain tolerance, which depends on the values sizes
+//! and a prescribed scaling factor.
+//! @tparam _typeLhs: Type of the lhs value
+//! @tparam _typeApprox: Type of the Approx class
+//! @param lhs: Left hand side of the comparison
+//! @param rhs: Right hand side of the comparison
+//! @return TRUE / FALSE
+template <typename _typeLhs, typename _typeApprox>
+constexpr bool operator!=(const _typeLhs lhs, const Approx<_typeApprox>& rhs)
+{
+    static_assert(std::is_floating_point<_typeLhs>::value || std::is_integral<_typeLhs>::value,
+                  "Lhs type must be an integral or floating point type.");
+    return !(rhs == static_cast<_typeApprox>(lhs));
+}
 
 
 
-using ApproxZero32 = ApproxZero<F32>;
-using ApproxZero64 = ApproxZero<F64>;
+//! @brief Checks if a floating point value is close to 0
+//! @tparam _type: Value type
+//! @param base: Base value that is used to calculate the epsilon (minimal possible increment)
+//! @param factor: The calculated minimal increment is multiplied with this factor to scale the tolerance of the
+//! comparison.
+template <typename _type>
+Approx<_type> ApproxZero(_type base = static_cast<_type>(1), I32 factor = 3)
+{
+    return Approx(static_cast<_type>(0), factor, base);
+}
 
 } // namespace GDL

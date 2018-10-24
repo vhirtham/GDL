@@ -8,7 +8,6 @@
 
 using namespace GDL;
 
-
 template <typename _type>
 void TestApprox()
 {
@@ -16,7 +15,7 @@ void TestApprox()
     {
         for (U32 j = 1; j < 100; ++j)
         {
-            _type value = Pow(static_cast<_type>(10.), i) * static_cast<_type>(1.e-10);
+            _type value = Pow(static_cast<_type>(10.), static_cast<I32>(i - 10));
 
             _type scaledEps = std::numeric_limits<_type>::epsilon() * value; // Epsilon of the current value
 
@@ -24,14 +23,16 @@ void TestApprox()
 
 
             // Compare values that are one epsilon above and below the adjusted tolerance
-            BOOST_CHECK(value + scaledEps * (factor - 1) == Approx<_type>(value, factor));
-            BOOST_CHECK(value + scaledEps * (factor + 1) != Approx<_type>(value, factor));
-            BOOST_CHECK(-value + scaledEps * (factor - 1) == Approx<_type>(-value, factor));
-            BOOST_CHECK(-value + scaledEps * (factor + 1) != Approx<_type>(-value, factor));
+            BOOST_CHECK(value + scaledEps * (factor - 1) == Approx<_type>(value, factor, value));
+            BOOST_CHECK(value + scaledEps * (factor + 1) != Approx<_type>(value, factor, value));
+            BOOST_CHECK(-value + scaledEps * (factor - 1) == Approx<_type>(-value, factor, value));
+            BOOST_CHECK(-value + scaledEps * (factor + 1) != Approx<_type>(-value, factor, value));
+            BOOST_CHECK(Approx<_type>(value, factor, value) == value + scaledEps * (factor - 1));
+            BOOST_CHECK(Approx<_type>(value, factor, value) != value + scaledEps * (factor + 1));
         }
     }
 
-    GDL_CHECK_THROW_DEV(Approx<_type>(0), Exception);
+    // GDL_CHECK_THROW_DEV(Approx<_type>(0), Exception);
     GDL_CHECK_THROW_DEV(Approx<_type>(1, 0), Exception);
     GDL_CHECK_THROW_DEV(Approx<_type>(1, -1), Exception);
 }
@@ -51,7 +52,7 @@ void TestApproxZero()
     {
         for (U32 j = 1; j < 100; ++j)
         {
-            _type base = Pow(static_cast<_type>(10.), i) * static_cast<_type>(1.e-10);
+            _type base = Pow(static_cast<_type>(10.), static_cast<I32>(i - 10));
 
             _type scaledEps = std::numeric_limits<_type>::epsilon() * base; // Epsilon of the current value
 
@@ -59,6 +60,11 @@ void TestApproxZero()
 
 
             // Compare values that are one epsilon above and below the adjusted tolerance
+            BOOST_CHECK(scaledEps * (factor - 1) == Approx<_type>(0, factor, base));
+            BOOST_CHECK(scaledEps * (factor + 1) != Approx<_type>(0, factor, base));
+            BOOST_CHECK(0 == Approx<_type>(scaledEps * (factor - 1), factor, base));
+            BOOST_CHECK(0 != Approx<_type>(scaledEps * (factor + 1), factor, base));
+
             BOOST_CHECK(scaledEps * (factor - 1) == ApproxZero<_type>(base, factor));
             BOOST_CHECK(scaledEps * (factor + 1) != ApproxZero<_type>(base, factor));
             BOOST_CHECK(scaledEps * (factor - 1) == ApproxZero<_type>(-base, factor));
