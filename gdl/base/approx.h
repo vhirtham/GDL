@@ -6,7 +6,6 @@
 #include <cassert>
 #include <cmath>
 #include <limits>
-#include <type_traits>
 
 
 namespace GDL
@@ -24,7 +23,7 @@ class Approx
 
 
     const _type mValue;
-    const _type mScale;
+    const I32 mFactor;
 
 public:
     Approx() = delete;
@@ -38,13 +37,13 @@ public:
 
     //! @brief ctor
     //! @param value: Value that should be compared to other values
-    //! @param scale: Factor to scale the tolerance. The tolerance is the minimal increment (epsilon) of the bigger of
-    //! two compared values.
-    explicit constexpr Approx(_type value, _type scale = static_cast<_type>(3))
+    //! @param factor: Factor to scale the tolerance. The tolerance is the minimal increment (epsilon) of the bigger of
+    //! the two compared values.
+    explicit constexpr Approx(_type value, I32 factor = 3)
         : mValue{value}
-        , mScale{scale}
+        , mFactor{factor}
     {
-        DEV_EXCEPTION(scale < static_cast<_type>(1), "Scaling factors smaller than 1 are not allowed.");
+        DEV_EXCEPTION(factor < 1, "Scaling factor must be bigger than 0.");
         DEV_EXCEPTION(std::abs(mValue) == static_cast<_type>(0),
                       "Can't use Approx with a value of 0. Use ApproxZero instead.");
     }
@@ -62,7 +61,7 @@ public:
         const _type lhsConv = static_cast<_type>(lhs);
 
         return std::abs(lhsConv - rhs.mValue) <
-               rhs.mScale * epsilon * (std::max(std::abs(lhsConv), std::abs(rhs.mValue)));
+               static_cast<_type>(rhs.mFactor) * epsilon * (std::max(std::abs(lhsConv), std::abs(rhs.mValue)));
     }
 
     //! @brief Checks if two compared values are NOT equal within a certain tolerance, which depends on the values sizes
@@ -106,21 +105,14 @@ public:
 
 
     //! @brief ctor
-    //! @param tolerance: Tolerance for comparison
-    explicit constexpr ApproxZero(_type tolerance = std::numeric_limits<_type>::epsilon())
-        : mTolerance{tolerance}
-    {
-        DEV_EXCEPTION(std::abs(mTolerance) == static_cast<_type>(0), "Tolerance must be bigger than 0.");
-    }
-
-    //! @brief ctor
     //! @param base: Value that should be compared to other values
-    //! @param scale: Factor to scale the tolerance. The tolerance is the minimal increment (epsilon) of the given base.
-    constexpr ApproxZero(_type base, _type scale)
-        : mTolerance{std::numeric_limits<_type>::epsilon() * base * scale}
+    //! @param factor: Factor to scale the tolerance. The tolerance is the minimal increment (epsilon) of the given
+    //! base.
+    constexpr ApproxZero(_type base = static_cast<_type>(1), I32 factor = 3)
+        : mTolerance{std::abs(std::numeric_limits<_type>::epsilon() * base * static_cast<_type>(factor))}
     {
-        DEV_EXCEPTION(scale < static_cast<_type>(1), "Scaling factors smaller than 1 are not allowed.");
-        DEV_EXCEPTION(std::abs(base) <= static_cast<_type>(0), "Base must be bigger than 0.");
+        DEV_EXCEPTION(factor < 1, "Scaling factor must be bigger than 0.");
+        DEV_EXCEPTION(std::abs(base) <= static_cast<_type>(0), "Base can't be 0.");
         assert(mTolerance > static_cast<_type>(0));
     }
 
