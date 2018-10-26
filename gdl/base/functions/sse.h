@@ -184,6 +184,32 @@ constexpr U32 CalcMinNumArrayRegisters(U32 numValues)
     return (numValues / registerSize) + ((numValues % registerSize > 0) ? 1 : 0);
 }
 
+// _mmx_store_p --------------------------------------------------------------------------------------------------------
+template <typename _registerType, typename _type>
+inline void _mmx_store_p([[maybe_unused]] _type* ptr, [[maybe_unused]] const _registerType& reg)
+{
+    // clang-format off
+    if constexpr(std::is_same<_registerType, __m128>::value && std::is_same<_type, F32>::value)
+        _mm_store_ps(ptr, reg);
+    else if constexpr(std::is_same<_registerType, __m128d>::value && std::is_same<_type, F64>::value)
+        _mm_store_pd(ptr, reg);
+#ifdef __AVX2__
+    else if constexpr(std::is_same<_registerType, __m256>::value && std::is_same<_type, F32>::value)
+        _mm256_store_ps(ptr, reg);
+    else if constexpr(std::is_same<_registerType, __m256d>::value && std::is_same<_type, F64>::value)
+        _mm256_store_pd(ptr, reg);
+#ifdef __AVX512F__
+    else if constexpr(std::is_same<_registerType, __m512>::value && std::is_same<_type, F32>::value)
+        _mm512_store_ps(ptr, reg);
+    else if constexpr(std::is_same<_registerType, __m512d>::value && std::is_same<_type, F64>::value)
+        _mm512_store_pd(ptr, reg);
+#endif // __AVX512F__
+#endif // __AVX2__
+
+    else
+        throw Exception(__PRETTY_FUNCTION__, "Not defined for selected combination of register type and data type");
+    // clang-format on
+}
 
 
 // _mmx_set1_p --------------------------------------------------------------------------------------------------------

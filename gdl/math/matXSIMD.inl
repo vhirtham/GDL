@@ -168,12 +168,15 @@ inline void matXSIMD<_type, _rows, _cols>::MultiplicationInnerLoops(matXSIMD<_ty
                                                                     U32 j) const
 {
     constexpr U32 registersPerColRhs = CalcMinNumArrayRegisters<__mx>(_rowsRhs);
+    alignas(mAlignment) std::array<_type, mNumRegisterEntries> registerValues;
+
     // loop over every RHS Col
     for (U32 i = 0; i < _colsRhs; ++i)
     {
         const U32 registerNumRhs = i * registersPerColRhs + j;
+        _mmx_store_p(registerValues.data(), rhs.mData[registerNumRhs]);
         alignas(mAlignment) std::array<__mx, _numMultipliedRegisters> tmp =
-                MultiplicationCreateRHSArray<_numMultipliedRegisters>(rhs.mData[registerNumRhs]);
+                MultiplicationCreateRHSArray<_numMultipliedRegisters>(registerValues);
 
         // loop over LHS rows (column registers)
         for (U32 k = 0; k < mNumRegistersPerCol; ++k)
@@ -210,7 +213,8 @@ matXSIMD<_type, _rows, _cols>::MultiplyAddRegisters(const std::array<__mx, _numO
 template <typename _type, I32 _rows, I32 _cols>
 template <U32 _arraySize, U32 _count, typename... _args>
 std::array<typename matXSIMD<_type, _rows, _cols>::__mx, _arraySize>
-matXSIMD<_type, _rows, _cols>::MultiplicationCreateRHSArray(const __mx& data, const _args&... args)
+matXSIMD<_type, _rows, _cols>::MultiplicationCreateRHSArray(const std::array<_type, mNumRegisterEntries>& data,
+                                                            const _args&... args)
 {
     static_assert(_arraySize <= GetNumRegisterEntries<__mx>() && _arraySize > 0, "Invalid array size.");
 
