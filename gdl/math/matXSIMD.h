@@ -16,7 +16,6 @@ namespace GDL
 //! @tparam _cols: Number of columns
 template <typename _type, I32 _rows, I32 _cols>
 class alignas(AlignmentBytes<decltype(SSEGetFittingRegister<_type, SSEMaxRegisterSize()>())>) matXSIMD
-// TODO: if register is a template parameter set corresponding alignment in the row above!
 {
     static_assert(std::is_floating_point<_type>::value, "Matrix can only be created with floating point types");
 
