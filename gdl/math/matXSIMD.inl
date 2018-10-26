@@ -36,13 +36,13 @@ matXSIMD<_type, _rows, _cols>::matXSIMD(_args... args)
 template <typename _type, I32 _rows, I32 _cols>
 matXSIMD<_type, _rows, _cols>::matXSIMD(const std::array<_type, _rows * _cols>& data)
 {
-    if (_rows % mNumRegisterEntries == 0)
-    {
-        assert(sizeof(mData) == sizeof(data));
-        std::memcpy(&mData, &data, sizeof(data));
-    }
+    if
+        constexpr(_rows % mNumRegisterEntries == 0)
+        {
+            assert(sizeof(mData) == sizeof(data));
+            std::memcpy(&mData, &data, sizeof(data));
+        }
     else
-    {
         for (U32 i = 0; i < _cols; ++i)
         {
             // Set last column register to zero
@@ -50,7 +50,6 @@ matXSIMD<_type, _rows, _cols>::matXSIMD(const std::array<_type, _rows * _cols>& 
             // Copy data into column
             std::memcpy(&mData[i * mNumRegistersPerCol], &data[i * _rows], sizeof(_type) * _rows);
         }
-    }
 
     ConstructionChecks();
 }
@@ -95,6 +94,7 @@ U32 matXSIMD<_type, _rows, _cols>::Cols() const
 template <typename _type, I32 _rows, I32 _cols>
 void matXSIMD<_type, _rows, _cols>::SetZero()
 {
+    // replace with mm_setzero
     mData.fill(_mmx_set1_p<__mx>(static_cast<_type>(0)));
 }
 
@@ -128,7 +128,7 @@ void matXSIMD<_type, _rows, _cols>::ConstructionChecks() const
     assert(sizeof(mData) == sizeof(__mx) * mData.size()); // Array needs to be compact
 #ifndef NDEVEXCEPTION
     for (const auto& iRegister : mData)
-        DEV_EXCEPTION(!IsAligned(&iRegister, AlignmentBytes<__mx>),
+        DEV_EXCEPTION(!IsAligned(&iRegister, mAlignment),
                       "One or more registers of the matrix are not aligned correctly");
 #endif
 }

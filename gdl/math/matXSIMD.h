@@ -15,17 +15,19 @@ namespace GDL
 //! @tparam _rows: Number of rows
 //! @tparam _cols: Number of columns
 template <typename _type, I32 _rows, I32 _cols>
-class alignas(AlignmentBytes<__m128>) matXSIMD
+class alignas(AlignmentBytes<decltype(SSEGetFittingRegister<_type, SSEMaxRegisterSize()>())>) matXSIMD
 // TODO: if register is a template parameter set corresponding alignment in the row above!
 {
-    typedef typename std::conditional<std::is_same<_type, F32>::value, __m128, __m128d>::type __mx;
+    static_assert(std::is_floating_point<_type>::value, "Matrix can only be created with floating point types");
+
+    using __mx = decltype(SSEGetFittingRegister<_type, SSEMaxRegisterSize()>());
     constexpr static U32 mAlignment = AlignmentBytes<__mx>;
     constexpr static U32 mNumRegisterEntries = GetNumRegisterEntries<__mx>();
     constexpr static U32 mNumRegistersPerCol = CalcMinNumArrayRegisters<__mx>(_rows);
     constexpr static U32 mNumRegisters = _cols * mNumRegistersPerCol;
 
 
-    alignas(AlignmentBytes<__mx>) std::array<__mx, mNumRegisters> mData;
+    alignas(mAlignment) std::array<__mx, mNumRegisters> mData;
 
     template <typename _typeOther, I32 _rowsOther, I32 _colsOther>
     friend class matXSIMD;

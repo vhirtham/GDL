@@ -25,8 +25,12 @@ bool CheckCloseArray(const _type& a, const _type& b)
     if (a.size() != b.size())
         return false;
     for (U32 i = 0; i < a.size(); ++i)
-        if (a[i] != Approx(b[i]))
-            return false;
+    {
+        if
+            constexpr(std::is_floating_point<_type>::value) if (a[i] != Approx(b[i])) return false;
+        if
+            constexpr(std::is_integral<_type>::value) if (a[i] != b[i]) return false;
+    }
     return true;
 }
 
@@ -40,8 +44,15 @@ bool CheckCloseMat(_type a, _type b)
 
     for (U32 i = 0; i < a.Rows(); ++i)
         for (U32 j = 0; j < a.Cols(); ++j)
-            if (a(i, j) != Approx(b(i, j)))
-                return false;
+        {
+            if
+                constexpr(std::is_floating_point<_type>::value)
+
+                        if (a(i, j) != Approx(b(i, j))) return false;
+
+            if
+                constexpr(std::is_integral<_type>::value) if (a(i, j) != b(i, j)) return false;
+        }
     return true;
 }
 
@@ -66,20 +77,20 @@ template <template <typename, I32, I32> class _matrix, typename _type>
 void CtorDataTest()
 {
     // array ctor
-    std::array<_type, 15> expA = {{0., 1., 2., 3., 4., 5., 6., 7., 8., 9., 10., 11., 12., 13., 14.}};
+    std::array<_type, 15> expA = {{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14}};
     _matrix<_type, 3, 5> A(expA);
     BOOST_CHECK(CheckCloseArray(A.Data(), expA));
 
-    std::array<_type, 15> expB = {{0., 1., 2., 3., 4., 5., 6., 7., 8., 9., 10., 11., 12., 13., 14.}};
+    std::array<_type, 15> expB = {{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14}};
     _matrix<_type, 5, 3> B(expB);
     BOOST_CHECK(CheckCloseArray(B.Data(), expB));
 
-    std::array<_type, 16> expC = {{0., 1., 2., 3., 4., 5., 6., 7., 8., 9., 10., 11., 12., 13., 14., 15.}};
+    std::array<_type, 16> expC = {{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15}};
     _matrix<_type, 4, 4> C(expC);
     BOOST_CHECK(CheckCloseArray(C.Data(), expC));
 
     // variadic ctor
-    _matrix<_type, 3, 5> A2(0., 1., 2., 3., 4., 5., 6., 7., 8., 9., 10., 11., 12., 13., 14.);
+    _matrix<_type, 3, 5> A2(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14);
     BOOST_CHECK(CheckCloseArray(A2.Data(), expA));
 }
 

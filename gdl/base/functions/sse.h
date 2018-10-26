@@ -13,6 +13,52 @@
 namespace GDL
 {
 
+// SSEMaxRegisterSize -------------------------------------------------------------------------------------------------
+
+constexpr U32 SSEMaxRegisterSize()
+{
+#ifdef __AVX512F__
+    return 512;
+#elif __AVX2__
+    return 256;
+#else
+    return 128;
+#endif
+}
+
+// SSEGetFittingRegister ----------------------------------------------------------------------------------------------
+
+template <typename _type, U32 _registerSize>
+auto SSEGetFittingRegister()
+{
+    static_assert(_registerSize == 128 || _registerSize == 256 || _registerSize == 512,
+                  "Register size must be 128, 256 or 512");
+
+    // clang-format off
+    if constexpr(std::is_same<_type, F32>::value && _registerSize == 128)
+        return __m128();
+    if constexpr(std::is_same<_type, F64>::value && _registerSize == 128)
+        return __m128d();
+    if constexpr(std::is_same<_type, I32>::value && _registerSize == 128)
+        return __m128i();
+#ifdef __AVX2__
+    if constexpr(std::is_same<_type, F32>::value && _registerSize == 256)
+        return __m256();
+    if constexpr(std::is_same<_type, F64>::value && _registerSize == 256)
+        return __m256d();
+    if constexpr(std::is_same<_type, I32>::value && _registerSize == 256)
+        return __m256i();
+#ifdef __AVX512F__
+    if constexpr(std::is_same<_type, F32>::value && _registerSize == 512)
+        return __m512();
+    if constexpr(std::is_same<_type, F64>::value && _registerSize == 512)
+        return __m512d();
+    if constexpr(std::is_same<_type, I32>::value && _registerSize == 512)
+        return __m512i();
+#endif // __AVX512F__
+#endif // __AVX2__
+    // clang-format on
+}
 
 
 // AlignmentBytes -----------------------------------------------------------------------------------------------------
