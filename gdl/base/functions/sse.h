@@ -107,67 +107,33 @@ constexpr const U32 AlignmentBytes<__m512i> = 64;
 template <typename _registerType>
 constexpr U32 GetNumRegisterEntries()
 {
-    throw Exception(__PRETTY_FUNCTION__, "No number of entries known for given register type");
-    return 0;
-}
-
-template <>
-constexpr U32 GetNumRegisterEntries<__m128>()
-{
-    return 4;
-}
-
-template <>
-constexpr U32 GetNumRegisterEntries<__m128d>()
-{
-    return 2;
-}
-
-template <>
-constexpr U32 GetNumRegisterEntries<__m128i>()
-{
-    return 4;
-}
-
+    // clang-format off
+    if constexpr(std::is_same<_registerType, __m128>::value)
+        return 4;
+    else if constexpr(std::is_same<_registerType, __m128d>::value)
+        return 2;
+    else if constexpr(std::is_same<_registerType, __m128i>::value)
+        return 4;
 #ifdef __AVX2__
-template <>
-constexpr U32 GetNumRegisterEntries<__m256>()
-{
-    return 8;
-}
-
-template <>
-constexpr U32 GetNumRegisterEntries<__m256d>()
-{
-    return 4;
-}
-
-template <>
-constexpr U32 GetNumRegisterEntries<__m256i>()
-{
-    return 8;
-}
-
+    else if constexpr(std::is_same<_registerType, __m256>::value)
+        return 8;
+    else if constexpr(std::is_same<_registerType, __m256d>::value)
+        return 4;
+    else if constexpr(std::is_same<_registerType, __m256i>::value)
+        return 8;
 #ifdef __AVX512F__
-template <>
-constexpr U32 GetNumRegisterEntries<__m512>()
-{
-    return 16;
-}
-
-template <>
-constexpr U32 GetNumRegisterEntries<__m512d>()
-{
-    return 8;
-}
-
-template <>
-constexpr U32 GetNumRegisterEntries<__m512i>()
-{
-    return 16;
-}
+    else if constexpr(std::is_same<_registerType, __m512>::value)
+        return 16;
+    else if constexpr(std::is_same<_registerType, __m512d>::value)
+        return 8;
+    else if constexpr(std::is_same<_registerType, __m512i>::value)
+        return 16;
 #endif // __AVX512F__
 #endif // __AVX2__
+    else
+        throw Exception(__PRETTY_FUNCTION__, "No number of entries known for given register type");
+    // clang-format on
+}
 
 
 
@@ -184,9 +150,17 @@ constexpr U32 CalcMinNumArrayRegisters(U32 numValues)
     return (numValues / registerSize) + ((numValues % registerSize > 0) ? 1 : 0);
 }
 
+
+
 // _mmx_store_p --------------------------------------------------------------------------------------------------------
-template <typename _registerType, typename _type>
-inline void _mmx_store_p([[maybe_unused]] _type* ptr, [[maybe_unused]] const _registerType& reg)
+
+//! @brief Stores the values of a register to a given memory location
+//! @tparam _type: Type of the registers values
+//! @tparam _registerType: Register type
+//! @param ptr: Pointer to a piece of memory where the data should be stored
+//! @param reg: Register that provides the data
+template <typename _type, typename _registerType>
+inline void _mmx_store_p(_type* ptr, const _registerType& reg)
 {
     // clang-format off
     if constexpr(std::is_same<_registerType, __m128>::value && std::is_same<_type, F32>::value)
@@ -205,7 +179,6 @@ inline void _mmx_store_p([[maybe_unused]] _type* ptr, [[maybe_unused]] const _re
         _mm512_store_pd(ptr, reg);
 #endif // __AVX512F__
 #endif // __AVX2__
-
     else
         throw Exception(__PRETTY_FUNCTION__, "Not defined for selected combination of register type and data type");
     // clang-format on
@@ -222,66 +195,33 @@ inline void _mmx_store_p([[maybe_unused]] _type* ptr, [[maybe_unused]] const _re
 template <typename _registerType, typename _type>
 inline _registerType _mmx_set1_p([[maybe_unused]] _type value)
 {
-    throw Exception(__PRETTY_FUNCTION__, "Not defined for selected combination of register type and data type");
-}
-
-template <>
-inline __m128 _mmx_set1_p(F32 value)
-{
-    return _mm_set1_ps(value);
-}
-
-template <>
-inline __m128d _mmx_set1_p(F64 value)
-{
-    return _mm_set1_pd(value);
-}
-
-template <>
-inline __m128i _mmx_set1_p(I32 value)
-{
-    return _mm_set1_epi32(value);
-}
-
+    // clang-format off
+    if constexpr(std::is_same<_registerType, __m128>::value && std::is_same<_type, F32>::value)
+        return _mm_set1_ps(value);
+    else if constexpr(std::is_same<_registerType, __m128d>::value && std::is_same<_type, F64>::value)
+        return _mm_set1_pd(value);
+    else if constexpr(std::is_same<_registerType, __m128i>::value && std::is_same<_type, I32>::value)
+        return _mm_set1_epi32(value);
 #ifdef __AVX2__
-template <>
-inline __m256 _mmx_set1_p(F32 value)
-{
-    return _mm256_set1_ps(value);
-}
-
-template <>
-inline __m256d _mmx_set1_p(F64 value)
-{
-    return _mm256_set1_pd(value);
-}
-
-template <>
-inline __m256i _mmx_set1_p(I32 value)
-{
-    return _mm256_set1_epi32(value);
-}
-
+    if constexpr(std::is_same<_registerType, __m256>::value && std::is_same<_type, F32>::value)
+        return _mm256_set1_ps(value);
+    else if constexpr(std::is_same<_registerType, __m256d>::value && std::is_same<_type, F64>::value)
+        return _mm256_set1_pd(value);
+    else if constexpr(std::is_same<_registerType, __m256i>::value && std::is_same<_type, I32>::value)
+        return _mm256_set1_epi32(value);
 #ifdef __AVX512F__
-template <>
-inline __m512 _mmx_set1_p(F32 value)
-{
-    return _mm512_set1_ps(value);
-}
-
-template <>
-inline __m512d _mmx_set1_p(F64 value)
-{
-    return _mm512_set1_pd(value);
-}
-
-template <>
-inline __m512i _mmx_set1_p(I32 value)
-{
-    return _mm512_set1_epi32(value);
-}
+    if constexpr(std::is_same<_registerType, __m512>::value && std::is_same<_type, F32>::value)
+        return _mm512_set1_ps(value);
+    else if constexpr(std::is_same<_registerType, __m512d>::value && std::is_same<_type, F64>::value)
+        return _mm512_set1_pd(value);
+    else if constexpr(std::is_same<_registerType, __m512i>::value && std::is_same<_type, I32>::value)
+        return _mm512_set1_epi32(value);
 #endif // __AVX512F__
 #endif // __AVX2__
+    else
+        throw Exception(__PRETTY_FUNCTION__, "Not defined for selected combination of register type and data type");
+    // clang-format on
+}
 
 
 
