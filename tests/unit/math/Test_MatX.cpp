@@ -1,8 +1,8 @@
 #include <boost/test/unit_test.hpp>
 
 #include "gdl/base/approx.h"
-#include "gdl/math/matXSIMD.inl"
-#include "gdl/math/matXSingle.inl"
+#include "gdl/math/matSIMD.inl"
+#include "gdl/math/matSingle.inl"
 
 #include <cmath>
 
@@ -91,15 +91,15 @@ void CtorDataTest()
 
 BOOST_AUTO_TEST_CASE(Construction_Single)
 {
-    CtorDataTest<matXSingle, F32>();
-    CtorDataTest<matXSingle, F64>();
+    CtorDataTest<MatSingle, F32>();
+    CtorDataTest<MatSingle, F64>();
 }
 
 
 BOOST_AUTO_TEST_CASE(Construction_SSE)
 {
-    CtorDataTest<matXSIMD, F32>();
-    CtorDataTest<matXSIMD, F64>();
+    CtorDataTest<MatSIMD, F32>();
+    CtorDataTest<MatSIMD, F64>();
 }
 
 // Assignment %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -126,15 +126,15 @@ void AssignmentTest()
 
 BOOST_AUTO_TEST_CASE(Assignment_Single)
 {
-    AssignmentTest<matXSingle, F32>();
-    AssignmentTest<matXSingle, F64>();
+    AssignmentTest<MatSingle, F32>();
+    AssignmentTest<MatSingle, F64>();
 }
 
 
 BOOST_AUTO_TEST_CASE(Assignment_SIMD)
 {
-    AssignmentTest<matXSIMD, F32>();
-    AssignmentTest<matXSIMD, F64>();
+    AssignmentTest<MatSIMD, F32>();
+    AssignmentTest<MatSIMD, F64>();
 }
 
 // Set zero %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -157,15 +157,15 @@ void SetZeroTest()
 
 BOOST_AUTO_TEST_CASE(SetZero_Single)
 {
-    SetZeroTest<matXSingle, F32>();
-    SetZeroTest<matXSingle, F64>();
+    SetZeroTest<MatSingle, F32>();
+    SetZeroTest<MatSingle, F64>();
 }
 
 
 BOOST_AUTO_TEST_CASE(SetZero_SIMD)
 {
-    SetZeroTest<matXSIMD, F32>();
-    SetZeroTest<matXSIMD, F64>();
+    SetZeroTest<MatSIMD, F32>();
+    SetZeroTest<MatSIMD, F64>();
 }
 
 // Multiplication %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -209,15 +209,15 @@ void MultiplicationTest()
 
 BOOST_AUTO_TEST_CASE(Multiplication_Single)
 {
-    MultiplicationTest<matXSingle, F32>();
-    MultiplicationTest<matXSingle, F64>();
+    MultiplicationTest<MatSingle, F32>();
+    MultiplicationTest<MatSingle, F64>();
 }
 
 
 BOOST_AUTO_TEST_CASE(Multiplication_SIMD)
 {
-    MultiplicationTest<matXSIMD, F32>();
-    MultiplicationTest<matXSIMD, F64>();
+    MultiplicationTest<MatSIMD, F32>();
+    MultiplicationTest<MatSIMD, F64>();
 }
 
 // Addition Assignment %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -249,13 +249,13 @@ void AdditionAssignmentTest()
 
 BOOST_AUTO_TEST_CASE(Addition_Assignment_Single)
 {
-    AdditionAssignmentTest<matXSingle, F32>();
-    AdditionAssignmentTest<matXSingle, F64>();
+    AdditionAssignmentTest<MatSingle, F32>();
+    AdditionAssignmentTest<MatSingle, F64>();
 }
 
 
 BOOST_AUTO_TEST_CASE(Addition_Assignment_SIMD)
 {
-    AdditionAssignmentTest<matXSIMD, F32>();
-    AdditionAssignmentTest<matXSIMD, F64>();
+    AdditionAssignmentTest<MatSIMD, F32>();
+    AdditionAssignmentTest<MatSIMD, F64>();
 }

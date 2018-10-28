@@ -12,10 +12,11 @@ namespace GDL
 
 
 //! @brief Matrix of arbitrary size with SIMD support
+//! @tparam _type: Data type of the matrix
 //! @tparam _rows: Number of rows
 //! @tparam _cols: Number of columns
 template <typename _type, I32 _rows, I32 _cols>
-class alignas(AlignmentBytes<decltype(SSEGetFittingRegister<_type, SSEMaxRegisterSize()>())>) matXSIMD
+class alignas(AlignmentBytes<decltype(SSEGetFittingRegister<_type, SSEMaxRegisterSize()>())>) MatSIMD
 {
     static_assert(std::is_floating_point<_type>::value, "Matrix can only be created with floating point types");
 
@@ -29,22 +30,22 @@ class alignas(AlignmentBytes<decltype(SSEGetFittingRegister<_type, SSEMaxRegiste
     alignas(mAlignment) std::array<__mx, mNumRegisters> mData;
 
     template <typename _typeOther, I32 _rowsOther, I32 _colsOther>
-    friend class matXSIMD;
+    friend class MatSIMD;
 
 public:
     //! @brief constructor
-    matXSIMD();
+    MatSIMD();
 
     //! @brief Constructor to set the whole matrix
     //! @param args: Values (column major)
     //! @tparam _args: Variadic data type
     template <typename... _args>
-    explicit matXSIMD(_args... args);
+    explicit MatSIMD(_args... args);
 
 
     //! @brief Constructor to set the whole matrix
     //! @brief Array with values (column major)
-    explicit matXSIMD(const std::array<_type, _rows * _cols>& data);
+    explicit MatSIMD(const std::array<_type, _rows * _cols>& data);
 
     //! @brief Matrix - matrix multiplication
     //! @tparam _rowsRhs: Rhs matrix number of rows
@@ -52,12 +53,12 @@ public:
     //! @param rhs: Rhs matrix
     //! @return Result of the multiplication
     template <I32 _rowsRhs, I32 _colsRhs>
-    inline matXSIMD<_type, _rows, _colsRhs> operator*(const matXSIMD<_type, _rowsRhs, _colsRhs>& rhs) const;
+    inline MatSIMD<_type, _rows, _colsRhs> operator*(const MatSIMD<_type, _rowsRhs, _colsRhs>& rhs) const;
 
     //! @brief Matrix - matrix addition
     //! @param rhs: Rhs matrix
     //! @return Result of the addition
-    inline matXSIMD& operator+=(const matXSIMD& rhs);
+    inline MatSIMD& operator+=(const MatSIMD& rhs);
 
     //! @brief Direct access operator
     //! @param row: Row of the accessed value
@@ -89,8 +90,8 @@ private:
     //! @param rhs: Rhs matrix
     //! @param j: Current outer loop value
     template <I32 _rowsRhs, I32 _colsRhs, U32 _numMultipliedRegisters = mNumRegisterEntries>
-    inline void MultiplicationInnerLoops(matXSIMD<_type, _rows, _colsRhs>& result,
-                                         const matXSIMD<_type, _rowsRhs, _colsRhs>& rhs, U32 j) const;
+    inline void MultiplicationInnerLoops(MatSIMD<_type, _rows, _colsRhs>& result,
+                                         const MatSIMD<_type, _rowsRhs, _colsRhs>& rhs, U32 j) const;
 
     //! @brief Creates a temporary array that is needed during matrix-matrix multiplication.
     //! @tparam _arraySize: Size of the array

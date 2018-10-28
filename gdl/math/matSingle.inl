@@ -1,6 +1,6 @@
 #pragma once
 
-#include "matXSingle.h"
+#include "matSingle.h"
 
 #include <algorithm>
 #include <cassert>
@@ -8,20 +8,20 @@
 
 
 template <typename T, GDL::I32 tRows, GDL::I32 tCols>
-GDL::matXSingle<T, tRows, tCols>::matXSingle()
+GDL::MatSingle<T, tRows, tCols>::MatSingle()
 {
 }
 
 template<typename T, GDL::I32 tRows, GDL::I32 tCols>
 template <typename... Args>
-GDL::matXSingle<T, tRows, tCols>::matXSingle(Args... args)
+GDL::MatSingle<T, tRows, tCols>::MatSingle(Args... args)
     : mData{{static_cast<T>(args)...}}
 {
     assert(mData.size() == sizeof...(args));
 }
 
 template <typename T, GDL::I32 tRows, GDL::I32 tCols>
-GDL::matXSingle<T, tRows, tCols>::matXSingle(const std::array<T, tRows * tCols>& data)
+GDL::MatSingle<T, tRows, tCols>::MatSingle(const std::array<T, tRows * tCols>& data)
     : mData(data)
 {
     assert(mData.size() == data.size());
@@ -30,12 +30,12 @@ GDL::matXSingle<T, tRows, tCols>::matXSingle(const std::array<T, tRows * tCols>&
 
 template <typename T, GDL::I32 tRows, GDL::I32 tCols>
 template <GDL::I32 tRowsRhs, GDL::I32 tColsRhs>
-GDL::matXSingle<T, tRows, tColsRhs> GDL::matXSingle<T, tRows, tCols>::
-operator*(const matXSingle<T, tRowsRhs, tColsRhs>& rhs) const
+GDL::MatSingle<T, tRows, tColsRhs> GDL::MatSingle<T, tRows, tCols>::
+operator*(const MatSingle<T, tRowsRhs, tColsRhs>& rhs) const
 {
     static_assert(tCols == tRowsRhs, "Lhs cols != Rhs rows - Matrix multiplication not possible!");
 
-    matXSingle<T, tRows, tColsRhs> result;
+    MatSingle<T, tRows, tColsRhs> result;
     result.SetZero();
     // loop over RHS cols
     for (U32 i = 0; i < tColsRhs; ++i)
@@ -49,7 +49,7 @@ operator*(const matXSingle<T, tRowsRhs, tColsRhs>& rhs) const
 
 
 template <typename T, GDL::I32 tRows, GDL::I32 tCols>
-GDL::matXSingle<T, tRows, tCols>& GDL::matXSingle<T, tRows, tCols>::operator+=(const matXSingle<T, tRows, tCols>& rhs)
+GDL::MatSingle<T, tRows, tCols>& GDL::MatSingle<T, tRows, tCols>::operator+=(const MatSingle<T, tRows, tCols>& rhs)
 {
     for (U32 i = 0; i < mData.size(); ++i)
         mData[i] += rhs.mData[i];
@@ -57,38 +57,38 @@ GDL::matXSingle<T, tRows, tCols>& GDL::matXSingle<T, tRows, tCols>::operator+=(c
 }
 
 template <typename T, GDL::I32 tRows, GDL::I32 tCols>
-T GDL::matXSingle<T, tRows, tCols>::operator()(const GDL::U32 row, const GDL::U32 col) const
+T GDL::MatSingle<T, tRows, tCols>::operator()(const GDL::U32 row, const GDL::U32 col) const
 {
     return mData[row + col * tRows];
 }
 
 template <typename T, GDL::I32 tRows, GDL::I32 tCols>
-GDL::U32 GDL::matXSingle<T, tRows, tCols>::Rows() const
+GDL::U32 GDL::MatSingle<T, tRows, tCols>::Rows() const
 {
     return tRows;
 }
 
 template <typename T, GDL::I32 tRows, GDL::I32 tCols>
-GDL::U32 GDL::matXSingle<T, tRows, tCols>::Cols() const
+GDL::U32 GDL::MatSingle<T, tRows, tCols>::Cols() const
 {
     return tCols;
 }
 
 template <typename T, GDL::I32 tRows, GDL::I32 tCols>
-std::array<T, tRows * tCols> GDL::matXSingle<T, tRows, tCols>::Data() const
+std::array<T, tRows * tCols> GDL::MatSingle<T, tRows, tCols>::Data() const
 {
     return mData;
 }
 
 template<typename T, GDL::I32 tRows, GDL::I32 tCols>
-void GDL::matXSingle<T, tRows, tCols>::SetZero()
+void GDL::MatSingle<T, tRows, tCols>::SetZero()
 {
     mData.fill(0.);
 }
 
 // template <typename T, GDL::I32 tRows, GDL::I32 tCols>
 // constexpr std::array<T, tRows * tCols>
-// GDL::matXSingle<T, tRows, tCols>::RowMajorToColumnMajor(std::array<T, tRows * tCols> rowMaj)
+// GDL::MatSingle<T, tRows, tCols>::RowMajorToColumnMajor(std::array<T, tRows * tCols> rowMaj)
 //{
 //    std::array<T, tRows * tCols> colMaj={};
 //    for (U32 i = 0; i < tRows * tCols; ++i)
@@ -102,7 +102,7 @@ void GDL::matXSingle<T, tRows, tCols>::SetZero()
 
 
 template <typename T2, GDL::I32 tRows2, GDL::I32 tCols2>
-std::ostream& operator<<(std::ostream& os, const GDL::matXSingle<T2, tRows2, tCols2>& mat)
+std::ostream& operator<<(std::ostream& os, const GDL::MatSingle<T2, tRows2, tCols2>& mat)
 {
     using namespace GDL;
     for (U32 i = 0; i < tRows2; ++i)

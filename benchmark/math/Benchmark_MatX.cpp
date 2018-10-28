@@ -1,5 +1,5 @@
-#include "gdl/math/matXSIMD.inl"
-#include "gdl/math/matXSingle.inl"
+#include "gdl/math/matSIMD.inl"
+#include "gdl/math/matSingle.inl"
 #include <benchmark/benchmark.h>
 
 #ifdef EIGEN3_FOUND
@@ -16,9 +16,9 @@ constexpr U32 M = N - 1;
 class SIMD : public benchmark::Fixture
 {
 public:
-    matXSIMD<F32, N, N> A;
-    matXSIMD<F32, N, N> B;
-    matXSingle<F32, M, N> C;
+    MatSIMD<F32, N, N> A;
+    MatSIMD<F32, N, N> B;
+    MatSingle<F32, M, N> C;
     std::array<F32, N * N> valArray;
     std::array<F32, M * N> valArray2;
 
@@ -35,8 +35,8 @@ public:
 class Single : public benchmark::Fixture
 {
 public:
-    matXSingle<F32, N, N> A;
-    matXSingle<F32, N, N> B;
+    MatSingle<F32, N, N> A;
+    MatSingle<F32, N, N> B;
     std::array<F32, N * N> valArray;
 
     Single()
@@ -64,14 +64,14 @@ public:
 BENCHMARK_F(Single, Construction_Def)(benchmark::State& state)
 {
     for (auto _ : state)
-        benchmark::DoNotOptimize(matXSingle<F32, N, N>());
+        benchmark::DoNotOptimize(MatSingle<F32, N, N>());
 }
 
 
 BENCHMARK_F(SIMD, Construction_Def)(benchmark::State& state)
 {
     for (auto _ : state)
-        benchmark::DoNotOptimize(matXSIMD<F32, N, N>());
+        benchmark::DoNotOptimize(MatSIMD<F32, N, N>());
 }
 
 // Value Construction %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -79,7 +79,7 @@ BENCHMARK_F(SIMD, Construction_Def)(benchmark::State& state)
 BENCHMARK_F(Single, Construction_Val)(benchmark::State& state)
 {
     for (auto _ : state)
-        benchmark::DoNotOptimize(matXSingle<F32, N, N>(valArray));
+        benchmark::DoNotOptimize(MatSingle<F32, N, N>(valArray));
 }
 
 
@@ -87,7 +87,7 @@ BENCHMARK_F(Single, Construction_Val)(benchmark::State& state)
 BENCHMARK_F(SIMD, Construction_Val)(benchmark::State& state)
 {
     for (auto _ : state)
-        benchmark::DoNotOptimize(matXSIMD<F32, N, N>(valArray));
+        benchmark::DoNotOptimize(MatSIMD<F32, N, N>(valArray));
 }
 
 
@@ -95,13 +95,13 @@ BENCHMARK_F(SIMD, Construction_Val)(benchmark::State& state)
 BENCHMARK_F(SIMD, Construction_Val_non_full_registers)(benchmark::State& state)
 {
     for (auto _ : state)
-        benchmark::DoNotOptimize(matXSIMD<F32, M, N>(valArray2));
+        benchmark::DoNotOptimize(MatSIMD<F32, M, N>(valArray2));
 }
 
 BENCHMARK_F(Single, Construction_Val_Variadic_12x12)(benchmark::State& state)
 {
     for (auto _ : state)
-        benchmark::DoNotOptimize(matXSingle<F32, 12, 12>(
+        benchmark::DoNotOptimize(MatSingle<F32, 12, 12>(
                 1., 2., 3., 4., 5., 6., 7., 8., 9., 10., 11., 12., 1., 2., 3., 4., 5., 6., 7., 8., 9., 10., 11., 12.,
                 1., 2., 3., 4., 5., 6., 7., 8., 9., 10., 11., 12., 1., 2., 3., 4., 5., 6., 7., 8., 9., 10., 11., 12.,
                 1., 2., 3., 4., 5., 6., 7., 8., 9., 10., 11., 12., 1., 2., 3., 4., 5., 6., 7., 8., 9., 10., 11., 12.,
@@ -113,7 +113,7 @@ BENCHMARK_F(Single, Construction_Val_Variadic_12x12)(benchmark::State& state)
 BENCHMARK_F(SIMD, Construction_Val_Variadic_12x12)(benchmark::State& state)
 {
     for (auto _ : state)
-        benchmark::DoNotOptimize(matXSIMD<F32, 12, 12>(
+        benchmark::DoNotOptimize(MatSIMD<F32, 12, 12>(
                 1., 2., 3., 4., 5., 6., 7., 8., 9., 10., 11., 12., 1., 2., 3., 4., 5., 6., 7., 8., 9., 10., 11., 12.,
                 1., 2., 3., 4., 5., 6., 7., 8., 9., 10., 11., 12., 1., 2., 3., 4., 5., 6., 7., 8., 9., 10., 11., 12.,
                 1., 2., 3., 4., 5., 6., 7., 8., 9., 10., 11., 12., 1., 2., 3., 4., 5., 6., 7., 8., 9., 10., 11., 12.,

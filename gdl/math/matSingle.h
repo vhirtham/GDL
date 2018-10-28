@@ -11,26 +11,26 @@ namespace GDL
 //! @tparam tRows: Number of rows
 //! @tparam tCols: Number of columns
 template <typename T, I32 tRows, I32 tCols>
-class matXSingle
+class MatSingle
 {
     template <typename T2, I32 tRows2, I32 tCols2>
-    friend class matXSingle;
+    friend class MatSingle;
 
     std::array<T, tRows * tCols> mData;
 
 public:
     //! @brief Constructor
-    matXSingle();
+    MatSingle();
 
     //! @brief Constructor to set the whole matrix
     //! @param args: Values (column major)
     //! @tparam Args: Variadic data type
     template <typename... Args>
-    explicit matXSingle(Args... args);
+    explicit MatSingle(Args... args);
 
     //! @brief Constructor to set the whole matrix
     //! @param data: Array with values (column major)
-    explicit matXSingle(const std::array<T, tRows * tCols>& data);
+    explicit MatSingle(const std::array<T, tRows * tCols>& data);
 
     //! @brief Matrix - matrix multiplication
     //! @tparam tRowsRhs: Rhs matrix number of rows
@@ -38,13 +38,13 @@ public:
     //! @param rhs: Rhs matrix
     //! @return Result of the multiplication
     template <I32 tRowsRhs, I32 tColsRhs>
-    inline matXSingle<T, tRows, tColsRhs> operator*(const matXSingle<T, tRowsRhs, tColsRhs>& rhs) const;
+    inline MatSingle<T, tRows, tColsRhs> operator*(const MatSingle<T, tRowsRhs, tColsRhs>& rhs) const;
 
 
     //! @brief Matrix - matrix addition
     //! @param rhs: Rhs matrix
     //! @return Result of the addition
-    inline matXSingle& operator+=(const matXSingle& rhs);
+    inline MatSingle& operator+=(const MatSingle& rhs);
 
 
     //! @brief Direct access operator
