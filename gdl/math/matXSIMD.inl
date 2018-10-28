@@ -93,9 +93,8 @@ U32 matXSIMD<_type, _rows, _cols>::Cols() const
 
 template <typename _type, I32 _rows, I32 _cols>
 void matXSIMD<_type, _rows, _cols>::SetZero()
-{
-    // replace with mm_setzero
-    mData.fill(_mmx_set1_p<__mx>(static_cast<_type>(0)));
+{   
+    mData.fill(_mmx_setzero_p<__mx>());
 }
 
 

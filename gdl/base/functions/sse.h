@@ -192,8 +192,48 @@ inline void _mmx_store_p(_type* ptr, const _registerType& reg)
 //! @tparam _type: Type of the value
 //! @param value: Value that should be set
 //! @return Register with all entries set to the same value
+template <typename _registerType>
+inline _registerType _mmx_setzero_p()
+{
+    // clang-format off
+    if constexpr(std::is_same<_registerType, __m128>::value)
+        return _mm_setzero_ps();
+    else if constexpr(std::is_same<_registerType, __m128d>::value)
+        return _mm_setzero_pd();
+    else if constexpr(std::is_same<_registerType, __m128i>::value)
+        return _mm_setzero_si128();
+#ifdef __AVX2__
+    if constexpr(std::is_same<_registerType, __m256>::value)
+        return _mm256_setzero_ps();
+    else if constexpr(std::is_same<_registerType, __m256d>::value)
+        return _mm256_setzero_pd();
+    else if constexpr(std::is_same<_registerType, __m256i>::value)
+        return _mm256_setzero_si256();
+#ifdef __AVX512F__
+    if constexpr(std::is_same<_registerType, __m512>::value)
+        return _mm512_setzero_ps();
+    else if constexpr(std::is_same<_registerType, __m512d>::value)
+        return _mm512_setzero_pd();
+    else if constexpr(std::is_same<_registerType, __m512i>::value)
+        return _mm512_setzero_si512();
+#endif // __AVX512F__
+#endif // __AVX2__
+    else
+        throw Exception(__PRETTY_FUNCTION__, "Not defined for selected combination of register type and data type");
+    // clang-format on
+}
+
+
+
+// _mmx_set1_p --------------------------------------------------------------------------------------------------------
+
+//! @brief Template to create a register with all entries set to the same value
+//! @tparam _registerType: Register type
+//! @tparam _type: Type of the value
+//! @param value: Value that should be set
+//! @return Register with all entries set to the same value
 template <typename _registerType, typename _type>
-inline _registerType _mmx_set1_p([[maybe_unused]] _type value)
+inline _registerType _mmx_set1_p(_type value)
 {
     // clang-format off
     if constexpr(std::is_same<_registerType, __m128>::value && std::is_same<_type, F32>::value)
@@ -233,7 +273,7 @@ inline _registerType _mmx_set1_p([[maybe_unused]] _type value)
 //! @param rhs: Right hand side value
 //! @return Result of the addition
 template <typename _registerType>
-inline _registerType _mmx_add_p(_registerType lhs, _registerType rhs)
+inline _registerType _mmx_add_p(const _registerType& lhs, const _registerType& rhs)
 {
     // clang-format off
     if constexpr(std::is_same<_registerType, __m128>::value)
@@ -273,7 +313,7 @@ inline _registerType _mmx_add_p(_registerType lhs, _registerType rhs)
 //! @param rhs: Right hand side value
 //! @return Result of the multiplication
 template <typename _registerType>
-inline _registerType _mmx_mul_p(_registerType lhs, _registerType rhs)
+inline _registerType _mmx_mul_p(const _registerType& lhs, const _registerType& rhs)
 {
     // clang-format off
     if constexpr(std::is_same<_registerType, __m128>::value)
@@ -317,7 +357,7 @@ inline _registerType _mmx_mul_p(_registerType lhs, _registerType rhs)
 //! @remark If fmadd intrinsics are not available the function still works. It performs the necessary operations
 //! seperately.
 template <typename _registerType>
-inline _registerType _mmx_fmadd_p(_registerType lhsM, _registerType rhsM, _registerType add)
+inline _registerType _mmx_fmadd_p(const _registerType& lhsM, const _registerType& rhsM, const _registerType& add)
 {
 #ifndef __FMA__
     return _mmx_add_p(_mmx_mul_p(lhsM, rhsM), add);
@@ -339,9 +379,9 @@ inline _registerType _mmx_fmadd_p(_registerType lhsM, _registerType rhsM, _regis
         return _mm512_fmadd_pd(lhsM, rhsM, add);
 #endif // __AVX512F__
 #endif // __AVX2__
-#endif // __FMA__
     else
         throw Exception(__PRETTY_FUNCTION__, "Not defined for selected register type.");
+#endif // __FMA__
     // clang-format on
 }
 
