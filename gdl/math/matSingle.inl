@@ -7,111 +7,106 @@
 #include <iostream>
 
 
-template <typename T, GDL::I32 tRows, GDL::I32 tCols>
-GDL::MatSingle<T, tRows, tCols>::MatSingle()
+
+
+namespace GDL
+{
+
+
+template <typename _type, I32 _rows, I32 _cols>
+MatSingle<_type, _rows, _cols>::MatSingle()
 {
 }
 
-template<typename T, GDL::I32 tRows, GDL::I32 tCols>
+template <typename _type, I32 _rows, I32 _cols>
 template <typename... Args>
-GDL::MatSingle<T, tRows, tCols>::MatSingle(Args... args)
-    : mData{{static_cast<T>(args)...}}
+MatSingle<_type, _rows, _cols>::MatSingle(Args... args)
+    : mData{{static_cast<_type>(args)...}}
 {
     assert(mData.size() == sizeof...(args));
 }
 
-template <typename T, GDL::I32 tRows, GDL::I32 tCols>
-GDL::MatSingle<T, tRows, tCols>::MatSingle(const std::array<T, tRows * tCols>& data)
+template <typename _type, I32 _rows, I32 _cols>
+MatSingle<_type, _rows, _cols>::MatSingle(const std::array<_type, _rows * _cols>& data)
     : mData(data)
 {
     assert(mData.size() == data.size());
 }
 
 
-template <typename T, GDL::I32 tRows, GDL::I32 tCols>
-template <GDL::I32 tRowsRhs, GDL::I32 tColsRhs>
-GDL::MatSingle<T, tRows, tColsRhs> GDL::MatSingle<T, tRows, tCols>::
-operator*(const MatSingle<T, tRowsRhs, tColsRhs>& rhs) const
+template <typename _type, I32 _rows, I32 _cols>
+template <I32 _rowsRhs, I32 _colsRhs>
+MatSingle<_type, _rows, _colsRhs> MatSingle<_type, _rows, _cols>::
+operator*(const MatSingle<_type, _rowsRhs, _colsRhs>& rhs) const
 {
-    static_assert(tCols == tRowsRhs, "Lhs cols != Rhs rows - Matrix multiplication not possible!");
+    static_assert(_cols == _rowsRhs, "Lhs cols != Rhs rows");
 
-    MatSingle<T, tRows, tColsRhs> result;
+    MatSingle<_type, _rows, _colsRhs> result;
     result.SetZero();
     // loop over RHS cols
-    for (U32 i = 0; i < tColsRhs; ++i)
+    for (U32 i = 0; i < _colsRhs; ++i)
         // loop over RHS row
-        for (U32 j = 0; j < tRowsRhs; ++j)
+        for (U32 j = 0; j < _rowsRhs; ++j)
             // loop over LHS rows
-            for (U32 k = 0; k < tRows; ++k)
-                result.mData[k + i * tRows] += mData[k + j * tRows] * rhs.mData[j + i * tRowsRhs];
+            for (U32 k = 0; k < _rows; ++k)
+                result.mData[k + i * _rows] += mData[k + j * _rows] * rhs.mData[j + i * _rowsRhs];
     return result;
 }
 
 
-template <typename T, GDL::I32 tRows, GDL::I32 tCols>
-GDL::MatSingle<T, tRows, tCols>& GDL::MatSingle<T, tRows, tCols>::operator+=(const MatSingle<T, tRows, tCols>& rhs)
+template <typename _type, I32 _rows, I32 _cols>
+MatSingle<_type, _rows, _cols>& MatSingle<_type, _rows, _cols>::
+operator+=(const MatSingle<_type, _rows, _cols>& rhs)
 {
     for (U32 i = 0; i < mData.size(); ++i)
         mData[i] += rhs.mData[i];
     return *this;
 }
 
-template <typename T, GDL::I32 tRows, GDL::I32 tCols>
-T GDL::MatSingle<T, tRows, tCols>::operator()(const GDL::U32 row, const GDL::U32 col) const
+template <typename _type, I32 _rows, I32 _cols>
+_type MatSingle<_type, _rows, _cols>::operator()(const U32 row, const U32 col) const
 {
-    return mData[row + col * tRows];
+    return mData[row + col * _rows];
 }
 
-template <typename T, GDL::I32 tRows, GDL::I32 tCols>
-GDL::U32 GDL::MatSingle<T, tRows, tCols>::Rows() const
+template <typename _type, I32 _rows, I32 _cols>
+U32 MatSingle<_type, _rows, _cols>::Rows() const
 {
-    return tRows;
+    return _rows;
 }
 
-template <typename T, GDL::I32 tRows, GDL::I32 tCols>
-GDL::U32 GDL::MatSingle<T, tRows, tCols>::Cols() const
+template <typename _type, I32 _rows, I32 _cols>
+U32 MatSingle<_type, _rows, _cols>::Cols() const
 {
-    return tCols;
+    return _cols;
 }
 
-template <typename T, GDL::I32 tRows, GDL::I32 tCols>
-std::array<T, tRows * tCols> GDL::MatSingle<T, tRows, tCols>::Data() const
+template <typename _type, I32 _rows, I32 _cols>
+std::array<_type, _rows * _cols> MatSingle<_type, _rows, _cols>::Data() const
 {
     return mData;
 }
 
-template<typename T, GDL::I32 tRows, GDL::I32 tCols>
-void GDL::MatSingle<T, tRows, tCols>::SetZero()
+template <typename _type, I32 _rows, I32 _cols>
+void MatSingle<_type, _rows, _cols>::SetZero()
 {
-    mData.fill(0.);
+    mData.fill(static_cast<_type>(0));
 }
 
-// template <typename T, GDL::I32 tRows, GDL::I32 tCols>
-// constexpr std::array<T, tRows * tCols>
-// GDL::MatSingle<T, tRows, tCols>::RowMajorToColumnMajor(std::array<T, tRows * tCols> rowMaj)
-//{
-//    std::array<T, tRows * tCols> colMaj={};
-//    for (U32 i = 0; i < tRows * tCols; ++i)
-//    {
-//        U32 currentCol = i / tRows;
-//        U32 currentRow = i % tRows;
-//        colMaj[i] = rowMaj[currentCol+currentRow*tCols];
-//    }
-//    return colMaj;
-//}
 
-
-template <typename T2, GDL::I32 tRows2, GDL::I32 tCols2>
-std::ostream& operator<<(std::ostream& os, const GDL::MatSingle<T2, tRows2, tCols2>& mat)
+template <typename _type2, I32 _rows2, I32 _cols2>
+std::ostream& operator<<(std::ostream& os, const MatSingle<_type2, _rows2, _cols2>& mat)
 {
     using namespace GDL;
-    for (U32 i = 0; i < tRows2; ++i)
+    for (U32 i = 0; i < _rows2; ++i)
     {
         os << "| ";
-        for (U32 j = 0; j < tCols2; ++j)
+        for (U32 j = 0; j < _cols2; ++j)
             os << mat(i, j) << " ";
         os << "|" << std::endl;
     }
     return os;
 }
 
+
+} // namespace GDL
