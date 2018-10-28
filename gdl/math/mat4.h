@@ -4,5 +4,5 @@
 
 namespace GDL
 {
-typedef mat4SIMD Mat4f;
+typedef Mat4SIMD Mat4f;
 }

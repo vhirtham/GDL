@@ -72,7 +72,7 @@ BOOST_AUTO_TEST_CASE(Construction_Single)
 
 BOOST_AUTO_TEST_CASE(Construction_SIMD)
 {
-    ConstructionTest<mat4SIMD>();
+    ConstructionTest<Mat4SIMD>();
 }
 
 // Addition Assignment %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -98,7 +98,7 @@ BOOST_FIXTURE_TEST_CASE(Addition_Assignment_Single, Fixture<mat4Single<F32>>)
 }
 
 
-BOOST_FIXTURE_TEST_CASE(Addition_Assignment_SIMD, Fixture<mat4SIMD>)
+BOOST_FIXTURE_TEST_CASE(Addition_Assignment_SIMD, Fixture<Mat4SIMD>)
 {
     AdditionAssignmentTest(A, B);
 }
@@ -126,7 +126,7 @@ BOOST_FIXTURE_TEST_CASE(Multiplication_Single, Fixture<mat4Single<F32>>)
 }
 
 
-BOOST_FIXTURE_TEST_CASE(Multiplication_SIMD, Fixture<mat4SIMD>)
+BOOST_FIXTURE_TEST_CASE(Multiplication_SIMD, Fixture<Mat4SIMD>)
 {
-    MultiplicationTest<mat4SIMD>(A, B);
+    MultiplicationTest<Mat4SIMD>(A, B);
 }

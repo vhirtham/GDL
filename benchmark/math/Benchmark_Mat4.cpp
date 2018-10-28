@@ -9,8 +9,8 @@ using namespace GDL;
 class SIMD : public benchmark::Fixture
 {
 public:
-    mat4SIMD A;
-    mat4SIMD B;
+    Mat4SIMD A;
+    Mat4SIMD B;
 
     SIMD()
         : A{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15}
@@ -47,7 +47,7 @@ BENCHMARK_F(Single, Construction)(benchmark::State& state)
 BENCHMARK_F(SIMD, Construction)(benchmark::State& state)
 {
     for (auto _ : state)
-        mat4SIMD C(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15);
+        Mat4SIMD C(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15);
 }
 
 

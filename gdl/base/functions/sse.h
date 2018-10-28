@@ -185,13 +185,12 @@ inline void _mmx_store_p(_type* ptr, const _registerType& reg)
 }
 
 
-// _mmx_set1_p --------------------------------------------------------------------------------------------------------
 
-//! @brief Template to create a register with all entries set to the same value
+// _mmx_setzero_p -----------------------------------------------------------------------------------------------------
+
+//! @brief Template to create a register with all entries set to zero
 //! @tparam _registerType: Register type
-//! @tparam _type: Type of the value
-//! @param value: Value that should be set
-//! @return Register with all entries set to the same value
+//! @return Register with all entries set to zero
 template <typename _registerType>
 inline _registerType _mmx_setzero_p()
 {
@@ -256,6 +255,49 @@ inline _registerType _mmx_set1_p(_type value)
         return _mm512_set1_pd(value);
     else if constexpr(std::is_same<_registerType, __m512i>::value && std::is_same<_type, I32>::value)
         return _mm512_set1_epi32(value);
+#endif // __AVX512F__
+#endif // __AVX2__
+    else
+        throw Exception(__PRETTY_FUNCTION__, "Not defined for selected combination of register type and data type");
+    // clang-format on
+}
+
+
+
+// _mmx_setr_p --------------------------------------------------------------------------------------------------------
+
+//! @brief Template to create a register with given values in reverse order
+//! @tparam _registerType: Register type
+//! @tparam _type: Type of the value
+//! @param v0: First value
+//! @param v1: Second value
+//! @param v2: Third value
+//! @param v3: Fourth value
+//! @return Register with given values in reverse order
+template <typename _registerType, typename _type>
+inline _registerType _mmx_setr_p(_type v0, _type v1, _type v2, _type v3)
+{
+    // clang-format off
+    if constexpr(std::is_same<_registerType, __m128>::value && std::is_same<_type, F32>::value)
+        return _mm_setr_ps(v0,v1,v2,v3);
+    else if constexpr(std::is_same<_registerType, __m128d>::value && std::is_same<_type, F64>::value)
+        return _mm_setr_pd(v0,v1,v2,v3);
+    else if constexpr(std::is_same<_registerType, __m128i>::value && std::is_same<_type, I32>::value)
+        return _mm_setr_epi32(v0,v1,v2,v3);
+#ifdef __AVX2__
+    if constexpr(std::is_same<_registerType, __m256>::value && std::is_same<_type, F32>::value)
+        return _mm256_setr_ps(v0,v1,v2,v3);
+    else if constexpr(std::is_same<_registerType, __m256d>::value && std::is_same<_type, F64>::value)
+        return _mm256_setr_pd(v0,v1,v2,v3);
+    else if constexpr(std::is_same<_registerType, __m256i>::value && std::is_same<_type, I32>::value)
+        return _mm256_setr_epi32(v0,v1,v2,v3);
+#ifdef __AVX512F__
+    if constexpr(std::is_same<_registerType, __m512>::value && std::is_same<_type, F32>::value)
+        return _mm512_setr_ps(v0,v1,v2,v3);
+    else if constexpr(std::is_same<_registerType, __m512d>::value && std::is_same<_type, F64>::value)
+        return _mm512_setr_pd(v0,v1,v2,v3);
+    else if constexpr(std::is_same<_registerType, __m512i>::value && std::is_same<_type, I32>::value)
+        return _mm512_setr_epi32(v0,v1,v2,v3);
 #endif // __AVX512F__
 #endif // __AVX2__
     else
