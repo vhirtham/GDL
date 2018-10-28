@@ -233,68 +233,35 @@ inline _registerType _mmx_set1_p([[maybe_unused]] _type value)
 //! @param rhs: Right hand side value
 //! @return Result of the addition
 template <typename _registerType>
-inline _registerType _mmx_add_p([[maybe_unused]] _registerType lhs, [[maybe_unused]] _registerType rhs)
+inline _registerType _mmx_add_p(_registerType lhs, _registerType rhs)
 {
-    throw Exception(__PRETTY_FUNCTION__, "Not defined for selected register type");
-}
-
-template <>
-inline __m128 _mmx_add_p(__m128 lhs, __m128 rhs)
-{
-    return _mm_add_ps(lhs, rhs);
-}
-
-template <>
-inline __m128d _mmx_add_p(__m128d lhs, __m128d rhs)
-{
-    return _mm_add_pd(lhs, rhs);
-}
-
-template <>
-inline __m128i _mmx_add_p(__m128i lhs, __m128i rhs)
-{
-    return _mm_add_epi32(lhs, rhs);
-}
-
+    // clang-format off
+    if constexpr(std::is_same<_registerType, __m128>::value)
+        return _mm_add_ps(lhs,rhs);
+    else if constexpr(std::is_same<_registerType, __m128d>::value)
+        return _mm_add_pd(lhs,rhs);
+    else if constexpr(std::is_same<_registerType, __m128i>::value)
+        return _mm_add_epi32(lhs,rhs);
 #ifdef __AVX2__
-template <>
-inline __m256 _mmx_add_p(__m256 lhs, __m256 rhs)
-{
-    return _mm256_add_ps(lhs, rhs);
-}
-
-template <>
-inline __m256d _mmx_add_p(__m256d lhs, __m256d rhs)
-{
-    return _mm256_add_pd(lhs, rhs);
-}
-
-template <>
-inline __m256i _mmx_add_p(__m256i lhs, __m256i rhs)
-{
-    return _mm256_add_epi32(lhs, rhs);
-}
-
+    if constexpr(std::is_same<_registerType, __m256>::value)
+        return _mm256_add_ps(lhs,rhs);
+    else if constexpr(std::is_same<_registerType, __m256d>::value)
+        return _mm256_add_pd(lhs,rhs);
+    else if constexpr(std::is_same<_registerType, __m256i>::value)
+        return _mm256_add_epi32(lhs,rhs);
 #ifdef __AVX512F__
-template <>
-inline __m512 _mmx_add_p(__m512 lhs, __m512 rhs)
-{
-    return _mm512_add_ps(lhs, rhs);
-}
-
-template <>
-inline __m512d _mmx_add_p(__m512d lhs, __m512d rhs)
-{
-    return _mm512_add_pd(lhs, rhs);
-}
-
-template <>
-inline __m512i _mmx_add_p(__m512i lhs, __m512i rhs)
-{
-    return _mm512_add_epi32(lhs, rhs);
-}
+    if constexpr(std::is_same<_registerType, __m512>::value)
+        return _mm512_add_ps(lhs,rhs);
+    else if constexpr(std::is_same<_registerType, __m512d>::value)
+        return _mm512_add_pd(lhs,rhs);
+    else if constexpr(std::is_same<_registerType, __m512i>::value)
+        return _mm512_add_epi32(lhs,rhs);
 #endif // __AVX512F__
 #endif // __AVX2__
+    else
+        throw Exception(__PRETTY_FUNCTION__, "Not defined for selected register type.");
+    // clang-format on
+}
 
 
 
@@ -306,68 +273,35 @@ inline __m512i _mmx_add_p(__m512i lhs, __m512i rhs)
 //! @param rhs: Right hand side value
 //! @return Result of the multiplication
 template <typename _registerType>
-inline _registerType _mmx_mul_p([[maybe_unused]] _registerType lhs, [[maybe_unused]] _registerType rhs)
+inline _registerType _mmx_mul_p(_registerType lhs, _registerType rhs)
 {
-    throw Exception(__PRETTY_FUNCTION__, "Not defined for selected register type");
-}
-
-template <>
-inline __m128 _mmx_mul_p(__m128 lhs, __m128 rhs)
-{
-    return _mm_mul_ps(lhs, rhs);
-}
-
-template <>
-inline __m128d _mmx_mul_p(__m128d lhs, __m128d rhs)
-{
-    return _mm_mul_pd(lhs, rhs);
-}
-
-template <>
-inline __m128i _mmx_mul_p(__m128i lhs, __m128i rhs)
-{
-    return _mm_mul_epi32(lhs, rhs);
-}
-
+    // clang-format off
+    if constexpr(std::is_same<_registerType, __m128>::value)
+        return _mm_mul_ps(lhs,rhs);
+    else if constexpr(std::is_same<_registerType, __m128d>::value)
+        return _mm_mul_pd(lhs,rhs);
+    else if constexpr(std::is_same<_registerType, __m128i>::value)
+        return _mm_mul_epi32(lhs,rhs);
 #ifdef __AVX2__
-template <>
-inline __m256 _mmx_mul_p(__m256 lhs, __m256 rhs)
-{
-    return _mm256_mul_ps(lhs, rhs);
-}
-
-template <>
-inline __m256d _mmx_mul_p(__m256d lhs, __m256d rhs)
-{
-    return _mm256_mul_pd(lhs, rhs);
-}
-
-template <>
-inline __m256i _mmx_mul_p(__m256i lhs, __m256i rhs)
-{
-    return _mm256_mul_epi32(lhs, rhs);
-}
-
+    if constexpr(std::is_same<_registerType, __m256>::value)
+        return _mm256_mul_ps(lhs,rhs);
+    else if constexpr(std::is_same<_registerType, __m256d>::value)
+        return _mm256_mul_pd(lhs,rhs);
+    else if constexpr(std::is_same<_registerType, __m256i>::value)
+        return _mm256_mul_epi32(lhs,rhs);
 #ifdef __AVX512F__
-template <>
-inline __m512 _mmx_mul_p(__m512 lhs, __m512 rhs)
-{
-    return _mm512_mul_ps(lhs, rhs);
-}
-
-template <>
-inline __m512d _mmx_mul_p(__m512d lhs, __m512d rhs)
-{
-    return _mm512_mul_pd(lhs, rhs);
-}
-
-template <>
-inline __m512i _mmx_mul_p(__m512i lhs, __m512i rhs)
-{
-    return _mm512_mul_epi32(lhs, rhs);
-}
+    if constexpr(std::is_same<_registerType, __m512>::value)
+        return _mm512_mul_ps(lhs,rhs);
+    else if constexpr(std::is_same<_registerType, __m512d>::value)
+        return _mm512_mul_pd(lhs,rhs);
+    else if constexpr(std::is_same<_registerType, __m512i>::value)
+        return _mm512_mul_epi32(lhs,rhs);
 #endif // __AVX512F__
 #endif // __AVX2__
+    else
+        throw Exception(__PRETTY_FUNCTION__, "Not defined for selected register type.");
+    // clang-format on
+}
 
 
 
@@ -385,50 +319,32 @@ inline __m512i _mmx_mul_p(__m512i lhs, __m512i rhs)
 template <typename _registerType>
 inline _registerType _mmx_fmadd_p(_registerType lhsM, _registerType rhsM, _registerType add)
 {
+#ifndef __FMA__
     return _mmx_add_p(_mmx_mul_p(lhsM, rhsM), add);
-}
-
-#ifdef __FMA__
-template <>
-inline __m128 _mmx_fmadd_p(__m128 lhsM, __m128 rhsM, __m128 add)
-{
-    return _mm_fmadd_ps(lhsM, rhsM, add);
-}
-
-template <>
-inline __m128d _mmx_fmadd_p(__m128d lhsM, __m128d rhsM, __m128d add)
-{
-    return _mm_fmadd_pd(lhsM, rhsM, add);
-}
-
+#else
+    // clang-format off
+    if constexpr(std::is_same<_registerType, __m128>::value)
+        return _mm_fmadd_ps(lhsM, rhsM, add);
+    else if constexpr(std::is_same<_registerType, __m128d>::value)
+        return _mm_fmadd_pd(lhsM, rhsM, add);
 #ifdef __AVX2__
-template <>
-inline __m256 _mmx_fmadd_p(__m256 lhsM, __m256 rhsM, __m256 add)
-{
-    return _mm256_fmadd_ps(lhsM, rhsM, add);
-}
-
-template <>
-inline __m256d _mmx_fmadd_p(__m256d lhsM, __m256d rhsM, __m256d add)
-{
-    return _mm256_fmadd_pd(lhsM, rhsM, add);
-}
-
+    else if constexpr(std::is_same<_registerType, __m256>::value)
+        return _mm256_fmadd_ps(lhsM, rhsM, add);
+    else if constexpr(std::is_same<_registerType, __m256d>::value)
+        return _mm256_fmadd_pd(lhsM, rhsM, add);
 #ifdef __AVX512F__
-template <>
-inline __m512 _mmx_fmadd_p(__m512 lhsM, __m512 rhsM, __m512 add)
-{
-    return _mm512_fmadd_ps(lhsM, rhsM, add);
-}
-
-template <>
-inline __m512d _mmx_fmadd_p(__m512d lhsM, __m512d rhsM, __m512d add)
-{
-    return _mm512_fmadd_pd(lhsM, b, add);
-}
-
-#endif // __FMA__
+    else if constexpr(std::is_same<_registerType, __m512>::value)
+        return _mm512_fmadd_ps(lhsM, rhsM, add);
+    else if constexpr(std::is_same<_registerType, __m512d>::value)
+        return _mm512_fmadd_pd(lhsM, rhsM, add);
 #endif // __AVX512F__
 #endif // __AVX2__
+#endif // __FMA__
+    else
+        throw Exception(__PRETTY_FUNCTION__, "Not defined for selected register type.");
+    // clang-format on
+}
+
+
 
 } // namespace GDL

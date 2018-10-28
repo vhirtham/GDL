@@ -45,13 +45,8 @@ bool CheckCloseMat(_type a, _type b)
     for (U32 i = 0; i < a.Rows(); ++i)
         for (U32 j = 0; j < a.Cols(); ++j)
         {
-            if
-                constexpr(std::is_floating_point<_type>::value)
-
-                        if (a(i, j) != Approx(b(i, j))) return false;
-
-            if
-                constexpr(std::is_integral<_type>::value) if (a(i, j) != b(i, j)) return false;
+            if (a(i, j) != Approx(b(i, j)))
+                return false;
         }
     return true;
 }
@@ -236,7 +231,6 @@ void AdditionAssignmentTest()
     _matrix<_type, 4, 4> expA1(8., 15., 14., 14., 6., 9., 18., 16., 5., 13., 15., 16., 9., 15., 13., 21.);
     f.A1 += f.B1;
     BOOST_CHECK(CheckCloseMat(f.A1, expA1));
-
 
     _matrix<_type, 4, 4> expB1(16., 22., 12., 4., 10., 8., 18., 6., 6., 14., 10., 4., 12., 16., 4., 12.);
     f.B1 += f.B1;
