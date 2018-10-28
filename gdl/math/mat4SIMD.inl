@@ -88,20 +88,10 @@ Mat4SIMD& Mat4SIMD::operator+=(const Mat4SIMD& other)
 
 F32 Mat4SIMD::operator()(const U32 row, const U32 col) const
 {
-    assert(row < 4 && "row - invalid value! [0..3]");
-    switch (col)
-    {
-    case 0:
-        return mData[0][row];
-    case 1:
-        return mData[1][row];
-    case 2:
-        return mData[2][row];
-    case 3:
-        return mData[3][row];
-    default:
-        throw std::out_of_range("col - invalid value! [0..3]");
-    }
+    DEV_EXCEPTION(row > 3, "row - invalid value! [0..3]");
+    DEV_EXCEPTION(col > 3, "col - invalid value! [0..3]");
+
+    return mData[col][row];
 }
 
 const std::array<F32, 16> Mat4SIMD::Data() const
