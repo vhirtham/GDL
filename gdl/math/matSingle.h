@@ -45,13 +45,19 @@ public:
     //! @return Result of the addition
     inline MatSingle& operator+=(const MatSingle& rhs);
 
+    //! @brief Matrix - matrix addition assignment
+    //! @param rhs: Rhs matrix
+    //! @return Result of the addition
+    [[nodiscard]] inline MatSingle operator+(const MatSingle& rhs);
+
     //! @brief Matrix - matrix multiplication
     //! @tparam _rowsRhs: Rhs matrix number of rows
     //! @tparam _colsRhs: Rhs matrix number of columns
     //! @param rhs: Rhs matrix
     //! @return Result of the multiplication
     template <I32 _rowsRhs, I32 _colsRhs>
-    inline MatSingle<_type, _rows, _colsRhs> operator*(const MatSingle<_type, _rowsRhs, _colsRhs>& rhs) const;
+    [[nodiscard]] inline MatSingle<_type, _rows, _colsRhs>
+    operator*(const MatSingle<_type, _rowsRhs, _colsRhs>& rhs) const;
 
     //! @brief Gets the number of rows
     //! @return Number of rows
@@ -63,7 +69,7 @@ public:
 
     //! @brief Gets the data array in column major ordering
     //! @return Data
-    inline std::array<_type, _rows * _cols> Data() const;
+    [[nodiscard]] inline std::array<_type, _rows * _cols> Data() const;
 
     //! @brief Sets all matrix entries to zero
     inline void SetZero();

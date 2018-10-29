@@ -57,6 +57,15 @@ MatSIMD<_type, _rows, _cols>::MatSIMD(const std::array<_type, _rows * _cols>& da
 
 
 template <typename _type, I32 _rows, I32 _cols>
+_type MatSIMD<_type, _rows, _cols>::operator()(const U32 row, const U32 col) const
+{
+    assert(row < _rows && col < _cols);
+    return mData[row / mNumRegisterEntries + col * mNumRegistersPerCol][row % mNumRegisterEntries];
+}
+
+
+
+template <typename _type, I32 _rows, I32 _cols>
 MatSIMD<_type, _rows, _cols>& MatSIMD<_type, _rows, _cols>::operator+=(const MatSIMD<_type, _rows, _cols>& rhs)
 {
     for (U32 i = 0; i < mData.size(); ++i)
@@ -67,10 +76,12 @@ MatSIMD<_type, _rows, _cols>& MatSIMD<_type, _rows, _cols>::operator+=(const Mat
 
 
 template <typename _type, I32 _rows, I32 _cols>
-_type MatSIMD<_type, _rows, _cols>::operator()(const U32 row, const U32 col) const
+MatSIMD<_type, _rows, _cols> MatSIMD<_type, _rows, _cols>::operator+(const MatSIMD<_type, _rows, _cols>& rhs)
 {
-    assert(row < _rows && col < _cols);
-    return mData[row / mNumRegisterEntries + col * mNumRegistersPerCol][row % mNumRegisterEntries];
+    MatSIMD<_type,_rows,_cols> result;
+    for (U32 i = 0; i < mData.size(); ++i)
+        result.mData[i] = _mmx_add_p(rhs.mData[i], mData[i]);
+    return result;
 }
 
 

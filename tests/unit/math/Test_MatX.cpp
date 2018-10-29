@@ -46,6 +46,7 @@ bool CheckCloseMat(_type a, _type b)
 }
 
 
+
 // Fixture definition %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 template <template <typename, I32, I32> class _matrix, typename _type>
@@ -61,7 +62,9 @@ struct Fixture
 };
 
 
+
 // Construction and Data function %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 template <template <typename, I32, I32> class _matrix, typename _type>
 void CtorDataTest()
 {
@@ -95,6 +98,8 @@ BOOST_AUTO_TEST_CASE(Construction_SSE)
     CtorDataTest<MatSIMD, F32>();
     CtorDataTest<MatSIMD, F64>();
 }
+
+
 
 // Assignment %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 template <template <typename, I32, I32> class _matrix, typename _type>
@@ -131,7 +136,10 @@ BOOST_AUTO_TEST_CASE(Assignment_SIMD)
     AssignmentTest<MatSIMD, F64>();
 }
 
+
+
 // Set zero %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 template <template <typename, I32, I32> class matrix, typename _type>
 void SetZeroTest()
 {
@@ -161,6 +169,88 @@ BOOST_AUTO_TEST_CASE(SetZero_SIMD)
     SetZeroTest<MatSIMD, F32>();
     SetZeroTest<MatSIMD, F64>();
 }
+
+
+
+// Addition Assignment %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+template <template <typename, I32, I32> class _matrix, typename _type>
+void AdditionAssignmentTest()
+{
+    Fixture<_matrix, _type> f;
+
+    // Square Matrix addition
+    _matrix<_type, 4, 4> expA1(8., 15., 14., 14., 6., 9., 18., 16., 5., 13., 15., 16., 9., 15., 13., 21.);
+    f.A1 += f.B1;
+    BOOST_CHECK(CheckCloseMat(f.A1, expA1));
+
+    _matrix<_type, 4, 4> expB1(16., 22., 12., 4., 10., 8., 18., 6., 6., 14., 10., 4., 12., 16., 4., 12.);
+    f.B1 += f.B1;
+    BOOST_CHECK(CheckCloseMat(f.B1, expB1));
+
+    // Non square matrix addition
+    _matrix<_type, 3, 5> B2(f.B2.Data());
+    _matrix<_type, 3, 5> expA2(8., 16., 16., 3., 11., 15., 11., 10., 15., 10., 13., 15., 10., 17., 16.);
+    f.A2 += B2;
+    BOOST_CHECK(CheckCloseMat(f.A2, expA2));
+
+    _matrix<_type, 3, 5> expB2(16., 22., 12., 4., 10., 8., 18., 6., 6., 14., 10., 4., 12., 16., 4.);
+    B2 += B2;
+    BOOST_CHECK(CheckCloseMat(B2, expB2));
+}
+
+BOOST_AUTO_TEST_CASE(Addition_Assignment_Single)
+{
+    AdditionAssignmentTest<MatSingle, F32>();
+    AdditionAssignmentTest<MatSingle, F64>();
+}
+
+
+BOOST_AUTO_TEST_CASE(Addition_Assignment_SIMD)
+{
+    AdditionAssignmentTest<MatSIMD, F32>();
+    AdditionAssignmentTest<MatSIMD, F64>();
+}
+
+
+
+// Addition Assignment %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+template <template <typename, I32, I32> class _matrix, typename _type>
+void AdditionTest()
+{
+    Fixture<_matrix, _type> f;
+
+    // Square Matrix addition
+
+    _matrix<_type, 4, 4> C = f.A1 + f.B1;
+    _matrix<_type, 4, 4> expC(8., 15., 14., 14., 6., 9., 18., 16., 5., 13., 15., 16., 9., 15., 13., 21.);
+
+    BOOST_CHECK(CheckCloseMat(C, expC));
+
+
+    // Non square matrix addition
+    _matrix<_type, 3, 5> B2(f.B2.Data());
+    _matrix<_type, 3, 5> C2 = f.A2 + B2;
+    _matrix<_type, 3, 5> expC2(8., 16., 16., 3., 11., 15., 11., 10., 15., 10., 13., 15., 10., 17., 16.);
+
+    BOOST_CHECK(CheckCloseMat(C2, expC2));
+}
+
+BOOST_AUTO_TEST_CASE(Addition_Single)
+{
+    AdditionTest<MatSingle, F32>();
+    AdditionTest<MatSingle, F64>();
+}
+
+
+BOOST_AUTO_TEST_CASE(Addition_SIMD)
+{
+    AdditionTest<MatSIMD, F32>();
+    AdditionTest<MatSIMD, F64>();
+}
+
+
 
 // Multiplication %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -212,44 +302,4 @@ BOOST_AUTO_TEST_CASE(Multiplication_SIMD)
 {
     MultiplicationTest<MatSIMD, F32>();
     MultiplicationTest<MatSIMD, F64>();
-}
-
-// Addition Assignment %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-template <template <typename, I32, I32> class _matrix, typename _type>
-void AdditionAssignmentTest()
-{
-    Fixture<_matrix, _type> f;
-
-    // Square Matrix addition
-    _matrix<_type, 4, 4> expA1(8., 15., 14., 14., 6., 9., 18., 16., 5., 13., 15., 16., 9., 15., 13., 21.);
-    f.A1 += f.B1;
-    BOOST_CHECK(CheckCloseMat(f.A1, expA1));
-
-    _matrix<_type, 4, 4> expB1(16., 22., 12., 4., 10., 8., 18., 6., 6., 14., 10., 4., 12., 16., 4., 12.);
-    f.B1 += f.B1;
-    BOOST_CHECK(CheckCloseMat(f.B1, expB1));
-
-    // Non square matrix addition
-    _matrix<_type, 3, 5> B2(f.B2.Data());
-    _matrix<_type, 3, 5> expA2(8., 16., 16., 3., 11., 15., 11., 10., 15., 10., 13., 15., 10., 17., 16.);
-    f.A2 += B2;
-    BOOST_CHECK(CheckCloseMat(f.A2, expA2));
-
-    _matrix<_type, 3, 5> expB2(16., 22., 12., 4., 10., 8., 18., 6., 6., 14., 10., 4., 12., 16., 4.);
-    B2 += B2;
-    BOOST_CHECK(CheckCloseMat(B2, expB2));
-}
-
-BOOST_AUTO_TEST_CASE(Addition_Assignment_Single)
-{
-    AdditionAssignmentTest<MatSingle, F32>();
-    AdditionAssignmentTest<MatSingle, F64>();
-}
-
-
-BOOST_AUTO_TEST_CASE(Addition_Assignment_SIMD)
-{
-    AdditionAssignmentTest<MatSIMD, F32>();
-    AdditionAssignmentTest<MatSIMD, F64>();
 }

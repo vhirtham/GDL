@@ -62,16 +62,16 @@ public:
     //! @brief Matrix - matrix addition
     //! @param rhs: Rhs matrix
     //! @return Result of the addition (this)
-    inline Mat4Single operator+(const Mat4Single& rhs);
+    [[nodiscard]] inline Mat4Single operator+(const Mat4Single& rhs);
 
     //! @brief Matrix - matrix multiplication
     //! @param other: Rhs matrix
     //! @return Result of the multiplication
-    inline Mat4Single operator*(const Mat4Single& other) const;
+    [[nodiscard]] inline Mat4Single operator*(const Mat4Single& other) const;
 
     //! @brief Gets the data array in column major ordering
     //! @return Data
-    inline const std::array<_type, 16> Data() const;
+    [[nodiscard]] inline const std::array<_type, 16> Data() const;
 };
 
 

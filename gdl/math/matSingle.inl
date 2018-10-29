@@ -39,6 +39,35 @@ MatSingle<_type, _rows, _cols>::MatSingle(const std::array<_type, _rows * _cols>
 
 
 template <typename _type, I32 _rows, I32 _cols>
+_type MatSingle<_type, _rows, _cols>::operator()(const U32 row, const U32 col) const
+{
+    return mData[row + col * _rows];
+}
+
+
+
+template <typename _type, I32 _rows, I32 _cols>
+MatSingle<_type, _rows, _cols>& MatSingle<_type, _rows, _cols>::operator+=(const MatSingle<_type, _rows, _cols>& rhs)
+{
+    for (U32 i = 0; i < mData.size(); ++i)
+        mData[i] += rhs.mData[i];
+    return *this;
+}
+
+
+
+template <typename _type, I32 _rows, I32 _cols>
+MatSingle<_type, _rows, _cols> MatSingle<_type, _rows, _cols>::operator+(const MatSingle<_type, _rows, _cols>& rhs)
+{
+    MatSingle<_type, _rows, _cols> result;
+    for (U32 i = 0; i < mData.size(); ++i)
+        result.mData[i] = mData[i] + rhs.mData[i];
+    return result;
+}
+
+
+
+template <typename _type, I32 _rows, I32 _cols>
 template <I32 _rowsRhs, I32 _colsRhs>
 MatSingle<_type, _rows, _colsRhs> MatSingle<_type, _rows, _cols>::
 operator*(const MatSingle<_type, _rowsRhs, _colsRhs>& rhs) const
@@ -55,24 +84,6 @@ operator*(const MatSingle<_type, _rowsRhs, _colsRhs>& rhs) const
             for (U32 k = 0; k < _rows; ++k)
                 result.mData[k + i * _rows] += mData[k + j * _rows] * rhs.mData[j + i * _rowsRhs];
     return result;
-}
-
-
-
-template <typename _type, I32 _rows, I32 _cols>
-MatSingle<_type, _rows, _cols>& MatSingle<_type, _rows, _cols>::operator+=(const MatSingle<_type, _rows, _cols>& rhs)
-{
-    for (U32 i = 0; i < mData.size(); ++i)
-        mData[i] += rhs.mData[i];
-    return *this;
-}
-
-
-
-template <typename _type, I32 _rows, I32 _cols>
-_type MatSingle<_type, _rows, _cols>::operator()(const U32 row, const U32 col) const
-{
-    return mData[row + col * _rows];
 }
 
 

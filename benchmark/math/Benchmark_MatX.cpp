@@ -191,6 +191,35 @@ BENCHMARK_F(Eigen3, Addition_Assignment)(benchmark::State& state)
 
 
 
+// Addition %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+BENCHMARK_F(Single, Addition)(benchmark::State& state)
+{
+    decltype(A) C;
+    for (auto _ : state)
+        benchmark::DoNotOptimize(C = A + B);
+}
+
+
+BENCHMARK_F(SIMD, Addition)(benchmark::State& state)
+{
+    decltype(A) C;
+    for (auto _ : state)
+        benchmark::DoNotOptimize(C = A + B);
+}
+
+
+#ifdef EIGEN3_FOUND
+BENCHMARK_F(Eigen3, Addition)(benchmark::State& state)
+{
+    decltype(A) C;
+    for (auto _ : state)
+        benchmark::DoNotOptimize((C = (A + B).eval()).eval());
+}
+#endif
+
+
+
 // Multiplication %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 BENCHMARK_F(Single, Multiplication)(benchmark::State& state)

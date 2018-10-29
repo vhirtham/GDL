@@ -68,16 +68,16 @@ public:
     //! @brief Matrix - matrix addition
     //! @param other: Rhs matrix
     //! @return Result of the addition (this)
-    inline Mat4SIMD operator+(const Mat4SIMD& other);
+    [[nodiscard]] inline Mat4SIMD operator+(const Mat4SIMD& other);
 
     //! @brief Matrix - matrix multiplication
     //! @param other: Rhs matrix
     //! @return Result of the multiplication
-    inline Mat4SIMD operator*(const Mat4SIMD& other) const;
+    [[nodiscard]] inline Mat4SIMD operator*(const Mat4SIMD& other) const;
 
     //! @brief Gets the data array in column major ordering
     //! @return Data
-    inline const std::array<F32, 16> Data() const;
+    [[nodiscard]] inline const std::array<F32, 16> Data() const;
 
 
     //! @brief Rotation matrix for a rotation around the z-axis
