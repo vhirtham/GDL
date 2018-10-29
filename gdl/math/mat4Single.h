@@ -59,6 +59,11 @@ public:
     //! @return Result of the addition (this)
     inline Mat4Single& operator+=(const Mat4Single& rhs);
 
+    //! @brief Matrix - matrix addition
+    //! @param rhs: Rhs matrix
+    //! @return Result of the addition (this)
+    inline Mat4Single operator+(const Mat4Single& rhs);
+
     //! @brief Matrix - matrix multiplication
     //! @param other: Rhs matrix
     //! @return Result of the multiplication

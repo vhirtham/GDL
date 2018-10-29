@@ -33,6 +33,38 @@ Mat4Single<_type>::Mat4Single(_type v0, _type v1, _type v2, _type v3, _type v4, 
 
 
 template <typename _type>
+_type Mat4Single<_type>::operator()(const U32 row, const U32 col) const
+{
+    DEV_EXCEPTION(row > 3, "row - invalid value! [0..3]");
+    DEV_EXCEPTION(col > 3, "col - invalid value! [0..3]");
+
+    return mD[row + col * 4];
+}
+
+
+
+template <typename _type>
+Mat4Single<_type> Mat4Single<_type>::operator+(const Mat4Single<_type>& rhs)
+{
+    Mat4Single<_type> result;
+    for (U32 i = 0; i < 16; ++i)
+        result.mD[i] = mD[i] + rhs.mD[i];
+    return result;
+}
+
+
+
+template <typename _type>
+Mat4Single<_type>& Mat4Single<_type>::operator+=(const Mat4Single<_type>& rhs)
+{
+    for (U32 i = 0; i < 16; ++i)
+        mD[i] += rhs.mD[i];
+    return *this;
+}
+
+
+
+template <typename _type>
 Mat4Single<_type> Mat4Single<_type>::operator*(const Mat4Single<_type>& other) const
 {
     return Mat4Single<_type>(
@@ -55,27 +87,6 @@ Mat4Single<_type> Mat4Single<_type>::operator*(const Mat4Single<_type>& other) c
             mD[1] * other.mD[12] + mD[5] * other.mD[13] + mD[9] * other.mD[14] + mD[13] * other.mD[15],
             mD[2] * other.mD[12] + mD[6] * other.mD[13] + mD[10] * other.mD[14] + mD[14] * other.mD[15],
             mD[3] * other.mD[12] + mD[7] * other.mD[13] + mD[11] * other.mD[14] + mD[15] * other.mD[15]);
-}
-
-
-
-template <typename _type>
-Mat4Single<_type>& Mat4Single<_type>::operator+=(const Mat4Single<_type>& rhs)
-{
-    for (U32 i = 0; i < 16; ++i)
-        mD[i] += rhs.mD[i];
-    return *this;
-}
-
-
-
-template <typename _type>
-_type Mat4Single<_type>::operator()(const U32 row, const U32 col) const
-{
-    DEV_EXCEPTION(row > 3, "row - invalid value! [0..3]");
-    DEV_EXCEPTION(col > 3, "col - invalid value! [0..3]");
-
-    return mD[row + col * 4];
 }
 
 

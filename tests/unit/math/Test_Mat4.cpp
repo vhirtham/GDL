@@ -106,6 +106,31 @@ BOOST_FIXTURE_TEST_CASE(Addition_Assignment_SIMD, Fixture<Mat4SIMD>)
 
 
 
+// Addition Assignment %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+template <typename matrix>
+void AdditionTest(matrix& A, matrix& B)
+{
+
+    matrix C = A + B;
+    matrix expC{8., 15., 14., 14., 6., 9., 18., 16., 5., 13., 15., 16., 9., 15., 13., 21.};
+    BOOST_CHECK(CheckCloseMat(C, expC));
+}
+
+
+BOOST_FIXTURE_TEST_CASE(Addition_Single, Fixture<Mat4Single<F32>>)
+{
+    AdditionTest(A, B);
+}
+
+
+BOOST_FIXTURE_TEST_CASE(Addition_SIMD, Fixture<Mat4SIMD>)
+{
+    AdditionTest(A, B);
+}
+
+
+
 // Multiplication %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 template <typename matrix>

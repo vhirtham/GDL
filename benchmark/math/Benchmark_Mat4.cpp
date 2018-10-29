@@ -68,6 +68,22 @@ BENCHMARK_F(SIMD, Addition_Assignment)(benchmark::State& state)
 
 
 
+// Addition %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+BENCHMARK_F(Single, Addition)(benchmark::State& state)
+{
+    for (auto _ : state)
+        benchmark::DoNotOptimize(A + B);
+}
+
+BENCHMARK_F(SIMD, Addition)(benchmark::State& state)
+{
+    for (auto _ : state)
+        benchmark::DoNotOptimize(A + B);
+}
+
+
+
 // Multiplication %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 BENCHMARK_F(Single, Multiplication)(benchmark::State& state)

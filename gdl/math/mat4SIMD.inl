@@ -54,6 +54,37 @@ Mat4SIMD::Mat4SIMD(const Mat4SIMD& other)
 
 
 
+F32 Mat4SIMD::operator()(const U32 row, const U32 col) const
+{
+    DEV_EXCEPTION(row > 3, "row - invalid value! [0..3]");
+    DEV_EXCEPTION(col > 3, "col - invalid value! [0..3]");
+
+    return mData[col][row];
+}
+
+
+
+Mat4SIMD& Mat4SIMD::operator+=(const Mat4SIMD& other)
+
+{
+    mData[0] = _mmx_add_p(mData[0], other.mData[0]);
+    mData[1] = _mmx_add_p(mData[1], other.mData[1]);
+    mData[2] = _mmx_add_p(mData[2], other.mData[2]);
+    mData[3] = _mmx_add_p(mData[3], other.mData[3]);
+    return *this;
+}
+
+
+
+Mat4SIMD Mat4SIMD::operator+(const Mat4SIMD& other)
+
+{
+    return Mat4SIMD(_mmx_add_p(mData[0], other.mData[0]), _mmx_add_p(mData[1], other.mData[1]),
+                    _mmx_add_p(mData[2], other.mData[2]), _mmx_add_p(mData[3], other.mData[3]));
+}
+
+
+
 Mat4SIMD Mat4SIMD::operator*(const Mat4SIMD& other) const
 {
     alignas(16) __m128 Col0 =
@@ -81,27 +112,6 @@ Mat4SIMD Mat4SIMD::operator*(const Mat4SIMD& other) const
                                                    _mm_mul_ps(_mmx_set1_p<__m128>(other.mData[3][3]), mData[3]))));
 
     return Mat4SIMD(Col0, Col1, Col2, Col3);
-}
-
-
-
-Mat4SIMD& Mat4SIMD::operator+=(const Mat4SIMD& other)
-{
-    mData[0] = _mmx_add_p(mData[0], other.mData[0]);
-    mData[1] = _mmx_add_p(mData[1], other.mData[1]);
-    mData[2] = _mmx_add_p(mData[2], other.mData[2]);
-    mData[3] = _mmx_add_p(mData[3], other.mData[3]);
-    return *this;
-}
-
-
-
-F32 Mat4SIMD::operator()(const U32 row, const U32 col) const
-{
-    DEV_EXCEPTION(row > 3, "row - invalid value! [0..3]");
-    DEV_EXCEPTION(col > 3, "col - invalid value! [0..3]");
-
-    return mData[col][row];
 }
 
 

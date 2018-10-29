@@ -65,6 +65,11 @@ public:
     //! @return Result of the addition (this)
     inline Mat4SIMD& operator+=(const Mat4SIMD& other);
 
+    //! @brief Matrix - matrix addition
+    //! @param other: Rhs matrix
+    //! @return Result of the addition (this)
+    inline Mat4SIMD operator+(const Mat4SIMD& other);
+
     //! @brief Matrix - matrix multiplication
     //! @param other: Rhs matrix
     //! @return Result of the multiplication
