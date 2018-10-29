@@ -1,6 +1,6 @@
 #pragma once
 
-#include "matSIMD.h"
+#include "gdl/math/matSIMD.h"
 
 #include "gdl/base/exception.h"
 #include "gdl/base/functions/alignment.h"
@@ -93,7 +93,7 @@ U32 MatSIMD<_type, _rows, _cols>::Cols() const
 
 template <typename _type, I32 _rows, I32 _cols>
 void MatSIMD<_type, _rows, _cols>::SetZero()
-{   
+{
     mData.fill(_mmx_setzero_p<__mx>());
 }
 
@@ -127,8 +127,7 @@ void MatSIMD<_type, _rows, _cols>::ConstructionChecks() const
     assert(sizeof(mData) == sizeof(__mx) * mData.size()); // Array needs to be compact
 #ifndef NDEVEXCEPTION
     for (const auto& reg : mData)
-        DEV_EXCEPTION(!IsAligned(&reg, mAlignment),
-                      "One or more registers of the matrix are not aligned correctly");
+        DEV_EXCEPTION(!IsAligned(&reg, mAlignment), "One or more registers of the matrix are not aligned correctly");
 #endif
 }
 
@@ -163,8 +162,8 @@ operator*(const MatSIMD<_type, _rowsRhs, _colsRhs>& rhs) const
 template <typename _type, I32 _rows, I32 _cols>
 template <I32 _rowsRhs, I32 _colsRhs, U32 _numMultipliedRegisters>
 inline void MatSIMD<_type, _rows, _cols>::MultiplicationInnerLoops(MatSIMD<_type, _rows, _colsRhs>& result,
-                                                                    const MatSIMD<_type, _rowsRhs, _colsRhs>& rhs,
-                                                                    U32 j) const
+                                                                   const MatSIMD<_type, _rowsRhs, _colsRhs>& rhs,
+                                                                   U32 j) const
 {
     constexpr U32 registersPerColRhs = CalcMinNumArrayRegisters<__mx>(_rowsRhs);
     alignas(mAlignment) std::array<_type, mNumRegisterEntries> registerValues;
@@ -194,7 +193,7 @@ template <typename _type, I32 _rows, I32 _cols>
 template <U32 _numOperations, U32 _count>
 typename MatSIMD<_type, _rows, _cols>::__mx
 MatSIMD<_type, _rows, _cols>::MultiplyAddRegisters(const std::array<__mx, _numOperations>& values,
-                                                    const __mx currentValue, const U32 currentBlockIndex) const
+                                                   const __mx currentValue, const U32 currentBlockIndex) const
 {
     static_assert(_numOperations <= mNumRegisterEntries && _numOperations > 0, "Invalid number of operations.");
 
@@ -213,7 +212,7 @@ template <typename _type, I32 _rows, I32 _cols>
 template <U32 _arraySize, U32 _count, typename... _args>
 std::array<typename MatSIMD<_type, _rows, _cols>::__mx, _arraySize>
 MatSIMD<_type, _rows, _cols>::MultiplicationCreateRHSArray(const std::array<_type, mNumRegisterEntries>& data,
-                                                            const _args&... args)
+                                                           const _args&... args)
 {
     static_assert(_arraySize <= GetNumRegisterEntries<__mx>() && _arraySize > 0, "Invalid array size.");
 
@@ -227,14 +226,14 @@ MatSIMD<_type, _rows, _cols>::MultiplicationCreateRHSArray(const std::array<_typ
 
 
 
-template <typename _type, I32 _rowsOther, I32 _colsOther>
-std::ostream& operator<<(std::ostream& os, const MatSIMD<_type, _rowsOther, _colsOther>& mat)
+template <typename _type, I32 _rows, I32 _cols>
+std::ostream& operator<<(std::ostream& os, const MatSIMD<_type, _rows, _cols>& mat)
 {
     using namespace GDL;
-    for (U32 i = 0; i < _rowsOther; ++i)
+    for (U32 i = 0; i < _rows; ++i)
     {
         os << "| ";
-        for (U32 j = 0; j < _colsOther; ++j)
+        for (U32 j = 0; j < _cols; ++j)
             os << mat(i, j) << " ";
         os << "|" << std::endl;
     }

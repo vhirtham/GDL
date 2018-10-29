@@ -1,79 +1,99 @@
 #pragma once
-#include "mat4Single.h"
+#include "gdl/math/mat4Single.h"
+
+#include "gdl/base/exception.h"
+
+namespace GDL
+{
 
 
-template <class T>
-GDL::mat4Single<T>::mat4Single()
-    : mA({{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}})
+template <typename _type>
+Mat4Single<_type>::Mat4Single()
+    : mD({{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}})
 {
 }
 
-template <class T>
-GDL::mat4Single<T>::mat4Single(T val)
-    : mA({val, 0.0, 0.0, 0.0, 0.0, val, 0.0, 0.0, 0.0, 0.0, val, 0.0, 0.0, 0.0, 0.0, val})
+
+
+template <typename _type>
+Mat4Single<_type>::Mat4Single(_type val)
+    : mD({val, 0.0, 0.0, 0.0, 0.0, val, 0.0, 0.0, 0.0, 0.0, val, 0.0, 0.0, 0.0, 0.0, val})
 {
 }
 
-template <class T>
-GDL::mat4Single<T>::mat4Single(T v0, T v1, T v2, T v3, T v4, T v5, T v6, T v7, T v8, T v9, T v10, T v11, T v12, T v13,
-                               T v14, T v15)
-    : mA({{v0, v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15}})
+
+
+template <typename _type>
+Mat4Single<_type>::Mat4Single(_type v0, _type v1, _type v2, _type v3, _type v4, _type v5, _type v6, _type v7, _type v8,
+                              _type v9, _type v10, _type v11, _type v12, _type v13, _type v14, _type v15)
+    : mD({{v0, v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15}})
 {
 }
 
-template <class T>
-GDL::mat4Single<T> GDL::mat4Single<T>::operator*(const mat4Single<T>& other) const
+
+
+template <typename _type>
+Mat4Single<_type> Mat4Single<_type>::operator*(const Mat4Single<_type>& other) const
 {
-    return mat4Single<T>(mA[0] * other.mA[0] + mA[4] * other.mA[1] + mA[8] * other.mA[2] + mA[12] * other.mA[3],
-                         mA[1] * other.mA[0] + mA[5] * other.mA[1] + mA[9] * other.mA[2] + mA[13] * other.mA[3],
-                         mA[2] * other.mA[0] + mA[6] * other.mA[1] + mA[10] * other.mA[2] + mA[14] * other.mA[3],
-                         mA[3] * other.mA[0] + mA[7] * other.mA[1] + mA[11] * other.mA[2] + mA[15] * other.mA[3],
+    return Mat4Single<_type>(
+            mD[0] * other.mD[0] + mD[4] * other.mD[1] + mD[8] * other.mD[2] + mD[12] * other.mD[3],
+            mD[1] * other.mD[0] + mD[5] * other.mD[1] + mD[9] * other.mD[2] + mD[13] * other.mD[3],
+            mD[2] * other.mD[0] + mD[6] * other.mD[1] + mD[10] * other.mD[2] + mD[14] * other.mD[3],
+            mD[3] * other.mD[0] + mD[7] * other.mD[1] + mD[11] * other.mD[2] + mD[15] * other.mD[3],
 
-                         mA[0] * other.mA[4] + mA[4] * other.mA[5] + mA[8] * other.mA[6] + mA[12] * other.mA[7],
-                         mA[1] * other.mA[4] + mA[5] * other.mA[5] + mA[9] * other.mA[6] + mA[13] * other.mA[7],
-                         mA[2] * other.mA[4] + mA[6] * other.mA[5] + mA[10] * other.mA[6] + mA[14] * other.mA[7],
-                         mA[3] * other.mA[4] + mA[7] * other.mA[5] + mA[11] * other.mA[6] + mA[15] * other.mA[7],
+            mD[0] * other.mD[4] + mD[4] * other.mD[5] + mD[8] * other.mD[6] + mD[12] * other.mD[7],
+            mD[1] * other.mD[4] + mD[5] * other.mD[5] + mD[9] * other.mD[6] + mD[13] * other.mD[7],
+            mD[2] * other.mD[4] + mD[6] * other.mD[5] + mD[10] * other.mD[6] + mD[14] * other.mD[7],
+            mD[3] * other.mD[4] + mD[7] * other.mD[5] + mD[11] * other.mD[6] + mD[15] * other.mD[7],
 
-                         mA[0] * other.mA[8] + mA[4] * other.mA[9] + mA[8] * other.mA[10] + mA[12] * other.mA[11],
-                         mA[1] * other.mA[8] + mA[5] * other.mA[9] + mA[9] * other.mA[10] + mA[13] * other.mA[11],
-                         mA[2] * other.mA[8] + mA[6] * other.mA[9] + mA[10] * other.mA[10] + mA[14] * other.mA[11],
-                         mA[3] * other.mA[8] + mA[7] * other.mA[9] + mA[11] * other.mA[10] + mA[15] * other.mA[11],
+            mD[0] * other.mD[8] + mD[4] * other.mD[9] + mD[8] * other.mD[10] + mD[12] * other.mD[11],
+            mD[1] * other.mD[8] + mD[5] * other.mD[9] + mD[9] * other.mD[10] + mD[13] * other.mD[11],
+            mD[2] * other.mD[8] + mD[6] * other.mD[9] + mD[10] * other.mD[10] + mD[14] * other.mD[11],
+            mD[3] * other.mD[8] + mD[7] * other.mD[9] + mD[11] * other.mD[10] + mD[15] * other.mD[11],
 
-                         mA[0] * other.mA[12] + mA[4] * other.mA[13] + mA[8] * other.mA[14] + mA[12] * other.mA[15],
-                         mA[1] * other.mA[12] + mA[5] * other.mA[13] + mA[9] * other.mA[14] + mA[13] * other.mA[15],
-                         mA[2] * other.mA[12] + mA[6] * other.mA[13] + mA[10] * other.mA[14] + mA[14] * other.mA[15],
-                         mA[3] * other.mA[12] + mA[7] * other.mA[13] + mA[11] * other.mA[14] + mA[15] * other.mA[15]);
+            mD[0] * other.mD[12] + mD[4] * other.mD[13] + mD[8] * other.mD[14] + mD[12] * other.mD[15],
+            mD[1] * other.mD[12] + mD[5] * other.mD[13] + mD[9] * other.mD[14] + mD[13] * other.mD[15],
+            mD[2] * other.mD[12] + mD[6] * other.mD[13] + mD[10] * other.mD[14] + mD[14] * other.mD[15],
+            mD[3] * other.mD[12] + mD[7] * other.mD[13] + mD[11] * other.mD[14] + mD[15] * other.mD[15]);
 }
 
-template <class T>
-GDL::mat4Single<T>& GDL::mat4Single<T>::operator+=(const mat4Single<T>& rhs)
+
+
+template <typename _type>
+Mat4Single<_type>& Mat4Single<_type>::operator+=(const Mat4Single<_type>& rhs)
 {
     for (U32 i = 0; i < 16; ++i)
-        mA[i] += rhs.mA[i];
+        mD[i] += rhs.mD[i];
     return *this;
 }
 
-template <class T>
-T GDL::mat4Single<T>::operator()(const U32 row, const U32 col) const
+
+
+template <typename _type>
+_type Mat4Single<_type>::operator()(const U32 row, const U32 col) const
 {
-    return mA[row + col * 4];
+    DEV_EXCEPTION(row > 3, "row - invalid value! [0..3]");
+    DEV_EXCEPTION(col > 3, "col - invalid value! [0..3]");
+
+    return mD[row + col * 4];
 }
 
-template<class T>
-const std::array<T, 16> GDL::mat4Single<T>::Data() const
+
+
+template <typename _type>
+const std::array<_type, 16> Mat4Single<_type>::Data() const
 {
-    return mA;
+    return mD;
 }
 
-#ifndef NDEBUG
-namespace GDL
-{
-template <typename T2>
-inline std::ostream& operator<<(std::ostream& os, const GDL::mat4Single<T2>& mat)
+
+
+template <typename _type2>
+inline std::ostream& operator<<(std::ostream& os, const Mat4Single<_type2>& mat)
 {
     for (U32 i = 0; i < 4; ++i)
         os << "| " << mat(i, 0) << " " << mat(i, 1) << " " << mat(i, 2) << " " << mat(i, 3) << " |" << std::endl;
     return os;
 }
-}
-#endif
+
+} // namespace GDL

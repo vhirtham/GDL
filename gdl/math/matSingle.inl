@@ -1,11 +1,10 @@
 #pragma once
 
-#include "matSingle.h"
+#include "gdl/math/matSingle.h"
 
 #include <algorithm>
 #include <cassert>
 #include <iostream>
-
 
 
 
@@ -18,6 +17,8 @@ MatSingle<_type, _rows, _cols>::MatSingle()
 {
 }
 
+
+
 template <typename _type, I32 _rows, I32 _cols>
 template <typename... Args>
 MatSingle<_type, _rows, _cols>::MatSingle(Args... args)
@@ -26,12 +27,15 @@ MatSingle<_type, _rows, _cols>::MatSingle(Args... args)
     assert(mData.size() == sizeof...(args));
 }
 
+
+
 template <typename _type, I32 _rows, I32 _cols>
 MatSingle<_type, _rows, _cols>::MatSingle(const std::array<_type, _rows * _cols>& data)
     : mData(data)
 {
     assert(mData.size() == data.size());
 }
+
 
 
 template <typename _type, I32 _rows, I32 _cols>
@@ -54,14 +58,16 @@ operator*(const MatSingle<_type, _rowsRhs, _colsRhs>& rhs) const
 }
 
 
+
 template <typename _type, I32 _rows, I32 _cols>
-MatSingle<_type, _rows, _cols>& MatSingle<_type, _rows, _cols>::
-operator+=(const MatSingle<_type, _rows, _cols>& rhs)
+MatSingle<_type, _rows, _cols>& MatSingle<_type, _rows, _cols>::operator+=(const MatSingle<_type, _rows, _cols>& rhs)
 {
     for (U32 i = 0; i < mData.size(); ++i)
         mData[i] += rhs.mData[i];
     return *this;
 }
+
+
 
 template <typename _type, I32 _rows, I32 _cols>
 _type MatSingle<_type, _rows, _cols>::operator()(const U32 row, const U32 col) const
@@ -69,11 +75,15 @@ _type MatSingle<_type, _rows, _cols>::operator()(const U32 row, const U32 col) c
     return mData[row + col * _rows];
 }
 
+
+
 template <typename _type, I32 _rows, I32 _cols>
 U32 MatSingle<_type, _rows, _cols>::Rows() const
 {
     return _rows;
 }
+
+
 
 template <typename _type, I32 _rows, I32 _cols>
 U32 MatSingle<_type, _rows, _cols>::Cols() const
@@ -81,11 +91,15 @@ U32 MatSingle<_type, _rows, _cols>::Cols() const
     return _cols;
 }
 
+
+
 template <typename _type, I32 _rows, I32 _cols>
 std::array<_type, _rows * _cols> MatSingle<_type, _rows, _cols>::Data() const
 {
     return mData;
 }
+
+
 
 template <typename _type, I32 _rows, I32 _cols>
 void MatSingle<_type, _rows, _cols>::SetZero()
@@ -94,14 +108,15 @@ void MatSingle<_type, _rows, _cols>::SetZero()
 }
 
 
-template <typename _type2, I32 _rows2, I32 _cols2>
-std::ostream& operator<<(std::ostream& os, const MatSingle<_type2, _rows2, _cols2>& mat)
+
+template <typename _type, I32 _rows, I32 _cols>
+std::ostream& operator<<(std::ostream& os, const MatSingle<_type, _rows, _cols>& mat)
 {
     using namespace GDL;
-    for (U32 i = 0; i < _rows2; ++i)
+    for (U32 i = 0; i < _rows; ++i)
     {
         os << "| ";
-        for (U32 j = 0; j < _cols2; ++j)
+        for (U32 j = 0; j < _cols; ++j)
             os << mat(i, j) << " ";
         os << "|" << std::endl;
     }

@@ -1,5 +1,5 @@
-#include "gdl/math/matSIMD.inl"
-#include "gdl/math/matSingle.inl"
+#include "gdl/math/matSIMD.h"
+#include "gdl/math/matSingle.h"
 #include <benchmark/benchmark.h>
 
 #ifdef EIGEN3_FOUND

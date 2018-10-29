@@ -3,7 +3,6 @@
 
 #include "gdl/base/exception.h"
 #include "gdl/base/functions/alignment.h"
-#include "gdl/base/functions/sse.h"
 
 #include <cassert>
 #include <cstring>
@@ -25,6 +24,8 @@ Mat4SIMD::Mat4SIMD()
     ConstructionChecks();
 }
 
+
+
 Mat4SIMD::Mat4SIMD(F32 v0, F32 v1, F32 v2, F32 v3, F32 v4, F32 v5, F32 v6, F32 v7, F32 v8, F32 v9, F32 v10, F32 v11,
                    F32 v12, F32 v13, F32 v14, F32 v15)
     : mData({{{_mmx_setr_p<__m128>(v0, v1, v2, v3)},
@@ -35,17 +36,22 @@ Mat4SIMD::Mat4SIMD(F32 v0, F32 v1, F32 v2, F32 v3, F32 v4, F32 v5, F32 v6, F32 v
     ConstructionChecks();
 }
 
+
+
 Mat4SIMD::Mat4SIMD(__m128 col0, __m128 col1, __m128 col2, __m128 col3)
     : mData({{col0, col1, col2, col3}})
 {
     ConstructionChecks();
 }
 
+
+
 Mat4SIMD::Mat4SIMD(const Mat4SIMD& other)
     : mData(other.mData)
 {
     ConstructionChecks();
 }
+
 
 
 Mat4SIMD Mat4SIMD::operator*(const Mat4SIMD& other) const
@@ -77,6 +83,8 @@ Mat4SIMD Mat4SIMD::operator*(const Mat4SIMD& other) const
     return Mat4SIMD(Col0, Col1, Col2, Col3);
 }
 
+
+
 Mat4SIMD& Mat4SIMD::operator+=(const Mat4SIMD& other)
 {
     mData[0] = _mmx_add_p(mData[0], other.mData[0]);
@@ -86,6 +94,8 @@ Mat4SIMD& Mat4SIMD::operator+=(const Mat4SIMD& other)
     return *this;
 }
 
+
+
 F32 Mat4SIMD::operator()(const U32 row, const U32 col) const
 {
     DEV_EXCEPTION(row > 3, "row - invalid value! [0..3]");
@@ -94,13 +104,18 @@ F32 Mat4SIMD::operator()(const U32 row, const U32 col) const
     return mData[col][row];
 }
 
+
+
 const std::array<F32, 16> Mat4SIMD::Data() const
 {
     std::array<F32, 16> data;
     assert(sizeof(mData) == sizeof(data));
+
     std::memcpy(&data, &mData, sizeof(data));
     return data;
 }
+
+
 
 void Mat4SIMD::ConstructionChecks() const
 {
@@ -114,10 +129,10 @@ void Mat4SIMD::ConstructionChecks() const
 inline std::ostream& operator<<(std::ostream& os, const Mat4SIMD& mat)
 {
     for (U32 i = 0; i < 4; ++i)
-        os << "| " << mat.mData[0][i] << " " << mat.mData[1][i] << " " << mat.mData[2][i] << " " << mat.mData[3][i]
-           << " |" << std::endl;
+        os << "| " << mat(i, 0) << " " << mat(i, 1) << " " << mat(i, 2) << " " << mat(i, 3) << " |" << std::endl;
     return os;
 }
+
 
 
 } // namespace GDL

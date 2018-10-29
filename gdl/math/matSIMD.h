@@ -47,6 +47,17 @@ public:
     //! @brief Array with values (column major)
     explicit MatSIMD(const std::array<_type, _rows * _cols>& data);
 
+    //! @brief Direct access operator
+    //! @param row: Row of the accessed value
+    //! @param col: Column of the accessed value
+    //! @return Accessed value
+    inline _type operator()(const U32 row, const U32 col) const;
+
+    //! @brief Matrix - matrix addition assignment
+    //! @param rhs: Rhs matrix
+    //! @return Result of the addition
+    inline MatSIMD& operator+=(const MatSIMD& rhs);
+
     //! @brief Matrix - matrix multiplication
     //! @tparam _rowsRhs: Rhs matrix number of rows
     //! @tparam _colsRhs: Rhs matrix number of columns
@@ -54,17 +65,6 @@ public:
     //! @return Result of the multiplication
     template <I32 _rowsRhs, I32 _colsRhs>
     inline MatSIMD<_type, _rows, _colsRhs> operator*(const MatSIMD<_type, _rowsRhs, _colsRhs>& rhs) const;
-
-    //! @brief Matrix - matrix addition
-    //! @param rhs: Rhs matrix
-    //! @return Result of the addition
-    inline MatSIMD& operator+=(const MatSIMD& rhs);
-
-    //! @brief Direct access operator
-    //! @param row: Row of the accessed value
-    //! @param col: Column of the accessed value
-    //! @return Accessed value
-    inline _type operator()(const U32 row, const U32 col) const;
 
     //! @brief Gets the number of rows
     //! @return Number of rows
@@ -120,4 +120,22 @@ private:
     //! @brief Checks if the matrix was constructed as expected
     void ConstructionChecks() const;
 };
+
+
+
+//! @brief Offstream operator
+//! @tparam _type: Data type of the matrix
+//! @tparam _rows: Number of rows of the matrix
+//! @tparam _cols: Number of columns of the matrix
+//! @param os: Reference to offstream object
+//! @param mat: Matrix
+//! @return Reference to offstream object
+template <typename _type, I32 _rows, I32 _cols>
+std::ostream& operator<<(std::ostream& os, const MatSIMD<_type, _rows, _cols>& mat);
+
+
 } // namespace GDL
+
+
+
+#include "gdl/math/matSIMD.inl"

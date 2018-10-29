@@ -1,8 +1,8 @@
 #include <boost/test/unit_test.hpp>
 
 #include "gdl/base/approx.h"
-#include "gdl/math/matSIMD.inl"
-#include "gdl/math/matSingle.inl"
+#include "gdl/math/matSIMD.h"
+#include "gdl/math/matSingle.h"
 
 #include <cmath>
 
@@ -25,12 +25,8 @@ bool CheckCloseArray(const _type& a, const _type& b)
     if (a.size() != b.size())
         return false;
     for (U32 i = 0; i < a.size(); ++i)
-    {
-        if
-            constexpr(std::is_floating_point<_type>::value) if (a[i] != Approx(b[i])) return false;
-        if
-            constexpr(std::is_integral<_type>::value) if (a[i] != b[i]) return false;
-    }
+        if (a[i] != Approx(b[i]))
+            return false;
     return true;
 }
 
@@ -44,10 +40,8 @@ bool CheckCloseMat(_type a, _type b)
 
     for (U32 i = 0; i < a.Rows(); ++i)
         for (U32 j = 0; j < a.Cols(); ++j)
-        {
             if (a(i, j) != Approx(b(i, j)))
                 return false;
-        }
     return true;
 }
 

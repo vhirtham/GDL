@@ -1,5 +1,5 @@
-#include "gdl/math/mat4SIMD.inl"
-#include "gdl/math/mat4Single.inl"
+#include "gdl/math/mat4SIMD.h"
+#include "gdl/math/mat4Single.h"
 #include <benchmark/benchmark.h>
 
 using namespace GDL;
@@ -23,8 +23,8 @@ public:
 class Single : public benchmark::Fixture
 {
 public:
-    mat4Single<F32> A;
-    mat4Single<F32> B;
+    Mat4Single<F32> A;
+    Mat4Single<F32> B;
 
     Single()
         : A{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15}
@@ -40,7 +40,7 @@ public:
 BENCHMARK_F(Single, Construction)(benchmark::State& state)
 {
     for (auto _ : state)
-        mat4Single<F32> C(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15);
+        Mat4Single<F32> C(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15);
 }
 
 

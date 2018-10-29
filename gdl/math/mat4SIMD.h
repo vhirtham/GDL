@@ -12,7 +12,7 @@
 namespace GDL
 {
 
-//! @brief 4x4 Matrix with SIMD support
+//! @brief 4x4 Matrix with SSE support
 class alignas(16) Mat4SIMD
 {
     alignas(16) std::array<__m128, 4> mData;
@@ -54,21 +54,21 @@ public:
     //! @brief Destructor
     inline ~Mat4SIMD() = default;
 
-    //! @brief Matrix - matrix multiplication
-    //! @param other: Rhs matrix
-    //! @return Result of the multiplication
-    inline Mat4SIMD operator*(const Mat4SIMD& other) const;
-
-    //! @brief Matrix - matrix addition
-    //! @param other: Rhs matrix
-    //! @return Result of the addition (this)
-    inline Mat4SIMD& operator+=(const Mat4SIMD& other);
-
     //! @brief Direct access operator
     //! @param row: Row of the accessed value
     //! @param col: Column of the accessed value
     //! @return Accessed value
     inline F32 operator()(const U32 row, const U32 col) const;
+
+    //! @brief Matrix - matrix addition assignment
+    //! @param other: Rhs matrix
+    //! @return Result of the addition (this)
+    inline Mat4SIMD& operator+=(const Mat4SIMD& other);
+
+    //! @brief Matrix - matrix multiplication
+    //! @param other: Rhs matrix
+    //! @return Result of the multiplication
+    inline Mat4SIMD operator*(const Mat4SIMD& other) const;
 
     //! @brief Gets the data array in column major ordering
     //! @return Data
@@ -94,8 +94,17 @@ public:
 private:
     //! @brief Checks if the matrix was constructed as expected
     inline void ConstructionChecks() const;
-
-    friend std::ostream& operator<<(std::ostream&, Mat4SIMD const&);
 };
 
+
+
+//! @brief Offstream operator
+//! @param os: Reference to offstream object
+//! @param mat: Matrix
+//! @return Reference to offstream object
+inline std::ostream& operator<<(std::ostream& os, const Mat4SIMD& mat);
+
 } // namespace GDL
+
+
+#include "gdl/math/mat4SIMD.inl"
