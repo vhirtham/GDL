@@ -42,11 +42,16 @@ public:
     template <typename... _args>
     explicit MatSIMD(_args... args);
 
-
     //! @brief Constructor to set the whole matrix
     //! @brief Array with values (column major)
     explicit MatSIMD(const std::array<_type, _rows * _cols>& data);
 
+private:
+    //! @brief Private helper ctor to initialize a MatSIMD without initializing the memory to zero or any other value.
+    //! @remark Find a better solution than using bool as parameter to distinguish from default ctor
+    explicit MatSIMD(bool);
+
+public:
     //! @brief Direct access operator
     //! @param row: Row of the accessed value
     //! @param col: Column of the accessed value
@@ -61,7 +66,7 @@ public:
     //! @brief Matrix - matrix addition assignment
     //! @param rhs: Rhs matrix
     //! @return Result of the addition
-    [[nodiscard]] inline MatSIMD operator+(const MatSIMD& rhs);
+    [[nodiscard]] inline MatSIMD operator+(const MatSIMD& rhs) const;
 
     //! @brief Matrix - matrix multiplication
     //! @tparam _rowsRhs: Rhs matrix number of rows

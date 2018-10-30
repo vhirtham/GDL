@@ -17,6 +17,7 @@ namespace GDL
 
 template <typename _type, I32 _rows, I32 _cols>
 MatSIMD<_type, _rows, _cols>::MatSIMD()
+    : mData{{0}}
 {
     ConstructionChecks();
 }
@@ -57,6 +58,13 @@ MatSIMD<_type, _rows, _cols>::MatSIMD(const std::array<_type, _rows * _cols>& da
 
 
 template <typename _type, I32 _rows, I32 _cols>
+MatSIMD<_type, _rows, _cols>::MatSIMD(bool)
+{
+}
+
+
+
+template <typename _type, I32 _rows, I32 _cols>
 _type MatSIMD<_type, _rows, _cols>::operator()(const U32 row, const U32 col) const
 {
     assert(row < _rows && col < _cols);
@@ -76,10 +84,10 @@ MatSIMD<_type, _rows, _cols>& MatSIMD<_type, _rows, _cols>::operator+=(const Mat
 
 
 template <typename _type, I32 _rows, I32 _cols>
-MatSIMD<_type, _rows, _cols> MatSIMD<_type, _rows, _cols>::operator+(const MatSIMD<_type, _rows, _cols>& rhs)
+MatSIMD<_type, _rows, _cols> MatSIMD<_type, _rows, _cols>::operator+(const MatSIMD<_type, _rows, _cols>& rhs) const
 {
-    MatSIMD<_type,_rows,_cols> result;
-    for (U32 i = 0; i < mData.size(); ++i)
+    MatSIMD<_type, _rows, _cols> result{true};
+    for (U32 i = 0; i < mNumRegisters; ++i)
         result.mData[i] = _mmx_add_p(rhs.mData[i], mData[i]);
     return result;
 }
@@ -105,7 +113,7 @@ U32 MatSIMD<_type, _rows, _cols>::Cols() const
 template <typename _type, I32 _rows, I32 _cols>
 void MatSIMD<_type, _rows, _cols>::SetZero()
 {
-    mData.fill(_mmx_setzero_p<__mx>());
+    std::memset(&mData, 0, sizeof(mData));
 }
 
 
@@ -152,7 +160,7 @@ operator*(const MatSIMD<_type, _rowsRhs, _colsRhs>& rhs) const
     static_assert(_cols == _rowsRhs, "Lhs cols != Rhs rows");
 
     MatSIMD<_type, _rows, _colsRhs> result;
-    result.SetZero();
+
 
     // loop over RHS rows (column registers)
     for (U32 j = 0; j < _rowsRhs / mNumRegisterEntries; ++j)

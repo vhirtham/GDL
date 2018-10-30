@@ -4,6 +4,7 @@
 
 #include <algorithm>
 #include <cassert>
+#include <cstring>
 #include <iostream>
 
 
@@ -14,6 +15,7 @@ namespace GDL
 
 template <typename _type, I32 _rows, I32 _cols>
 MatSingle<_type, _rows, _cols>::MatSingle()
+    : mData{{0}}
 {
 }
 
@@ -115,7 +117,7 @@ std::array<_type, _rows * _cols> MatSingle<_type, _rows, _cols>::Data() const
 template <typename _type, I32 _rows, I32 _cols>
 void MatSingle<_type, _rows, _cols>::SetZero()
 {
-    mData.fill(static_cast<_type>(0));
+    std::memset(&mData, 0, sizeof(mData));
 }
 
 

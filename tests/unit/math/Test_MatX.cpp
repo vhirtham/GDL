@@ -68,6 +68,7 @@ struct Fixture
 template <template <typename, I32, I32> class _matrix, typename _type>
 void CtorDataTest()
 {
+
     // array ctor
     std::array<_type, 15> expA = {{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14}};
     _matrix<_type, 3, 5> A(expA);
@@ -84,6 +85,10 @@ void CtorDataTest()
     // variadic ctor
     _matrix<_type, 3, 5> A2(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14);
     BOOST_CHECK(CheckCloseArray(A2.Data(), expA));
+
+    // default ctor - all variables 0
+    _matrix<_type, 13, 7> D;
+    BOOST_CHECK(CheckArrayZero(D.Data()));
 }
 
 BOOST_AUTO_TEST_CASE(Construction_Single)
