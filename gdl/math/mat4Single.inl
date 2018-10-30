@@ -1,6 +1,7 @@
 #pragma once
 #include "gdl/math/mat4Single.h"
 
+#include "gdl/base/approx.h"
 #include "gdl/base/exception.h"
 
 namespace GDL
@@ -21,7 +22,11 @@ Mat4Single<_type>::Mat4Single(_type val)
 {
 }
 
-
+template <typename _type>
+Mat4Single<_type>::Mat4Single(std::array<_type, 16> data)
+    : mD{data}
+{
+}
 
 template <typename _type>
 Mat4Single<_type>::Mat4Single(_type v0, _type v1, _type v2, _type v3, _type v4, _type v5, _type v6, _type v7, _type v8,
@@ -44,7 +49,26 @@ _type Mat4Single<_type>::operator()(const U32 row, const U32 col) const
 
 
 template <typename _type>
-Mat4Single<_type> Mat4Single<_type>::operator+(const Mat4Single<_type>& rhs)
+bool Mat4Single<_type>::operator==(const Mat4Single<_type>& rhs) const
+{
+    bool result = true;
+    for (U32 i = 0; i < 16; ++i)
+        result = result && mD[i] == Approx(rhs.mD[i]);
+    return result;
+}
+
+
+
+template <typename _type>
+bool Mat4Single<_type>::operator!=(const Mat4Single<_type>& rhs) const
+{
+    return !(operator==(rhs));
+}
+
+
+
+template <typename _type>
+Mat4Single<_type> Mat4Single<_type>::operator+(const Mat4Single<_type>& rhs) const
 {
     Mat4Single<_type> result;
     for (U32 i = 0; i < 16; ++i)

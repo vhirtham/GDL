@@ -1,6 +1,7 @@
 #pragma once
 #include "gdl/math/mat4SIMD.h"
 
+#include "gdl/base/approx.h"
 #include "gdl/base/exception.h"
 #include "gdl/base/functions/alignment.h"
 
@@ -20,6 +21,16 @@ Mat4SIMD::Mat4SIMD()
               {_mmx_setzero_p<__m128>()},
               {_mmx_setzero_p<__m128>()},
               {_mmx_setzero_p<__m128>()}}})
+{
+    ConstructionChecks();
+}
+
+
+Mat4SIMD::Mat4SIMD(std::array<F32, 16> data)
+    : mData({{{_mmx_setr_p<__m128>(data[0], data[1], data[2], data[3])},
+              {_mmx_setr_p<__m128>(data[4], data[5], data[6], data[7])},
+              {_mmx_setr_p<__m128>(data[8], data[9], data[10], data[11])},
+              {_mmx_setr_p<__m128>(data[12], data[13], data[14], data[15])}}})
 {
     ConstructionChecks();
 }
@@ -60,6 +71,23 @@ F32 Mat4SIMD::operator()(const U32 row, const U32 col) const
     DEV_EXCEPTION(col > 3, "col - invalid value! [0..3]");
 
     return mData[col][row];
+}
+
+bool Mat4SIMD::operator==(const Mat4SIMD& rhs) const
+{
+    // TODO: Replace this version as soon as Approx supports registers!
+    bool result = true;
+    for (U32 i = 0; i < 4; ++i)
+        for (U32 j = 0; j < 4; ++j)
+                result = result && mData[i][j] == Approx(rhs.mData[i][j]);
+    return result;
+}
+
+
+
+bool Mat4SIMD::operator!=(const Mat4SIMD& rhs) const
+{
+    return !(operator==(rhs));
 }
 
 

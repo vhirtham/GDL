@@ -3,7 +3,7 @@
 #include "gdl/base/exception.h"
 #include "gdl/base/fundamentalTypes.h"
 
-#include <cassert>
+#include <algorithm>
 #include <cmath>
 #include <limits>
 

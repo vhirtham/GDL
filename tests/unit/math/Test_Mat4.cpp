@@ -31,16 +31,6 @@ bool CheckCloseArray(const _type& a, const _type& b)
     return true;
 }
 
-template <typename _type>
-bool CheckCloseMat(_type a, _type b)
-{
-    for (U32 i = 0; i < 4; ++i)
-        for (U32 j = 0; j < 4; ++j)
-            if (a(i, j) != Approx(b(i, j)))
-                return false;
-    return true;
-}
-
 
 
 // Fixture definition %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -53,7 +43,7 @@ struct Fixture
 };
 
 
-// Addition Assignment %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+// Construction %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 template <typename matrix>
 void ConstructionTest()
@@ -64,6 +54,9 @@ void ConstructionTest()
     matrix B(0., 1., 2., 3., 4., 5., 6., 7., 8., 9., 10., 11., 12., 13., 14., 15.);
     std::array<F32, 16> expB{{0., 1., 2., 3., 4., 5., 6., 7., 8., 9., 10., 11., 12., 13., 14., 15.}};
     BOOST_CHECK(CheckCloseArray(B.Data(), expB));
+
+    matrix B1(expB);
+    BOOST_CHECK(CheckCloseArray(B1.Data(), expB));
 }
 
 BOOST_AUTO_TEST_CASE(Construction_Single)
@@ -76,6 +69,55 @@ BOOST_AUTO_TEST_CASE(Construction_SIMD)
     ConstructionTest<Mat4SIMD>();
 }
 
+
+// Comparison %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+template <typename matrix>
+void ComparisonTest(matrix& A, matrix& B)
+{
+    BOOST_CHECK(A == A);
+    BOOST_CHECK(!(A != A));
+
+    BOOST_CHECK(A != B);
+    BOOST_CHECK(!(A == B));
+
+
+    // Check Tolerances
+    constexpr F32 epsilon = std::numeric_limits<F32>::epsilon();
+    std::array<F32, 16> matAData = A.Data();
+    std::array<F32, 16> matEps1Data, matEps2Data;
+
+
+    for (U32 i = 0; i < 16; ++i)
+    {
+        matEps1Data[i] = matAData[i] + epsilon;
+        matEps2Data[i] = matAData[i] + 10 * epsilon;
+    }
+
+    matrix matEps1(matEps1Data);
+    matrix matEps2(matEps2Data);
+
+    BOOST_CHECK(A == matEps1);
+    BOOST_CHECK(!(A != matEps1));
+
+    BOOST_CHECK(A != matEps2);
+    BOOST_CHECK(!(A == matEps2));
+}
+
+
+BOOST_FIXTURE_TEST_CASE(Comparison_Single, Fixture<Mat4Single<F32>>)
+{
+    ComparisonTest(A, B);
+}
+
+
+BOOST_FIXTURE_TEST_CASE(Comparison_SIMD, Fixture<Mat4SIMD>)
+{
+    ComparisonTest(A, B);
+}
+
+
+
 // Addition Assignment %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 template <typename matrix>
@@ -84,12 +126,12 @@ void AdditionAssignmentTest(matrix& A, matrix& B)
 
     A += B;
     matrix expA{8., 15., 14., 14., 6., 9., 18., 16., 5., 13., 15., 16., 9., 15., 13., 21.};
-    BOOST_CHECK(CheckCloseMat(A, expA));
+    BOOST_CHECK(A == expA);
 
     // self assignment
     B += B;
     matrix expB{16., 22., 12., 4., 10., 8., 18., 6., 6., 14., 10., 4., 12., 16., 4., 12.};
-    BOOST_CHECK(CheckCloseMat(B, expB));
+    BOOST_CHECK(B == expB);
 }
 
 
@@ -106,7 +148,7 @@ BOOST_FIXTURE_TEST_CASE(Addition_Assignment_SIMD, Fixture<Mat4SIMD>)
 
 
 
-// Addition Assignment %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+// Addition %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 template <typename matrix>
 void AdditionTest(matrix& A, matrix& B)
@@ -114,7 +156,7 @@ void AdditionTest(matrix& A, matrix& B)
 
     matrix C = A + B;
     matrix expC{8., 15., 14., 14., 6., 9., 18., 16., 5., 13., 15., 16., 9., 15., 13., 21.};
-    BOOST_CHECK(CheckCloseMat(C, expC));
+    BOOST_CHECK(C == expC);
 }
 
 
@@ -138,11 +180,11 @@ void MultiplicationTest(const matrix& A, const matrix& B)
 {
     auto C = A * B;
     matrix expC{29., 137., 245., 353., 31., 115., 199., 283., 23., 91., 159., 227., 30., 118., 206., 294.};
-    BOOST_CHECK(CheckCloseMat(C, expC));
+    BOOST_CHECK(C == expC);
 
     auto D = B * A;
     matrix expD{116., 168., 100., 100., 138., 198., 122., 113., 160., 228., 144., 126., 182., 258., 166., 139.};
-    BOOST_CHECK(CheckCloseMat(D, expD));
+    BOOST_CHECK(D == expD);
 }
 
 

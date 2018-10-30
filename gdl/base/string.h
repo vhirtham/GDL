@@ -4,7 +4,7 @@
 
 #include <array>
 #include <limits>
-#include <string>
+#include <cstring>
 
 #ifndef USE_STD_ALLOCATOR
 

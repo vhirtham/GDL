@@ -2,6 +2,8 @@
 #include "gdl/math/mat4Single.h"
 #include <benchmark/benchmark.h>
 
+
+
 using namespace GDL;
 
 // Fixture declaration %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -50,6 +52,33 @@ BENCHMARK_F(SIMD, Construction)(benchmark::State& state)
         Mat4SIMD C(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15);
 }
 
+
+// Comparison %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+BENCHMARK_F(Single, Comparison_Equal)(benchmark::State& state)
+{
+    for (auto _ : state)
+        benchmark::DoNotOptimize(A == A);
+}
+
+BENCHMARK_F(SIMD, Comparison_Equal)(benchmark::State& state)
+{
+    for (auto _ : state)
+        benchmark::DoNotOptimize(A == A);
+}
+
+
+BENCHMARK_F(Single, Comparison_Not_Equal)(benchmark::State& state)
+{
+    for (auto _ : state)
+        benchmark::DoNotOptimize(A == B);
+}
+
+BENCHMARK_F(SIMD, Comparison_Not_Equal)(benchmark::State& state)
+{
+    for (auto _ : state)
+        benchmark::DoNotOptimize(A == B);
+}
 
 
 // Addition Assignment %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

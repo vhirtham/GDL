@@ -18,8 +18,16 @@ class alignas(16) Mat4SIMD
     alignas(16) std::array<__m128, 4> mData;
 
 public:
-    //! @brief Constructor
     inline Mat4SIMD();
+    inline Mat4SIMD(const Mat4SIMD& other);
+    inline Mat4SIMD(Mat4SIMD&& other) = default;
+    inline Mat4SIMD& operator=(const Mat4SIMD& other) = default;
+    inline Mat4SIMD& operator=(Mat4SIMD&& other) = default;
+    inline ~Mat4SIMD() = default;
+
+    //! @brief Constructor which initializes the matrix with the provided array
+    //! @param data: Array containing the data
+    inline explicit Mat4SIMD(std::array<F32, 16> data);
 
     //! @brief Constructor that initializes full matrix with specific values (column major)
     //! @param v0-v15: Matrix values in row major ordering
@@ -35,30 +43,25 @@ private:
     inline Mat4SIMD(__m128 col0, __m128 col1, __m128 col2, __m128 col3);
 
 public:
-    //! @brief Copy constructor
-    //! @param other: Object that should be copied
-    inline Mat4SIMD(const Mat4SIMD& other);
-
-    //! @brief Move constructor
-    //! @param other: Object that should be moved
-    inline Mat4SIMD(Mat4SIMD&& other) = default;
-
-    //! @brief Copy assignment operator
-    //! @param other: Object that should be copied
-    inline Mat4SIMD& operator=(const Mat4SIMD& other) = default;
-
-    //! @brief Move assignment operator
-    //! @param other: Object that should be moved
-    inline Mat4SIMD& operator=(Mat4SIMD&& other) = default;
-
-    //! @brief Destructor
-    inline ~Mat4SIMD() = default;
-
     //! @brief Direct access operator
     //! @param row: Row of the accessed value
     //! @param col: Column of the accessed value
     //! @return Accessed value
     inline F32 operator()(const U32 row, const U32 col) const;
+
+    //! @brief Compares if two matrices are equal
+    //! @param rhs: Matrix that should be compared
+    //! @return TRUE/FALSE
+    //! @remark This function uses the Approx class internally. The default minimal base is used. This might be changed
+    //! in the future. A global minimal base for linear algebra comparison might be introduced.
+    [[nodiscard]] inline bool operator==(const Mat4SIMD& rhs) const;
+
+    //! @brief Compares if two matrices are NOT equal
+    //! @param rhs: Matrix that should be compared
+    //! @return TRUE/FALSE
+    //! @remark This function uses the Approx class internally. The default minimal base is used. This might be changed
+    //! in the future. A global minimal base for linear algebra comparison might be introduced.
+    [[nodiscard]] inline bool operator!=(const Mat4SIMD& rhs) const;
 
     //! @brief Matrix - matrix addition assignment
     //! @param other: Rhs matrix
