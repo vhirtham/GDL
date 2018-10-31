@@ -22,8 +22,8 @@ class alignas(AlignmentBytes<decltype(SSEGetFittingRegister<_type, SSEMaxRegiste
 
     using __mx = decltype(SSEGetFittingRegister<_type, SSEMaxRegisterSize()>());
     constexpr static U32 mAlignment = AlignmentBytes<__mx>;
-    constexpr static U32 mNumRegisterEntries = GetNumRegisterEntries<__mx>();
-    constexpr static U32 mNumRegistersPerCol = CalcMinNumArrayRegisters<__mx>(_rows);
+    constexpr static U32 mNumRegisterEntries = SSEGetNumRegisterEntries<__mx>();
+    constexpr static U32 mNumRegistersPerCol = SSECalcMinNumArrayRegisters<__mx>(_rows);
     constexpr static U32 mNumRegisters = _cols * mNumRegistersPerCol;
 
 

@@ -152,7 +152,7 @@ constexpr const U32 AlignmentBytes<__m512i> = 64;
 //! @tparam _registerType: Register type
 //! @return Number of values that can be stored in the register
 template <typename _registerType>
-constexpr U32 GetNumRegisterEntries()
+constexpr U32 SSEGetNumRegisterEntries()
 {
     // clang-format off
     if constexpr(std::is_same<_registerType, __m128>::value)
@@ -570,9 +570,9 @@ inline auto _mmx_movemask_epi8(_registerType reg)
 //! @param numValues: Number of values that should be stored
 //! @return Minimal number of registers
 template <typename _registerType>
-constexpr U32 CalcMinNumArrayRegisters(U32 numValues)
+constexpr U32 SSECalcMinNumArrayRegisters(U32 numValues)
 {
-    constexpr U32 registerSize = GetNumRegisterEntries<_registerType>();
+    constexpr U32 registerSize = SSEGetNumRegisterEntries<_registerType>();
     return (numValues / registerSize) + ((numValues % registerSize > 0) ? 1 : 0);
 }
 
@@ -613,18 +613,18 @@ inline auto SSEReinterpretAsIntRegister(_registerType reg)
 //! @tparam _numComparedValues: Number of register values that should be compared. If the value is smaller than the
 //! number of register values, only the first elements of the register are compared.
 //! @return Value with specific bit signature
-template <typename _registerType, U32 _numComparedValues = GetNumRegisterEntries<_registerType>()>
+template <typename _registerType, U32 _numComparedValues = SSEGetNumRegisterEntries<_registerType>()>
 constexpr auto SSECalculateComparisonValueAllTrue()
 {
     using ReturnType = decltype(_mmx_movemask_epi8(SSEReinterpretAsIntRegister(_mmx_setzero_p<_registerType>())));
+    constexpr U32 numRegisterEntries = SSEGetNumRegisterEntries<_registerType>();
 
     // clang-format off
-    if constexpr(_numComparedValues == GetNumRegisterEntries<_registerType>())
+    if constexpr(_numComparedValues == numRegisterEntries)
         return std::numeric_limits<ReturnType>::max();
     else
     {
-        constexpr U32 numUnusedBits =
-                (sizeof(ReturnType) * 8 * _numComparedValues) / GetNumRegisterEntries<_registerType>();
+        constexpr U32 numUnusedBits = (sizeof(ReturnType) * 8 * _numComparedValues) / numRegisterEntries;
         return static_cast<ReturnType>(Pow<numUnusedBits>(2) - 1);
     }
     // clang-format on
@@ -647,7 +647,9 @@ constexpr auto SSECalculateComparisonValueAllTrue()
 template <typename _registerType, U32 _numComparedValues, typename _compFunction>
 inline bool SSECompareAllTrue(_registerType lhs, _registerType rhs, _compFunction compFunction)
 {
-    static_assert(_numComparedValues > 0 && _numComparedValues <= GetNumRegisterEntries<_registerType>(),
+    constexpr U32 numRegisterEntries = SSEGetNumRegisterEntries<_registerType>();
+
+    static_assert(_numComparedValues > 0 && _numComparedValues <= numRegisterEntries,
                   "Invalid number of compared values ---> [1 ... numRegisterEntries]");
 
     auto cmpResult = _mmx_movemask_epi8(SSEReinterpretAsIntRegister(compFunction(lhs, rhs)));
@@ -656,7 +658,7 @@ inline bool SSECompareAllTrue(_registerType lhs, _registerType rhs, _compFunctio
     static_assert(std::is_same_v<decltype(cmpResult), decltype(limit)>, "Mismatching types for comparison");
 
     // clang-format off
-    if constexpr(_numComparedValues != GetNumRegisterEntries<_registerType>())
+    if constexpr(_numComparedValues != numRegisterEntries)
         cmpResult &= limit; // Set bits of elemts that should not be compared to zero
     // clang-format on
 
@@ -676,7 +678,7 @@ inline bool SSECompareAllTrue(_registerType lhs, _registerType rhs, _compFunctio
 //! @param lhs: Left hand side register
 //! @param rhs: Right hand side register
 //! @return TRUE / FALSE
-template <typename _registerType, U32 _numComparedValues = GetNumRegisterEntries<_registerType>()>
+template <typename _registerType, U32 _numComparedValues = SSEGetNumRegisterEntries<_registerType>()>
 inline bool SSECompareAllEqual(_registerType lhs, _registerType rhs)
 {
     return SSECompareAllTrue<_registerType, _numComparedValues, decltype(_mmx_cmpeq_p<_registerType>)>(
@@ -696,7 +698,7 @@ inline bool SSECompareAllEqual(_registerType lhs, _registerType rhs)
 //! @param lhs: Left hand side register
 //! @param rhs: Right hand side register
 //! @return TRUE / FALSE
-template <typename _registerType, U32 _numComparedValues = GetNumRegisterEntries<_registerType>()>
+template <typename _registerType, U32 _numComparedValues = SSEGetNumRegisterEntries<_registerType>()>
 inline bool SSECompareAllLessEqual(_registerType lhs, _registerType rhs)
 {
     return SSECompareAllTrue<_registerType, _numComparedValues, decltype(_mmx_cmple_p<_registerType>)>(

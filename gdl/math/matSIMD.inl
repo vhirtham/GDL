@@ -184,7 +184,7 @@ inline void MatSIMD<_type, _rows, _cols>::MultiplicationInnerLoops(MatSIMD<_type
                                                                    const MatSIMD<_type, _rowsRhs, _colsRhs>& rhs,
                                                                    U32 j) const
 {
-    constexpr U32 registersPerColRhs = CalcMinNumArrayRegisters<__mx>(_rowsRhs);
+    constexpr U32 registersPerColRhs = SSECalcMinNumArrayRegisters<__mx>(_rowsRhs);
     alignas(mAlignment) std::array<_type, mNumRegisterEntries> registerValues;
 
     // loop over every RHS Col
@@ -233,7 +233,7 @@ std::array<typename MatSIMD<_type, _rows, _cols>::__mx, _arraySize>
 MatSIMD<_type, _rows, _cols>::MultiplicationCreateRHSArray(const std::array<_type, mNumRegisterEntries>& data,
                                                            const _args&... args)
 {
-    static_assert(_arraySize <= GetNumRegisterEntries<__mx>() && _arraySize > 0, "Invalid array size.");
+    static_assert(_arraySize <= SSEGetNumRegisterEntries<__mx>() && _arraySize > 0, "Invalid array size.");
 
     // clang-format off
     if constexpr(_arraySize == _count)
