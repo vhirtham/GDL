@@ -40,154 +40,89 @@ BOOST_AUTO_TEST_CASE(Calc_Min_Num_Array_Registers)
 // Test CompareAllEqual ----------------------------------------------------------------------------------------------
 
 //! @brief Tests the SSECompareAllEqual function with varying number of compared values.
-template <typename _registerType>
+template <typename _registerType, U32 _count = 1>
 void TestCompareAllEqual()
 {
     using dataType = decltype(SSEGetDataType<_registerType>());
     constexpr U32 numRegisterEntries = GetNumRegisterEntries<_registerType>();
 
+    auto compEQ = [](_registerType lhs, _registerType rhs) {
+        return SSECompareAllEqual<_registerType, _count>(lhs, rhs);
+    };
+
 
     alignas(AlignmentBytes<_registerType>) _registerType lhs = _mmx_setzero_p<_registerType>();
     for (U32 i = 0; i < numRegisterEntries; ++i)
         lhs[i] = static_cast<dataType>(i + 1);
-    alignas(AlignmentBytes<_registerType>) _registerType rhs = lhs;
+    alignas(AlignmentBytes<_registerType>) _registerType rhs;
 
-    BOOST_CHECK(SSECompareAllEqual(lhs, lhs));
-    BOOST_CHECK(!SSECompareAllEqual(lhs, _mmx_setzero_p<_registerType>()));
-    for (U32 i = 0; i < numRegisterEntries; ++i)
+
+    // all values return true
+    BOOST_CHECK(compEQ(lhs, lhs));
+
+    // all values return false
+    BOOST_CHECK(!compEQ(lhs, _mmx_setzero_p<_registerType>()));
+
+
+    // Maximal 1 used value returns false
+    for (U32 i = 0; i < _count; ++i)
+    {
+        for (U32 j = _count; j < numRegisterEntries; ++j)
+        {
+            // all unused values return true
+            rhs = lhs;
+            BOOST_CHECK(compEQ(lhs, rhs));
+            rhs[i] = lhs[i] + std::numeric_limits<dataType>::epsilon() * numRegisterEntries;
+            BOOST_CHECK(!compEQ(lhs, rhs));
+            rhs[i] = lhs[i] - std::numeric_limits<dataType>::epsilon() * numRegisterEntries;
+            BOOST_CHECK(!compEQ(lhs, rhs));
+
+            // one unused value returns false
+            rhs = lhs;
+            rhs[j] = 0;
+            BOOST_CHECK(compEQ(lhs, rhs));
+            rhs[i] = lhs[i] + std::numeric_limits<dataType>::epsilon() * numRegisterEntries;
+            BOOST_CHECK(!compEQ(lhs, rhs));
+            rhs[i] = lhs[i] - std::numeric_limits<dataType>::epsilon() * numRegisterEntries;
+            BOOST_CHECK(!compEQ(lhs, rhs));
+        }
+
+        // Up to all unused values return false
+        rhs = lhs;
+        for (U32 j = _count; j < numRegisterEntries; ++j)
+        {
+            rhs[j] = 0;
+
+            rhs[i] = lhs[i] + std::numeric_limits<dataType>::epsilon() * numRegisterEntries;
+            BOOST_CHECK(!compEQ(lhs, rhs));
+            rhs[i] = lhs[i] - std::numeric_limits<dataType>::epsilon() * numRegisterEntries;
+            BOOST_CHECK(!compEQ(lhs, rhs));
+            rhs[i] = lhs[i];
+            BOOST_CHECK(compEQ(lhs, rhs));
+        }
+    }
+
+    // maximal all used values return false
+    for (U32 j = _count; j < numRegisterEntries; ++j)
     {
         rhs = lhs;
-        rhs[i] = rhs[i] + std::numeric_limits<dataType>::epsilon() * numRegisterEntries;
-        BOOST_CHECK(!SSECompareAllEqual(lhs, rhs));
+        for (U32 i = 0; i < _count; ++i)
+        {
+            // all unused values return true
+            rhs[i] = 0;
+            BOOST_CHECK(!compEQ(lhs, rhs));
+
+            // one unused value returns false
+            rhs[j] = 0;
+            BOOST_CHECK(!compEQ(lhs, rhs));
+        }
     }
 
 
-
-    // Only one register value should be compared
-    // ------------------------------------------
-
-    // All uncompared elements equal
-    rhs = lhs;
-
-    bool resultComparison = SSECompareAllEqual<_registerType, 1>(lhs, rhs);
-    BOOST_CHECK(resultComparison);
-    rhs[0] = -1;
-    resultComparison = SSECompareAllEqual<_registerType, 1>(lhs, rhs);
-    BOOST_CHECK(!resultComparison);
-
-    // All uncompared elements not equal
-    rhs = lhs;
-    for (U32 i = 1; i < numRegisterEntries; ++i)
-        rhs[i] = static_cast<dataType>(0);
-
-    resultComparison = SSECompareAllEqual<_registerType, 1>(lhs, rhs);
-    BOOST_CHECK(resultComparison);
-    rhs[0] = -1;
-    resultComparison = SSECompareAllEqual<_registerType, 1>(lhs, rhs);
-    BOOST_CHECK(!resultComparison);
-
-    // One uncompared element differs
-    for (U32 i = 1; i < numRegisterEntries; ++i)
-    {
-        rhs = lhs;
-        rhs[i] = static_cast<dataType>(0);
-        resultComparison = SSECompareAllEqual<_registerType, 1>(lhs, rhs);
-        BOOST_CHECK(resultComparison);
-        rhs[0] = -1;
-        resultComparison = SSECompareAllEqual<_registerType, 1>(lhs, rhs);
-        BOOST_CHECK(!resultComparison);
-    }
-
-
-    // All except one register values should be compared
-    // -------------------------------------------------
-
-    constexpr U32 indexLast = numRegisterEntries - 1;
-
-    rhs = lhs;
-    resultComparison = SSECompareAllEqual<_registerType, numRegisterEntries - 1>(lhs, rhs);
-    BOOST_CHECK(resultComparison);
-    rhs[indexLast] = static_cast<dataType>(0);
-    resultComparison = SSECompareAllEqual<_registerType, numRegisterEntries - 1>(lhs, rhs);
-    BOOST_CHECK(resultComparison);
-
-    rhs = lhs;
-    for (U32 i = 0; i < numRegisterEntries - 1; ++i)
-    {
-        rhs[i] = static_cast<dataType>(0);
-    }
-    resultComparison = SSECompareAllEqual<_registerType, numRegisterEntries - 1>(lhs, rhs);
-    BOOST_CHECK(!resultComparison);
-    rhs[indexLast] = static_cast<dataType>(0);
-    resultComparison = SSECompareAllEqual<_registerType, numRegisterEntries - 1>(lhs, rhs);
-    BOOST_CHECK(!resultComparison);
-
-    for (U32 i = 0; i < numRegisterEntries - 1; ++i)
-    {
-        rhs = lhs;
-        rhs[i] = rhs[i] + std::numeric_limits<dataType>::epsilon() * numRegisterEntries;
-        resultComparison = SSECompareAllEqual<_registerType, numRegisterEntries - 1>(lhs, rhs);
-        BOOST_CHECK(!resultComparison);
-        rhs[indexLast] = static_cast<dataType>(0);
-        resultComparison = SSECompareAllEqual<_registerType, numRegisterEntries - 1>(lhs, rhs);
-        BOOST_CHECK(!resultComparison);
-    }
-
-    // All except two register values should be compared
-    // -------------------------------------------------
 
     // clang-format off
-    if constexpr(numRegisterEntries > 2)
-    {
-        constexpr U32 indexLast = numRegisterEntries - 1;
-
-        rhs = lhs;
-        resultComparison = SSECompareAllEqual<_registerType, numRegisterEntries - 2>(lhs, rhs);
-        BOOST_CHECK(resultComparison);
-        rhs[indexLast] = static_cast<dataType>(0);
-        resultComparison = SSECompareAllEqual<_registerType, numRegisterEntries - 2>(lhs, rhs);
-        BOOST_CHECK(resultComparison);
-        rhs[indexLast-1] = static_cast<dataType>(0);
-        resultComparison = SSECompareAllEqual<_registerType, numRegisterEntries - 2>(lhs, rhs);
-        BOOST_CHECK(resultComparison);
-        rhs[indexLast] = lhs[indexLast];
-        resultComparison = SSECompareAllEqual<_registerType, numRegisterEntries - 2>(lhs, rhs);
-        BOOST_CHECK(resultComparison);
-
-        rhs = lhs;
-        for (U32 i = 0; i < numRegisterEntries - 2; ++i)
-        {
-            rhs[i] = static_cast<dataType>(0);
-        }
-        resultComparison = SSECompareAllEqual<_registerType, numRegisterEntries - 2>(lhs, rhs);
-        BOOST_CHECK(!resultComparison);
-        rhs[indexLast] = static_cast<dataType>(0);
-        resultComparison = SSECompareAllEqual<_registerType, numRegisterEntries - 2>(lhs, rhs);
-        BOOST_CHECK(!resultComparison);
-        rhs[indexLast-1] = static_cast<dataType>(0);
-        resultComparison = SSECompareAllEqual<_registerType, numRegisterEntries - 2>(lhs, rhs);
-        BOOST_CHECK(!resultComparison);
-        rhs[indexLast] = lhs[indexLast];
-        resultComparison = SSECompareAllEqual<_registerType, numRegisterEntries - 2>(lhs, rhs);
-        BOOST_CHECK(!resultComparison);
-
-        for (U32 i = 0; i < numRegisterEntries - 2; ++i)
-        {
-            rhs = lhs;
-            rhs[i] = rhs[i] + std::numeric_limits<dataType>::epsilon() * numRegisterEntries;
-            resultComparison = SSECompareAllEqual<_registerType, numRegisterEntries - 2>(lhs, rhs);
-            BOOST_CHECK(!resultComparison);
-            rhs[indexLast] = static_cast<dataType>(0);
-            resultComparison = SSECompareAllEqual<_registerType, numRegisterEntries - 2>(lhs, rhs);
-            BOOST_CHECK(!resultComparison);
-            rhs[indexLast-1] = static_cast<dataType>(0);
-            resultComparison = SSECompareAllEqual<_registerType, numRegisterEntries - 2>(lhs, rhs);
-            BOOST_CHECK(!resultComparison);
-            rhs[indexLast] = lhs[indexLast];
-            resultComparison = SSECompareAllEqual<_registerType, numRegisterEntries - 2>(lhs, rhs);
-            BOOST_CHECK(!resultComparison);
-        }
-    }
+    if constexpr(_count < numRegisterEntries)
+        TestCompareAllEqual<_registerType, _count + 1>();
     // clang-format on
 }
 
@@ -209,7 +144,7 @@ BOOST_AUTO_TEST_CASE(All_Equal)
 
 
 
-// Test CompareAllEqual ----------------------------------------------------------------------------------------------
+// Test CompareAllLessEqual -------------------------------------------------------------------------------------------
 
 //! @brief Tests the SSECompareAllLessEqual function with varying number of compared values.
 template <typename _registerType, U32 _count = 1>
@@ -217,7 +152,6 @@ void TestCompareAllLessEqual()
 {
     using dataType = decltype(SSEGetDataType<_registerType>());
     constexpr U32 numRegisterEntries = GetNumRegisterEntries<_registerType>();
-    constexpr U32 numUnusedElements = numRegisterEntries - _count;
 
     auto compLE = [](_registerType lhs, _registerType rhs) {
         return SSECompareAllLessEqual<_registerType, _count>(lhs, rhs);
@@ -227,7 +161,7 @@ void TestCompareAllLessEqual()
     alignas(AlignmentBytes<_registerType>) _registerType lhs = _mmx_setzero_p<_registerType>();
     for (U32 i = 0; i < numRegisterEntries; ++i)
         lhs[i] = static_cast<dataType>(i + 1);
-    alignas(AlignmentBytes<_registerType>) _registerType rhs = lhs;
+    alignas(AlignmentBytes<_registerType>) _registerType rhs;
 
 
     // all values return true
