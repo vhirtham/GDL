@@ -7,7 +7,9 @@
 
 #include "gdl/base/exception.h"
 #include "gdl/base/fundamentalTypes.h"
+#include "gdl/base/functions/pow.h"
 
+#include <limits>
 #include <x86intrin.h>
 
 namespace GDL
@@ -15,6 +17,8 @@ namespace GDL
 
 // SSEMaxRegisterSize -------------------------------------------------------------------------------------------------
 
+//! @brief Gets the bitsize of the largest available register
+//! @return Bitsize of the largest available register
 constexpr U32 SSEMaxRegisterSize()
 {
 #ifdef __AVX512F__
@@ -26,8 +30,15 @@ constexpr U32 SSEMaxRegisterSize()
 #endif
 }
 
+
+
 // SSEGetFittingRegister ----------------------------------------------------------------------------------------------
 
+//! @brief Gets a register of the provided bitsize which is compatible with a given data type
+//! @tparam _type: Returned register must be capable to store values of this data type
+//! @tparam _registerSize: Bit size of the returned register
+//! @return Register of the provided bitsize which is compatible with a given data type
+//! @remark A function call should usually be combined with decltype
 template <typename _type, U32 _registerSize>
 auto SSEGetFittingRegister()
 {
@@ -61,8 +72,44 @@ auto SSEGetFittingRegister()
 }
 
 
+
+// SSEGetDataType -----------------------------------------------------------------------------------------------------
+
+//! @brief Gets an inatance of the underlying data type of a register
+//! @tparam _registerType: Register type
+//! @return Inatance of  the underlying data type of a register
+//! @remark A function call should usually be combined with decltype
+template <typename _registerType>
+constexpr auto SSEGetDataType()
+{
+    // clang-format off
+    if constexpr(std::is_same<_registerType, __m128>::value)
+        return F32{0};
+    else if constexpr(std::is_same<_registerType, __m128d>::value)
+        return F64{0};
+#ifdef __AVX2__
+    else if constexpr(std::is_same<_registerType, __m256>::value)
+        return F32{0};
+    else if constexpr(std::is_same<_registerType, __m256d>::value)
+        return F64{0};
+#ifdef __AVX512F__
+    else if constexpr(std::is_same<_registerType, __m512>::value)
+        return F32{0};
+    else if constexpr(std::is_same<_registerType, __m512d>::value)
+        return F64{0};
+#endif // __AVX512F__
+#endif // __AVX2__
+    else
+        throw Exception(__PRETTY_FUNCTION__, "Not defined for selected register type.");
+    // clang-format on
+}
+
+
+
 // AlignmentBytes -----------------------------------------------------------------------------------------------------
 
+//! @brief Constant which stores the necessary alignment in bytes for the provided register type
+//! @tparam _registerType: RegisterType
 template <typename _registerType>
 constexpr const U32 AlignmentBytes = 0;
 
@@ -145,7 +192,7 @@ constexpr U32 GetNumRegisterEntries()
 //! @param ptr: Pointer to a piece of memory where the data should be stored
 //! @param reg: Register that provides the data
 template <typename _type, typename _registerType>
-inline void _mmx_store_p(_type* ptr, const _registerType& reg)
+inline void _mmx_store_p(_type* ptr, _registerType reg)
 {
     // clang-format off
     if constexpr(std::is_same<_registerType, __m128>::value && std::is_same<_type, F32>::value)
@@ -300,7 +347,7 @@ inline _registerType _mmx_setr_p(_type v0, _type v1, _type v2, _type v3)
 //! @param rhs: Right hand side value
 //! @return Result of the addition
 template <typename _registerType>
-inline _registerType _mmx_add_p(const _registerType& lhs, const _registerType& rhs)
+inline _registerType _mmx_add_p(_registerType lhs, _registerType rhs)
 {
     // clang-format off
     if constexpr(std::is_same<_registerType, __m128>::value)
@@ -340,7 +387,7 @@ inline _registerType _mmx_add_p(const _registerType& lhs, const _registerType& r
 //! @param rhs: Right hand side value
 //! @return Result of the multiplication
 template <typename _registerType>
-inline _registerType _mmx_mul_p(const _registerType& lhs, const _registerType& rhs)
+inline _registerType _mmx_mul_p(_registerType lhs, _registerType rhs)
 {
     // clang-format off
     if constexpr(std::is_same<_registerType, __m128>::value)
@@ -384,7 +431,7 @@ inline _registerType _mmx_mul_p(const _registerType& lhs, const _registerType& r
 //! @remark If fmadd intrinsics are not available the function still works. It performs the necessary operations
 //! seperately.
 template <typename _registerType>
-inline _registerType _mmx_fmadd_p(const _registerType& lhsM, const _registerType& rhsM, const _registerType& add)
+inline _registerType _mmx_fmadd_p(_registerType lhsM, _registerType rhsM, _registerType add)
 {
 #ifndef __FMA__
     return _mmx_add_p(_mmx_mul_p(lhsM, rhsM), add);
@@ -413,6 +460,108 @@ inline _registerType _mmx_fmadd_p(const _registerType& lhsM, const _registerType
 }
 
 
+// _mmx_cmpeq_p -------------------------------------------------------------------------------------------------------
+
+//! @brief Compares two registers for equality
+//! @tparam _registerType: Register type
+//! @param lhs: Left hand side register
+//! @param rhs: Right hand side register
+//! @return Register which stores the results of the comparison
+template <typename _registerType>
+inline auto _mmx_cmpeq_p(_registerType lhs, _registerType rhs)
+{
+
+    // clang-format off
+    if constexpr(std::is_same<_registerType, __m128>::value)
+        return _mm_cmpeq_ps(lhs,rhs);
+    else if constexpr(std::is_same<_registerType, __m128d>::value)
+        return _mm_cmpeq_pd(lhs,rhs);
+#ifdef __AVX2__
+    else if constexpr(std::is_same<_registerType, __m256>::value)
+        return _mm256_cmp_ps(lhs, rhs, _CMP_EQ_OS);
+
+    else if constexpr(std::is_same<_registerType, __m256d>::value)
+        return _mm256_cmp_pd(lhs, rhs, _CMP_EQ_OS);
+#ifdef __AVX512F__
+    // Check https://software.intel.com/en-us/forums/intel-isa-extensions/topic/749055
+    else if constexpr(std::is_same<_registerType, __m512>::value)
+        throw(__PRETTY_FUNCTION__,"Not implemented");
+    else if constexpr(std::is_same<_registerType, __m512d>::value)
+        throw(__PRETTY_FUNCTION__,"Not implemented");
+#endif // __AVX512F__
+#endif // __AVX2__
+    else
+        throw Exception(__PRETTY_FUNCTION__, "Not defined for selected register type.");
+    // clang-format on
+}
+
+
+
+// _mmx_cmple_p -------------------------------------------------------------------------------------------------------
+
+//! @brief Compares lhs <= rhs for two registers
+//! @tparam _registerType: Register type
+//! @param lhs: Left hand side register
+//! @param rhs: Right hand side register
+//! @return Register which stores the results of the comparison
+template <typename _registerType>
+inline auto _mmx_cmple_p(_registerType lhs, _registerType rhs)
+{
+
+    // clang-format off
+    if constexpr(std::is_same<_registerType, __m128>::value)
+        return _mm_cmple_ps(lhs,rhs);
+    else if constexpr(std::is_same<_registerType, __m128d>::value)
+        return _mm_cmple_pd(lhs,rhs);
+#ifdef __AVX2__
+    else if constexpr(std::is_same<_registerType, __m256>::value)
+        return _mm256_cmp_ps(lhs, rhs, _CMP_LE_OS);
+
+    else if constexpr(std::is_same<_registerType, __m256d>::value)
+        return _mm256_cmp_pd(lhs, rhs, _CMP_LE_OS);
+#ifdef __AVX512F__
+    // Check https://software.intel.com/en-us/forums/intel-isa-extensions/topic/749055
+    else if constexpr(std::is_same<_registerType, __m512>::value)
+        throw(__PRETTY_FUNCTION__,"Not implemented");
+    else if constexpr(std::is_same<_registerType, __m512d>::value)
+        throw(__PRETTY_FUNCTION__,"Not implemented");
+#endif // __AVX512F__
+#endif // __AVX2__
+    else
+        throw Exception(__PRETTY_FUNCTION__, "Not defined for selected register type.");
+    // clang-format on
+}
+
+
+
+// _mmx_movemask_epi8 -------------------------------------------------------------------------------------------------
+
+//! @brief Create mask from the most significant bit of each 8-bit element in a register and returns it
+//! @tparam _registerType: Register type
+//! @param reg: Register which serves as source for the mask
+//! @return Mask from the most significant bit of each 8-bit element of the source register
+template <typename _registerType>
+inline auto _mmx_movemask_epi8(_registerType reg)
+{
+
+    // clang-format off
+    if constexpr(std::is_same<_registerType, __m128i>::value)
+        return static_cast<U16>(_mm_movemask_epi8(reg));
+#ifdef __AVX2__
+    else if constexpr(std::is_same<_registerType, __m256i>::value)
+        return static_cast<U32>(_mm256_movemask_epi8(reg));
+#ifdef __AVX512F__
+    // Check https://software.intel.com/en-us/forums/intel-isa-extensions/topic/749055
+    else if constexpr(std::is_same<_registerType, __m512i>::value)
+        throw(__PRETTY_FUNCTION__,"Not implemented");
+#endif // __AVX512F__
+#endif // __AVX2__
+    else
+        throw Exception(__PRETTY_FUNCTION__, "Not defined for selected register type.");
+    // clang-format on
+}
+
+
 
 // CalcMinNumArrayRegisters -------------------------------------------------------------------------------------------
 
@@ -427,6 +576,132 @@ constexpr U32 CalcMinNumArrayRegisters(U32 numValues)
     return (numValues / registerSize) + ((numValues % registerSize > 0) ? 1 : 0);
 }
 
+
+
+// SSEReinterpretAsIntRegister ----------------------------------------------------------------------------------------
+
+//! @brief Reinterprets the passed register as a integer register of the same size
+//! @tparam _registerType: Register type
+//! @param reg: Register that should be cast
+//! @return Integer register
+template <typename _registerType>
+inline auto SSEReinterpretAsIntRegister(_registerType reg)
+{
+    // clang-format off
+    if constexpr(std::is_same<_registerType, __m128>::value || std::is_same<_registerType, __m128d>::value)
+        return reinterpret_cast<__m128i>(reg);
+#ifdef __AVX2__
+    if constexpr(std::is_same<_registerType, __m256>::value || std::is_same<_registerType, __m256d>::value)
+        return reinterpret_cast<__m256i>(reg);
+#ifdef __AVX512F__
+    if constexpr(std::is_same<_registerType, __m512>::value || std::is_same<_registerType, __m512d>::value)
+        return reinterpret_cast<__m512i>(reg);
+#endif // __AVX512F__
+#endif // __AVX2__
+    else
+        throw Exception(__PRETTY_FUNCTION__, "Not defined for selected register type.");
+    // clang-format on
+}
+
+
+
+// SSEGetComparisonValueAllTrue ---------------------------------------------------------------------------------------
+
+//! @brief Calculates a value with a certain bitsignature that corresponds to the expected result from a register
+//! comparison where all element comparisons return true
+//! @tparam _registerType: RegisterType
+//! @tparam _numComparedValues: Number of register values that should be compared. If the value is smaller than the
+//! number of register values, only the first elements of the register are compared.
+//! @return Value with specific bit signature
+template <typename _registerType, U32 _numComparedValues = GetNumRegisterEntries<_registerType>()>
+constexpr auto SSECalculateComparisonValueAllTrue()
+{
+    using ReturnType = decltype(_mmx_movemask_epi8(SSEReinterpretAsIntRegister(_mmx_setzero_p<_registerType>())));
+
+    // clang-format off
+    if constexpr(_numComparedValues == GetNumRegisterEntries<_registerType>())
+        return std::numeric_limits<ReturnType>::max();
+    else
+    {
+        constexpr U32 numUnusedBits =
+                (sizeof(ReturnType) * 8 * _numComparedValues) / GetNumRegisterEntries<_registerType>();
+        return static_cast<ReturnType>(Pow<numUnusedBits>(2) - 1);
+    }
+    // clang-format on
+}
+
+
+
+// SSECompareAllTrue -------------------------------------------------------------------------------------------------
+
+//! @brief Compares two register with the passed comparison function. If a single element comparison returns false, this
+//! function will also return false.
+//! @tparam _registerType: Register type
+//! @tparam _numComparedValues: Number of register values that should be compared. If the value is smaller than the
+//! number of register values, only the first elements of the register are compared.
+//! @tparam _compFunction: Type of the comparison function
+//! @param lhs: Left hand side register
+//! @param rhs: Right hand side register
+//! @param compFunction: Comparison function
+//! @return TRUE / FALSE
+template <typename _registerType, U32 _numComparedValues, typename _compFunction>
+inline bool SSECompareAllTrue(_registerType lhs, _registerType rhs, _compFunction compFunction)
+{
+    static_assert(_numComparedValues > 0 && _numComparedValues <= GetNumRegisterEntries<_registerType>(),
+                  "Invalid number of compared values ---> [1 ... numRegisterEntries]");
+
+    auto cmpResult = _mmx_movemask_epi8(SSEReinterpretAsIntRegister(compFunction(lhs, rhs)));
+    auto limit = SSECalculateComparisonValueAllTrue<_registerType, _numComparedValues>();
+
+    static_assert(std::is_same_v<decltype(cmpResult), decltype(limit)>, "Mismatching types for comparison");
+
+    // clang-format off
+    if constexpr(_numComparedValues != GetNumRegisterEntries<_registerType>())
+        cmpResult &= limit; // Set bits of elemts that should not be compared to zero
+    // clang-format on
+
+    return cmpResult >= limit;
+}
+
+
+
+// SSECompareAllEqual -------------------------------------------------------------------------------------------------
+
+
+//! @brief Compares if the values of two register are equal. This function returns true if all values are equal and
+//! false otherwise
+//! @tparam _registerType: Register type
+//! @tparam _numComparedValues: Number of register values that should be compared. If the value is smaller than the
+//! number of register values, only the first elements of the register are compared.
+//! @param lhs: Left hand side register
+//! @param rhs: Right hand side register
+//! @return TRUE / FALSE
+template <typename _registerType, U32 _numComparedValues = GetNumRegisterEntries<_registerType>()>
+inline bool SSECompareAllEqual(_registerType lhs, _registerType rhs)
+{
+    return SSECompareAllTrue<_registerType, _numComparedValues, decltype(_mmx_cmpeq_p<_registerType>)>(
+            lhs, rhs, &_mmx_cmpeq_p<_registerType>);
+}
+
+
+
+// SSECompareAllLessEqual ---------------------------------------------------------------------------------------------
+
+
+//! @brief Compares lhs <= rhs for two register. This function returns true if all lhs values are less or equal when
+//! compared to the corresponding rhs value
+//! @tparam _registerType: Register type
+//! @tparam _numComparedValues: Number of register values that should be compared. If the value is smaller than the
+//! number of register values, only the first elements of the register are compared.
+//! @param lhs: Left hand side register
+//! @param rhs: Right hand side register
+//! @return TRUE / FALSE
+template <typename _registerType, U32 _numComparedValues = GetNumRegisterEntries<_registerType>()>
+inline bool SSECompareAllLessEqual(_registerType lhs, _registerType rhs)
+{
+    return SSECompareAllTrue<_registerType, _numComparedValues, decltype(_mmx_cmple_p<_registerType>)>(
+            lhs, rhs, &_mmx_cmple_p<_registerType>);
+}
 
 
 } // namespace GDL
