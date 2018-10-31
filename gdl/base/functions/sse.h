@@ -137,21 +137,6 @@ constexpr U32 GetNumRegisterEntries()
 
 
 
-// CalcMinNumArrayRegisters -------------------------------------------------------------------------------------------
-
-//! @brief Calculates the minimal number of registers to store a certain number of values
-//! @tparam _registerType: Register type
-//! @param numValues: Number of values that should be stored
-//! @return Minimal number of registers
-template <typename _registerType>
-constexpr U32 CalcMinNumArrayRegisters(U32 numValues)
-{
-    constexpr U32 registerSize = GetNumRegisterEntries<_registerType>();
-    return (numValues / registerSize) + ((numValues % registerSize > 0) ? 1 : 0);
-}
-
-
-
 // _mmx_store_p --------------------------------------------------------------------------------------------------------
 
 //! @brief Stores the values of a register to a given memory location
@@ -425,6 +410,21 @@ inline _registerType _mmx_fmadd_p(const _registerType& lhsM, const _registerType
         throw Exception(__PRETTY_FUNCTION__, "Not defined for selected register type.");
 #endif // __FMA__
     // clang-format on
+}
+
+
+
+// CalcMinNumArrayRegisters -------------------------------------------------------------------------------------------
+
+//! @brief Calculates the minimal number of registers to store a certain number of values
+//! @tparam _registerType: Register type
+//! @param numValues: Number of values that should be stored
+//! @return Minimal number of registers
+template <typename _registerType>
+constexpr U32 CalcMinNumArrayRegisters(U32 numValues)
+{
+    constexpr U32 registerSize = GetNumRegisterEntries<_registerType>();
+    return (numValues / registerSize) + ((numValues % registerSize > 0) ? 1 : 0);
 }
 
 

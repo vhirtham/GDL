@@ -1,4 +1,5 @@
 addTest(approx)
+addTest(sse)
 addTest(freeFunctions)
 addTest(outputFile)
 
