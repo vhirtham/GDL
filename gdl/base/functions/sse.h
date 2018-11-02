@@ -379,6 +379,45 @@ inline _registerType _mmx_add_p(_registerType lhs, _registerType rhs)
 
 
 
+// _mmx_sub_p ---------------------------------------------------------------------------------------------------------
+
+//! @brief Template for register substraction
+//! @tparam _registerType: Register type
+//! @param lhs: Left hand side value
+//! @param rhs: Right hand side value
+//! @return Result of the substraction
+template <typename _registerType>
+inline _registerType _mmx_sub_p(_registerType lhs, _registerType rhs)
+{
+    // clang-format off
+    if constexpr(std::is_same<_registerType, __m128>::value)
+        return _mm_sub_ps(lhs,rhs);
+    else if constexpr(std::is_same<_registerType, __m128d>::value)
+        return _mm_sub_pd(lhs,rhs);
+    else if constexpr(std::is_same<_registerType, __m128i>::value)
+        return _mm_sub_epi32(lhs,rhs);
+#ifdef __AVX2__
+    if constexpr(std::is_same<_registerType, __m256>::value)
+        return _mm256_sub_ps(lhs,rhs);
+    else if constexpr(std::is_same<_registerType, __m256d>::value)
+        return _mm256_sub_pd(lhs,rhs);
+    else if constexpr(std::is_same<_registerType, __m256i>::value)
+        return _mm256_sub_epi32(lhs,rhs);
+#ifdef __AVX512F__
+    if constexpr(std::is_same<_registerType, __m512>::value)
+        return _mm512_sub_ps(lhs,rhs);
+    else if constexpr(std::is_same<_registerType, __m512d>::value)
+        return _mm512_sub_pd(lhs,rhs);
+    else if constexpr(std::is_same<_registerType, __m512i>::value)
+        return _mm512_sub_epi32(lhs,rhs);
+#endif // __AVX512F__
+#endif // __AVX2__
+    else
+        throw Exception(__PRETTY_FUNCTION__, "Not defined for selected register type.");
+    // clang-format on
+}
+
+
 // _mmx_mul_p ---------------------------------------------------------------------------------------------------------
 
 //! @brief Template for register multiplication
