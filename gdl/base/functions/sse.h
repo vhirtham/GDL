@@ -159,22 +159,16 @@ constexpr U32 SSEGetNumRegisterEntries()
         return 4;
     else if constexpr(std::is_same<_registerType, __m128d>::value)
         return 2;
-    else if constexpr(std::is_same<_registerType, __m128i>::value)
-        return 4;
 #ifdef __AVX2__
     else if constexpr(std::is_same<_registerType, __m256>::value)
         return 8;
     else if constexpr(std::is_same<_registerType, __m256d>::value)
         return 4;
-    else if constexpr(std::is_same<_registerType, __m256i>::value)
-        return 8;
 #ifdef __AVX512F__
     else if constexpr(std::is_same<_registerType, __m512>::value)
         return 16;
     else if constexpr(std::is_same<_registerType, __m512d>::value)
         return 8;
-    else if constexpr(std::is_same<_registerType, __m512i>::value)
-        return 16;
 #endif // __AVX512F__
 #endif // __AVX2__
     else
@@ -271,22 +265,16 @@ inline _registerType _mmx_set1_p(_type value)
         return _mm_set1_ps(value);
     else if constexpr(std::is_same<_registerType, __m128d>::value && std::is_same<_type, F64>::value)
         return _mm_set1_pd(value);
-    else if constexpr(std::is_same<_registerType, __m128i>::value && std::is_same<_type, I32>::value)
-        return _mm_set1_epi32(value);
 #ifdef __AVX2__
     if constexpr(std::is_same<_registerType, __m256>::value && std::is_same<_type, F32>::value)
         return _mm256_set1_ps(value);
     else if constexpr(std::is_same<_registerType, __m256d>::value && std::is_same<_type, F64>::value)
         return _mm256_set1_pd(value);
-    else if constexpr(std::is_same<_registerType, __m256i>::value && std::is_same<_type, I32>::value)
-        return _mm256_set1_epi32(value);
 #ifdef __AVX512F__
     if constexpr(std::is_same<_registerType, __m512>::value && std::is_same<_type, F32>::value)
         return _mm512_set1_ps(value);
     else if constexpr(std::is_same<_registerType, __m512d>::value && std::is_same<_type, F64>::value)
         return _mm512_set1_pd(value);
-    else if constexpr(std::is_same<_registerType, __m512i>::value && std::is_same<_type, I32>::value)
-        return _mm512_set1_epi32(value);
 #endif // __AVX512F__
 #endif // __AVX2__
     else
@@ -314,22 +302,16 @@ inline _registerType _mmx_setr_p(_args... args)
         return _mm_setr_ps(std::forward<_args>(args)...);
     else if constexpr(std::is_same<_registerType, __m128d>::value)
         return _mm_setr_pd(std::forward<_args>(args)...);
-    else if constexpr(std::is_same<_registerType, __m128i>::value)
-        return _mm_setr_epi32(std::forward<_args>(args)...);
 #ifdef __AVX2__
     if constexpr(std::is_same<_registerType, __m256>::value)
         return _mm256_setr_ps(std::forward<_args>(args)...);
     else if constexpr(std::is_same<_registerType, __m256d>::value)
         return _mm256_setr_pd(std::forward<_args>(args)...);
-    else if constexpr(std::is_same<_registerType, __m256i>::value)
-        return _mm256_setr_epi32(std::forward<_args>(args)...);
 #ifdef __AVX512F__
     if constexpr(std::is_same<_registerType, __m512>::value)
         return _mm512_setr_ps(std::forward<_args>(args)...);
     else if constexpr(std::is_same<_registerType, __m512d>::value)
         return _mm512_setr_pd(std::forward<_args>(args)...);
-    else if constexpr(std::is_same<_registerType, __m512i>::value)
-        return _mm512_setr_epi32(std::forward<_args>(args)...);
 #endif // __AVX512F__
 #endif // __AVX2__
     else
@@ -354,22 +336,16 @@ inline _registerType _mmx_add_p(_registerType lhs, _registerType rhs)
         return _mm_add_ps(lhs,rhs);
     else if constexpr(std::is_same<_registerType, __m128d>::value)
         return _mm_add_pd(lhs,rhs);
-    else if constexpr(std::is_same<_registerType, __m128i>::value)
-        return _mm_add_epi32(lhs,rhs);
 #ifdef __AVX2__
     if constexpr(std::is_same<_registerType, __m256>::value)
         return _mm256_add_ps(lhs,rhs);
     else if constexpr(std::is_same<_registerType, __m256d>::value)
         return _mm256_add_pd(lhs,rhs);
-    else if constexpr(std::is_same<_registerType, __m256i>::value)
-        return _mm256_add_epi32(lhs,rhs);
 #ifdef __AVX512F__
     if constexpr(std::is_same<_registerType, __m512>::value)
         return _mm512_add_ps(lhs,rhs);
     else if constexpr(std::is_same<_registerType, __m512d>::value)
         return _mm512_add_pd(lhs,rhs);
-    else if constexpr(std::is_same<_registerType, __m512i>::value)
-        return _mm512_add_epi32(lhs,rhs);
 #endif // __AVX512F__
 #endif // __AVX2__
     else
@@ -394,22 +370,16 @@ inline _registerType _mmx_sub_p(_registerType lhs, _registerType rhs)
         return _mm_sub_ps(lhs,rhs);
     else if constexpr(std::is_same<_registerType, __m128d>::value)
         return _mm_sub_pd(lhs,rhs);
-    else if constexpr(std::is_same<_registerType, __m128i>::value)
-        return _mm_sub_epi32(lhs,rhs);
 #ifdef __AVX2__
     if constexpr(std::is_same<_registerType, __m256>::value)
         return _mm256_sub_ps(lhs,rhs);
     else if constexpr(std::is_same<_registerType, __m256d>::value)
         return _mm256_sub_pd(lhs,rhs);
-    else if constexpr(std::is_same<_registerType, __m256i>::value)
-        return _mm256_sub_epi32(lhs,rhs);
 #ifdef __AVX512F__
     if constexpr(std::is_same<_registerType, __m512>::value)
         return _mm512_sub_ps(lhs,rhs);
     else if constexpr(std::is_same<_registerType, __m512d>::value)
         return _mm512_sub_pd(lhs,rhs);
-    else if constexpr(std::is_same<_registerType, __m512i>::value)
-        return _mm512_sub_epi32(lhs,rhs);
 #endif // __AVX512F__
 #endif // __AVX2__
     else
@@ -433,22 +403,16 @@ inline _registerType _mmx_mul_p(_registerType lhs, _registerType rhs)
         return _mm_mul_ps(lhs,rhs);
     else if constexpr(std::is_same<_registerType, __m128d>::value)
         return _mm_mul_pd(lhs,rhs);
-    else if constexpr(std::is_same<_registerType, __m128i>::value)
-        return _mm_mul_epi32(lhs,rhs);
 #ifdef __AVX2__
     if constexpr(std::is_same<_registerType, __m256>::value)
         return _mm256_mul_ps(lhs,rhs);
     else if constexpr(std::is_same<_registerType, __m256d>::value)
         return _mm256_mul_pd(lhs,rhs);
-    else if constexpr(std::is_same<_registerType, __m256i>::value)
-        return _mm256_mul_epi32(lhs,rhs);
 #ifdef __AVX512F__
     if constexpr(std::is_same<_registerType, __m512>::value)
         return _mm512_mul_ps(lhs,rhs);
     else if constexpr(std::is_same<_registerType, __m512d>::value)
         return _mm512_mul_pd(lhs,rhs);
-    else if constexpr(std::is_same<_registerType, __m512i>::value)
-        return _mm512_mul_epi32(lhs,rhs);
 #endif // __AVX512F__
 #endif // __AVX2__
     else
