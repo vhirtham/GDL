@@ -21,8 +21,8 @@ class InsideTolerance
     static_assert(std::is_integral<_type>::value || std::is_floating_point<_type>::value,
                   "InsideTolerance can only be used with integer and floating point types.");
 
-    _type mValue;
-    _type mTolerance;
+    const _type mValue;
+    const _type mTolerance;
 
 public:
     InsideTolerance() = delete;
@@ -37,7 +37,7 @@ public:
     //! @brief ctor
     //! @param value: Value that should be compared to other values
     //! @param tolerance: Tolerance for the comparison
-    constexpr InsideTolerance(_type value, _type tolerance);
+    constexpr InsideTolerance(const _type value, const _type tolerance);
 
     //! @brief Compares if the rhs value is inside a certain tolerance to the stored value
     //! @param rhs: Right hand side value
@@ -49,7 +49,6 @@ public:
     //! @return True / false
     constexpr bool operator!=(_type rhs) const;
 };
-
 
 
 

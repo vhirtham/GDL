@@ -7,7 +7,7 @@ namespace GDL
 {
 
 template <typename _type, bool _sse>
-constexpr InsideTolerance<_type, _sse>::InsideTolerance(_type value, _type tolerance)
+constexpr InsideTolerance<_type, _sse>::InsideTolerance(const _type value, const _type tolerance)
     : mValue{value}
     , mTolerance{tolerance}
 {
@@ -18,7 +18,7 @@ constexpr InsideTolerance<_type, _sse>::InsideTolerance(_type value, _type toler
 template <typename _type, bool _sse>
 constexpr bool InsideTolerance<_type, _sse>::operator==(_type rhs) const
 {
-    return std::abs(rhs - mValue) <= mTolerance;
+    return std::abs(mValue - rhs) <= mTolerance;
 }
 
 
@@ -53,7 +53,7 @@ InsideTolerance<_registerType, true>::InsideTolerance(_registerType value, _type
 
 
 template <typename _registerType>
-bool GDL::InsideTolerance<_registerType, true>::operator==(_registerType rhs) const
+bool InsideTolerance<_registerType, true>::operator==(_registerType rhs) const
 {
     return SSECompareAllLessEqual(SSEAbs(_mmx_sub_p(rhs, mValue)), mTolerance);
 }
@@ -61,7 +61,7 @@ bool GDL::InsideTolerance<_registerType, true>::operator==(_registerType rhs) co
 
 
 template <typename _registerType>
-bool GDL::InsideTolerance<_registerType, true>::operator!=(_registerType rhs) const
+bool InsideTolerance<_registerType, true>::operator!=(_registerType rhs) const
 {
     return !operator==(rhs);
 }
