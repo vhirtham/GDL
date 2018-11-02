@@ -1,7 +1,8 @@
 addTest(approx)
-addTest(sse)
 addTest(freeFunctions)
+addTest(insideTolerance)
 addTest(outputFile)
+addTest(sse)
 
 addTest(string
     resources/memory/generalPurposeMemory.cpp

@@ -55,7 +55,7 @@ void TestAbs()
     alignas(alignmentBytes<_registerType>) _registerType cmp2 = _mmx_setzero_p<_registerType>();
     alignas(alignmentBytes<_registerType>) _registerType cmp3 = _mmx_setzero_p<_registerType>();
 
-    for (I32 i = 0; i < numRegisterEntries; ++i)
+    for (I32 i = 0; i < static_cast<I32>(numRegisterEntries); ++i)
     {
 
         ref[i] = static_cast<DataType>(i);

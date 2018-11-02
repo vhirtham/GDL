@@ -15,6 +15,33 @@
 namespace GDL
 {
 
+// SSEIsRegisterType --------------------------------------------------------------------------------------------------
+
+//! @brief Returns if the template type is a sse register type
+//! @tparam _registerType: Register type
+//! @return Inatance of  the underlying data type of a register
+template <typename _registerType>
+constexpr bool SSEIsRegisterType()
+{
+    // clang-format off
+    if constexpr(std::is_same<_registerType, __m128>::value
+              || std::is_same<_registerType, __m128d>::value
+#ifdef __AVX2__
+              || std::is_same<_registerType, __m256>::value
+              || std::is_same<_registerType, __m256d>::value
+#ifdef __AVX512F__
+              || std::is_same<_registerType, __m512>::value
+              || std::is_same<_registerType, __m512d>::value
+#endif // __AVX512F__
+#endif // __AVX2__
+                 )
+        return true;
+    // clang-format on
+    return false;
+}
+
+
+
 // SSEMaxRegisterSize -------------------------------------------------------------------------------------------------
 
 //! @brief Gets the bitsize of the largest available register
@@ -649,7 +676,7 @@ inline _registerType _mmx_andnot_p(_registerType lhs, _registerType rhs)
 
     // clang-format off
     if constexpr(std::is_same<_registerType, __m128>::value)
-        return _mm_andnot_pd(lhs,rhs);
+        return _mm_andnot_ps(lhs,rhs);
     else if constexpr(std::is_same<_registerType, __m128d>::value)
         return _mm_andnot_pd(lhs,rhs);
 #ifdef __AVX2__
