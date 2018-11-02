@@ -106,41 +106,41 @@ constexpr auto SSEGetDataType()
 
 
 
-// AlignmentBytes -----------------------------------------------------------------------------------------------------
+// alignmentBytes -----------------------------------------------------------------------------------------------------
 
 //! @brief Constant which stores the necessary alignment in bytes for the provided register type
 //! @tparam _registerType: RegisterType
 template <typename _registerType>
-constexpr const U32 AlignmentBytes = 0;
+constexpr const U32 alignmentBytes = 0;
 
 template <>
-constexpr const U32 AlignmentBytes<__m128> = 16;
+constexpr const U32 alignmentBytes<__m128> = 16;
 
 template <>
-constexpr const U32 AlignmentBytes<__m128d> = 16;
+constexpr const U32 alignmentBytes<__m128d> = 16;
 
 template <>
-constexpr const U32 AlignmentBytes<__m128i> = 16;
+constexpr const U32 alignmentBytes<__m128i> = 16;
 
 #ifdef __AVX2__
 template <>
-constexpr const U32 AlignmentBytes<__m256> = 32;
+constexpr const U32 alignmentBytes<__m256> = 32;
 
 template <>
-constexpr const U32 AlignmentBytes<__m256d> = 32;
+constexpr const U32 alignmentBytes<__m256d> = 32;
 
 template <>
-constexpr const U32 AlignmentBytes<__m256i> = 32;
+constexpr const U32 alignmentBytes<__m256i> = 32;
 
 #ifdef __AVX512F__
 template <>
-constexpr const U32 AlignmentBytes<__m512> = 64;
+constexpr const U32 alignmentBytes<__m512> = 64;
 
 template <>
-constexpr const U32 AlignmentBytes<__m512d> = 64;
+constexpr const U32 alignmentBytes<__m512d> = 64;
 
 template <>
-constexpr const U32 AlignmentBytes<__m512i> = 64;
+constexpr const U32 alignmentBytes<__m512i> = 64;
 #endif // __AVX512F__
 #endif // __AVX2__
 
@@ -261,19 +261,19 @@ template <typename _registerType, typename _type>
 inline _registerType _mmx_set1_p(_type value)
 {
     // clang-format off
-    if constexpr(std::is_same<_registerType, __m128>::value && std::is_same<_type, F32>::value)
+    if constexpr(std::is_same<_registerType, __m128>::value)
         return _mm_set1_ps(value);
-    else if constexpr(std::is_same<_registerType, __m128d>::value && std::is_same<_type, F64>::value)
+    else if constexpr(std::is_same<_registerType, __m128d>::value)
         return _mm_set1_pd(value);
 #ifdef __AVX2__
-    if constexpr(std::is_same<_registerType, __m256>::value && std::is_same<_type, F32>::value)
+    if constexpr(std::is_same<_registerType, __m256>::value)
         return _mm256_set1_ps(value);
-    else if constexpr(std::is_same<_registerType, __m256d>::value && std::is_same<_type, F64>::value)
+    else if constexpr(std::is_same<_registerType, __m256d>::value)
         return _mm256_set1_pd(value);
 #ifdef __AVX512F__
-    if constexpr(std::is_same<_registerType, __m512>::value && std::is_same<_type, F32>::value)
+    if constexpr(std::is_same<_registerType, __m512>::value)
         return _mm512_set1_ps(value);
-    else if constexpr(std::is_same<_registerType, __m512d>::value && std::is_same<_type, F64>::value)
+    else if constexpr(std::is_same<_registerType, __m512d>::value)
         return _mm512_set1_pd(value);
 #endif // __AVX512F__
 #endif // __AVX2__
@@ -388,6 +388,7 @@ inline _registerType _mmx_sub_p(_registerType lhs, _registerType rhs)
 }
 
 
+
 // _mmx_mul_p ---------------------------------------------------------------------------------------------------------
 
 //! @brief Template for register multiplication
@@ -461,6 +462,7 @@ inline _registerType _mmx_fmadd_p(_registerType lhsM, _registerType rhsM, _regis
 #endif // __FMA__
     // clang-format on
 }
+
 
 
 // _mmx_cmpeq_p -------------------------------------------------------------------------------------------------------
@@ -630,6 +632,58 @@ inline auto _mmx_movemask_epi8(_registerType reg)
     else
         throw Exception(__PRETTY_FUNCTION__, "Not defined for selected register type.");
     // clang-format on
+}
+
+
+
+// _mmx_andnot_p ------------------------------------------------------------------------------------------------------
+
+//! @brief Performs a and-not operation on the passed registers
+//! @tparam _registerType: Register type
+//! @param lhs: Left hand side register
+//! @param rhs: Right hand side register
+//! @return Result of the and-not operation
+template <typename _registerType>
+inline _registerType _mmx_andnot_p(_registerType lhs, _registerType rhs)
+{
+
+    // clang-format off
+    if constexpr(std::is_same<_registerType, __m128>::value)
+        return _mm_andnot_pd(lhs,rhs);
+    else if constexpr(std::is_same<_registerType, __m128d>::value)
+        return _mm_andnot_pd(lhs,rhs);
+#ifdef __AVX2__
+    else if constexpr(std::is_same<_registerType, __m256>::value)
+        return _mm256_andnot_ps(lhs, rhs);
+    else if constexpr(std::is_same<_registerType, __m256d>::value)
+        return _mm256_andnot_pd(lhs, rhs);
+#ifdef __AVX512F__
+    else if constexpr(std::is_same<_registerType, __m512>::value)
+        return _mm512_andnot_ps(lhs, rhs);
+    else if constexpr(std::is_same<_registerType, __m512d>::value)
+        return _mm512_andnot_pd(lhs, rhs);
+#endif // __AVX512F__
+#endif // __AVX2__
+    else
+        throw Exception(__PRETTY_FUNCTION__, "Not defined for selected register type.");
+    // clang-format on
+}
+
+
+
+// SSEAbs -------------------------------------------------------------------------------------------------------------
+
+//! @brief Calculates the absolute value of each element
+//! @tparam _registerType: Register type
+//! @param reg: Input register
+//! @return Register with absolute values
+//! @remark source:
+//! https://stackoverflow.com/questions/23847377/how-does-this-function-compute-the-absolute-value-of-a-float-through-a-not-and-a
+template <typename _registerType>
+_registerType SSEAbs(_registerType reg)
+{
+    const _registerType mask = _mmx_set1_p<_registerType>(-0.0);
+    return _mmx_andnot_p(mask, reg);
 }
 
 

@@ -16,12 +16,12 @@ namespace GDL
 //! @tparam _rows: Number of rows
 //! @tparam _cols: Number of columns
 template <typename _type, I32 _rows, I32 _cols>
-class alignas(AlignmentBytes<decltype(SSEGetFittingRegister<_type, SSEMaxRegisterSize()>())>) MatSIMD
+class alignas(alignmentBytes<decltype(SSEGetFittingRegister<_type, SSEMaxRegisterSize()>())>) MatSIMD
 {
     static_assert(std::is_floating_point<_type>::value, "Matrix can only be created with floating point types");
 
     using __mx = decltype(SSEGetFittingRegister<_type, SSEMaxRegisterSize()>());
-    constexpr static U32 mAlignment = AlignmentBytes<__mx>;
+    constexpr static U32 mAlignment = alignmentBytes<__mx>;
     constexpr static U32 mNumRegisterEntries = SSEGetNumRegisterEntries<__mx>();
     constexpr static U32 mNumRegistersPerCol = SSECalcMinNumArrayRegisters<__mx>(_rows);
     constexpr static U32 mNumRegisters = _cols * mNumRegistersPerCol;

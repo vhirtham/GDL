@@ -3,7 +3,6 @@
 
 #include "gdl/base/functions/sse.h"
 
-#include <iostream>
 using namespace GDL;
 
 
@@ -30,6 +29,68 @@ BOOST_AUTO_TEST_CASE(Calc_Min_Num_Array_Registers)
 }
 
 
+
+// Test SSEAbs --------------------------------------------------------------------------------------------------------
+
+
+
+//! @brief Tests the SSEAbs function
+//! @remark The direct comparison of floating point values is intended only the sign bit should be modified
+template <typename _registerType, U32 _count = 1>
+void TestAbs()
+{
+    using DataType = decltype(SSEGetDataType<_registerType>());
+    constexpr U32 numRegisterEntries = SSEGetNumRegisterEntries<_registerType>();
+
+    auto cmpAllElementsEqual = [](_registerType lhs, _registerType rhs) {
+        for (U32 i = 0; i < numRegisterEntries; ++i)
+            if (lhs[i] != rhs[i])
+                return false;
+        return true;
+
+    };
+
+    alignas(alignmentBytes<_registerType>) _registerType ref = _mmx_setzero_p<_registerType>();
+    alignas(alignmentBytes<_registerType>) _registerType cmp = _mmx_setzero_p<_registerType>();
+    alignas(alignmentBytes<_registerType>) _registerType cmp2 = _mmx_setzero_p<_registerType>();
+    alignas(alignmentBytes<_registerType>) _registerType cmp3 = _mmx_setzero_p<_registerType>();
+
+    for (I32 i = 0; i < numRegisterEntries; ++i)
+    {
+
+        ref[i] = static_cast<DataType>(i);
+        cmp[i] = static_cast<DataType>(-i);
+        cmp2[i] = static_cast<DataType>(i * ((i % 2 == 0) ? 1 : -1));
+        cmp3[i] = static_cast<DataType>(i * ((i % 3 == 0) ? 1 : -1));
+    }
+
+    BOOST_CHECK(cmpAllElementsEqual(ref, SSEAbs(ref)));
+    BOOST_CHECK(!cmpAllElementsEqual(ref, cmp));
+    BOOST_CHECK(cmpAllElementsEqual(ref, SSEAbs(cmp)));
+    BOOST_CHECK(!cmpAllElementsEqual(ref, cmp2));
+    BOOST_CHECK(cmpAllElementsEqual(ref, SSEAbs(cmp2)));
+    BOOST_CHECK(!cmpAllElementsEqual(ref, cmp3));
+    BOOST_CHECK(cmpAllElementsEqual(ref, SSEAbs(cmp3)));
+}
+
+
+
+BOOST_AUTO_TEST_CASE(Abs)
+{
+    TestAbs<__m128>();
+    TestAbs<__m128d>();
+#ifdef __AVX2__
+    TestAbs<__m256>();
+    TestAbs<__m256d>();
+#ifdef __AVX512F__
+    TestAbs<__m512>();
+    TestAbs<__m512d>();
+#endif // __AVX512F__
+#endif // __AVX2__
+}
+
+
+
 // -------------------------------------------------------------------------------------------------------------------
 // Test comparison operations where all values need to return true
 // We test only two operations (== and <=), since they use the same mechanics just with different comparison operators
@@ -43,7 +104,7 @@ BOOST_AUTO_TEST_CASE(Calc_Min_Num_Array_Registers)
 template <typename _registerType, U32 _count = 1>
 void TestCompareAllEqual()
 {
-    using dataType = decltype(SSEGetDataType<_registerType>());
+    using DataType = decltype(SSEGetDataType<_registerType>());
     constexpr U32 numRegisterEntries = SSEGetNumRegisterEntries<_registerType>();
 
     auto compEQ = [](_registerType lhs, _registerType rhs) {
@@ -51,10 +112,10 @@ void TestCompareAllEqual()
     };
 
 
-    alignas(AlignmentBytes<_registerType>) _registerType lhs = _mmx_setzero_p<_registerType>();
+    alignas(alignmentBytes<_registerType>) _registerType lhs = _mmx_setzero_p<_registerType>();
     for (U32 i = 0; i < numRegisterEntries; ++i)
-        lhs[i] = static_cast<dataType>(i + 1);
-    alignas(AlignmentBytes<_registerType>) _registerType rhs;
+        lhs[i] = static_cast<DataType>(i + 1);
+    alignas(alignmentBytes<_registerType>) _registerType rhs;
 
 
     // all values return true
@@ -72,18 +133,18 @@ void TestCompareAllEqual()
             // all unused values return true
             rhs = lhs;
             BOOST_CHECK(compEQ(lhs, rhs));
-            rhs[i] = lhs[i] + std::numeric_limits<dataType>::epsilon() * numRegisterEntries;
+            rhs[i] = lhs[i] + std::numeric_limits<DataType>::epsilon() * numRegisterEntries;
             BOOST_CHECK(!compEQ(lhs, rhs));
-            rhs[i] = lhs[i] - std::numeric_limits<dataType>::epsilon() * numRegisterEntries;
+            rhs[i] = lhs[i] - std::numeric_limits<DataType>::epsilon() * numRegisterEntries;
             BOOST_CHECK(!compEQ(lhs, rhs));
 
             // one unused value returns false
             rhs = lhs;
             rhs[j] = 0;
             BOOST_CHECK(compEQ(lhs, rhs));
-            rhs[i] = lhs[i] + std::numeric_limits<dataType>::epsilon() * numRegisterEntries;
+            rhs[i] = lhs[i] + std::numeric_limits<DataType>::epsilon() * numRegisterEntries;
             BOOST_CHECK(!compEQ(lhs, rhs));
-            rhs[i] = lhs[i] - std::numeric_limits<dataType>::epsilon() * numRegisterEntries;
+            rhs[i] = lhs[i] - std::numeric_limits<DataType>::epsilon() * numRegisterEntries;
             BOOST_CHECK(!compEQ(lhs, rhs));
         }
 
@@ -93,9 +154,9 @@ void TestCompareAllEqual()
         {
             rhs[j] = 0;
 
-            rhs[i] = lhs[i] + std::numeric_limits<dataType>::epsilon() * numRegisterEntries;
+            rhs[i] = lhs[i] + std::numeric_limits<DataType>::epsilon() * numRegisterEntries;
             BOOST_CHECK(!compEQ(lhs, rhs));
-            rhs[i] = lhs[i] - std::numeric_limits<dataType>::epsilon() * numRegisterEntries;
+            rhs[i] = lhs[i] - std::numeric_limits<DataType>::epsilon() * numRegisterEntries;
             BOOST_CHECK(!compEQ(lhs, rhs));
             rhs[i] = lhs[i];
             BOOST_CHECK(compEQ(lhs, rhs));
@@ -150,7 +211,7 @@ BOOST_AUTO_TEST_CASE(All_Equal)
 template <typename _registerType, U32 _count = 1>
 void TestCompareAllLessEqual()
 {
-    using dataType = decltype(SSEGetDataType<_registerType>());
+    using DataType = decltype(SSEGetDataType<_registerType>());
     constexpr U32 numRegisterEntries = SSEGetNumRegisterEntries<_registerType>();
 
     auto compLE = [](_registerType lhs, _registerType rhs) {
@@ -158,10 +219,10 @@ void TestCompareAllLessEqual()
     };
 
 
-    alignas(AlignmentBytes<_registerType>) _registerType lhs = _mmx_setzero_p<_registerType>();
+    alignas(alignmentBytes<_registerType>) _registerType lhs = _mmx_setzero_p<_registerType>();
     for (U32 i = 0; i < numRegisterEntries; ++i)
-        lhs[i] = static_cast<dataType>(i + 1);
-    alignas(AlignmentBytes<_registerType>) _registerType rhs;
+        lhs[i] = static_cast<DataType>(i + 1);
+    alignas(alignmentBytes<_registerType>) _registerType rhs;
 
 
     // all values return true
@@ -179,18 +240,18 @@ void TestCompareAllLessEqual()
             // all unused values return true
             rhs = lhs;
             BOOST_CHECK(compLE(lhs, rhs));
-            rhs[i] = lhs[i] + std::numeric_limits<dataType>::epsilon() * numRegisterEntries;
+            rhs[i] = lhs[i] + std::numeric_limits<DataType>::epsilon() * numRegisterEntries;
             BOOST_CHECK(compLE(lhs, rhs));
-            rhs[i] = lhs[i] - std::numeric_limits<dataType>::epsilon() * numRegisterEntries;
+            rhs[i] = lhs[i] - std::numeric_limits<DataType>::epsilon() * numRegisterEntries;
             BOOST_CHECK(!compLE(lhs, rhs));
 
             // one unused value returns false
             rhs = lhs;
             rhs[j] = 0;
             BOOST_CHECK(compLE(lhs, rhs));
-            rhs[i] = lhs[i] + std::numeric_limits<dataType>::epsilon() * numRegisterEntries;
+            rhs[i] = lhs[i] + std::numeric_limits<DataType>::epsilon() * numRegisterEntries;
             BOOST_CHECK(compLE(lhs, rhs));
-            rhs[i] = lhs[i] - std::numeric_limits<dataType>::epsilon() * numRegisterEntries;
+            rhs[i] = lhs[i] - std::numeric_limits<DataType>::epsilon() * numRegisterEntries;
             BOOST_CHECK(!compLE(lhs, rhs));
         }
 
@@ -200,9 +261,9 @@ void TestCompareAllLessEqual()
         {
             rhs[j] = 0;
 
-            rhs[i] = lhs[i] + std::numeric_limits<dataType>::epsilon() * numRegisterEntries;
+            rhs[i] = lhs[i] + std::numeric_limits<DataType>::epsilon() * numRegisterEntries;
             BOOST_CHECK(compLE(lhs, rhs));
-            rhs[i] = lhs[i] - std::numeric_limits<dataType>::epsilon() * numRegisterEntries;
+            rhs[i] = lhs[i] - std::numeric_limits<DataType>::epsilon() * numRegisterEntries;
             BOOST_CHECK(!compLE(lhs, rhs));
             rhs[i] = lhs[i];
             BOOST_CHECK(compLE(lhs, rhs));
