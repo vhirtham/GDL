@@ -55,6 +55,7 @@ void TestInsideToleranceSSE()
         ref[i] = i;
 
     InsideTolerance<_registerType> insideTolerance(ref, tolerance);
+    InsideTolerance<_registerType, numRegisterEntries - 1> insideToleranceMinus1(ref, tolerance);
 
 
     for (U32 run = 0; run < 2; ++run)
@@ -63,6 +64,7 @@ void TestInsideToleranceSSE()
         {
             toleranceValue = 2.5;
             insideTolerance = InsideTolerance<_registerType>(ref, toleranceValue);
+            insideToleranceMinus1 = InsideTolerance<_registerType, numRegisterEntries - 1>(ref, toleranceValue);
         }
 
         BOOST_CHECK(insideTolerance == ref);
@@ -93,6 +95,54 @@ void TestInsideToleranceSSE()
                 BOOST_CHECK(cmpSingle != insideTolerance);
                 BOOST_CHECK(!(cmpAll == insideTolerance));
                 BOOST_CHECK(!(cmpSingle == insideTolerance));
+            }
+        }
+
+
+        // Not all values should be in tolerance --- Not doing a complete check here, since the used
+        // SSECompareAllLessEqual function is already tested.
+
+        for (I32 i = -4; i < 4; ++i)
+        {
+            cmpAll = ref;
+            cmpSingle = ref;
+
+            cmpAll = _mmx_add_p(cmpAll, _mmx_set1_p<_registerType>(i));
+            cmpSingle[1] += i;
+            if (std::abs(i) <= toleranceValue)
+            {
+                BOOST_CHECK(cmpAll == insideTolerance);
+                BOOST_CHECK(cmpSingle == insideTolerance);
+                BOOST_CHECK(!(cmpAll != insideTolerance));
+                BOOST_CHECK(!(cmpSingle != insideTolerance));
+            }
+            else
+            {
+                BOOST_CHECK(cmpAll != insideTolerance);
+                BOOST_CHECK(cmpSingle != insideTolerance);
+                BOOST_CHECK(!(cmpAll == insideTolerance));
+                BOOST_CHECK(!(cmpSingle == insideTolerance));
+            }
+
+
+
+            cmpSingle = ref;
+            cmpSingle[0] += i;
+            cmpAll[numRegisterEntries - 1] = -1337;
+            cmpSingle[numRegisterEntries - 1] = -1337;
+            if (std::abs(i) <= toleranceValue)
+            {
+                BOOST_CHECK(cmpAll == insideToleranceMinus1);
+                BOOST_CHECK(cmpSingle == insideToleranceMinus1);
+                BOOST_CHECK(!(cmpAll != insideToleranceMinus1));
+                BOOST_CHECK(!(cmpSingle != insideToleranceMinus1));
+            }
+            else
+            {
+                BOOST_CHECK(cmpAll != insideToleranceMinus1);
+                BOOST_CHECK(cmpSingle != insideToleranceMinus1);
+                BOOST_CHECK(!(cmpAll == insideToleranceMinus1));
+                BOOST_CHECK(!(cmpSingle == insideToleranceMinus1));
             }
         }
     }

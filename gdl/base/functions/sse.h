@@ -199,7 +199,7 @@ constexpr U32 SSEGetNumRegisterEntries()
 #endif // __AVX512F__
 #endif // __AVX2__
     else
-        throw Exception(__PRETTY_FUNCTION__, "No number of entries known for given register type");
+        return 0;
     // clang-format on
 }
 
