@@ -78,8 +78,7 @@ bool Mat4SIMD::operator==(const Mat4SIMD& rhs) const
     // TODO: Replace this version as soon as Approx supports registers!
     bool result = true;
     for (U32 i = 0; i < 4; ++i)
-        for (U32 j = 0; j < 4; ++j)
-                result = result && mData[i][j] == Approx(rhs.mData[i][j]);
+        result = result && mData[i] == Approx(rhs.mData[i]);
     return result;
 }
 
