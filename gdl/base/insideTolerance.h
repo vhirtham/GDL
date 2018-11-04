@@ -3,7 +3,7 @@
 #include "gdl/base/fundamentalTypes.h"
 #include "gdl/base/functions/sse.h"
 
-#include <type_traits>
+
 
 namespace GDL
 {
