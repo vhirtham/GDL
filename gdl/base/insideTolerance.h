@@ -1,10 +1,8 @@
 #pragma once
 
-#include "gdl/base/exception.h"
 #include "gdl/base/fundamentalTypes.h"
 #include "gdl/base/functions/sse.h"
 
-#include <cmath>
 #include <type_traits>
 
 namespace GDL

@@ -2,6 +2,7 @@
 
 #include "gdl/base/insideTolerance.h"
 
+#include <cmath>
 
 namespace GDL
 {

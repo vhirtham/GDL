@@ -10,7 +10,7 @@ template <typename _type>
 void TestInsideTolerance()
 {
 
-    InsideTolerance insideTolerance(10, 2);
+    InsideTolerance<_type> insideTolerance(static_cast<_type>(10), static_cast<_type>(2));
 
     BOOST_CHECK(insideTolerance == 10);
     BOOST_CHECK(insideTolerance == 12);

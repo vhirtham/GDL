@@ -104,9 +104,11 @@ auto SSEGetFittingRegister()
 
 //! @brief Gets an inatance of the underlying data type of a register
 //! @tparam _registerType: Register type
+//! @tparam _returnTypeIfNoTARegister: If set to true, this function returns an instance of the template parameters type
+//! if it is not a register. If set to false (default), it will throw.
 //! @return Inatance of  the underlying data type of a register
 //! @remark A function call should usually be combined with decltype
-template <typename _registerType>
+template <typename _registerType, bool _returnTypeIfNoTARegister = false>
 constexpr auto SSEGetDataType()
 {
     // clang-format off
@@ -127,7 +129,12 @@ constexpr auto SSEGetDataType()
 #endif // __AVX512F__
 #endif // __AVX2__
     else
-        throw Exception(__PRETTY_FUNCTION__, "Not defined for selected register type.");
+    {
+        if constexpr(_returnTypeIfNoTARegister)
+            return _registerType();
+        else
+            throw Exception(__PRETTY_FUNCTION__, "Not defined for selected register type.");
+    }
     // clang-format on
 }
 
