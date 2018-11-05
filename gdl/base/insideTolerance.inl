@@ -12,6 +12,8 @@ InsideTolerance<_registerType, _numComparedValuesSSE>::InsideTolerance(_register
     : mValue{value}
     , mTolerance{tolerance}
 {
+    DEV_EXCEPTION(!SSECompareAllGreaterThan(tolerance, _mmx_setzero_p<_registerType>()),
+                  "Tolerance values must be greater than 0.");
 }
 
 
@@ -24,6 +26,7 @@ InsideTolerance<_registerType, _numComparedValuesSSE>::InsideTolerance(_register
 {
     static_assert(std::is_integral<_type>::value || std::is_floating_point<_type>::value,
                   "Tolerance must be an integer or floating point type.");
+    DEV_EXCEPTION(tolerance <= 0, "Tolerance must be greater than 0.");
 }
 
 
@@ -49,6 +52,7 @@ constexpr InsideTolerance<_type, 0>::InsideTolerance(const _type value, const _t
     : mValue{value}
     , mTolerance{tolerance}
 {
+    DEV_EXCEPTION(mTolerance <= 0, "Tolerance must be greater than 0.");
 }
 
 

@@ -3,6 +3,8 @@
 #include "gdl/base/fundamentalTypes.h"
 #include "gdl/base/insideTolerance.h"
 
+#include "tests/tools/ExceptionChecks.h"
+
 using namespace GDL;
 
 
@@ -32,6 +34,9 @@ void TestInsideTolerance()
     BOOST_CHECK(!(7 == insideTolerance));
     BOOST_CHECK(!(8 != insideTolerance));
     BOOST_CHECK(7 != insideTolerance);
+
+    GDL_CHECK_THROW_DEV(InsideTolerance<_type>(1, 0), Exception);
+    GDL_CHECK_THROW_DEV(InsideTolerance<_type>(1, -1), Exception);
 }
 
 BOOST_AUTO_TEST_CASE(Inside_Tolerance)
@@ -145,6 +150,18 @@ void TestInsideToleranceSSE()
                 BOOST_CHECK(!(cmpSingle == insideToleranceMinus1));
             }
         }
+    }
+
+    GDL_CHECK_THROW_DEV(InsideTolerance<_registerType>(ref, 0), Exception);
+    GDL_CHECK_THROW_DEV(InsideTolerance<_registerType>(ref, -1), Exception);
+    GDL_CHECK_THROW_DEV(InsideTolerance<_registerType>(ref, _mmx_setzero_p<_registerType>()), Exception);
+    GDL_CHECK_THROW_DEV(InsideTolerance<_registerType>(ref, _mmx_set1_p<_registerType>(-1)), Exception);
+    // Only one invalid tolerance
+    for (U32 i = 0; i < numRegisterEntries; ++i)
+    {
+        tolerance = _mmx_set1_p<_registerType>(toleranceValue);
+        tolerance[i] = -1;
+        GDL_CHECK_THROW_DEV(InsideTolerance<_registerType>(ref, tolerance), Exception);
     }
 }
 

@@ -309,3 +309,110 @@ BOOST_AUTO_TEST_CASE(All_Less_Equal)
 #endif // __AVX512F__
 #endif // __AVX2__
 }
+
+
+
+// Test CompareAllGreaterThan -----------------------------------------------------------------------------------------
+
+//! @brief Tests the SSECompareAllLessEqual function with varying number of compared values.
+template <typename _registerType, U32 _count = 1>
+void TestCompareAllGreaterThan()
+{
+    using DataType = decltype(SSEGetDataType<_registerType>());
+    constexpr U32 numRegisterEntries = SSEGetNumRegisterEntries<_registerType>();
+
+    auto compGT = [](_registerType lhs, _registerType rhs) {
+        return SSECompareAllGreaterThan<_registerType, _count>(lhs, rhs);
+    };
+
+
+    alignas(alignmentBytes<_registerType>) _registerType lhs = _mmx_setzero_p<_registerType>();
+    for (U32 i = 0; i < numRegisterEntries; ++i)
+        lhs[i] = static_cast<DataType>(i + 1);
+    alignas(alignmentBytes<_registerType>) _registerType rhs;
+
+
+    // all values return true
+    BOOST_CHECK(!compGT(lhs, lhs));
+
+    // all values return false
+    BOOST_CHECK(compGT(lhs, _mmx_set1_p<_registerType>(-100)));
+
+
+    // Maximal 1 used value returns false
+    for (U32 i = 0; i < _count; ++i)
+    {
+        for (U32 j = _count; j < numRegisterEntries; ++j)
+        {
+            // all unused values return true
+            rhs = _mmx_sub_p(lhs, _mmx_set1_p<_registerType>(1));
+            BOOST_CHECK(compGT(lhs, rhs));
+            rhs[i] = lhs[i] + 1;
+            BOOST_CHECK(!compGT(lhs, rhs));
+            rhs[i] = lhs[i] + 10;
+            BOOST_CHECK(!compGT(lhs, rhs));
+
+            // one unused value returns false
+            rhs = _mmx_sub_p(lhs, _mmx_set1_p<_registerType>(1));
+            rhs[j] = lhs[j] + 10;
+            BOOST_CHECK(compGT(lhs, rhs));
+            rhs[i] = lhs[i] + 1;
+            BOOST_CHECK(!compGT(lhs, rhs));
+            rhs[i] = lhs[i] + 10;
+            BOOST_CHECK(!compGT(lhs, rhs));
+        }
+
+        // Up to all unused values return false
+        rhs = _mmx_sub_p(lhs, _mmx_set1_p<_registerType>(1));
+        for (U32 j = _count; j < numRegisterEntries; ++j)
+        {
+            rhs[j] = lhs[j] + 10;
+
+            rhs[i] = lhs[i] + 1;
+            BOOST_CHECK(!compGT(lhs, rhs));
+            rhs[i] = lhs[i] + 10;
+            BOOST_CHECK(!compGT(lhs, rhs));
+            rhs[i] = lhs[i] - 1;
+            BOOST_CHECK(compGT(lhs, rhs));
+        }
+    }
+
+    // maximal all used values return false
+    for (U32 j = _count; j < numRegisterEntries; ++j)
+    {
+        rhs = _mmx_sub_p(lhs, _mmx_set1_p<_registerType>(1));
+        for (U32 i = 0; i < _count; ++i)
+        {
+            // all unused values return true
+            rhs[i] = lhs[i] + 10;
+            BOOST_CHECK(!compGT(lhs, rhs));
+
+            // one unused value returns false
+            rhs[j] = lhs[j] + 10;
+            BOOST_CHECK(!compGT(lhs, rhs));
+        }
+    }
+
+
+
+    // clang-format off
+    if constexpr(_count < numRegisterEntries)
+        TestCompareAllGreaterThan<_registerType, _count + 1>();
+    // clang-format on
+}
+
+
+
+BOOST_AUTO_TEST_CASE(All_Greater_Than)
+{
+    TestCompareAllGreaterThan<__m128>();
+    TestCompareAllGreaterThan<__m128d>();
+#ifdef __AVX2__
+    TestCompareAllGreaterThan<__m256>();
+    TestCompareAllGreaterThan<__m256d>();
+#ifdef __AVX512F__
+    TestCompareAllGreaterThan<__m512>();
+    TestCompareAllGreaterThan<__m512d>();
+#endif // __AVX512F__
+#endif // __AVX2__
+}

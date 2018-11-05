@@ -70,9 +70,9 @@ void TestApproxZero()
             BOOST_CHECK(scaledEps * (factor + 1) != ApproxZero<_type>(-base, factor));
         }
 
-        GDL_CHECK_THROW_DEV_DISABLE(ApproxZero<_type>(0, 1), Exception);
-        GDL_CHECK_THROW_DEV_DISABLE(ApproxZero<_type>(1, 0), Exception);
-        GDL_CHECK_THROW_DEV_DISABLE(ApproxZero<_type>(1, -1), Exception);
+        GDL_CHECK_THROW_DEV(ApproxZero<_type>(0, 1), Exception);
+        GDL_CHECK_THROW_DEV(ApproxZero<_type>(1, 0), Exception);
+        GDL_CHECK_THROW_DEV(ApproxZero<_type>(1, -1), Exception);
     }
 }
 
@@ -287,9 +287,9 @@ void TestApproxZeroSSE()
             }
         }
 
-        GDL_CHECK_THROW_DEV_DISABLE(ApproxZero<_registerType>(0, 1), Exception);
-        GDL_CHECK_THROW_DEV_DISABLE(ApproxZero<_registerType>(1, 0), Exception);
-        GDL_CHECK_THROW_DEV_DISABLE(ApproxZero<_registerType>(1, -1), Exception);
+        GDL_CHECK_THROW_DEV(ApproxZero<_registerType>(0, 1), Exception);
+        GDL_CHECK_THROW_DEV(ApproxZero<_registerType>(1, 0), Exception);
+        GDL_CHECK_THROW_DEV(ApproxZero<_registerType>(1, -1), Exception);
     }
 }
 

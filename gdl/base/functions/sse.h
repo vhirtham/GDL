@@ -571,6 +571,42 @@ inline auto _mmx_cmple_p(_registerType lhs, _registerType rhs)
 
 
 
+// _mmx_cmpgt_p -------------------------------------------------------------------------------------------------------
+
+//! @brief Compares lhs > rhs for two registers
+//! @tparam _registerType: Register type
+//! @param lhs: Left hand side register
+//! @param rhs: Right hand side register
+//! @return Register which stores the results of the comparison
+template <typename _registerType>
+inline auto _mmx_cmpgt_p(_registerType lhs, _registerType rhs)
+{
+
+    // clang-format off
+    if constexpr(std::is_same<_registerType, __m128>::value)
+        return _mm_cmpgt_ps(lhs,rhs);
+    else if constexpr(std::is_same<_registerType, __m128d>::value)
+        return _mm_cmpgt_pd(lhs,rhs);
+#ifdef __AVX2__
+    else if constexpr(std::is_same<_registerType, __m256>::value)
+        return _mm256_cmp_ps(lhs, rhs, _CMP_GT_OS);
+    else if constexpr(std::is_same<_registerType, __m256d>::value)
+        return _mm256_cmp_pd(lhs, rhs, _CMP_GT_OS);
+#ifdef __AVX512F__
+    // Check https://software.intel.com/en-us/forums/intel-isa-extensions/topic/749055
+    else if constexpr(std::is_same<_registerType, __m512>::value)
+        throw(__PRETTY_FUNCTION__,"Not implemented");
+    else if constexpr(std::is_same<_registerType, __m512d>::value)
+        throw(__PRETTY_FUNCTION__,"Not implemented");
+#endif // __AVX512F__
+#endif // __AVX2__
+    else
+        throw Exception(__PRETTY_FUNCTION__, "Not defined for selected register type.");
+    // clang-format on
+}
+
+
+
 // _mmx_max_p ---------------------------------------------------------------------------------------------------------
 
 //! @brief Calculates the maximum values of two registers
@@ -863,6 +899,28 @@ inline bool SSECompareAllLessEqual(_registerType lhs, _registerType rhs)
     return SSECompareAllTrue<_registerType, _numComparedValues, decltype(_mmx_cmple_p<_registerType>)>(
             lhs, rhs, &_mmx_cmple_p<_registerType>);
 }
+
+
+
+// SSECompareAllGreaterThan
+// ---------------------------------------------------------------------------------------------
+
+
+//! @brief Compares lhs > rhs for two register. This function returns true if all lhs values are greater than the rhs
+//! values. False if not.
+//! @tparam _registerType: Register type
+//! @tparam _numComparedValues: Number of register values that should be compared. If the value is smaller than the
+//! number of register values, only the first elements of the register are compared.
+//! @param lhs: Left hand side register
+//! @param rhs: Right hand side register
+//! @return TRUE / FALSE
+template <typename _registerType, U32 _numComparedValues = SSEGetNumRegisterEntries<_registerType>()>
+inline bool SSECompareAllGreaterThan(_registerType lhs, _registerType rhs)
+{
+    return SSECompareAllTrue<_registerType, _numComparedValues, decltype(_mmx_cmpgt_p<_registerType>)>(
+            lhs, rhs, &_mmx_cmpgt_p<_registerType>);
+}
+
 
 
 } // namespace GDL
