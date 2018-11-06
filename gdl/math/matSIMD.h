@@ -56,7 +56,7 @@ public:
     //! @param row: Row of the accessed value
     //! @param col: Column of the accessed value
     //! @return Accessed value
-    inline _type operator()(const U32 row, const U32 col) const;
+    [[nodiscard]] inline _type operator()(const U32 row, const U32 col) const;
 
     //! @brief Compares if two matrices are equal
     //! @param rhs: Matrix that should be compared
@@ -92,11 +92,11 @@ public:
 
     //! @brief Gets the number of rows
     //! @return Number of rows
-    inline U32 Rows() const;
+    [[nodiscard]] inline U32 Rows() const;
 
     //! @brief Gets the number of columns
     //! @return Number of columns
-    inline U32 Cols() const;
+    [[nodiscard]] inline U32 Cols() const;
 
     //! @brief Sets all matrix entries to zero
     inline void SetZero();
