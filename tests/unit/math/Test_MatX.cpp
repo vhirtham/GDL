@@ -30,21 +30,6 @@ bool CheckCloseArray(const _type& a, const _type& b)
     return true;
 }
 
-template <typename _type>
-bool CheckCloseMat(_type a, _type b)
-{
-    if (a.Rows() != b.Rows())
-        return false;
-    if (a.Cols() != b.Cols())
-        return false;
-
-    for (U32 i = 0; i < a.Rows(); ++i)
-        for (U32 j = 0; j < a.Cols(); ++j)
-            if (a(i, j) != Approx(b(i, j)))
-                return false;
-    return true;
-}
-
 
 
 // Fixture definition %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -206,17 +191,17 @@ void AssignmentTest()
     _matrix<_type, 4, 4> A1;
     A1.SetZero();
     A1 = f.A1;
-    BOOST_CHECK(CheckCloseMat(A1, f.A1));
+    BOOST_CHECK(A1 == f.A1);
 
     _matrix<_type, 3, 5> A2;
     A2.SetZero();
     A2 = f.A2;
-    BOOST_CHECK(CheckCloseMat(A2, f.A2));
+    BOOST_CHECK(A2 == f.A2);
 
     _matrix<_type, 5, 3> B2;
     B2.SetZero();
     B2 = f.B2;
-    BOOST_CHECK(CheckCloseMat(B2, f.B2));
+    BOOST_CHECK(B2 == f.B2);
 }
 
 BOOST_AUTO_TEST_CASE(Assignment_Single)
@@ -278,21 +263,21 @@ void AdditionAssignmentTest()
     // Square Matrix addition
     _matrix<_type, 4, 4> expA1(8., 15., 14., 14., 6., 9., 18., 16., 5., 13., 15., 16., 9., 15., 13., 21.);
     f.A1 += f.B1;
-    BOOST_CHECK(CheckCloseMat(f.A1, expA1));
+    BOOST_CHECK(f.A1 == expA1);
 
     _matrix<_type, 4, 4> expB1(16., 22., 12., 4., 10., 8., 18., 6., 6., 14., 10., 4., 12., 16., 4., 12.);
     f.B1 += f.B1;
-    BOOST_CHECK(CheckCloseMat(f.B1, expB1));
+    BOOST_CHECK(f.B1 == expB1);
 
     // Non square matrix addition
     _matrix<_type, 3, 5> B2(f.B2.Data());
     _matrix<_type, 3, 5> expA2(8., 16., 16., 3., 11., 15., 11., 10., 15., 10., 13., 15., 10., 17., 16.);
     f.A2 += B2;
-    BOOST_CHECK(CheckCloseMat(f.A2, expA2));
+    BOOST_CHECK(f.A2 == expA2);
 
     _matrix<_type, 3, 5> expB2(16., 22., 12., 4., 10., 8., 18., 6., 6., 14., 10., 4., 12., 16., 4.);
     B2 += B2;
-    BOOST_CHECK(CheckCloseMat(B2, expB2));
+    BOOST_CHECK(B2 == expB2);
 }
 
 BOOST_AUTO_TEST_CASE(Addition_Assignment_Single)
@@ -322,7 +307,7 @@ void AdditionTest()
     _matrix<_type, 4, 4> C = f.A1 + f.B1;
     _matrix<_type, 4, 4> expC(8., 15., 14., 14., 6., 9., 18., 16., 5., 13., 15., 16., 9., 15., 13., 21.);
 
-    BOOST_CHECK(CheckCloseMat(C, expC));
+    BOOST_CHECK(C == expC);
 
 
     // Non square matrix addition
@@ -330,7 +315,7 @@ void AdditionTest()
     _matrix<_type, 3, 5> C2 = f.A2 + B2;
     _matrix<_type, 3, 5> expC2(8., 16., 16., 3., 11., 15., 11., 10., 15., 10., 13., 15., 10., 17., 16.);
 
-    BOOST_CHECK(CheckCloseMat(C2, expC2));
+    BOOST_CHECK(C2 == expC2);
 }
 
 BOOST_AUTO_TEST_CASE(Addition_Single)
@@ -359,32 +344,32 @@ void MultiplicationTest()
     _matrix<_type, 4, 4> expC1(29., 137., 245., 353., 31., 115., 199., 283., 23., 91., 159., 227., 30., 118., 206.,
                                294.);
     _matrix<_type, 4, 4> C1 = f.A1 * f.B1;
-    BOOST_CHECK(CheckCloseMat(C1, expC1));
+    BOOST_CHECK(C1 == expC1);
 
     _matrix<_type, 4, 4> expD1(116., 168., 100., 100., 138., 198., 122., 113., 160., 228., 144., 126., 182., 258., 166.,
                                139.);
     _matrix<_type, 4, 4> D1 = f.B1 * f.A1;
-    BOOST_CHECK(CheckCloseMat(D1, expD1));
+    BOOST_CHECK(D1 == expD1);
 
     // Non square matrix multiplication
     _matrix<_type, 3, 3> expC2(49., 209., 369., 52., 182., 312., 46., 161., 276.);
     _matrix<_type, 3, 3> C2 = f.A2 * f.B2;
-    BOOST_CHECK(CheckCloseMat(C2, expC2));
+    BOOST_CHECK(C2 == expC2);
 
     _matrix<_type, 5, 5> expD2(70., 65., 75., 95., 55., 87., 87., 90., 108., 69., 104., 109., 105., 121., 83., 121.,
                                131., 120., 134., 97., 138., 153., 135., 147., 111.);
     _matrix<_type, 5, 5> D2 = f.B2 * f.A2;
-    BOOST_CHECK(CheckCloseMat(D2, expD2));
+    BOOST_CHECK(D2 == expD2);
 
     _matrix<_type, 2, 2> expC3(119, 425, 570, 1458);
     _matrix<_type, 2, 2> C3 = f.A3 * f.B3;
-    BOOST_CHECK(CheckCloseMat(C3, expC3));
+    BOOST_CHECK(C3 == expC3);
 
 
     _matrix<_type, 6, 6> expD3(185, 47, 237, 42, 505, 71, 232, 64, 276, 48, 578, 88, 279, 81, 315, 54, 651, 105, 326,
                                98, 354, 60, 724, 122, 373, 115, 393, 66, 797, 139, 420, 132, 432, 72, 870, 156);
     _matrix<_type, 6, 6> D3 = f.B3 * f.A3;
-    BOOST_CHECK(CheckCloseMat(D3, expD3));
+    BOOST_CHECK(D3 == expD3);
 }
 
 BOOST_AUTO_TEST_CASE(Multiplication_Single)
