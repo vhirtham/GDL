@@ -164,6 +164,41 @@ BENCHMARK_F(SIMD, Data_non_full_registers)(benchmark::State& state)
 
 
 
+// Compare Equal %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+BENCHMARK_F(Single, Compare_Equal)(benchmark::State& state)
+{
+    for (auto _ : state)
+        benchmark::DoNotOptimize(A == A);
+}
+
+
+BENCHMARK_F(SIMD, Compare_Equal)(benchmark::State& state)
+{
+
+    for (auto _ : state)
+        benchmark::DoNotOptimize(A == A);
+}
+
+
+// Compare NOT Equal %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+BENCHMARK_F(Single, Compare_Not_Equal)(benchmark::State& state)
+{
+    for (auto _ : state)
+        benchmark::DoNotOptimize(A != A);
+}
+
+
+BENCHMARK_F(SIMD, Compare_Not_Equal)(benchmark::State& state)
+{
+
+    for (auto _ : state)
+        benchmark::DoNotOptimize(A != A);
+}
+
+
+
 // Addition Assignment %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 BENCHMARK_F(Single, Addition_Assignment)(benchmark::State& state)
