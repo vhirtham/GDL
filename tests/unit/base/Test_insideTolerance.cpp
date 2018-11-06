@@ -11,29 +11,30 @@ using namespace GDL;
 template <typename _type>
 void TestInsideTolerance()
 {
+    const _type refValue = 10;
 
-    InsideTolerance<_type> insideTolerance(static_cast<_type>(10), static_cast<_type>(2));
+    InsideTolerance<_type> insideTolerance(refValue, 2);
+    _type cmp = 0;
 
-    BOOST_CHECK(insideTolerance == 10);
-    BOOST_CHECK(insideTolerance == 12);
-    BOOST_CHECK(!(insideTolerance == 13));
-    BOOST_CHECK(!(insideTolerance != 12));
-    BOOST_CHECK(insideTolerance != 13);
-    BOOST_CHECK(insideTolerance == 8);
-    BOOST_CHECK(!(insideTolerance == 7));
-    BOOST_CHECK(!(insideTolerance != 8));
-    BOOST_CHECK(insideTolerance != 7);
+    for (I32 tol = 1; tol < 6; ++tol)
+    {
+        insideTolerance = InsideTolerance<_type>(refValue, tol);
+        for (I32 i = -10; i < 10; ++i)
+        {
+            cmp = refValue + static_cast<_type>(i);
 
-
-    BOOST_CHECK(10 == insideTolerance);
-    BOOST_CHECK(12 == insideTolerance);
-    BOOST_CHECK(!(13 == insideTolerance));
-    BOOST_CHECK(!(12 != insideTolerance));
-    BOOST_CHECK(13 != insideTolerance);
-    BOOST_CHECK(8 == insideTolerance);
-    BOOST_CHECK(!(7 == insideTolerance));
-    BOOST_CHECK(!(8 != insideTolerance));
-    BOOST_CHECK(7 != insideTolerance);
+            if (std::abs(i) <= tol)
+            {
+                BOOST_CHECK(insideTolerance == cmp);
+                BOOST_CHECK(!(insideTolerance != cmp));
+            }
+            else
+            {
+                BOOST_CHECK(insideTolerance != cmp);
+                BOOST_CHECK(!(insideTolerance == cmp));
+            }
+        }
+    }
 
     GDL_CHECK_THROW_DEV(InsideTolerance<_type>(1, 0), Exception);
     GDL_CHECK_THROW_DEV(InsideTolerance<_type>(1, -1), Exception);
@@ -47,10 +48,11 @@ BOOST_AUTO_TEST_CASE(Inside_Tolerance)
 }
 
 
-template <typename _registerType>
+template <typename _registerType, U32 _count = 1>
 void TestInsideToleranceSSE()
 {
     constexpr U32 numRegisterEntries = SSEGetNumRegisterEntries<_registerType>();
+    using InsideToleranceType = InsideTolerance<_registerType, _count>;
 
     F32 toleranceValue = 1.5;
     alignas(alignmentBytes<_registerType>) _registerType ref = _mmx_setzero_p<_registerType>();
@@ -59,17 +61,16 @@ void TestInsideToleranceSSE()
     for (U32 i = 0; i < numRegisterEntries; ++i)
         ref[i] = i;
 
-    InsideTolerance<_registerType> insideTolerance(ref, tolerance);
-    InsideTolerance<_registerType, numRegisterEntries - 1> insideToleranceMinus1(ref, tolerance);
+    InsideToleranceType insideTolerance(ref, tolerance);
 
 
     for (U32 run = 0; run < 2; ++run)
     {
+        // Use alternative ctor
         if (run == 1)
         {
             toleranceValue = 2.5;
-            insideTolerance = InsideTolerance<_registerType>(ref, toleranceValue);
-            insideToleranceMinus1 = InsideTolerance<_registerType, numRegisterEntries - 1>(ref, toleranceValue);
+            insideTolerance = InsideToleranceType(ref, toleranceValue);
         }
 
         BOOST_CHECK(insideTolerance == ref);
@@ -82,87 +83,89 @@ void TestInsideToleranceSSE()
 
         for (I32 i = -4; i < 4; ++i)
         {
-            cmpAll = ref;
-            cmpSingle = ref;
+            // All values modified
+            // -------------------
+            cmpAll = _mmx_add_p(ref, _mmx_set1_p<_registerType>(i));
 
-            cmpAll = _mmx_add_p(cmpAll, _mmx_set1_p<_registerType>(i));
-            cmpSingle[1] += i;
+            // Not compared values are equal to ref
+            for (U32 j = _count; j < numRegisterEntries; ++j)
+                cmpAll[j] = ref[j];
+
             if (std::abs(i) <= toleranceValue)
             {
                 BOOST_CHECK(cmpAll == insideTolerance);
-                BOOST_CHECK(cmpSingle == insideTolerance);
                 BOOST_CHECK(!(cmpAll != insideTolerance));
-                BOOST_CHECK(!(cmpSingle != insideTolerance));
             }
             else
             {
                 BOOST_CHECK(cmpAll != insideTolerance);
-                BOOST_CHECK(cmpSingle != insideTolerance);
                 BOOST_CHECK(!(cmpAll == insideTolerance));
-                BOOST_CHECK(!(cmpSingle == insideTolerance));
             }
-        }
 
-
-        // Not all values should be in tolerance --- Not doing a complete check here, since the used
-        // SSECompareAllLessEqual function is already tested.
-
-        for (I32 i = -4; i < 4; ++i)
-        {
-            cmpAll = ref;
-            cmpSingle = ref;
-
-            cmpAll = _mmx_add_p(cmpAll, _mmx_set1_p<_registerType>(i));
-            cmpSingle[1] += i;
-            if (std::abs(i) <= toleranceValue)
+            // Up to all compared values might be out of tolerance
+            for (U32 j = _count; j < numRegisterEntries; ++j)
             {
-                BOOST_CHECK(cmpAll == insideTolerance);
-                BOOST_CHECK(cmpSingle == insideTolerance);
-                BOOST_CHECK(!(cmpAll != insideTolerance));
-                BOOST_CHECK(!(cmpSingle != insideTolerance));
-            }
-            else
-            {
-                BOOST_CHECK(cmpAll != insideTolerance);
-                BOOST_CHECK(cmpSingle != insideTolerance);
-                BOOST_CHECK(!(cmpAll == insideTolerance));
-                BOOST_CHECK(!(cmpSingle == insideTolerance));
+                cmpAll[j] = -1337;
+                if (std::abs(i) <= toleranceValue)
+                {
+                    BOOST_CHECK(cmpAll == insideTolerance);
+                    BOOST_CHECK(!(cmpAll != insideTolerance));
+                }
+                else
+                {
+                    BOOST_CHECK(cmpAll != insideTolerance);
+                    BOOST_CHECK(!(cmpAll == insideTolerance));
+                }
             }
 
 
+            // Only single value modified
+            // --------------------------
+            for (U32 j = 0; j < numRegisterEntries; ++j)
+            {
+                cmpSingle = ref;
 
-            cmpSingle = ref;
-            cmpSingle[0] += i;
-            cmpAll[numRegisterEntries - 1] = -1337;
-            cmpSingle[numRegisterEntries - 1] = -1337;
-            if (std::abs(i) <= toleranceValue)
-            {
-                BOOST_CHECK(cmpAll == insideToleranceMinus1);
-                BOOST_CHECK(cmpSingle == insideToleranceMinus1);
-                BOOST_CHECK(!(cmpAll != insideToleranceMinus1));
-                BOOST_CHECK(!(cmpSingle != insideToleranceMinus1));
-            }
-            else
-            {
-                BOOST_CHECK(cmpAll != insideToleranceMinus1);
-                BOOST_CHECK(cmpSingle != insideToleranceMinus1);
-                BOOST_CHECK(!(cmpAll == insideToleranceMinus1));
-                BOOST_CHECK(!(cmpSingle == insideToleranceMinus1));
+                cmpSingle[j] += i;
+                if (std::abs(i) <= toleranceValue)
+                {
+                    BOOST_CHECK(cmpSingle == insideTolerance);
+                    BOOST_CHECK(!(cmpSingle != insideTolerance));
+                }
+                else
+                {
+                    if (j < _count)
+                    {
+                        BOOST_CHECK(cmpSingle != insideTolerance);
+                        BOOST_CHECK(!(cmpSingle == insideTolerance));
+                    }
+                    else
+                    {
+                        BOOST_CHECK(cmpSingle == insideTolerance);
+                        BOOST_CHECK(!(cmpSingle != insideTolerance));
+                    }
+                }
             }
         }
     }
 
-    GDL_CHECK_THROW_DEV(InsideTolerance<_registerType>(ref, 0), Exception);
-    GDL_CHECK_THROW_DEV(InsideTolerance<_registerType>(ref, -1), Exception);
-    GDL_CHECK_THROW_DEV(InsideTolerance<_registerType>(ref, _mmx_setzero_p<_registerType>()), Exception);
-    GDL_CHECK_THROW_DEV(InsideTolerance<_registerType>(ref, _mmx_set1_p<_registerType>(-1)), Exception);
+
+
+    GDL_CHECK_THROW_DEV(InsideToleranceType(ref, 0), Exception);
+    GDL_CHECK_THROW_DEV(InsideToleranceType(ref, -1), Exception);
+    GDL_CHECK_THROW_DEV(InsideToleranceType(ref, _mmx_setzero_p<_registerType>()), Exception);
+    GDL_CHECK_THROW_DEV(InsideToleranceType(ref, _mmx_set1_p<_registerType>(-1)), Exception);
     // Only one invalid tolerance
     for (U32 i = 0; i < numRegisterEntries; ++i)
     {
         tolerance = _mmx_set1_p<_registerType>(toleranceValue);
         tolerance[i] = -1;
-        GDL_CHECK_THROW_DEV(InsideTolerance<_registerType>(ref, tolerance), Exception);
+        GDL_CHECK_THROW_DEV(InsideToleranceType(ref, tolerance), Exception);
     }
+
+    // clang-format off
+    if constexpr (_count < numRegisterEntries)
+        TestInsideToleranceSSE<_registerType, _count + 1>();
+    // clang-format on
 }
 
 

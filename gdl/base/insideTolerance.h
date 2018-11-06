@@ -67,8 +67,8 @@ class InsideTolerance<_type, 0>
     static_assert(std::is_integral<_type>::value || std::is_floating_point<_type>::value,
                   "InsideTolerance can only be used with integer and floating point types.");
 
-    const _type mValue;
-    const _type mTolerance;
+    _type mValue;
+    _type mTolerance;
 
 public:
     InsideTolerance() = delete;
