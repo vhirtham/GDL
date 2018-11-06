@@ -106,7 +106,98 @@ BOOST_AUTO_TEST_CASE(Construction_SSE)
 
 
 
+// Comparison Equal %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+template <I32 _cols, I32 _rows, typename _type, template <typename, I32, I32> class _matrix>
+void ComparisonEqualMatrixTest(const _matrix<_type, _rows, _cols>& ref)
+{
+    BOOST_CHECK(ref == ref);
+    BOOST_CHECK(!(ref != ref));
+
+
+    constexpr _type epsilon = std::numeric_limits<_type>::epsilon();
+    std::array<_type, _rows* _cols> refData = ref.Data();
+    std::array<_type, _rows * _cols> matEps1Data, matEps2Data;
+
+    for (U32 i = 0; i < _rows * _cols; ++i)
+    {
+        if (static_cast<I32>(refData[i]) == 0)
+        {
+            matEps1Data[i] = refData[i] + epsilon;
+            matEps2Data[i] = refData[i] + 10 * epsilon;
+        }
+        else
+        {
+            matEps1Data[i] = refData[i] + epsilon * refData[i];
+            matEps2Data[i] = refData[i] + 10 * epsilon * refData[i];
+        }
+    }
+
+    _matrix<_type, _rows, _cols> matEps1(matEps1Data);
+    _matrix<_type, _rows, _cols> matEps2(matEps2Data);
+
+    BOOST_CHECK(ref == matEps1);
+    BOOST_CHECK(!(ref != matEps1));
+    BOOST_CHECK(ref != matEps2);
+    BOOST_CHECK(!(ref == matEps2));
+
+
+    for (U32 i = 0; i < _rows * _cols; ++i)
+    {
+        matEps2Data = refData;
+        matEps2 = _matrix<_type, _rows, _cols>(matEps2Data);
+        BOOST_CHECK(ref == matEps2);
+        BOOST_CHECK(!(ref != matEps2));
+
+        if (static_cast<I32>(refData[i]) == 0)
+            matEps2Data[i] = refData[i] + 10 * epsilon;
+        else
+            matEps2Data[i] = refData[i] + 10 * epsilon * refData[i];
+
+        matEps2 = _matrix<_type, _rows, _cols>(matEps2Data);
+        BOOST_CHECK(ref != matEps2);
+        BOOST_CHECK(!(ref == matEps2));
+    }
+}
+
+
+
+template <template <typename, I32, I32> class _matrix, typename _type>
+void ComparisonEqualTest()
+{
+    // square matrices
+    Fixture<_matrix, _type> f;
+
+    ComparisonEqualMatrixTest(f.A1);
+    ComparisonEqualMatrixTest(f.B1);
+    ComparisonEqualMatrixTest(f.A2);
+    ComparisonEqualMatrixTest(f.B2);
+    ComparisonEqualMatrixTest(f.A3);
+    ComparisonEqualMatrixTest(f.B3);
+
+    BOOST_CHECK(f.A1 != f.B1);
+    BOOST_CHECK(!(f.A1 == f.B1));
+}
+
+
+
+BOOST_AUTO_TEST_CASE(ComparisonEqual_Single)
+{
+    //    ComparisonEqualTest<MatSingle, F32>();
+    //    ComparisonEqualTest<MatSingle, F64>();
+}
+
+
+BOOST_AUTO_TEST_CASE(ComparisonEqual_SSE)
+{
+    ComparisonEqualTest<MatSIMD, F32>();
+    ComparisonEqualTest<MatSIMD, F64>();
+}
+
+
+
 // Assignment %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 template <template <typename, I32, I32> class _matrix, typename _type>
 void AssignmentTest()
 {

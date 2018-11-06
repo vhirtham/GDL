@@ -2,6 +2,7 @@
 
 #include "gdl/math/matSIMD.h"
 
+#include "gdl/base/approx.h"
 #include "gdl/base/exception.h"
 #include "gdl/base/functions/alignment.h"
 
@@ -69,6 +70,43 @@ _type MatSIMD<_type, _rows, _cols>::operator()(const U32 row, const U32 col) con
 {
     assert(row < _rows && col < _cols);
     return mData[row / mNumRegisterEntries + col * mNumRegistersPerCol][row % mNumRegisterEntries];
+}
+
+
+
+template <typename _type, I32 _rows, I32 _cols>
+bool MatSIMD<_type, _rows, _cols>::operator==(const MatSIMD& rhs) const
+{
+    bool result = true;
+
+    // clang-format off
+    if constexpr(_rows % mNumRegisterEntries == 0)
+        {
+            for (U32 i = 0; i < mData.size(); ++i)
+                result = result && mData[i] == Approx(rhs.mData[i]);
+        }
+    else
+        for (U32 i = 0; i < _cols; ++i)
+        {
+            for (U32 j = 0; j < mNumRegistersPerCol - 1; ++j)
+            {
+                U32 index = i * mNumRegistersPerCol + j;
+                result = result && (mData[index] == Approx(rhs.mData[index]));
+            }
+            U32 index = (i + 1) * mNumRegistersPerCol - 1;
+            result = result && mData[index] == (Approx<__mx, _rows % mNumRegisterEntries>(rhs.mData[index]));
+        }
+    // clang-format on
+
+    return result;
+}
+
+
+
+template <typename _type, I32 _rows, I32 _cols>
+bool MatSIMD<_type, _rows, _cols>::operator!=(const MatSIMD& rhs) const
+{
+    return !operator==(rhs);
 }
 
 

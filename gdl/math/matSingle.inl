@@ -48,6 +48,27 @@ _type MatSingle<_type, _rows, _cols>::operator()(const U32 row, const U32 col) c
 
 
 
+
+template<typename _type, I32 _rows, I32 _cols>
+bool MatSingle<_type, _rows, _cols>::operator==(const MatSingle &rhs) const
+{
+    bool result = true;
+    for (U32 i = 0; i < mData.size(); ++i)
+        result = result && mData[i] == Approx(rhs.mData[i]);
+    return result;
+}
+
+
+
+
+template<typename _type, I32 _rows, I32 _cols>
+bool MatSingle<_type, _rows, _cols>::operator!=(const MatSingle &rhs) const
+{
+    return !operator==(rhs);
+}
+
+
+
 template <typename _type, I32 _rows, I32 _cols>
 MatSingle<_type, _rows, _cols>& MatSingle<_type, _rows, _cols>::operator+=(const MatSingle<_type, _rows, _cols>& rhs)
 {

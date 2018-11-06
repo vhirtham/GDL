@@ -40,6 +40,20 @@ public:
     //! @return Accessed value
     inline _type operator()(const U32 row, const U32 col) const;
 
+    //! @brief Compares if two matrices are equal
+    //! @param rhs: Matrix that should be compared
+    //! @return TRUE/FALSE
+    //! @remark This function uses the Approx class internally. The default minimal base is used. This might be changed
+    //! in the future. A global minimal base for linear algebra comparison might be introduced.
+    [[nodiscard]] inline bool operator==(const MatSingle& rhs) const;
+
+    //! @brief Compares if two matrices are NOT equal
+    //! @param rhs: Matrix that should be compared
+    //! @return TRUE/FALSE
+    //! @remark This function uses the Approx class internally. The default minimal base is used. This might be changed
+    //! in the future. A global minimal base for linear algebra comparison might be introduced.
+    [[nodiscard]] inline bool operator!=(const MatSingle& rhs) const;
+
     //! @brief Matrix - matrix addition assignment
     //! @param rhs: Rhs matrix
     //! @return Result of the addition

@@ -90,8 +90,16 @@ void ComparisonTest(matrix& A, matrix& B)
 
     for (U32 i = 0; i < 16; ++i)
     {
-        matEps1Data[i] = matAData[i] + epsilon;
-        matEps2Data[i] = matAData[i] + 10 * epsilon;
+        if (static_cast<I32>(matAData[i]) == 0)
+        {
+            matEps1Data[i] = matAData[i] + epsilon;
+            matEps2Data[i] = matAData[i] + 10 * epsilon;
+        }
+        else
+        {
+            matEps1Data[i] = matAData[i] + epsilon * matAData[i];
+            matEps2Data[i] = matAData[i] + 10 * epsilon * matAData[i];
+        }
     }
 
     matrix matEps1(matEps1Data);
