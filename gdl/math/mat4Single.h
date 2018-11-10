@@ -33,7 +33,7 @@ public:
     inline explicit Mat4Single(std::array<_type, 16> data);
 
     //! @brief Constructor that initializes full matrix with specific values (column major)
-    //! @param v0-v16: Matrix values in row major ordering
+    //! @param v0-v16: Matrix values in column major ordering
     inline Mat4Single(_type v0, _type v1, _type v2, _type v3, _type v4, _type v5, _type v6, _type v7, _type v8,
                       _type v9, _type v10, _type v11, _type v12, _type v13, _type v14, _type v15);
 
@@ -71,6 +71,10 @@ public:
     //! @param other: Rhs matrix
     //! @return Result of the multiplication
     [[nodiscard]] inline Mat4Single operator*(const Mat4Single& other) const;
+
+    //! @brief Returns the transposed matrix
+    //! @return Transposed matrix
+    [[nodiscard]] inline Mat4Single Transpose() const;
 
     //! @brief Gets the data array in column major ordering
     //! @return Data

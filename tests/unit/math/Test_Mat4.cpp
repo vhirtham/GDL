@@ -206,3 +206,30 @@ BOOST_FIXTURE_TEST_CASE(Multiplication_SIMD, Fixture<Mat4SIMD>)
 {
     MultiplicationTest<Mat4SIMD>(A, B);
 }
+
+
+
+// Transpose %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+template <typename matrix>
+void Transpose(const matrix& A)
+{
+    matrix expected(0., 1., 2., 3., 4., 5., 6., 7., 8., 9., 10., 11., 12., 13., 14., 15.);
+    BOOST_CHECK(A != expected);
+    BOOST_CHECK(A == expected.Transpose());
+    BOOST_CHECK(A.Transpose() == expected);
+    BOOST_CHECK(A != A.Transpose());
+    BOOST_CHECK(A == A.Transpose().Transpose());
+}
+
+
+BOOST_FIXTURE_TEST_CASE(Transpose_Single, Fixture<Mat4Single<F32>>)
+{
+    Transpose<Mat4Single<F32>>(A);
+}
+
+
+BOOST_FIXTURE_TEST_CASE(Transpose_SIMD, Fixture<Mat4SIMD>)
+{
+    Transpose<Mat4SIMD>(A);
+}

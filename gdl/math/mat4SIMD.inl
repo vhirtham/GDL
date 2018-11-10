@@ -4,6 +4,7 @@
 #include "gdl/base/approx.h"
 #include "gdl/base/exception.h"
 #include "gdl/base/functions/alignment.h"
+#include "gdl/base/sse/transpose.h"
 
 #include <cassert>
 #include <cstring>
@@ -139,6 +140,15 @@ Mat4SIMD Mat4SIMD::operator*(const Mat4SIMD& other) const
                                                    _mm_mul_ps(_mmx_set1_p<__m128>(other.mData[3][3]), mData[3]))));
 
     return Mat4SIMD(Col0, Col1, Col2, Col3);
+}
+
+
+
+Mat4SIMD Mat4SIMD::Transpose() const
+{
+        Mat4SIMD t;
+        GDL::Transpose(mData[0],mData[1],mData[2],mData[3],t.mData[0],t.mData[1],t.mData[2],t.mData[3]);
+        return t;
 }
 
 

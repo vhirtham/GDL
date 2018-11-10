@@ -30,7 +30,7 @@ public:
     inline explicit Mat4SIMD(std::array<F32, 16> data);
 
     //! @brief Constructor that initializes full matrix with specific values (column major)
-    //! @param v0-v15: Matrix values in row major ordering
+    //! @param v0-v15: Matrix values in column major ordering
     inline Mat4SIMD(F32 v0, F32 v1, F32 v2, F32 v3, F32 v4, F32 v5, F32 v6, F32 v7, F32 v8, F32 v9, F32 v10, F32 v11,
                     F32 v12, F32 v13, F32 v14, F32 v15);
 
@@ -77,6 +77,10 @@ public:
     //! @param other: Rhs matrix
     //! @return Result of the multiplication
     [[nodiscard]] inline Mat4SIMD operator*(const Mat4SIMD& other) const;
+
+    //! @brief Returns the transposed matrix
+    //! @return Transposed matrix
+    [[nodiscard]] inline Mat4SIMD Transpose() const;
 
     //! @brief Gets the data array in column major ordering
     //! @return Data

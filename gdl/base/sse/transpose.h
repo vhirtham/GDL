@@ -106,14 +106,14 @@ inline void Transpose(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 in4
     tmp6 = _mm256_blend_ps(out5, tmpBlend, 0xCC);
     tmp7 = _mm256_blend_ps(out7, tmpBlend, 0x33);
 
-    out0 = _mm256_permute2f128_pd(tmp0, tmp4, 16 * 2);
-    out1 = _mm256_permute2f128_pd(tmp1, tmp5, 16 * 2);
-    out2 = _mm256_permute2f128_pd(tmp2, tmp6, 16 * 2);
-    out3 = _mm256_permute2f128_pd(tmp3, tmp7, 16 * 2);
-    out4 = _mm256_permute2f128_pd(tmp0, tmp4, 1 + 16 * 3);
-    out5 = _mm256_permute2f128_pd(tmp1, tmp5, 1 + 16 * 3);
-    out6 = _mm256_permute2f128_pd(tmp2, tmp6, 1 + 16 * 3);
-    out7 = _mm256_permute2f128_pd(tmp3, tmp7, 1 + 16 * 3);
+    out0 = _mm256_permute2f128_ps(tmp0, tmp4, 16 * 2);
+    out1 = _mm256_permute2f128_ps(tmp1, tmp5, 16 * 2);
+    out2 = _mm256_permute2f128_ps(tmp2, tmp6, 16 * 2);
+    out3 = _mm256_permute2f128_ps(tmp3, tmp7, 16 * 2);
+    out4 = _mm256_permute2f128_ps(tmp0, tmp4, 1 + 16 * 3);
+    out5 = _mm256_permute2f128_ps(tmp1, tmp5, 1 + 16 * 3);
+    out6 = _mm256_permute2f128_ps(tmp2, tmp6, 1 + 16 * 3);
+    out7 = _mm256_permute2f128_ps(tmp3, tmp7, 1 + 16 * 3);
 }
 
 #endif // __AVX2__

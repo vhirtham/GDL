@@ -113,6 +113,12 @@ Mat4Single<_type> Mat4Single<_type>::operator*(const Mat4Single<_type>& other) c
             mD[3] * other.mD[12] + mD[7] * other.mD[13] + mD[11] * other.mD[14] + mD[15] * other.mD[15]);
 }
 
+template<typename _type>
+Mat4Single<_type> Mat4Single<_type>::Transpose() const
+{
+    return Mat4Single<_type>(mD[0],mD[4],mD[8],mD[12],mD[1],mD[5],mD[9],mD[13],mD[2],mD[6],mD[10],mD[14],mD[3],mD[7],mD[11],mD[15]);
+}
+
 
 
 template <typename _type>

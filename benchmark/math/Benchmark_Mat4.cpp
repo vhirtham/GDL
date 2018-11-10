@@ -130,5 +130,22 @@ BENCHMARK_F(SIMD, Multiplication)(benchmark::State& state)
 
 
 
+// Transpose %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+BENCHMARK_F(Single, Transpose)(benchmark::State& state)
+{
+    for (auto _ : state)
+        benchmark::DoNotOptimize(A.Transpose());
+}
+
+
+BENCHMARK_F(SIMD, Transpose)(benchmark::State& state)
+{
+    for (auto _ : state)
+        benchmark::DoNotOptimize(A.Transpose());
+}
+
+
+
 // Main %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 BENCHMARK_MAIN();
