@@ -12,3 +12,4 @@ addTest(string
     resources/memory/memoryStack.cpp)
 
 addTest(timer)
+addTest(transpose)
