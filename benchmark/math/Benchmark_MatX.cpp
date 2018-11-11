@@ -140,6 +140,22 @@ BENCHMARK_F(SIMD, Set_Zero)(benchmark::State& state)
 
 
 
+// Transpose %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+BENCHMARK_F(Single, Transpose)(benchmark::State& state)
+{
+    for (auto _ : state)
+        benchmark::DoNotOptimize(A.Transpose());
+}
+
+
+BENCHMARK_F(SIMD, Transpose)(benchmark::State& state)
+{
+    for (auto _ : state)
+        benchmark::DoNotOptimize(A.Transpose());
+}
+
+
 // Data %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 BENCHMARK_F(Single, Data)(benchmark::State& state)

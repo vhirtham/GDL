@@ -384,3 +384,45 @@ BOOST_AUTO_TEST_CASE(Multiplication_SIMD)
     MultiplicationTest<MatSIMD, F32>();
     MultiplicationTest<MatSIMD, F64>();
 }
+
+
+
+// Transpose %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+template <template <typename, I32, I32> class _matrix, typename _type>
+void TransposeTest()
+{
+    // square matrix
+    std::array<_type, 64> aData, aTData;
+    for (U32 i = 0; i < 8; ++i)
+        for (U32 j = 0; j < 8; ++j)
+        {
+            aData[i + j * 8] = i + j * 8 + 1;
+            aTData[i * 8 + j] = i + j * 8 + 1;
+        }
+
+    _matrix<_type, 8, 8> a(aData);
+    _matrix<_type, 8, 8> aT(aTData);
+
+    BOOST_CHECK(a != aT);
+    BOOST_CHECK(a == aT.Transpose());
+    BOOST_CHECK(a.Transpose() == aT);
+    BOOST_CHECK(a != a.Transpose());
+    BOOST_CHECK(a == a.Transpose().Transpose());
+}
+
+
+BOOST_AUTO_TEST_CASE(Transpose_Single)
+{
+    TransposeTest<MatSingle, F32>();
+    TransposeTest<MatSingle, F64>();
+}
+
+
+
+BOOST_AUTO_TEST_CASE(Transpose_SIMD)
+{
+
+    TransposeTest<MatSIMD, F32>();
+    TransposeTest<MatSIMD, F64>();
+}

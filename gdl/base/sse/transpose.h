@@ -20,7 +20,6 @@ inline void Transpose(__m128d in0, __m128d in1, __m128d& out0, __m128d& out1)
 
 
 
-
 //! @brief Transposes a 4x4 matrix which consists of 4 __m128 registers
 //! @param in: Input registers
 //! @param out: Output registers
@@ -65,7 +64,6 @@ inline void Transpose(__m256d in0, __m256d in1, __m256d in2, __m256d in3, __m256
 
 
 
-
 //! @brief Transposes a 8x8 matrix which consists of 8 __m256 registers
 //! @param in: Input registers
 //! @param out: Output registers
@@ -73,7 +71,7 @@ inline void Transpose(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 in4
                       __m256& out0, __m256& out1, __m256& out2, __m256& out3, __m256& out4, __m256& out5, __m256& out6,
                       __m256& out7)
 {
-    alignas(alignmentBytes<__m256>) __m256 tmp0, tmp1, tmp2, tmp3,tmp4, tmp5, tmp6, tmp7,tmpBlend;
+    alignas(alignmentBytes<__m256>) __m256 tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7, tmpBlend;
 
     out0 = _mm256_unpacklo_ps(in0, in1);
     out1 = _mm256_unpackhi_ps(in0, in1);

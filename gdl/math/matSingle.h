@@ -73,6 +73,10 @@ public:
     [[nodiscard]] inline MatSingle<_type, _rows, _colsRhs>
     operator*(const MatSingle<_type, _rowsRhs, _colsRhs>& rhs) const;
 
+    //! @brief Returns the transposed matrix
+    //! @return Transposed matrix
+    [[nodiscard]] inline MatSingle<_type, _cols, _rows> Transpose() const;
+
     //! @brief Gets the number of rows
     //! @return Number of rows
     [[nodiscard]] inline U32 Rows() const;

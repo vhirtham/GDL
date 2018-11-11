@@ -90,6 +90,10 @@ public:
     template <I32 _rowsRhs, I32 _colsRhs>
     [[nodiscard]] inline MatSIMD<_type, _rows, _colsRhs> operator*(const MatSIMD<_type, _rowsRhs, _colsRhs>& rhs) const;
 
+    //! @brief Returns the transposed matrix
+    //! @return Transposed matrix
+    [[nodiscard]] inline MatSIMD<_type, _cols, _rows> Transpose() const;
+
     //! @brief Gets the number of rows
     //! @return Number of rows
     [[nodiscard]] inline U32 Rows() const;
@@ -140,6 +144,19 @@ private:
     template <U32 _numOperations = mNumRegisterEntries, U32 _count = 0>
     inline __mx MultiplyAddRegisters(const std::array<__mx, _numOperations>& values, const __mx currentValue,
                                      const U32 currentBlockIndex) const;
+
+    //! @brief Helper function to transposes a small block matrix
+    //! @tparam _countIn: Counts the unpacked input registers
+    //! @tparam _countOut: Counts the unpacked output registers
+    //! @tparam _args: Type of additional arguments
+    //! @param transposed: Matrix that should store the transposed data
+    //! @param rowIndexBlock: Row index of the current block matrix
+    //! @param colIndexBlock: Column index of the current block matrix
+    //! @param args: Additional arguments
+    //! @remark: The parameter pack is used to generate the inputs for the sse transpose function.
+    template <U32 _countIn = 0, U32 _countOut = 0, typename... _args>
+    void TransposeBlock(MatSIMD<_type, _cols, _rows>& transposed, U32 rowIndexBlock, U32 colIndexBlock,
+                        _args&... args) const;
 
     //! @brief Checks if the matrix was constructed as expected
     void ConstructionChecks() const;

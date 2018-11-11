@@ -1,10 +1,11 @@
-#pragma once
+﻿#pragma once
 
 #include "gdl/math/matSIMD.h"
 
 #include "gdl/base/approx.h"
 #include "gdl/base/exception.h"
 #include "gdl/base/functions/alignment.h"
+#include "gdl/base/sse/transpose.h"
 
 #include <algorithm>
 #include <cassert>
@@ -128,6 +129,58 @@ MatSIMD<_type, _rows, _cols> MatSIMD<_type, _rows, _cols>::operator+(const MatSI
     for (U32 i = 0; i < mNumRegisters; ++i)
         result.mData[i] = _mmx_add_p(rhs.mData[i], mData[i]);
     return result;
+}
+
+
+
+template <typename _type, I32 _rows, I32 _cols>
+template <U32 _countIn, U32 _countOut, typename... _args>
+void MatSIMD<_type, _rows, _cols>::TransposeBlock(MatSIMD<_type, _cols, _rows>& transposed, U32 rowIndexBlock,
+                                                  U32 colIndexBlock, _args&... args) const
+{
+    // TODO: Static assert: __mx == _args
+    static_assert(sizeof...(_args) == _countIn + _countOut, "Invalid number of additional parameters.");
+
+    if
+        constexpr(_countIn < mNumRegisterEntries)
+        {
+
+            U32 registerIndex = rowIndexBlock + (colIndexBlock * mNumRegisterEntries + _countIn) * mNumRegistersPerCol;
+            TransposeBlock<_countIn + 1, _countOut>(transposed, rowIndexBlock, colIndexBlock, args...,
+                                                    mData[registerIndex]);
+        }
+    else if
+        constexpr(_countOut < mNumRegisterEntries)
+        {
+            U32 registerIndex =
+                    colIndexBlock + (rowIndexBlock * mNumRegisterEntries + _countOut) * transposed.mNumRegistersPerCol;
+            TransposeBlock<_countIn, _countOut + 1>(transposed, rowIndexBlock, colIndexBlock, args...,
+                                                    transposed.mData[registerIndex]);
+        }
+    else
+        GDL::Transpose(args...);
+}
+
+
+
+template <typename _type, I32 _rows, I32 _cols>
+MatSIMD<_type, _cols, _rows> MatSIMD<_type, _rows, _cols>::Transpose() const
+{
+    if
+        constexpr(_rows % mNumRegisterEntries == 0 && _cols % mNumRegisterEntries == 0)
+        {
+            constexpr U32 rowsBlock = _rows / mNumRegisterEntries;
+            constexpr U32 colsBlock = _cols / mNumRegisterEntries;
+
+            MatSIMD<_type, _cols, _rows> transposed;
+            for (U32 i = 0; i < rowsBlock; ++i)
+                for (U32 j = 0; j < colsBlock; ++j)
+                    TransposeBlock(transposed, i, j);
+
+            return transposed;
+        }
+    else
+        throw Exception(__PRETTY_FUNCTION__, "Not implemented");
 }
 
 

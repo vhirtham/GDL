@@ -48,9 +48,8 @@ _type MatSingle<_type, _rows, _cols>::operator()(const U32 row, const U32 col) c
 
 
 
-
-template<typename _type, I32 _rows, I32 _cols>
-bool MatSingle<_type, _rows, _cols>::operator==(const MatSingle &rhs) const
+template <typename _type, I32 _rows, I32 _cols>
+bool MatSingle<_type, _rows, _cols>::operator==(const MatSingle& rhs) const
 {
     bool result = true;
     for (U32 i = 0; i < mData.size(); ++i)
@@ -60,9 +59,8 @@ bool MatSingle<_type, _rows, _cols>::operator==(const MatSingle &rhs) const
 
 
 
-
-template<typename _type, I32 _rows, I32 _cols>
-bool MatSingle<_type, _rows, _cols>::operator!=(const MatSingle &rhs) const
+template <typename _type, I32 _rows, I32 _cols>
+bool MatSingle<_type, _rows, _cols>::operator!=(const MatSingle& rhs) const
 {
     return !operator==(rhs);
 }
@@ -86,6 +84,18 @@ MatSingle<_type, _rows, _cols> MatSingle<_type, _rows, _cols>::operator+(const M
     for (U32 i = 0; i < mData.size(); ++i)
         result.mData[i] = mData[i] + rhs.mData[i];
     return result;
+}
+
+
+
+template <typename _type, I32 _rows, I32 _cols>
+MatSingle<_type, _cols, _rows> MatSingle<_type, _rows, _cols>::Transpose() const
+{
+    MatSingle<_type, _cols, _rows> transposed;
+    for (U32 i = 0; i < _rows; ++i)
+        for (U32 j = 0; j < _cols; ++j)
+            transposed.mData[i + j * 8] = mData[j + i * 8];
+    return transposed;
 }
 
 
