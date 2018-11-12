@@ -17,7 +17,7 @@ public:
     HeapMemory(HeapMemory&&) = delete;
     HeapMemory& operator=(const HeapMemory&) = delete;
     HeapMemory& operator=(HeapMemory&&) = delete;
-    ~HeapMemory() = default;
+    ~HeapMemory() override = default;
 
     //! @brief Allocates memory
     //! @param size: Size of the memory that should be allocated
@@ -32,4 +32,4 @@ public:
     virtual void Deallocate(void* address, size_t alignment = 1) override;
 };
 
-}// namespace GDL
+} // namespace GDL

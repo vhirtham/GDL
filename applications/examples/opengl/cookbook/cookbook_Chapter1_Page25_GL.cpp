@@ -35,7 +35,7 @@ void RenderFunction()
 
 
 
-int main(int argc, char* argv[])
+int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
 {
     // Setup Render Context #####################
 
@@ -91,15 +91,15 @@ int main(int argc, char* argv[])
     // clang-format off
     std::vector<F32> positionData
     {
-        -0.8, -0.8,  0.0,
-         0.8, -0.8,  0.0,
-         0.0,  0.8,  0.0
+        -0.8f, -0.8f,  0.0f,
+         0.8f, -0.8f,  0.0f,
+         0.0f,  0.8f,  0.0f
     };
     std::vector<F32> colorData
     {
-         1.0,  0.0,  0.0,
-         0.0,  1.0,  0.0,
-         0.0,  0.0,  1.0
+         1.0f,  0.0f,  0.0f,
+         0.0f,  1.0f,  0.0f,
+         0.0f,  0.0f,  1.0f
     };
     // clang-format on
     BufferObject positionBuffer(positionData, GL_STATIC_DRAW);

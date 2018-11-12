@@ -182,7 +182,7 @@ void* MemoryStackTemplate<_ThreadPrivate>::AllocatePrivate(size_t size, size_t a
 }
 
 template <bool _ThreadPrivate>
-void MemoryStackTemplate<_ThreadPrivate>::DeallocatePrivate(void* address)
+void MemoryStackTemplate<_ThreadPrivate>::DeallocatePrivate([[maybe_unused]] void* address)
 {
     DEV_EXCEPTION(address == nullptr, "Can't free a nullptr");
     DEV_EXCEPTION(static_cast<U8*>(address) < mMemory.get() ||

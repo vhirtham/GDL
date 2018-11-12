@@ -59,7 +59,7 @@ public:
     GeneralPurposeMemory(GeneralPurposeMemory&&) = delete;
     GeneralPurposeMemory& operator=(const GeneralPurposeMemory&) = delete;
     GeneralPurposeMemory& operator=(GeneralPurposeMemory&&) = delete;
-    ~GeneralPurposeMemory();
+    ~GeneralPurposeMemory() override;
 
 
     //! @brief Allocates memory

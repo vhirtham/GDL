@@ -64,7 +64,7 @@ public:
     MemoryStackTemplate(MemoryStackTemplate&&) = delete;
     MemoryStackTemplate& operator=(const MemoryStackTemplate&) = delete;
     MemoryStackTemplate& operator=(MemoryStackTemplate&&) = delete;
-    ~MemoryStackTemplate();
+    ~MemoryStackTemplate() override;
 
 
     //! @brief Allocates memory
@@ -100,7 +100,7 @@ private:
 
     //! @brief Class internal function which does the deallocation
     //! @param address: Adress that should be freed
-    void DeallocatePrivate(void* address);
+    void DeallocatePrivate([[maybe_unused]] void* address);
 
     //! @brief Class internal function that deinitializes the memory stack
     void DeinitializePrivate();

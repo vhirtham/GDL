@@ -117,19 +117,19 @@ void CreateVBO(void)
     glBindVertexArray(VaoId);
 
     glBufferData(GL_ARRAY_BUFFER, sizeof(Vertices), Vertices, GL_STATIC_DRAW);
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
+    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, nullptr);
     glEnableVertexAttribArray(0);
 
     glGenBuffers(1, &ColorBufferId);
     glBindBuffer(GL_ARRAY_BUFFER, ColorBufferId);
     glBufferData(GL_ARRAY_BUFFER, sizeof(Colors), Colors, GL_STATIC_DRAW);
-    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, 0);
+    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, nullptr);
     glEnableVertexAttribArray(1);
 
     glGenBuffers(1, &TexCoordId);
     glBindBuffer(GL_ARRAY_BUFFER, TexCoordId);
     glBufferData(GL_ARRAY_BUFFER, sizeof(TexCoords), TexCoords, GL_STATIC_DRAW);
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, 0);
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
     glEnableVertexAttribArray(2);
 
     ErrorCheckValue = glGetError();
@@ -142,7 +142,7 @@ void CreateVBO(void)
 }
 
 
-int main(int argc, char* argv[])
+int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
 {
     GLenum ErrorCheckValue = glGetError();
 
@@ -220,7 +220,8 @@ int main(int argc, char* argv[])
     Shader vertexShader(GL_VERTEX_SHADER, VertexShaderCode);
     Shader fragmentShader(GL_FRAGMENT_SHADER, FragmentShaderCode);
 
-    std::vector<F32> perspectiveMatValues{1.2, 0., 0., 0., 0., 0.9, 0., 0., 0., 0., 1., 0., 0., 0., 0., 1.};
+    std::vector<F32> perspectiveMatValues{1.2f, 0.f, 0.f, 0.f, 0.f, 0.9f, 0.f, 0.f,
+                                          0.f,  0.f, 1.f, 0.f, 0.f, 0.f,  0.f, 1.f};
 
     Program program(vertexShader, fragmentShader);
     ProgramDataManager programDM(program);

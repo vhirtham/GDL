@@ -33,6 +33,12 @@ class HeapAllocationCounter
     friend void ::operator delete[](void* ptr, std::align_val_t al) noexcept;
     friend void ::operator delete(void* ptr, std::align_val_t al, const std::nothrow_t& tag) noexcept;
     friend void ::operator delete[](void* ptr, std::align_val_t al, const std::nothrow_t& tag) noexcept;
+#ifdef __cpp_sized_deallocation
+    friend void ::operator delete(void* ptr, std::size_t sz) noexcept;
+    friend void ::operator delete[](void* ptr, std::size_t sz) noexcept;
+    friend void ::operator delete(void* ptr, std::size_t sz, std::align_val_t al) noexcept;
+    friend void ::operator delete[](void* ptr, std::size_t sz, std::align_val_t al) noexcept;
+#endif // __cpp_sized_deallocation
 #endif // DISABLE_HEAP_ALLOCATION_COUNTER
 
     std::atomic<I32> mNewCallsInstance = -1;
@@ -62,7 +68,7 @@ public:
     //! @param expectedDeleteCalls: Expected number of delete calls
     //! @return TRUE if the expected numbers match the real count. FALSE otherwise
     //! @remark Returns always TRUE if DISABLE_HEAP_ALLOCATION_COUNTER is defined
-    bool CheckNumCallsExpected(I32 expectedNewCalls, I32 expectedDeleteCalls) const
+    bool CheckNumCallsExpected([[maybe_unused]] I32 expectedNewCalls, [[maybe_unused]] I32 expectedDeleteCalls) const
     {
 #ifndef DISABLE_HEAP_ALLOCATION_COUNTER
         if (!(GetNumNewCalls() == expectedNewCalls && GetNumDeleteCalls() == expectedDeleteCalls))
@@ -168,7 +174,7 @@ private:
     //! returns -1.
     //! @param value: Value to return
     //! @return Passed value or -1
-    static inline I32 ReturnValue(I32 value)
+    static inline I32 ReturnValue([[maybe_unused]] I32 value)
     {
 #ifndef DISABLE_HEAP_ALLOCATION_COUNTER
         return value;
@@ -251,21 +257,51 @@ void operator delete(void* ptr) noexcept
     GDL::HeapAllocationCounter::IncreaseTotalDeleteCalls();
     free(ptr);
 }
-void operator delete(void* ptr, const std::nothrow_t&)noexcept
-{
-    GDL::HeapAllocationCounter::IncreaseTotalDeleteCalls();
-    free(ptr);
-}
+
 void operator delete[](void* ptr) noexcept
 {
     GDL::HeapAllocationCounter::IncreaseTotalDeleteCalls();
     free(ptr);
 }
+
+void operator delete(void* ptr, const std::nothrow_t&)noexcept
+{
+    GDL::HeapAllocationCounter::IncreaseTotalDeleteCalls();
+    free(ptr);
+}
+
 void operator delete[](void* ptr, const std::nothrow_t&) noexcept
 {
     GDL::HeapAllocationCounter::IncreaseTotalDeleteCalls();
     free(ptr);
 }
+
+
+#ifdef __cpp_sized_deallocation
+void operator delete(void* ptr, [[maybe_unused]] std::size_t sz) noexcept
+{
+    GDL::HeapAllocationCounter::IncreaseTotalDeleteCalls();
+    free(ptr);
+}
+
+void operator delete[](void* ptr, [[maybe_unused]] std::size_t sz) noexcept
+{
+    GDL::HeapAllocationCounter::IncreaseTotalDeleteCalls();
+    free(ptr);
+}
+
+void operator delete(void* ptr, [[maybe_unused]] std::size_t sz, [[maybe_unused]] std::align_val_t al) noexcept
+{
+    GDL::HeapAllocationCounter::IncreaseTotalDeleteCalls();
+    free(ptr);
+}
+
+void operator delete[](void* ptr, [[maybe_unused]] std::size_t sz, [[maybe_unused]] std::align_val_t al) noexcept
+{
+    GDL::HeapAllocationCounter::IncreaseTotalDeleteCalls();
+    free(ptr);
+}
+#endif // __cpp_sized_deallocation
 
 void operator delete(void* ptr, [[maybe_unused]] std::align_val_t al) noexcept
 {
@@ -279,13 +315,15 @@ void operator delete[](void* ptr, [[maybe_unused]] std::align_val_t al) noexcept
     free(ptr);
 }
 
-void operator delete(void* ptr, [[maybe_unused]] std::align_val_t al, const std::nothrow_t& tag) noexcept
+void operator delete(void* ptr, [[maybe_unused]] std::align_val_t al,
+                     [[maybe_unused]] const std::nothrow_t& tag) noexcept
 {
     GDL::HeapAllocationCounter::IncreaseTotalDeleteCalls();
     free(ptr);
 }
 
-void operator delete[](void* ptr, [[maybe_unused]] std::align_val_t al, const std::nothrow_t& tag) noexcept
+void operator delete[](void* ptr, [[maybe_unused]] std::align_val_t al,
+                       [[maybe_unused]] const std::nothrow_t& tag) noexcept
 {
     GDL::HeapAllocationCounter::IncreaseTotalDeleteCalls();
     free(ptr);

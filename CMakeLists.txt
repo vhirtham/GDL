@@ -9,7 +9,8 @@ set(GDL_COMPILE_DEFINITIONS )
 
 # COMPILER SETUP
 # --------------
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native -Wall -Wno-long-long -pedantic -pthread")
+# https://stackoverflow.com/questions/32940860/gcc-optimization-levels-which-is-better
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native -Wall -Wextra -Wpedantic -Wno-long-long -pthread")
 
 # Options
 # -------

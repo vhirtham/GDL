@@ -155,7 +155,7 @@ An exception for releasing a pointer from the wrong memory system is only thrown
 ### Manual allocation
 
 
-
+- alignment --> memory Pool
 - thread private memory stack
 - thread safety
 - memory usage due to alignment and internal information that needs to be stored

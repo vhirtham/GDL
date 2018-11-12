@@ -67,6 +67,7 @@ inline void Transpose(__m256d in0, __m256d in1, __m256d in2, __m256d in3, __m256
 //! @brief Transposes a 8x8 matrix which consists of 8 __m256 registers
 //! @param in: Input registers
 //! @param out: Output registers
+//! @remark source: https://stackoverflow.com/questions/25622745/transpose-an-8x8-float-using-avx-avx2
 inline void Transpose(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 in4, __m256 in5, __m256 in6, __m256 in7,
                       __m256& out0, __m256& out1, __m256& out2, __m256& out3, __m256& out4, __m256& out5, __m256& out6,
                       __m256& out7)

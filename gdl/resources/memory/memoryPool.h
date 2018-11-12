@@ -38,7 +38,7 @@ public:
     MemoryPool(MemoryPool&&) = delete;
     MemoryPool& operator=(const MemoryPool&) = delete;
     MemoryPool& operator=(MemoryPool&&) = delete;
-    ~MemoryPool();
+    ~MemoryPool() override;
 
     //! @brief Allocates memory
     //! @param size: Size of the memory that should be allocated

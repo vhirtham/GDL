@@ -33,11 +33,11 @@ MemoryPool::~MemoryPool()
 
 
 
-void* MemoryPool::Allocate(size_t size, size_t alignment)
+void* MemoryPool::Allocate([[maybe_unused]] size_t size, [[maybe_unused]] size_t alignment)
 {
     std::lock_guard<SpinLock> lock(mSpinLock);
     DEV_EXCEPTION(!IsPowerOf2(alignment), "Alignment must be a power of 2.");
-    DEV_EXCEPTION((alignment - 1) / mAlignment > 0, "Alignment must be a power of 2.");
+    DEV_EXCEPTION(alignment > mAlignment, "Alignment request can not be fulfilled.");
     DEV_EXCEPTION(IsInitialized() == false, "Memory pool not initialized");
     DEV_EXCEPTION(size > mElementSize, "Allocation size is larger than a pool element.");
     EXCEPTION(mFirstFreeElement == nullptr, "No more memory available.");
@@ -123,7 +123,7 @@ void MemoryPool::CheckConstructionParameters() const
 
 
 
-void MemoryPool::CheckDeallocation(void* address) const
+void MemoryPool::CheckDeallocation([[maybe_unused]] void* address) const
 {
     DEV_EXCEPTION(IsInitialized() == false, "memory pool not initialized");
     DEV_EXCEPTION(address == nullptr, "Can't free a nullptr");
