@@ -142,18 +142,26 @@ BENCHMARK_F(SIMD, Set_Zero)(benchmark::State& state)
 
 // Transpose %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-BENCHMARK_F(Single, Transpose)(benchmark::State& state)
+BENCHMARK_F(Single, Assign_Transposed)(benchmark::State& state)
 {
     for (auto _ : state)
-        benchmark::DoNotOptimize(A.Transpose());
+        B = A.Transpose();
 }
 
 
-BENCHMARK_F(SIMD, Transpose)(benchmark::State& state)
+BENCHMARK_F(SIMD, Assign_Transposed)(benchmark::State& state)
 {
     for (auto _ : state)
-        benchmark::DoNotOptimize(A.Transpose());
+        B = A.Transpose();
 }
+
+#ifdef EIGEN3_FOUND
+BENCHMARK_F(Eigen3, Assign_Transposed)(benchmark::State& state)
+{
+    for (auto _ : state)
+        B = A.transpose();
+}
+#endif
 
 
 // Data %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -292,6 +300,32 @@ BENCHMARK_F(Eigen3, Multiplication)(benchmark::State& state)
 {
     for (auto _ : state)
         benchmark::DoNotOptimize((A * B).eval());
+}
+#endif
+
+
+
+// Expression %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+BENCHMARK_F(Single, Expression)(benchmark::State& state)
+{
+    for (auto _ : state)
+        B = A.Transpose() * A + A * A;
+}
+
+
+BENCHMARK_F(SIMD, Expression)(benchmark::State& state)
+{
+    for (auto _ : state)
+        B = A.Transpose() * A + A * A;
+}
+
+
+#ifdef EIGEN3_FOUND
+BENCHMARK_F(Eigen3, Expression)(benchmark::State& state)
+{
+    for (auto _ : state)
+        B = A.transpose() * A + A * A;
 }
 #endif
 

@@ -134,31 +134,60 @@ MatSIMD<_type, _rows, _cols> MatSIMD<_type, _rows, _cols>::operator+(const MatSI
 
 
 template <typename _type, I32 _rows, I32 _cols>
-template <U32 _countIn, U32 _countOut, typename... _args>
-void MatSIMD<_type, _rows, _cols>::TransposeBlock(MatSIMD<_type, _cols, _rows>& transposed, U32 rowIndexBlock,
-                                                  U32 colIndexBlock, _args&... args) const
+void MatSIMD<_type, _rows, _cols>::TransposeFullBlocks(MatSIMD<_type, _cols, _rows>& result) const
 {
-    // TODO: Static assert: __mx == _args
-    static_assert(sizeof...(_args) == _countIn + _countOut, "Invalid number of additional parameters.");
+    constexpr U32 rowsBlock = _rows / mNumRegisterEntries;
+    constexpr U32 colsBlock = _cols / mNumRegisterEntries;
 
-    if
-        constexpr(_countIn < mNumRegisterEntries)
-        {
 
-            U32 registerIndex = rowIndexBlock + (colIndexBlock * mNumRegisterEntries + _countIn) * mNumRegistersPerCol;
-            TransposeBlock<_countIn + 1, _countOut>(transposed, rowIndexBlock, colIndexBlock, args...,
-                                                    mData[registerIndex]);
-        }
-    else if
-        constexpr(_countOut < mNumRegisterEntries)
+    // clang-format off
+    for (U32 iR = 0; iR < rowsBlock; ++iR)
+        for (U32 iC = 0; iC < colsBlock; ++iC)
         {
-            U32 registerIndex =
-                    colIndexBlock + (rowIndexBlock * mNumRegisterEntries + _countOut) * transposed.mNumRegistersPerCol;
-            TransposeBlock<_countIn, _countOut + 1>(transposed, rowIndexBlock, colIndexBlock, args...,
-                                                    transposed.mData[registerIndex]);
+            const U32 firstRegisterIndexSrc = iR + iC * mNumRegisterEntries * mNumRegistersPerCol;
+            const U32 firstRegisterIndexRes = iC + iR * mNumRegisterEntries * result.mNumRegistersPerCol;
+
+            if constexpr(mNumRegisterEntries == 2)
+            {
+                GDL::Transpose(mData[firstRegisterIndexSrc + 0 * mNumRegistersPerCol],
+                               mData[firstRegisterIndexSrc + 1 * mNumRegistersPerCol],
+                               result.mData[firstRegisterIndexRes + 0 * result.mNumRegistersPerCol],
+                               result.mData[firstRegisterIndexRes + 1 * result.mNumRegistersPerCol]);
+            }
+            else if constexpr(mNumRegisterEntries == 4)
+            {
+                GDL::Transpose(mData[firstRegisterIndexSrc + 0 * mNumRegistersPerCol],
+                               mData[firstRegisterIndexSrc + 1 * mNumRegistersPerCol],
+                               mData[firstRegisterIndexSrc + 2 * mNumRegistersPerCol],
+                               mData[firstRegisterIndexSrc + 3 * mNumRegistersPerCol],
+                               result.mData[firstRegisterIndexRes + 0 * result.mNumRegistersPerCol],
+                               result.mData[firstRegisterIndexRes + 1 * result.mNumRegistersPerCol],
+                               result.mData[firstRegisterIndexRes + 2 * result.mNumRegistersPerCol],
+                               result.mData[firstRegisterIndexRes + 3 * result.mNumRegistersPerCol]);
+            }
+            else if constexpr(mNumRegisterEntries == 8)
+            {
+                GDL::Transpose(mData[firstRegisterIndexSrc + 0 * mNumRegistersPerCol],
+                               mData[firstRegisterIndexSrc + 1 * mNumRegistersPerCol],
+                               mData[firstRegisterIndexSrc + 2 * mNumRegistersPerCol],
+                               mData[firstRegisterIndexSrc + 3 * mNumRegistersPerCol],
+                               mData[firstRegisterIndexSrc + 4 * mNumRegistersPerCol],
+                               mData[firstRegisterIndexSrc + 5 * mNumRegistersPerCol],
+                               mData[firstRegisterIndexSrc + 6 * mNumRegistersPerCol],
+                               mData[firstRegisterIndexSrc + 7 * mNumRegistersPerCol],
+                               result.mData[firstRegisterIndexRes + 0 * result.mNumRegistersPerCol],
+                               result.mData[firstRegisterIndexRes + 1 * result.mNumRegistersPerCol],
+                               result.mData[firstRegisterIndexRes + 2 * result.mNumRegistersPerCol],
+                               result.mData[firstRegisterIndexRes + 3 * result.mNumRegistersPerCol],
+                               result.mData[firstRegisterIndexRes + 4 * result.mNumRegistersPerCol],
+                               result.mData[firstRegisterIndexRes + 5 * result.mNumRegistersPerCol],
+                               result.mData[firstRegisterIndexRes + 6 * result.mNumRegistersPerCol],
+                               result.mData[firstRegisterIndexRes + 7 * result.mNumRegistersPerCol]);
+            }
+            else
+                EXCEPTION(true, "Not implemented for given register size");
         }
-    else
-        GDL::Transpose(args...);
+    // clang-format on
 }
 
 
@@ -166,21 +195,18 @@ void MatSIMD<_type, _rows, _cols>::TransposeBlock(MatSIMD<_type, _cols, _rows>& 
 template <typename _type, I32 _rows, I32 _cols>
 MatSIMD<_type, _cols, _rows> MatSIMD<_type, _rows, _cols>::Transpose() const
 {
-    if
-        constexpr(_rows % mNumRegisterEntries == 0 && _cols % mNumRegisterEntries == 0)
-        {
-            constexpr U32 rowsBlock = _rows / mNumRegisterEntries;
-            constexpr U32 colsBlock = _cols / mNumRegisterEntries;
+    MatSIMD<_type, _cols, _rows> transposed;
 
-            MatSIMD<_type, _cols, _rows> transposed;
-            for (U32 i = 0; i < rowsBlock; ++i)
-                for (U32 j = 0; j < colsBlock; ++j)
-                    TransposeBlock(transposed, i, j);
+    TransposeFullBlocks(transposed);
 
-            return transposed;
-        }
-    else
-        throw Exception(__PRETTY_FUNCTION__, "Not implemented");
+    // clang-format off
+    if constexpr(_rows % mNumRegisterEntries != 0 && _cols % mNumRegisterEntries != 0)
+    {
+        // TransposeSparseBlocks
+    }
+    // clang-format on
+
+    return transposed;
 }
 
 

@@ -110,6 +110,11 @@ public:
     [[nodiscard]] inline const std::array<_type, _rows * _cols> Data() const;
 
 private:
+    //! @brief Transposes all completly filled blocks of the matrix and writes them to the corresponding position of the
+    //! passed matrix
+    //! @param result: Matrix that stores the results
+    inline void TransposeFullBlocks(MatSIMD<_type, _cols, _rows>& result) const;
+
     //! @brief Processes the inner two loops of matrix-matrix multiplication.
     //! @tparam _rowsRhs: Rhs matrix number of rows
     //! @tparam _colsRhs: Rhs matrix number of columns
@@ -132,7 +137,6 @@ private:
     static std::array<__mx, _arraySize> MultiplicationCreateRHSArray(const std::array<_type, mNumRegisterEntries>& data,
                                                                      const _args&... args);
 
-
     //! @brief This function helps with the generalization of matrix-matrix multiplication. It calculates some in
     //! between values that depend on the number of values in the used register and adds them to the current solution.
     //! @tparam _numOperations: Number of recursive function calls.
@@ -144,19 +148,6 @@ private:
     template <U32 _numOperations = mNumRegisterEntries, U32 _count = 0>
     inline __mx MultiplyAddRegisters(const std::array<__mx, _numOperations>& values, const __mx currentValue,
                                      const U32 currentBlockIndex) const;
-
-    //! @brief Helper function to transposes a small block matrix
-    //! @tparam _countIn: Counts the unpacked input registers
-    //! @tparam _countOut: Counts the unpacked output registers
-    //! @tparam _args: Type of additional arguments
-    //! @param transposed: Matrix that should store the transposed data
-    //! @param rowIndexBlock: Row index of the current block matrix
-    //! @param colIndexBlock: Column index of the current block matrix
-    //! @param args: Additional arguments
-    //! @remark: The parameter pack is used to generate the inputs for the sse transpose function.
-    template <U32 _countIn = 0, U32 _countOut = 0, typename... _args>
-    void TransposeBlock(MatSIMD<_type, _cols, _rows>& transposed, U32 rowIndexBlock, U32 colIndexBlock,
-                        _args&... args) const;
 
     //! @brief Checks if the matrix was constructed as expected
     void ConstructionChecks() const;
