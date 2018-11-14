@@ -94,7 +94,7 @@ MatSingle<_type, _cols, _rows> MatSingle<_type, _rows, _cols>::Transpose() const
     MatSingle<_type, _cols, _rows> transposed;
     for (U32 i = 0; i < _rows; ++i)
         for (U32 j = 0; j < _cols; ++j)
-            transposed.mData[i + j * 8] = mData[j + i * 8];
+            transposed.mData[j + i * _cols] = mData[i + j * _rows];
     return transposed;
 }
 

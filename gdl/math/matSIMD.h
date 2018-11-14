@@ -115,6 +115,16 @@ private:
     //! @param result: Matrix that stores the results
     inline void TransposeFullBlocks(MatSIMD<_type, _cols, _rows>& result) const;
 
+    //! @brief Transposes all partially filled blocks of the matrix and writes them to the corresponding position of the
+    //! passed matrix
+    //! @param result: Matrix that stores the results
+    template <U32 _count = 0, typename... _args>
+    inline void TransposeSparseBlocks(MatSIMD<_type, _cols, _rows>& result, U32 i, _args&... args) const;
+    template <U32 _count = 0, typename... _args>
+    inline void TransposeSparseBlocks2(MatSIMD<_type, _cols, _rows>& result, U32 i, _args&... args) const;
+    template <U32 _count = 0, typename... _args>
+    inline void TransposeSparseBlocks3(MatSIMD<_type, _cols, _rows>& result, _args&... args) const;
+
     //! @brief Processes the inner two loops of matrix-matrix multiplication.
     //! @tparam _rowsRhs: Rhs matrix number of rows
     //! @tparam _colsRhs: Rhs matrix number of columns

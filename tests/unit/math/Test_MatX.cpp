@@ -409,13 +409,47 @@ void TransposeTest()
     BOOST_CHECK(a.Transpose() == aT);
     BOOST_CHECK(a != a.Transpose());
     BOOST_CHECK(a == a.Transpose().Transpose());
+
+
+
+    std::array<_type, 128> bData, bTData;
+    for (U32 i = 0; i < 16; ++i)
+        for (U32 j = 0; j < 8; ++j)
+        {
+            bData[i + j * 16] = i + j * 16 + 1;
+            bTData[i * 8 + j] = i + j * 16 + 1;
+        }
+
+    _matrix<_type, 16, 8> b(bData);
+    _matrix<_type, 8, 16> bT(bTData);
+
+    BOOST_CHECK(b == bT.Transpose());
+    BOOST_CHECK(b.Transpose() == bT);
+    BOOST_CHECK(b == b.Transpose().Transpose());
+
+
+
+    std::array<_type, 99> cData, cTData;
+    for (U32 i = 0; i < 11; ++i)
+        for (U32 j = 0; j < 9; ++j)
+        {
+            cData[i + j * 11] = i + j * 11 + 1;
+            cTData[i * 9 + j] = i + j * 11 + 1;
+        }
+
+    _matrix<_type, 11, 9> c(cData);
+    _matrix<_type, 9, 11> cT(cTData);
+
+    // std::cout << c << std::endl;
+    std::cout << cT << std::endl;
+    std::cout << c.Transpose() << std::endl;
 }
 
 
 BOOST_AUTO_TEST_CASE(Transpose_Single)
 {
-    TransposeTest<MatSingle, F32>();
-    TransposeTest<MatSingle, F64>();
+    // TransposeTest<MatSingle, F32>();
+    //    TransposeTest<MatSingle, F64>();
 }
 
 
@@ -424,5 +458,5 @@ BOOST_AUTO_TEST_CASE(Transpose_SIMD)
 {
 
     TransposeTest<MatSIMD, F32>();
-    TransposeTest<MatSIMD, F64>();
+    //    TransposeTest<MatSIMD, F64>();
 }

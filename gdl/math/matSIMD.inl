@@ -193,6 +193,103 @@ void MatSIMD<_type, _rows, _cols>::TransposeFullBlocks(MatSIMD<_type, _cols, _ro
 
 
 template <typename _type, I32 _rows, I32 _cols>
+template<U32 _count, typename... _args>
+void MatSIMD<_type, _rows, _cols>::TransposeSparseBlocks(MatSIMD<_type, _cols, _rows>& result, U32 i,_args&... args) const
+{
+    constexpr U32 iC = _cols / mNumRegisterEntries;
+    const U32 firstRegisterIndexSrc = i + iC * mNumRegisterEntries * mNumRegistersPerCol;
+    // clang-format off
+    if constexpr(_count <mNumRegisterEntries)
+    {
+        if constexpr(_count < _cols % mNumRegisterEntries)
+            TransposeSparseBlocks<_count+1>(result,i,args...,mData[firstRegisterIndexSrc + _count * mNumRegistersPerCol]);
+        else
+        {
+            alignas(mAlignment) __mx tmp = _mmx_setzero_p<__mx>();
+            TransposeSparseBlocks<_count+1>(result,i,args...,tmp);
+        }
+    }
+    else if constexpr(_count < mNumRegisterEntries *2)
+    {
+        const U32 firstRegisterIndexRes = iC + i * mNumRegisterEntries * result.mNumRegistersPerCol;
+        TransposeSparseBlocks<_count+1>(result,i,args...,result.mData[firstRegisterIndexRes + (_count -mNumRegisterEntries) * result.mNumRegistersPerCol]);
+    }
+    else
+    GDL::Transpose(args...);
+    // clang-format on
+}
+
+
+
+template <typename _type, I32 _rows, I32 _cols>
+template<U32 _count, typename... _args>
+void MatSIMD<_type, _rows, _cols>::TransposeSparseBlocks2(MatSIMD<_type, _cols, _rows>& result, U32 i,_args&... args) const
+{
+    constexpr U32 iR = _rows / mNumRegisterEntries;
+    const U32 firstRegisterIndexSrc = iR + i * mNumRegisterEntries * mNumRegistersPerCol;
+    // clang-format off
+    if constexpr(_count <mNumRegisterEntries)
+    {
+            TransposeSparseBlocks2<_count+1>(result,i,args...,mData[firstRegisterIndexSrc + _count * mNumRegistersPerCol]);
+    }
+    else if constexpr(_count < mNumRegisterEntries *2)
+    {
+        if constexpr(_count-mNumRegisterEntries < _rows % mNumRegisterEntries)
+        {
+            const U32 firstRegisterIndexRes = i + iR * mNumRegisterEntries * result.mNumRegistersPerCol;
+            TransposeSparseBlocks2<_count+1>(result,i,args...,result.mData[firstRegisterIndexRes + (_count -mNumRegisterEntries) * result.mNumRegistersPerCol]);
+        }
+        else
+        {
+            alignas(mAlignment) __mx tmp = _mmx_setzero_p<__mx>();
+            TransposeSparseBlocks2<_count+1>(result,i,args...,tmp);
+        }
+    }
+    else
+    GDL::Transpose(args...);
+    // clang-format on
+}
+
+
+
+template <typename _type, I32 _rows, I32 _cols>
+template<U32 _count, typename... _args>
+void MatSIMD<_type, _rows, _cols>::TransposeSparseBlocks3(MatSIMD<_type, _cols, _rows>& result,_args&... args) const
+{
+    constexpr U32 iR = _rows / mNumRegisterEntries;
+    constexpr U32 iC = _cols / mNumRegisterEntries;
+    const U32 firstRegisterIndexSrc = iR + iC * mNumRegisterEntries * mNumRegistersPerCol;
+    // clang-format off
+    if constexpr(_count <mNumRegisterEntries)
+    {
+        if constexpr(_count < _cols % mNumRegisterEntries)
+            TransposeSparseBlocks3<_count+1>(result,args...,mData[firstRegisterIndexSrc + _count * mNumRegistersPerCol]);
+        else
+        {
+            alignas(mAlignment) __mx tmp = _mmx_setzero_p<__mx>();
+            TransposeSparseBlocks3<_count+1>(result,args...,tmp);
+        }
+    }
+    else if constexpr(_count < mNumRegisterEntries *2)
+    {
+        if constexpr(_count-mNumRegisterEntries < _rows % mNumRegisterEntries)
+        {
+            const U32 firstRegisterIndexRes = iC + iR * mNumRegisterEntries * result.mNumRegistersPerCol;
+            TransposeSparseBlocks3<_count+1>(result,args...,result.mData[firstRegisterIndexRes + (_count -mNumRegisterEntries) * result.mNumRegistersPerCol]);
+        }
+        else
+        {
+            alignas(mAlignment) __mx tmp = _mmx_setzero_p<__mx>();
+            TransposeSparseBlocks3<_count+1>(result,args...,tmp);
+        }
+    }
+    else
+    GDL::Transpose(args...);
+    // clang-format on
+}
+
+
+template <typename _type, I32 _rows, I32 _cols>
 MatSIMD<_type, _cols, _rows> MatSIMD<_type, _rows, _cols>::Transpose() const
 {
     MatSIMD<_type, _cols, _rows> transposed;
@@ -202,7 +299,12 @@ MatSIMD<_type, _cols, _rows> MatSIMD<_type, _rows, _cols>::Transpose() const
     // clang-format off
     if constexpr(_rows % mNumRegisterEntries != 0 && _cols % mNumRegisterEntries != 0)
     {
-        // TransposeSparseBlocks
+        for(U32 i=0; i<_rows/mNumRegisterEntries;++i)
+            TransposeSparseBlocks(transposed,i);
+        for(U32 i=0; i<_cols/mNumRegisterEntries;++i)
+            TransposeSparseBlocks2(transposed,i);
+
+        TransposeSparseBlocks3(transposed);
     }
     // clang-format on
 
