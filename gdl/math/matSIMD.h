@@ -126,13 +126,6 @@ private:
     inline void MultiplicationInnerLoops(MatSIMD<_type, _rows, _colsRhs>& result,
                                          const MatSIMD<_type, _rowsRhs, _colsRhs>& rhs, U32 j) const;
 
-    //! @brief Creates a temporary array that is needed during matrix-matrix multiplication.
-    //! @tparam _arraySize: Size of the array
-    //! @param reg: Register that provides the values for the array
-    //! @return Array that is needed during matrix-matrix multiplication.
-    template <U32 _arraySize = mNumRegisterEntries>
-    static std::array<__mx, _arraySize> MultiplicationCreateRHSArray(const __mx reg);
-
     //! @brief This function helps with the generalization of matrix-matrix multiplication. It calculates some in
     //! between values that depend on the number of values in the used register and adds them to the current solution.
     //! @tparam _numOperations: Number of recursive function calls.

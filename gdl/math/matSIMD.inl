@@ -306,16 +306,21 @@ inline void MatSIMD<_type, _rows, _cols>::MultiplicationInnerLoops(MatSIMD<_type
 
     for (U32 i = 0; i < _colsRhs; ++i)
     {
-        const U32 registerNumRhs = i * registersPerColRhs + j;
-        auto tmp = MultiplicationCreateRHSArray<_numMultipliedRegisters>(rhs.mData[registerNumRhs]);
+        const U32 indexRegisterRhs = i * registersPerColRhs + j;
+        alignas(mAlignment) std::array<_type, mNumRegisterEntries> rhsRegisterValues;
+        _mmx_store_p(rhsRegisterValues.data(), rhs.mData[indexRegisterRhs]);
+
+        std::array<__mx, _numMultipliedRegisters> tmp;
+        for (U32 k = 0; k < _numMultipliedRegisters; ++k)
+            tmp[k] = _mmx_set1_p<__mx>(rhsRegisterValues[k]);
 
         // loop over LHS rows (column registers)
         for (U32 k = 0; k < mNumRegistersPerCol; ++k)
         {
-            const U32 registerNumResult = i * mNumRegistersPerCol + k;
-            const U32 currentBlockLhs = j * mNumRegisterEntries * mNumRegistersPerCol + k;
-            result.mData[registerNumResult] = MultiplyAddRegisters<_numMultipliedRegisters>(
-                    tmp, result.mData[registerNumResult], currentBlockLhs);
+            const U32 indexRegisterResult = i * mNumRegistersPerCol + k;
+            const U32 indexFirstRegisterLhsBlock = j * mNumRegisterEntries * mNumRegistersPerCol + k;
+            result.mData[indexRegisterResult] = MultiplyAddRegisters<_numMultipliedRegisters>(
+                    tmp, result.mData[indexRegisterResult], indexFirstRegisterLhsBlock);
         }
     }
 }
@@ -337,25 +342,6 @@ MatSIMD<_type, _rows, _cols>::MultiplyAddRegisters(const std::array<__mx, _numOp
         return _mmx_fmadd_p(mData[currentBlockIndex + _count * mNumRegistersPerCol], values[_count],
                             MultiplyAddRegisters<_numOperations, _count + 1>(values, currentValue, currentBlockIndex));
     // clang-format on
-}
-
-
-
-template <typename _type, I32 _rows, I32 _cols>
-template <U32 _arraySize>
-std::array<typename MatSIMD<_type, _rows, _cols>::__mx, _arraySize>
-MatSIMD<_type, _rows, _cols>::MultiplicationCreateRHSArray(const __mx reg)
-{
-    static_assert(_arraySize <= SSEGetNumRegisterEntries<__mx>() && _arraySize > 0, "Invalid array size.");
-
-    alignas(mAlignment) std::array<_type, mNumRegisterEntries> registerValues;
-
-    _mmx_store_p(registerValues.data(), reg);
-
-    std::array<__mx, _arraySize> result;
-    for (U32 i = 0; i < _arraySize; ++i)
-        result[i] = _mmx_set1_p<__mx>(registerValues[i]);
-    return result;
 }
 
 
