@@ -303,11 +303,11 @@ inline void MatSIMD<_type, _rows, _cols>::MultiplicationInnerLoops(MatSIMD<_type
 {
     constexpr U32 registersPerColRhs = SSECalcMinNumArrayRegisters<__mx>(_rowsRhs);
 
+
     for (U32 i = 0; i < _colsRhs; ++i)
     {
         const U32 registerNumRhs = i * registersPerColRhs + j;
-        alignas(mAlignment) std::array<__mx, _numMultipliedRegisters> tmp =
-                MultiplicationCreateRHSArray<_numMultipliedRegisters>(rhs.mData[registerNumRhs]);
+        auto tmp = MultiplicationCreateRHSArray<_numMultipliedRegisters>(rhs.mData[registerNumRhs]);
 
         // loop over LHS rows (column registers)
         for (U32 k = 0; k < mNumRegistersPerCol; ++k)
