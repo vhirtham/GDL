@@ -677,35 +677,6 @@ inline _registerType _mmx_min_p(_registerType lhs, _registerType rhs)
 
 
 
-// _mmx_movemask_epi8 -------------------------------------------------------------------------------------------------
-
-//! @brief Create mask from the most significant bit of each 8-bit element in a register and returns it
-//! @tparam _registerType: Register type
-//! @param reg: Register which serves as source for the mask
-//! @return Mask from the most significant bit of each 8-bit element of the source register
-template <typename _registerType>
-inline auto _mmx_movemask_epi8(_registerType reg)
-{
-
-    // clang-format off
-    if constexpr(std::is_same<_registerType, __m128i>::value)
-        return static_cast<U16>(_mm_movemask_epi8(reg));
-#ifdef __AVX2__
-    else if constexpr(std::is_same<_registerType, __m256i>::value)
-        return static_cast<U32>(_mm256_movemask_epi8(reg));
-#ifdef __AVX512F__
-    // Check https://software.intel.com/en-us/forums/intel-isa-extensions/topic/749055
-    else if constexpr(std::is_same<_registerType, __m512i>::value)
-        throw(__PRETTY_FUNCTION__,"Not implemented");
-#endif // __AVX512F__
-#endif // __AVX2__
-    else
-        throw Exception(__PRETTY_FUNCTION__, "Not defined for selected register type.");
-    // clang-format on
-}
-
-
-
 // _mmx_andnot_p ------------------------------------------------------------------------------------------------------
 
 //! @brief Performs a and-not operation on the passed registers
@@ -732,6 +703,35 @@ inline _registerType _mmx_andnot_p(_registerType lhs, _registerType rhs)
         return _mm512_andnot_ps(lhs, rhs);
     else if constexpr(std::is_same<_registerType, __m512d>::value)
         return _mm512_andnot_pd(lhs, rhs);
+#endif // __AVX512F__
+#endif // __AVX2__
+    else
+        throw Exception(__PRETTY_FUNCTION__, "Not defined for selected register type.");
+    // clang-format on
+}
+
+
+
+// _mmx_movemask_epi8 -------------------------------------------------------------------------------------------------
+
+//! @brief Create mask from the most significant bit of each 8-bit element in a register and returns it
+//! @tparam _registerType: Register type
+//! @param reg: Register which serves as source for the mask
+//! @return Mask from the most significant bit of each 8-bit element of the source register
+template <typename _registerType>
+inline auto _mmx_movemask_epi8(_registerType reg)
+{
+
+    // clang-format off
+    if constexpr(std::is_same<_registerType, __m128i>::value)
+        return static_cast<U16>(_mm_movemask_epi8(reg));
+#ifdef __AVX2__
+    else if constexpr(std::is_same<_registerType, __m256i>::value)
+        return static_cast<U32>(_mm256_movemask_epi8(reg));
+#ifdef __AVX512F__
+    // Check https://software.intel.com/en-us/forums/intel-isa-extensions/topic/749055
+    else if constexpr(std::is_same<_registerType, __m512i>::value)
+        throw(__PRETTY_FUNCTION__,"Not implemented");
 #endif // __AVX512F__
 #endif // __AVX2__
     else

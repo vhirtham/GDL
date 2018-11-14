@@ -302,15 +302,12 @@ inline void MatSIMD<_type, _rows, _cols>::MultiplicationInnerLoops(MatSIMD<_type
                                                                    U32 j) const
 {
     constexpr U32 registersPerColRhs = SSECalcMinNumArrayRegisters<__mx>(_rowsRhs);
-    alignas(mAlignment) std::array<_type, mNumRegisterEntries> registerValues;
 
-    // loop over every RHS Col
     for (U32 i = 0; i < _colsRhs; ++i)
     {
         const U32 registerNumRhs = i * registersPerColRhs + j;
-        _mmx_store_p(registerValues.data(), rhs.mData[registerNumRhs]);
         alignas(mAlignment) std::array<__mx, _numMultipliedRegisters> tmp =
-                MultiplicationCreateRHSArray<_numMultipliedRegisters>(registerValues);
+                MultiplicationCreateRHSArray<_numMultipliedRegisters>(rhs.mData[registerNumRhs]);
 
         // loop over LHS rows (column registers)
         for (U32 k = 0; k < mNumRegistersPerCol; ++k)
@@ -345,19 +342,20 @@ MatSIMD<_type, _rows, _cols>::MultiplyAddRegisters(const std::array<__mx, _numOp
 
 
 template <typename _type, I32 _rows, I32 _cols>
-template <U32 _arraySize, U32 _count, typename... _args>
+template <U32 _arraySize>
 std::array<typename MatSIMD<_type, _rows, _cols>::__mx, _arraySize>
-MatSIMD<_type, _rows, _cols>::MultiplicationCreateRHSArray(const std::array<_type, mNumRegisterEntries>& data,
-                                                           const _args&... args)
+MatSIMD<_type, _rows, _cols>::MultiplicationCreateRHSArray(const __mx reg)
 {
     static_assert(_arraySize <= SSEGetNumRegisterEntries<__mx>() && _arraySize > 0, "Invalid array size.");
 
-    // clang-format off
-    if constexpr(_arraySize == _count)
-        return std::array<__mx, _arraySize>{{args...}};
-    else
-        return MultiplicationCreateRHSArray<_arraySize, _count + 1>(data, args..., _mmx_set1_p<__mx>(data[_count]));
-    // clang-format on
+    alignas(mAlignment) std::array<_type, mNumRegisterEntries> registerValues;
+
+    _mmx_store_p(registerValues.data(), reg);
+
+    std::array<__mx, _arraySize> result;
+    for (U32 i = 0; i < _arraySize; ++i)
+        result[i] = _mmx_set1_p<__mx>(registerValues[i]);
+    return result;
 }
 
 
