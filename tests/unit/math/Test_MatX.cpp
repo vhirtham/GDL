@@ -389,67 +389,52 @@ BOOST_AUTO_TEST_CASE(Multiplication_SIMD)
 
 // Transpose %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-template <template <typename, I32, I32> class _matrix, typename _type>
+template <template <typename, I32, I32> class _matrix, typename _type, U32 _rows = 8, U32 _cols = 8>
 void TransposeTest()
 {
     // square matrix
-    std::array<_type, 64> aData, aTData;
-    for (U32 i = 0; i < 8; ++i)
-        for (U32 j = 0; j < 8; ++j)
+    std::array<_type, _rows * _cols> aData, aTData;
+    for (U32 i = 0; i < _rows; ++i)
+        for (U32 j = 0; j < _cols; ++j)
         {
-            aData[i + j * 8] = i + j * 8 + 1;
-            aTData[i * 8 + j] = i + j * 8 + 1;
+            aData[i + j * _rows] = i + j * _rows + 1;
+            aTData[i * _cols + j] = i + j * _rows + 1;
         }
 
-    _matrix<_type, 8, 8> a(aData);
-    _matrix<_type, 8, 8> aT(aTData);
+    _matrix<_type, _rows, _cols> a(aData);
+    _matrix<_type, _cols, _rows> aT(aTData);
 
-    BOOST_CHECK(a != aT);
+
     BOOST_CHECK(a == aT.Transpose());
     BOOST_CHECK(a.Transpose() == aT);
-    BOOST_CHECK(a != a.Transpose());
     BOOST_CHECK(a == a.Transpose().Transpose());
 
-
-
-    std::array<_type, 128> bData, bTData;
-    for (U32 i = 0; i < 16; ++i)
-        for (U32 j = 0; j < 8; ++j)
+    // clang-format off
+    if
+        constexpr(_rows == _cols)
         {
-            bData[i + j * 16] = i + j * 16 + 1;
-            bTData[i * 8 + j] = i + j * 16 + 1;
+            BOOST_CHECK(a != aT);
+            BOOST_CHECK(a != a.Transpose());
         }
 
-    _matrix<_type, 16, 8> b(bData);
-    _matrix<_type, 8, 16> bT(bTData);
-
-    BOOST_CHECK(b == bT.Transpose());
-    BOOST_CHECK(b.Transpose() == bT);
-    BOOST_CHECK(b == b.Transpose().Transpose());
-
-
-
-    std::array<_type, 99> cData, cTData;
-    for (U32 i = 0; i < 11; ++i)
-        for (U32 j = 0; j < 9; ++j)
-        {
-            cData[i + j * 11] = i + j * 11 + 1;
-            cTData[i * 9 + j] = i + j * 11 + 1;
-        }
-
-    _matrix<_type, 11, 9> c(cData);
-    _matrix<_type, 9, 11> cT(cTData);
-
-    // std::cout << c << std::endl;
-    std::cout << cT << std::endl;
-    std::cout << c.Transpose() << std::endl;
+    if constexpr(_cols == 8 && _rows == 8)
+    {
+        TransposeTest<_matrix, _type, 9, 8>();
+        TransposeTest<_matrix, _type, 8, 9>();
+        TransposeTest<_matrix, _type, 9, 9>();
+        TransposeTest<_matrix, _type, 11, 15>();
+        TransposeTest<_matrix, _type, 13, 10>();
+        TransposeTest<_matrix, _type, 14, 14>();
+        TransposeTest<_matrix, _type, 16, 16>();
+    }
+    // clang-format on
 }
 
 
 BOOST_AUTO_TEST_CASE(Transpose_Single)
 {
-    // TransposeTest<MatSingle, F32>();
-    //    TransposeTest<MatSingle, F64>();
+    TransposeTest<MatSingle, F32>();
+    TransposeTest<MatSingle, F64>();
 }
 
 
@@ -458,5 +443,5 @@ BOOST_AUTO_TEST_CASE(Transpose_SIMD)
 {
 
     TransposeTest<MatSIMD, F32>();
-    //    TransposeTest<MatSIMD, F64>();
+    TransposeTest<MatSIMD, F64>();
 }

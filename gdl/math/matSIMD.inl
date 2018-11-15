@@ -193,8 +193,9 @@ void MatSIMD<_type, _rows, _cols>::TransposeFullBlocks(MatSIMD<_type, _cols, _ro
 
 
 template <typename _type, I32 _rows, I32 _cols>
-template<U32 _count, typename... _args>
-void MatSIMD<_type, _rows, _cols>::TransposeSparseBlocks(MatSIMD<_type, _cols, _rows>& result, U32 i,_args&... args) const
+template <U32 _count, typename... _args>
+void MatSIMD<_type, _rows, _cols>::TransposeSparseBlocks(MatSIMD<_type, _cols, _rows>& result, U32 i,
+                                                         _args&... args) const
 {
     constexpr U32 iC = _cols / mNumRegisterEntries;
     const U32 firstRegisterIndexSrc = i + iC * mNumRegisterEntries * mNumRegistersPerCol;
@@ -222,8 +223,9 @@ void MatSIMD<_type, _rows, _cols>::TransposeSparseBlocks(MatSIMD<_type, _cols, _
 
 
 template <typename _type, I32 _rows, I32 _cols>
-template<U32 _count, typename... _args>
-void MatSIMD<_type, _rows, _cols>::TransposeSparseBlocks2(MatSIMD<_type, _cols, _rows>& result, U32 i,_args&... args) const
+template <U32 _count, typename... _args>
+void MatSIMD<_type, _rows, _cols>::TransposeSparseBlocks2(MatSIMD<_type, _cols, _rows>& result, U32 i,
+                                                          _args&... args) const
 {
     constexpr U32 iR = _rows / mNumRegisterEntries;
     const U32 firstRegisterIndexSrc = iR + i * mNumRegisterEntries * mNumRegistersPerCol;
@@ -253,8 +255,8 @@ void MatSIMD<_type, _rows, _cols>::TransposeSparseBlocks2(MatSIMD<_type, _cols, 
 
 
 template <typename _type, I32 _rows, I32 _cols>
-template<U32 _count, typename... _args>
-void MatSIMD<_type, _rows, _cols>::TransposeSparseBlocks3(MatSIMD<_type, _cols, _rows>& result,_args&... args) const
+template <U32 _count, typename... _args>
+void MatSIMD<_type, _rows, _cols>::TransposeSparseBlocks3(MatSIMD<_type, _cols, _rows>& result, _args&... args) const
 {
     constexpr U32 iR = _rows / mNumRegisterEntries;
     constexpr U32 iC = _cols / mNumRegisterEntries;
@@ -262,7 +264,7 @@ void MatSIMD<_type, _rows, _cols>::TransposeSparseBlocks3(MatSIMD<_type, _cols, 
     // clang-format off
     if constexpr(_count <mNumRegisterEntries)
     {
-        if constexpr(_count < _cols % mNumRegisterEntries)
+        if constexpr(_count < _cols % mNumRegisterEntries && _cols % mNumRegisterEntries>0)
             TransposeSparseBlocks3<_count+1>(result,args...,mData[firstRegisterIndexSrc + _count * mNumRegistersPerCol]);
         else
         {
@@ -272,7 +274,7 @@ void MatSIMD<_type, _rows, _cols>::TransposeSparseBlocks3(MatSIMD<_type, _cols, 
     }
     else if constexpr(_count < mNumRegisterEntries *2)
     {
-        if constexpr(_count-mNumRegisterEntries < _rows % mNumRegisterEntries)
+        if constexpr(_count-mNumRegisterEntries < _rows % mNumRegisterEntries && _rows % mNumRegisterEntries>0)
         {
             const U32 firstRegisterIndexRes = iC + iR * mNumRegisterEntries * result.mNumRegistersPerCol;
             TransposeSparseBlocks3<_count+1>(result,args...,result.mData[firstRegisterIndexRes + (_count -mNumRegisterEntries) * result.mNumRegistersPerCol]);
@@ -297,18 +299,20 @@ MatSIMD<_type, _cols, _rows> MatSIMD<_type, _rows, _cols>::Transpose() const
     TransposeFullBlocks(transposed);
 
     // clang-format off
-    if constexpr(_rows % mNumRegisterEntries != 0 && _cols % mNumRegisterEntries != 0)
-    {
+    if constexpr(_cols % mNumRegisterEntries != 0 )
+
         for(U32 i=0; i<_rows/mNumRegisterEntries;++i)
             TransposeSparseBlocks(transposed,i);
+
+    if constexpr( _rows % mNumRegisterEntries != 0)
         for(U32 i=0; i<_cols/mNumRegisterEntries;++i)
             TransposeSparseBlocks2(transposed,i);
 
+    if constexpr(_rows % mNumRegisterEntries != 0 && _cols % mNumRegisterEntries != 0)
         TransposeSparseBlocks3(transposed);
-    }
-    // clang-format on
+// clang-format on
 
-    return transposed;
+return transposed;
 }
 
 
