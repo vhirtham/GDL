@@ -47,7 +47,6 @@ void TestAbs()
             if (lhs[i] != rhs[i])
                 return false;
         return true;
-
     };
 
     alignas(alignmentBytes<_registerType>) _registerType ref = _mmx_setzero_p<_registerType>();
@@ -180,11 +179,8 @@ void TestCompareAllEqual()
     }
 
 
-
-    // clang-format off
-    if constexpr(_count < numRegisterEntries)
+    if constexpr (_count < numRegisterEntries)
         TestCompareAllEqual<_registerType, _count + 1>();
-    // clang-format on
 }
 
 
@@ -287,11 +283,8 @@ void TestCompareAllLessEqual()
     }
 
 
-
-    // clang-format off
-    if constexpr(_count < numRegisterEntries)
+    if constexpr (_count < numRegisterEntries)
         TestCompareAllLessEqual<_registerType, _count + 1>();
-    // clang-format on
 }
 
 
@@ -394,11 +387,8 @@ void TestCompareAllGreaterThan()
     }
 
 
-
-    // clang-format off
-    if constexpr(_count < numRegisterEntries)
+    if constexpr (_count < numRegisterEntries)
         TestCompareAllGreaterThan<_registerType, _count + 1>();
-    // clang-format on
 }
 
 

@@ -79,12 +79,11 @@ bool MatSIMD<_type, _rows, _cols>::operator==(const MatSIMD& rhs) const
 {
     bool result = true;
 
-    // clang-format off
-    if constexpr(_rows % mNumRegisterEntries == 0)
-        {
-            for (U32 i = 0; i < mData.size(); ++i)
-                result = result && mData[i] == Approx(rhs.mData[i]);
-        }
+    if constexpr (_rows % mNumRegisterEntries == 0)
+    {
+        for (U32 i = 0; i < mData.size(); ++i)
+            result = result && mData[i] == Approx(rhs.mData[i]);
+    }
     else
         for (U32 i = 0; i < _cols; ++i)
         {
@@ -96,7 +95,6 @@ bool MatSIMD<_type, _rows, _cols>::operator==(const MatSIMD& rhs) const
             U32 index = (i + 1) * mNumRegistersPerCol - 1;
             result = result && mData[index] == (Approx<__mx, _rows % mNumRegisterEntries>(rhs.mData[index]));
         }
-    // clang-format on
 
     return result;
 }
@@ -138,22 +136,20 @@ void MatSIMD<_type, _rows, _cols>::TransposeFullBlocks(MatSIMD<_type, _cols, _ro
     constexpr U32 rowsBlock = _rows / mNumRegisterEntries;
     constexpr U32 colsBlock = _cols / mNumRegisterEntries;
 
-
-    // clang-format off
     for (U32 iR = 0; iR < rowsBlock; ++iR)
         for (U32 iC = 0; iC < colsBlock; ++iC)
         {
             const U32 firstRegisterIndexSrc = iR + iC * mNumRegisterEntries * mNumRegistersPerCol;
             const U32 firstRegisterIndexRes = iC + iR * mNumRegisterEntries * result.mNumRegistersPerCol;
 
-            if constexpr(mNumRegisterEntries == 2)
+            if constexpr (mNumRegisterEntries == 2)
             {
                 GDL::Transpose(mData[firstRegisterIndexSrc + 0 * mNumRegistersPerCol],
                                mData[firstRegisterIndexSrc + 1 * mNumRegistersPerCol],
                                result.mData[firstRegisterIndexRes + 0 * result.mNumRegistersPerCol],
                                result.mData[firstRegisterIndexRes + 1 * result.mNumRegistersPerCol]);
             }
-            else if constexpr(mNumRegisterEntries == 4)
+            else if constexpr (mNumRegisterEntries == 4)
             {
                 GDL::Transpose(mData[firstRegisterIndexSrc + 0 * mNumRegistersPerCol],
                                mData[firstRegisterIndexSrc + 1 * mNumRegistersPerCol],
@@ -164,7 +160,7 @@ void MatSIMD<_type, _rows, _cols>::TransposeFullBlocks(MatSIMD<_type, _cols, _ro
                                result.mData[firstRegisterIndexRes + 2 * result.mNumRegistersPerCol],
                                result.mData[firstRegisterIndexRes + 3 * result.mNumRegistersPerCol]);
             }
-            else if constexpr(mNumRegisterEntries == 8)
+            else if constexpr (mNumRegisterEntries == 8)
             {
                 GDL::Transpose(mData[firstRegisterIndexSrc + 0 * mNumRegistersPerCol],
                                mData[firstRegisterIndexSrc + 1 * mNumRegistersPerCol],
@@ -186,7 +182,6 @@ void MatSIMD<_type, _rows, _cols>::TransposeFullBlocks(MatSIMD<_type, _cols, _ro
             else
                 EXCEPTION(true, "Not implemented for given register size");
         }
-    // clang-format on
 }
 
 

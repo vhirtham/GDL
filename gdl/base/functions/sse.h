@@ -23,20 +23,15 @@ namespace GDL
 template <typename _registerType>
 constexpr bool SSEIsRegisterType()
 {
-    // clang-format off
-    if constexpr(std::is_same<_registerType, __m128>::value
-              || std::is_same<_registerType, __m128d>::value
+    if constexpr (std::is_same<_registerType, __m128>::value || std::is_same<_registerType, __m128d>::value
 #ifdef __AVX2__
-              || std::is_same<_registerType, __m256>::value
-              || std::is_same<_registerType, __m256d>::value
+                  || std::is_same<_registerType, __m256>::value || std::is_same<_registerType, __m256d>::value
 #ifdef __AVX512F__
-              || std::is_same<_registerType, __m512>::value
-              || std::is_same<_registerType, __m512d>::value
+                  || std::is_same<_registerType, __m512>::value || std::is_same<_registerType, __m512d>::value
 #endif // __AVX512F__
 #endif // __AVX2__
-                 )
+    )
         return true;
-    // clang-format on
     return false;
 }
 
@@ -72,30 +67,28 @@ auto SSEGetFittingRegister()
     static_assert(_registerSize == 128 || _registerSize == 256 || _registerSize == 512,
                   "Register size must be 128, 256 or 512");
 
-    // clang-format off
-    if constexpr(std::is_same<_type, F32>::value && _registerSize == 128)
+    if constexpr (std::is_same<_type, F32>::value && _registerSize == 128)
         return __m128();
-    if constexpr(std::is_same<_type, F64>::value && _registerSize == 128)
+    if constexpr (std::is_same<_type, F64>::value && _registerSize == 128)
         return __m128d();
-    if constexpr(std::is_same<_type, I32>::value && _registerSize == 128)
+    if constexpr (std::is_same<_type, I32>::value && _registerSize == 128)
         return __m128i();
 #ifdef __AVX2__
-    if constexpr(std::is_same<_type, F32>::value && _registerSize == 256)
+    if constexpr (std::is_same<_type, F32>::value && _registerSize == 256)
         return __m256();
-    if constexpr(std::is_same<_type, F64>::value && _registerSize == 256)
+    if constexpr (std::is_same<_type, F64>::value && _registerSize == 256)
         return __m256d();
-    if constexpr(std::is_same<_type, I32>::value && _registerSize == 256)
+    if constexpr (std::is_same<_type, I32>::value && _registerSize == 256)
         return __m256i();
 #ifdef __AVX512F__
-    if constexpr(std::is_same<_type, F32>::value && _registerSize == 512)
+    if constexpr (std::is_same<_type, F32>::value && _registerSize == 512)
         return __m512();
-    if constexpr(std::is_same<_type, F64>::value && _registerSize == 512)
+    if constexpr (std::is_same<_type, F64>::value && _registerSize == 512)
         return __m512d();
-    if constexpr(std::is_same<_type, I32>::value && _registerSize == 512)
+    if constexpr (std::is_same<_type, I32>::value && _registerSize == 512)
         return __m512i();
 #endif // __AVX512F__
 #endif // __AVX2__
-    // clang-format on
 }
 
 
@@ -111,31 +104,29 @@ auto SSEGetFittingRegister()
 template <typename _registerType, bool _returnTypeIfNoTARegister = false>
 constexpr auto SSEGetDataType()
 {
-    // clang-format off
-    if constexpr(std::is_same<_registerType, __m128>::value)
+    if constexpr (std::is_same<_registerType, __m128>::value)
         return F32{0};
-    else if constexpr(std::is_same<_registerType, __m128d>::value)
+    else if constexpr (std::is_same<_registerType, __m128d>::value)
         return F64{0};
 #ifdef __AVX2__
-    else if constexpr(std::is_same<_registerType, __m256>::value)
+    else if constexpr (std::is_same<_registerType, __m256>::value)
         return F32{0};
-    else if constexpr(std::is_same<_registerType, __m256d>::value)
+    else if constexpr (std::is_same<_registerType, __m256d>::value)
         return F64{0};
 #ifdef __AVX512F__
-    else if constexpr(std::is_same<_registerType, __m512>::value)
+    else if constexpr (std::is_same<_registerType, __m512>::value)
         return F32{0};
-    else if constexpr(std::is_same<_registerType, __m512d>::value)
+    else if constexpr (std::is_same<_registerType, __m512d>::value)
         return F64{0};
 #endif // __AVX512F__
 #endif // __AVX2__
     else
     {
-        if constexpr(_returnTypeIfNoTARegister)
+        if constexpr (_returnTypeIfNoTARegister)
             return _registerType();
         else
             throw Exception(__PRETTY_FUNCTION__, "Not defined for selected register type.");
     }
-    // clang-format on
 }
 
 
@@ -188,26 +179,24 @@ constexpr const U32 alignmentBytes<__m512i> = 64;
 template <typename _registerType>
 constexpr U32 SSEGetNumRegisterEntries()
 {
-    // clang-format off
-    if constexpr(std::is_same<_registerType, __m128>::value)
+    if constexpr (std::is_same<_registerType, __m128>::value)
         return 4;
-    else if constexpr(std::is_same<_registerType, __m128d>::value)
+    else if constexpr (std::is_same<_registerType, __m128d>::value)
         return 2;
 #ifdef __AVX2__
-    else if constexpr(std::is_same<_registerType, __m256>::value)
+    else if constexpr (std::is_same<_registerType, __m256>::value)
         return 8;
-    else if constexpr(std::is_same<_registerType, __m256d>::value)
+    else if constexpr (std::is_same<_registerType, __m256d>::value)
         return 4;
 #ifdef __AVX512F__
-    else if constexpr(std::is_same<_registerType, __m512>::value)
+    else if constexpr (std::is_same<_registerType, __m512>::value)
         return 16;
-    else if constexpr(std::is_same<_registerType, __m512d>::value)
+    else if constexpr (std::is_same<_registerType, __m512d>::value)
         return 8;
 #endif // __AVX512F__
 #endif // __AVX2__
     else
         return 0;
-    // clang-format on
 }
 
 
@@ -222,26 +211,24 @@ constexpr U32 SSEGetNumRegisterEntries()
 template <typename _type, typename _registerType>
 inline void _mmx_store_p(_type* ptr, _registerType reg)
 {
-    // clang-format off
-    if constexpr(std::is_same<_registerType, __m128>::value && std::is_same<_type, F32>::value)
+    if constexpr (std::is_same<_registerType, __m128>::value && std::is_same<_type, F32>::value)
         _mm_store_ps(ptr, reg);
-    else if constexpr(std::is_same<_registerType, __m128d>::value && std::is_same<_type, F64>::value)
+    else if constexpr (std::is_same<_registerType, __m128d>::value && std::is_same<_type, F64>::value)
         _mm_store_pd(ptr, reg);
 #ifdef __AVX2__
-    else if constexpr(std::is_same<_registerType, __m256>::value && std::is_same<_type, F32>::value)
+    else if constexpr (std::is_same<_registerType, __m256>::value && std::is_same<_type, F32>::value)
         _mm256_store_ps(ptr, reg);
-    else if constexpr(std::is_same<_registerType, __m256d>::value && std::is_same<_type, F64>::value)
+    else if constexpr (std::is_same<_registerType, __m256d>::value && std::is_same<_type, F64>::value)
         _mm256_store_pd(ptr, reg);
 #ifdef __AVX512F__
-    else if constexpr(std::is_same<_registerType, __m512>::value && std::is_same<_type, F32>::value)
+    else if constexpr (std::is_same<_registerType, __m512>::value && std::is_same<_type, F32>::value)
         _mm512_store_ps(ptr, reg);
-    else if constexpr(std::is_same<_registerType, __m512d>::value && std::is_same<_type, F64>::value)
+    else if constexpr (std::is_same<_registerType, __m512d>::value && std::is_same<_type, F64>::value)
         _mm512_store_pd(ptr, reg);
 #endif // __AVX512F__
 #endif // __AVX2__
     else
         throw Exception(__PRETTY_FUNCTION__, "Not defined for selected combination of register type and data type");
-    // clang-format on
 }
 
 
@@ -254,32 +241,30 @@ inline void _mmx_store_p(_type* ptr, _registerType reg)
 template <typename _registerType>
 inline _registerType _mmx_setzero_p()
 {
-    // clang-format off
-    if constexpr(std::is_same<_registerType, __m128>::value)
+    if constexpr (std::is_same<_registerType, __m128>::value)
         return _mm_setzero_ps();
-    else if constexpr(std::is_same<_registerType, __m128d>::value)
+    else if constexpr (std::is_same<_registerType, __m128d>::value)
         return _mm_setzero_pd();
-    else if constexpr(std::is_same<_registerType, __m128i>::value)
+    else if constexpr (std::is_same<_registerType, __m128i>::value)
         return _mm_setzero_si128();
 #ifdef __AVX2__
-    if constexpr(std::is_same<_registerType, __m256>::value)
+    if constexpr (std::is_same<_registerType, __m256>::value)
         return _mm256_setzero_ps();
-    else if constexpr(std::is_same<_registerType, __m256d>::value)
+    else if constexpr (std::is_same<_registerType, __m256d>::value)
         return _mm256_setzero_pd();
-    else if constexpr(std::is_same<_registerType, __m256i>::value)
+    else if constexpr (std::is_same<_registerType, __m256i>::value)
         return _mm256_setzero_si256();
 #ifdef __AVX512F__
-    if constexpr(std::is_same<_registerType, __m512>::value)
+    if constexpr (std::is_same<_registerType, __m512>::value)
         return _mm512_setzero_ps();
-    else if constexpr(std::is_same<_registerType, __m512d>::value)
+    else if constexpr (std::is_same<_registerType, __m512d>::value)
         return _mm512_setzero_pd();
-    else if constexpr(std::is_same<_registerType, __m512i>::value)
+    else if constexpr (std::is_same<_registerType, __m512i>::value)
         return _mm512_setzero_si512();
 #endif // __AVX512F__
 #endif // __AVX2__
     else
         throw Exception(__PRETTY_FUNCTION__, "Not defined for selected combination of register type and data type");
-    // clang-format on
 }
 
 
@@ -294,26 +279,24 @@ inline _registerType _mmx_setzero_p()
 template <typename _registerType, typename _type>
 inline _registerType _mmx_set1_p(_type value)
 {
-    // clang-format off
-    if constexpr(std::is_same<_registerType, __m128>::value)
+    if constexpr (std::is_same<_registerType, __m128>::value)
         return _mm_set1_ps(value);
-    else if constexpr(std::is_same<_registerType, __m128d>::value)
+    else if constexpr (std::is_same<_registerType, __m128d>::value)
         return _mm_set1_pd(value);
 #ifdef __AVX2__
-    if constexpr(std::is_same<_registerType, __m256>::value)
+    if constexpr (std::is_same<_registerType, __m256>::value)
         return _mm256_set1_ps(value);
-    else if constexpr(std::is_same<_registerType, __m256d>::value)
+    else if constexpr (std::is_same<_registerType, __m256d>::value)
         return _mm256_set1_pd(value);
 #ifdef __AVX512F__
-    if constexpr(std::is_same<_registerType, __m512>::value)
+    if constexpr (std::is_same<_registerType, __m512>::value)
         return _mm512_set1_ps(value);
-    else if constexpr(std::is_same<_registerType, __m512d>::value)
+    else if constexpr (std::is_same<_registerType, __m512d>::value)
         return _mm512_set1_pd(value);
 #endif // __AVX512F__
 #endif // __AVX2__
     else
         throw Exception(__PRETTY_FUNCTION__, "Not defined for selected combination of register type and data type");
-    // clang-format on
 }
 
 
@@ -331,26 +314,24 @@ inline _registerType _mmx_set1_p(_type value)
 template <typename _registerType, typename... _args>
 inline _registerType _mmx_setr_p(_args... args)
 {
-    // clang-format off
-    if constexpr(std::is_same<_registerType, __m128>::value)
+    if constexpr (std::is_same<_registerType, __m128>::value)
         return _mm_setr_ps(std::forward<_args>(args)...);
-    else if constexpr(std::is_same<_registerType, __m128d>::value)
+    else if constexpr (std::is_same<_registerType, __m128d>::value)
         return _mm_setr_pd(std::forward<_args>(args)...);
 #ifdef __AVX2__
-    if constexpr(std::is_same<_registerType, __m256>::value)
+    if constexpr (std::is_same<_registerType, __m256>::value)
         return _mm256_setr_ps(std::forward<_args>(args)...);
-    else if constexpr(std::is_same<_registerType, __m256d>::value)
+    else if constexpr (std::is_same<_registerType, __m256d>::value)
         return _mm256_setr_pd(std::forward<_args>(args)...);
 #ifdef __AVX512F__
-    if constexpr(std::is_same<_registerType, __m512>::value)
+    if constexpr (std::is_same<_registerType, __m512>::value)
         return _mm512_setr_ps(std::forward<_args>(args)...);
-    else if constexpr(std::is_same<_registerType, __m512d>::value)
+    else if constexpr (std::is_same<_registerType, __m512d>::value)
         return _mm512_setr_pd(std::forward<_args>(args)...);
 #endif // __AVX512F__
 #endif // __AVX2__
     else
         throw Exception(__PRETTY_FUNCTION__, "Not defined for selected combination of register type and data type");
-    // clang-format on
 }
 
 
@@ -365,26 +346,24 @@ inline _registerType _mmx_setr_p(_args... args)
 template <typename _registerType>
 inline _registerType _mmx_add_p(_registerType lhs, _registerType rhs)
 {
-    // clang-format off
-    if constexpr(std::is_same<_registerType, __m128>::value)
-        return _mm_add_ps(lhs,rhs);
-    else if constexpr(std::is_same<_registerType, __m128d>::value)
-        return _mm_add_pd(lhs,rhs);
+    if constexpr (std::is_same<_registerType, __m128>::value)
+        return _mm_add_ps(lhs, rhs);
+    else if constexpr (std::is_same<_registerType, __m128d>::value)
+        return _mm_add_pd(lhs, rhs);
 #ifdef __AVX2__
-    if constexpr(std::is_same<_registerType, __m256>::value)
-        return _mm256_add_ps(lhs,rhs);
-    else if constexpr(std::is_same<_registerType, __m256d>::value)
-        return _mm256_add_pd(lhs,rhs);
+    if constexpr (std::is_same<_registerType, __m256>::value)
+        return _mm256_add_ps(lhs, rhs);
+    else if constexpr (std::is_same<_registerType, __m256d>::value)
+        return _mm256_add_pd(lhs, rhs);
 #ifdef __AVX512F__
-    if constexpr(std::is_same<_registerType, __m512>::value)
-        return _mm512_add_ps(lhs,rhs);
-    else if constexpr(std::is_same<_registerType, __m512d>::value)
-        return _mm512_add_pd(lhs,rhs);
+    if constexpr (std::is_same<_registerType, __m512>::value)
+        return _mm512_add_ps(lhs, rhs);
+    else if constexpr (std::is_same<_registerType, __m512d>::value)
+        return _mm512_add_pd(lhs, rhs);
 #endif // __AVX512F__
 #endif // __AVX2__
     else
         throw Exception(__PRETTY_FUNCTION__, "Not defined for selected register type.");
-    // clang-format on
 }
 
 
@@ -399,26 +378,24 @@ inline _registerType _mmx_add_p(_registerType lhs, _registerType rhs)
 template <typename _registerType>
 inline _registerType _mmx_sub_p(_registerType lhs, _registerType rhs)
 {
-    // clang-format off
-    if constexpr(std::is_same<_registerType, __m128>::value)
-        return _mm_sub_ps(lhs,rhs);
-    else if constexpr(std::is_same<_registerType, __m128d>::value)
-        return _mm_sub_pd(lhs,rhs);
+    if constexpr (std::is_same<_registerType, __m128>::value)
+        return _mm_sub_ps(lhs, rhs);
+    else if constexpr (std::is_same<_registerType, __m128d>::value)
+        return _mm_sub_pd(lhs, rhs);
 #ifdef __AVX2__
-    if constexpr(std::is_same<_registerType, __m256>::value)
-        return _mm256_sub_ps(lhs,rhs);
-    else if constexpr(std::is_same<_registerType, __m256d>::value)
-        return _mm256_sub_pd(lhs,rhs);
+    if constexpr (std::is_same<_registerType, __m256>::value)
+        return _mm256_sub_ps(lhs, rhs);
+    else if constexpr (std::is_same<_registerType, __m256d>::value)
+        return _mm256_sub_pd(lhs, rhs);
 #ifdef __AVX512F__
-    if constexpr(std::is_same<_registerType, __m512>::value)
-        return _mm512_sub_ps(lhs,rhs);
-    else if constexpr(std::is_same<_registerType, __m512d>::value)
-        return _mm512_sub_pd(lhs,rhs);
+    if constexpr (std::is_same<_registerType, __m512>::value)
+        return _mm512_sub_ps(lhs, rhs);
+    else if constexpr (std::is_same<_registerType, __m512d>::value)
+        return _mm512_sub_pd(lhs, rhs);
 #endif // __AVX512F__
 #endif // __AVX2__
     else
         throw Exception(__PRETTY_FUNCTION__, "Not defined for selected register type.");
-    // clang-format on
 }
 
 
@@ -433,26 +410,24 @@ inline _registerType _mmx_sub_p(_registerType lhs, _registerType rhs)
 template <typename _registerType>
 inline _registerType _mmx_mul_p(_registerType lhs, _registerType rhs)
 {
-    // clang-format off
-    if constexpr(std::is_same<_registerType, __m128>::value)
-        return _mm_mul_ps(lhs,rhs);
-    else if constexpr(std::is_same<_registerType, __m128d>::value)
-        return _mm_mul_pd(lhs,rhs);
+    if constexpr (std::is_same<_registerType, __m128>::value)
+        return _mm_mul_ps(lhs, rhs);
+    else if constexpr (std::is_same<_registerType, __m128d>::value)
+        return _mm_mul_pd(lhs, rhs);
 #ifdef __AVX2__
-    if constexpr(std::is_same<_registerType, __m256>::value)
-        return _mm256_mul_ps(lhs,rhs);
-    else if constexpr(std::is_same<_registerType, __m256d>::value)
-        return _mm256_mul_pd(lhs,rhs);
+    if constexpr (std::is_same<_registerType, __m256>::value)
+        return _mm256_mul_ps(lhs, rhs);
+    else if constexpr (std::is_same<_registerType, __m256d>::value)
+        return _mm256_mul_pd(lhs, rhs);
 #ifdef __AVX512F__
-    if constexpr(std::is_same<_registerType, __m512>::value)
-        return _mm512_mul_ps(lhs,rhs);
-    else if constexpr(std::is_same<_registerType, __m512d>::value)
-        return _mm512_mul_pd(lhs,rhs);
+    if constexpr (std::is_same<_registerType, __m512>::value)
+        return _mm512_mul_ps(lhs, rhs);
+    else if constexpr (std::is_same<_registerType, __m512d>::value)
+        return _mm512_mul_pd(lhs, rhs);
 #endif // __AVX512F__
 #endif // __AVX2__
     else
         throw Exception(__PRETTY_FUNCTION__, "Not defined for selected register type.");
-    // clang-format on
 }
 
 
@@ -474,27 +449,25 @@ inline _registerType _mmx_fmadd_p(_registerType lhsM, _registerType rhsM, _regis
 #ifndef __FMA__
     return _mmx_add_p(_mmx_mul_p(lhsM, rhsM), add);
 #else
-    // clang-format off
-    if constexpr(std::is_same<_registerType, __m128>::value)
+    if constexpr (std::is_same<_registerType, __m128>::value)
         return _mm_fmadd_ps(lhsM, rhsM, add);
-    else if constexpr(std::is_same<_registerType, __m128d>::value)
+    else if constexpr (std::is_same<_registerType, __m128d>::value)
         return _mm_fmadd_pd(lhsM, rhsM, add);
 #ifdef __AVX2__
-    else if constexpr(std::is_same<_registerType, __m256>::value)
+    else if constexpr (std::is_same<_registerType, __m256>::value)
         return _mm256_fmadd_ps(lhsM, rhsM, add);
-    else if constexpr(std::is_same<_registerType, __m256d>::value)
+    else if constexpr (std::is_same<_registerType, __m256d>::value)
         return _mm256_fmadd_pd(lhsM, rhsM, add);
 #ifdef __AVX512F__
-    else if constexpr(std::is_same<_registerType, __m512>::value)
+    else if constexpr (std::is_same<_registerType, __m512>::value)
         return _mm512_fmadd_ps(lhsM, rhsM, add);
-    else if constexpr(std::is_same<_registerType, __m512d>::value)
+    else if constexpr (std::is_same<_registerType, __m512d>::value)
         return _mm512_fmadd_pd(lhsM, rhsM, add);
 #endif // __AVX512F__
 #endif // __AVX2__
     else
         throw Exception(__PRETTY_FUNCTION__, "Not defined for selected register type.");
 #endif // __FMA__
-    // clang-format on
 }
 
 
@@ -509,28 +482,25 @@ inline _registerType _mmx_fmadd_p(_registerType lhsM, _registerType rhsM, _regis
 template <typename _registerType>
 inline auto _mmx_cmpeq_p(_registerType lhs, _registerType rhs)
 {
-
-    // clang-format off
-    if constexpr(std::is_same<_registerType, __m128>::value)
-        return _mm_cmpeq_ps(lhs,rhs);
-    else if constexpr(std::is_same<_registerType, __m128d>::value)
-        return _mm_cmpeq_pd(lhs,rhs);
+    if constexpr (std::is_same<_registerType, __m128>::value)
+        return _mm_cmpeq_ps(lhs, rhs);
+    else if constexpr (std::is_same<_registerType, __m128d>::value)
+        return _mm_cmpeq_pd(lhs, rhs);
 #ifdef __AVX2__
-    else if constexpr(std::is_same<_registerType, __m256>::value)
+    else if constexpr (std::is_same<_registerType, __m256>::value)
         return _mm256_cmp_ps(lhs, rhs, _CMP_EQ_OS);
-    else if constexpr(std::is_same<_registerType, __m256d>::value)
+    else if constexpr (std::is_same<_registerType, __m256d>::value)
         return _mm256_cmp_pd(lhs, rhs, _CMP_EQ_OS);
 #ifdef __AVX512F__
     // Check https://software.intel.com/en-us/forums/intel-isa-extensions/topic/749055
-    else if constexpr(std::is_same<_registerType, __m512>::value)
-        throw(__PRETTY_FUNCTION__,"Not implemented");
-    else if constexpr(std::is_same<_registerType, __m512d>::value)
-        throw(__PRETTY_FUNCTION__,"Not implemented");
+    else if constexpr (std::is_same<_registerType, __m512>::value)
+        throw(__PRETTY_FUNCTION__, "Not implemented");
+    else if constexpr (std::is_same<_registerType, __m512d>::value)
+        throw(__PRETTY_FUNCTION__, "Not implemented");
 #endif // __AVX512F__
 #endif // __AVX2__
     else
         throw Exception(__PRETTY_FUNCTION__, "Not defined for selected register type.");
-    // clang-format on
 }
 
 
@@ -545,28 +515,25 @@ inline auto _mmx_cmpeq_p(_registerType lhs, _registerType rhs)
 template <typename _registerType>
 inline auto _mmx_cmple_p(_registerType lhs, _registerType rhs)
 {
-
-    // clang-format off
-    if constexpr(std::is_same<_registerType, __m128>::value)
-        return _mm_cmple_ps(lhs,rhs);
-    else if constexpr(std::is_same<_registerType, __m128d>::value)
-        return _mm_cmple_pd(lhs,rhs);
+    if constexpr (std::is_same<_registerType, __m128>::value)
+        return _mm_cmple_ps(lhs, rhs);
+    else if constexpr (std::is_same<_registerType, __m128d>::value)
+        return _mm_cmple_pd(lhs, rhs);
 #ifdef __AVX2__
-    else if constexpr(std::is_same<_registerType, __m256>::value)
+    else if constexpr (std::is_same<_registerType, __m256>::value)
         return _mm256_cmp_ps(lhs, rhs, _CMP_LE_OS);
-    else if constexpr(std::is_same<_registerType, __m256d>::value)
+    else if constexpr (std::is_same<_registerType, __m256d>::value)
         return _mm256_cmp_pd(lhs, rhs, _CMP_LE_OS);
 #ifdef __AVX512F__
     // Check https://software.intel.com/en-us/forums/intel-isa-extensions/topic/749055
-    else if constexpr(std::is_same<_registerType, __m512>::value)
-        throw(__PRETTY_FUNCTION__,"Not implemented");
-    else if constexpr(std::is_same<_registerType, __m512d>::value)
-        throw(__PRETTY_FUNCTION__,"Not implemented");
+    else if constexpr (std::is_same<_registerType, __m512>::value)
+        throw(__PRETTY_FUNCTION__, "Not implemented");
+    else if constexpr (std::is_same<_registerType, __m512d>::value)
+        throw(__PRETTY_FUNCTION__, "Not implemented");
 #endif // __AVX512F__
 #endif // __AVX2__
     else
         throw Exception(__PRETTY_FUNCTION__, "Not defined for selected register type.");
-    // clang-format on
 }
 
 
@@ -581,28 +548,25 @@ inline auto _mmx_cmple_p(_registerType lhs, _registerType rhs)
 template <typename _registerType>
 inline auto _mmx_cmpgt_p(_registerType lhs, _registerType rhs)
 {
-
-    // clang-format off
-    if constexpr(std::is_same<_registerType, __m128>::value)
-        return _mm_cmpgt_ps(lhs,rhs);
-    else if constexpr(std::is_same<_registerType, __m128d>::value)
-        return _mm_cmpgt_pd(lhs,rhs);
+    if constexpr (std::is_same<_registerType, __m128>::value)
+        return _mm_cmpgt_ps(lhs, rhs);
+    else if constexpr (std::is_same<_registerType, __m128d>::value)
+        return _mm_cmpgt_pd(lhs, rhs);
 #ifdef __AVX2__
-    else if constexpr(std::is_same<_registerType, __m256>::value)
+    else if constexpr (std::is_same<_registerType, __m256>::value)
         return _mm256_cmp_ps(lhs, rhs, _CMP_GT_OS);
-    else if constexpr(std::is_same<_registerType, __m256d>::value)
+    else if constexpr (std::is_same<_registerType, __m256d>::value)
         return _mm256_cmp_pd(lhs, rhs, _CMP_GT_OS);
 #ifdef __AVX512F__
     // Check https://software.intel.com/en-us/forums/intel-isa-extensions/topic/749055
-    else if constexpr(std::is_same<_registerType, __m512>::value)
-        throw(__PRETTY_FUNCTION__,"Not implemented");
-    else if constexpr(std::is_same<_registerType, __m512d>::value)
-        throw(__PRETTY_FUNCTION__,"Not implemented");
+    else if constexpr (std::is_same<_registerType, __m512>::value)
+        throw(__PRETTY_FUNCTION__, "Not implemented");
+    else if constexpr (std::is_same<_registerType, __m512d>::value)
+        throw(__PRETTY_FUNCTION__, "Not implemented");
 #endif // __AVX512F__
 #endif // __AVX2__
     else
         throw Exception(__PRETTY_FUNCTION__, "Not defined for selected register type.");
-    // clang-format on
 }
 
 
@@ -617,27 +581,24 @@ inline auto _mmx_cmpgt_p(_registerType lhs, _registerType rhs)
 template <typename _registerType>
 inline _registerType _mmx_max_p(_registerType lhs, _registerType rhs)
 {
-
-    // clang-format off
-    if constexpr(std::is_same<_registerType, __m128>::value)
-        return _mm_max_ps(lhs,rhs);
-    else if constexpr(std::is_same<_registerType, __m128d>::value)
-        return _mm_max_pd(lhs,rhs);
+    if constexpr (std::is_same<_registerType, __m128>::value)
+        return _mm_max_ps(lhs, rhs);
+    else if constexpr (std::is_same<_registerType, __m128d>::value)
+        return _mm_max_pd(lhs, rhs);
 #ifdef __AVX2__
-    else if constexpr(std::is_same<_registerType, __m256>::value)
+    else if constexpr (std::is_same<_registerType, __m256>::value)
         return _mm256_max_ps(lhs, rhs);
-    else if constexpr(std::is_same<_registerType, __m256d>::value)
+    else if constexpr (std::is_same<_registerType, __m256d>::value)
         return _mm256_max_pd(lhs, rhs);
 #ifdef __AVX512F__
-    else if constexpr(std::is_same<_registerType, __m512>::value)
+    else if constexpr (std::is_same<_registerType, __m512>::value)
         return _mm512_max_ps(lhs, rhs);
-    else if constexpr(std::is_same<_registerType, __m512d>::value)
+    else if constexpr (std::is_same<_registerType, __m512d>::value)
         return _mm512_max_pd(lhs, rhs);
 #endif // __AVX512F__
 #endif // __AVX2__
     else
         throw Exception(__PRETTY_FUNCTION__, "Not defined for selected register type.");
-    // clang-format on
 }
 
 
@@ -652,27 +613,24 @@ inline _registerType _mmx_max_p(_registerType lhs, _registerType rhs)
 template <typename _registerType>
 inline _registerType _mmx_min_p(_registerType lhs, _registerType rhs)
 {
-
-    // clang-format off
-    if constexpr(std::is_same<_registerType, __m128>::value)
-        return _mm_min_ps(lhs,rhs);
-    else if constexpr(std::is_same<_registerType, __m128d>::value)
-        return _mm_min_pd(lhs,rhs);
+    if constexpr (std::is_same<_registerType, __m128>::value)
+        return _mm_min_ps(lhs, rhs);
+    else if constexpr (std::is_same<_registerType, __m128d>::value)
+        return _mm_min_pd(lhs, rhs);
 #ifdef __AVX2__
-    else if constexpr(std::is_same<_registerType, __m256>::value)
+    else if constexpr (std::is_same<_registerType, __m256>::value)
         return _mm256_min_ps(lhs, rhs);
-    else if constexpr(std::is_same<_registerType, __m256d>::value)
+    else if constexpr (std::is_same<_registerType, __m256d>::value)
         return _mm256_min_pd(lhs, rhs);
 #ifdef __AVX512F__
-    else if constexpr(std::is_same<_registerType, __m512>::value)
+    else if constexpr (std::is_same<_registerType, __m512>::value)
         return _mm512_min_ps(lhs, rhs);
-    else if constexpr(std::is_same<_registerType, __m512d>::value)
+    else if constexpr (std::is_same<_registerType, __m512d>::value)
         return _mm512_min_pd(lhs, rhs);
 #endif // __AVX512F__
 #endif // __AVX2__
     else
         throw Exception(__PRETTY_FUNCTION__, "Not defined for selected register type.");
-    // clang-format on
 }
 
 
@@ -687,27 +645,24 @@ inline _registerType _mmx_min_p(_registerType lhs, _registerType rhs)
 template <typename _registerType>
 inline _registerType _mmx_andnot_p(_registerType lhs, _registerType rhs)
 {
-
-    // clang-format off
-    if constexpr(std::is_same<_registerType, __m128>::value)
-        return _mm_andnot_ps(lhs,rhs);
-    else if constexpr(std::is_same<_registerType, __m128d>::value)
-        return _mm_andnot_pd(lhs,rhs);
+    if constexpr (std::is_same<_registerType, __m128>::value)
+        return _mm_andnot_ps(lhs, rhs);
+    else if constexpr (std::is_same<_registerType, __m128d>::value)
+        return _mm_andnot_pd(lhs, rhs);
 #ifdef __AVX2__
-    else if constexpr(std::is_same<_registerType, __m256>::value)
+    else if constexpr (std::is_same<_registerType, __m256>::value)
         return _mm256_andnot_ps(lhs, rhs);
-    else if constexpr(std::is_same<_registerType, __m256d>::value)
+    else if constexpr (std::is_same<_registerType, __m256d>::value)
         return _mm256_andnot_pd(lhs, rhs);
 #ifdef __AVX512F__
-    else if constexpr(std::is_same<_registerType, __m512>::value)
+    else if constexpr (std::is_same<_registerType, __m512>::value)
         return _mm512_andnot_ps(lhs, rhs);
-    else if constexpr(std::is_same<_registerType, __m512d>::value)
+    else if constexpr (std::is_same<_registerType, __m512d>::value)
         return _mm512_andnot_pd(lhs, rhs);
 #endif // __AVX512F__
 #endif // __AVX2__
     else
         throw Exception(__PRETTY_FUNCTION__, "Not defined for selected register type.");
-    // clang-format on
 }
 
 
@@ -721,22 +676,19 @@ inline _registerType _mmx_andnot_p(_registerType lhs, _registerType rhs)
 template <typename _registerType>
 inline auto _mmx_movemask_epi8(_registerType reg)
 {
-
-    // clang-format off
-    if constexpr(std::is_same<_registerType, __m128i>::value)
+    if constexpr (std::is_same<_registerType, __m128i>::value)
         return static_cast<U16>(_mm_movemask_epi8(reg));
 #ifdef __AVX2__
-    else if constexpr(std::is_same<_registerType, __m256i>::value)
+    else if constexpr (std::is_same<_registerType, __m256i>::value)
         return static_cast<U32>(_mm256_movemask_epi8(reg));
 #ifdef __AVX512F__
     // Check https://software.intel.com/en-us/forums/intel-isa-extensions/topic/749055
-    else if constexpr(std::is_same<_registerType, __m512i>::value)
-        throw(__PRETTY_FUNCTION__,"Not implemented");
+    else if constexpr (std::is_same<_registerType, __m512i>::value)
+        throw(__PRETTY_FUNCTION__, "Not implemented");
 #endif // __AVX512F__
 #endif // __AVX2__
     else
         throw Exception(__PRETTY_FUNCTION__, "Not defined for selected register type.");
-    // clang-format on
 }
 
 
@@ -782,20 +734,18 @@ constexpr U32 SSECalcMinNumArrayRegisters(U32 numValues)
 template <typename _registerType>
 inline auto SSEReinterpretAsIntRegister(_registerType reg)
 {
-    // clang-format off
-    if constexpr(std::is_same<_registerType, __m128>::value || std::is_same<_registerType, __m128d>::value)
+    if constexpr (std::is_same<_registerType, __m128>::value || std::is_same<_registerType, __m128d>::value)
         return reinterpret_cast<__m128i>(reg);
 #ifdef __AVX2__
-    if constexpr(std::is_same<_registerType, __m256>::value || std::is_same<_registerType, __m256d>::value)
+    if constexpr (std::is_same<_registerType, __m256>::value || std::is_same<_registerType, __m256d>::value)
         return reinterpret_cast<__m256i>(reg);
 #ifdef __AVX512F__
-    if constexpr(std::is_same<_registerType, __m512>::value || std::is_same<_registerType, __m512d>::value)
+    if constexpr (std::is_same<_registerType, __m512>::value || std::is_same<_registerType, __m512d>::value)
         return reinterpret_cast<__m512i>(reg);
 #endif // __AVX512F__
 #endif // __AVX2__
     else
         throw Exception(__PRETTY_FUNCTION__, "Not defined for selected register type.");
-    // clang-format on
 }
 
 
@@ -814,15 +764,13 @@ constexpr auto SSECalculateComparisonValueAllTrue()
     using ReturnType = decltype(_mmx_movemask_epi8(SSEReinterpretAsIntRegister(_mmx_setzero_p<_registerType>())));
     constexpr U32 numRegisterEntries = SSEGetNumRegisterEntries<_registerType>();
 
-    // clang-format off
-    if constexpr(_numComparedValues == numRegisterEntries)
+    if constexpr (_numComparedValues == numRegisterEntries)
         return std::numeric_limits<ReturnType>::max();
     else
     {
         constexpr U32 numUnusedBits = (sizeof(ReturnType) * 8 * _numComparedValues) / numRegisterEntries;
         return static_cast<ReturnType>(Pow<numUnusedBits>(2) - 1);
     }
-    // clang-format on
 }
 
 
@@ -852,10 +800,8 @@ inline bool SSECompareAllTrue(_registerType lhs, _registerType rhs, _compFunctio
 
     static_assert(std::is_same_v<const decltype(cmpResult), decltype(refResult)>, "Mismatching types for comparison");
 
-    // clang-format off
-    if constexpr(_numComparedValues != numRegisterEntries)
+    if constexpr (_numComparedValues != numRegisterEntries)
         cmpResult &= refResult; // Set bits of elemts that should not be compared to zero
-    // clang-format on
 
     return cmpResult >= refResult;
 }

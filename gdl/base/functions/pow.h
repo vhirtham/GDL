@@ -52,8 +52,7 @@ constexpr _type Pow(const _type base, std::integral_constant<I32, -1>)
 template <typename _type, I32 _exponent>
 constexpr _type Pow(const _type base, std::integral_constant<I32, _exponent>)
 {
-    // clang-format off
-    if constexpr(_exponent < 0)
+    if constexpr (_exponent < 0)
     {
         static_assert(std::is_floating_point<_type>::value,
                       "Negative exponents are only supported for floating point types");
@@ -61,7 +60,6 @@ constexpr _type Pow(const _type base, std::integral_constant<I32, _exponent>)
     }
     else
         return Pow(base, std::integral_constant<I32, _exponent - 1>()) * base;
-    // clang-format on
 }
 
 

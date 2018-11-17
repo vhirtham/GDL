@@ -27,7 +27,8 @@ Approx<_registerType, _numComparedValuesSSE>::Approx(const _registerType values,
 template <typename _registerType, U32 _numComparedValuesSSE>
 bool Approx<_registerType, _numComparedValuesSSE>::operator==(const _registerType rhs) const
 {
-    const _registerType tolerance = _mmx_mul_p(mFactor, _mmx_max_p(_mmx_max_p(SSEAbs(rhs), SSEAbs(mValues)), mBaseZero));
+    const _registerType tolerance =
+            _mmx_mul_p(mFactor, _mmx_max_p(_mmx_max_p(SSEAbs(rhs), SSEAbs(mValues)), mBaseZero));
 
     return SSECompareAllLessEqual<_registerType, _numComparedValuesSSE>(SSEAbs(_mmx_sub_p(rhs, mValues)), tolerance);
 }
@@ -95,12 +96,10 @@ constexpr bool operator!=(const _typeLhs lhs, const Approx<_typeApprox, _numComp
 template <typename _classType, U32 _numComparedValuesSSE, typename _baseType>
 constexpr auto ApproxZero(_baseType base, I32 factor)
 {
-    // clang-format off
-    if constexpr(SSEIsRegisterType<_classType>())
+    if constexpr (SSEIsRegisterType<_classType>())
         return Approx<_classType, _numComparedValuesSSE>(_mmx_setzero_p<_classType>(), factor, base);
     else
         return Approx<_classType>(static_cast<_baseType>(0), factor, static_cast<_baseType>(base));
-    // clang-format on
 }
 
 

@@ -162,10 +162,8 @@ void TestInsideToleranceSSE()
         GDL_CHECK_THROW_DEV(InsideToleranceType(ref, tolerance), Exception);
     }
 
-    // clang-format off
     if constexpr (_count < numRegisterEntries)
         TestInsideToleranceSSE<_registerType, _count + 1>();
-    // clang-format on
 }
 
 
