@@ -408,6 +408,10 @@ void TransposeTest()
     BOOST_CHECK(a == aT.Transpose());
     BOOST_CHECK(a.Transpose() == aT);
     BOOST_CHECK(a == a.Transpose().Transpose());
+    if (a != aT.Transpose())
+    {
+        std::cout << aT.Transpose() << std::endl;
+    }
 
     // clang-format off
     if

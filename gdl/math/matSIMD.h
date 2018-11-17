@@ -117,13 +117,15 @@ private:
 
     //! @brief Transposes all partially filled blocks of the matrix and writes them to the corresponding position of the
     //! passed matrix
+    //! @tparam _hasZeroRows: defines if the transposed block has rows that are completely filled with zeros
+    //! @tparam _hasZeroCols: defines if the transposed block has columns that are completely filled with zeros
+    //! @tparam _count: internal recursion counter
+    //! @tparam _args: Additional argument type
     //! @param result: Matrix that stores the results
-    template <U32 _count = 0, typename... _args>
-    inline void TransposeSparseBlocks(MatSIMD<_type, _cols, _rows>& result, U32 i, _args&... args) const;
-    template <U32 _count = 0, typename... _args>
-    inline void TransposeSparseBlocks2(MatSIMD<_type, _cols, _rows>& result, U32 i, _args&... args) const;
-    template <U32 _count = 0, typename... _args>
-    inline void TransposeSparseBlocks3(MatSIMD<_type, _cols, _rows>& result, _args&... args) const;
+    //! @param indexBlock: Row / column index of the current block.
+    //! @param args: This parameter pack is used to gather the parameters for the sse transpose function.
+    template <bool _hasSparseRows, bool _hasSparseCols, U32 _count = 0, typename... _args>
+    inline void TransposeSparseBlocks(MatSIMD<_type, _cols, _rows>& result, U32 indexBlock, _args&... args) const;
 
     //! @brief Processes the inner two loops of matrix-matrix multiplication.
     //! @tparam _rowsRhs: Rhs matrix number of rows

@@ -39,12 +39,11 @@ MatSIMD<_type, _rows, _cols>::MatSIMD(_args... args)
 template <typename _type, I32 _rows, I32 _cols>
 MatSIMD<_type, _rows, _cols>::MatSIMD(const std::array<_type, _rows * _cols>& data)
 {
-    if
-        constexpr(_rows % mNumRegisterEntries == 0)
-        {
-            assert(sizeof(mData) == sizeof(data));
-            std::memcpy(&mData, &data, sizeof(data));
-        }
+    if constexpr (_rows % mNumRegisterEntries == 0)
+    {
+        assert(sizeof(mData) == sizeof(data));
+        std::memcpy(&mData, &data, sizeof(data));
+    }
     else
         for (U32 i = 0; i < _cols; ++i)
         {
@@ -193,102 +192,47 @@ void MatSIMD<_type, _rows, _cols>::TransposeFullBlocks(MatSIMD<_type, _cols, _ro
 
 
 template <typename _type, I32 _rows, I32 _cols>
-template <U32 _count, typename... _args>
-void MatSIMD<_type, _rows, _cols>::TransposeSparseBlocks(MatSIMD<_type, _cols, _rows>& result, U32 i,
+template <bool _hasSparseRows, bool _hasSparseCols, U32 _count, typename... _args>
+void MatSIMD<_type, _rows, _cols>::TransposeSparseBlocks(MatSIMD<_type, _cols, _rows>& result, U32 indexBlock,
                                                          _args&... args) const
 {
-    constexpr U32 iC = _cols / mNumRegisterEntries;
-    const U32 firstRegisterIndexSrc = i + iC * mNumRegisterEntries * mNumRegistersPerCol;
-    // clang-format off
-    if constexpr(_count <mNumRegisterEntries)
+    static_assert(_hasSparseRows || _hasSparseCols, "This function cant be used with non sparse blocks");
+
+    const U32 iC = (_hasSparseRows && !_hasSparseCols) ? indexBlock : _cols / mNumRegisterEntries;
+    const U32 iR = (_hasSparseCols && !_hasSparseRows) ? indexBlock : _rows / mNumRegisterEntries;
+
+    if constexpr (_count < mNumRegisterEntries)
     {
-        if constexpr(_count < _cols % mNumRegisterEntries)
-            TransposeSparseBlocks<_count+1>(result,i,args...,mData[firstRegisterIndexSrc + _count * mNumRegistersPerCol]);
-        else
+        if constexpr (_hasSparseCols && _count >= _cols % mNumRegisterEntries)
         {
             alignas(mAlignment) __mx tmp = _mmx_setzero_p<__mx>();
-            TransposeSparseBlocks<_count+1>(result,i,args...,tmp);
-        }
-    }
-    else if constexpr(_count < mNumRegisterEntries *2)
-    {
-        const U32 firstRegisterIndexRes = iC + i * mNumRegisterEntries * result.mNumRegistersPerCol;
-        TransposeSparseBlocks<_count+1>(result,i,args...,result.mData[firstRegisterIndexRes + (_count -mNumRegisterEntries) * result.mNumRegistersPerCol]);
-    }
-    else
-    GDL::Transpose(args...);
-    // clang-format on
-}
-
-
-
-template <typename _type, I32 _rows, I32 _cols>
-template <U32 _count, typename... _args>
-void MatSIMD<_type, _rows, _cols>::TransposeSparseBlocks2(MatSIMD<_type, _cols, _rows>& result, U32 i,
-                                                          _args&... args) const
-{
-    constexpr U32 iR = _rows / mNumRegisterEntries;
-    const U32 firstRegisterIndexSrc = iR + i * mNumRegisterEntries * mNumRegistersPerCol;
-    // clang-format off
-    if constexpr(_count <mNumRegisterEntries)
-    {
-            TransposeSparseBlocks2<_count+1>(result,i,args...,mData[firstRegisterIndexSrc + _count * mNumRegistersPerCol]);
-    }
-    else if constexpr(_count < mNumRegisterEntries *2)
-    {
-        if constexpr(_count-mNumRegisterEntries < _rows % mNumRegisterEntries)
-        {
-            const U32 firstRegisterIndexRes = i + iR * mNumRegisterEntries * result.mNumRegistersPerCol;
-            TransposeSparseBlocks2<_count+1>(result,i,args...,result.mData[firstRegisterIndexRes + (_count -mNumRegisterEntries) * result.mNumRegistersPerCol]);
+            TransposeSparseBlocks<_hasSparseRows, _hasSparseCols, _count + 1>(result, indexBlock, args..., tmp);
         }
         else
         {
+            const U32 registerIndexSrc = iR + (iC * mNumRegisterEntries + _count) * mNumRegistersPerCol;
+            TransposeSparseBlocks<_hasSparseRows, _hasSparseCols, _count + 1>(result, indexBlock, args...,
+                                                                              mData[registerIndexSrc]);
+        }
+    }
+    else if constexpr (_count < mNumRegisterEntries * 2)
+    {
+        if constexpr (_hasSparseRows && _count >= _rows % mNumRegisterEntries + mNumRegisterEntries)
+        {
             alignas(mAlignment) __mx tmp = _mmx_setzero_p<__mx>();
-            TransposeSparseBlocks2<_count+1>(result,i,args...,tmp);
+            TransposeSparseBlocks<_hasSparseRows, _hasSparseCols, _count + 1>(result, indexBlock, args..., tmp);
+        }
+        else
+        {
+            const U32 registerIndexRes = iC + ((iR - 1) * mNumRegisterEntries + _count) * result.mNumRegistersPerCol;
+            TransposeSparseBlocks<_hasSparseRows, _hasSparseCols, _count + 1>(result, indexBlock, args...,
+                                                                              result.mData[registerIndexRes]);
         }
     }
     else
-    GDL::Transpose(args...);
-    // clang-format on
+        GDL::Transpose(args...);
 }
 
-
-
-template <typename _type, I32 _rows, I32 _cols>
-template <U32 _count, typename... _args>
-void MatSIMD<_type, _rows, _cols>::TransposeSparseBlocks3(MatSIMD<_type, _cols, _rows>& result, _args&... args) const
-{
-    constexpr U32 iR = _rows / mNumRegisterEntries;
-    constexpr U32 iC = _cols / mNumRegisterEntries;
-    const U32 firstRegisterIndexSrc = iR + iC * mNumRegisterEntries * mNumRegistersPerCol;
-    // clang-format off
-    if constexpr(_count <mNumRegisterEntries)
-    {
-        if constexpr(_count < _cols % mNumRegisterEntries && _cols % mNumRegisterEntries>0)
-            TransposeSparseBlocks3<_count+1>(result,args...,mData[firstRegisterIndexSrc + _count * mNumRegistersPerCol]);
-        else
-        {
-            alignas(mAlignment) __mx tmp = _mmx_setzero_p<__mx>();
-            TransposeSparseBlocks3<_count+1>(result,args...,tmp);
-        }
-    }
-    else if constexpr(_count < mNumRegisterEntries *2)
-    {
-        if constexpr(_count-mNumRegisterEntries < _rows % mNumRegisterEntries && _rows % mNumRegisterEntries>0)
-        {
-            const U32 firstRegisterIndexRes = iC + iR * mNumRegisterEntries * result.mNumRegistersPerCol;
-            TransposeSparseBlocks3<_count+1>(result,args...,result.mData[firstRegisterIndexRes + (_count -mNumRegisterEntries) * result.mNumRegistersPerCol]);
-        }
-        else
-        {
-            alignas(mAlignment) __mx tmp = _mmx_setzero_p<__mx>();
-            TransposeSparseBlocks3<_count+1>(result,args...,tmp);
-        }
-    }
-    else
-    GDL::Transpose(args...);
-    // clang-format on
-}
 
 
 template <typename _type, I32 _rows, I32 _cols>
@@ -298,21 +242,18 @@ MatSIMD<_type, _cols, _rows> MatSIMD<_type, _rows, _cols>::Transpose() const
 
     TransposeFullBlocks(transposed);
 
-    // clang-format off
-    if constexpr(_cols % mNumRegisterEntries != 0 )
+    if constexpr (_cols % mNumRegisterEntries != 0)
+        for (U32 i = 0; i < _rows / mNumRegisterEntries; ++i)
+            TransposeSparseBlocks<false, true>(transposed, i);
 
-        for(U32 i=0; i<_rows/mNumRegisterEntries;++i)
-            TransposeSparseBlocks(transposed,i);
+    if constexpr (_rows % mNumRegisterEntries != 0)
+        for (U32 i = 0; i < _cols / mNumRegisterEntries; ++i)
+            TransposeSparseBlocks<true, false>(transposed, i);
 
-    if constexpr( _rows % mNumRegisterEntries != 0)
-        for(U32 i=0; i<_cols/mNumRegisterEntries;++i)
-            TransposeSparseBlocks2(transposed,i);
+    if constexpr (_rows % mNumRegisterEntries != 0 && _cols % mNumRegisterEntries != 0)
+        TransposeSparseBlocks<true, true>(transposed, 0);
 
-    if constexpr(_rows % mNumRegisterEntries != 0 && _cols % mNumRegisterEntries != 0)
-        TransposeSparseBlocks3(transposed);
-// clang-format on
-
-return transposed;
+    return transposed;
 }
 
 
@@ -345,12 +286,11 @@ template <typename _type, I32 _rows, I32 _cols>
 const std::array<_type, _rows * _cols> MatSIMD<_type, _rows, _cols>::Data() const
 {
     std::array<_type, _rows * _cols> data;
-    if
-        constexpr(_rows % mNumRegisterEntries == 0)
-        {
-            assert(sizeof(mData) == sizeof(data));
-            std::memcpy(&data, &mData, sizeof(data));
-        }
+    if constexpr (_rows % mNumRegisterEntries == 0)
+    {
+        assert(sizeof(mData) == sizeof(data));
+        std::memcpy(&data, &mData, sizeof(data));
+    }
     else
     {
         for (U32 i = 0; i < _cols; ++i)
@@ -389,12 +329,9 @@ operator*(const MatSIMD<_type, _rowsRhs, _colsRhs>& rhs) const
     for (U32 j = 0; j < _rowsRhs / mNumRegisterEntries; ++j)
         MultiplicationInnerLoops<_rowsRhs, _colsRhs, mNumRegisterEntries>(result, rhs, j);
 
-
-    // clang-format off
     constexpr U32 remainder = _rowsRhs % mNumRegisterEntries;
-    if constexpr(remainder > 0)
+    if constexpr (remainder > 0)
         MultiplicationInnerLoops<_rowsRhs, _colsRhs, remainder>(result, rhs, _rowsRhs / mNumRegisterEntries);
-    // clang-format on
 
     return result;
 }
@@ -441,13 +378,12 @@ MatSIMD<_type, _rows, _cols>::MultiplyAddRegisters(const std::array<__mx, _numOp
 {
     static_assert(_numOperations <= mNumRegisterEntries && _numOperations > 0, "Invalid number of operations.");
 
-    // clang-format off
-    if constexpr(_count + 1 == _numOperations)
+
+    if constexpr (_count + 1 == _numOperations)
         return _mmx_fmadd_p(mData[currentBlockIndex + _count * mNumRegistersPerCol], values[_count], currentValue);
     else
         return _mmx_fmadd_p(mData[currentBlockIndex + _count * mNumRegistersPerCol], values[_count],
                             MultiplyAddRegisters<_numOperations, _count + 1>(values, currentValue, currentBlockIndex));
-    // clang-format on
 }
 
 
