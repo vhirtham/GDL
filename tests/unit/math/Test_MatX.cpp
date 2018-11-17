@@ -168,8 +168,8 @@ void ComparisonEqualTest()
 
 BOOST_AUTO_TEST_CASE(ComparisonEqual_Single)
 {
-    //    ComparisonEqualTest<MatSingle, F32>();
-    //    ComparisonEqualTest<MatSingle, F64>();
+    ComparisonEqualTest<MatSingle, F32>();
+    ComparisonEqualTest<MatSingle, F64>();
 }
 
 
@@ -177,6 +177,47 @@ BOOST_AUTO_TEST_CASE(ComparisonEqual_SSE)
 {
     ComparisonEqualTest<MatSIMD, F32>();
     ComparisonEqualTest<MatSIMD, F64>();
+}
+
+
+
+// Operator() test %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+template <template <typename, I32, I32> class _matrix, typename _type, I32 _rows, I32 _cols>
+void ParenthesesOperatorMatrixTest(const _matrix<_type, _rows, _cols>& matrix)
+{
+    std::array<_type, _rows* _cols> data = matrix.Data();
+
+    for (U32 r = 0; r < matrix.Rows(); ++r)
+        for (U32 c = 0; c < matrix.Cols(); ++c)
+            BOOST_CHECK(matrix(r, c) == Approx(data[r + c * _rows]));
+}
+
+
+template <template <typename, I32, I32> class _matrix, typename _type>
+void ParenthesesOperatorTest()
+{
+    Fixture<_matrix, _type> f;
+
+    ParenthesesOperatorMatrixTest(f.A1);
+    ParenthesesOperatorMatrixTest(f.B1);
+    ParenthesesOperatorMatrixTest(f.A2);
+    ParenthesesOperatorMatrixTest(f.B2);
+    ParenthesesOperatorMatrixTest(f.A3);
+    ParenthesesOperatorMatrixTest(f.B3);
+}
+
+BOOST_AUTO_TEST_CASE(Parentheses_Operator_Single)
+{
+    ParenthesesOperatorTest<MatSingle, F32>();
+    ParenthesesOperatorTest<MatSingle, F64>();
+}
+
+
+BOOST_AUTO_TEST_CASE(Parentheses_Operator_SIMD)
+{
+    ParenthesesOperatorTest<MatSIMD, F32>();
+    ParenthesesOperatorTest<MatSIMD, F64>();
 }
 
 
@@ -408,20 +449,16 @@ void TransposeTest()
     BOOST_CHECK(a == aT.Transpose());
     BOOST_CHECK(a.Transpose() == aT);
     BOOST_CHECK(a == a.Transpose().Transpose());
-    if (a != aT.Transpose())
+
+
+
+    if constexpr (_rows == _cols)
     {
-        std::cout << aT.Transpose() << std::endl;
+        BOOST_CHECK(a != aT);
+        BOOST_CHECK(a != a.Transpose());
     }
 
-    // clang-format off
-    if
-        constexpr(_rows == _cols)
-        {
-            BOOST_CHECK(a != aT);
-            BOOST_CHECK(a != a.Transpose());
-        }
-
-    if constexpr(_cols == 8 && _rows == 8)
+    if constexpr (_cols == 8 && _rows == 8)
     {
         TransposeTest<_matrix, _type, 9, 8>();
         TransposeTest<_matrix, _type, 8, 9>();
@@ -431,7 +468,6 @@ void TransposeTest()
         TransposeTest<_matrix, _type, 14, 14>();
         TransposeTest<_matrix, _type, 16, 16>();
     }
-    // clang-format on
 }
 
 
