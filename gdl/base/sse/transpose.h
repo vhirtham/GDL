@@ -4,7 +4,7 @@
 
 
 // Replace if alignmentBytes is in own header
-#include <gdl/base/functions/sse.h>
+#include "gdl/base/sse/intrinsics.h"
 
 namespace GDL
 {

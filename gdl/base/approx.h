@@ -1,8 +1,7 @@
 #pragma once
 
 #include "gdl/base/fundamentalTypes.h"
-#include "gdl/base/functions/sse.h"
-
+#include "gdl/base/sse/intrinsics.h"
 
 
 namespace GDL

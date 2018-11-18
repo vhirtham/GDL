@@ -1,7 +1,7 @@
 #include <boost/test/unit_test.hpp>
 
 
-#include "gdl/base/functions/sse.h"
+#include "gdl/base/sse/intrinsics.h"
 
 using namespace GDL;
 

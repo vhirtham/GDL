@@ -1,7 +1,9 @@
 #pragma once
 
 #include "gdl/base/fundamentalTypes.h"
-#include "gdl/base/functions/sse.h"
+
+// Replace by corresponding headers after SSE restructuring
+#include "gdl/base/sse/intrinsics.h"
 
 
 

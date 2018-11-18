@@ -1,6 +1,6 @@
 #include <boost/test/unit_test.hpp>
 
-#include "gdl/base/functions/sse.h"
+#include "gdl/base/sse/intrinsics.h"
 #include "gdl/base/sse/transpose.h"
 
 

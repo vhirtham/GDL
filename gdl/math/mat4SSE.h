@@ -1,7 +1,7 @@
 #pragma once
 
 #include "gdl/base/fundamentalTypes.h"
-#include "gdl/base/functions/sse.h"
+#include "gdl/base/sse/intrinsics.h"
 
 #include <x86intrin.h>
 #include <array>
