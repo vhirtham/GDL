@@ -1,6 +1,7 @@
 #pragma once
 
 #include "gdl/base/fundamentalTypes.h"
+#include "gdl/base/sse/utility.h"
 #include "gdl/base/sse/intrinsics.h"
 
 #include <x86intrin.h>
@@ -13,9 +14,9 @@ namespace GDL
 {
 
 //! @brief 4x4 Matrix with SSE support
-class alignas(16) Mat4SSE
+class alignas(sse::alignmentBytes<__m128>) Mat4SSE
 {
-    alignas(16) std::array<__m128, 4> mData;
+    alignas(sse::alignmentBytes<__m128>) std::array<__m128, 4> mData;
 
 public:
     inline Mat4SSE();

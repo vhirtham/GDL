@@ -87,9 +87,9 @@ BOOST_AUTO_TEST_CASE(Zero)
 template <typename _registerType>
 void TestApproxSSE()
 {
-    constexpr U32 numRegisterEntries = SSEGetNumRegisterEntries<_registerType>();
+    constexpr U32 numRegisterEntries = sse::numRegisterValues<_registerType>;
 
-    using ElementType = decltype(SSEGetDataType<_registerType>());
+    using ElementType = decltype(sse::GetDataType<_registerType>());
 
 
 
@@ -222,9 +222,9 @@ BOOST_AUTO_TEST_CASE(Approx_Non_Zero_SSE)
 template <typename _registerType>
 void TestApproxZeroSSE()
 {
-    constexpr U32 numRegisterEntries = SSEGetNumRegisterEntries<_registerType>();
+    constexpr U32 numRegisterEntries = sse::numRegisterValues<_registerType>;
 
-    using ElementType = decltype(SSEGetDataType<_registerType>());
+    using ElementType = decltype(sse::GetDataType<_registerType>());
 
     // Base and scaling ctor
     for (U32 i = 1; i < 20; ++i)

@@ -115,25 +115,25 @@ Mat4SSE Mat4SSE::operator+(const Mat4SSE& other)
 
 Mat4SSE Mat4SSE::operator*(const Mat4SSE& other) const
 {
-    alignas(16) __m128 Col0 =
+    alignas(sse::alignmentBytes<__m128>) __m128 Col0 =
             _mmx_fmadd_p(_mmx_set1_p<__m128>(other.mData[0][0]), mData[0],
                          _mmx_fmadd_p(_mmx_set1_p<__m128>(other.mData[0][1]), mData[1],
                                       _mmx_fmadd_p(_mmx_set1_p<__m128>(other.mData[0][2]), mData[2],
                                                    _mm_mul_ps(_mmx_set1_p<__m128>(other.mData[0][3]), mData[3]))));
 
-    alignas(16) __m128 Col1 =
+    alignas(sse::alignmentBytes<__m128>) __m128 Col1 =
             _mmx_fmadd_p(_mmx_set1_p<__m128>(other.mData[1][0]), mData[0],
                          _mmx_fmadd_p(_mmx_set1_p<__m128>(other.mData[1][1]), mData[1],
                                       _mmx_fmadd_p(_mmx_set1_p<__m128>(other.mData[1][2]), mData[2],
                                                    _mm_mul_ps(_mmx_set1_p<__m128>(other.mData[1][3]), mData[3]))));
 
-    alignas(16) __m128 Col2 =
+    alignas(sse::alignmentBytes<__m128>) __m128 Col2 =
             _mmx_fmadd_p(_mmx_set1_p<__m128>(other.mData[2][0]), mData[0],
                          _mmx_fmadd_p(_mmx_set1_p<__m128>(other.mData[2][1]), mData[1],
                                       _mmx_fmadd_p(_mmx_set1_p<__m128>(other.mData[2][2]), mData[2],
                                                    _mm_mul_ps(_mmx_set1_p<__m128>(other.mData[2][3]), mData[3]))));
 
-    alignas(16) __m128 Col3 =
+    alignas(sse::alignmentBytes<__m128>) __m128 Col3 =
             _mmx_fmadd_p(_mmx_set1_p<__m128>(other.mData[3][0]), mData[0],
                          _mmx_fmadd_p(_mmx_set1_p<__m128>(other.mData[3][1]), mData[1],
                                       _mmx_fmadd_p(_mmx_set1_p<__m128>(other.mData[3][2]), mData[2],
@@ -147,7 +147,7 @@ Mat4SSE Mat4SSE::operator*(const Mat4SSE& other) const
 Mat4SSE Mat4SSE::Transpose() const
 {
         Mat4SSE t;
-        GDL::Transpose(mData[0],mData[1],mData[2],mData[3],t.mData[0],t.mData[1],t.mData[2],t.mData[3]);
+        sse::Transpose(mData[0],mData[1],mData[2],mData[3],t.mData[0],t.mData[1],t.mData[2],t.mData[3]);
         return t;
 }
 

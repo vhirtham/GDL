@@ -144,14 +144,14 @@ void MatSSE<_type, _rows, _cols>::TransposeFullBlocks(MatSSE<_type, _cols, _rows
 
             if constexpr (mNumRegisterEntries == 2)
             {
-                GDL::Transpose(mData[firstRegisterIndexSrc + 0 * mNumRegistersPerCol],
+                sse::Transpose(mData[firstRegisterIndexSrc + 0 * mNumRegistersPerCol],
                                mData[firstRegisterIndexSrc + 1 * mNumRegistersPerCol],
                                result.mData[firstRegisterIndexRes + 0 * result.mNumRegistersPerCol],
                                result.mData[firstRegisterIndexRes + 1 * result.mNumRegistersPerCol]);
             }
             else if constexpr (mNumRegisterEntries == 4)
             {
-                GDL::Transpose(mData[firstRegisterIndexSrc + 0 * mNumRegistersPerCol],
+                sse::Transpose(mData[firstRegisterIndexSrc + 0 * mNumRegistersPerCol],
                                mData[firstRegisterIndexSrc + 1 * mNumRegistersPerCol],
                                mData[firstRegisterIndexSrc + 2 * mNumRegistersPerCol],
                                mData[firstRegisterIndexSrc + 3 * mNumRegistersPerCol],
@@ -162,7 +162,7 @@ void MatSSE<_type, _rows, _cols>::TransposeFullBlocks(MatSSE<_type, _cols, _rows
             }
             else if constexpr (mNumRegisterEntries == 8)
             {
-                GDL::Transpose(mData[firstRegisterIndexSrc + 0 * mNumRegistersPerCol],
+                sse::Transpose(mData[firstRegisterIndexSrc + 0 * mNumRegistersPerCol],
                                mData[firstRegisterIndexSrc + 1 * mNumRegistersPerCol],
                                mData[firstRegisterIndexSrc + 2 * mNumRegistersPerCol],
                                mData[firstRegisterIndexSrc + 3 * mNumRegistersPerCol],
@@ -225,7 +225,7 @@ void MatSSE<_type, _rows, _cols>::TransposeSparseBlocks(MatSSE<_type, _cols, _ro
         }
     }
     else
-        GDL::Transpose(args...);
+        sse::Transpose(args...);
 }
 
 
@@ -339,8 +339,7 @@ inline void MatSSE<_type, _rows, _cols>::MultiplicationInnerLoops(MatSSE<_type, 
                                                                    const MatSSE<_type, _rowsRhs, _colsRhs>& rhs,
                                                                    U32 j) const
 {
-    constexpr U32 registersPerColRhs = SSECalcMinNumArrayRegisters<__mx>(_rowsRhs);
-
+    constexpr U32 registersPerColRhs = sse::CalcMinNumArrayRegisters<__mx>(_rowsRhs);
 
     for (U32 i = 0; i < _colsRhs; ++i)
     {

@@ -2,8 +2,7 @@
 
 #include "gdl/base/fundamentalTypes.h"
 
-// Replace by corresponding headers after SSE restructuring
-#include "gdl/base/sse/intrinsics.h"
+#include "gdl/base/sse/utility.h"
 
 
 
@@ -16,15 +15,15 @@ namespace GDL
 //! be compared. For non sse types this value should be set to 0 (specialized case).
 //! @remark There is also the Approx class which has a quiet similar purpose. The major difference is, that the approx
 //! has a dynamic tolerance while this class only has a fixed tolerance
-template <typename _registerType, U32 _numComparedValuesSSE = SSEGetNumRegisterEntries<_registerType>()>
-class alignas(alignmentBytes<_registerType>) InsideTolerance
+template <typename _registerType, U32 _numComparedValuesSSE = sse::numRegisterValues<_registerType>>
+class alignas(sse::alignmentBytes<_registerType>) InsideTolerance
 {
-    static_assert(SSEIsRegisterType<_registerType>(), "Type is no valid sse register type");
-    static_assert(_numComparedValuesSSE <= SSEGetNumRegisterEntries<_registerType>(),
+    static_assert(sse::IsRegisterType<_registerType>(), "Type is no valid sse register type");
+    static_assert(_numComparedValuesSSE <= sse::numRegisterValues<_registerType>,
                   "_numComparedValues > Number of register elements.");
 
-    alignas(alignmentBytes<_registerType>) _registerType mValue;
-    alignas(alignmentBytes<_registerType>) _registerType mTolerance;
+    alignas(sse::alignmentBytes<_registerType>) _registerType mValue;
+    alignas(sse::alignmentBytes<_registerType>) _registerType mTolerance;
 
 public:
     InsideTolerance() = delete;

@@ -1,6 +1,9 @@
 #pragma once
 
 #include "gdl/base/insideTolerance.h"
+#include "gdl/base/sse/abs.h"
+#include "gdl/base/sse/compareAll.h"
+#include "gdl/base/sse/intrinsics.h"
 
 #include <cmath>
 
@@ -12,7 +15,7 @@ InsideTolerance<_registerType, _numComparedValuesSSE>::InsideTolerance(_register
     : mValue{value}
     , mTolerance{tolerance}
 {
-    DEV_EXCEPTION(!SSECompareAllGreaterThan(tolerance, _mmx_setzero_p<_registerType>()),
+    DEV_EXCEPTION(!sse::CompareAllGreaterThan(tolerance, _mmx_setzero_p<_registerType>()),
                   "Tolerance values must be greater than 0.");
 }
 
@@ -34,7 +37,7 @@ InsideTolerance<_registerType, _numComparedValuesSSE>::InsideTolerance(_register
 template <typename _registerType, U32 _numComparedValuesSSE>
 bool InsideTolerance<_registerType, _numComparedValuesSSE>::operator==(_registerType rhs) const
 {
-    return SSECompareAllLessEqual<_registerType, _numComparedValuesSSE>(SSEAbs(_mmx_sub_p(rhs, mValue)), mTolerance);
+    return sse::CompareAllLessEqual<_registerType, _numComparedValuesSSE>(sse::Abs(_mmx_sub_p(rhs, mValue)), mTolerance);
 }
 
 
@@ -77,7 +80,7 @@ template <typename _typeLhs, typename _typeInsideTolerance, U32 _numComparedValu
 constexpr bool operator==(const _typeLhs lhs, const InsideTolerance<_typeInsideTolerance, _numComparedValuesSSE>& rhs)
 {
     static_assert(std::is_floating_point<_typeLhs>::value || std::is_integral<_typeLhs>::value ||
-                          SSEIsRegisterType<_typeLhs>(),
+                          sse::IsRegisterType<_typeLhs>(),
                   "Lhs type must be an integral, floating point or sse register type.");
 
     return rhs == lhs;
@@ -89,7 +92,7 @@ template <typename _typeLhs, typename _typeInsideTolerance, U32 _numComparedValu
 constexpr bool operator!=(const _typeLhs lhs, const InsideTolerance<_typeInsideTolerance, _numComparedValuesSSE>& rhs)
 {
     static_assert(std::is_floating_point<_typeLhs>::value || std::is_integral<_typeLhs>::value ||
-                          SSEIsRegisterType<_typeLhs>(),
+                          sse::IsRegisterType<_typeLhs>(),
                   "Lhs type must be an integral, floating point or sse register type.");
 
     return rhs != lhs;

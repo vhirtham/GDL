@@ -51,12 +51,12 @@ BOOST_AUTO_TEST_CASE(Inside_Tolerance)
 template <typename _registerType, U32 _count = 1>
 void TestInsideToleranceSSE()
 {
-    constexpr U32 numRegisterEntries = SSEGetNumRegisterEntries<_registerType>();
+    constexpr U32 numRegisterEntries = sse::numRegisterValues<_registerType>;
     using InsideToleranceType = InsideTolerance<_registerType, _count>;
 
     F32 toleranceValue = 1.5;
-    alignas(alignmentBytes<_registerType>) _registerType ref = _mmx_setzero_p<_registerType>();
-    alignas(alignmentBytes<_registerType>) _registerType tolerance = _mmx_set1_p<_registerType>(toleranceValue);
+    alignas(sse::alignmentBytes<_registerType>) _registerType ref = _mmx_setzero_p<_registerType>();
+    alignas(sse::alignmentBytes<_registerType>) _registerType tolerance = _mmx_set1_p<_registerType>(toleranceValue);
 
     for (U32 i = 0; i < numRegisterEntries; ++i)
         ref[i] = i;
@@ -78,8 +78,8 @@ void TestInsideToleranceSSE()
         BOOST_CHECK(insideTolerance != _mmx_set1_p<_registerType>(-10));
         BOOST_CHECK(_mmx_set1_p<_registerType>(-10) != insideTolerance);
 
-        alignas(alignmentBytes<_registerType>) _registerType cmpAll;
-        alignas(alignmentBytes<_registerType>) _registerType cmpSingle;
+        alignas(sse::alignmentBytes<_registerType>) _registerType cmpAll;
+        alignas(sse::alignmentBytes<_registerType>) _registerType cmpSingle;
 
         for (I32 i = -4; i < 4; ++i)
         {

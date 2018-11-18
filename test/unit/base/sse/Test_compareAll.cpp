@@ -1,108 +1,29 @@
 #include <boost/test/unit_test.hpp>
 
-
-#include "gdl/base/sse/intrinsics.h"
+#include "gdl/base/sse/compareAll.h"
 
 using namespace GDL;
 
 
-BOOST_AUTO_TEST_CASE(Calc_Min_Num_Array_Registers)
-{
-    BOOST_CHECK(SSECalcMinNumArrayRegisters<__m128>(13) == 4);
-    BOOST_CHECK(SSECalcMinNumArrayRegisters<__m128>(4) == 1);
-    BOOST_CHECK(SSECalcMinNumArrayRegisters<__m128d>(13) == 7);
-    BOOST_CHECK(SSECalcMinNumArrayRegisters<__m128d>(4) == 2);
-#ifdef __AVX2__
-    BOOST_CHECK(SSECalcMinNumArrayRegisters<__m256>(13) == 2);
-    BOOST_CHECK(SSECalcMinNumArrayRegisters<__m256>(4) == 1);
-    BOOST_CHECK(SSECalcMinNumArrayRegisters<__m256d>(13) == 4);
-    BOOST_CHECK(SSECalcMinNumArrayRegisters<__m256d>(4) == 1);
-#endif // __AVX2__
-}
-
-
-
-// Test SSEAbs --------------------------------------------------------------------------------------------------------
-
-
-
-//! @brief Tests the SSEAbs function
-//! @remark The direct comparison of floating point values is intended only the sign bit should be modified
-template <typename _registerType, U32 _count = 1>
-void TestAbs()
-{
-    using DataType = decltype(SSEGetDataType<_registerType>());
-    constexpr U32 numRegisterEntries = SSEGetNumRegisterEntries<_registerType>();
-
-    auto cmpAllElementsEqual = [](_registerType lhs, _registerType rhs) {
-        for (U32 i = 0; i < numRegisterEntries; ++i)
-            if (lhs[i] != rhs[i])
-                return false;
-        return true;
-    };
-
-    alignas(alignmentBytes<_registerType>) _registerType ref = _mmx_setzero_p<_registerType>();
-    alignas(alignmentBytes<_registerType>) _registerType cmp = _mmx_setzero_p<_registerType>();
-    alignas(alignmentBytes<_registerType>) _registerType cmp2 = _mmx_setzero_p<_registerType>();
-    alignas(alignmentBytes<_registerType>) _registerType cmp3 = _mmx_setzero_p<_registerType>();
-
-    for (I32 i = 0; i < static_cast<I32>(numRegisterEntries); ++i)
-    {
-
-        ref[i] = static_cast<DataType>(i);
-        cmp[i] = static_cast<DataType>(-i);
-        cmp2[i] = static_cast<DataType>(i * ((i % 2 == 0) ? 1 : -1));
-        cmp3[i] = static_cast<DataType>(i * ((i % 3 == 0) ? 1 : -1));
-    }
-
-    BOOST_CHECK(cmpAllElementsEqual(ref, SSEAbs(ref)));
-    BOOST_CHECK(!cmpAllElementsEqual(ref, cmp));
-    BOOST_CHECK(cmpAllElementsEqual(ref, SSEAbs(cmp)));
-    BOOST_CHECK(!cmpAllElementsEqual(ref, cmp2));
-    BOOST_CHECK(cmpAllElementsEqual(ref, SSEAbs(cmp2)));
-    BOOST_CHECK(!cmpAllElementsEqual(ref, cmp3));
-    BOOST_CHECK(cmpAllElementsEqual(ref, SSEAbs(cmp3)));
-}
-
-
-
-BOOST_AUTO_TEST_CASE(Abs)
-{
-    TestAbs<__m128>();
-    TestAbs<__m128d>();
-#ifdef __AVX2__
-    TestAbs<__m256>();
-    TestAbs<__m256d>();
-#endif // __AVX2__
-}
-
-
-
-// -------------------------------------------------------------------------------------------------------------------
-// Test comparison operations where all values need to return true
-// We test only two operations (== and <=), since they use the same mechanics just with different comparison operators
-// applied.
-// -------------------------------------------------------------------------------------------------------------------
-
 
 // Test CompareAllEqual ----------------------------------------------------------------------------------------------
 
-//! @brief Tests the SSECompareAllEqual function with varying number of compared values.
+//! @brief Tests the sse::CompareAllEqual function with varying number of compared values.
 template <typename _registerType, U32 _count = 1>
 void TestCompareAllEqual()
 {
-    using DataType = decltype(SSEGetDataType<_registerType>());
-    constexpr U32 numRegisterEntries = SSEGetNumRegisterEntries<_registerType>();
+    using DataType = decltype(sse::GetDataType<_registerType>());
+    constexpr U32 numRegisterEntries = sse::numRegisterValues<_registerType>;
 
     auto compEQ = [](_registerType lhs, _registerType rhs) {
-        return SSECompareAllEqual<_registerType, _count>(lhs, rhs);
+        return sse::CompareAllEqual<_registerType, _count>(lhs, rhs);
     };
 
 
-    alignas(alignmentBytes<_registerType>) _registerType lhs = _mmx_setzero_p<_registerType>();
+    alignas(sse::alignmentBytes<_registerType>) _registerType lhs = _mmx_setzero_p<_registerType>();
     for (U32 i = 0; i < numRegisterEntries; ++i)
         lhs[i] = static_cast<DataType>(i + 1);
-    alignas(alignmentBytes<_registerType>) _registerType rhs;
+    alignas(sse::alignmentBytes<_registerType>) _registerType rhs;
 
 
     // all values return true
@@ -187,22 +108,22 @@ BOOST_AUTO_TEST_CASE(All_Equal)
 
 // Test CompareAllLessEqual -------------------------------------------------------------------------------------------
 
-//! @brief Tests the SSECompareAllLessEqual function with varying number of compared values.
+//! @brief Tests the sse::CompareAllLessEqual function with varying number of compared values.
 template <typename _registerType, U32 _count = 1>
 void TestCompareAllLessEqual()
 {
-    using DataType = decltype(SSEGetDataType<_registerType>());
-    constexpr U32 numRegisterEntries = SSEGetNumRegisterEntries<_registerType>();
+    using DataType = decltype(sse::GetDataType<_registerType>());
+    constexpr U32 numRegisterEntries = sse::numRegisterValues<_registerType>;
 
     auto compLE = [](_registerType lhs, _registerType rhs) {
-        return SSECompareAllLessEqual<_registerType, _count>(lhs, rhs);
+        return sse::CompareAllLessEqual<_registerType, _count>(lhs, rhs);
     };
 
 
-    alignas(alignmentBytes<_registerType>) _registerType lhs = _mmx_setzero_p<_registerType>();
+    alignas(sse::alignmentBytes<_registerType>) _registerType lhs = _mmx_setzero_p<_registerType>();
     for (U32 i = 0; i < numRegisterEntries; ++i)
         lhs[i] = static_cast<DataType>(i + 1);
-    alignas(alignmentBytes<_registerType>) _registerType rhs;
+    alignas(sse::alignmentBytes<_registerType>) _registerType rhs;
 
 
     // all values return true
@@ -287,22 +208,22 @@ BOOST_AUTO_TEST_CASE(All_Less_Equal)
 
 // Test CompareAllGreaterThan -----------------------------------------------------------------------------------------
 
-//! @brief Tests the SSECompareAllLessEqual function with varying number of compared values.
+//! @brief Tests the sse::CompareAllLessEqual function with varying number of compared values.
 template <typename _registerType, U32 _count = 1>
 void TestCompareAllGreaterThan()
 {
-    using DataType = decltype(SSEGetDataType<_registerType>());
-    constexpr U32 numRegisterEntries = SSEGetNumRegisterEntries<_registerType>();
+    using DataType = decltype(sse::GetDataType<_registerType>());
+    constexpr U32 numRegisterEntries = sse::numRegisterValues<_registerType>;
 
     auto compGT = [](_registerType lhs, _registerType rhs) {
-        return SSECompareAllGreaterThan<_registerType, _count>(lhs, rhs);
+        return sse::CompareAllGreaterThan<_registerType, _count>(lhs, rhs);
     };
 
 
-    alignas(alignmentBytes<_registerType>) _registerType lhs = _mmx_setzero_p<_registerType>();
+    alignas(sse::alignmentBytes<_registerType>) _registerType lhs = _mmx_setzero_p<_registerType>();
     for (U32 i = 0; i < numRegisterEntries; ++i)
         lhs[i] = static_cast<DataType>(i + 1);
-    alignas(alignmentBytes<_registerType>) _registerType rhs;
+    alignas(sse::alignmentBytes<_registerType>) _registerType rhs;
 
 
     // all values return true
