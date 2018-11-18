@@ -1,2 +1,2 @@
 addTest(Mat4)
-addTest(MatX)
+addTest(Mat)

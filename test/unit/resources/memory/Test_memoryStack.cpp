@@ -1,5 +1,5 @@
 #include <boost/test/unit_test.hpp>
-#include "tests/tools/ExceptionChecks.h"
+#include "test/tools/ExceptionChecks.h"
 
 #include "gdl/base/exception.h"
 #include "gdl/base/functions/alignment.h"
@@ -270,7 +270,6 @@ BOOST_AUTO_TEST_CASE(Thread_safety_non_thread_private)
 
             for (U32 j = 0; j < numAllocations; ++j)
                 ms.Deallocate(values[j]);
-
         });
 
     bool allThreadReady = false;

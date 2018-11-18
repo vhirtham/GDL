@@ -6,7 +6,7 @@
 #include "gdl/base/functions/isPowerOf2.h"
 #include "gdl/base/functions/pow.h"
 
-#include "tests/tools/ExceptionChecks.h"
+#include "test/tools/ExceptionChecks.h"
 
 using namespace GDL;
 

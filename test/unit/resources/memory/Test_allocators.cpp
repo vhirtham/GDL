@@ -13,7 +13,7 @@
 
 
 #include "memoryManagerSetup.h"
-#include "tests/tools/ExceptionChecks.h"
+#include "test/tools/ExceptionChecks.h"
 
 #include <array>
 #include <atomic>

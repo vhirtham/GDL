@@ -4,7 +4,7 @@
 #include "gdl/base/fundamentalTypes.h"
 #include "gdl/base/functions/pow.h"
 
-#include "tests/tools/ExceptionChecks.h"
+#include "test/tools/ExceptionChecks.h"
 
 using namespace GDL;
 

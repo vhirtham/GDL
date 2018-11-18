@@ -1,8 +1,8 @@
 #pragma once
 
-#include "gdl/math/mat4SIMD.h"
+#include "gdl/math/mat4SSE.h"
 
 namespace GDL
 {
-typedef Mat4SIMD Mat4f;
+typedef Mat4SSE Mat4f;
 }

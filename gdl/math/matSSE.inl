@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "gdl/math/matSIMD.h"
+#include "gdl/math/matSSE.h"
 
 #include "gdl/base/approx.h"
 #include "gdl/base/exception.h"
@@ -18,7 +18,7 @@ namespace GDL
 
 
 template <typename _type, I32 _rows, I32 _cols>
-MatSIMD<_type, _rows, _cols>::MatSIMD()
+MatSSE<_type, _rows, _cols>::MatSSE()
     : mData{{0}}
 {
     ConstructionChecks();
@@ -28,16 +28,16 @@ MatSIMD<_type, _rows, _cols>::MatSIMD()
 
 template <typename _type, I32 _rows, I32 _cols>
 template <typename... _args>
-MatSIMD<_type, _rows, _cols>::MatSIMD(_args... args)
+MatSSE<_type, _rows, _cols>::MatSSE(_args... args)
 {
     assert(sizeof...(args) == _rows * _cols);
-    *this = MatSIMD(std::array<_type, _rows * _cols>{{static_cast<_type>(args)...}});
+    *this = MatSSE(std::array<_type, _rows * _cols>{{static_cast<_type>(args)...}});
 }
 
 
 
 template <typename _type, I32 _rows, I32 _cols>
-MatSIMD<_type, _rows, _cols>::MatSIMD(const std::array<_type, _rows * _cols>& data)
+MatSSE<_type, _rows, _cols>::MatSSE(const std::array<_type, _rows * _cols>& data)
 {
     if constexpr (_rows % mNumRegisterEntries == 0)
     {
@@ -59,14 +59,14 @@ MatSIMD<_type, _rows, _cols>::MatSIMD(const std::array<_type, _rows * _cols>& da
 
 
 template <typename _type, I32 _rows, I32 _cols>
-MatSIMD<_type, _rows, _cols>::MatSIMD(bool)
+MatSSE<_type, _rows, _cols>::MatSSE(bool)
 {
 }
 
 
 
 template <typename _type, I32 _rows, I32 _cols>
-_type MatSIMD<_type, _rows, _cols>::operator()(const U32 row, const U32 col) const
+_type MatSSE<_type, _rows, _cols>::operator()(const U32 row, const U32 col) const
 {
     assert(row < _rows && col < _cols);
     return mData[row / mNumRegisterEntries + col * mNumRegistersPerCol][row % mNumRegisterEntries];
@@ -75,7 +75,7 @@ _type MatSIMD<_type, _rows, _cols>::operator()(const U32 row, const U32 col) con
 
 
 template <typename _type, I32 _rows, I32 _cols>
-bool MatSIMD<_type, _rows, _cols>::operator==(const MatSIMD& rhs) const
+bool MatSSE<_type, _rows, _cols>::operator==(const MatSSE& rhs) const
 {
     bool result = true;
 
@@ -102,7 +102,7 @@ bool MatSIMD<_type, _rows, _cols>::operator==(const MatSIMD& rhs) const
 
 
 template <typename _type, I32 _rows, I32 _cols>
-bool MatSIMD<_type, _rows, _cols>::operator!=(const MatSIMD& rhs) const
+bool MatSSE<_type, _rows, _cols>::operator!=(const MatSSE& rhs) const
 {
     return !operator==(rhs);
 }
@@ -110,7 +110,7 @@ bool MatSIMD<_type, _rows, _cols>::operator!=(const MatSIMD& rhs) const
 
 
 template <typename _type, I32 _rows, I32 _cols>
-MatSIMD<_type, _rows, _cols>& MatSIMD<_type, _rows, _cols>::operator+=(const MatSIMD<_type, _rows, _cols>& rhs)
+MatSSE<_type, _rows, _cols>& MatSSE<_type, _rows, _cols>::operator+=(const MatSSE<_type, _rows, _cols>& rhs)
 {
     for (U32 i = 0; i < mData.size(); ++i)
         mData[i] = _mmx_add_p(rhs.mData[i], mData[i]);
@@ -120,9 +120,9 @@ MatSIMD<_type, _rows, _cols>& MatSIMD<_type, _rows, _cols>::operator+=(const Mat
 
 
 template <typename _type, I32 _rows, I32 _cols>
-MatSIMD<_type, _rows, _cols> MatSIMD<_type, _rows, _cols>::operator+(const MatSIMD<_type, _rows, _cols>& rhs) const
+MatSSE<_type, _rows, _cols> MatSSE<_type, _rows, _cols>::operator+(const MatSSE<_type, _rows, _cols>& rhs) const
 {
-    MatSIMD<_type, _rows, _cols> result{true};
+    MatSSE<_type, _rows, _cols> result{true};
     for (U32 i = 0; i < mNumRegisters; ++i)
         result.mData[i] = _mmx_add_p(rhs.mData[i], mData[i]);
     return result;
@@ -131,7 +131,7 @@ MatSIMD<_type, _rows, _cols> MatSIMD<_type, _rows, _cols>::operator+(const MatSI
 
 
 template <typename _type, I32 _rows, I32 _cols>
-void MatSIMD<_type, _rows, _cols>::TransposeFullBlocks(MatSIMD<_type, _cols, _rows>& result) const
+void MatSSE<_type, _rows, _cols>::TransposeFullBlocks(MatSSE<_type, _cols, _rows>& result) const
 {
     constexpr U32 rowsBlock = _rows / mNumRegisterEntries;
     constexpr U32 colsBlock = _cols / mNumRegisterEntries;
@@ -188,7 +188,7 @@ void MatSIMD<_type, _rows, _cols>::TransposeFullBlocks(MatSIMD<_type, _cols, _ro
 
 template <typename _type, I32 _rows, I32 _cols>
 template <bool _hasSparseRows, bool _hasSparseCols, U32 _count, typename... _args>
-void MatSIMD<_type, _rows, _cols>::TransposeSparseBlocks(MatSIMD<_type, _cols, _rows>& result, U32 indexBlock,
+void MatSSE<_type, _rows, _cols>::TransposeSparseBlocks(MatSSE<_type, _cols, _rows>& result, U32 indexBlock,
                                                          _args&... args) const
 {
     static_assert(_hasSparseRows || _hasSparseCols, "This function cant be used with non sparse blocks");
@@ -231,9 +231,9 @@ void MatSIMD<_type, _rows, _cols>::TransposeSparseBlocks(MatSIMD<_type, _cols, _
 
 
 template <typename _type, I32 _rows, I32 _cols>
-MatSIMD<_type, _cols, _rows> MatSIMD<_type, _rows, _cols>::Transpose() const
+MatSSE<_type, _cols, _rows> MatSSE<_type, _rows, _cols>::Transpose() const
 {
-    MatSIMD<_type, _cols, _rows> transposed;
+    MatSSE<_type, _cols, _rows> transposed;
 
     TransposeFullBlocks(transposed);
 
@@ -254,7 +254,7 @@ MatSIMD<_type, _cols, _rows> MatSIMD<_type, _rows, _cols>::Transpose() const
 
 
 template <typename _type, I32 _rows, I32 _cols>
-U32 MatSIMD<_type, _rows, _cols>::Rows() const
+U32 MatSSE<_type, _rows, _cols>::Rows() const
 {
     return _rows;
 }
@@ -262,7 +262,7 @@ U32 MatSIMD<_type, _rows, _cols>::Rows() const
 
 
 template <typename _type, I32 _rows, I32 _cols>
-U32 MatSIMD<_type, _rows, _cols>::Cols() const
+U32 MatSSE<_type, _rows, _cols>::Cols() const
 {
     return _cols;
 }
@@ -270,7 +270,7 @@ U32 MatSIMD<_type, _rows, _cols>::Cols() const
 
 
 template <typename _type, I32 _rows, I32 _cols>
-void MatSIMD<_type, _rows, _cols>::SetZero()
+void MatSSE<_type, _rows, _cols>::SetZero()
 {
     std::memset(&mData, 0, sizeof(mData));
 }
@@ -278,7 +278,7 @@ void MatSIMD<_type, _rows, _cols>::SetZero()
 
 
 template <typename _type, I32 _rows, I32 _cols>
-const std::array<_type, _rows * _cols> MatSIMD<_type, _rows, _cols>::Data() const
+const std::array<_type, _rows * _cols> MatSSE<_type, _rows, _cols>::Data() const
 {
     std::array<_type, _rows * _cols> data;
     if constexpr (_rows % mNumRegisterEntries == 0)
@@ -299,7 +299,7 @@ const std::array<_type, _rows * _cols> MatSIMD<_type, _rows, _cols>::Data() cons
 
 
 template <typename _type, I32 _rows, I32 _cols>
-void MatSIMD<_type, _rows, _cols>::ConstructionChecks() const
+void MatSSE<_type, _rows, _cols>::ConstructionChecks() const
 {
     assert(sizeof(mData) == sizeof(__mx) * mData.size()); // Array needs to be compact
 #ifndef NDEVEXCEPTION
@@ -312,12 +312,12 @@ void MatSIMD<_type, _rows, _cols>::ConstructionChecks() const
 
 template <typename _type, I32 _rows, I32 _cols>
 template <I32 _rowsRhs, I32 _colsRhs>
-MatSIMD<_type, _rows, _colsRhs> MatSIMD<_type, _rows, _cols>::
-operator*(const MatSIMD<_type, _rowsRhs, _colsRhs>& rhs) const
+MatSSE<_type, _rows, _colsRhs> MatSSE<_type, _rows, _cols>::
+operator*(const MatSSE<_type, _rowsRhs, _colsRhs>& rhs) const
 {
     static_assert(_cols == _rowsRhs, "Lhs cols != Rhs rows");
 
-    MatSIMD<_type, _rows, _colsRhs> result;
+    MatSSE<_type, _rows, _colsRhs> result;
 
 
     // loop over RHS rows (column registers)
@@ -335,8 +335,8 @@ operator*(const MatSIMD<_type, _rowsRhs, _colsRhs>& rhs) const
 
 template <typename _type, I32 _rows, I32 _cols>
 template <I32 _rowsRhs, I32 _colsRhs, U32 _numMultipliedRegisters>
-inline void MatSIMD<_type, _rows, _cols>::MultiplicationInnerLoops(MatSIMD<_type, _rows, _colsRhs>& result,
-                                                                   const MatSIMD<_type, _rowsRhs, _colsRhs>& rhs,
+inline void MatSSE<_type, _rows, _cols>::MultiplicationInnerLoops(MatSSE<_type, _rows, _colsRhs>& result,
+                                                                   const MatSSE<_type, _rowsRhs, _colsRhs>& rhs,
                                                                    U32 j) const
 {
     constexpr U32 registersPerColRhs = SSECalcMinNumArrayRegisters<__mx>(_rowsRhs);
@@ -367,8 +367,8 @@ inline void MatSIMD<_type, _rows, _cols>::MultiplicationInnerLoops(MatSIMD<_type
 
 template <typename _type, I32 _rows, I32 _cols>
 template <U32 _numOperations, U32 _count>
-typename MatSIMD<_type, _rows, _cols>::__mx
-MatSIMD<_type, _rows, _cols>::MultiplyAddRegisters(const std::array<__mx, _numOperations>& values,
+typename MatSSE<_type, _rows, _cols>::__mx
+MatSSE<_type, _rows, _cols>::MultiplyAddRegisters(const std::array<__mx, _numOperations>& values,
                                                    const __mx currentValue, const U32 currentBlockIndex) const
 {
     static_assert(_numOperations <= mNumRegisterEntries && _numOperations > 0, "Invalid number of operations.");
@@ -384,7 +384,7 @@ MatSIMD<_type, _rows, _cols>::MultiplyAddRegisters(const std::array<__mx, _numOp
 
 
 template <typename _type, I32 _rows, I32 _cols>
-std::ostream& operator<<(std::ostream& os, const MatSIMD<_type, _rows, _cols>& mat)
+std::ostream& operator<<(std::ostream& os, const MatSSE<_type, _rows, _cols>& mat)
 {
     using namespace GDL;
     for (U32 i = 0; i < _rows; ++i)

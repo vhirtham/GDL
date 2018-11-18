@@ -13,25 +13,25 @@ namespace GDL
 {
 
 //! @brief 4x4 Matrix with SSE support
-class alignas(16) Mat4SIMD
+class alignas(16) Mat4SSE
 {
     alignas(16) std::array<__m128, 4> mData;
 
 public:
-    inline Mat4SIMD();
-    inline Mat4SIMD(const Mat4SIMD& other);
-    inline Mat4SIMD(Mat4SIMD&& other) = default;
-    inline Mat4SIMD& operator=(const Mat4SIMD& other) = default;
-    inline Mat4SIMD& operator=(Mat4SIMD&& other) = default;
-    inline ~Mat4SIMD() = default;
+    inline Mat4SSE();
+    inline Mat4SSE(const Mat4SSE& other);
+    inline Mat4SSE(Mat4SSE&& other) = default;
+    inline Mat4SSE& operator=(const Mat4SSE& other) = default;
+    inline Mat4SSE& operator=(Mat4SSE&& other) = default;
+    inline ~Mat4SSE() = default;
 
     //! @brief Constructor which initializes the matrix with the provided array
     //! @param data: Array containing the data
-    inline explicit Mat4SIMD(std::array<F32, 16> data);
+    inline explicit Mat4SSE(std::array<F32, 16> data);
 
     //! @brief Constructor that initializes full matrix with specific values (column major)
     //! @param v0-v15: Matrix values in column major ordering
-    inline Mat4SIMD(F32 v0, F32 v1, F32 v2, F32 v3, F32 v4, F32 v5, F32 v6, F32 v7, F32 v8, F32 v9, F32 v10, F32 v11,
+    inline Mat4SSE(F32 v0, F32 v1, F32 v2, F32 v3, F32 v4, F32 v5, F32 v6, F32 v7, F32 v8, F32 v9, F32 v10, F32 v11,
                     F32 v12, F32 v13, F32 v14, F32 v15);
 
 private:
@@ -40,7 +40,7 @@ private:
     //! @param col1: second column
     //! @param col2: third column
     //! @param col3: fourth column
-    inline Mat4SIMD(__m128 col0, __m128 col1, __m128 col2, __m128 col3);
+    inline Mat4SSE(__m128 col0, __m128 col1, __m128 col2, __m128 col3);
 
 public:
     //! @brief Direct access operator
@@ -54,33 +54,33 @@ public:
     //! @return TRUE/FALSE
     //! @remark This function uses the Approx class internally. The default minimal base is used. This might be changed
     //! in the future. A global minimal base for linear algebra comparison might be introduced.
-    [[nodiscard]] inline bool operator==(const Mat4SIMD& rhs) const;
+    [[nodiscard]] inline bool operator==(const Mat4SSE& rhs) const;
 
     //! @brief Compares if two matrices are NOT equal
     //! @param rhs: Matrix that should be compared
     //! @return TRUE/FALSE
     //! @remark This function uses the Approx class internally. The default minimal base is used. This might be changed
     //! in the future. A global minimal base for linear algebra comparison might be introduced.
-    [[nodiscard]] inline bool operator!=(const Mat4SIMD& rhs) const;
+    [[nodiscard]] inline bool operator!=(const Mat4SSE& rhs) const;
 
     //! @brief Matrix - matrix addition assignment
     //! @param other: Rhs matrix
     //! @return Result of the addition (this)
-    inline Mat4SIMD& operator+=(const Mat4SIMD& other);
+    inline Mat4SSE& operator+=(const Mat4SSE& other);
 
     //! @brief Matrix - matrix addition
     //! @param other: Rhs matrix
     //! @return Result of the addition (this)
-    [[nodiscard]] inline Mat4SIMD operator+(const Mat4SIMD& other);
+    [[nodiscard]] inline Mat4SSE operator+(const Mat4SSE& other);
 
     //! @brief Matrix - matrix multiplication
     //! @param other: Rhs matrix
     //! @return Result of the multiplication
-    [[nodiscard]] inline Mat4SIMD operator*(const Mat4SIMD& other) const;
+    [[nodiscard]] inline Mat4SSE operator*(const Mat4SSE& other) const;
 
     //! @brief Returns the transposed matrix
     //! @return Transposed matrix
-    [[nodiscard]] inline Mat4SIMD Transpose() const;
+    [[nodiscard]] inline Mat4SSE Transpose() const;
 
     //! @brief Gets the data array in column major ordering
     //! @return Data
@@ -90,12 +90,12 @@ public:
     //! @brief Rotation matrix for a rotation around the z-axis
     //! @param angle: Rotation angle in rad
     //! @return Rotation matrix
-    static Mat4SIMD RotationMatrixZ(F32 angle)
+    static Mat4SSE RotationMatrixZ(F32 angle)
     {
         F32 sinAngle = std::sin(angle);
         F32 cosAngle = std::cos(angle);
         // clang-format off
-        return Mat4SIMD(
+        return Mat4SSE(
              cosAngle, sinAngle,       0.,       0.,
             -sinAngle, cosAngle,       0.,       0.,
                    0.,       0.,       1.,       0.,
@@ -114,9 +114,9 @@ private:
 //! @param os: Reference to offstream object
 //! @param mat: Matrix
 //! @return Reference to offstream object
-inline std::ostream& operator<<(std::ostream& os, const Mat4SIMD& mat);
+inline std::ostream& operator<<(std::ostream& os, const Mat4SSE& mat);
 
 } // namespace GDL
 
 
-#include "gdl/math/mat4SIMD.inl"
+#include "gdl/math/mat4SSE.inl"

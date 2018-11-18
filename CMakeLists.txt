@@ -61,7 +61,7 @@ add_subdirectory(gdl)
 
 add_subdirectory(applications)
 if(ENABLE_TESTS)
-    add_subdirectory(tests)
+    add_subdirectory(test)
 endif()
 if(ENABLE_BENCHMARKS)
     add_subdirectory(benchmark)

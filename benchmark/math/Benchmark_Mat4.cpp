@@ -1,4 +1,4 @@
-#include "gdl/math/mat4SIMD.h"
+#include "gdl/math/mat4SSE.h"
 #include "gdl/math/mat4Single.h"
 #include <benchmark/benchmark.h>
 
@@ -11,8 +11,8 @@ using namespace GDL;
 class SIMD : public benchmark::Fixture
 {
 public:
-    Mat4SIMD A;
-    Mat4SIMD B;
+    Mat4SSE A;
+    Mat4SSE B;
 
     SIMD()
         : A{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15}
@@ -49,7 +49,7 @@ BENCHMARK_F(Single, Construction)(benchmark::State& state)
 BENCHMARK_F(SIMD, Construction)(benchmark::State& state)
 {
     for (auto _ : state)
-        Mat4SIMD C(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15);
+        Mat4SSE C(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15);
 }
 
 

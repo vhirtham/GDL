@@ -2,7 +2,7 @@
 
 #include "gdl/base/approx.h"
 #include "gdl/base/fundamentalTypes.h"
-#include "gdl/math/mat4SIMD.h"
+#include "gdl/math/mat4SSE.h"
 #include "gdl/math/mat4Single.h"
 
 #include <cmath>
@@ -66,7 +66,7 @@ BOOST_AUTO_TEST_CASE(Construction_Single)
 
 BOOST_AUTO_TEST_CASE(Construction_SIMD)
 {
-    ConstructionTest<Mat4SIMD>();
+    ConstructionTest<Mat4SSE>();
 }
 
 
@@ -119,7 +119,7 @@ BOOST_FIXTURE_TEST_CASE(Comparison_Single, Fixture<Mat4Single<F32>>)
 }
 
 
-BOOST_FIXTURE_TEST_CASE(Comparison_SIMD, Fixture<Mat4SIMD>)
+BOOST_FIXTURE_TEST_CASE(Comparison_SIMD, Fixture<Mat4SSE>)
 {
     ComparisonTest(A, B);
 }
@@ -149,7 +149,7 @@ BOOST_FIXTURE_TEST_CASE(Addition_Assignment_Single, Fixture<Mat4Single<F32>>)
 }
 
 
-BOOST_FIXTURE_TEST_CASE(Addition_Assignment_SIMD, Fixture<Mat4SIMD>)
+BOOST_FIXTURE_TEST_CASE(Addition_Assignment_SIMD, Fixture<Mat4SSE>)
 {
     AdditionAssignmentTest(A, B);
 }
@@ -174,7 +174,7 @@ BOOST_FIXTURE_TEST_CASE(Addition_Single, Fixture<Mat4Single<F32>>)
 }
 
 
-BOOST_FIXTURE_TEST_CASE(Addition_SIMD, Fixture<Mat4SIMD>)
+BOOST_FIXTURE_TEST_CASE(Addition_SIMD, Fixture<Mat4SSE>)
 {
     AdditionTest(A, B);
 }
@@ -202,9 +202,9 @@ BOOST_FIXTURE_TEST_CASE(Multiplication_Single, Fixture<Mat4Single<F32>>)
 }
 
 
-BOOST_FIXTURE_TEST_CASE(Multiplication_SIMD, Fixture<Mat4SIMD>)
+BOOST_FIXTURE_TEST_CASE(Multiplication_SIMD, Fixture<Mat4SSE>)
 {
-    MultiplicationTest<Mat4SIMD>(A, B);
+    MultiplicationTest<Mat4SSE>(A, B);
 }
 
 
@@ -229,7 +229,7 @@ BOOST_FIXTURE_TEST_CASE(Transpose_Single, Fixture<Mat4Single<F32>>)
 }
 
 
-BOOST_FIXTURE_TEST_CASE(Transpose_SIMD, Fixture<Mat4SIMD>)
+BOOST_FIXTURE_TEST_CASE(Transpose_SIMD, Fixture<Mat4SSE>)
 {
-    Transpose<Mat4SIMD>(A);
+    Transpose<Mat4SSE>(A);
 }

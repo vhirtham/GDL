@@ -1,7 +1,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include "gdl/base/approx.h"
-#include "gdl/math/matSIMD.h"
+#include "gdl/math/matSSE.h"
 #include "gdl/math/matSingle.h"
 
 #include <cmath>
@@ -85,8 +85,8 @@ BOOST_AUTO_TEST_CASE(Construction_Single)
 
 BOOST_AUTO_TEST_CASE(Construction_SSE)
 {
-    CtorDataTest<MatSIMD, F32>();
-    CtorDataTest<MatSIMD, F64>();
+    CtorDataTest<MatSSE, F32>();
+    CtorDataTest<MatSSE, F64>();
 }
 
 
@@ -175,8 +175,8 @@ BOOST_AUTO_TEST_CASE(ComparisonEqual_Single)
 
 BOOST_AUTO_TEST_CASE(ComparisonEqual_SSE)
 {
-    ComparisonEqualTest<MatSIMD, F32>();
-    ComparisonEqualTest<MatSIMD, F64>();
+    ComparisonEqualTest<MatSSE, F32>();
+    ComparisonEqualTest<MatSSE, F64>();
 }
 
 
@@ -216,8 +216,8 @@ BOOST_AUTO_TEST_CASE(Parentheses_Operator_Single)
 
 BOOST_AUTO_TEST_CASE(Parentheses_Operator_SIMD)
 {
-    ParenthesesOperatorTest<MatSIMD, F32>();
-    ParenthesesOperatorTest<MatSIMD, F64>();
+    ParenthesesOperatorTest<MatSSE, F32>();
+    ParenthesesOperatorTest<MatSSE, F64>();
 }
 
 
@@ -254,8 +254,8 @@ BOOST_AUTO_TEST_CASE(Assignment_Single)
 
 BOOST_AUTO_TEST_CASE(Assignment_SIMD)
 {
-    AssignmentTest<MatSIMD, F32>();
-    AssignmentTest<MatSIMD, F64>();
+    AssignmentTest<MatSSE, F32>();
+    AssignmentTest<MatSSE, F64>();
 }
 
 
@@ -288,8 +288,8 @@ BOOST_AUTO_TEST_CASE(SetZero_Single)
 
 BOOST_AUTO_TEST_CASE(SetZero_SIMD)
 {
-    SetZeroTest<MatSIMD, F32>();
-    SetZeroTest<MatSIMD, F64>();
+    SetZeroTest<MatSSE, F32>();
+    SetZeroTest<MatSSE, F64>();
 }
 
 
@@ -330,8 +330,8 @@ BOOST_AUTO_TEST_CASE(Addition_Assignment_Single)
 
 BOOST_AUTO_TEST_CASE(Addition_Assignment_SIMD)
 {
-    AdditionAssignmentTest<MatSIMD, F32>();
-    AdditionAssignmentTest<MatSIMD, F64>();
+    AdditionAssignmentTest<MatSSE, F32>();
+    AdditionAssignmentTest<MatSSE, F64>();
 }
 
 
@@ -368,8 +368,8 @@ BOOST_AUTO_TEST_CASE(Addition_Single)
 
 BOOST_AUTO_TEST_CASE(Addition_SIMD)
 {
-    AdditionTest<MatSIMD, F32>();
-    AdditionTest<MatSIMD, F64>();
+    AdditionTest<MatSSE, F32>();
+    AdditionTest<MatSSE, F64>();
 }
 
 
@@ -422,8 +422,8 @@ BOOST_AUTO_TEST_CASE(Multiplication_Single)
 
 BOOST_AUTO_TEST_CASE(Multiplication_SIMD)
 {
-    MultiplicationTest<MatSIMD, F32>();
-    MultiplicationTest<MatSIMD, F64>();
+    MultiplicationTest<MatSSE, F32>();
+    MultiplicationTest<MatSSE, F64>();
 }
 
 
@@ -482,6 +482,6 @@ BOOST_AUTO_TEST_CASE(Transpose_Single)
 BOOST_AUTO_TEST_CASE(Transpose_SIMD)
 {
 
-    TransposeTest<MatSIMD, F32>();
-    TransposeTest<MatSIMD, F64>();
+    TransposeTest<MatSSE, F32>();
+    TransposeTest<MatSSE, F64>();
 }

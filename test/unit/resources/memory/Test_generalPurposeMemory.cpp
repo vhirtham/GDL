@@ -1,5 +1,5 @@
 #include <boost/test/unit_test.hpp>
-#include "tests/tools/ExceptionChecks.h"
+#include "test/tools/ExceptionChecks.h"
 
 #include "gdl/base/exception.h"
 #include "gdl/base/functions/alignment.h"

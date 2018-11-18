@@ -1,7 +1,7 @@
 addBenchmark(Mat4)
-addBenchmark(MatX)
+addBenchmark(Mat)
 if(Eigen3_FOUND)
-    target_compile_definitions(Benchmark_MatX
+    target_compile_definitions(Benchmark_Mat
         PRIVATE
             -DEIGEN3_FOUND)
 endif()

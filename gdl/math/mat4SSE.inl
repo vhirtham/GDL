@@ -1,5 +1,5 @@
 #pragma once
-#include "gdl/math/mat4SIMD.h"
+#include "gdl/math/mat4SSE.h"
 
 #include "gdl/base/approx.h"
 #include "gdl/base/exception.h"
@@ -17,7 +17,7 @@ namespace GDL
 
 
 
-Mat4SIMD::Mat4SIMD()
+Mat4SSE::Mat4SSE()
     : mData({{{_mmx_setzero_p<__m128>()},
               {_mmx_setzero_p<__m128>()},
               {_mmx_setzero_p<__m128>()},
@@ -27,7 +27,7 @@ Mat4SIMD::Mat4SIMD()
 }
 
 
-Mat4SIMD::Mat4SIMD(std::array<F32, 16> data)
+Mat4SSE::Mat4SSE(std::array<F32, 16> data)
     : mData({{{_mmx_setr_p<__m128>(data[0], data[1], data[2], data[3])},
               {_mmx_setr_p<__m128>(data[4], data[5], data[6], data[7])},
               {_mmx_setr_p<__m128>(data[8], data[9], data[10], data[11])},
@@ -38,7 +38,7 @@ Mat4SIMD::Mat4SIMD(std::array<F32, 16> data)
 
 
 
-Mat4SIMD::Mat4SIMD(F32 v0, F32 v1, F32 v2, F32 v3, F32 v4, F32 v5, F32 v6, F32 v7, F32 v8, F32 v9, F32 v10, F32 v11,
+Mat4SSE::Mat4SSE(F32 v0, F32 v1, F32 v2, F32 v3, F32 v4, F32 v5, F32 v6, F32 v7, F32 v8, F32 v9, F32 v10, F32 v11,
                    F32 v12, F32 v13, F32 v14, F32 v15)
     : mData({{{_mmx_setr_p<__m128>(v0, v1, v2, v3)},
               {_mmx_setr_p<__m128>(v4, v5, v6, v7)},
@@ -50,7 +50,7 @@ Mat4SIMD::Mat4SIMD(F32 v0, F32 v1, F32 v2, F32 v3, F32 v4, F32 v5, F32 v6, F32 v
 
 
 
-Mat4SIMD::Mat4SIMD(__m128 col0, __m128 col1, __m128 col2, __m128 col3)
+Mat4SSE::Mat4SSE(__m128 col0, __m128 col1, __m128 col2, __m128 col3)
     : mData({{col0, col1, col2, col3}})
 {
     ConstructionChecks();
@@ -58,7 +58,7 @@ Mat4SIMD::Mat4SIMD(__m128 col0, __m128 col1, __m128 col2, __m128 col3)
 
 
 
-Mat4SIMD::Mat4SIMD(const Mat4SIMD& other)
+Mat4SSE::Mat4SSE(const Mat4SSE& other)
     : mData(other.mData)
 {
     ConstructionChecks();
@@ -66,7 +66,7 @@ Mat4SIMD::Mat4SIMD(const Mat4SIMD& other)
 
 
 
-F32 Mat4SIMD::operator()(const U32 row, const U32 col) const
+F32 Mat4SSE::operator()(const U32 row, const U32 col) const
 {
     DEV_EXCEPTION(row > 3, "row - invalid value! [0..3]");
     DEV_EXCEPTION(col > 3, "col - invalid value! [0..3]");
@@ -74,7 +74,7 @@ F32 Mat4SIMD::operator()(const U32 row, const U32 col) const
     return mData[col][row];
 }
 
-bool Mat4SIMD::operator==(const Mat4SIMD& rhs) const
+bool Mat4SSE::operator==(const Mat4SSE& rhs) const
 {
     // TODO: Replace this version as soon as Approx supports registers!
     bool result = true;
@@ -85,14 +85,14 @@ bool Mat4SIMD::operator==(const Mat4SIMD& rhs) const
 
 
 
-bool Mat4SIMD::operator!=(const Mat4SIMD& rhs) const
+bool Mat4SSE::operator!=(const Mat4SSE& rhs) const
 {
     return !(operator==(rhs));
 }
 
 
 
-Mat4SIMD& Mat4SIMD::operator+=(const Mat4SIMD& other)
+Mat4SSE& Mat4SSE::operator+=(const Mat4SSE& other)
 
 {
     mData[0] = _mmx_add_p(mData[0], other.mData[0]);
@@ -104,16 +104,16 @@ Mat4SIMD& Mat4SIMD::operator+=(const Mat4SIMD& other)
 
 
 
-Mat4SIMD Mat4SIMD::operator+(const Mat4SIMD& other)
+Mat4SSE Mat4SSE::operator+(const Mat4SSE& other)
 
 {
-    return Mat4SIMD(_mmx_add_p(mData[0], other.mData[0]), _mmx_add_p(mData[1], other.mData[1]),
+    return Mat4SSE(_mmx_add_p(mData[0], other.mData[0]), _mmx_add_p(mData[1], other.mData[1]),
                     _mmx_add_p(mData[2], other.mData[2]), _mmx_add_p(mData[3], other.mData[3]));
 }
 
 
 
-Mat4SIMD Mat4SIMD::operator*(const Mat4SIMD& other) const
+Mat4SSE Mat4SSE::operator*(const Mat4SSE& other) const
 {
     alignas(16) __m128 Col0 =
             _mmx_fmadd_p(_mmx_set1_p<__m128>(other.mData[0][0]), mData[0],
@@ -139,21 +139,21 @@ Mat4SIMD Mat4SIMD::operator*(const Mat4SIMD& other) const
                                       _mmx_fmadd_p(_mmx_set1_p<__m128>(other.mData[3][2]), mData[2],
                                                    _mm_mul_ps(_mmx_set1_p<__m128>(other.mData[3][3]), mData[3]))));
 
-    return Mat4SIMD(Col0, Col1, Col2, Col3);
+    return Mat4SSE(Col0, Col1, Col2, Col3);
 }
 
 
 
-Mat4SIMD Mat4SIMD::Transpose() const
+Mat4SSE Mat4SSE::Transpose() const
 {
-        Mat4SIMD t;
+        Mat4SSE t;
         GDL::Transpose(mData[0],mData[1],mData[2],mData[3],t.mData[0],t.mData[1],t.mData[2],t.mData[3]);
         return t;
 }
 
 
 
-const std::array<F32, 16> Mat4SIMD::Data() const
+const std::array<F32, 16> Mat4SSE::Data() const
 {
     std::array<F32, 16> data;
     assert(sizeof(mData) == sizeof(data));
@@ -164,16 +164,16 @@ const std::array<F32, 16> Mat4SIMD::Data() const
 
 
 
-void Mat4SIMD::ConstructionChecks() const
+void Mat4SSE::ConstructionChecks() const
 {
     DEV_EXCEPTION(!(IsAligned(&mData[0], 16) && IsAligned(&mData[1], 16) && IsAligned(&mData[2], 16) &&
                     IsAligned(&mData[3], 16)),
-                  "One or more registers of Mat4SIMD are not 16 byte aligned");
+                  "One or more registers of Mat4SSE are not 16 byte aligned");
 }
 
 
 
-inline std::ostream& operator<<(std::ostream& os, const Mat4SIMD& mat)
+inline std::ostream& operator<<(std::ostream& os, const Mat4SSE& mat)
 {
     for (U32 i = 0; i < 4; ++i)
         os << "| " << mat(i, 0) << " " << mat(i, 1) << " " << mat(i, 2) << " " << mat(i, 3) << " |" << std::endl;

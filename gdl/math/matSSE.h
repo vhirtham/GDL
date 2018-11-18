@@ -16,7 +16,7 @@ namespace GDL
 //! @tparam _rows: Number of rows
 //! @tparam _cols: Number of columns
 template <typename _type, I32 _rows, I32 _cols>
-class alignas(alignmentBytes<decltype(SSEGetFittingRegister<_type, SSEMaxRegisterSize()>())>) MatSIMD
+class alignas(alignmentBytes<decltype(SSEGetFittingRegister<_type, SSEMaxRegisterSize()>())>) MatSSE
 {
     static_assert(std::is_floating_point<_type>::value, "Matrix can only be created with floating point types");
 
@@ -30,26 +30,26 @@ class alignas(alignmentBytes<decltype(SSEGetFittingRegister<_type, SSEMaxRegiste
     alignas(mAlignment) std::array<__mx, mNumRegisters> mData;
 
     template <typename _typeOther, I32 _rowsOther, I32 _colsOther>
-    friend class MatSIMD;
+    friend class MatSSE;
 
 public:
     //! @brief constructor
-    MatSIMD();
+    MatSSE();
 
     //! @brief Constructor to set the whole matrix
     //! @param args: Values (column major)
     //! @tparam _args: Variadic data type
     template <typename... _args>
-    explicit MatSIMD(_args... args);
+    explicit MatSSE(_args... args);
 
     //! @brief Constructor to set the whole matrix
     //! @brief Array with values (column major)
-    explicit MatSIMD(const std::array<_type, _rows * _cols>& data);
+    explicit MatSSE(const std::array<_type, _rows * _cols>& data);
 
 private:
-    //! @brief Private helper ctor to initialize a MatSIMD without initializing the memory to zero or any other value.
+    //! @brief Private helper ctor to initialize a MatSSE without initializing the memory to zero or any other value.
     //! @remark Find a better solution than using bool as parameter to distinguish from default ctor
-    explicit MatSIMD(bool);
+    explicit MatSSE(bool);
 
 public:
     //! @brief Direct access operator
@@ -63,24 +63,24 @@ public:
     //! @return TRUE/FALSE
     //! @remark This function uses the Approx class internally. The default minimal base is used. This might be changed
     //! in the future. A global minimal base for linear algebra comparison might be introduced.
-    [[nodiscard]] inline bool operator==(const MatSIMD& rhs) const;
+    [[nodiscard]] inline bool operator==(const MatSSE& rhs) const;
 
     //! @brief Compares if two matrices are NOT equal
     //! @param rhs: Matrix that should be compared
     //! @return TRUE/FALSE
     //! @remark This function uses the Approx class internally. The default minimal base is used. This might be changed
     //! in the future. A global minimal base for linear algebra comparison might be introduced.
-    [[nodiscard]] inline bool operator!=(const MatSIMD& rhs) const;
+    [[nodiscard]] inline bool operator!=(const MatSSE& rhs) const;
 
     //! @brief Matrix - matrix addition assignment
     //! @param rhs: Rhs matrix
     //! @return Result of the addition
-    inline MatSIMD& operator+=(const MatSIMD& rhs);
+    inline MatSSE& operator+=(const MatSSE& rhs);
 
     //! @brief Matrix - matrix addition assignment
     //! @param rhs: Rhs matrix
     //! @return Result of the addition
-    [[nodiscard]] inline MatSIMD operator+(const MatSIMD& rhs) const;
+    [[nodiscard]] inline MatSSE operator+(const MatSSE& rhs) const;
 
     //! @brief Matrix - matrix multiplication
     //! @tparam _rowsRhs: Rhs matrix number of rows
@@ -88,11 +88,11 @@ public:
     //! @param rhs: Rhs matrix
     //! @return Result of the multiplication
     template <I32 _rowsRhs, I32 _colsRhs>
-    [[nodiscard]] inline MatSIMD<_type, _rows, _colsRhs> operator*(const MatSIMD<_type, _rowsRhs, _colsRhs>& rhs) const;
+    [[nodiscard]] inline MatSSE<_type, _rows, _colsRhs> operator*(const MatSSE<_type, _rowsRhs, _colsRhs>& rhs) const;
 
     //! @brief Returns the transposed matrix
     //! @return Transposed matrix
-    [[nodiscard]] inline MatSIMD<_type, _cols, _rows> Transpose() const;
+    [[nodiscard]] inline MatSSE<_type, _cols, _rows> Transpose() const;
 
     //! @brief Gets the number of rows
     //! @return Number of rows
@@ -113,7 +113,7 @@ private:
     //! @brief Transposes all completly filled blocks of the matrix and writes them to the corresponding position of the
     //! passed matrix
     //! @param result: Matrix that stores the results
-    inline void TransposeFullBlocks(MatSIMD<_type, _cols, _rows>& result) const;
+    inline void TransposeFullBlocks(MatSSE<_type, _cols, _rows>& result) const;
 
     //! @brief Transposes all partially filled blocks of the matrix and writes them to the corresponding position of the
     //! passed matrix
@@ -125,7 +125,7 @@ private:
     //! @param indexBlock: Row / column index of the current block.
     //! @param args: This parameter pack is used to gather the parameters for the sse transpose function.
     template <bool _hasSparseRows, bool _hasSparseCols, U32 _count = 0, typename... _args>
-    inline void TransposeSparseBlocks(MatSIMD<_type, _cols, _rows>& result, U32 indexBlock, _args&... args) const;
+    inline void TransposeSparseBlocks(MatSSE<_type, _cols, _rows>& result, U32 indexBlock, _args&... args) const;
 
     //! @brief Processes the inner two loops of matrix-matrix multiplication.
     //! @tparam _rowsRhs: Rhs matrix number of rows
@@ -135,8 +135,8 @@ private:
     //! @param rhs: Rhs matrix
     //! @param j: Current outer loop value
     template <I32 _rowsRhs, I32 _colsRhs, U32 _numMultipliedRegisters = mNumRegisterEntries>
-    inline void MultiplicationInnerLoops(MatSIMD<_type, _rows, _colsRhs>& result,
-                                         const MatSIMD<_type, _rowsRhs, _colsRhs>& rhs, U32 j) const;
+    inline void MultiplicationInnerLoops(MatSSE<_type, _rows, _colsRhs>& result,
+                                         const MatSSE<_type, _rowsRhs, _colsRhs>& rhs, U32 j) const;
 
     //! @brief This function helps with the generalization of matrix-matrix multiplication. It calculates some in
     //! between values that depend on the number of values in the used register and adds them to the current solution.
@@ -164,11 +164,11 @@ private:
 //! @param mat: Matrix
 //! @return Reference to offstream object
 template <typename _type, I32 _rows, I32 _cols>
-std::ostream& operator<<(std::ostream& os, const MatSIMD<_type, _rows, _cols>& mat);
+std::ostream& operator<<(std::ostream& os, const MatSSE<_type, _rows, _cols>& mat);
 
 
 } // namespace GDL
 
 
 
-#include "gdl/math/matSIMD.inl"
+#include "gdl/math/matSSE.inl"
