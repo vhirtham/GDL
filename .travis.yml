@@ -32,7 +32,7 @@ script:
     - docker exec dock ctest --output-on-failure
     - if [[ "$COVERAGE" == "--coverage" ]]; then docker exec dock lcov --directory . --capture --output-file ../code/coverage.info; fi
     - if [[ "$COVERAGE" == "--coverage" ]]; then docker exec dock lcov --remove ../code/coverage.info 'usr/*' --output-file ../code/coverage.info; fi
-    - if [[ "$COVERAGE" == "--coverage" ]]; then docker exec dock lcov --remove ../code/coverage.info '*/tests/*' --output-file ../code/coverage.info; fi
+    - if [[ "$COVERAGE" == "--coverage" ]]; then docker exec dock lcov --remove ../code/coverage.info '*/test/*' --output-file ../code/coverage.info; fi
     - if [[ "$COVERAGE" == "--coverage" ]]; then bash <(curl -s https://codecov.io/bash); fi
 
 after_success:
