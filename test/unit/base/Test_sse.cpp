@@ -17,14 +17,6 @@ BOOST_AUTO_TEST_CASE(Calc_Min_Num_Array_Registers)
     BOOST_CHECK(SSECalcMinNumArrayRegisters<__m256>(4) == 1);
     BOOST_CHECK(SSECalcMinNumArrayRegisters<__m256d>(13) == 4);
     BOOST_CHECK(SSECalcMinNumArrayRegisters<__m256d>(4) == 1);
-#ifdef __AVX512F__
-    BOOST_CHECK(SSECalcMinNumArrayRegisters<__m512>(21) == 2);
-    BOOST_CHECK(SSECalcMinNumArrayRegisters<__m512>(13) == 1);
-    BOOST_CHECK(SSECalcMinNumArrayRegisters<__m512>(4) == 1);
-    BOOST_CHECK(SSECalcMinNumArrayRegisters<__m512d>(21) == 3);
-    BOOST_CHECK(SSECalcMinNumArrayRegisters<__m512d>(13) == 2);
-    BOOST_CHECK(SSECalcMinNumArrayRegisters<__m512d>(4) == 1);
-#endif // __AVX512F__
 #endif // __AVX2__
 }
 
@@ -81,10 +73,6 @@ BOOST_AUTO_TEST_CASE(Abs)
 #ifdef __AVX2__
     TestAbs<__m256>();
     TestAbs<__m256d>();
-#ifdef __AVX512F__
-    TestAbs<__m512>();
-    TestAbs<__m512d>();
-#endif // __AVX512F__
 #endif // __AVX2__
 }
 
@@ -192,10 +180,6 @@ BOOST_AUTO_TEST_CASE(All_Equal)
 #ifdef __AVX2__
     TestCompareAllEqual<__m256>();
     TestCompareAllEqual<__m256d>();
-#ifdef __AVX512F__
-    TestCompareAllEqual<__m512>();
-    TestCompareAllEqual<__m512d>();
-#endif // __AVX512F__
 #endif // __AVX2__
 }
 
@@ -296,10 +280,6 @@ BOOST_AUTO_TEST_CASE(All_Less_Equal)
 #ifdef __AVX2__
     TestCompareAllLessEqual<__m256>();
     TestCompareAllLessEqual<__m256d>();
-#ifdef __AVX512F__
-    TestCompareAllLessEqual<__m512>();
-    TestCompareAllLessEqual<__m512d>();
-#endif // __AVX512F__
 #endif // __AVX2__
 }
 
@@ -400,9 +380,5 @@ BOOST_AUTO_TEST_CASE(All_Greater_Than)
 #ifdef __AVX2__
     TestCompareAllGreaterThan<__m256>();
     TestCompareAllGreaterThan<__m256d>();
-#ifdef __AVX512F__
-    TestCompareAllGreaterThan<__m512>();
-    TestCompareAllGreaterThan<__m512d>();
-#endif // __AVX512F__
 #endif // __AVX2__
 }

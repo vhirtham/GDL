@@ -214,10 +214,6 @@ BOOST_AUTO_TEST_CASE(Approx_Non_Zero_SSE)
 #ifdef __AVX2__
     TestApproxSSE<__m256>();
     TestApproxSSE<__m256d>();
-#ifdef __AVX512F__
-    TestApproxSSE<__m512>();
-    TestApproxSSE<__m512d>();
-#endif // __AVX512F__
 #endif // __AVX2__
 }
 
@@ -301,9 +297,5 @@ BOOST_AUTO_TEST_CASE(Approx_Zero_SSE)
 #ifdef __AVX2__
     TestApproxZeroSSE<__m256>();
     TestApproxZeroSSE<__m256d>();
-#ifdef __AVX512F__
-    TestApproxZeroSSE<__m512>();
-    TestApproxZeroSSE<__m512d>();
-#endif // __AVX512F__
 #endif // __AVX2__
 }

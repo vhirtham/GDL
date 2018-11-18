@@ -174,9 +174,5 @@ BOOST_AUTO_TEST_CASE(Inside_Tolerance_SSE)
 #ifdef __AVX2__
     TestInsideToleranceSSE<__m256>();
     TestInsideToleranceSSE<__m256d>();
-#ifdef __AVX512F__
-    TestInsideToleranceSSE<__m512>();
-    TestInsideToleranceSSE<__m512d>();
-#endif // __AVX512F__
 #endif // __AVX2__
 }

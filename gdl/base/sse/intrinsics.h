@@ -26,9 +26,6 @@ constexpr bool SSEIsRegisterType()
     if constexpr (std::is_same<_registerType, __m128>::value || std::is_same<_registerType, __m128d>::value
 #ifdef __AVX2__
                   || std::is_same<_registerType, __m256>::value || std::is_same<_registerType, __m256d>::value
-#ifdef __AVX512F__
-                  || std::is_same<_registerType, __m512>::value || std::is_same<_registerType, __m512d>::value
-#endif // __AVX512F__
 #endif // __AVX2__
     )
         return true;
@@ -43,9 +40,7 @@ constexpr bool SSEIsRegisterType()
 //! @return Bitsize of the largest available register
 constexpr U32 SSEMaxRegisterSize()
 {
-#ifdef __AVX512F__
-    return 512;
-#elif __AVX2__
+#ifdef __AVX2__
     return 256;
 #else
     return 128;
@@ -71,23 +66,11 @@ auto SSEGetFittingRegister()
         return __m128();
     if constexpr (std::is_same<_type, F64>::value && _registerSize == 128)
         return __m128d();
-    if constexpr (std::is_same<_type, I32>::value && _registerSize == 128)
-        return __m128i();
 #ifdef __AVX2__
     if constexpr (std::is_same<_type, F32>::value && _registerSize == 256)
         return __m256();
     if constexpr (std::is_same<_type, F64>::value && _registerSize == 256)
         return __m256d();
-    if constexpr (std::is_same<_type, I32>::value && _registerSize == 256)
-        return __m256i();
-#ifdef __AVX512F__
-    if constexpr (std::is_same<_type, F32>::value && _registerSize == 512)
-        return __m512();
-    if constexpr (std::is_same<_type, F64>::value && _registerSize == 512)
-        return __m512d();
-    if constexpr (std::is_same<_type, I32>::value && _registerSize == 512)
-        return __m512i();
-#endif // __AVX512F__
 #endif // __AVX2__
 }
 
@@ -113,20 +96,11 @@ constexpr auto SSEGetDataType()
         return F32{0};
     else if constexpr (std::is_same<_registerType, __m256d>::value)
         return F64{0};
-#ifdef __AVX512F__
-    else if constexpr (std::is_same<_registerType, __m512>::value)
-        return F32{0};
-    else if constexpr (std::is_same<_registerType, __m512d>::value)
-        return F64{0};
-#endif // __AVX512F__
 #endif // __AVX2__
+    else if constexpr (_returnTypeIfNoTARegister)
+        return _registerType();
     else
-    {
-        if constexpr (_returnTypeIfNoTARegister)
-            return _registerType();
-        else
-            throw Exception(__PRETTY_FUNCTION__, "Not defined for selected register type.");
-    }
+        throw Exception(__PRETTY_FUNCTION__, "Not defined for selected register type.");
 }
 
 
@@ -157,16 +131,6 @@ constexpr const U32 alignmentBytes<__m256d> = 32;
 template <>
 constexpr const U32 alignmentBytes<__m256i> = 32;
 
-#ifdef __AVX512F__
-template <>
-constexpr const U32 alignmentBytes<__m512> = 64;
-
-template <>
-constexpr const U32 alignmentBytes<__m512d> = 64;
-
-template <>
-constexpr const U32 alignmentBytes<__m512i> = 64;
-#endif // __AVX512F__
 #endif // __AVX2__
 
 
@@ -188,12 +152,6 @@ constexpr U32 SSEGetNumRegisterEntries()
         return 8;
     else if constexpr (std::is_same<_registerType, __m256d>::value)
         return 4;
-#ifdef __AVX512F__
-    else if constexpr (std::is_same<_registerType, __m512>::value)
-        return 16;
-    else if constexpr (std::is_same<_registerType, __m512d>::value)
-        return 8;
-#endif // __AVX512F__
 #endif // __AVX2__
     else
         return 0;
@@ -220,12 +178,6 @@ inline void _mmx_store_p(_type* ptr, _registerType reg)
         _mm256_store_ps(ptr, reg);
     else if constexpr (std::is_same<_registerType, __m256d>::value && std::is_same<_type, F64>::value)
         _mm256_store_pd(ptr, reg);
-#ifdef __AVX512F__
-    else if constexpr (std::is_same<_registerType, __m512>::value && std::is_same<_type, F32>::value)
-        _mm512_store_ps(ptr, reg);
-    else if constexpr (std::is_same<_registerType, __m512d>::value && std::is_same<_type, F64>::value)
-        _mm512_store_pd(ptr, reg);
-#endif // __AVX512F__
 #endif // __AVX2__
     else
         throw Exception(__PRETTY_FUNCTION__, "Not defined for selected combination of register type and data type");
@@ -254,14 +206,6 @@ inline _registerType _mmx_setzero_p()
         return _mm256_setzero_pd();
     else if constexpr (std::is_same<_registerType, __m256i>::value)
         return _mm256_setzero_si256();
-#ifdef __AVX512F__
-    if constexpr (std::is_same<_registerType, __m512>::value)
-        return _mm512_setzero_ps();
-    else if constexpr (std::is_same<_registerType, __m512d>::value)
-        return _mm512_setzero_pd();
-    else if constexpr (std::is_same<_registerType, __m512i>::value)
-        return _mm512_setzero_si512();
-#endif // __AVX512F__
 #endif // __AVX2__
     else
         throw Exception(__PRETTY_FUNCTION__, "Not defined for selected combination of register type and data type");
@@ -288,12 +232,6 @@ inline _registerType _mmx_set1_p(_type value)
         return _mm256_set1_ps(value);
     else if constexpr (std::is_same<_registerType, __m256d>::value)
         return _mm256_set1_pd(value);
-#ifdef __AVX512F__
-    if constexpr (std::is_same<_registerType, __m512>::value)
-        return _mm512_set1_ps(value);
-    else if constexpr (std::is_same<_registerType, __m512d>::value)
-        return _mm512_set1_pd(value);
-#endif // __AVX512F__
 #endif // __AVX2__
     else
         throw Exception(__PRETTY_FUNCTION__, "Not defined for selected combination of register type and data type");
@@ -323,12 +261,6 @@ inline _registerType _mmx_setr_p(_args... args)
         return _mm256_setr_ps(std::forward<_args>(args)...);
     else if constexpr (std::is_same<_registerType, __m256d>::value)
         return _mm256_setr_pd(std::forward<_args>(args)...);
-#ifdef __AVX512F__
-    if constexpr (std::is_same<_registerType, __m512>::value)
-        return _mm512_setr_ps(std::forward<_args>(args)...);
-    else if constexpr (std::is_same<_registerType, __m512d>::value)
-        return _mm512_setr_pd(std::forward<_args>(args)...);
-#endif // __AVX512F__
 #endif // __AVX2__
     else
         throw Exception(__PRETTY_FUNCTION__, "Not defined for selected combination of register type and data type");
@@ -355,12 +287,6 @@ inline _registerType _mmx_add_p(_registerType lhs, _registerType rhs)
         return _mm256_add_ps(lhs, rhs);
     else if constexpr (std::is_same<_registerType, __m256d>::value)
         return _mm256_add_pd(lhs, rhs);
-#ifdef __AVX512F__
-    if constexpr (std::is_same<_registerType, __m512>::value)
-        return _mm512_add_ps(lhs, rhs);
-    else if constexpr (std::is_same<_registerType, __m512d>::value)
-        return _mm512_add_pd(lhs, rhs);
-#endif // __AVX512F__
 #endif // __AVX2__
     else
         throw Exception(__PRETTY_FUNCTION__, "Not defined for selected register type.");
@@ -387,12 +313,6 @@ inline _registerType _mmx_sub_p(_registerType lhs, _registerType rhs)
         return _mm256_sub_ps(lhs, rhs);
     else if constexpr (std::is_same<_registerType, __m256d>::value)
         return _mm256_sub_pd(lhs, rhs);
-#ifdef __AVX512F__
-    if constexpr (std::is_same<_registerType, __m512>::value)
-        return _mm512_sub_ps(lhs, rhs);
-    else if constexpr (std::is_same<_registerType, __m512d>::value)
-        return _mm512_sub_pd(lhs, rhs);
-#endif // __AVX512F__
 #endif // __AVX2__
     else
         throw Exception(__PRETTY_FUNCTION__, "Not defined for selected register type.");
@@ -419,12 +339,6 @@ inline _registerType _mmx_mul_p(_registerType lhs, _registerType rhs)
         return _mm256_mul_ps(lhs, rhs);
     else if constexpr (std::is_same<_registerType, __m256d>::value)
         return _mm256_mul_pd(lhs, rhs);
-#ifdef __AVX512F__
-    if constexpr (std::is_same<_registerType, __m512>::value)
-        return _mm512_mul_ps(lhs, rhs);
-    else if constexpr (std::is_same<_registerType, __m512d>::value)
-        return _mm512_mul_pd(lhs, rhs);
-#endif // __AVX512F__
 #endif // __AVX2__
     else
         throw Exception(__PRETTY_FUNCTION__, "Not defined for selected register type.");
@@ -458,12 +372,6 @@ inline _registerType _mmx_fmadd_p(_registerType lhsM, _registerType rhsM, _regis
         return _mm256_fmadd_ps(lhsM, rhsM, add);
     else if constexpr (std::is_same<_registerType, __m256d>::value)
         return _mm256_fmadd_pd(lhsM, rhsM, add);
-#ifdef __AVX512F__
-    else if constexpr (std::is_same<_registerType, __m512>::value)
-        return _mm512_fmadd_ps(lhsM, rhsM, add);
-    else if constexpr (std::is_same<_registerType, __m512d>::value)
-        return _mm512_fmadd_pd(lhsM, rhsM, add);
-#endif // __AVX512F__
 #endif // __AVX2__
     else
         throw Exception(__PRETTY_FUNCTION__, "Not defined for selected register type.");
@@ -491,13 +399,6 @@ inline auto _mmx_cmpeq_p(_registerType lhs, _registerType rhs)
         return _mm256_cmp_ps(lhs, rhs, _CMP_EQ_OS);
     else if constexpr (std::is_same<_registerType, __m256d>::value)
         return _mm256_cmp_pd(lhs, rhs, _CMP_EQ_OS);
-#ifdef __AVX512F__
-    // Check https://software.intel.com/en-us/forums/intel-isa-extensions/topic/749055
-    else if constexpr (std::is_same<_registerType, __m512>::value)
-        throw(__PRETTY_FUNCTION__, "Not implemented");
-    else if constexpr (std::is_same<_registerType, __m512d>::value)
-        throw(__PRETTY_FUNCTION__, "Not implemented");
-#endif // __AVX512F__
 #endif // __AVX2__
     else
         throw Exception(__PRETTY_FUNCTION__, "Not defined for selected register type.");
@@ -524,13 +425,6 @@ inline auto _mmx_cmple_p(_registerType lhs, _registerType rhs)
         return _mm256_cmp_ps(lhs, rhs, _CMP_LE_OS);
     else if constexpr (std::is_same<_registerType, __m256d>::value)
         return _mm256_cmp_pd(lhs, rhs, _CMP_LE_OS);
-#ifdef __AVX512F__
-    // Check https://software.intel.com/en-us/forums/intel-isa-extensions/topic/749055
-    else if constexpr (std::is_same<_registerType, __m512>::value)
-        throw(__PRETTY_FUNCTION__, "Not implemented");
-    else if constexpr (std::is_same<_registerType, __m512d>::value)
-        throw(__PRETTY_FUNCTION__, "Not implemented");
-#endif // __AVX512F__
 #endif // __AVX2__
     else
         throw Exception(__PRETTY_FUNCTION__, "Not defined for selected register type.");
@@ -557,13 +451,6 @@ inline auto _mmx_cmpgt_p(_registerType lhs, _registerType rhs)
         return _mm256_cmp_ps(lhs, rhs, _CMP_GT_OS);
     else if constexpr (std::is_same<_registerType, __m256d>::value)
         return _mm256_cmp_pd(lhs, rhs, _CMP_GT_OS);
-#ifdef __AVX512F__
-    // Check https://software.intel.com/en-us/forums/intel-isa-extensions/topic/749055
-    else if constexpr (std::is_same<_registerType, __m512>::value)
-        throw(__PRETTY_FUNCTION__, "Not implemented");
-    else if constexpr (std::is_same<_registerType, __m512d>::value)
-        throw(__PRETTY_FUNCTION__, "Not implemented");
-#endif // __AVX512F__
 #endif // __AVX2__
     else
         throw Exception(__PRETTY_FUNCTION__, "Not defined for selected register type.");
@@ -590,12 +477,6 @@ inline _registerType _mmx_max_p(_registerType lhs, _registerType rhs)
         return _mm256_max_ps(lhs, rhs);
     else if constexpr (std::is_same<_registerType, __m256d>::value)
         return _mm256_max_pd(lhs, rhs);
-#ifdef __AVX512F__
-    else if constexpr (std::is_same<_registerType, __m512>::value)
-        return _mm512_max_ps(lhs, rhs);
-    else if constexpr (std::is_same<_registerType, __m512d>::value)
-        return _mm512_max_pd(lhs, rhs);
-#endif // __AVX512F__
 #endif // __AVX2__
     else
         throw Exception(__PRETTY_FUNCTION__, "Not defined for selected register type.");
@@ -622,12 +503,6 @@ inline _registerType _mmx_min_p(_registerType lhs, _registerType rhs)
         return _mm256_min_ps(lhs, rhs);
     else if constexpr (std::is_same<_registerType, __m256d>::value)
         return _mm256_min_pd(lhs, rhs);
-#ifdef __AVX512F__
-    else if constexpr (std::is_same<_registerType, __m512>::value)
-        return _mm512_min_ps(lhs, rhs);
-    else if constexpr (std::is_same<_registerType, __m512d>::value)
-        return _mm512_min_pd(lhs, rhs);
-#endif // __AVX512F__
 #endif // __AVX2__
     else
         throw Exception(__PRETTY_FUNCTION__, "Not defined for selected register type.");
@@ -654,12 +529,6 @@ inline _registerType _mmx_andnot_p(_registerType lhs, _registerType rhs)
         return _mm256_andnot_ps(lhs, rhs);
     else if constexpr (std::is_same<_registerType, __m256d>::value)
         return _mm256_andnot_pd(lhs, rhs);
-#ifdef __AVX512F__
-    else if constexpr (std::is_same<_registerType, __m512>::value)
-        return _mm512_andnot_ps(lhs, rhs);
-    else if constexpr (std::is_same<_registerType, __m512d>::value)
-        return _mm512_andnot_pd(lhs, rhs);
-#endif // __AVX512F__
 #endif // __AVX2__
     else
         throw Exception(__PRETTY_FUNCTION__, "Not defined for selected register type.");
@@ -681,11 +550,6 @@ inline auto _mmx_movemask_epi8(_registerType reg)
 #ifdef __AVX2__
     else if constexpr (std::is_same<_registerType, __m256i>::value)
         return static_cast<U32>(_mm256_movemask_epi8(reg));
-#ifdef __AVX512F__
-    // Check https://software.intel.com/en-us/forums/intel-isa-extensions/topic/749055
-    else if constexpr (std::is_same<_registerType, __m512i>::value)
-        throw(__PRETTY_FUNCTION__, "Not implemented");
-#endif // __AVX512F__
 #endif // __AVX2__
     else
         throw Exception(__PRETTY_FUNCTION__, "Not defined for selected register type.");
@@ -739,10 +603,6 @@ inline auto SSEReinterpretAsIntRegister(_registerType reg)
 #ifdef __AVX2__
     if constexpr (std::is_same<_registerType, __m256>::value || std::is_same<_registerType, __m256d>::value)
         return reinterpret_cast<__m256i>(reg);
-#ifdef __AVX512F__
-    if constexpr (std::is_same<_registerType, __m512>::value || std::is_same<_registerType, __m512d>::value)
-        return reinterpret_cast<__m512i>(reg);
-#endif // __AVX512F__
 #endif // __AVX2__
     else
         throw Exception(__PRETTY_FUNCTION__, "Not defined for selected register type.");
