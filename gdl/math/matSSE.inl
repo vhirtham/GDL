@@ -347,7 +347,7 @@ inline void MatSSE<_type, _rows, _cols>::MultiplicationInnerLoops(MatSSE<_type, 
         alignas(mAlignment) std::array<_type, mNumRegisterEntries> rhsRegisterValues;
         _mmx_store_p(rhsRegisterValues.data(), rhs.mData[indexRegisterRhs]);
 
-        std::array<__mx, _numMultipliedRegisters> tmp;
+        alignas(mAlignment) std::array<__mx, _numMultipliedRegisters> tmp;
         for (U32 k = 0; k < _numMultipliedRegisters; ++k)
             tmp[k] = _mmx_set1_p<__mx>(rhsRegisterValues[k]);
 

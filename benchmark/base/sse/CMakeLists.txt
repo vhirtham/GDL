@@ -1,1 +1,1 @@
-
+addBenchmark(directAccess)
