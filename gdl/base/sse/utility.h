@@ -64,6 +64,50 @@ constexpr const U32 numRegisterValues<__m256d> = 4;
 template <typename _registerType>
 constexpr U32 CalcMinNumArrayRegisters(U32 numValues);
 
+//! @brief Gets the value of a register at the desired position (compile time version)
+//! @tparam _index: Index of the value
+//! @return Value of a register at the desired position
+template <U32 _index>
+inline F32 GetValue(__m128 reg);
+
+//! @brief Gets the value of a register at the desired position (run time version)
+//! @tparam _index: Index of the value
+//! @return Value of a register at the desired position
+inline F32 GetValue(__m128 reg, U32 index);
+
+//! @brief Gets the value of a register at the desired position (compile time version)
+//! @tparam _index: Index of the value
+//! @return Value of a register at the desired position
+template <U32 _index>
+inline F64 GetValue(__m128d reg);
+
+//! @brief Gets the value of a register at the desired position (run time version)
+//! @tparam _index: Index of the value
+//! @return Value of a register at the desired position
+inline F64 GetValue(__m128d reg, U32 index);
+
+//! @brief Gets the value of a register at the desired position (compile time version)
+//! @tparam _index: Index of the value
+//! @return Value of a register at the desired position
+template <U32 _index>
+inline F32 GetValue(__m256 reg);
+
+//! @brief Gets the value of a register at the desired position (run time version)
+//! @tparam _index: Index of the value
+//! @return Value of a register at the desired position
+inline F32 GetValue(__m256 reg, U32 index);
+
+//! @brief Gets the value of a register at the desired position (compile time version)
+//! @tparam _index: Index of the value
+//! @return Value of a register at the desired position
+template <U32 _index>
+inline F64 GetValue(__m256d reg);
+
+//! @brief Gets the value of a register at the desired position (run time version)
+//! @tparam _index: Index of the value
+//! @return Value of a register at the desired position
+inline F64 GetValue(__m256d reg, U32 index);
+
 //! @brief Gets a register of the provided bitsize which is compatible with a given data type
 //! @tparam _type: Returned register must be capable to store values of this data type
 //! @tparam _registerSize: Bit size of the returned register
@@ -80,6 +124,16 @@ auto GetFittingRegister();
 //! @remark A function call should usually be combined with decltype
 template <typename _registerType, bool _returnTypeIfNoTARegister = false>
 constexpr auto GetDataType();
+
+template <I32 _i0, I32 _i1>
+constexpr I32 ShuffleMask();
+
+constexpr I32 ShuffleMask(I32 i0, I32 i1);
+
+template <I32 _i0, I32 _i1, I32 _i2, I32 _i3>
+constexpr I32 ShuffleMask();
+
+constexpr I32 ShuffleMask(I32 i0, I32 i1, I32 i2, I32 i3);
 
 //! @brief Returns if the template type is a sse register type
 //! @tparam _registerType: Register type
