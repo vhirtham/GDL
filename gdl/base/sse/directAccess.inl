@@ -3,137 +3,71 @@
 #include "gdl/base/sse/directAccess.h"
 
 #include "gdl/base/exception.h"
+#include "gdl/base/sse/intrinsics.h"
 #include "gdl/base/sse/utility.h"
 
 
 namespace GDL::sse
 {
 
-
-template <U32 _index>
-inline F32 GetValue(__m128 reg)
+template <U32 _index, typename _registerType>
+inline auto GetValue(const _registerType reg)
 {
-    static_assert(_index < 4, "Invalid index");
-    if constexpr (_index == 0)
-        return _mm_cvtss_f32(reg);
-    else
-        return _mm_cvtss_f32(_mm_shuffle_ps(reg, reg, _MM_SHUFFLE(_index, _index, _index, _index)));
-}
+    using ValueType = decltype(sse::GetDataType<_registerType>());
 
+    static_assert(_index < sse::numRegisterValues<_registerType>, "Index >= numRegisterValues");
 
-inline F32 GetValue(__m128 reg, const U32 index)
-{
-    switch (index)
-    {
-    case 0:
-        return GetValue<0>(reg);
-    case 1:
-        return GetValue<1>(reg);
-    case 2:
-        return GetValue<2>(reg);
-    case 3:
-        return GetValue<3>(reg);
-    default:
-        EXCEPTION(true, "Invalid index");
-    }
-}
-
-
-template <U32 _index>
-inline F64 GetValue(__m128d reg)
-{
-    static_assert(_index < 2, "Invalid index");
-    if constexpr (_index == 0)
-        return _mm_cvtsd_f64(reg);
-    else
-        return _mm_cvtsd_f64(_mm_unpackhi_pd(reg, reg));
+    alignas(sse::alignmentBytes<_registerType>) ValueType array[sse::numRegisterValues<_registerType>];
+    _mmx_store_p(array, reg);
+    return array[_index];
 }
 
 
 
-inline F64 GetValue(__m128d reg, U32 index)
+template <typename _registerType>
+inline auto GetValue(const _registerType reg, const U32 index)
 {
-    switch (index)
-    {
-    case 0:
-        return GetValue<0>(reg);
-    case 1:
-        return GetValue<1>(reg);
-    default:
-        EXCEPTION(true, "Invalid index");
-    }
-}
+    using ValueType = decltype(sse::GetDataType<_registerType>());
 
-#ifdef __AVX2__
+    DEV_EXCEPTION(index >= sse::numRegisterValues<_registerType>, "Index >= numRegisterValues");
 
-template <U32 _index>
-inline F32 GetValue(__m256 reg)
-{
-    static_assert(_index < 8, "Invalid index");
-    if constexpr (_index < 4)
-        return GetValue<_index>(_mm256_extractf128_ps(reg, 0));
-    else
-        return GetValue<_index - 4>(_mm256_extractf128_ps(reg, 1));
+    alignas(sse::alignmentBytes<_registerType>) ValueType array[sse::numRegisterValues<_registerType>];
+    _mmx_store_p(array, reg);
+    return array[index];
 }
 
 
 
-inline F32 GetValue(__m256 reg, U32 index)
+template <U32 _index, typename _registerType, typename _type>
+inline auto SetValue(_registerType& reg, const _type value)
 {
-    switch (index)
-    {
-    case 0:
-        return GetValue<0>(reg);
-    case 1:
-        return GetValue<1>(reg);
-    case 2:
-        return GetValue<2>(reg);
-    case 3:
-        return GetValue<3>(reg);
-    case 4:
-        return GetValue<4>(reg);
-    case 5:
-        return GetValue<5>(reg);
-    case 6:
-        return GetValue<6>(reg);
-    case 7:
-        return GetValue<7>(reg);
-    default:
-        EXCEPTION(true, "Invalid index");
-    }
+    using ValueType = decltype(sse::GetDataType<_registerType>());
+
+    static_assert(_index < sse::numRegisterValues<_registerType>, "Index >= numRegisterValues");
+    static_assert(std::is_convertible<_type, ValueType>::value,
+                  "The values type can't be converted to the registers value type");
+
+    alignas(sse::alignmentBytes<_registerType>) ValueType array[sse::numRegisterValues<_registerType>];
+    _mmx_store_p(array, reg);
+    array[_index] = static_cast<ValueType>(value);
+    reg = _mmx_load_p<_registerType>(array);
 }
 
 
 
-template <U32 _index>
-inline F64 GetValue(__m256d reg)
+template <typename _registerType, typename _type>
+inline auto SetValue(_registerType& reg, const _type value, const U32 index)
 {
-    static_assert(_index < 4, "Invalid index");
-    if constexpr (_index < 2)
-        return GetValue<_index>(_mm256_extractf128_pd(reg, 0));
-    else
-        return GetValue<_index - 2>(_mm256_extractf128_pd(reg, 1));
+    using ValueType = decltype(sse::GetDataType<_registerType>());
+
+    DEV_EXCEPTION(index >= sse::numRegisterValues<_registerType>, "Index >= numRegisterValues");
+    static_assert(std::is_convertible<_type, ValueType>::value,
+                  "The values type can't be converted to the registers value type");
+
+    alignas(sse::alignmentBytes<_registerType>) ValueType array[sse::numRegisterValues<_registerType>];
+    _mmx_store_p(array, reg);
+    array[index] = static_cast<ValueType>(value);
+    reg = _mmx_load_p<_registerType>(array);
 }
-
-
-
-inline F64 GetValue(__m256d reg, U32 index)
-{
-    switch (index)
-    {
-    case 0:
-        return GetValue<0>(reg);
-    case 1:
-        return GetValue<1>(reg);
-    case 2:
-        return GetValue<2>(reg);
-    case 3:
-        return GetValue<3>(reg);
-    default:
-        EXCEPTION(true, "Invalid index");
-    }
-}
-
-#endif // __AVX2__
 
 } // namespace GDL::sse

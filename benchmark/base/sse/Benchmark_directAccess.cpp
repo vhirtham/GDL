@@ -8,9 +8,13 @@
 using namespace GDL;
 
 
-constexpr U32 iE = 0;
+constexpr U32 valueIndex = 0;
 using registerType = __m256;
 using valueType = decltype(sse::GetDataType<registerType>());
+
+
+//#define DISABLE_BENCHMARK_GETTER
+
 
 // Fixture declaration %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -19,7 +23,6 @@ class alignas(sse::alignmentBytes<registerType>) FixtureTemplate : public benchm
 {
 public:
     _registerType reg;
-    valueType v = static_cast<valueType>(0);
 
     FixtureTemplate()
     {
@@ -27,10 +30,12 @@ public:
             reg = _mm_setr_pd(1.f, 2.f);
         if constexpr (std::is_same<registerType, __m128>::value)
             reg = _mm_setr_ps(1.f, 2.f, 3.f, 4.f);
+#ifdef __AVX2__
         if constexpr (std::is_same<registerType, __m256d>::value)
             reg = _mm256_setr_pd(1., 2., 3., 4.);
         if constexpr (std::is_same<registerType, __m256>::value)
             reg = _mm256_setr_ps(1.f, 2.f, 3.f, 4.f, 5.f, 6.f, 7.f, 8.f);
+#endif // __AVX2__
     }
 };
 
@@ -38,6 +43,8 @@ using FixtureBenchmark = FixtureTemplate<registerType>;
 
 
 // Getter Implementations %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+#ifndef DISABLE_BENCHMARK_GETTER
+
 
 template <U32 _index>
 valueType GetterDirectAccessOperator(registerType reg)
@@ -85,6 +92,8 @@ valueType GetterFirstElementShuffle(__m128d reg)
         return _mm_cvtsd_f64(_mm_unpackhi_pd(reg, reg));
 }
 
+#ifdef __AVX2__
+
 template <U32 _index>
 valueType GetterFirstElementShuffle(__m256d reg)
 {
@@ -103,43 +112,111 @@ valueType GetterFirstElementShuffle(__m256 reg)
         return GetterFirstElementShuffle<_index - 4>(_mm256_extractf128_ps(reg, 1));
 }
 
+#endif // __AVX2__
+
+
 
 // Getter Benchmarks %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-BENCHMARK_F(FixtureBenchmark, Current_Implementation)(benchmark::State& state)
-{
-    for (auto _ : state)
-        for (U32 i = 0; i < 100; ++i)
-            benchmark::DoNotOptimize(sse::GetValue<iE>(reg));
-}
 
 BENCHMARK_F(FixtureBenchmark, GetterDirectAccessOperator)(benchmark::State& state)
 {
     for (auto _ : state)
         for (U32 i = 0; i < 100; ++i)
-            benchmark::DoNotOptimize(GetterDirectAccessOperator<iE>(reg));
+            benchmark::DoNotOptimize(GetterDirectAccessOperator<valueIndex>(reg));
 }
 
 BENCHMARK_F(FixtureBenchmark, GetterStore)(benchmark::State& state)
 {
     for (auto _ : state)
         for (U32 i = 0; i < 100; ++i)
-            benchmark::DoNotOptimize(GetterStore<iE>(reg));
+            benchmark::DoNotOptimize(GetterStore<valueIndex>(reg));
 }
 
 BENCHMARK_F(FixtureBenchmark, GetterUnion)(benchmark::State& state)
 {
     for (auto _ : state)
         for (U32 i = 0; i < 100; ++i)
-            benchmark::DoNotOptimize(GetterUnion<iE>(reg));
+            benchmark::DoNotOptimize(GetterUnion<valueIndex>(reg));
 }
-
 
 BENCHMARK_F(FixtureBenchmark, GetterFirstElementShuffle)(benchmark::State& state)
 {
     for (auto _ : state)
         for (U32 i = 0; i < 100; ++i)
-            benchmark::DoNotOptimize(GetterFirstElementShuffle<iE>(reg));
+            benchmark::DoNotOptimize(GetterFirstElementShuffle<valueIndex>(reg));
+}
+
+BENCHMARK_F(FixtureBenchmark, Current_Implementation)(benchmark::State& state)
+{
+    for (auto _ : state)
+        for (U32 i = 0; i < 100; ++i)
+            benchmark::DoNotOptimize(sse::GetValue<valueIndex>(reg));
+}
+#endif // DISABLE_BENCHMARK_GETTER
+
+
+
+// Setter Implementations %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+template <U32 _index>
+void SetterDirectAccessOperator(registerType& reg, valueType value)
+{
+    reg[_index] = value;
+}
+
+
+
+template <U32 _index>
+void SetterStoreModifyLoad(registerType& reg, valueType value)
+{
+    alignas(sse::alignmentBytes<registerType>) valueType array[sse::numRegisterValues<registerType>];
+    _mmx_store_p(array, reg);
+    array[_index] = value;
+    reg = _mmx_load_p<registerType>(array);
+}
+
+
+
+template <U32 _index>
+void SetterUnion(registerType& reg, valueType value)
+{
+    union Data {
+        registerType sse;
+        valueType array[sse::numRegisterValues<registerType>];
+    };
+
+    Data data{reg};
+    data.array[_index] = value;
+    reg = data.sse;
+}
+
+
+// Setter Benchmarks %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+BENCHMARK_F(FixtureBenchmark, SetterDirectAccessOperator)(benchmark::State& state)
+{
+    for (auto _ : state)
+        for (U32 i = 0; i < 100; ++i)
+            SetterDirectAccessOperator<valueIndex>(reg, static_cast<valueType>(i));
+}
+
+
+
+BENCHMARK_F(FixtureBenchmark, SetterStoreModifyLoad)(benchmark::State& state)
+{
+    for (auto _ : state)
+        for (U32 i = 0; i < 100; ++i)
+            SetterStoreModifyLoad<valueIndex>(reg, static_cast<valueType>(i));
+}
+
+
+
+BENCHMARK_F(FixtureBenchmark, SetterUnion)(benchmark::State& state)
+{
+    for (auto _ : state)
+        for (U32 i = 0; i < 100; ++i)
+            SetterUnion<valueIndex>(reg, static_cast<valueType>(i));
 }
 
 

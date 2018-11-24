@@ -31,6 +31,25 @@ inline void _mmx_store_p(_type* ptr, _registerType reg)
 
 
 
+template <typename _registerType, typename _type>
+inline _registerType _mmx_load_p(_type* ptr)
+{
+    if constexpr (std::is_same<_registerType, __m128>::value && std::is_same<_type, F32>::value)
+        return _mm_load_ps(ptr);
+    else if constexpr (std::is_same<_registerType, __m128d>::value && std::is_same<_type, F64>::value)
+        return _mm_load_pd(ptr);
+#ifdef __AVX2__
+    else if constexpr (std::is_same<_registerType, __m256>::value && std::is_same<_type, F32>::value)
+        return _mm256_load_ps(ptr);
+    else if constexpr (std::is_same<_registerType, __m256d>::value && std::is_same<_type, F64>::value)
+        return _mm256_load_pd(ptr);
+#endif // __AVX2__
+    else
+        throw Exception(__PRETTY_FUNCTION__, "Not defined for selected combination of register type and data type");
+}
+
+
+
 template <typename _registerType>
 inline _registerType _mmx_setzero_p()
 {
