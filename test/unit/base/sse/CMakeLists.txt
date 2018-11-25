@@ -1,4 +1,5 @@
 addTest(abs)
 addTest(compareAll)
 addTest(directAccess)
+addTest(maskMacros)
 addTest(utility)
