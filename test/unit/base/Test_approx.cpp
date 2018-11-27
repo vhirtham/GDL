@@ -3,6 +3,7 @@
 #include "gdl/base/approx.h"
 #include "gdl/base/fundamentalTypes.h"
 #include "gdl/base/functions/pow.h"
+#include "gdl/base/sse/directAccess.h"
 
 #include "test/tools/ExceptionChecks.h"
 
@@ -105,7 +106,7 @@ void TestApproxSSE()
 
 
             for (U32 k = 0; k < numRegisterEntries; ++k)
-                values[k] = valueBase * static_cast<ElementType>(k);
+                sse::SetValue(values, valueBase * static_cast<ElementType>(k), k);
 
             _registerType negValues = _mmx_mul_p(values, _mmx_set1_p<_registerType>(-1));
 
@@ -151,17 +152,19 @@ void TestApproxSSE()
                 cmp = values;
                 // first value is 0! ---> comparison will use valueBase
                 if (k == 0)
-                    cmp[k] = valueBase * epsilonBase * (factor - 1);
+                    sse::SetValue(cmp, valueBase * epsilonBase * (factor - 1), k);
                 else
-                    cmp[k] = values[k] + values[k] * epsilonBase * (factor - 1);
+                    sse::SetValue(cmp, sse::GetValue(values, k) + sse::GetValue(values, k) * epsilonBase * (factor - 1),
+                                  k);
                 BOOST_CHECK(cmp == approx);
                 BOOST_CHECK(approx == cmp);
 
                 // first value is 0! ---> comparison will use valueBase
                 if (k == 0)
-                    cmp[k] = valueBase * epsilonBase * (factor + 1);
+                    sse::SetValue(cmp, valueBase * epsilonBase * (factor + 1), k);
                 else
-                    cmp[k] = values[k] + values[k] * epsilonBase * (factor + 1);
+                    sse::SetValue(cmp, sse::GetValue(values, k) + sse::GetValue(values, k) * epsilonBase * (factor + 1),
+                                  k);
                 BOOST_CHECK(cmp != approx);
                 BOOST_CHECK(approx != cmp);
             }
@@ -176,17 +179,19 @@ void TestApproxSSE()
                 cmp = values;
                 // first value is 0! ---> comparison will use valueBase
                 if (k == 0)
-                    cmp[k] = valueBase * epsilonBase * (factor - 1);
+                    sse::SetValue(cmp, valueBase * epsilonBase * (factor - 1), k);
                 else
-                    cmp[k] = values[k] + values[k] * epsilonBase * (factor - 1);
+                    sse::SetValue(cmp, sse::GetValue(values, k) + sse::GetValue(values, k) * epsilonBase * (factor - 1),
+                                  k);
                 BOOST_CHECK(cmp == approxMinus1);
                 BOOST_CHECK(approxMinus1 == cmp);
 
                 // first value is 0! ---> comparison will use valueBase
                 if (k == 0)
-                    cmp[k] = valueBase * epsilonBase * (factor + 1);
+                    sse::SetValue(cmp, valueBase * epsilonBase * (factor + 1), k);
                 else
-                    cmp[k] = values[k] + values[k] * epsilonBase * (factor + 1);
+                    sse::SetValue(cmp, sse::GetValue(values, k) + sse::GetValue(values, k) * epsilonBase * (factor + 1),
+                                  k);
                 if (k < numRegisterEntries - 1)
                 {
                     BOOST_CHECK(cmp != approxMinus1);
@@ -262,7 +267,7 @@ void TestApproxZeroSSE()
             for (U32 k = 0; k < numRegisterEntries; ++k)
             {
                 cmp = zeroReg;
-                cmp[k] = scaledEps[0] * (factor + 1);
+                sse::SetValue(cmp, sse::GetValue(scaledEps, 0) * (factor + 1), k);
 
                 BOOST_CHECK(cmp != ApproxZero<_registerType>(base, factor));
             }
@@ -273,7 +278,7 @@ void TestApproxZeroSSE()
             for (U32 k = 0; k < numRegisterEntries; ++k)
             {
                 cmp = zeroReg;
-                cmp[k] = scaledEps[0] * (factor + 1);
+                sse::SetValue(cmp, sse::GetValue(scaledEps, 0) * (factor + 1), k);
 
                 auto approxZero = ApproxZero<_registerType, numRegisterEntries - 1>(base, factor);
                 if (k < numRegisterEntries - 1)
