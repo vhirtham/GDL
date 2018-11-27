@@ -9,7 +9,7 @@
 
 using namespace GDL;
 
-// Helper functions %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+// Helper functions ---------------------------------------------------------------------------------------------------
 
 template <typename _type>
 bool CheckArrayZero(const _type& a)
@@ -33,7 +33,7 @@ bool CheckCloseArray(const _type& a, const _type& b)
 
 
 
-// Fixture definition %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+// Fixture definition -------------------------------------------------------------------------------------------------
 
 template <typename matrix>
 struct Fixture
@@ -43,7 +43,8 @@ struct Fixture
 };
 
 
-// Construction %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+// Construction -------------------------------------------------------------------------------------------------------
 
 template <typename matrix>
 void ConstructionTest()
@@ -59,18 +60,23 @@ void ConstructionTest()
     BOOST_CHECK(CheckCloseArray(B1.Data(), expB));
 }
 
+
+
 BOOST_AUTO_TEST_CASE(Construction_Single)
 {
     ConstructionTest<Mat4Single<F32>>();
 }
 
-BOOST_AUTO_TEST_CASE(Construction_SIMD)
+
+
+BOOST_AUTO_TEST_CASE(Construction_SSE)
 {
     ConstructionTest<Mat4SSE>();
 }
 
 
-// Comparison %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+// Comparison ---------------------------------------------------------------------------------------------------------
 
 template <typename matrix>
 void ComparisonTest(matrix& A, matrix& B)
@@ -113,20 +119,59 @@ void ComparisonTest(matrix& A, matrix& B)
 }
 
 
+
 BOOST_FIXTURE_TEST_CASE(Comparison_Single, Fixture<Mat4Single<F32>>)
 {
     ComparisonTest(A, B);
 }
 
 
-BOOST_FIXTURE_TEST_CASE(Comparison_SIMD, Fixture<Mat4SSE>)
+
+BOOST_FIXTURE_TEST_CASE(Comparison_SSE, Fixture<Mat4SSE>)
 {
     ComparisonTest(A, B);
 }
 
 
 
-// Addition Assignment %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+// Operator() test ----------------------------------------------------------------------------------------------------
+
+template <typename _matrix>
+void ParenthesesOperatorMatrixTest(const _matrix& matrix)
+{
+    std::array<F32, 16> data = matrix.Data();
+
+    for (U32 r = 0; r < 4; ++r)
+        for (U32 c = 0; c < 4; ++c)
+            BOOST_CHECK(matrix(r, c) == Approx(data[r + c * 4]));
+}
+
+
+
+template <typename _matrix>
+void ParenthesesOperatorTest(_matrix A, _matrix B)
+{
+    ParenthesesOperatorMatrixTest(A);
+    ParenthesesOperatorMatrixTest(B);
+}
+
+
+
+BOOST_FIXTURE_TEST_CASE(Parentheses_Operator_Single, Fixture<Mat4Single<F32>>)
+{
+    ParenthesesOperatorTest(A, B);
+}
+
+
+
+BOOST_FIXTURE_TEST_CASE(Parentheses_Operator_SSE, Fixture<Mat4Single<F32>>)
+{
+    ParenthesesOperatorTest(A, B);
+}
+
+
+
+// Addition Assignment ------------------------------------------------------------------------------------------------
 
 template <typename matrix>
 void AdditionAssignmentTest(matrix& A, matrix& B)
@@ -143,20 +188,22 @@ void AdditionAssignmentTest(matrix& A, matrix& B)
 }
 
 
+
 BOOST_FIXTURE_TEST_CASE(Addition_Assignment_Single, Fixture<Mat4Single<F32>>)
 {
     AdditionAssignmentTest(A, B);
 }
 
 
-BOOST_FIXTURE_TEST_CASE(Addition_Assignment_SIMD, Fixture<Mat4SSE>)
+
+BOOST_FIXTURE_TEST_CASE(Addition_Assignment_SSE, Fixture<Mat4SSE>)
 {
     AdditionAssignmentTest(A, B);
 }
 
 
 
-// Addition %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+// Addition -----------------------------------------------------------------------------------------------------------
 
 template <typename matrix>
 void AdditionTest(matrix& A, matrix& B)
@@ -168,20 +215,22 @@ void AdditionTest(matrix& A, matrix& B)
 }
 
 
+
 BOOST_FIXTURE_TEST_CASE(Addition_Single, Fixture<Mat4Single<F32>>)
 {
     AdditionTest(A, B);
 }
 
 
-BOOST_FIXTURE_TEST_CASE(Addition_SIMD, Fixture<Mat4SSE>)
+
+BOOST_FIXTURE_TEST_CASE(Addition_SSE, Fixture<Mat4SSE>)
 {
     AdditionTest(A, B);
 }
 
 
 
-// Multiplication %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+// Multiplication -----------------------------------------------------------------------------------------------------
 
 template <typename matrix>
 void MultiplicationTest(const matrix& A, const matrix& B)
@@ -196,20 +245,22 @@ void MultiplicationTest(const matrix& A, const matrix& B)
 }
 
 
+
 BOOST_FIXTURE_TEST_CASE(Multiplication_Single, Fixture<Mat4Single<F32>>)
 {
     MultiplicationTest<Mat4Single<F32>>(A, B);
 }
 
 
-BOOST_FIXTURE_TEST_CASE(Multiplication_SIMD, Fixture<Mat4SSE>)
+
+BOOST_FIXTURE_TEST_CASE(Multiplication_SSE, Fixture<Mat4SSE>)
 {
     MultiplicationTest<Mat4SSE>(A, B);
 }
 
 
 
-// Transpose %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+// Transpose ----------------------------------------------------------------------------------------------------------
 
 template <typename matrix>
 void Transpose(const matrix& A)
@@ -223,13 +274,15 @@ void Transpose(const matrix& A)
 }
 
 
+
 BOOST_FIXTURE_TEST_CASE(Transpose_Single, Fixture<Mat4Single<F32>>)
 {
     Transpose<Mat4Single<F32>>(A);
 }
 
 
-BOOST_FIXTURE_TEST_CASE(Transpose_SIMD, Fixture<Mat4SSE>)
+
+BOOST_FIXTURE_TEST_CASE(Transpose_SSE, Fixture<Mat4SSE>)
 {
     Transpose<Mat4SSE>(A);
 }

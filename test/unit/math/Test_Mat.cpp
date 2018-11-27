@@ -8,7 +8,7 @@
 
 using namespace GDL;
 
-// Helper functions %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+// Helper functions ---------------------------------------------------------------------------------------------------
 
 template <typename _type>
 bool CheckArrayZero(const _type& a)
@@ -18,6 +18,8 @@ bool CheckArrayZero(const _type& a)
             return false;
     return true;
 }
+
+
 
 template <typename _type>
 bool CheckCloseArray(const _type& a, const _type& b)
@@ -32,7 +34,7 @@ bool CheckCloseArray(const _type& a, const _type& b)
 
 
 
-// Fixture definition %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+// Fixture definition -------------------------------------------------------------------------------------------------
 
 template <template <typename, I32, I32> class _matrix, typename _type>
 struct Fixture
@@ -48,7 +50,7 @@ struct Fixture
 
 
 
-// Construction and Data function %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+// Construction and Data function -------------------------------------------------------------------------------------
 
 template <template <typename, I32, I32> class _matrix, typename _type>
 void CtorDataTest()
@@ -76,11 +78,14 @@ void CtorDataTest()
     BOOST_CHECK(CheckArrayZero(D.Data()));
 }
 
+
+
 BOOST_AUTO_TEST_CASE(Construction_Single)
 {
     CtorDataTest<MatSingle, F32>();
     CtorDataTest<MatSingle, F64>();
 }
+
 
 
 BOOST_AUTO_TEST_CASE(Construction_SSE)
@@ -91,7 +96,7 @@ BOOST_AUTO_TEST_CASE(Construction_SSE)
 
 
 
-// Comparison Equal %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+// Comparison Equal ---------------------------------------------------------------------------------------------------
 
 template <I32 _cols, I32 _rows, typename _type, template <typename, I32, I32> class _matrix>
 void ComparisonEqualMatrixTest(const _matrix<_type, _rows, _cols>& ref)
@@ -173,6 +178,7 @@ BOOST_AUTO_TEST_CASE(ComparisonEqual_Single)
 }
 
 
+
 BOOST_AUTO_TEST_CASE(ComparisonEqual_SSE)
 {
     ComparisonEqualTest<MatSSE, F32>();
@@ -181,7 +187,7 @@ BOOST_AUTO_TEST_CASE(ComparisonEqual_SSE)
 
 
 
-// Operator() test %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+// Operator() test ----------------------------------------------------------------------------------------------------
 
 template <template <typename, I32, I32> class _matrix, typename _type, I32 _rows, I32 _cols>
 void ParenthesesOperatorMatrixTest(const _matrix<_type, _rows, _cols>& matrix)
@@ -192,6 +198,7 @@ void ParenthesesOperatorMatrixTest(const _matrix<_type, _rows, _cols>& matrix)
         for (U32 c = 0; c < matrix.Cols(); ++c)
             BOOST_CHECK(matrix(r, c) == Approx(data[r + c * _rows]));
 }
+
 
 
 template <template <typename, I32, I32> class _matrix, typename _type>
@@ -207,11 +214,14 @@ void ParenthesesOperatorTest()
     ParenthesesOperatorMatrixTest(f.B3);
 }
 
+
+
 BOOST_AUTO_TEST_CASE(Parentheses_Operator_Single)
 {
     ParenthesesOperatorTest<MatSingle, F32>();
     ParenthesesOperatorTest<MatSingle, F64>();
 }
+
 
 
 BOOST_AUTO_TEST_CASE(Parentheses_Operator_SIMD)
@@ -245,11 +255,14 @@ void AssignmentTest()
     BOOST_CHECK(B2 == f.B2);
 }
 
+
+
 BOOST_AUTO_TEST_CASE(Assignment_Single)
 {
     AssignmentTest<MatSingle, F32>();
     AssignmentTest<MatSingle, F64>();
 }
+
 
 
 BOOST_AUTO_TEST_CASE(Assignment_SIMD)
@@ -279,11 +292,14 @@ void SetZeroTest()
     BOOST_CHECK(CheckArrayZero(f.B2.Data()));
 }
 
+
+
 BOOST_AUTO_TEST_CASE(SetZero_Single)
 {
     SetZeroTest<MatSingle, F32>();
     SetZeroTest<MatSingle, F64>();
 }
+
 
 
 BOOST_AUTO_TEST_CASE(SetZero_SIMD)
@@ -321,11 +337,14 @@ void AdditionAssignmentTest()
     BOOST_CHECK(B2 == expB2);
 }
 
+
+
 BOOST_AUTO_TEST_CASE(Addition_Assignment_Single)
 {
     AdditionAssignmentTest<MatSingle, F32>();
     AdditionAssignmentTest<MatSingle, F64>();
 }
+
 
 
 BOOST_AUTO_TEST_CASE(Addition_Assignment_SIMD)
@@ -359,11 +378,14 @@ void AdditionTest()
     BOOST_CHECK(C2 == expC2);
 }
 
+
+
 BOOST_AUTO_TEST_CASE(Addition_Single)
 {
     AdditionTest<MatSingle, F32>();
     AdditionTest<MatSingle, F64>();
 }
+
 
 
 BOOST_AUTO_TEST_CASE(Addition_SIMD)
@@ -413,11 +435,14 @@ void MultiplicationTest()
     BOOST_CHECK(D3 == expD3);
 }
 
+
+
 BOOST_AUTO_TEST_CASE(Multiplication_Single)
 {
     MultiplicationTest<MatSingle, F32>();
     MultiplicationTest<MatSingle, F64>();
 }
+
 
 
 BOOST_AUTO_TEST_CASE(Multiplication_SIMD)
@@ -469,6 +494,7 @@ void TransposeTest()
         TransposeTest<_matrix, _type, 16, 16>();
     }
 }
+
 
 
 BOOST_AUTO_TEST_CASE(Transpose_Single)
