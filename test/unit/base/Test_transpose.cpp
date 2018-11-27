@@ -1,5 +1,6 @@
 #include <boost/test/unit_test.hpp>
 
+#include "gdl/base/sse/directAccess.h"
 #include "gdl/base/sse/intrinsics.h"
 #include "gdl/base/sse/transpose.h"
 
@@ -24,7 +25,7 @@ BOOST_AUTO_TEST_CASE(Transpose2x2_128)
 
     for (U32 i = 0; i < 2; ++i)
         for (U32 j = 0; j < 2; ++j)
-            BOOST_CHECK(b[i][j] == expected[i][j]);
+            BOOST_CHECK(sse::GetValue(b[i], j) == sse::GetValue(expected[i], j));
 }
 
 
@@ -48,7 +49,7 @@ BOOST_AUTO_TEST_CASE(Transpose4x4_128)
 
     for (U32 i = 0; i < 4; ++i)
         for (U32 j = 0; j < 4; ++j)
-            BOOST_CHECK(b[i][j] == expected[i][j]);
+            BOOST_CHECK(sse::GetValue(b[i], j) == sse::GetValue(expected[i], j));
 }
 
 
@@ -73,7 +74,7 @@ BOOST_AUTO_TEST_CASE(Transpose4x4_256)
 
     for (U32 i = 0; i < 4; ++i)
         for (U32 j = 0; j < 4; ++j)
-            BOOST_CHECK(b[i][j] == expected[i][j]);
+            BOOST_CHECK(sse::GetValue(b[i], j) == sse::GetValue(expected[i], j));
 }
 
 
@@ -105,7 +106,7 @@ BOOST_AUTO_TEST_CASE(Transpose8x8_256)
 
     for (U32 i = 0; i < 8; ++i)
         for (U32 j = 0; j < 8; ++j)
-            BOOST_CHECK(b[i][j] == expected[i][j]);
+            BOOST_CHECK(sse::GetValue(b[i], j) == sse::GetValue(expected[i], j));
 }
 
 
