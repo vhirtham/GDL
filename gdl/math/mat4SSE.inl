@@ -4,6 +4,7 @@
 #include "gdl/base/approx.h"
 #include "gdl/base/exception.h"
 #include "gdl/base/functions/alignment.h"
+#include "gdl/base/sse/directAccess.h"
 #include "gdl/base/sse/transpose.h"
 
 #include <cassert>
@@ -39,7 +40,7 @@ Mat4SSE::Mat4SSE(std::array<F32, 16> data)
 
 
 Mat4SSE::Mat4SSE(F32 v0, F32 v1, F32 v2, F32 v3, F32 v4, F32 v5, F32 v6, F32 v7, F32 v8, F32 v9, F32 v10, F32 v11,
-                   F32 v12, F32 v13, F32 v14, F32 v15)
+                 F32 v12, F32 v13, F32 v14, F32 v15)
     : mData({{{_mmx_setr_p<__m128>(v0, v1, v2, v3)},
               {_mmx_setr_p<__m128>(v4, v5, v6, v7)},
               {_mmx_setr_p<__m128>(v8, v9, v10, v11)},
@@ -71,12 +72,11 @@ F32 Mat4SSE::operator()(const U32 row, const U32 col) const
     DEV_EXCEPTION(row > 3, "row - invalid value! [0..3]");
     DEV_EXCEPTION(col > 3, "col - invalid value! [0..3]");
 
-    return mData[col][row];
+    return sse::GetValue(mData[col], row);
 }
 
 bool Mat4SSE::operator==(const Mat4SSE& rhs) const
 {
-    // TODO: Replace this version as soon as Approx supports registers!
     bool result = true;
     for (U32 i = 0; i < 4; ++i)
         result = result && mData[i] == Approx(rhs.mData[i]);
@@ -108,36 +108,40 @@ Mat4SSE Mat4SSE::operator+(const Mat4SSE& other)
 
 {
     return Mat4SSE(_mmx_add_p(mData[0], other.mData[0]), _mmx_add_p(mData[1], other.mData[1]),
-                    _mmx_add_p(mData[2], other.mData[2]), _mmx_add_p(mData[3], other.mData[3]));
+                   _mmx_add_p(mData[2], other.mData[2]), _mmx_add_p(mData[3], other.mData[3]));
 }
 
 
 
 Mat4SSE Mat4SSE::operator*(const Mat4SSE& other) const
 {
+
+    alignas(sse::alignmentBytes<__m128>) F32 colValsOther[4];
+
+    _mm_store_ps(colValsOther, other.mData[0]);
     alignas(sse::alignmentBytes<__m128>) __m128 Col0 =
-            _mmx_fmadd_p(_mmx_set1_p<__m128>(other.mData[0][0]), mData[0],
-                         _mmx_fmadd_p(_mmx_set1_p<__m128>(other.mData[0][1]), mData[1],
-                                      _mmx_fmadd_p(_mmx_set1_p<__m128>(other.mData[0][2]), mData[2],
-                                                   _mm_mul_ps(_mmx_set1_p<__m128>(other.mData[0][3]), mData[3]))));
-
+            _mmx_fmadd_p(_mmx_set1_p<__m128>(colValsOther[0]), mData[0],
+                         _mmx_fmadd_p(_mmx_set1_p<__m128>(colValsOther[1]), mData[1],
+                                      _mmx_fmadd_p(_mmx_set1_p<__m128>(colValsOther[2]), mData[2],
+                                                   _mm_mul_ps(_mmx_set1_p<__m128>(colValsOther[3]), mData[3]))));
+    _mm_store_ps(colValsOther, other.mData[1]);
     alignas(sse::alignmentBytes<__m128>) __m128 Col1 =
-            _mmx_fmadd_p(_mmx_set1_p<__m128>(other.mData[1][0]), mData[0],
-                         _mmx_fmadd_p(_mmx_set1_p<__m128>(other.mData[1][1]), mData[1],
-                                      _mmx_fmadd_p(_mmx_set1_p<__m128>(other.mData[1][2]), mData[2],
-                                                   _mm_mul_ps(_mmx_set1_p<__m128>(other.mData[1][3]), mData[3]))));
-
+            _mmx_fmadd_p(_mmx_set1_p<__m128>(colValsOther[0]), mData[0],
+                         _mmx_fmadd_p(_mmx_set1_p<__m128>(colValsOther[1]), mData[1],
+                                      _mmx_fmadd_p(_mmx_set1_p<__m128>(colValsOther[2]), mData[2],
+                                                   _mm_mul_ps(_mmx_set1_p<__m128>(colValsOther[3]), mData[3]))));
+    _mm_store_ps(colValsOther, other.mData[2]);
     alignas(sse::alignmentBytes<__m128>) __m128 Col2 =
-            _mmx_fmadd_p(_mmx_set1_p<__m128>(other.mData[2][0]), mData[0],
-                         _mmx_fmadd_p(_mmx_set1_p<__m128>(other.mData[2][1]), mData[1],
-                                      _mmx_fmadd_p(_mmx_set1_p<__m128>(other.mData[2][2]), mData[2],
-                                                   _mm_mul_ps(_mmx_set1_p<__m128>(other.mData[2][3]), mData[3]))));
-
+            _mmx_fmadd_p(_mmx_set1_p<__m128>(colValsOther[0]), mData[0],
+                         _mmx_fmadd_p(_mmx_set1_p<__m128>(colValsOther[1]), mData[1],
+                                      _mmx_fmadd_p(_mmx_set1_p<__m128>(colValsOther[2]), mData[2],
+                                                   _mm_mul_ps(_mmx_set1_p<__m128>(colValsOther[3]), mData[3]))));
+    _mm_store_ps(colValsOther, other.mData[3]);
     alignas(sse::alignmentBytes<__m128>) __m128 Col3 =
-            _mmx_fmadd_p(_mmx_set1_p<__m128>(other.mData[3][0]), mData[0],
-                         _mmx_fmadd_p(_mmx_set1_p<__m128>(other.mData[3][1]), mData[1],
-                                      _mmx_fmadd_p(_mmx_set1_p<__m128>(other.mData[3][2]), mData[2],
-                                                   _mm_mul_ps(_mmx_set1_p<__m128>(other.mData[3][3]), mData[3]))));
+            _mmx_fmadd_p(_mmx_set1_p<__m128>(colValsOther[0]), mData[0],
+                         _mmx_fmadd_p(_mmx_set1_p<__m128>(colValsOther[1]), mData[1],
+                                      _mmx_fmadd_p(_mmx_set1_p<__m128>(colValsOther[2]), mData[2],
+                                                   _mm_mul_ps(_mmx_set1_p<__m128>(colValsOther[3]), mData[3]))));
 
     return Mat4SSE(Col0, Col1, Col2, Col3);
 }
@@ -146,9 +150,9 @@ Mat4SSE Mat4SSE::operator*(const Mat4SSE& other) const
 
 Mat4SSE Mat4SSE::Transpose() const
 {
-        Mat4SSE t;
-        sse::Transpose(mData[0],mData[1],mData[2],mData[3],t.mData[0],t.mData[1],t.mData[2],t.mData[3]);
-        return t;
+    Mat4SSE t;
+    sse::Transpose(mData[0], mData[1], mData[2], mData[3], t.mData[0], t.mData[1], t.mData[2], t.mData[3]);
+    return t;
 }
 
 
