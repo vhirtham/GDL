@@ -5,6 +5,7 @@
 #include "gdl/base/approx.h"
 #include "gdl/base/exception.h"
 #include "gdl/base/functions/alignment.h"
+#include "gdl/base/sse/directAccess.h"
 #include "gdl/base/sse/transpose.h"
 
 #include <algorithm>
@@ -69,7 +70,7 @@ template <typename _type, I32 _rows, I32 _cols>
 _type MatSSE<_type, _rows, _cols>::operator()(const U32 row, const U32 col) const
 {
     assert(row < _rows && col < _cols);
-    return mData[row / mNumRegisterEntries + col * mNumRegistersPerCol][row % mNumRegisterEntries];
+    return sse::GetValue(mData[row / mNumRegisterEntries + col * mNumRegistersPerCol],row % mNumRegisterEntries);
 }
 
 

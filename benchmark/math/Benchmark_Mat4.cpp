@@ -37,79 +37,79 @@ public:
 
 
 
-//// Value Construction %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+// Value Construction %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-// BENCHMARK_F(Single, Construction)(benchmark::State& state)
-//{
-//    for (auto _ : state)
-//        Mat4Single<F32> C(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15);
-//}
-
-
-// BENCHMARK_F(SIMD, Construction)(benchmark::State& state)
-//{
-//    for (auto _ : state)
-//        Mat4SSE C(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15);
-//}
+BENCHMARK_F(Single, Construction)(benchmark::State& state)
+{
+    for (auto _ : state)
+        Mat4Single<F32> C(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15);
+}
 
 
-//// Comparison %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-// BENCHMARK_F(Single, Comparison_Equal)(benchmark::State& state)
-//{
-//    for (auto _ : state)
-//        benchmark::DoNotOptimize(A == A);
-//}
-
-// BENCHMARK_F(SIMD, Comparison_Equal)(benchmark::State& state)
-//{
-//    for (auto _ : state)
-//        benchmark::DoNotOptimize(A == A);
-//}
+BENCHMARK_F(SIMD, Construction)(benchmark::State& state)
+{
+    for (auto _ : state)
+        Mat4SSE C(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15);
+}
 
 
-// BENCHMARK_F(Single, Comparison_Not_Equal)(benchmark::State& state)
-//{
-//    for (auto _ : state)
-//        benchmark::DoNotOptimize(A == B);
-//}
+// Comparison %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-// BENCHMARK_F(SIMD, Comparison_Not_Equal)(benchmark::State& state)
-//{
-//    for (auto _ : state)
-//        benchmark::DoNotOptimize(A == B);
-//}
+BENCHMARK_F(Single, Comparison_Equal)(benchmark::State& state)
+{
+    for (auto _ : state)
+        benchmark::DoNotOptimize(A == A);
+}
 
-
-//// Addition Assignment %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-// BENCHMARK_F(Single, Addition_Assignment)(benchmark::State& state)
-//{
-//    for (auto _ : state)
-//        benchmark::DoNotOptimize(A += B);
-//}
-
-// BENCHMARK_F(SIMD, Addition_Assignment)(benchmark::State& state)
-//{
-//    for (auto _ : state)
-//        benchmark::DoNotOptimize(A += B);
-//}
+BENCHMARK_F(SIMD, Comparison_Equal)(benchmark::State& state)
+{
+    for (auto _ : state)
+        benchmark::DoNotOptimize(A == A);
+}
 
 
+BENCHMARK_F(Single, Comparison_Not_Equal)(benchmark::State& state)
+{
+    for (auto _ : state)
+        benchmark::DoNotOptimize(A == B);
+}
 
-//// Addition %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+BENCHMARK_F(SIMD, Comparison_Not_Equal)(benchmark::State& state)
+{
+    for (auto _ : state)
+        benchmark::DoNotOptimize(A == B);
+}
 
-// BENCHMARK_F(Single, Addition)(benchmark::State& state)
-//{
-//    for (auto _ : state)
-//        benchmark::DoNotOptimize(A + B);
-//}
 
-// BENCHMARK_F(SIMD, Addition)(benchmark::State& state)
-//{
-//    for (auto _ : state)
-//        benchmark::DoNotOptimize(A + B);
-//}
+// Addition Assignment %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+BENCHMARK_F(Single, Addition_Assignment)(benchmark::State& state)
+{
+    for (auto _ : state)
+        benchmark::DoNotOptimize(A += B);
+}
+
+BENCHMARK_F(SIMD, Addition_Assignment)(benchmark::State& state)
+{
+    for (auto _ : state)
+        benchmark::DoNotOptimize(A += B);
+}
+
+
+
+// Addition %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+BENCHMARK_F(Single, Addition)(benchmark::State& state)
+{
+    for (auto _ : state)
+        benchmark::DoNotOptimize(A + B);
+}
+
+BENCHMARK_F(SIMD, Addition)(benchmark::State& state)
+{
+    for (auto _ : state)
+        benchmark::DoNotOptimize(A + B);
+}
 
 
 
@@ -130,20 +130,20 @@ BENCHMARK_F(SIMD, Multiplication)(benchmark::State& state)
 
 
 
-//// Transpose %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+// Transpose %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-// BENCHMARK_F(Single, Transpose)(benchmark::State& state)
-//{
-//    for (auto _ : state)
-//        benchmark::DoNotOptimize(A.Transpose());
-//}
+BENCHMARK_F(Single, Transpose)(benchmark::State& state)
+{
+    for (auto _ : state)
+        benchmark::DoNotOptimize(A.Transpose());
+}
 
 
-// BENCHMARK_F(SIMD, Transpose)(benchmark::State& state)
-//{
-//    for (auto _ : state)
-//        benchmark::DoNotOptimize(A.Transpose());
-//}
+BENCHMARK_F(SIMD, Transpose)(benchmark::State& state)
+{
+    for (auto _ : state)
+        benchmark::DoNotOptimize(A.Transpose());
+}
 
 
 
