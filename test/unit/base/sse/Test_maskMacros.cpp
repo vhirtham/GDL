@@ -18,7 +18,7 @@ void TestShuffle2()
     const __m128d a = _mm_setr_pd(1., 2.);
     const __m128d b = _mm_setr_pd(3., 4.);
 
-    const __m128d c = _mm_shuffle_pd(a, b, SHUFFLE_MASK_2(_i, _j));
+    const __m128d c = _mm_shuffle_pd(a, b, SHUFFLE_2_MASK(_i, _j));
 
     BOOST_CHECK(sse::GetValue<0>(c) == Approx(sse::GetValue<_i>(a)));
     BOOST_CHECK(sse::GetValue<1>(c) == Approx(sse::GetValue<_j>(b)));
@@ -48,7 +48,7 @@ void TestShuffle4()
     const __m128 a = _mm_setr_ps(1.f, 2.f, 3.f, 4.f);
     const __m128 b = _mm_setr_ps(5.f, 6.f, 7.f, 8.f);
 
-    const __m128 c = _mm_shuffle_ps(a, b, SHUFFLE_MASK_4(_i, _j, _k, _l));
+    const __m128 c = _mm_shuffle_ps(a, b, SHUFFLE_4_MASK(_i, _j, _k, _l));
 
 
 
@@ -85,7 +85,7 @@ void TestBlend2()
     const __m128d a = _mm_setr_pd(1., 2.);
     const __m128d b = _mm_setr_pd(3., 4.);
 
-    const __m128d c = _mm_blend_pd(a, b, BLEND_MASK_2(_i, _j));
+    const __m128d c = _mm_blend_pd(a, b, BLEND_2_MASK(_i, _j));
 
     BOOST_CHECK(sse::GetValue<0>(c) == Approx((_i == 0) ? 1.f : 3.f));
     BOOST_CHECK(sse::GetValue<1>(c) == Approx((_j == 0) ? 2.f : 4.f));
@@ -114,7 +114,7 @@ void TestBlend4()
     const __m128 a = _mm_setr_ps(1.f, 2.f, 3.f, 4.f);
     const __m128 b = _mm_setr_ps(5.f, 6.f, 7.f, 8.f);
 
-    const __m128 c = _mm_blend_ps(a, b, BLEND_MASK_4(_i, _j, _k, _l));
+    const __m128 c = _mm_blend_ps(a, b, BLEND_4_MASK(_i, _j, _k, _l));
 
 
     BOOST_CHECK(sse::GetValue<0>(c) == Approx((_i == 0) ? 1.f : 5.f));
@@ -152,7 +152,7 @@ void TestBlend8()
     const __m256 a = _mm256_setr_ps(1.f, 2.f, 3.f, 4.f, 5.f, 6.f, 7.f, 8.f);
     const __m256 b = _mm256_setr_ps(9.f, 10.f, 11.f, 12.f, 13.f, 14.f, 15.f, 16.f);
 
-    const __m256 c = _mm256_blend_ps(a, b, BLEND_MASK_8(_i, _j, _k, _l, _m, _n, _o, _p));
+    const __m256 c = _mm256_blend_ps(a, b, BLEND_8_MASK(_i, _j, _k, _l, _m, _n, _o, _p));
 
 
     BOOST_CHECK(sse::GetValue<0>(c) == Approx((_i == 0) ? 1.f : 9.f));
@@ -202,7 +202,7 @@ void TestPermute2f128()
     __m256 a = _mm256_setr_ps(1.f, 2.f, 3.f, 4.f, 5.f, 6.f, 7.f, 8.f);
     __m256 b = _mm256_setr_ps(9.f, 10.f, 11.f, 12.f, 13.f, 14.f, 15.f, 16.f);
 
-    __m256 c = _mm256_permute2f128_ps(a, b, PERMUTE_MASK_2F128(_i, _j, _k, _l));
+    __m256 c = _mm256_permute2f128_ps(a, b, PERMUTE_2F128_MASK(_i, _j, _k, _l));
 
     for (U32 i = 0; i < 4; ++i)
     {
