@@ -2,6 +2,7 @@
 
 #include "gdl/base/fundamentalTypes.h"
 #include "gdl/base/insideTolerance.h"
+#include "gdl/base/sse/directAccess.h"
 
 #include "test/tools/ExceptionChecks.h"
 
@@ -59,7 +60,7 @@ void TestInsideToleranceSSE()
     alignas(sse::alignmentBytes<_registerType>) _registerType tolerance = _mmx_set1_p<_registerType>(toleranceValue);
 
     for (U32 i = 0; i < numRegisterEntries; ++i)
-        ref[i] = i;
+        sse::SetValue(ref, i, i);
 
     InsideToleranceType insideTolerance(ref, tolerance);
 
@@ -89,7 +90,7 @@ void TestInsideToleranceSSE()
 
             // Not compared values are equal to ref
             for (U32 j = _count; j < numRegisterEntries; ++j)
-                cmpAll[j] = ref[j];
+                sse::SetValue(cmpAll, sse::GetValue(ref, j), j);
 
             if (std::abs(i) <= toleranceValue)
             {
@@ -105,7 +106,7 @@ void TestInsideToleranceSSE()
             // Up to all compared values might be out of tolerance
             for (U32 j = _count; j < numRegisterEntries; ++j)
             {
-                cmpAll[j] = -1337;
+                sse::SetValue(cmpAll, -1337, j);
                 if (std::abs(i) <= toleranceValue)
                 {
                     BOOST_CHECK(cmpAll == insideTolerance);
@@ -125,7 +126,7 @@ void TestInsideToleranceSSE()
             {
                 cmpSingle = ref;
 
-                cmpSingle[j] += i;
+                sse::SetValue(cmpSingle, sse::GetValue(cmpSingle, j) + i, j);
                 if (std::abs(i) <= toleranceValue)
                 {
                     BOOST_CHECK(cmpSingle == insideTolerance);
@@ -158,7 +159,7 @@ void TestInsideToleranceSSE()
     for (U32 i = 0; i < numRegisterEntries; ++i)
     {
         tolerance = _mmx_set1_p<_registerType>(toleranceValue);
-        tolerance[i] = -1;
+        sse::SetValue(tolerance, -1, i);
         GDL_CHECK_THROW_DEV(InsideToleranceType(ref, tolerance), Exception);
     }
 
