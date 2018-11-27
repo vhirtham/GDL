@@ -2,6 +2,7 @@
 
 #include "gdl/base/approx.h"
 #include "gdl/base/sse/abs.h"
+#include "gdl/base/sse/directAccess.h"
 #include "gdl/base/sse/utility.h"
 
 using namespace GDL;
@@ -16,7 +17,7 @@ void TestAbs()
 
     auto cmpAllElementsEqual = [](_registerType lhs, _registerType rhs) {
         for (U32 i = 0; i < numRegisterEntries; ++i)
-            if (lhs[i] != Approx(rhs[i]))
+            if (sse::GetValue(lhs, i) != Approx(sse::GetValue(rhs, i)))
                 return false;
         return true;
     };
@@ -29,10 +30,10 @@ void TestAbs()
     for (I32 i = 0; i < static_cast<I32>(numRegisterEntries); ++i)
     {
 
-        ref[i] = static_cast<DataType>(i);
-        cmp[i] = static_cast<DataType>(-i);
-        cmp2[i] = static_cast<DataType>(i * ((i % 2 == 0) ? 1 : -1));
-        cmp3[i] = static_cast<DataType>(i * ((i % 3 == 0) ? 1 : -1));
+        sse::SetValue(ref, static_cast<DataType>(i), static_cast<U32>(i));
+        sse::SetValue(cmp, static_cast<DataType>(-i), static_cast<U32>(i));
+        sse::SetValue(cmp2, static_cast<DataType>(i * ((i % 2 == 0) ? 1 : -1)), static_cast<U32>(i));
+        sse::SetValue(cmp3, static_cast<DataType>(i * ((i % 3 == 0) ? 1 : -1)), static_cast<U32>(i));
     }
 
     BOOST_CHECK(cmpAllElementsEqual(ref, sse::Abs(ref)));
