@@ -11,7 +11,7 @@ using namespace GDL::OpenGL;
 RenderWindow& GetRenderWindow()
 {
     static bool initialized = false;
-    static RenderWindow renderWindow;
+    RenderWindow& renderWindow = RenderWindow::Instance();
     if (!initialized)
     {
         renderWindow.Initialize();

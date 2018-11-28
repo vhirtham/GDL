@@ -146,7 +146,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
 {
     GLenum ErrorCheckValue = glGetError();
 
-    RenderWindow renderWindow;
+    RenderWindow& renderWindow = RenderWindow::Instance();
     renderWindow.SetTitle("OpenGL Triangle Test");
     renderWindow.Initialize();
 

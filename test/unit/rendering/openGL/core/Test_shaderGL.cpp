@@ -9,7 +9,7 @@ using namespace GDL::OpenGL;
 
 BOOST_AUTO_TEST_CASE(Construction)
 {
-    RenderWindow renderWindow;
+    RenderWindow& renderWindow = RenderWindow::Instance();
     renderWindow.Initialize();
 
     BOOST_CHECK_THROW(Shader shader(GL_VERTEX_SHADER, "fail"), Exception);

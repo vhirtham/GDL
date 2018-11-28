@@ -33,7 +33,7 @@ public:
     //! @brief Constructor that initializes full matrix with specific values (column major)
     //! @param v0-v15: Matrix values in column major ordering
     inline Mat4SSE(F32 v0, F32 v1, F32 v2, F32 v3, F32 v4, F32 v5, F32 v6, F32 v7, F32 v8, F32 v9, F32 v10, F32 v11,
-                    F32 v12, F32 v13, F32 v14, F32 v15);
+                   F32 v12, F32 v13, F32 v14, F32 v15);
 
 private:
     //! @brief Constructor that initializes full matrix with specific columns
@@ -86,23 +86,6 @@ public:
     //! @brief Gets the data array in column major ordering
     //! @return Data
     [[nodiscard]] inline const std::array<F32, 16> Data() const;
-
-
-    //! @brief Rotation matrix for a rotation around the z-axis
-    //! @param angle: Rotation angle in rad
-    //! @return Rotation matrix
-    static Mat4SSE RotationMatrixZ(F32 angle)
-    {
-        F32 sinAngle = std::sin(angle);
-        F32 cosAngle = std::cos(angle);
-        // clang-format off
-        return Mat4SSE(
-             cosAngle, sinAngle,       0.,       0.,
-            -sinAngle, cosAngle,       0.,       0.,
-                   0.,       0.,       1.,       0.,
-                   0.,       0.,       0.,       1.);
-        // clang-format on
-    }
 
 private:
     //! @brief Checks if the matrix was constructed as expected

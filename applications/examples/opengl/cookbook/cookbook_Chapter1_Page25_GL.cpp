@@ -39,7 +39,8 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
 {
     // Setup Render Context #####################
 
-    RenderWindow renderWindow(1200, 800, TITLE);
+    RenderWindow& renderWindow = RenderWindow::Instance();
+    renderWindow.SetTitle(TITLE);
     renderWindow.Initialize();
 
     glutReshapeFunc(ResizeFunction);

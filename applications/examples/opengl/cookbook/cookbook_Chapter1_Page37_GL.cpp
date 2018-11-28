@@ -7,7 +7,9 @@
 
 
 #include "gdl/base/time.h"
+#include "gdl/base/timer.h"
 #include "gdl/math/mat4.inl"
+#include "gdl/math/transformationMatrix.h"
 #include "gdl/rendering/openGL/core/bufferObjectGL.h"
 #include "gdl/rendering/openGL/core/programGL.h"
 #include "gdl/rendering/openGL/core/renderWindowGL.h"
@@ -31,11 +33,6 @@ void Close()
     RunProgramm = false;
 }
 
-void ResizeFunction(int Width, int Height)
-{
-    glViewport(0, 0, Width, Height);
-}
-
 
 void RenderFunction()
 {
@@ -51,10 +48,11 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
 {
     // Setup Render Context #####################
 
-    RenderWindow renderWindow(1000, 800, TITLE);
+    RenderWindow& renderWindow = RenderWindow::Instance();
+    renderWindow.SetTitle(TITLE);
     renderWindow.Initialize();
 
-    glutReshapeFunc(ResizeFunction);
+
     glutDisplayFunc(RenderFunction);
     glutCloseFunc(Close);
 
@@ -70,13 +68,14 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
 
             out vec3 Color;
 
-            uniform mat4 RotationMatrix;
+            uniform mat4 ProjectionMatrix;
+            uniform mat4 ModelWorldMatrix;
 
             void main(void)
             {
                 Color = VertexColor;
 
-                gl_Position = RotationMatrix * vec4(VertexPosition,1.0);
+                gl_Position = ProjectionMatrix * ModelWorldMatrix * vec4(VertexPosition,1.0);
             }
             )glsl";
 
@@ -106,9 +105,9 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
     // clang-format off
     std::vector<F32> positionData
     {
-        -0.8f, -0.8f,  0.0f,
-         0.8f, -0.8f,  0.0f,
-         0.0f,  0.8f,  0.0f
+        -1.0f, -0.6f,  0.0f,
+         1.0f, -0.6f,  0.0f,
+         0.0f,  1.0f,  0.0f
     };
     std::vector<F32> colorData
     {
@@ -117,9 +116,9 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
          0.f,  0.f,  1.f
     };
     // clang-format on
+
     BufferObject positionBuffer(positionData, GL_STATIC_DRAW);
     BufferObject colorBuffer(colorData, GL_STATIC_DRAW);
-
 
 
     // Create Vertex Array Object ###############
@@ -136,16 +135,21 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
 
 
     // Get uniform location ####################
-    GLuint uniformLocation = program.QueryUniformLocation("RotationMatrix");
+
+    GLuint uniformProjection = program.QueryUniformLocation("ProjectionMatrix");
+    GLuint uniformModelWorld = program.QueryUniformLocation("ModelWorldMatrix");
 
 
 
     // Constant rotation setup ##################
 
+    TimePoint startTime = CurrentTime();
     TimePoint prevTime = CurrentTime();
     TimePoint currTime = CurrentTime();
 
     F32 angle = 0.;
+    F32 translateX = 0.;
+    F32 translateY = 0.;
 
     // Uncomment for fullscreen #################
     // glutFullScreen();
@@ -155,14 +159,26 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
     {
         prevTime = currTime;
         currTime = CurrentTime();
-        angle += 3.14 * std::chrono::duration_cast<Microseconds>(currTime - prevTime).count() / 1.e6;
 
-        program.SetUniform(static_cast<I32>(uniformLocation), Mat4f::RotationMatrixZ(angle));
+        F32 frameTimeMS = std::chrono::duration_cast<Microseconds>(currTime - prevTime).count();
+        F32 elapsedTimeMS = std::chrono::duration_cast<Microseconds>(currTime - startTime).count();
+
+        angle += 3.14f * frameTimeMS / 5.e5f;
+        translateX = std::sin(elapsedTimeMS / 3.e5f) * renderWindow.GetWidth() / 3.f;
+        translateY = std::sin(elapsedTimeMS / 4.e5f) * renderWindow.GetHeight() / 3.f;
+
+        Mat4f ProjectionMatrix =
+                TransformationMatrix4::OrthogonalProjection(renderWindow.GetWidth(), renderWindow.GetHeight());
+        Mat4f ModelWorldMatrix = TransformationMatrix4::Translation(translateX, translateY, 0.) *
+                                 TransformationMatrix4::RotationZ(angle) *
+                                 TransformationMatrix4::Scale(200.f, 200.f, 1);
+
+        program.SetUniform(static_cast<I32>(uniformProjection), ProjectionMatrix);
+        program.SetUniform(static_cast<I32>(uniformModelWorld), ModelWorldMatrix);
 
         glDrawArrays(GL_TRIANGLES, 0, 3);
         glutMainLoopEvent();
     }
-
 
     exit(EXIT_SUCCESS);
 }
