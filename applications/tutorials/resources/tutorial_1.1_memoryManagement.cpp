@@ -1,6 +1,7 @@
 #include "gdl/base/uniquePtr.h"
 #include "gdl/base/container/vector.h"
 #include "gdl/resources/memory/memoryManager.h"
+#include "gdl/resources/memory/stackAllocator.h"
 
 
 using namespace GDL;

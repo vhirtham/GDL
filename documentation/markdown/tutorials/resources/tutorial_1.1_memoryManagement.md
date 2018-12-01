@@ -199,7 +199,7 @@ An exception for releasing a pointer from the wrong memory system is only thrown
 
 ### Manual allocation with allocators
 
-Apart from using the provided container types and smart pointers, you can also allocate and free memory manually. This can be done in two ways. The first one is to use the existing allocators that are also used by the containers and which provide a fallback system as described before. To do so you have to create the corresponding allocator of the data type you want to allocate:
+Apart from using the provided container types and smart pointers, you can also allocate and free memory manually. This can be done in two ways. The first one is to use the existing allocators that are also used by the containers and which provide a fallback system as described before. To do so you have to include the right header and create the corresponding allocator of the data type you want to allocate:
 
 ~~~ cpp
 StackAllocator<F32> stackAllocator;
