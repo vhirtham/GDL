@@ -239,11 +239,31 @@ You might wonder, why allocators need the number of elements that were allocated
 
 
 
-- alignment --> memory Pool
+
+## Aligned allocations
+
+Some data structures need their addresses to be aligned for maximum efficiency. For example SSE registers. If you use the provided containers and allocators, data alignment is done automatically. All you need to do is to add the `alignas` keyword to your data structures. If you use the memory systems directly, the `allocate` function provides a second optional parameter to specify the alignment of the returned address. If we want to align the array from the previous section to 32 byte addresses we just add the alignment value as second parameter:
+
+~~~ cpp
+myIntArray = static_cast<I32*>(tpms->Allocate(sizeof(I32) * 5, 32));
+~~~
+
+You can choose an arbitrary alignment value that is a power of 2 (including a value of 1) if you use the general purpose memory or one of the two memory stack variants. Just keep in mind that the necessary padding will allocate extra memory. 
+The memory pool is a little bit more limited since the fixed block size does not offer much space for extra padding, This gets especially problematic if the alignment is bigger than the block size. To get around this issues you can specify the alignment of the blocks as third optional parameter during the creation of the memory pool:
+
+~~~ cpp
+memoryManager.CreateMemoryPool(128_B, 1000, 32);
+~~~
+
+Here we created a memory pool with 1000 blocks with a size of 128 bytes that are all aligned to 32 byte addresses. The alignment value that you specify during the creation of the memory pool also limits the maximum alignment request the memory pool can suffice. There is no extra padding added, even if the total allocation size (padding + data size) would fit into the block. With the `DEV_EXCEPTION` macro enabled the `allocate` function will throw an exception if your alignment request is not supported.
+
+
+
 - memory usage due to alignment and internal information that needs to be stored
 - typedef to use std::allocator --- define instead of typedef???
 - heap allocation counter
 - no protection to read/write at an invalid address ---> array[6] if there are less elements
+- pool allocator chooses memory pool with best fitting block size and with the right alignment
 
 
 

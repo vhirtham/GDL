@@ -14,6 +14,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
     memoryManager.CreateMemoryStack(1_MB);
     memoryManager.CreateMemoryPool(32_B, 1000);
     memoryManager.CreateMemoryPool(64_B, 1000);
+    memoryManager.CreateMemoryPool(128_B, 1000, 32); // Memory pool with 32 byte aligned blocks
     memoryManager.EnableThreadPrivateMemory();
 
     memoryManager.Initialize();
@@ -54,6 +55,10 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
         return -1;
 
     I32* myIntArray = static_cast<I32*>(tpms->Allocate(sizeof(I32) * 5));
+    tpms->Deallocate(myIntArray);
+
+    // aligned allocation
+    myIntArray = static_cast<I32*>(tpms->Allocate(sizeof(I32) * 5, 32));
     tpms->Deallocate(myIntArray);
 
 
