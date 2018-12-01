@@ -13,8 +13,13 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
     memoryManager.CreateMemoryStack(1_MB);
     memoryManager.CreateMemoryPool(32_B, 1000);
     memoryManager.CreateMemoryPool(64_B, 1000);
+    memoryManager.EnableThreadPrivateMemory();
 
     memoryManager.Initialize();
+
+    memoryManager.CreatePrivateMemoryStackForThisThread(1_MB);
+
+    // Container --------------------------------
 
     Vector<U32> myVec;
     myVec.push_back(1);
@@ -32,6 +37,26 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
     myPtr.reset(nullptr);
 
 
+
+    // Manual allocaion wit allocators ----------
+
+    StackAllocator<F32> stackAllocator;
+
+    F32* myFloatArray = stackAllocator.allocate(5);
+    stackAllocator.deallocate(myFloatArray, 5);
+
+
+    // Manual allocaion witout allocators -------
+
+    ThreadPrivateMemoryStack* tpms = memoryManager.GetThreadPrivateMemoryStack();
+    if (tpms == nullptr)
+        return -1;
+
+    I32* myIntArray = static_cast<I32*>(tpms->Allocate(sizeof(I32) * 5));
+    tpms->Deallocate(myIntArray);
+
+
+    memoryManager.DeletePrivateMemoryStackForThisThread();
     memoryManager.Deinitialize();
 
     return 0;
