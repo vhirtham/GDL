@@ -4,7 +4,38 @@ Dynamic memory allocation using the heap (new/delete or malloc/free) is usually 
 
 In this tutorial we will learn how to use this memory system. The good news is, that it is quiet simple, especially if you are familiar with the standard template library (STL).
 
- 
+The complete program of this tutorial can be found in the following location:
+
+~~~
+applications/tutorials/resources/tutorial_1.1_memoryManagement.cpp
+~~~
+
+
+***
+
+
+## Table of content
+
+1. [Initialization](#Initialization)
+    - [Thread safety](#thread-safety)
+    - [Thread private memory stack](#thread-private-memory-stack)
+2. [Memory allocation](#memory-allocation)
+    - [Container and smart pointer](#container-and-smart-pointer)
+    - [Manual allocation with allocators](#manual-allocation-with-allocators)
+    - [Manual allocation without allocators](#manual-allocation-without-allocators)
+    - [Aligned allocations](#aligned-allocations)
+    - [Checking the number of heap allocations](#checking-the-number-of-heap-allocations)
+3. [Additional information](#additional-information)
+    - [Effective memory consumption](#effective-memory-consumption)
+    - [Multiple memory pools](#multiple-memory-pools)
+    - [Internal memory allocation of GDL classes](#internal-memory-allocation-of-gdl-classes)
+    - [Disable GDL allocators](#disable-gdl-allocators)
+    - [Reading and writing to invalid addresses](#reading-and-writing-to-invalid-addresses)
+
+
+***
+
+
 ## Initialization
 
 First thing you need to do is including the header of the memory manager:
@@ -63,10 +94,11 @@ This function checks if any memory system is still in use or if the internal mem
 While it is possible to initialize and deinitialize the memory manager multiple times, you can only modify the memory manager before the first initialization. 
 
 
-### Thread Safety
+### Thread safety
 
 If you are using multiple threads in your program you have to be careful with resources that are shared among them. The pure allocation and deallocation of memory is completely safe, since the corresponding operations are protected by a spinlock (with one exception that we will talk about in the next section). You can't corrupt the memory system if multiple threads try to allocate memory at the same time. The only downside is, that just a single thread can allocate or deallocate memory from a certain memory system. All other threads that access the same memory system have to wait until the operation is finished. Note that multiple threads can still access different memory systems at the same time without any performance penalty.
 Keep in mind that while the pure allocation and deallocation is thread safe, data that uses the GDL memory systems ,like STL containers for example, is not. You have to take care of that problem yourself.
+
 
 ### Thread private memory stack
 
@@ -125,13 +157,12 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
 ~~~
 
 
-
-
+***
 
 
 ## Memory allocation
 
-### Container and smart pointers
+### Container and smart pointer
 
 If you are already using STL containers, there is not much you need to learn. You will find a GDL version of most of the STL containers in the directory
 
@@ -225,7 +256,7 @@ if (tpms == nullptr)
     return -1;
 ~~~
 
-If a certain memory system is not available, the corresponding getter of the memory manager will return a `nullptr`. Make sure that this is not the case before you try to use a memory system.
+If a certain memory system is not available, the corresponding getter of the memory manager will return a `nullptr`. Make sure that this is not the case before you try to use a memory system. Also note that the getter for the memory pool needs two arguments in contrast to the other memory systems. This is because you can have multiple memory pools and the given parameters help to select the right one (Have a look at the [Multiple memory pools](#multiple-memory-pools) section). 
 Afterwards you can allocate and deallocate memory as follows:
 
 ~~~ cpp
@@ -238,9 +269,7 @@ Since all memory systems return `void*` with the allocated memories address, you
 You might wonder, why allocators need the number of elements that were allocated, while the used memory systems already know how much memory needs to be freed at the passed address. The answer is that this is prescribed by allocator interface of the STL containers.
 
 
-
-
-## Aligned allocations
+### Aligned allocations
 
 Some data structures need their addresses to be aligned for maximum efficiency. For example SSE registers. If you use the provided containers and allocators, data alignment is done automatically. All you need to do is to add the `alignas` keyword to your data structures. If you use the memory systems directly, the `allocate` function provides a second optional parameter to specify the alignment of the returned address. If we want to align the array from the previous section to 32 byte addresses we just add the alignment value as second parameter:
 
@@ -258,17 +287,64 @@ memoryManager.CreateMemoryPool(128_B, 1000, 32);
 Here we created a memory pool with 1000 blocks with a size of 128 bytes that are all aligned to 32 byte addresses. The alignment value that you specify during the creation of the memory pool also limits the maximum alignment request the memory pool can suffice. There is no extra padding added, even if the total allocation size (padding + data size) would fit into the block. With the `DEV_EXCEPTION` macro enabled the `allocate` function will throw an exception if your alignment request is not supported.
 
 
+### Checking the number of heap allocations
 
-- memory usage due to alignment and internal information that needs to be stored
-- typedef to use std::allocator --- define instead of typedef???
-- heap allocation counter
-- no protection to read/write at an invalid address ---> array[6] if there are less elements
-- pool allocator chooses memory pool with best fitting block size and with the right alignment
+The whole purpose of the memory management system is to avoid expensive allocations on the heap. If you want to be sure that there are no hidden heap allocations or if you want to count the number of heap allocations of a specific code segment, you can use the `HeapAllocationCounter`. To do so include the following header:
 
-
-
-The complete program of this tutorial can be found at the following path:
-
+~~~ cpp
+#include "gdl/resources/memory/utility/heapAllocationCounter.h"
 ~~~
-applications/tutorials/resources/tutorial_1.1_memoryManagement.cpp
+
+Then simply create an instance of the class at the point where you want to start counting the number of heap allocations:
+
+~~~ cpp
+HeapAllocationCounter hac;
 ~~~
+
+You can print the number of allocations and deallocations at any point by calling:
+
+~~~ cpp
+hac.PrintCalls();
+~~~
+
+For further information about this class check the doxygen documentation.
+
+
+***
+
+
+## Additional information
+
+### Effective memory consumption
+
+The general purpose memory and the memory stacks (might) allocate more memory than requested. This has two reasons. First alignment requests have to be sufficed by adding a certain padding. Additionally, in case of the general purpose memory, the size of the allocation needs to be stored too in order to know how much memory can be freed during deallocation. The additional memory requirements for this information is `sizeof(size_t)`. Keep this in mind if you optimize for minimal sized memory systems.
+
+
+### Multiple memory pools
+
+If you use multiple memory pools you might wonder which one is returned if you call `GetMemoryPool` of the memory manager or if you use a pool allocator. The selection process works in a way that difference between the block size and the allocation size gets minimal while still fulfilling the alignment requests. 
+Lets say you have three memory pools with sizes of 32, 64 and 128 bytes. The first two pools are 16 byte aligned while the one with a block size of 128 bytes is 32 byte aligned. Now you want to allocate 48 bytes with an alignment of 16 bytes. The selection routine will skip the first pool since it does not offer enough space. From the two left choices it will pick the one with the smaller block size (64 bytes) to minimize the wasted memory. Both fulfill the alignment requests since 32 byte alignment is automatically also 16 byte aligned. If we change the alignment of our allocation to 32 bytes, only the pool with a block size of 128 bytes can fulfill our request and hence it is chosen instead.
+In case that there is no fitting memory pool available the `GetMemoryPool` function of the memory manager will return a `nullptr`. The pool allocator will use the next available fallback system instead (general purpose memory or heap).
+
+
+### Internal memory allocation of GDL classes
+
+All GDL classes use the best fitting allocator internally. This is usually the general purpose allocator or the pool allocator. Memory stacks are not used by default since the deallocation mechanism restricts its use cases. However, some classes offer the possibility to exchange their allocator.
+Due to the fallback mechanisms of the allocators, you are not forced to create specific memory systems. They keep working even if you do not add any memory system to the memory manager.
+
+
+### Disable GDL allocators
+
+If you don't want to use the GDL memory system or if you want to compare the speed of your program with and without the memory management system, you can turn it off by disabling the cmake `ENABLE_ALLOCATORS` option. This replaces all GDL allocators with the `std::allocator`
+
+
+### Reading and writing to invalid addresses
+
+All of the offered memory types do not prevent writing and reading from invalid addresses, since their only job is to provide the memory and not to check how you use it. Writing to an invalid address, for example by accessing a non existing array element with the direct access operator, might irreversibly corrupt the memory system and result in undefined behavior. Again, if you deinitialize the memory manager a corrupted memory system will usually throw an exception which gives you at least a hint that something went wrong with dynamic memory. Turning on the `DEV_EXCEPTION` macro might help to narrow down the location of the corruption.
+
+
+
+***
+
+
+

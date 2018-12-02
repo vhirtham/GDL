@@ -2,6 +2,7 @@
 #include "gdl/base/container/vector.h"
 #include "gdl/resources/memory/memoryManager.h"
 #include "gdl/resources/memory/stackAllocator.h"
+#include "gdl/resources/memory/utility/heapAllocationCounter.h"
 
 
 using namespace GDL;
@@ -20,6 +21,8 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
     memoryManager.Initialize();
 
     memoryManager.CreatePrivateMemoryStackForThisThread(1_MB);
+
+    HeapAllocationCounter hac;
 
     // Container --------------------------------
 
@@ -61,6 +64,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
     myIntArray = static_cast<I32*>(tpms->Allocate(sizeof(I32) * 5, 32));
     tpms->Deallocate(myIntArray);
 
+    hac.PrintCalls();
 
     memoryManager.DeletePrivateMemoryStackForThisThread();
     memoryManager.Deinitialize();
