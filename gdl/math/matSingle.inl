@@ -156,7 +156,6 @@ void MatSingle<_type, _rows, _cols>::SetZero()
 template <typename _type, I32 _rows, I32 _cols>
 std::ostream& operator<<(std::ostream& os, const MatSingle<_type, _rows, _cols>& mat)
 {
-    using namespace GDL;
     for (U32 i = 0; i < _rows; ++i)
     {
         os << "| ";

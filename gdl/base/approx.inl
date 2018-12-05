@@ -15,14 +15,14 @@ namespace GDL
 
 template <typename _registerType, U32 _numComparedValuesSSE>
 Approx<_registerType, _numComparedValuesSSE>::Approx(const _registerType values, const I32 factor,
-                                                     const mElementType minimalBase)
+                                                     const ElementType minimalBase)
     : mValues{values}
     , mFactor{_mmx_set1_p<_registerType>(
-              static_cast<mElementType>(factor * std::numeric_limits<mElementType>::epsilon()))}
+              static_cast<ElementType>(factor * std::numeric_limits<ElementType>::epsilon()))}
     , mBaseZero{_mmx_set1_p<_registerType>(std::abs(minimalBase))}
 {
     DEV_EXCEPTION(factor <= 0, "Scaling factor must be bigger than 0.");
-    DEV_EXCEPTION(mBaseZero[0] <= static_cast<mElementType>(0), "Minimal base can't be 0.");
+    DEV_EXCEPTION(mBaseZero[0] <= static_cast<ElementType>(0), "Minimal base can't be 0.");
 }
 
 

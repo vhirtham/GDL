@@ -21,14 +21,14 @@ class alignas(sse::alignmentBytes<decltype(sse::GetFittingRegister<_type, sse::M
 {
     static_assert(std::is_floating_point<_type>::value, "Matrix can only be created with floating point types");
 
-    using __mx = decltype(sse::GetFittingRegister<_type, sse::MaxRegisterSize()>());
-    constexpr static U32 mAlignment = sse::alignmentBytes<__mx>;
-    constexpr static U32 mNumRegisterEntries = sse::numRegisterValues<__mx>;
-    constexpr static U32 mNumRegistersPerCol = sse::CalcMinNumArrayRegisters<__mx>(_rows);
+    using RegisterType = decltype(sse::GetFittingRegister<_type, sse::MaxRegisterSize()>());
+    constexpr static U32 mAlignment = sse::alignmentBytes<RegisterType>;
+    constexpr static U32 mNumRegisterEntries = sse::numRegisterValues<RegisterType>;
+    constexpr static U32 mNumRegistersPerCol = sse::CalcMinNumArrayRegisters<RegisterType>(_rows);
     constexpr static U32 mNumRegisters = _cols * mNumRegistersPerCol;
 
 
-    alignas(mAlignment) std::array<__mx, mNumRegisters> mData;
+    alignas(mAlignment) std::array<RegisterType, mNumRegisters> mData;
 
     template <typename _typeOther, I32 _rowsOther, I32 _colsOther>
     friend class MatSSE;
@@ -148,8 +148,8 @@ private:
     //! @param currentBlockIndex: Index of the currently used register of the lhs matrix.
     //! @return Updated solution register
     template <U32 _numOperations = mNumRegisterEntries, U32 _count = 0>
-    inline __mx MultiplyAddRegisters(const std::array<__mx, _numOperations>& values, const __mx currentValue,
-                                     const U32 currentBlockIndex) const;
+    inline RegisterType MultiplyAddRegisters(const std::array<RegisterType, _numOperations>& values,
+                                             const RegisterType currentValue, const U32 currentBlockIndex) const;
 
     //! @brief Checks if the matrix was constructed as expected
     void ConstructionChecks() const;

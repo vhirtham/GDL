@@ -28,6 +28,8 @@ using F32 = float;
 using F64 = double;
 
 
-static_assert(sizeof(float) * CHAR_BIT == 32, "float  is not 32 bit on this architecture, fix the F32 typedef.");
-static_assert(sizeof(double) * CHAR_BIT == 64, "double is not 64 bit on this architecture, fix the F64 typedef.");
-}
+static_assert(sizeof(float) * CHAR_BIT == 32,
+              "float  is not 32 bit on this architecture, fix the F32 type definition.");
+static_assert(sizeof(double) * CHAR_BIT == 64,
+              "double is not 64 bit on this architecture, fix the F64 type definition.");
+} // namespace GDL

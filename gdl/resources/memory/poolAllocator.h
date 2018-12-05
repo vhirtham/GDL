@@ -16,7 +16,7 @@ struct PoolAllocator
     template <typename _type2>
     friend class PoolDeleter;
 
-    typedef _type value_type;
+    using value_type = _type;
 
     //! @brief Ctor
     PoolAllocator() noexcept;

@@ -20,9 +20,7 @@ template <bool _ThreadPrivate>
 class MemoryStackTemplate : public MemoryInterface
 {
 
-    typedef typename std::conditional<_ThreadPrivate, std::thread::id, SpinLock>::type SpinlockOrThreadId;
-
-
+    using ThreadSafetyMechanism = typename std::conditional<_ThreadPrivate, std::thread::id, SpinLock>::type;
 
     //! @brief Class which stores the current state of the memory stack and restores it when the object is destroyed
     class MemoryStackDeallocator
@@ -52,7 +50,7 @@ class MemoryStackTemplate : public MemoryInterface
     U32 mNumAllocations;
     U8* mCurrentMemoryPtr;
     std::unique_ptr<U8[]> mMemory;
-    SpinlockOrThreadId mSpinlockOrThreadId;
+    ThreadSafetyMechanism mThreadSafetyMechanism;
 
 public:
     //! @brief Creates the thread private memory stack with <memorySize> bytes of memory

@@ -20,7 +20,7 @@ class ThreadPrivateStackAllocator
     MemoryInterface& mMemoryAllocationPattern;
 
 public:
-    typedef _type value_type;
+    using value_type = _type;
 
     //! @brief Ctor
     ThreadPrivateStackAllocator() noexcept;

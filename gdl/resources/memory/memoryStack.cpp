@@ -16,7 +16,7 @@ MemoryStackTemplate<true>::MemoryStackTemplate(MemorySize memorySize)
     , mNumAllocations{0}
     , mCurrentMemoryPtr{nullptr}
     , mMemory{nullptr}
-    , mSpinlockOrThreadId{std::this_thread::get_id()}
+    , mThreadSafetyMechanism{std::this_thread::get_id()}
 {
     CheckConstructionParameters();
 }
@@ -41,7 +41,7 @@ MemoryStackTemplate<_ThreadPrivate>::~MemoryStackTemplate()
 template <>
 void* MemoryStackTemplate<true>::Allocate(size_t size, size_t alignment)
 {
-    DEV_EXCEPTION(mSpinlockOrThreadId != std::this_thread::get_id(),
+    DEV_EXCEPTION(mThreadSafetyMechanism != std::this_thread::get_id(),
                   "Thread private memory stack can only be accessed by owning thread");
 
     return AllocatePrivate(size, alignment);
@@ -52,7 +52,7 @@ void* MemoryStackTemplate<true>::Allocate(size_t size, size_t alignment)
 template <>
 void* MemoryStackTemplate<false>::Allocate(size_t size, size_t alignment)
 {
-    std::lock_guard<SpinLock> lock(mSpinlockOrThreadId);
+    std::lock_guard<SpinLock> lock(mThreadSafetyMechanism);
     return AllocatePrivate(size, alignment);
 }
 
@@ -61,7 +61,7 @@ void* MemoryStackTemplate<false>::Allocate(size_t size, size_t alignment)
 template <>
 MemoryStackTemplate<false>::MemoryStackDeallocator MemoryStackTemplate<false>::CreateMemoryStackDeallocator()
 {
-    std::lock_guard<SpinLock> lock(mSpinlockOrThreadId);
+    std::lock_guard<SpinLock> lock(mThreadSafetyMechanism);
 
     return MemoryStackDeallocator{*this};
 }
@@ -71,7 +71,7 @@ MemoryStackTemplate<false>::MemoryStackDeallocator MemoryStackTemplate<false>::C
 template <>
 MemoryStackTemplate<true>::MemoryStackDeallocator MemoryStackTemplate<true>::CreateMemoryStackDeallocator()
 {
-    DEV_EXCEPTION(mSpinlockOrThreadId != std::this_thread::get_id(),
+    DEV_EXCEPTION(mThreadSafetyMechanism != std::this_thread::get_id(),
                   "Thread private memory stack can only be accessed by owning thread");
 
     return MemoryStackDeallocator{*this};
@@ -82,7 +82,7 @@ MemoryStackTemplate<true>::MemoryStackDeallocator MemoryStackTemplate<true>::Cre
 template <>
 void MemoryStackTemplate<false>::SetState(U32 numAllocations, U8* memoryPointer)
 {
-    std::lock_guard<SpinLock> lock(mSpinlockOrThreadId);
+    std::lock_guard<SpinLock> lock(mThreadSafetyMechanism);
 
     mNumAllocations = numAllocations;
     mCurrentMemoryPtr = memoryPointer;
@@ -93,7 +93,7 @@ void MemoryStackTemplate<false>::SetState(U32 numAllocations, U8* memoryPointer)
 template <>
 void MemoryStackTemplate<true>::SetState(U32 numAllocations, U8* memoryPointer)
 {
-    DEV_EXCEPTION(mSpinlockOrThreadId != std::this_thread::get_id(),
+    DEV_EXCEPTION(mThreadSafetyMechanism != std::this_thread::get_id(),
                   "Thread private memory stack can only be accessed by owning thread");
 
     mNumAllocations = numAllocations;
@@ -105,7 +105,7 @@ void MemoryStackTemplate<true>::SetState(U32 numAllocations, U8* memoryPointer)
 template <>
 void MemoryStackTemplate<true>::Deallocate(void* address, [[maybe_unused]] size_t alignment)
 {
-    DEV_EXCEPTION(mSpinlockOrThreadId != std::this_thread::get_id(),
+    DEV_EXCEPTION(mThreadSafetyMechanism != std::this_thread::get_id(),
                   "Thread private memory stack can only be accessed by owning thread");
 
     DeallocatePrivate(address);
@@ -116,7 +116,7 @@ void MemoryStackTemplate<true>::Deallocate(void* address, [[maybe_unused]] size_
 template <>
 void MemoryStackTemplate<false>::Deallocate(void* address, [[maybe_unused]] size_t alignment)
 {
-    std::lock_guard<SpinLock> lock(mSpinlockOrThreadId);
+    std::lock_guard<SpinLock> lock(mThreadSafetyMechanism);
     DeallocatePrivate(address);
 }
 
@@ -125,7 +125,7 @@ void MemoryStackTemplate<false>::Deallocate(void* address, [[maybe_unused]] size
 template <>
 void MemoryStackTemplate<true>::Deinitialize()
 {
-    EXCEPTION(mSpinlockOrThreadId != std::this_thread::get_id(),
+    EXCEPTION(mThreadSafetyMechanism != std::this_thread::get_id(),
               "Thread private memory stack can only be accessed by owning thread");
 
     DeinitializePrivate();
@@ -136,7 +136,7 @@ void MemoryStackTemplate<true>::Deinitialize()
 template <>
 void MemoryStackTemplate<false>::Deinitialize()
 {
-    std::lock_guard<SpinLock> lock(mSpinlockOrThreadId);
+    std::lock_guard<SpinLock> lock(mThreadSafetyMechanism);
     DeinitializePrivate();
 }
 
@@ -145,7 +145,7 @@ void MemoryStackTemplate<false>::Deinitialize()
 template <>
 void MemoryStackTemplate<true>::Initialize()
 {
-    EXCEPTION(mSpinlockOrThreadId != std::this_thread::get_id(),
+    EXCEPTION(mThreadSafetyMechanism != std::this_thread::get_id(),
               "Thread private memory stack can only be accessed by owning thread");
 
     InitializePrivate();
@@ -156,7 +156,7 @@ void MemoryStackTemplate<true>::Initialize()
 template <>
 void MemoryStackTemplate<false>::Initialize()
 {
-    std::lock_guard<SpinLock> lock(mSpinlockOrThreadId);
+    std::lock_guard<SpinLock> lock(mThreadSafetyMechanism);
     InitializePrivate();
 }
 

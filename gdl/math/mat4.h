@@ -12,7 +12,7 @@ class Mat4Single;
 
 
 
-typedef Mat4SSE Mat4f;
+using Mat4f = Mat4SSE;
 
 
 

@@ -21,7 +21,7 @@ namespace GDL
 template <typename _registerType, U32 _numComparedValuesSSE = sse::numRegisterValues<_registerType>>
 class alignas(sse::alignmentBytes<_registerType>) Approx
 {
-    using mElementType = decltype(sse::GetDataType<_registerType, true>());
+    using ElementType = decltype(sse::GetDataType<_registerType, true>());
 
     alignas(sse::alignmentBytes<_registerType>) _registerType mValues;
     alignas(sse::alignmentBytes<_registerType>) _registerType mFactor;
@@ -38,7 +38,7 @@ public:
     //! the epsilon instead of the maximum of both values. This is important if one of the values is 0 or close to 0.
     //! Without this value a comparison to 0 would be impossible.
     inline Approx(const _registerType values, const I32 factor = 3,
-                  const mElementType minimalBase = static_cast<mElementType>(1));
+                  const ElementType minimalBase = static_cast<ElementType>(1));
 
     //! @brief Checks if two compared registers are equal within a certain tolerance, which depends on the values sizes
     //! and

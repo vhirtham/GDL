@@ -49,7 +49,7 @@ MatSSE<_type, _rows, _cols>::MatSSE(const std::array<_type, _rows * _cols>& data
         for (U32 i = 0; i < _cols; ++i)
         {
             // Set last column register to zero
-            std::memset((&mData[(i + 1) * mNumRegistersPerCol - 1]), 0, sizeof(__mx));
+            std::memset((&mData[(i + 1) * mNumRegistersPerCol - 1]), 0, sizeof(RegisterType));
             // Copy data into column
             std::memcpy(&mData[i * mNumRegistersPerCol], &data[i * _rows], sizeof(_type) * _rows);
         }
@@ -70,7 +70,7 @@ template <typename _type, I32 _rows, I32 _cols>
 _type MatSSE<_type, _rows, _cols>::operator()(const U32 row, const U32 col) const
 {
     assert(row < _rows && col < _cols);
-    return sse::GetValue(mData[row / mNumRegisterEntries + col * mNumRegistersPerCol],row % mNumRegisterEntries);
+    return sse::GetValue(mData[row / mNumRegisterEntries + col * mNumRegistersPerCol], row % mNumRegisterEntries);
 }
 
 
@@ -94,7 +94,7 @@ bool MatSSE<_type, _rows, _cols>::operator==(const MatSSE& rhs) const
                 result = result && (mData[index] == Approx(rhs.mData[index]));
             }
             U32 index = (i + 1) * mNumRegistersPerCol - 1;
-            result = result && mData[index] == (Approx<__mx, _rows % mNumRegisterEntries>(rhs.mData[index]));
+            result = result && mData[index] == (Approx<RegisterType, _rows % mNumRegisterEntries>(rhs.mData[index]));
         }
 
     return result;
@@ -190,7 +190,7 @@ void MatSSE<_type, _rows, _cols>::TransposeFullBlocks(MatSSE<_type, _cols, _rows
 template <typename _type, I32 _rows, I32 _cols>
 template <bool _hasSparseRows, bool _hasSparseCols, U32 _count, typename... _args>
 void MatSSE<_type, _rows, _cols>::TransposeSparseBlocks(MatSSE<_type, _cols, _rows>& result, U32 indexBlock,
-                                                         _args&... args) const
+                                                        _args&... args) const
 {
     static_assert(_hasSparseRows || _hasSparseCols, "This function cant be used with non sparse blocks");
 
@@ -201,7 +201,7 @@ void MatSSE<_type, _rows, _cols>::TransposeSparseBlocks(MatSSE<_type, _cols, _ro
     {
         if constexpr (_hasSparseCols && _count >= _cols % mNumRegisterEntries)
         {
-            alignas(mAlignment) __mx tmp = _mmx_setzero_p<__mx>();
+            alignas(mAlignment) RegisterType tmp = _mmx_setzero_p<RegisterType>();
             TransposeSparseBlocks<_hasSparseRows, _hasSparseCols, _count + 1>(result, indexBlock, args..., tmp);
         }
         else
@@ -215,7 +215,7 @@ void MatSSE<_type, _rows, _cols>::TransposeSparseBlocks(MatSSE<_type, _cols, _ro
     {
         if constexpr (_hasSparseRows && _count >= _rows % mNumRegisterEntries + mNumRegisterEntries)
         {
-            alignas(mAlignment) __mx tmp = _mmx_setzero_p<__mx>();
+            alignas(mAlignment) RegisterType tmp = _mmx_setzero_p<RegisterType>();
             TransposeSparseBlocks<_hasSparseRows, _hasSparseCols, _count + 1>(result, indexBlock, args..., tmp);
         }
         else
@@ -302,7 +302,7 @@ const std::array<_type, _rows * _cols> MatSSE<_type, _rows, _cols>::Data() const
 template <typename _type, I32 _rows, I32 _cols>
 void MatSSE<_type, _rows, _cols>::ConstructionChecks() const
 {
-    assert(sizeof(mData) == sizeof(__mx) * mData.size()); // Array needs to be compact
+    assert(sizeof(mData) == sizeof(RegisterType) * mData.size()); // Array needs to be compact
 #ifndef NDEVEXCEPTION
     for (const auto& reg : mData)
         DEV_EXCEPTION(!IsAligned(&reg, mAlignment), "One or more registers of the matrix are not aligned correctly");
@@ -337,10 +337,10 @@ operator*(const MatSSE<_type, _rowsRhs, _colsRhs>& rhs) const
 template <typename _type, I32 _rows, I32 _cols>
 template <I32 _rowsRhs, I32 _colsRhs, U32 _numMultipliedRegisters>
 inline void MatSSE<_type, _rows, _cols>::MultiplicationInnerLoops(MatSSE<_type, _rows, _colsRhs>& result,
-                                                                   const MatSSE<_type, _rowsRhs, _colsRhs>& rhs,
-                                                                   U32 j) const
+                                                                  const MatSSE<_type, _rowsRhs, _colsRhs>& rhs,
+                                                                  U32 j) const
 {
-    constexpr U32 registersPerColRhs = sse::CalcMinNumArrayRegisters<__mx>(_rowsRhs);
+    constexpr U32 registersPerColRhs = sse::CalcMinNumArrayRegisters<RegisterType>(_rowsRhs);
 
     for (U32 i = 0; i < _colsRhs; ++i)
     {
@@ -348,9 +348,9 @@ inline void MatSSE<_type, _rows, _cols>::MultiplicationInnerLoops(MatSSE<_type, 
         alignas(mAlignment) std::array<_type, mNumRegisterEntries> rhsRegisterValues;
         _mmx_store_p(rhsRegisterValues.data(), rhs.mData[indexRegisterRhs]);
 
-        alignas(mAlignment) std::array<__mx, _numMultipliedRegisters> tmp;
+        alignas(mAlignment) std::array<RegisterType, _numMultipliedRegisters> tmp;
         for (U32 k = 0; k < _numMultipliedRegisters; ++k)
-            tmp[k] = _mmx_set1_p<__mx>(rhsRegisterValues[k]);
+            tmp[k] = _mmx_set1_p<RegisterType>(rhsRegisterValues[k]);
 
         // loop over LHS rows (column registers)
         for (U32 k = 0; k < mNumRegistersPerCol; ++k)
@@ -367,9 +367,9 @@ inline void MatSSE<_type, _rows, _cols>::MultiplicationInnerLoops(MatSSE<_type, 
 
 template <typename _type, I32 _rows, I32 _cols>
 template <U32 _numOperations, U32 _count>
-typename MatSSE<_type, _rows, _cols>::__mx
-MatSSE<_type, _rows, _cols>::MultiplyAddRegisters(const std::array<__mx, _numOperations>& values,
-                                                   const __mx currentValue, const U32 currentBlockIndex) const
+typename MatSSE<_type, _rows, _cols>::RegisterType
+MatSSE<_type, _rows, _cols>::MultiplyAddRegisters(const std::array<RegisterType, _numOperations>& values,
+                                                  const RegisterType currentValue, const U32 currentBlockIndex) const
 {
     static_assert(_numOperations <= mNumRegisterEntries && _numOperations > 0, "Invalid number of operations.");
 
@@ -386,7 +386,6 @@ MatSSE<_type, _rows, _cols>::MultiplyAddRegisters(const std::array<__mx, _numOpe
 template <typename _type, I32 _rows, I32 _cols>
 std::ostream& operator<<(std::ostream& os, const MatSSE<_type, _rows, _cols>& mat)
 {
-    using namespace GDL;
     for (U32 i = 0; i < _rows; ++i)
     {
         os << "| ";

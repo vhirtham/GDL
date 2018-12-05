@@ -17,7 +17,7 @@ struct GeneralPurposeAllocator
     template <typename _type2>
     friend class GeneralPurposeDeleter;
 
-    typedef _type value_type;
+    using value_type = _type;
 
     //! @brief Ctor
     GeneralPurposeAllocator() noexcept;
