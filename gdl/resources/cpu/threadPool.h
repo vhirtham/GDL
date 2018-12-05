@@ -162,7 +162,7 @@ private:
     template <typename... _args>
     void AddMessageToExceptionLog(const _args&... args);
 };
-}
+} // namespace GDL
 
 #include "gdl/resources/cpu/threadPoolThread.h"
 #include "gdl/resources/cpu/threadPool.inl"
