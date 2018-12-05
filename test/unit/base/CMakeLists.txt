@@ -2,7 +2,7 @@ add_subdirectory(sse)
 
 addTest(approx)
 addTest(freeFunctions)
-addTest(insideTolerance)
+addTest(tolerance)
 addTest(outputFile)
 
 addTest(string

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "gdl/base/insideTolerance.h"
+#include "gdl/base/tolerance.h"
 #include "gdl/base/sse/abs.h"
 #include "gdl/base/sse/compareAll.h"
 #include "gdl/base/sse/intrinsics.h"
@@ -11,7 +11,7 @@ namespace GDL
 {
 
 template <typename _registerType, U32 _numComparedValuesSSE>
-InsideTolerance<_registerType, _numComparedValuesSSE>::InsideTolerance(_registerType value, _registerType tolerance)
+Tolerance<_registerType, _numComparedValuesSSE>::Tolerance(_registerType value, _registerType tolerance)
     : mValue{value}
     , mTolerance{tolerance}
 {
@@ -23,7 +23,7 @@ InsideTolerance<_registerType, _numComparedValuesSSE>::InsideTolerance(_register
 
 template <typename _registerType, U32 _numComparedValuesSSE>
 template <typename _type>
-InsideTolerance<_registerType, _numComparedValuesSSE>::InsideTolerance(_registerType value, _type tolerance)
+Tolerance<_registerType, _numComparedValuesSSE>::Tolerance(_registerType value, _type tolerance)
     : mValue{value}
     , mTolerance{_mmx_set1_p<_registerType>(tolerance)}
 {
@@ -35,15 +35,16 @@ InsideTolerance<_registerType, _numComparedValuesSSE>::InsideTolerance(_register
 
 
 template <typename _registerType, U32 _numComparedValuesSSE>
-bool InsideTolerance<_registerType, _numComparedValuesSSE>::operator==(_registerType rhs) const
+bool Tolerance<_registerType, _numComparedValuesSSE>::operator==(_registerType rhs) const
 {
-    return sse::CompareAllLessEqual<_registerType, _numComparedValuesSSE>(sse::Abs(_mmx_sub_p(rhs, mValue)), mTolerance);
+    return sse::CompareAllLessEqual<_registerType, _numComparedValuesSSE>(sse::Abs(_mmx_sub_p(rhs, mValue)),
+                                                                          mTolerance);
 }
 
 
 
 template <typename _registerType, U32 _numComparedValuesSSE>
-bool InsideTolerance<_registerType, _numComparedValuesSSE>::operator!=(_registerType rhs) const
+bool Tolerance<_registerType, _numComparedValuesSSE>::operator!=(_registerType rhs) const
 {
     return !operator==(rhs);
 }
@@ -51,7 +52,7 @@ bool InsideTolerance<_registerType, _numComparedValuesSSE>::operator!=(_register
 
 
 template <typename _type>
-constexpr InsideTolerance<_type, 0>::InsideTolerance(const _type value, const _type tolerance)
+constexpr Tolerance<_type, 0>::Tolerance(const _type value, const _type tolerance)
     : mValue{value}
     , mTolerance{tolerance}
 {
@@ -61,7 +62,7 @@ constexpr InsideTolerance<_type, 0>::InsideTolerance(const _type value, const _t
 
 
 template <typename _type>
-constexpr bool InsideTolerance<_type, 0>::operator==(_type rhs) const
+constexpr bool Tolerance<_type, 0>::operator==(_type rhs) const
 {
     return std::abs(mValue - rhs) <= mTolerance;
 }
@@ -69,15 +70,15 @@ constexpr bool InsideTolerance<_type, 0>::operator==(_type rhs) const
 
 
 template <typename _type>
-constexpr bool InsideTolerance<_type, 0>::operator!=(_type rhs) const
+constexpr bool Tolerance<_type, 0>::operator!=(_type rhs) const
 {
     return !operator==(rhs);
 }
 
 
 
-template <typename _typeLhs, typename _typeInsideTolerance, U32 _numComparedValuesSSE>
-constexpr bool operator==(const _typeLhs lhs, const InsideTolerance<_typeInsideTolerance, _numComparedValuesSSE>& rhs)
+template <typename _typeLhs, typename _typeTolerance, U32 _numComparedValuesSSE>
+constexpr bool operator==(const _typeLhs lhs, const Tolerance<_typeTolerance, _numComparedValuesSSE>& rhs)
 {
     static_assert(std::is_floating_point<_typeLhs>::value || std::is_integral<_typeLhs>::value ||
                           sse::IsRegisterType<_typeLhs>(),
@@ -88,8 +89,8 @@ constexpr bool operator==(const _typeLhs lhs, const InsideTolerance<_typeInsideT
 
 
 
-template <typename _typeLhs, typename _typeInsideTolerance, U32 _numComparedValuesSSE>
-constexpr bool operator!=(const _typeLhs lhs, const InsideTolerance<_typeInsideTolerance, _numComparedValuesSSE>& rhs)
+template <typename _typeLhs, typename _typeTolerance, U32 _numComparedValuesSSE>
+constexpr bool operator!=(const _typeLhs lhs, const Tolerance<_typeTolerance, _numComparedValuesSSE>& rhs)
 {
     static_assert(std::is_floating_point<_typeLhs>::value || std::is_integral<_typeLhs>::value ||
                           sse::IsRegisterType<_typeLhs>(),
