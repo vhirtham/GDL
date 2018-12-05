@@ -18,9 +18,8 @@ const GDL::OpenGL::Uniform& GDL::OpenGL::ProgramDataManager::GetUniform(std::str
 {
     auto iterator = mUniforms.find(uniformName);
     if (iterator == mUniforms.end())
-        throw Exception(__PRETTY_FUNCTION__,
-                        "Did not find uniform \"" + uniformName +
-                                "\". GLSL compiler optimization might be the reason.");
+        throw Exception(__PRETTY_FUNCTION__, "Did not find uniform \"" + uniformName +
+                                                     "\". GLSL compiler optimization might be the reason.");
     return iterator->second;
 }
 
@@ -28,9 +27,8 @@ const GDL::OpenGL::UniformBlock& GDL::OpenGL::ProgramDataManager::GetUniformBloc
 {
     auto iterator = mUniformBlocks.find(uniformBlockName);
     if (iterator == mUniformBlocks.end())
-        throw Exception(__PRETTY_FUNCTION__,
-                        "Did not find uniform block \"" + uniformBlockName +
-                                "\". GLSL compiler optimization might be the reason.");
+        throw Exception(__PRETTY_FUNCTION__, "Did not find uniform block \"" + uniformBlockName +
+                                                     "\". GLSL compiler optimization might be the reason.");
     return iterator->second;
 }
 
@@ -155,17 +153,17 @@ const GDL::OpenGL::Uniform& GDL::OpenGL::ProgramDataManager::GetUniformByLocatio
 }
 
 
-template <GDL::U32 TNumProps>
-std::vector<std::array<GLint, TNumProps>>
+template <GDL::U32 _numProps>
+std::vector<std::array<GLint, _numProps>>
 GDL::OpenGL::ProgramDataManager::FindProgramResourceData(GLenum eResourceType,
-                                                         std::array<GLenum, TNumProps> properties) const
+                                                         std::array<GLenum, _numProps> properties) const
 {
     GLint numResources = 0;
     glGetProgramInterfaceiv(mProgram.GetHandle(), eResourceType, GL_ACTIVE_RESOURCES, &numResources);
-    std::vector<std::array<GLint, TNumProps>> results(numResources);
+    std::vector<std::array<GLint, _numProps>> results(numResources);
     for (GLint i = 0; i < numResources; ++i)
     {
-        glGetProgramResourceiv(mProgram.GetHandle(), eResourceType, i, TNumProps, properties.data(), TNumProps, nullptr,
+        glGetProgramResourceiv(mProgram.GetHandle(), eResourceType, i, _numProps, properties.data(), _numProps, nullptr,
                                results[i].data());
     }
     return results;

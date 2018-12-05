@@ -31,8 +31,8 @@ MemoryStackTemplate<false>::MemoryStackTemplate(MemorySize memorySize)
     CheckConstructionParameters();
 }
 
-template <bool _ThreadPrivate>
-MemoryStackTemplate<_ThreadPrivate>::~MemoryStackTemplate()
+template <bool _threadPrivate>
+MemoryStackTemplate<_threadPrivate>::~MemoryStackTemplate()
 {
 }
 
@@ -161,8 +161,8 @@ void MemoryStackTemplate<false>::Initialize()
 }
 
 
-template <bool _ThreadPrivate>
-void* MemoryStackTemplate<_ThreadPrivate>::AllocatePrivate(size_t size, size_t alignment)
+template <bool _threadPrivate>
+void* MemoryStackTemplate<_threadPrivate>::AllocatePrivate(size_t size, size_t alignment)
 {
     size_t misalignment = Misalignment(mCurrentMemoryPtr, alignment);
     size_t correction = ((misalignment + alignment - 1) / alignment) * alignment - misalignment;
@@ -181,8 +181,8 @@ void* MemoryStackTemplate<_ThreadPrivate>::AllocatePrivate(size_t size, size_t a
     return allocatedMemoryPtr;
 }
 
-template <bool _ThreadPrivate>
-void MemoryStackTemplate<_ThreadPrivate>::DeallocatePrivate([[maybe_unused]] void* address)
+template <bool _threadPrivate>
+void MemoryStackTemplate<_threadPrivate>::DeallocatePrivate([[maybe_unused]] void* address)
 {
     DEV_EXCEPTION(address == nullptr, "Can't free a nullptr");
     DEV_EXCEPTION(static_cast<U8*>(address) < mMemory.get() ||
@@ -195,8 +195,8 @@ void MemoryStackTemplate<_ThreadPrivate>::DeallocatePrivate([[maybe_unused]] voi
         mCurrentMemoryPtr = mMemory.get();
 }
 
-template <bool _ThreadPrivate>
-void MemoryStackTemplate<_ThreadPrivate>::DeinitializePrivate()
+template <bool _threadPrivate>
+void MemoryStackTemplate<_threadPrivate>::DeinitializePrivate()
 {
 
     EXCEPTION(IsInitialized() == false, "Memory stack already deinitialized.");
@@ -206,8 +206,8 @@ void MemoryStackTemplate<_ThreadPrivate>::DeinitializePrivate()
     mCurrentMemoryPtr = {nullptr};
 }
 
-template <bool _ThreadPrivate>
-void MemoryStackTemplate<_ThreadPrivate>::InitializePrivate()
+template <bool _threadPrivate>
+void MemoryStackTemplate<_threadPrivate>::InitializePrivate()
 {
     EXCEPTION(IsInitialized(), "Memory stack is already initialized");
 
@@ -218,24 +218,24 @@ void MemoryStackTemplate<_ThreadPrivate>::InitializePrivate()
 
 
 
-template <bool _ThreadPrivate>
-void MemoryStackTemplate<_ThreadPrivate>::CheckConstructionParameters() const
+template <bool _threadPrivate>
+void MemoryStackTemplate<_threadPrivate>::CheckConstructionParameters() const
 {
     EXCEPTION(mMemorySize < 1, "Memory size must be bigger than 0");
 }
 
 
 
-template <bool _ThreadPrivate>
-bool MemoryStackTemplate<_ThreadPrivate>::IsInitialized() const
+template <bool _threadPrivate>
+bool MemoryStackTemplate<_threadPrivate>::IsInitialized() const
 {
     return mMemory != nullptr;
 }
 
 
 
-template <bool _ThreadPrivate>
-MemoryStackTemplate<_ThreadPrivate>::MemoryStackDeallocator::MemoryStackDeallocator(MemoryStackTemplate& memoryStack)
+template <bool _threadPrivate>
+MemoryStackTemplate<_threadPrivate>::MemoryStackDeallocator::MemoryStackDeallocator(MemoryStackTemplate& memoryStack)
     : mMemoryStack{memoryStack}
     , mStoredNumAllocations{memoryStack.mNumAllocations}
     , mStoredPointer{memoryStack.mCurrentMemoryPtr}
@@ -244,8 +244,8 @@ MemoryStackTemplate<_ThreadPrivate>::MemoryStackDeallocator::MemoryStackDealloca
 
 
 
-template <bool _ThreadPrivate>
-MemoryStackTemplate<_ThreadPrivate>::MemoryStackDeallocator::~MemoryStackDeallocator()
+template <bool _threadPrivate>
+MemoryStackTemplate<_threadPrivate>::MemoryStackDeallocator::~MemoryStackDeallocator()
 {
     mMemoryStack.SetState(mStoredNumAllocations, mStoredPointer);
 }

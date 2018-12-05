@@ -37,8 +37,8 @@ public:
     //! @param bufferData: Vector of data that should be used for initialization
     //! @param usage: Enum that specifies the buffer objects usage (have a look at the official reference for
     //! glNamedBufferData)
-    template <typename TDataType>
-    explicit BufferObject(const std::vector<TDataType>& bufferData, GLenum usage);
+    template <typename _dataType>
+    explicit BufferObject(const std::vector<_dataType>& bufferData, GLenum usage);
 
     //! @brief Gets the handle of the buffer object
     //! @return Handle of the buffer object
@@ -65,16 +65,16 @@ public:
     //! @tparam TDataType: Data type of the provided data
     //! @param data: The data that should be written to the buffer object
     //! @param offset: Location inside the buffer where the data should be written
-    template <typename TDataType>
-    void SetData(TDataType data, GLint offset = 0) const;
+    template <typename _dataType>
+    void SetData(_dataType data, GLint offset = 0) const;
 
 private:
     //! @brief Initializes the buffer object
     //! @param bufferData: Data that should be used for initialization
     //! @param usage: Enum that specifies the buffer objects usage (have a look at the official reference for
     //! glNamedBufferData)
-    template <typename TDataType>
-    void Initialize(const std::vector<TDataType>& bufferData, GLenum usage);
+    template <typename _dataType>
+    void Initialize(const std::vector<_dataType>& bufferData, GLenum usage);
 };
-}
-}
+} // namespace OpenGL
+} // namespace GDL

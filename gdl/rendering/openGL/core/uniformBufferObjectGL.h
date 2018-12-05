@@ -32,8 +32,8 @@ public:
     //! @param bufferData: Vector of data that should be used for initialization
     //! @param usage: Enum that specifies the buffer objects usage (have a look at the official reference for
     //! glNamedBufferData)
-    template <typename TDataType>
-    UniformBufferObject(const std::vector<TDataType>& buffer, GLenum usage)
+    template <typename _dataType>
+    UniformBufferObject(const std::vector<_dataType>& buffer, GLenum usage)
         : mBufferObject(buffer, usage)
     {
     }
@@ -73,11 +73,11 @@ public:
     void SetBindingPoint(GLint bindingPoint);
 
     //! @brief Writes data to the uniform buffer object starting at the given offset
-    //! @tparam TDataType: Data type of the provided data
+    //! @tparam _dataType: Data type of the provided data
     //! @param data: The data that should be written to the uniform buffer object
     //! @param offset: Location inside the buffer where the data should be written
-    template <typename TDataType>
-    void SetData(TDataType data, GLint offset = 0) const
+    template <typename _dataType>
+    void SetData(_dataType data, GLint offset = 0) const
     {
         mBufferObject.SetData(data, offset);
     }
@@ -89,5 +89,5 @@ private:
     //! @return true/false
     bool BindingPointValid() const;
 };
-}
-}
+} // namespace OpenGL
+} // namespace GDL

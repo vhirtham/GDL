@@ -25,15 +25,15 @@ public:
     ~Program();
 
     //! @brief Constructor that takes as many shaders as desired and links the program
-    //! @tparam TShader: Varying number of shaders
+    //! @tparam _shader: Varying number of shaders
     //! @param shaderList: List of shaders
     //! @remark Even though the template should be callable with any input type, only the Shader class will compile.
     //! Didn't find a better way to use a parameter pack.
-    template <typename... TShader>
-    Program(const TShader&... shaderList)
+    template <typename... _shader>
+    Program(const _shader&... shaderList)
         : mHandle(glCreateProgram())
     {
-        Initialize({std::forward<const TShader&>(shaderList)...});
+        Initialize({std::forward<const _shader&>(shaderList)...});
     }
 
 
@@ -56,20 +56,20 @@ public:
 
     //! @brief Sets the value of an uniform
     //! @tparam TTypeEnum: GL type enum
-    //! @tparam TValue: Value type
+    //! @tparam _value: Value type
     //! @param uniformLocation: Location of the uniform
     //! @param value: New value
-    template <typename TValue>
-    void SetUniform(GLint uniformLocation, TValue value) const;
+    template <typename _value>
+    void SetUniform(GLint uniformLocation, _value value) const;
 
 
     //! @brief Sets the values of an uniform array
     //! @tparam TTypeEnum: GL type enum
-    //! @tparam TValue: Value type
+    //! @tparam _value: Value type
     //! @param uniformLocation: location of the first uniform array member that should be set
     //! @param values: Vector with values
-    template <typename TValue>
-    void SetUniformArray(GLint uniformLocation, const TValue* const values, U32 size) const;
+    template <typename _value>
+    void SetUniformArray(GLint uniformLocation, const _value* const values, U32 size) const;
 
     //! @brief Sets this program as active program
     void Use() const;
@@ -88,5 +88,5 @@ private:
     //! @param shaderList: Shaders that should be linked
     void Initialize(std::initializer_list<std::reference_wrapper<const Shader>> shaderList);
 };
-}
-}
+} // namespace OpenGL
+} // namespace GDL

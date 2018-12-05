@@ -22,8 +22,8 @@ MatSingle<_type, _rows, _cols>::MatSingle()
 
 
 template <typename _type, I32 _rows, I32 _cols>
-template <typename... Args>
-MatSingle<_type, _rows, _cols>::MatSingle(Args... args)
+template <typename... _args>
+MatSingle<_type, _rows, _cols>::MatSingle(_args... args)
     : mData{{static_cast<_type>(args)...}}
 {
     assert(mData.size() == sizeof...(args));

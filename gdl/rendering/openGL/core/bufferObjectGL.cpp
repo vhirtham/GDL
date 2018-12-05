@@ -19,8 +19,8 @@ BufferObject::BufferObject(GLuint size, GLenum usage)
 
 
 
-template <typename TDataType>
-BufferObject::BufferObject(const std::vector<TDataType>& bufferData, GLenum usage)
+template <typename _dataType>
+BufferObject::BufferObject(const std::vector<_dataType>& bufferData, GLenum usage)
     : mSize(bufferData.size())
     , mUsage(usage)
 {
@@ -57,15 +57,15 @@ void BufferObject::SetData<std::vector<F32>>(std::vector<F32> data, GLint offset
 
 
 
-template <typename TDataType>
-void BufferObject::Initialize(const std::vector<TDataType>& bufferData, GLenum usage)
+template <typename _dataType>
+void BufferObject::Initialize(const std::vector<_dataType>& bufferData, GLenum usage)
 {
     glCreateBuffers(1, &mHandle);
-    glNamedBufferData(mHandle, bufferData.size() * sizeof(TDataType), bufferData.data(), usage);
+    glNamedBufferData(mHandle, bufferData.size() * sizeof(_dataType), bufferData.data(), usage);
     assert(mHandle > 0);
     assert(glGetError() == GL_NO_ERROR);
 }
 
 
-} // namespace OpenGl
+} // namespace OpenGL
 } // namespace GDL

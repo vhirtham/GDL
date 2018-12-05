@@ -17,7 +17,7 @@
 #include <iostream>
 namespace GDL
 {
-template <U32 _BufferSize>
+template <U32 _bufferSize>
 class TraceBuffer
 {
 
@@ -66,7 +66,7 @@ class TraceBuffer
 
     std::atomic_int32_t mIndex;
     std::atomic_bool mWriteToLogfile;
-    std::array<EventLog, _BufferSize> mLog;
+    std::array<EventLog, _bufferSize> mLog;
     Timer mTimer;
     std::unique_ptr<Thread> mWriterThread;
 
@@ -95,7 +95,7 @@ public:
     //! @return Requested event log
     const EventLog& operator[](I32 index) const
     {
-        assert(index > -1 && index < static_cast<I32>(_BufferSize));
+        assert(index > -1 && index < static_cast<I32>(_bufferSize));
         return mLog[index];
     }
 
@@ -112,7 +112,7 @@ public:
     //! @return Buffer size
     constexpr U32 GetBufferSize() const
     {
-        return _BufferSize;
+        return _bufferSize;
     }
 
 
@@ -187,7 +187,7 @@ private:
     //! @return Next index, based on the passed value
     I32 GetNextIndex(I32 currentIndex) const
     {
-        if (currentIndex == _BufferSize - 1)
+        if (currentIndex == _bufferSize - 1)
             return 0;
         return currentIndex + 1;
     }
@@ -203,4 +203,4 @@ private:
         return reservedIndex;
     }
 };
-}
+} // namespace GDL

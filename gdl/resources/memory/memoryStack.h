@@ -14,18 +14,18 @@ namespace GDL
 
 //! @brief Memory system that can only allocate memory from its end. The memory is only freed all at once if the number
 //! of allocations equals the number of deallocations. The template bool defines how multithreading is handled.
-//! @tparam _ThreadPrivate: TRUE if the memory stack can only be accessed by a single thread. FALSE if the memory stack
+//! @tparam  _threadPrivate: TRUE if the memory stack can only be accessed by a single thread. FALSE if the memory stack
 //! is accessable by multiple threads and needs to be protected by a mutex
-template <bool _ThreadPrivate>
+template <bool _threadPrivate>
 class MemoryStackTemplate : public MemoryInterface
 {
 
-    using ThreadSafetyMechanism = typename std::conditional<_ThreadPrivate, std::thread::id, SpinLock>::type;
+    using ThreadSafetyMechanism = typename std::conditional<_threadPrivate, std::thread::id, SpinLock>::type;
 
     //! @brief Class which stores the current state of the memory stack and restores it when the object is destroyed
     class MemoryStackDeallocator
     {
-        friend class MemoryStackTemplate<_ThreadPrivate>;
+        friend class MemoryStackTemplate<_threadPrivate>;
 
         MemoryStackTemplate& mMemoryStack;
         U32 mStoredNumAllocations = 0;

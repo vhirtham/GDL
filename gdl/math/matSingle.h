@@ -25,10 +25,10 @@ public:
     MatSingle();
 
     //! @brief Constructor to set the whole matrix
+    //! @tparam _args: Variadic data type
     //! @param args: Values (column major)
-    //! @tparam Args: Variadic data type
-    template <typename... Args>
-    explicit MatSingle(Args... args);
+    template <typename... _args>
+    explicit MatSingle(_args... args);
 
     //! @brief Constructor to set the whole matrix
     //! @param data: Array with values (column major)

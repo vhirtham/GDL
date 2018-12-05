@@ -87,51 +87,51 @@ public:
     }
 
     //! @brief Sets the value of an uniform of the managed program
-    //! @tparam TTypeEnum: GL type enum
-    //! @tparam TValue: Value type
+    //! @tparam _typeEnum: GL type enum
+    //! @tparam _value: Value type
     //! @param uniformLocation: Location of the uniform
     //! @param value: New value
-    template <GLuint TTypeEnum, typename TValue>
-    void SetUniform(GLint uniformLocation, TValue value) const
+    template <GLuint _typeEnum, typename _value>
+    void SetUniform(GLint uniformLocation, _value value) const
     {
-        assert(GetUniformByLocation(uniformLocation).GetType() == TTypeEnum);
+        assert(GetUniformByLocation(uniformLocation).GetType() == _typeEnum);
         mProgram.SetUniform(uniformLocation, value);
     }
 
     //! @brief Sets the value of an uniform of the managed program
-    //! @tparam TTypeEnum: GL type enum
-    //! @tparam TValue: Value type
+    //! @tparam _typeEnum: GL type enum
+    //! @tparam _value: Value type
     //! @param uniformName: Name of the uniform
     //! @param value: New value
-    template <GLuint TTypeEnum, typename TValue>
-    void SetUniform(std::string uniformName, TValue value) const
+    template <GLuint _typeEnum, typename _value>
+    void SetUniform(std::string uniformName, _value value) const
     {
-        SetUniform<TTypeEnum>(GetUniform(uniformName).GetLocation(), value);
+        SetUniform<_typeEnum>(GetUniform(uniformName).GetLocation(), value);
     }
 
 
     //! @brief Sets the values of an uniform array of the managed program
-    //! @tparam TTypeEnum: GL type enum
-    //! @tparam TValue: Value type
+    //! @tparam _typeEnum: GL type enum
+    //! @tparam _value: Value type
     //! @param uniformLocation: location of the first uniform array member that should be set
     //! @param values: Vector with values
-    template <GLuint TTypeEnum, typename TValue>
-    void SetUniformArray(GLint uniformLocation, const TValue* const values, U32 size) const
+    template <GLuint _typeEnum, typename _value>
+    void SetUniformArray(GLint uniformLocation, const _value* const values, U32 size) const
     {
-        assert(GetUniformByLocation(uniformLocation).GetType() == TTypeEnum);
+        assert(GetUniformByLocation(uniformLocation).GetType() == _typeEnum);
         assert(GetUniformByLocation(uniformLocation).GetArraySize() >= size);
         mProgram.SetUniformArray(uniformLocation, values, size);
     }
 
     //! @brief Sets the values of an uniform array of the managed program
-    //! @tparam TTypeEnum: GL type enum
-    //! @tparam TValue: Value type
+    //! @tparam _typeEnum: GL type enum
+    //! @tparam _value: Value type
     //! @param uniformName: Name of the uniform
     //! @param values: Vector with values
-    template <GLuint TTypeEnum, typename TValue>
-    void SetUniformArray(std::string uniformName, const TValue* const values, U32 size) const
+    template <GLuint _typeEnum, typename _value>
+    void SetUniformArray(std::string uniformName, const _value* const values, U32 size) const
     {
-        SetUniformArray<TTypeEnum>(GetUniform(uniformName).GetLocation(), values, size);
+        SetUniformArray<_typeEnum>(GetUniform(uniformName).GetLocation(), values, size);
     }
 
     //! @brief Sets this program as active program
@@ -164,10 +164,10 @@ private:
     //! @brief Finds the specified properties of all instances of the given resource type
     //! @param eResourceType: Enum that speciefies the resource type
     //! @param properties: Proberties that should be determined
-    //! @tparam TNumProps: Number of properties that should be determined
-    template <U32 TNumProps>
-    std::vector<std::array<GLint, TNumProps>> FindProgramResourceData(GLenum eResourceType,
-                                                                      std::array<GLenum, TNumProps> properties) const;
+    //! @tparam _numProps: Number of properties that should be determined
+    template <U32 _numProps>
+    std::vector<std::array<GLint, _numProps>> FindProgramResourceData(GLenum eResourceType,
+                                                                      std::array<GLenum, _numProps> properties) const;
 
     //! @brief Gets the name of a resource
     //! @param eResourceType: Enum that speciefies the resource type
@@ -181,5 +181,5 @@ private:
     //! @return Uniform
     const Uniform& GetUniformByLocation(GLint location) const;
 };
-}
-}
+} // namespace OpenGL
+} // namespace GDL

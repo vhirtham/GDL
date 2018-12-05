@@ -63,10 +63,10 @@ public:
     }
 
     //! @brief Writes data to the file
-    //! @tparam _Type: Data type of the passed data
+    //! @tparam _type: Data type of the passed data
     //! @param data: Data that should be written
-    template <typename _Type>
-    OutputFile& Write(const _Type& data)
+    template <typename _type>
+    OutputFile& Write(const _type& data)
     {
         mFile << data;
         mFile.flush();
@@ -74,16 +74,16 @@ public:
     }
 
     //! @brief Writes data to the file
-    //! @tparam _Type: Data type of the passed data
-    //! @tparam _Args: Parameter pack for additional parameters
+    //! @tparam _type: Data type of the passed data
+    //! @tparam _args: Parameter pack for additional parameters
     //! @param data: Data that should be written
     //! @param args: Additional data
-    template <typename _Type, typename... _Args>
-    OutputFile& Write(const _Type& data, const _Args&... args)
+    template <typename _type, typename... _args>
+    OutputFile& Write(const _type& data, const _args&... args)
     {
         mFile << data;
         Write(args...);
         return *this;
     }
 };
-}
+} // namespace GDL
