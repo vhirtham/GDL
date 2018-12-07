@@ -108,7 +108,7 @@ BOOST_AUTO_TEST_CASE(Exception_handling)
     BOOST_CHECK_NO_THROW(tp.PropagateExceptions());
 
     tp.Submit([&] { throw Exception(__PRETTY_FUNCTION__, "test"); });
-    while (tp.ExceptionLogSize() == 0)
+    while (tp.GetExceptionLogSize() == 0)
         std::this_thread::sleep_for(1ms);
 
     BOOST_CHECK_THROW(tp.PropagateExceptions(), Exception);

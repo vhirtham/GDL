@@ -226,7 +226,7 @@ void ThreadPool<_numQueues>::ClearExceptionLog()
 
 
 template <I32 _numQueues>
-U32 ThreadPool<_numQueues>::ExceptionLogSize() const
+U32 ThreadPool<_numQueues>::GetExceptionLogSize() const
 {
     std::lock_guard<std::mutex> lock(mMutexExceptionLog);
     return mExceptionLog.size();

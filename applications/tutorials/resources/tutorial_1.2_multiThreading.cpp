@@ -25,10 +25,15 @@ void SetValueTo1337(I32& value)
 
 int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
 {
+    // Thread class -------------------------------------------------------------------------------
+
     {
         Thread thread(HelloFromThread);
     }
 
+
+
+    // Thread pool --------------------------------------------------------------------------------
 
     ThreadPool<> pool;
 
@@ -49,6 +54,58 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
     std::cout << "Running threads: " << pool.GetNumThreads() << std::endl;
     pool.CloseThreads(1);
     std::cout << "Running threads: " << pool.GetNumThreads() << std::endl;
-
     pool.CloseAllThreads();
+    std::cout << "Running threads: " << pool.GetNumThreads() << std::endl;
+
+    U32 counter = 0;
+    auto threadMainFunc = [&]() { ++counter; };
+    pool.StartThreads(1, threadMainFunc);
+    std::this_thread::sleep_for(std::chrono::milliseconds{10});
+    pool.CloseAllThreads();
+
+    std::cout << "Thread main loop iterations: " << counter << std::endl;
+
+
+    auto threadInitFunc = [&]() { std::cout << "Start thread" << std::endl; };
+    auto threadDeinitFunc = [&]() { std::cout << "Stop thread" << std::endl; };
+    pool.StartThreads(1, threadMainFunc, threadInitFunc, threadDeinitFunc);
+    pool.CloseAllThreads();
+
+    std::cout << "Exception log size: " << pool.GetExceptionLogSize() << std::endl;
+
+    pool.PropagateExceptions();
+    pool.Deinitialize();
+
+
+    // Thread pool with multiple queues -----------------------------------------------------------
+
+    ThreadPool<2> pool2Queues;
+
+    auto prioritizeFirstQueue = [&]() {
+        if (pool2Queues.HasTasks(0))
+            pool2Queues.TryExecuteTask(0);
+        else
+            pool2Queues.TryExecuteTask(1);
+    };
+
+    pool2Queues.StartThreads(2, prioritizeFirstQueue);
+
+    for (U32 i = 0; i < 10; ++i)
+        pool2Queues.Submit(1, []() {
+            std::cout << "Task from second queue processed" << std::endl;
+            std::this_thread::sleep_for(std::chrono::milliseconds{1});
+        });
+
+    for (U32 i = 0; i < 10; ++i)
+        pool2Queues.Submit(0, []() {
+            std::cout << "Task from first queue processed" << std::endl;
+            std::this_thread::sleep_for(std::chrono::milliseconds{1});
+        });
+
+    while (pool2Queues.HasTasks(0) || pool2Queues.HasTasks(1))
+    {
+        std::this_thread::sleep_for(std::chrono::milliseconds{10});
+    }
+
+    pool2Queues.Deinitialize();
 }
