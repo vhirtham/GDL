@@ -8,6 +8,10 @@ The complete program of this tutorial can be found in the following location:
 applications/tutorials/resources/tutorial_1.2_multiThreading.cpp
 ~~~
 
+
+
+***
+
 ## Table of content
 
 - [**The Thread class**](#the-thread-class)
@@ -20,6 +24,8 @@ applications/tutorials/resources/tutorial_1.2_multiThreading.cpp
 - [**Things you should keep in mind**](#things-you-should-keep-in-mind)
 
 
+
+***
 
 ## The Thread class
 
@@ -57,6 +63,10 @@ Hello from thread with ID 140314797389568!
 ~~~
 
 All this program does so far is starting a thread which prints a hello world message and closing it afterwards. Keep in mind that the destructor of the Thread class tries to join the thread. So if you are using a loop that waits for an exit condition to be fulfilled, you will create a deadlock if you don't give the exit signal before the destructor is called.
+
+
+
+***
 
 ## Thread pool
 
@@ -280,6 +290,9 @@ pool2Queues.Deinitialize();
 
 The output you will get most of the time is that all messages of the first queue are printed in front of the messages of the second queue even though we fill the second queue first. The reason for this is the slow startup process of the threads. The main thread has already finished filling the queues before the worker threads start asking for tasks. However, occasionally it might happen that you see a different ordering of the output messages due to temporary slowdowns in one or more threads.
 
+
+
+***
 
 ## Things you should keep in mind
 

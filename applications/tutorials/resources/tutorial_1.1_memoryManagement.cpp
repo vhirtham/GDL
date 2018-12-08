@@ -60,14 +60,23 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
     I32* myIntArray = static_cast<I32*>(tpms->Allocate(sizeof(I32) * 5));
     tpms->Deallocate(myIntArray);
 
-    // aligned allocation
+    // Aligned allocation
     myIntArray = static_cast<I32*>(tpms->Allocate(sizeof(I32) * 5, 32));
     tpms->Deallocate(myIntArray);
 
-    hac.PrintCalls();
 
+
+    // Memory stack deallocator------------------
+
+    F32* v1 = stackAllocator.allocate(1);
+    {
+        MemoryStack::MemoryStackDeallocator msd = memoryManager.GetMemoryStack()->CreateMemoryStackDeallocator();
+        [[maybe_unused]] F32* v2 = stackAllocator.allocate(1);
+    }
+    stackAllocator.deallocate(v1, 1);
+
+    hac.PrintCalls();
     memoryManager.DeletePrivateMemoryStackForThisThread();
     memoryManager.Deinitialize();
-
     return 0;
 }

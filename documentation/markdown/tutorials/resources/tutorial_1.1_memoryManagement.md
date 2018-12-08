@@ -24,6 +24,7 @@ applications/tutorials/resources/tutorial_1.1_memoryManagement.cpp
     - [Manual allocation with allocators](#manual-allocation-with-allocators)
     - [Manual allocation without allocators](#manual-allocation-without-allocators)
     - [Aligned allocations](#aligned-allocations)
+    - [Memory stack deallocator](#memory-stack-deallocator)
     - [Checking the number of heap allocations](#checking-the-number-of-heap-allocations)
 3. [Additional information](#additional-information)
     - [Effective memory consumption](#effective-memory-consumption)
@@ -31,6 +32,7 @@ applications/tutorials/resources/tutorial_1.1_memoryManagement.cpp
     - [Internal memory allocation of GDL classes](#internal-memory-allocation-of-gdl-classes)
     - [Disable GDL allocators](#disable-gdl-allocators)
     - [Reading and writing to invalid addresses](#reading-and-writing-to-invalid-addresses)
+    - [Strings](#strings)
 
 
 ***
@@ -287,6 +289,24 @@ memoryManager.CreateMemoryPool(128_B, 1000, 32);
 Here we created a memory pool with 1000 blocks with a size of 128 bytes that are all aligned to 32 byte addresses. The alignment value that you specify during the creation of the memory pool also limits the maximum alignment request the memory pool can suffice. There is no extra padding added, even if the total allocation size (padding + data size) would fit into the block. With the `DEV_EXCEPTION` macro enabled the `allocate` function will throw an exception if your alignment request is not supported.
 
 
+### Memory stack deallocator
+
+Earlier we mentioned that there is a helper class to free memory on the memory stack even though the internal counter did not go back to zero. This class is the memory stack deallocator. It is a member class of the memory stack. It stores the current state of the memory stack during construction and restores it when its destructor is called.
+To create an instance of this class you have to use the corresponding function of the memory stack. Here is a short example:
+
+~~~ cpp
+F32* v1 = stackAllocator.allocate(1);
+{
+    MemoryStack::MemoryStackDeallocator msd = memoryManager.GetMemoryStack()->CreateMemoryStackDeallocator();
+    F32* v2 = stackAllocator.allocate(1);
+}
+stackAllocator.deallocate(v1, 1);
+~~~
+
+In this example we allocate a piece of memory on the memory stack before we open a new scope. Inside of this new scope we create an instance of the memory stack deallocator and allocate another piece of memory. Then we close the scope and free the memory we allocated first. Without the memory stack deallocator the memory stack would throw an exception during deinitialization because we never called `stackAllocator.deallocate(v2, 1)`. But since the memory stack deallocator restores the state from before the second allocation as soon as the extra scope is left, there will be no exception. However, fixing missing deallocations is not the main purpose of this class. The more important feature is, that the memory that was used after its creation is immediately available after its destruction.
+
+REMARK: In the previous example we used `memoryManager.GetMemoryStack()->CreateMemoryStackDeallocator()` to get an instance of the memory stack deallocator. There we ignored the fact, that `memoryManager.GetMemoryStack()` might return a `nullptr` to keep the example short. In practice you should always check for a `nullptr` before using member functions of the memory stack.
+
 ### Checking the number of heap allocations
 
 The whole purpose of the memory management system is to avoid expensive allocations on the heap. If you want to be sure that there are no hidden heap allocations or if you want to count the number of heap allocations of a specific code segment, you can use the `HeapAllocationCounter`. To do so include the following header:
@@ -342,7 +362,9 @@ If you don't want to use the GDL memory system or if you want to compare the spe
 
 All of the offered memory types do not prevent writing and reading from invalid addresses, since their only job is to provide the memory and not to check how you use it. Writing to an invalid address, for example by accessing a non existing array element with the direct access operator, might irreversibly corrupt the memory system and result in undefined behavior. Again, if you deinitialize the memory manager a corrupted memory system will usually throw an exception which gives you at least a hint that something went wrong with dynamic memory. Turning on the `DEV_EXCEPTION` macro might help to narrow down the location of the corruption.
 
+### Strings
 
+The string header of the GDL also include some function in addition to the pure type definitions. Some of them are meant as replacements for STL functions that perform dynamic memory allocations but do not offer the possibility to provide an alternative allocator. For example the `std::to_string` function can only return a `std::string` which uses the `std::allocator`. Therefore the GDL has a own `ToString` function. Check the doxygen documentation of the string header for further information. 
 
 ***
 

@@ -22,6 +22,7 @@ class MemoryStackTemplate : public MemoryInterface
 
     using ThreadSafetyMechanism = typename std::conditional<_threadPrivate, std::thread::id, SpinLock>::type;
 
+public:
     //! @brief Class which stores the current state of the memory stack and restores it when the object is destroyed
     class MemoryStackDeallocator
     {
@@ -44,8 +45,7 @@ class MemoryStackTemplate : public MemoryInterface
         ~MemoryStackDeallocator();
     };
 
-
-
+private:
     MemorySize mMemorySize;
     U32 mNumAllocations;
     U8* mCurrentMemoryPtr;
