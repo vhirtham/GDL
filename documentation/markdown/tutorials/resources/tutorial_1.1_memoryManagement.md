@@ -305,7 +305,9 @@ stackAllocator.deallocate(v1, 1);
 
 In this example we allocate a piece of memory on the memory stack before we open a new scope. Inside of this new scope we create an instance of the memory stack deallocator and allocate another piece of memory. Then we close the scope and free the memory we allocated first. Without the memory stack deallocator the memory stack would throw an exception during deinitialization because we never called `stackAllocator.deallocate(v2, 1)`. But since the memory stack deallocator restores the state from before the second allocation as soon as the extra scope is left, there will be no exception. However, fixing missing deallocations is not the main purpose of this class. The more important feature is, that the memory that was used after its creation is immediately available after its destruction.
 
-REMARK: In the previous example we used `memoryManager.GetMemoryStack()->CreateMemoryStackDeallocator()` to get an instance of the memory stack deallocator. There we ignored the fact, that `memoryManager.GetMemoryStack()` might return a `nullptr` to keep the example short. In practice you should always check for a `nullptr` before using member functions of the memory stack.
+However, don't use this class if multiple threads can access the same memory stack (which is never the case for thread private memory stacks). Every memory that is allocated by other threads during the lifetime of the memory stack deallocator will be invalidated after its destruction which will leave your program in an undefined state.
+
+REMARK: In the previous example we used `memoryManager.GetMemoryStack()->CreateMemoryStackDeallocator()` to get an instance of the memory stack deallocator. There we ignored the fact, that `memoryManager.GetMemoryStack()` might return a `nullptr` to keep the example short. In practice you should always check for a `nullptr`.
 
 ### Checking the number of heap allocations
 

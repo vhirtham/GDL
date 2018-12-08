@@ -207,7 +207,7 @@ pool.CloseAllThreads();
 std::cout << "Thread main loop iterations: " << counter << std::endl;
 ~~~
 
-Here we pass a lambda function that just counts the number of function calls. Note that this thread does not process any tasks of the thread pools queue. You have to explicitly tell it to do so by adding `pool.TryExecuteTask()` to the passed lambda function.
+Here we pass a lambda function that just counts the number of function calls. Note that this thread does not process any tasks of the thread pools queue. You have to explicitly tell it to do so by adding `pool.TryExecuteTask()` to the passed lambda function. However, nothing hinders you to use a thread pool thread for other purposes than processing the thread pools tasks.
 
 You should also know that there is no internal load balancing mechanism. Each thread will repeatedly execute its main loop function as fast as possible. In case of the default function this means that each thread will contiguously try to fetch tasks, even if there are none in the queue (busy waiting). This can be a huge waste of energy if your program is idle, but with the opportunity of passing custom main loop functions you can easily change this behavior by using common synchronization mechanisms like a `std::condition_variable`.
 
@@ -296,7 +296,8 @@ The output you will get most of the time is that all messages of the first queue
 
 ## Things you should keep in mind
 
-- it is your responsibility to do all necessary synchronization (avoiding data races and deadlocks)
-- thread pool threads perform busy waiting by default
-- regularly check the thread pools exception log inside your main thread to detect errors as soon as possible
-- always call `Deinitialize` before the thread pool is destroyed
+- It is your responsibility to do all necessary synchronization (avoiding data races and deadlocks)
+- Thread pool threads perform busy waiting by default
+- Regularly check the thread pools exception log inside your main thread to detect errors as soon as possible
+- Always call `Deinitialize` before the thread pool is destroyed
+- Your main thread or any other thread that is not part of the thread pool can also help processing tasks by calling the thread pools `TryExecuteTask` function.
