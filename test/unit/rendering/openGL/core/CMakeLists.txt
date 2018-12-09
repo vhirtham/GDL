@@ -1,5 +1,5 @@
-addTest(renderWindowGL
-    rendering/openGL/core/renderWindowGL.cpp
+addTest(renderWindowGLUT
+    rendering/openGL/core/renderWindowGLUT.cpp
     # External libs
     OpenGL::GL
     OpenGL::GLU
@@ -7,9 +7,10 @@ addTest(renderWindowGL
     GLEW::GLEW
     )
 
-addTest(shaderGL
-    rendering/openGL/core/shaderGL.cpp
-    rendering/openGL/core/renderWindowGL.cpp
+addTest(shader
+    rendering/openGL/core/shader.cpp
+    rendering/openGL/core/renderWindowGLUT.cpp
+    GDL::Resources
     # External libs
     OpenGL::GL
     OpenGL::GLU
@@ -19,8 +20,9 @@ addTest(shaderGL
 
 addTest(programGL
     rendering/openGL/core/programGL.cpp
-    rendering/openGL/core/shaderGL.cpp
-    rendering/openGL/core/renderWindowGL.cpp
+    rendering/openGL/core/shader.cpp
+    rendering/openGL/core/renderWindowGLUT.cpp
+    GDL::Resources
     # External libs
     OpenGL::GL
     OpenGL::GLU
@@ -29,9 +31,10 @@ addTest(programGL
     )
 
 addTest(uniformBufferObjectGL
-    rendering/openGL/core/renderWindowGL.cpp
+    rendering/openGL/core/renderWindowGLUT.cpp
     rendering/openGL/core/bufferObjectGL.cpp
     rendering/openGL/core/uniformBufferObjectGL.cpp
+    GDL::Resources
     # External libs
     OpenGL::GL
     OpenGL::GLU
@@ -40,8 +43,9 @@ addTest(uniformBufferObjectGL
     )
 
 addTest(bufferObjectGL
-    rendering/openGL/core/renderWindowGL.cpp
+    rendering/openGL/core/renderWindowGLUT.cpp
     rendering/openGL/core/bufferObjectGL.cpp
+    GDL::Resources
     # External libs
     OpenGL::GL
     OpenGL::GLU
@@ -50,9 +54,10 @@ addTest(bufferObjectGL
     )
 
 addTest(vertexArrayObjectGL
-    rendering/openGL/core/renderWindowGL.cpp
+    rendering/openGL/core/renderWindowGLUT.cpp
     rendering/openGL/core/vertexArrayObjectGL.cpp
     rendering/openGL/core/bufferObjectGL.cpp
+    GDL::Resources
     # External libs
     OpenGL::GL
     OpenGL::GLU

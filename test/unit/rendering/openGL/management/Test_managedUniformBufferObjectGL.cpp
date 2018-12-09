@@ -2,7 +2,7 @@
 
 
 #include "gdl/base/fundamentalTypes.h"
-#include "gdl/rendering/openGL/core/renderWindowGL.h"
+#include "gdl/rendering/openGL/core/renderWindowGLUT.h"
 #include "gdl/rendering/openGL/core/uniformBufferObjectGL.h"
 #include "gdl/rendering/openGL/management/uniformBlockGL.h"
 #include "gdl/rendering/openGL/management/uniformBlockVariableGL.h"
@@ -13,10 +13,10 @@
 using namespace GDL;
 using namespace GDL::OpenGL;
 
-RenderWindow& GetRenderWindow()
+RenderWindowGLUT& GetRenderWindowGLUT()
 {
     static bool initialized = false;
-    RenderWindow& renderWindow = RenderWindow::Instance();
+    RenderWindowGLUT& renderWindow = RenderWindowGLUT::Instance();
     if (!initialized)
     {
         renderWindow.Initialize();
@@ -27,7 +27,7 @@ RenderWindow& GetRenderWindow()
 
 BOOST_AUTO_TEST_CASE(Construct_From_UniformBlock)
 {
-    GetRenderWindow();
+    GetRenderWindowGLUT();
 
     constexpr U32 bufferSize = 160;
     std::vector<U8> buffer(bufferSize, 0);
@@ -55,7 +55,7 @@ BOOST_AUTO_TEST_CASE(Construct_From_UniformBlock)
 
 BOOST_AUTO_TEST_CASE(UniformBlock_Compatibility)
 {
-    GetRenderWindow();
+    GetRenderWindowGLUT();
 
     constexpr U32 bufferSize = 160;
 

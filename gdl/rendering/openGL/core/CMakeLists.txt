@@ -1,11 +1,12 @@
 addGDLLib(OpenGLCore
     bufferObjectGL.cpp
     programGL.cpp
-    renderWindowGL.cpp
-    shaderGL.cpp
+    renderWindowGLUT.cpp
+    shader.cpp
     uniformBufferObjectGL.cpp
     vertexArrayObjectGL.cpp
 
+    GDL::Resources
     # External libs
     OpenGL::GL
     OpenGL::GLU

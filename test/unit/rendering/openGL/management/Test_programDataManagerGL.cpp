@@ -1,17 +1,17 @@
 #include <boost/test/unit_test.hpp>
 
-#include "gdl/rendering/openGL/core/renderWindowGL.h"
-#include "gdl/rendering/openGL/core/shaderGL.h"
+#include "gdl/rendering/openGL/core/renderWindowGLUT.h"
+#include "gdl/rendering/openGL/core/shader.h"
 #include "gdl/rendering/openGL/core/programGL.h"
 #include "gdl/rendering/openGL/management/programDataManagerGL.h"
 
 using namespace GDL;
 using namespace GDL::OpenGL;
 
-RenderWindow& GetRenderWindow()
+RenderWindowGLUT& GetRenderWindowGLUT()
 {
     static bool initialized = false;
-    RenderWindow& renderWindow = RenderWindow::Instance();
+    RenderWindowGLUT& renderWindow = RenderWindowGLUT::Instance();
     if (!initialized)
     {
         renderWindow.Initialize();
@@ -22,7 +22,7 @@ RenderWindow& GetRenderWindow()
 
 BOOST_AUTO_TEST_CASE(Inputs)
 {
-    GetRenderWindow();
+    GetRenderWindowGLUT();
 
     const char vertexShaderCode[] = R"glsl(
                                     #version 430
@@ -71,7 +71,7 @@ BOOST_AUTO_TEST_CASE(Inputs)
 
 BOOST_AUTO_TEST_CASE(Uniforms)
 {
-    GetRenderWindow();
+    GetRenderWindowGLUT();
 
     const char vertexShaderCode[] = R"glsl(
                                     #version 430
@@ -160,7 +160,7 @@ BOOST_AUTO_TEST_CASE(Uniforms)
 
 BOOST_AUTO_TEST_CASE(UniformBlocks)
 {
-    GetRenderWindow();
+    GetRenderWindowGLUT();
     const char vertexShaderCode[] = R"glsl(
                                     #version 430
 

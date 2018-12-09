@@ -8,8 +8,8 @@
 
 #include "gdl/rendering/openGL/core/bufferObjectGL.h"
 #include "gdl/rendering/openGL/core/programGL.h"
-#include "gdl/rendering/openGL/core/renderWindowGL.h"
-#include "gdl/rendering/openGL/core/shaderGL.h"
+#include "gdl/rendering/openGL/core/renderWindowGLUT.h"
+#include "gdl/rendering/openGL/core/shader.h"
 #include "gdl/rendering/openGL/core/vertexArrayObjectGL.h"
 
 #include <GL/glew.h>
@@ -39,7 +39,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
 {
     // Setup Render Context #####################
 
-    RenderWindow& renderWindow = RenderWindow::Instance();
+    RenderWindowGLUT& renderWindow = RenderWindowGLUT::Instance();
     renderWindow.SetTitle(TITLE);
     renderWindow.Initialize();
 

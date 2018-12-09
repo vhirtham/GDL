@@ -2,16 +2,16 @@
 
 #include "gdl/base/exception.h"
 #include "gdl/base/fundamentalTypes.h"
-#include "gdl/rendering/openGL/core/renderWindowGL.h"
+#include "gdl/rendering/openGL/core/renderWindowGLUT.h"
 #include "gdl/rendering/openGL/core/uniformBufferObjectGL.h"
 
 using namespace GDL;
 using namespace GDL::OpenGL;
 
-RenderWindow& GetRenderWindow()
+RenderWindowGLUT& GetRenderWindowGLUT()
 {
     static bool initialized = false;
-    RenderWindow& renderWindow = RenderWindow::Instance();
+    RenderWindowGLUT& renderWindow = RenderWindowGLUT::Instance();
     if (!initialized)
     {
         renderWindow.Initialize();
@@ -22,7 +22,7 @@ RenderWindow& GetRenderWindow()
 
 BOOST_AUTO_TEST_CASE(Construction_And_Binding)
 {
-    GetRenderWindow();
+    GetRenderWindowGLUT();
 
     // Ctor with size test
     constexpr GLsizei size_A = 120;
@@ -78,7 +78,7 @@ BOOST_AUTO_TEST_CASE(Construction_And_Binding)
 
 BOOST_AUTO_TEST_CASE(Set_Data)
 {
-    GetRenderWindow();
+    GetRenderWindowGLUT();
 
     constexpr GLsizei size = 120;
     constexpr GLenum usage = GL_STATIC_DRAW;

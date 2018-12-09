@@ -3,16 +3,16 @@
 #include "gdl/base/exception.h"
 #include "gdl/base/fundamentalTypes.h"
 #include "gdl/rendering/openGL/core/bufferObjectGL.h"
-#include "gdl/rendering/openGL/core/renderWindowGL.h"
+#include "gdl/rendering/openGL/core/renderWindowGLUT.h"
 #include "gdl/rendering/openGL/core/vertexArrayObjectGL.h"
 
 using namespace GDL;
 using namespace GDL::OpenGL;
 
-RenderWindow& GetRenderWindow()
+RenderWindowGLUT& GetRenderWindowGLUT()
 {
     static bool initialized = false;
-    RenderWindow& renderWindow = RenderWindow::Instance();
+    RenderWindowGLUT& renderWindow = RenderWindowGLUT::Instance();
     if (!initialized)
     {
         renderWindow.Initialize();
@@ -23,14 +23,14 @@ RenderWindow& GetRenderWindow()
 
 BOOST_AUTO_TEST_CASE(Construction)
 {
-    GetRenderWindow();
+    GetRenderWindowGLUT();
     VertexArrayObject vao;
 }
 
 
 BOOST_AUTO_TEST_CASE(Add_Attributes)
 {
-    GetRenderWindow();
+    GetRenderWindowGLUT();
     VertexArrayObject vao;
     BufferObject vbo1(120, GL_STATIC_DRAW);
     BufferObject vbo2(40, GL_STATIC_DRAW);
@@ -45,7 +45,7 @@ BOOST_AUTO_TEST_CASE(Add_Attributes)
 
 BOOST_AUTO_TEST_CASE(State_Check_Functions)
 {
-    GetRenderWindow();
+    GetRenderWindowGLUT();
 
     VertexArrayObject vao;
     BufferObject vbo1(120, GL_STATIC_DRAW);

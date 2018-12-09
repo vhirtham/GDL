@@ -2,16 +2,16 @@
 
 #include "gdl/base/exception.h"
 #include "gdl/rendering/openGL/core/programGL.h"
-#include "gdl/rendering/openGL/core/shaderGL.h"
-#include "gdl/rendering/openGL/core/renderWindowGL.h"
+#include "gdl/rendering/openGL/core/shader.h"
+#include "gdl/rendering/openGL/core/renderWindowGLUT.h"
 
 using namespace GDL;
 using namespace GDL::OpenGL;
 
-RenderWindow& GetRenderWindow()
+RenderWindowGLUT& GetRenderWindowGLUT()
 {
     static bool initialized = false;
-    RenderWindow& renderWindow = RenderWindow::Instance();
+    RenderWindowGLUT& renderWindow = RenderWindowGLUT::Instance();
     if (!initialized)
     {
         renderWindow.Initialize();
@@ -22,7 +22,7 @@ RenderWindow& GetRenderWindow()
 
 BOOST_AUTO_TEST_CASE(LinkProgram)
 {
-    GetRenderWindow();
+    GetRenderWindowGLUT();
 
     const char vertexShaderCode[] = R"glsl(
                                     #version 430

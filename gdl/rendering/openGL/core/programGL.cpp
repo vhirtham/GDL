@@ -2,7 +2,7 @@
 
 #include "gdl/base/exception.h"
 #include "gdl/math/mat4.inl"
-#include "gdl/rendering/openGL/core/shaderGL.h"
+#include "gdl/rendering/openGL/core/shader.h"
 
 #include <cassert>
 #include <memory>
@@ -42,7 +42,7 @@ void GDL::OpenGL::Program::CheckShaders(std::initializer_list<std::reference_wra
             throw Exception(__PRETTY_FUNCTION__,
                             "Multiple shaders of the same type in one program are not "
                             "supported.\n You tried to attach multiple shaders of type: " +
-                                    Shader::GetShaderTypeString(shader.get().GetType()));
+                                    std::string(Shader::GetShaderTypeString(shader.get().GetType())));
         attachedShaderTypes.emplace(shader.get().GetType());
     }
     if (attachedShaderTypes.find(GL_VERTEX_SHADER) == attachedShaderTypes.end() ||
@@ -75,9 +75,8 @@ void GDL::OpenGL::Program::CheckForErrors() const
 {
     GLenum errorCode = glGetError();
     if (errorCode != GL_NO_ERROR)
-        throw Exception(__PRETTY_FUNCTION__,
-                        "Could not create program:\n" +
-                                std::string(reinterpret_cast<const char*>(gluErrorString(errorCode))));
+        throw Exception(__PRETTY_FUNCTION__, "Could not create program:\n" + std::string(reinterpret_cast<const char*>(
+                                                                                     gluErrorString(errorCode))));
 }
 
 

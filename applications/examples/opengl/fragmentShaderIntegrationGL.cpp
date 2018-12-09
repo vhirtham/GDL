@@ -4,8 +4,8 @@
 #include "gdl/base/time.h"
 #include "gdl/rendering/openGL/core/bufferObjectGL.h"
 #include "gdl/rendering/openGL/core/programGL.h"
-#include "gdl/rendering/openGL/core/renderWindowGL.h"
-#include "gdl/rendering/openGL/core/shaderGL.h"
+#include "gdl/rendering/openGL/core/renderWindowGLUT.h"
+#include "gdl/rendering/openGL/core/shader.h"
 #include "gdl/rendering/openGL/core/vertexArrayObjectGL.h"
 #include "gdl/rendering/openGL/management/programDataManagerGL.h"
 #include "gdl/rendering/openGL/management/managedUniformBufferObjectGL.h"
@@ -146,7 +146,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
 {
     GLenum ErrorCheckValue = glGetError();
 
-    RenderWindow& renderWindow = RenderWindow::Instance();
+    RenderWindowGLUT& renderWindow = RenderWindowGLUT::Instance();
     renderWindow.SetTitle("OpenGL Triangle Test");
     renderWindow.Initialize();
 

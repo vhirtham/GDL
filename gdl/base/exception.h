@@ -7,9 +7,11 @@
 
 // Macros -------------------------------------------------------------------------------------------------------------
 
+#define THROW(message) throw GDL::Exception(__PRETTY_FUNCTION__, message)
+
 #define EXCEPTION(condition, message)                                                                                  \
     if (condition)                                                                                                     \
-    throw GDL::Exception(__PRETTY_FUNCTION__, message)
+    THROW(message)
 
 
 // Debug exceptions are turned off in release mode like assertions. In contrast to assertions, debug exceptions can be
@@ -54,4 +56,4 @@ public:
     {
     }
 };
-}
+} // namespace GDL

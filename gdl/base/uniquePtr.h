@@ -69,8 +69,6 @@ inline UniquePtr<_type> MakeUnique(_args&&... args)
     return UniquePtr<_type>(new (Allocator.allocate(1)) _type(std::forward<_args>(args)...));
 }
 
-
-
 //! @brief Creates a new unique pointer which uses the pool memory
 //! @tparam _type: Type of the pointer
 //! @tparam _args: Parameter pack of the arguments that should be passed to the managed types constructor

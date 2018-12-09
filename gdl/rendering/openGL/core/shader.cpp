@@ -1,15 +1,18 @@
-#include "shaderGL.h"
+#include "gdl/rendering/openGL/core/shader.h"
 
 #include "gdl/base/exception.h"
+#include "gdl/base/container/vector.h"
 
-#include <memory>
+namespace GDL::OpenGL
+{
 
-GDL::OpenGL::Shader::~Shader()
+
+Shader::~Shader()
 {
     glDeleteShader(mHandle);
 }
 
-GDL::OpenGL::Shader::Shader(GLenum shaderType, const char* shaderCode)
+Shader::Shader(GLenum shaderType, const char* shaderCode)
     : mShaderType(shaderType)
     , mHandle(glCreateShader(mShaderType))
 {
@@ -24,16 +27,31 @@ GDL::OpenGL::Shader::Shader(GLenum shaderType, const char* shaderCode)
         GLint infoLogLength;
         glGetShaderiv(mHandle, GL_INFO_LOG_LENGTH, &infoLogLength);
 
-        std::unique_ptr<GLchar[]> infoLog = std::make_unique<GLchar[]>(infoLogLength);
-        glGetShaderInfoLog(mHandle, infoLogLength, nullptr, infoLog.get());
+        Vector<GLchar> infoLog(static_cast<U32>(infoLogLength));
+        glGetShaderInfoLog(mHandle, infoLogLength, nullptr, infoLog.data());
 
-        throw Exception(__PRETTY_FUNCTION__,
-                        "Failed to compile " + GetShaderTypeString(mShaderType) + "! \n\nLog Message:\n" +
-                                infoLog.get());
+        THROW("Failed to compile " + std::string(GetShaderTypeString(mShaderType)) + "! \n\nLog Message:\n" +
+              infoLog.data());
     }
 }
 
-std::string GDL::OpenGL::Shader::GetShaderTypeString(GLenum shaderType)
+
+
+GLuint Shader::GetHandle() const
+{
+    return mHandle;
+}
+
+
+
+GLenum Shader::GetType() const
+{
+    return mShaderType;
+}
+
+
+
+const char* Shader::GetShaderTypeString(GLenum shaderType)
 {
     // clang-format off
     switch (shaderType)
@@ -48,3 +66,5 @@ std::string GDL::OpenGL::Shader::GetShaderTypeString(GLenum shaderType)
     }
     // clang-format on
 }
+
+} // namespace GDL::OpenGL

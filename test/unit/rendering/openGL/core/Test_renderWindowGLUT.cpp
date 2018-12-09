@@ -1,13 +1,15 @@
 #include <boost/test/unit_test.hpp>
 
-#include "gdl/rendering/openGL/core/renderWindowGL.h"
+#include "gdl/rendering/openGL/core/renderWindowGLUT.h"
 
 using namespace GDL;
 using namespace GDL::OpenGL;
 
 BOOST_AUTO_TEST_CASE(renderWindow)
 {
-    RenderWindow& renderWindow = RenderWindow::Instance();
+    RenderWindowGLUT& renderWindow = RenderWindowGLUT::Instance();
     renderWindow.SetTitle("render window test");
     renderWindow.Initialize();
+    renderWindow.GetHeight();
+    renderWindow.GetWidth();
 }

@@ -1,18 +1,19 @@
 #include <boost/test/unit_test.hpp>
 
 #include "gdl/base/exception.h"
-#include "gdl/rendering/openGL/core/renderWindowGL.h"
-#include "gdl/rendering/openGL/core/shaderGL.h"
+#include "gdl/rendering/openGL/core/renderWindowGLUT.h"
+#include "gdl/rendering/openGL/core/shader.h"
 
 using namespace GDL;
 using namespace GDL::OpenGL;
 
 BOOST_AUTO_TEST_CASE(Construction)
 {
-    RenderWindow& renderWindow = RenderWindow::Instance();
+    RenderWindowGLUT& renderWindow = RenderWindowGLUT::Instance();
     renderWindow.Initialize();
 
     BOOST_CHECK_THROW(Shader shader(GL_VERTEX_SHADER, "fail"), Exception);
+
 
     const char vertexShaderCode[] = R"glsl(
                                     #version 430
