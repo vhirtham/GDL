@@ -3,7 +3,7 @@
 
 #include "gdl/base/time.h"
 #include "gdl/rendering/openGL/core/bufferObjectGL.h"
-#include "gdl/rendering/openGL/core/programGL.h"
+#include "gdl/rendering/openGL/core/program.h"
 #include "gdl/rendering/openGL/core/renderWindowGLUT.h"
 #include "gdl/rendering/openGL/core/shader.h"
 #include "gdl/rendering/openGL/core/vertexArrayObjectGL.h"

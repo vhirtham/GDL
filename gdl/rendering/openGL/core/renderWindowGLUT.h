@@ -13,9 +13,11 @@ class RenderWindowGLUT
     I32 mWindowHandle = 0;
     U32 mWidth = 800;
     U32 mHeight = 600;
+    bool mInitialized = false;
     std::string mTitle = "GDL OpenGL Window";
 
     RenderWindowGLUT() = default;
+
 public:
     RenderWindowGLUT(const RenderWindowGLUT& other) = delete;
     RenderWindowGLUT(RenderWindowGLUT&& other) = delete;
@@ -44,6 +46,10 @@ public:
     //! @brief Gets the window width
     //! @return Window width
     U32 GetWidth() const;
+
+    //! @brief Returns if the render window is initialized or not
+    //! @return True / False
+    bool IsInitialized() const;
 
 private:
     //! @brief Callback function that should be called after the window is resized

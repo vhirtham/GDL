@@ -41,6 +41,7 @@ void RenderWindowGLUT::Initialize(int argc, char* argv)
                       std::string(reinterpret_cast<const char*>(glewGetErrorString(GlewInitResult))));
 
     glutReshapeFunc(ResizeCallback);
+    mInitialized = true;
 }
 
 
@@ -62,6 +63,13 @@ U32 RenderWindowGLUT::GetHeight() const
 U32 RenderWindowGLUT::GetWidth() const
 {
     return mWidth;
+}
+
+
+
+bool RenderWindowGLUT::IsInitialized() const
+{
+    return mInitialized;
 }
 
 

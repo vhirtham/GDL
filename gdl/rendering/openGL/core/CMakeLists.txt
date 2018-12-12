@@ -1,6 +1,6 @@
 addGDLLib(OpenGLCore
     bufferObjectGL.cpp
-    programGL.cpp
+    program.cpp
     renderWindowGLUT.cpp
     shader.cpp
     uniformBufferObjectGL.cpp

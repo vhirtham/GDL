@@ -18,7 +18,7 @@ namespace GDL
 using String = std::basic_string<char, std::char_traits<char>, GeneralPurposeAllocator<char>>;
 using StringS = std::basic_string<char, std::char_traits<char>, StackAllocator<char>>;
 using StringTPS = std::basic_string<char, std::char_traits<char>, ThreadPrivateStackAllocator<char>>;
-}
+} // namespace GDL
 
 #else
 
@@ -28,7 +28,7 @@ namespace GDL
 using String = std::basic_string<char>;
 using StringS = std::basic_string<char>;
 using StringTPS = std::basic_string<char>;
-}
+} // namespace GDL
 
 
 

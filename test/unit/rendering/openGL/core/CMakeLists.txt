@@ -18,8 +18,8 @@ addTest(shader
     GLEW::GLEW
     )
 
-addTest(programGL
-    rendering/openGL/core/programGL.cpp
+addTest(program
+    rendering/openGL/core/program.cpp
     rendering/openGL/core/shader.cpp
     rendering/openGL/core/renderWindowGLUT.cpp
     GDL::Resources

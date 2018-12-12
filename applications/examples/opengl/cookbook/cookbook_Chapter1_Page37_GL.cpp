@@ -11,7 +11,7 @@
 #include "gdl/math/mat4.inl"
 #include "gdl/math/transformationMatrix.h"
 #include "gdl/rendering/openGL/core/bufferObjectGL.h"
-#include "gdl/rendering/openGL/core/programGL.h"
+#include "gdl/rendering/openGL/core/program.h"
 #include "gdl/rendering/openGL/core/renderWindowGLUT.h"
 #include "gdl/rendering/openGL/core/shader.h"
 #include "gdl/rendering/openGL/core/vertexArrayObjectGL.h"
@@ -60,7 +60,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
 
     // Shader Code ##############################
 
-    const char vertexShaderCode[] = R"glsl(
+    const char* vertexShaderCode = R"glsl(
             #version 430
 
             layout (location=0) in vec3 VertexPosition;
@@ -79,7 +79,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
             }
             )glsl";
 
-    const char fragmentShaderCode[] = R"glsl(
+    const char* fragmentShaderCode = R"glsl(
             #version 430
 
             in vec3 Color;

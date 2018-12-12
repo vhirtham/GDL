@@ -1,14 +1,14 @@
 #pragma once
 
 #include "gdl/base/fundamentalTypes.h"
+#include "gdl/math/mat4.h"
 
 #include <GL/glew.h>
 #include <functional>
 
-namespace GDL
+namespace GDL::OpenGL
 {
-namespace OpenGL
-{
+
 class Shader;
 
 //! @brief Class that manages the lifetime of a OpenGL program
@@ -30,12 +30,7 @@ public:
     //! @remark Even though the template should be callable with any input type, only the Shader class will compile.
     //! Didn't find a better way to use a parameter pack.
     template <typename... _shader>
-    Program(const _shader&... shaderList)
-        : mHandle(glCreateProgram())
-    {
-        Initialize({std::forward<const _shader&>(shaderList)...});
-    }
-
+    Program(const _shader&... shaderList);
 
     //! @brief Constructor that takes as many shaders as desired and links the program (initializer version)
     //! @param shaderList: List of shaders
@@ -43,41 +38,32 @@ public:
 
     //! @brief Gets the programs handle
     //! @return Program handle
-    GLuint GetHandle() const
-    {
-        return mHandle;
-    }
+    GLuint GetHandle() const;
 
     //! @brief Queries the location of a uniform with the given name
     //! @param uniformName: Name of the uniform
     //! @return Handle of the uniform
-    GLuint QueryUniformLocation(const std::string& uniformName) const;
+    GLint QueryUniformLocation(const char* uniformName) const;
 
-
-    //! @brief Sets the value of an uniform
-    //! @tparam TTypeEnum: GL type enum
-    //! @tparam _value: Value type
+    //! @brief Sets the value of a uniform
     //! @param uniformLocation: Location of the uniform
     //! @param value: New value
-    template <typename _value>
-    void SetUniform(GLint uniformLocation, _value value) const;
+    void SetUniform(GLint uniformLocation, F32 value) const;
 
+    //! @brief Sets the value of a uniform
+    //! @param uniformLocation: Location of the uniform
+    //! @param value: New value
+    void SetUniform(GLint uniformLocation, const Mat4f& value) const;
 
-    //! @brief Sets the values of an uniform array
-    //! @tparam TTypeEnum: GL type enum
-    //! @tparam _value: Value type
+    //! @brief Sets the values of a uniform array
     //! @param uniformLocation: location of the first uniform array member that should be set
     //! @param values: Vector with values
-    template <typename _value>
-    void SetUniformArray(GLint uniformLocation, const _value* const values, U32 size) const;
+    void SetUniformArray(GLint uniformLocation, const F32* const values, U32 size) const;
 
     //! @brief Sets this program as active program
     void Use() const;
 
 private:
-    //! @brief Checks if the included shaders can actually be linked into a program
-    void CheckShaders(std::initializer_list<std::reference_wrapper<const GDL::OpenGL::Shader>> shaderList) const;
-
     //! @brief Checks if the program links without errors
     void CheckLinkStatus() const;
 
@@ -88,5 +74,16 @@ private:
     //! @param shaderList: Shaders that should be linked
     void Initialize(std::initializer_list<std::reference_wrapper<const Shader>> shaderList);
 };
-} // namespace OpenGL
-} // namespace GDL
+
+
+// Template definitions ---------------------------------------------------------------------------
+
+template <typename... _shader>
+Program::Program(const _shader&... shaderList)
+    : mHandle(glCreateProgram())
+{
+    Initialize({std::forward<const _shader&>(shaderList)...});
+}
+
+
+} // namespace GDL::OpenGL

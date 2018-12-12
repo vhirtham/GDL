@@ -1,7 +1,7 @@
 #pragma once
 
 #include "gdl/base/fundamentalTypes.h"
-#include "gdl/rendering/openGL/core/programGL.h"
+#include "gdl/rendering/openGL/core/program.h"
 #include "gdl/rendering/openGL/management/programInputGL.h"
 #include "gdl/rendering/openGL/management/uniformGL.h"
 #include "gdl/rendering/openGL/management/uniformBlockGL.h"

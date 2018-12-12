@@ -5,6 +5,8 @@
 using namespace GDL;
 using namespace GDL::OpenGL;
 
+// TODO: Add some real test cases to this test
+
 BOOST_AUTO_TEST_CASE(renderWindow)
 {
     RenderWindowGLUT& renderWindow = RenderWindowGLUT::Instance();
@@ -12,4 +14,5 @@ BOOST_AUTO_TEST_CASE(renderWindow)
     renderWindow.Initialize();
     renderWindow.GetHeight();
     renderWindow.GetWidth();
+    renderWindow.IsInitialized();
 }
