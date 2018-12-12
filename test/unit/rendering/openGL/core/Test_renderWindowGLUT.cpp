@@ -11,9 +11,11 @@ using namespace GDL::OpenGL;
 BOOST_AUTO_TEST_CASE(renderWindow)
 {
     ContextGLUT& contextGLUT = ContextGLUT::Instance();
+    contextGLUT.EnableDebug();
     RenderWindowGLUT renderWindow(contextGLUT);
     renderWindow.SetTitle("render window test");
     renderWindow.Initialize();
+
     renderWindow.GetHeight();
     renderWindow.GetWidth();
     renderWindow.IsInitialized();

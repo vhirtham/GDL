@@ -22,6 +22,9 @@ RenderWindowGLUT::RenderWindowGLUT(ContextGLUT& contextGLUT)
 
 void RenderWindowGLUT::Initialize()
 {
+    EXCEPTION(mInitialized, "Render window is already initialized");
+
+
     if (!mContextGLUT.IsInitialized())
         mContextGLUT.Initialize();
 
@@ -38,12 +41,15 @@ void RenderWindowGLUT::Initialize()
     if (!glewController.IsInitialized())
         glewController.Initialize();
 
+    if (mContextGLUT.IsDebug())
+        mContextGLUT.SetDefaultDebugCallback();
+
     mInitialized = true;
 }
 
 
 
-void RenderWindowGLUT::SetTitle(std::string title)
+void RenderWindowGLUT::SetTitle(const char* title)
 {
     mTitle = title;
 }
@@ -52,14 +58,14 @@ void RenderWindowGLUT::SetTitle(std::string title)
 
 U32 RenderWindowGLUT::GetHeight() const
 {
-    return mHeight;
+    return static_cast<U32>(glutGet(GLUT_WINDOW_HEIGHT));
 }
 
 
 
 U32 RenderWindowGLUT::GetWidth() const
 {
-    return mWidth;
+    return static_cast<U32>(glutGet(GLUT_WINDOW_WIDTH));
 }
 
 

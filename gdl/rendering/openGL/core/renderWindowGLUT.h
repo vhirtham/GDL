@@ -40,7 +40,7 @@ public:
 
     //! @brief Sets the title
     //! @param title: New Window Title
-    void SetTitle(std::string title);
+    void SetTitle(const char* title);
 
     //! @brief Gets the window height
     //! @return Window height

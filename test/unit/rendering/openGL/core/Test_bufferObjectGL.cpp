@@ -13,7 +13,10 @@ RenderWindowGLUT& GetRenderWindowGLUT()
     ContextGLUT& contextGLUT = ContextGLUT::Instance();
     static RenderWindowGLUT renderWindow(contextGLUT);
     if (!renderWindow.IsInitialized())
+    {
+        contextGLUT.EnableDebug();
         renderWindow.Initialize();
+    }
     return renderWindow;
 }
 

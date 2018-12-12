@@ -1,15 +1,25 @@
 #pragma once
 
+
+#include "gdl/base/fundamentalTypes.h"
+
+#include <GL/glew.h>
+#include <GL/freeglut.h>
+
 namespace GDL::OpenGL
 {
 
 
-//! @brief Class that enables and manages the OpenGL 4.3 debug system
+//! @brief Singleton class that manages a GLUT context
 class ContextGLUT
 {
     bool mInitialized = false;
+    bool mDebug = false;
+    I32 mGlutContextFlags;
 
-    ContextGLUT() = default;
+
+    ContextGLUT();
+
 public:
     ContextGLUT(const ContextGLUT&) = delete;
     ContextGLUT(ContextGLUT&&) = delete;
@@ -26,9 +36,23 @@ public:
     //! @param argv: Additional arguments
     static ContextGLUT& Instance();
 
-    //! @brief returns if the context is initialized
+    //! @brief Returns if the context is running in debug mode
+    //! @return True / False
+    bool IsDebug() const;
+
+    //! @brief Returns if the context is initialized
     //! @return True / False
     bool IsInitialized() const;
+
+    //! @brief Enables the OpenGL 4.3 debug mechanism
+    void EnableDebug();
+
+    //! Sets the contexts debug callback to the default version
+    void SetDefaultDebugCallback() const;
+
+private:
+    static void DefaultDebugCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length,
+                                     const GLchar* message, const void* userParam);
 };
 
 } // namespace GDL::OpenGL
