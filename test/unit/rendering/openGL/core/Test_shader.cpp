@@ -1,6 +1,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include "gdl/base/exception.h"
+#include "gdl/rendering/openGL/core/contextGLUT.h"
 #include "gdl/rendering/openGL/core/renderWindowGLUT.h"
 #include "gdl/rendering/openGL/core/shader.h"
 
@@ -9,7 +10,8 @@ using namespace GDL::OpenGL;
 
 BOOST_AUTO_TEST_CASE(Construction)
 {
-    RenderWindowGLUT& renderWindow = RenderWindowGLUT::Instance();
+    ContextGLUT& contextGLUT = ContextGLUT::Instance();
+    RenderWindowGLUT renderWindow(contextGLUT);
     renderWindow.Initialize();
 
     BOOST_CHECK_THROW(Shader shader(GL_VERTEX_SHADER, "fail"), Exception);

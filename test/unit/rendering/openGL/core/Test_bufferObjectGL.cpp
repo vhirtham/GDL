@@ -1,6 +1,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include "gdl/base/exception.h"
+#include "gdl/rendering/openGL/core/contextGLUT.h"
 #include "gdl/rendering/openGL/core/renderWindowGLUT.h"
 #include "gdl/rendering/openGL/core/bufferObjectGL.h"
 
@@ -9,13 +10,10 @@ using namespace GDL::OpenGL;
 
 RenderWindowGLUT& GetRenderWindowGLUT()
 {
-    static bool initialized = false;
-    RenderWindowGLUT& renderWindow = RenderWindowGLUT::Instance();
-    if (!initialized)
-    {
+    ContextGLUT& contextGLUT = ContextGLUT::Instance();
+    static RenderWindowGLUT renderWindow(contextGLUT);
+    if (!renderWindow.IsInitialized())
         renderWindow.Initialize();
-        initialized = true;
-    }
     return renderWindow;
 }
 

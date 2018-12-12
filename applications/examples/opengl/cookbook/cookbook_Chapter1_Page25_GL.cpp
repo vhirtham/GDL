@@ -7,6 +7,7 @@
 
 
 #include "gdl/rendering/openGL/core/bufferObjectGL.h"
+#include "gdl/rendering/openGL/core/contextGLUT.h"
 #include "gdl/rendering/openGL/core/program.h"
 #include "gdl/rendering/openGL/core/renderWindowGLUT.h"
 #include "gdl/rendering/openGL/core/shader.h"
@@ -39,7 +40,8 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
 {
     // Setup Render Context #####################
 
-    RenderWindowGLUT& renderWindow = RenderWindowGLUT::Instance();
+    ContextGLUT& contextGLUT = ContextGLUT::Instance();
+    RenderWindowGLUT renderWindow(contextGLUT);
     renderWindow.SetTitle(TITLE);
     renderWindow.Initialize();
 

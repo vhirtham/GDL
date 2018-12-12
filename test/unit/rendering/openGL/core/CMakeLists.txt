@@ -1,4 +1,15 @@
+addTest(contextGLUT
+    rendering/openGL/core/contextGLUT.cpp
+    rendering/openGL/core/renderWindowGLUT.cpp
+    # External libs
+    OpenGL::GL
+    OpenGL::GLU
+    GLUT::GLUT
+    GLEW::GLEW
+    )
+
 addTest(renderWindowGLUT
+    rendering/openGL/core/contextGLUT.cpp
     rendering/openGL/core/renderWindowGLUT.cpp
     # External libs
     OpenGL::GL
@@ -8,6 +19,7 @@ addTest(renderWindowGLUT
     )
 
 addTest(shader
+    rendering/openGL/core/contextGLUT.cpp
     rendering/openGL/core/shader.cpp
     rendering/openGL/core/renderWindowGLUT.cpp
     GDL::Resources
@@ -19,6 +31,7 @@ addTest(shader
     )
 
 addTest(program
+    rendering/openGL/core/contextGLUT.cpp
     rendering/openGL/core/program.cpp
     rendering/openGL/core/shader.cpp
     rendering/openGL/core/renderWindowGLUT.cpp
@@ -31,6 +44,7 @@ addTest(program
     )
 
 addTest(uniformBufferObjectGL
+    rendering/openGL/core/contextGLUT.cpp
     rendering/openGL/core/renderWindowGLUT.cpp
     rendering/openGL/core/bufferObjectGL.cpp
     rendering/openGL/core/uniformBufferObjectGL.cpp
@@ -43,6 +57,7 @@ addTest(uniformBufferObjectGL
     )
 
 addTest(bufferObjectGL
+    rendering/openGL/core/contextGLUT.cpp
     rendering/openGL/core/renderWindowGLUT.cpp
     rendering/openGL/core/bufferObjectGL.cpp
     GDL::Resources
@@ -54,6 +69,7 @@ addTest(bufferObjectGL
     )
 
 addTest(vertexArrayObjectGL
+    rendering/openGL/core/contextGLUT.cpp
     rendering/openGL/core/renderWindowGLUT.cpp
     rendering/openGL/core/vertexArrayObjectGL.cpp
     rendering/openGL/core/bufferObjectGL.cpp

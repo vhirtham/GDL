@@ -7,6 +7,8 @@
 namespace GDL::OpenGL
 {
 
+class ContextGLUT;
+
 //! @brief This class creates and manages a render window by using thr glut library. It is implemented as a singleton
 class RenderWindowGLUT
 {
@@ -15,25 +17,27 @@ class RenderWindowGLUT
     U32 mHeight = 600;
     bool mInitialized = false;
     std::string mTitle = "GDL OpenGL Window";
+    ContextGLUT& mContextGLUT;
 
-    RenderWindowGLUT() = default;
 
 public:
+    RenderWindowGLUT() = delete;
     RenderWindowGLUT(const RenderWindowGLUT& other) = delete;
     RenderWindowGLUT(RenderWindowGLUT&& other) = delete;
     RenderWindowGLUT& operator=(const RenderWindowGLUT& other) = delete;
     RenderWindowGLUT& operator=(RenderWindowGLUT&& other) = delete;
     ~RenderWindowGLUT() = default;
 
+    //! @brief Constructor
+    //! @param contextGLUT: Reference to the GLUT context
+    RenderWindowGLUT(ContextGLUT& contextGLUT);
 
-    //! @brief Gets the render windows instance
-    //! @return Render window instance
-    static RenderWindowGLUT& Instance();
+
 
     //! @brief Initializes the render window
     //! @param argc: Additional argument count
     //! @param argv: Additional arguments
-    void Initialize(int argc = 1, char* argv = nullptr);
+    void Initialize();
 
     //! @brief Sets the title
     //! @param title: New Window Title

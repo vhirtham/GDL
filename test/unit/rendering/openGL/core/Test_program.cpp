@@ -1,6 +1,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include "gdl/base/exception.h"
+#include "gdl/rendering/openGL/core/contextGLUT.h"
 #include "gdl/rendering/openGL/core/program.h"
 #include "gdl/rendering/openGL/core/shader.h"
 #include "gdl/rendering/openGL/core/renderWindowGLUT.h"
@@ -11,7 +12,8 @@ using namespace GDL::OpenGL;
 
 RenderWindowGLUT& GetRenderWindowGLUT()
 {
-    RenderWindowGLUT& renderWindow = RenderWindowGLUT::Instance();
+    ContextGLUT& contextGLUT = ContextGLUT::Instance();
+    static RenderWindowGLUT renderWindow(contextGLUT);
     if (!renderWindow.IsInitialized())
         renderWindow.Initialize();
     return renderWindow;
