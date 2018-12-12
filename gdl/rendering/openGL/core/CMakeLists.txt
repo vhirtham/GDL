@@ -1,6 +1,7 @@
 addGDLLib(OpenGLCore
     bufferObjectGL.cpp
     contextGLUT.cpp
+    GLEWController.cpp
     program.cpp
     renderWindowGLUT.cpp
     shader.cpp

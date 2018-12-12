@@ -1,9 +1,9 @@
 #include "gdl/rendering/openGL/core/renderWindowGLUT.h"
 
 #include "gdl/rendering/openGL/core/contextGLUT.h"
+#include "gdl/rendering/openGL/core/GLEWController.h"
 #include "gdl/base/exception.h"
 
-#include <GL/glew.h>
 #include <GL/freeglut.h>
 
 
@@ -25,22 +25,18 @@ void RenderWindowGLUT::Initialize()
     if (!mContextGLUT.IsInitialized())
         mContextGLUT.Initialize();
 
-
-
     glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE, GLUT_ACTION_GLUTMAINLOOP_RETURNS);
-
     glutInitWindowSize(static_cast<I32>(mWidth), static_cast<I32>(mHeight));
 
 
     mWindowHandle = glutCreateWindow(mTitle.c_str());
     EXCEPTION(mWindowHandle < 1, "Could not create OpenGL Window!");
+
     glutReshapeFunc(ResizeCallback);
 
-    GLenum GlewInitResult = glewInit();
-
-    EXCEPTION(GLEW_OK != GlewInitResult,
-              "Could not initialize GLEW! \n GLEW error string: " +
-                      std::string(reinterpret_cast<const char*>(glewGetErrorString(GlewInitResult))));
+    GLEWController& glewController = GLEWController::Instance();
+    if (!glewController.IsInitialized())
+        glewController.Initialize();
 
     mInitialized = true;
 }

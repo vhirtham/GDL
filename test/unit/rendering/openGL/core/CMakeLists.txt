@@ -1,82 +1,35 @@
 addTest(contextGLUT
-    rendering/openGL/core/contextGLUT.cpp
-    rendering/openGL/core/renderWindowGLUT.cpp
-    # External libs
-    OpenGL::GL
-    OpenGL::GLU
-    GLUT::GLUT
-    GLEW::GLEW
+    ${OpenGLTestDefaultSources}
     )
 
 addTest(renderWindowGLUT
-    rendering/openGL/core/contextGLUT.cpp
-    rendering/openGL/core/renderWindowGLUT.cpp
-    # External libs
-    OpenGL::GL
-    OpenGL::GLU
-    GLUT::GLUT
-    GLEW::GLEW
+    ${OpenGLTestDefaultSources}
     )
 
 addTest(shader
-    rendering/openGL/core/contextGLUT.cpp
     rendering/openGL/core/shader.cpp
-    rendering/openGL/core/renderWindowGLUT.cpp
-    GDL::Resources
-    # External libs
-    OpenGL::GL
-    OpenGL::GLU
-    GLUT::GLUT
-    GLEW::GLEW
+    ${OpenGLTestDefaultSources}
     )
 
 addTest(program
-    rendering/openGL/core/contextGLUT.cpp
     rendering/openGL/core/program.cpp
-    rendering/openGL/core/shader.cpp
-    rendering/openGL/core/renderWindowGLUT.cpp
-    GDL::Resources
-    # External libs
-    OpenGL::GL
-    OpenGL::GLU
-    GLUT::GLUT
-    GLEW::GLEW
+    rendering/openGL/core/shader.cpp    
+    ${OpenGLTestDefaultSources}
     )
 
 addTest(uniformBufferObjectGL
-    rendering/openGL/core/contextGLUT.cpp
-    rendering/openGL/core/renderWindowGLUT.cpp
     rendering/openGL/core/bufferObjectGL.cpp
     rendering/openGL/core/uniformBufferObjectGL.cpp
-    GDL::Resources
-    # External libs
-    OpenGL::GL
-    OpenGL::GLU
-    GLUT::GLUT
-    GLEW::GLEW
+    ${OpenGLTestDefaultSources}
     )
 
 addTest(bufferObjectGL
-    rendering/openGL/core/contextGLUT.cpp
-    rendering/openGL/core/renderWindowGLUT.cpp
     rendering/openGL/core/bufferObjectGL.cpp
-    GDL::Resources
-    # External libs
-    OpenGL::GL
-    OpenGL::GLU
-    GLUT::GLUT
-    GLEW::GLEW
+    ${OpenGLTestDefaultSources}
     )
 
 addTest(vertexArrayObjectGL
-    rendering/openGL/core/contextGLUT.cpp
-    rendering/openGL/core/renderWindowGLUT.cpp
     rendering/openGL/core/vertexArrayObjectGL.cpp
     rendering/openGL/core/bufferObjectGL.cpp
-    GDL::Resources
-    # External libs
-    OpenGL::GL
-    OpenGL::GLU
-    GLUT::GLUT
-    GLEW::GLEW
+    ${OpenGLTestDefaultSources}
     )

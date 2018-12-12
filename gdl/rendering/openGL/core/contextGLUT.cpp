@@ -2,7 +2,6 @@
 
 #include "gdl/base/exception.h"
 
-#include <GL/glew.h>
 #include <GL/freeglut.h>
 
 namespace GDL::OpenGL

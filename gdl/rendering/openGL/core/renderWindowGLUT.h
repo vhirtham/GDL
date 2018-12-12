@@ -1,8 +1,7 @@
 #pragma once
 
 #include "gdl/base/fundamentalTypes.h"
-
-#include <string>
+#include "gdl/base/string.h"
 
 namespace GDL::OpenGL
 {
@@ -16,7 +15,7 @@ class RenderWindowGLUT
     U32 mWidth = 800;
     U32 mHeight = 600;
     bool mInitialized = false;
-    std::string mTitle = "GDL OpenGL Window";
+    String mTitle = "GDL OpenGL Window";
     ContextGLUT& mContextGLUT;
 
 

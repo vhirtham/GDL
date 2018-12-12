@@ -1,11 +1,5 @@
 #pragma once
 
-#include "gdl/base/fundamentalTypes.h"
-#include "gdl/math/mat4.h"
-
-#include <GL/glew.h>
-#include <functional>
-
 namespace GDL::OpenGL
 {
 
