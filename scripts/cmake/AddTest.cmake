@@ -40,7 +40,7 @@ function(addTest TestName)
 
 
     ### Create Test
-    string(REPLACE "${GDL_SOURCE_DIR}/test/" ""
+    string(REPLACE "${GDL_ROOT_DIR}/test/" ""
         Relpath ${CMAKE_CURRENT_SOURCE_DIR})
     string(REPLACE "/" "::"
         TestPrefix ${Relpath})

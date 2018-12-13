@@ -1,35 +1,35 @@
 addTest(contextGLUT
-    ${OpenGLTestDefaultSources}
+    ${OpenGLTestDefaultLibs}
     )
 
 addTest(renderWindowGLUT
-    ${OpenGLTestDefaultSources}
+    ${OpenGLTestDefaultLibs}
     )
 
 addTest(shader
     rendering/openGL/core/shader.cpp
-    ${OpenGLTestDefaultSources}
+    ${OpenGLTestDefaultLibs}
     )
 
 addTest(program
     rendering/openGL/core/program.cpp
     rendering/openGL/core/shader.cpp    
-    ${OpenGLTestDefaultSources}
+    ${OpenGLTestDefaultLibs}
     )
 
 addTest(uniformBufferObjectGL
     rendering/openGL/core/bufferObjectGL.cpp
     rendering/openGL/core/uniformBufferObjectGL.cpp
-    ${OpenGLTestDefaultSources}
+    ${OpenGLTestDefaultLibs}
     )
 
 addTest(bufferObjectGL
     rendering/openGL/core/bufferObjectGL.cpp
-    ${OpenGLTestDefaultSources}
+    ${OpenGLTestDefaultLibs}
     )
 
 addTest(vertexArrayObjectGL
     rendering/openGL/core/vertexArrayObjectGL.cpp
     rendering/openGL/core/bufferObjectGL.cpp
-    ${OpenGLTestDefaultSources}
+    ${OpenGLTestDefaultLibs}
     )

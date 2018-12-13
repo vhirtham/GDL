@@ -17,6 +17,7 @@ RenderWindowGLUT& GetRenderWindowGLUT()
     if (!renderWindow.IsInitialized())
     {
         contextGLUT.EnableDebug();
+        contextGLUT.GetDebugMessageHandler().SetOutputMethod(GL_DEBUG_TYPE_ERROR, OutputMethod::COUT);
         renderWindow.Initialize();
     }
     return renderWindow;
@@ -25,6 +26,7 @@ RenderWindowGLUT& GetRenderWindowGLUT()
 BOOST_AUTO_TEST_CASE(LinkProgram)
 {
     GetRenderWindowGLUT();
+
 
     const char vertexShaderCode[] = R"glsl(
                                     #version 430

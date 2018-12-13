@@ -2,7 +2,7 @@ addTest(programDataManagerGL
     rendering/openGL/management/programDataManagerGL.cpp
     rendering/openGL/core/program.cpp
     rendering/openGL/core/shader.cpp
-    ${OpenGLTestDefaultSources}
+    ${OpenGLTestDefaultLibs}
     )
 
 addTest(managedUniformBufferObjectGL
@@ -11,5 +11,5 @@ addTest(managedUniformBufferObjectGL
     rendering/openGL/core/program.cpp
     rendering/openGL/core/shader.cpp
     rendering/openGL/core/uniformBufferObjectGL.cpp
-    ${OpenGLTestDefaultSources}
+    ${OpenGLTestDefaultLibs}
     )

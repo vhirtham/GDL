@@ -1,7 +1,7 @@
 #include "gdl/rendering/openGL/core/renderWindowGLUT.h"
 
 #include "gdl/rendering/openGL/core/contextGLUT.h"
-#include "gdl/rendering/openGL/core/GLEWController.h"
+#include "gdl/rendering/openGL/core/glewController.h"
 #include "gdl/base/exception.h"
 
 #include <GL/freeglut.h>
@@ -42,7 +42,7 @@ void RenderWindowGLUT::Initialize()
         glewController.Initialize();
 
     if (mContextGLUT.IsDebug())
-        mContextGLUT.SetDefaultDebugCallback();
+        mContextGLUT.GetDebugMessageHandler().Initialize();
 
     mInitialized = true;
 }

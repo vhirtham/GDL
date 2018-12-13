@@ -2,9 +2,8 @@
 
 
 #include "gdl/base/fundamentalTypes.h"
+#include "gdl/rendering/openGL/core/debugMessageHandler.h"
 
-#include <GL/glew.h>
-#include <GL/freeglut.h>
 
 namespace GDL::OpenGL
 {
@@ -13,9 +12,9 @@ namespace GDL::OpenGL
 //! @brief Singleton class that manages a GLUT context
 class ContextGLUT
 {
-    bool mInitialized = false;
     bool mDebug = false;
     I32 mGlutContextFlags;
+    DebugMessageHandler mDebugMessageHandler;
 
 
     ContextGLUT();
@@ -47,12 +46,9 @@ public:
     //! @brief Enables the OpenGL 4.3 debug mechanism
     void EnableDebug();
 
-    //! Sets the contexts debug callback to the default version
-    void SetDefaultDebugCallback() const;
-
-private:
-    static void DefaultDebugCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length,
-                                     const GLchar* message, const void* userParam);
+    //! @brief Gets the debug message handler
+    //! @return Debug message handler
+    DebugMessageHandler& GetDebugMessageHandler();
 };
 
 } // namespace GDL::OpenGL

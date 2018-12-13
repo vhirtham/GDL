@@ -6,7 +6,7 @@ function(TargetDefaultBuildSetup target)
 
     target_include_directories(${target}
         PUBLIC
-            ${GDL_SOURCE_DIR})
+            ${GDL_ROOT_DIR})
 
     target_compile_features(${target}
         PUBLIC

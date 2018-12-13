@@ -1,4 +1,4 @@
-#include "gdl/rendering/openGL/core/GLEWController.h"
+#include "gdl/rendering/openGL/core/glewController.h"
 
 #include "gdl/base/exception.h"
 #include "gdl/base/string.h"

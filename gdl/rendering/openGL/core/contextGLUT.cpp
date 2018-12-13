@@ -21,7 +21,7 @@ ContextGLUT::ContextGLUT()
 
 void ContextGLUT::Initialize(int argc, char* argv)
 {
-    EXCEPTION(mInitialized, "Context is already initialized");
+    EXCEPTION(IsInitialized(), "Context is already initialized");
 
     glutInit(&argc, &argv);
 
@@ -29,23 +29,20 @@ void ContextGLUT::Initialize(int argc, char* argv)
     glutInitContextFlags(mGlutContextFlags);
     glutInitContextProfile(GLUT_CORE_PROFILE);
     glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
-
-
-    mInitialized = true;
 }
 
 
 
 bool ContextGLUT::IsInitialized() const
 {
-    return mInitialized;
+    return glutGet(GLUT_INIT_STATE);
 }
 
 
 
 void ContextGLUT::EnableDebug()
 {
-    EXCEPTION(mInitialized, "Context is already initialized. Can not enable debug mode.");
+    EXCEPTION(IsInitialized(), "Context is already initialized. Can not enable debug mode.");
     glEnable(GL_DEBUG_OUTPUT);
     mGlutContextFlags |= GLUT_DEBUG;
     mDebug = true;
@@ -53,30 +50,9 @@ void ContextGLUT::EnableDebug()
 
 
 
-void ContextGLUT::SetDefaultDebugCallback() const
+DebugMessageHandler& ContextGLUT::GetDebugMessageHandler()
 {
-    glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
-    glDebugMessageCallback(DefaultDebugCallback, nullptr);
-}
-
-
-
-void ContextGLUT::DefaultDebugCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length,
-                                       const GLchar* message, const void* userParam)
-{
-    // TODO: Write DebugMessageHandler class and make it a member of the context. Move callback there. Then I can also
-    // store in a variable if the default callback was set. Debug handler can set different options how debug messages
-    // should be treated. Throw, write to log etc...
-    switch (type)
-    {
-    case GL_DEBUG_TYPE_ERROR:
-        //       THROW(message);
-
-    default:
-        std::cout << message << std::endl;
-        break;
-    }
-    U32 test = id;
+    return mDebugMessageHandler;
 }
 
 

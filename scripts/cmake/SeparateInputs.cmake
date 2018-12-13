@@ -18,7 +18,7 @@ function(SeparateInputs Inputs)
             endif()
         else()
             set(Sources
-                "${Sources};${GDL_SOURCE_DIR}/gdl/${Input}")
+                "${Sources};${GDL_SOURCE_DIR}/${Input}")
         endif()
     endforeach()
     set(Sources ${Sources} PARENT_SCOPE)
