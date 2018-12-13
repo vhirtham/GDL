@@ -1,7 +1,8 @@
 #pragma once
 
-#include "gdl/base/string.h"
 #include "gdl/base/container/map.h"
+#include "gdl/base/fundamentalTypes.h"
+#include "gdl/base/string.h"
 
 #include <GL/glew.h>
 #include <GL/freeglut.h>
@@ -22,7 +23,13 @@ class DebugMessageHandler
 {
     friend class ContextGLUT;
 
-    Map<GLenum, OutputMethod> mTypeOutputMethod;
+    struct MessageTypeSetup
+    {
+        OutputMethod outputMethod;
+        GLenum severityLevel;
+    };
+
+    Map<GLenum, MessageTypeSetup> mTypeOutputMethod;
     bool mInitialized = false;
 
 
@@ -53,7 +60,46 @@ public:
     //! @param outputMethod: Output method enum
     void SetOutputMethod(GLenum type, OutputMethod outputMethod);
 
+    //! @brief Gets the minimal severity that a message of the specified type must have to be processed.
+    //! @param type: Type enum
+    //! @return Minimal severity that a message of the specified type must have to be processed.
+    GLenum GetMinimalSeverityLevel(GLenum type) const;
+
+    //! @brief Sets the minimal severity level for the message type. If the severity of a message is lower it will be
+    //! ignored.
+    //! @param type: Type enum
+    //! @param severity: Severity enum
+    void SetMinimalSeverityLevel(GLenum type, GLenum severity);
+
 private:
+    //! @brief Debug callback function that is regitered to the debug context if a instance of this class is initialized
+    //! @param source: Source enum
+    //! @param type: Type enum
+    //! @param id: Message id
+    //! @param severity: Severity enum
+    //! @param length: Length of the message
+    //! @param message: The error message
+    //! @param userParam: Address of an instance of this class
+    //! @remark The interface of this class is prescribed by the OpenGL API
+    static void DebugCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length,
+                              const GLchar* message, const void* userParam);
+
+    //! @brief Gets the setup struct for the specified message type
+    //! @param type: Type enum
+    //! @return Setup struct for the specified message type
+    MessageTypeSetup& GetMessageTypeSetup(GLenum type);
+
+    //! @brief Gets the setup struct for the specified message type
+    //! @param type: Type enum
+    //! @return Setup struct for the specified message type
+    const MessageTypeSetup& GetMessageTypeSetup(GLenum type) const;
+
+    //! @brief Returns a number that corresponds to the importance of the message. The number increases with the
+    //! messages importance.
+    //! @param severity: Severity enum
+    //! @return Number that corresponds to the importance of the message
+    static U32 GetSeverityInteger(GLenum severity);
+
     //! @brief Casts the severity enum to a string
     //! @param severity: Severity enum
     //! @return Severity enum as string
@@ -78,17 +124,10 @@ private:
     //! @return Debug message
     static String GenerateMessage(GLenum source, GLenum type, GLuint id, GLenum severity, const GLchar* message);
 
-    //! @brief Debug callback function that is regitered to the debug context if a instance of this class is initialized
-    //! @param source: Source enum
-    //! @param type: Type enum
-    //! @param id: Message id
-    //! @param severity: Severity enum
-    //! @param length: Length of the message
-    //! @param message: The error message
-    //! @param userParam: Address of an instance of this class
-    //! @remark The interface of this class is prescribed by the OpenGL API
-    static void DebugCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length,
-                              const GLchar* message, const void* userParam);
+    //! @brief Forwards the output message to the specified output system
+    //! @param outputMethod: Output method enum
+    //! @param outputMessage: Output message
+    static void ForwardOutputMessage(OutputMethod outputMethod, const String& outputMessage);
 };
 
 

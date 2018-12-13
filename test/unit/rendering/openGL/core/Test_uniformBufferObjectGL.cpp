@@ -2,21 +2,13 @@
 
 #include "gdl/base/exception.h"
 #include "gdl/base/fundamentalTypes.h"
-#include "gdl/rendering/openGL/core/contextGLUT.h"
-#include "gdl/rendering/openGL/core/renderWindowGLUT.h"
 #include "gdl/rendering/openGL/core/uniformBufferObjectGL.h"
+
+#include "test/tools/GetRenderWindowGLUT.h"
 
 using namespace GDL;
 using namespace GDL::OpenGL;
 
-RenderWindowGLUT& GetRenderWindowGLUT()
-{
-    ContextGLUT& contextGLUT = ContextGLUT::Instance();
-    static RenderWindowGLUT renderWindow(contextGLUT);
-    if (!renderWindow.IsInitialized())
-        renderWindow.Initialize();
-    return renderWindow;
-}
 
 BOOST_AUTO_TEST_CASE(Construction_And_Binding)
 {

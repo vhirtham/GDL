@@ -2,26 +2,18 @@
 
 
 #include "gdl/base/fundamentalTypes.h"
-#include "gdl/rendering/openGL/core/contextGLUT.h"
-#include "gdl/rendering/openGL/core/renderWindowGLUT.h"
 #include "gdl/rendering/openGL/core/uniformBufferObjectGL.h"
 #include "gdl/rendering/openGL/management/uniformBlockGL.h"
 #include "gdl/rendering/openGL/management/uniformBlockVariableGL.h"
 #include "gdl/rendering/openGL/management/managedUniformBufferObjectGL.h"
+
+#include "test/tools/GetRenderWindowGLUT.h"
 
 #include <map>
 #include <string>
 using namespace GDL;
 using namespace GDL::OpenGL;
 
-RenderWindowGLUT& GetRenderWindowGLUT()
-{
-    ContextGLUT& contextGLUT = ContextGLUT::Instance();
-    static RenderWindowGLUT renderWindow(contextGLUT);
-    if (!renderWindow.IsInitialized())
-        renderWindow.Initialize();
-    return renderWindow;
-}
 
 BOOST_AUTO_TEST_CASE(Construct_From_UniformBlock)
 {

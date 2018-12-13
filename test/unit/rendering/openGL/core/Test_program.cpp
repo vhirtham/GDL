@@ -1,27 +1,16 @@
 #include <boost/test/unit_test.hpp>
 
 #include "gdl/base/exception.h"
-#include "gdl/rendering/openGL/core/contextGLUT.h"
 #include "gdl/rendering/openGL/core/program.h"
 #include "gdl/rendering/openGL/core/shader.h"
-#include "gdl/rendering/openGL/core/renderWindowGLUT.h"
+
 #include "test/tools/ExceptionChecks.h"
+#include "test/tools/GetRenderWindowGLUT.h"
 
 using namespace GDL;
 using namespace GDL::OpenGL;
 
-RenderWindowGLUT& GetRenderWindowGLUT()
-{
-    ContextGLUT& contextGLUT = ContextGLUT::Instance();
-    static RenderWindowGLUT renderWindow(contextGLUT);
-    if (!renderWindow.IsInitialized())
-    {
-        contextGLUT.EnableDebug();
-        contextGLUT.GetDebugMessageHandler().SetOutputMethod(GL_DEBUG_TYPE_ERROR, OutputMethod::COUT);
-        renderWindow.Initialize();
-    }
-    return renderWindow;
-}
+
 
 BOOST_AUTO_TEST_CASE(LinkProgram)
 {

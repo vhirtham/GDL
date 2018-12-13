@@ -10,14 +10,14 @@ namespace GDL::OpenGL
 {
 
 DebugMessageHandler::DebugMessageHandler()
-    : mTypeOutputMethod{{GL_DEBUG_TYPE_ERROR, OutputMethod::EXCEPTION},
-                        {GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR, OutputMethod::COUT},
-                        {GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR, OutputMethod::COUT},
-                        {GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR, OutputMethod::COUT},
-                        {GL_DEBUG_TYPE_PORTABILITY, OutputMethod::COUT},
-                        {GL_DEBUG_TYPE_PERFORMANCE, OutputMethod::COUT},
-                        {GL_DEBUG_TYPE_MARKER, OutputMethod::COUT},
-                        {GL_DEBUG_TYPE_OTHER, OutputMethod::COUT}}
+    : mTypeOutputMethod{{GL_DEBUG_TYPE_ERROR, {OutputMethod::EXCEPTION, GL_DEBUG_SEVERITY_NOTIFICATION}},
+                        {GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR, {OutputMethod::COUT, GL_DEBUG_SEVERITY_NOTIFICATION}},
+                        {GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR, {OutputMethod::COUT, GL_DEBUG_SEVERITY_NOTIFICATION}},
+                        {GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR, {OutputMethod::COUT, GL_DEBUG_SEVERITY_NOTIFICATION}},
+                        {GL_DEBUG_TYPE_PORTABILITY, {OutputMethod::COUT, GL_DEBUG_SEVERITY_NOTIFICATION}},
+                        {GL_DEBUG_TYPE_PERFORMANCE, {OutputMethod::COUT, GL_DEBUG_SEVERITY_NOTIFICATION}},
+                        {GL_DEBUG_TYPE_MARKER, {OutputMethod::COUT, GL_DEBUG_SEVERITY_NOTIFICATION}},
+                        {GL_DEBUG_TYPE_OTHER, {OutputMethod::COUT, GL_DEBUG_SEVERITY_NOTIFICATION}}}
 {
 }
 
@@ -41,18 +41,90 @@ bool DebugMessageHandler::IsInitialized() const
     return mInitialized;
 }
 
+
+
 OutputMethod DebugMessageHandler::GetOutputMethod(GLenum type) const
+{
+    return GetMessageTypeSetup(type).outputMethod;
+}
+
+
+
+void DebugMessageHandler::SetOutputMethod(GLenum type, OutputMethod outputMethod)
+{
+    GetMessageTypeSetup(type).outputMethod = outputMethod;
+}
+
+
+
+GLenum DebugMessageHandler::GetMinimalSeverityLevel(GLenum type) const
+{
+    return GetMessageTypeSetup(type).severityLevel;
+}
+
+
+
+void DebugMessageHandler::SetMinimalSeverityLevel(GLenum type, GLenum severity)
+{
+    GetMessageTypeSetup(type).severityLevel = severity;
+}
+
+
+
+void DebugMessageHandler::DebugCallback(GLenum source, GLenum type, GLuint id, GLenum severity,
+                                        [[maybe_unused]] GLsizei length, const GLchar* message, const void* userParam)
+{
+    DEV_EXCEPTION(userParam == nullptr,
+                  "You passed a nullptr as userParam. It must contain the address of a DebugMessageHandlers.");
+    const DebugMessageHandler& debugMessageHandler = *(reinterpret_cast<const DebugMessageHandler*>(userParam));
+
+    const U32 severityLevel = GetSeverityInteger(severity);
+    const U32 minimalSeverityLevel = GetSeverityInteger(debugMessageHandler.GetMinimalSeverityLevel(type));
+    const OutputMethod outputMethod = debugMessageHandler.GetOutputMethod(type);
+
+    if (outputMethod == OutputMethod::NONE || severityLevel < minimalSeverityLevel)
+        return;
+
+    String outputMessage = GenerateMessage(source, type, id, severity, message);
+
+    ForwardOutputMessage(outputMethod, outputMessage);
+}
+
+
+
+DebugMessageHandler::MessageTypeSetup& DebugMessageHandler::GetMessageTypeSetup(GLenum type)
 {
     auto iter = mTypeOutputMethod.find(type);
     EXCEPTION(iter == mTypeOutputMethod.end(), "Invalid type");
     return iter->second;
 }
 
-void DebugMessageHandler::SetOutputMethod(GLenum type, OutputMethod outputMethod)
+
+
+const DebugMessageHandler::MessageTypeSetup& DebugMessageHandler::GetMessageTypeSetup(GLenum type) const
 {
     auto iter = mTypeOutputMethod.find(type);
     EXCEPTION(iter == mTypeOutputMethod.end(), "Invalid type");
-    iter->second = outputMethod;
+    return iter->second;
+}
+
+
+
+U32 DebugMessageHandler::GetSeverityInteger(GLenum severity)
+{
+    switch (severity)
+    {
+    case GL_DEBUG_SEVERITY_HIGH:
+        return 3;
+    case GL_DEBUG_SEVERITY_MEDIUM:
+        return 2;
+    case GL_DEBUG_SEVERITY_LOW:
+        return 1;
+    case GL_DEBUG_SEVERITY_NOTIFICATION:
+        return 0;
+    default:
+        return 3;
+    }
 }
 
 
@@ -140,19 +212,8 @@ String DebugMessageHandler::GenerateMessage(GLenum source, GLenum type, GLuint i
 
 
 
-void DebugMessageHandler::DebugCallback(GLenum source, GLenum type, GLuint id, GLenum severity,
-                                        [[maybe_unused]] GLsizei length, const GLchar* message, const void* userParam)
+void DebugMessageHandler::ForwardOutputMessage(OutputMethod outputMethod, const String& outputMessage)
 {
-    DEV_EXCEPTION(userParam == nullptr,
-                  "You passed a nullptr as userParam. It must contain the address of a DebugMessageHandlers.");
-    const DebugMessageHandler& debugMessageHandler = *(reinterpret_cast<const DebugMessageHandler*>(userParam));
-
-    OutputMethod outputMethod = debugMessageHandler.GetOutputMethod(type);
-    if (outputMethod == OutputMethod::NONE)
-        return;
-
-    String outputMessage = GenerateMessage(source, type, id, severity, message);
-
     switch (outputMethod)
     {
     case OutputMethod::COUT:
