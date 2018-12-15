@@ -6,7 +6,7 @@ addGDLLib(OpenGLCore
     program.cpp
     renderWindowGLUT.cpp
     shader.cpp
-    uniformBufferObjectGL.cpp
+    uniformBufferObject.cpp
     vertexArrayObjectGL.cpp
 
     GDL::Resources

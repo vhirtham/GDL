@@ -1,6 +1,5 @@
 #include "gdl/rendering/openGL/core/bufferObject.h"
 
-#include <cassert>
 
 
 namespace GDL::OpenGL

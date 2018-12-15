@@ -5,7 +5,6 @@
 
 #include <GL/glew.h>
 
-#include <vector>
 
 namespace GDL::OpenGL
 {

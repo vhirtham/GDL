@@ -1,5 +1,6 @@
-addTest(bufferObject
+addTest(bufferObjects
     rendering/openGL/core/bufferObject.cpp
+    rendering/openGL/core/uniformBufferObject.cpp
     ${OpenGLTestDefaultLibs}
     )
 
@@ -23,13 +24,6 @@ addTest(renderWindowGLUT
 
 addTest(shader
     rendering/openGL/core/shader.cpp
-    ${OpenGLTestDefaultLibs}
-    )
-
-
-addTest(uniformBufferObjectGL
-    rendering/openGL/core/bufferObject.cpp
-    rendering/openGL/core/uniformBufferObjectGL.cpp
     ${OpenGLTestDefaultLibs}
     )
 
