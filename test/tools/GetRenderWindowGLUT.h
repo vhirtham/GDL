@@ -16,7 +16,7 @@ RenderWindowGLUT& GetRenderWindowGLUT()
     if (!renderWindow.IsInitialized())
     {
         contextGLUT.EnableDebug();
-        contextGLUT.GetDebugMessageHandler().SetOutputMethod(GL_DEBUG_TYPE_ERROR, OutputMethod::COUT);
+        contextGLUT.GetDebugMessageHandler().SetOutputMethod(OutputMethod::COUT);
         renderWindow.Initialize();
     }
     return renderWindow;

@@ -10,7 +10,7 @@ namespace GDL::OpenGL
 {
 
 DebugMessageHandler::DebugMessageHandler()
-    : mTypeOutputMethod{{GL_DEBUG_TYPE_ERROR, {OutputMethod::EXCEPTION, GL_DEBUG_SEVERITY_NOTIFICATION}},
+    : mMessageTypeSetup{{GL_DEBUG_TYPE_ERROR, {OutputMethod::EXCEPTION, GL_DEBUG_SEVERITY_NOTIFICATION}},
                         {GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR, {OutputMethod::COUT, GL_DEBUG_SEVERITY_NOTIFICATION}},
                         {GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR, {OutputMethod::COUT, GL_DEBUG_SEVERITY_NOTIFICATION}},
                         {GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR, {OutputMethod::COUT, GL_DEBUG_SEVERITY_NOTIFICATION}},
@@ -19,6 +19,20 @@ DebugMessageHandler::DebugMessageHandler()
                         {GL_DEBUG_TYPE_MARKER, {OutputMethod::COUT, GL_DEBUG_SEVERITY_NOTIFICATION}},
                         {GL_DEBUG_TYPE_OTHER, {OutputMethod::COUT, GL_DEBUG_SEVERITY_NOTIFICATION}}}
 {
+}
+
+
+
+OutputMethod DebugMessageHandler::GetMessageTypeOutputMethod(GLenum type) const
+{
+    return GetMessageTypeSetup(type).outputMethod;
+}
+
+
+
+GLenum DebugMessageHandler::GetMessageTypeSeverityLevel(GLenum type) const
+{
+    return GetMessageTypeSetup(type).severityLevel;
 }
 
 
@@ -43,30 +57,34 @@ bool DebugMessageHandler::IsInitialized() const
 
 
 
-OutputMethod DebugMessageHandler::GetOutputMethod(GLenum type) const
-{
-    return GetMessageTypeSetup(type).outputMethod;
-}
-
-
-
-void DebugMessageHandler::SetOutputMethod(GLenum type, OutputMethod outputMethod)
+void DebugMessageHandler::SetMessageTypeOutputMethod(GLenum type, OutputMethod outputMethod)
 {
     GetMessageTypeSetup(type).outputMethod = outputMethod;
 }
 
 
 
-GLenum DebugMessageHandler::GetMinimalSeverityLevel(GLenum type) const
+void DebugMessageHandler::SetMessageTypeSeverityLevel(GLenum type, GLenum severity)
 {
-    return GetMessageTypeSetup(type).severityLevel;
+    DEV_EXCEPTION(!IsSeverityValid(severity), "The value of the severity enum does not belong to a severity level");
+    GetMessageTypeSetup(type).severityLevel = severity;
 }
 
 
 
-void DebugMessageHandler::SetMinimalSeverityLevel(GLenum type, GLenum severity)
+void DebugMessageHandler::SetOutputMethod(OutputMethod outputMethod)
 {
-    GetMessageTypeSetup(type).severityLevel = severity;
+    for (auto& keyValuePair : mMessageTypeSetup)
+        keyValuePair.second.outputMethod = outputMethod;
+}
+
+
+
+void DebugMessageHandler::SetSeverityLevel(GLenum severity)
+{
+    DEV_EXCEPTION(!IsSeverityValid(severity), "The value of the severity enum does not belong to a severity level");
+    for (auto& keyValuePair : mMessageTypeSetup)
+        keyValuePair.second.severityLevel = severity;
 }
 
 
@@ -79,23 +97,54 @@ void DebugMessageHandler::DebugCallback(GLenum source, GLenum type, GLuint id, G
     const DebugMessageHandler& debugMessageHandler = *(reinterpret_cast<const DebugMessageHandler*>(userParam));
 
     const U32 severityLevel = GetSeverityInteger(severity);
-    const U32 minimalSeverityLevel = GetSeverityInteger(debugMessageHandler.GetMinimalSeverityLevel(type));
-    const OutputMethod outputMethod = debugMessageHandler.GetOutputMethod(type);
 
-    if (outputMethod == OutputMethod::NONE || severityLevel < minimalSeverityLevel)
+    MessageTypeSetup messageTypeSetup = debugMessageHandler.GetMessageTypeSetup(type);
+    const U32 minimalSeverityLevel = GetSeverityInteger(messageTypeSetup.severityLevel);
+
+    if (messageTypeSetup.outputMethod == OutputMethod::NONE || severityLevel < minimalSeverityLevel)
         return;
 
     String outputMessage = GenerateMessage(source, type, id, severity, message);
 
-    ForwardOutputMessage(outputMethod, outputMessage);
+    ForwardOutputMessage(messageTypeSetup.outputMethod, outputMessage);
+}
+
+
+
+void DebugMessageHandler::ForwardOutputMessage(OutputMethod outputMethod, const String& outputMessage)
+{
+    switch (outputMethod)
+    {
+    case OutputMethod::COUT:
+        std::cout << outputMessage << std::endl;
+        break;
+    default:
+        THROW(MakeString("\nCritical OpenGL debug message occurred:\n", outputMessage).c_str());
+    }
+}
+
+
+
+String DebugMessageHandler::GenerateMessage(GLenum source, GLenum type, GLuint id, GLenum severity,
+                                            const GLchar* message)
+{
+    // clang-format off
+    return MakeString("OpenGL debug message",
+                    "\n--------------------",
+                    "\nSource   : ", GetSourceString(source),
+                    "\nType     : ", GetTypeString(type),
+                    "\nID       : ", ToString(id),
+                    "\nSeverity : ", GetSeverityString(severity),
+                    "\nMessage  : ", message, "\n");
+    // clang-format on
 }
 
 
 
 DebugMessageHandler::MessageTypeSetup& DebugMessageHandler::GetMessageTypeSetup(GLenum type)
 {
-    auto iter = mTypeOutputMethod.find(type);
-    EXCEPTION(iter == mTypeOutputMethod.end(), "Invalid type");
+    auto iter = mMessageTypeSetup.find(type);
+    EXCEPTION(iter == mMessageTypeSetup.end(), "Invalid type enum");
     return iter->second;
 }
 
@@ -103,8 +152,8 @@ DebugMessageHandler::MessageTypeSetup& DebugMessageHandler::GetMessageTypeSetup(
 
 const DebugMessageHandler::MessageTypeSetup& DebugMessageHandler::GetMessageTypeSetup(GLenum type) const
 {
-    auto iter = mTypeOutputMethod.find(type);
-    EXCEPTION(iter == mTypeOutputMethod.end(), "Invalid type");
+    auto iter = mMessageTypeSetup.find(type);
+    EXCEPTION(iter == mMessageTypeSetup.end(), "Invalid type enum");
     return iter->second;
 }
 
@@ -196,32 +245,20 @@ const char* DebugMessageHandler::GetTypeString(GLenum type)
 
 
 
-String DebugMessageHandler::GenerateMessage(GLenum source, GLenum type, GLuint id, GLenum severity,
-                                            const GLchar* message)
+bool DebugMessageHandler::IsSeverityValid(GLenum severity)
 {
-    // clang-format off
-    return MakeString("OpenGL debug message",
-                    "\n--------------------",
-                    "\nSource   : ", GetSourceString(source),
-                    "\nType     : ", GetTypeString(type),
-                    "\nID       : ", ToString(id),
-                    "\nSeverity : ", GetSeverityString(severity),
-                    "\nMessage  : ", message, "\n");
-    // clang-format on
-}
-
-
-
-void DebugMessageHandler::ForwardOutputMessage(OutputMethod outputMethod, const String& outputMessage)
-{
-    switch (outputMethod)
+    switch (severity)
     {
-    case OutputMethod::COUT:
-        std::cout << outputMessage << std::endl;
-        break;
+    case GL_DEBUG_SEVERITY_HIGH:
+    case GL_DEBUG_SEVERITY_MEDIUM:
+    case GL_DEBUG_SEVERITY_LOW:
+    case GL_DEBUG_SEVERITY_NOTIFICATION:
+        return true;
     default:
-        THROW(MakeString("\nCritical OpenGL debug message occurred:\n", outputMessage).c_str());
+        return false;
     }
 }
+
+
 
 } // namespace GDL::OpenGL

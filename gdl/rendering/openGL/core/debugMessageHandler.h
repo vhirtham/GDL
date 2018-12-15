@@ -29,7 +29,7 @@ class DebugMessageHandler
         GLenum severityLevel;
     };
 
-    Map<GLenum, MessageTypeSetup> mTypeOutputMethod;
+    Map<GLenum, MessageTypeSetup> mMessageTypeSetup;
     bool mInitialized = false;
 
 
@@ -42,6 +42,16 @@ public:
     DebugMessageHandler& operator=(DebugMessageHandler&&) = delete;
     ~DebugMessageHandler() = default;
 
+    //! @brief Gets the output method of the specified message type
+    //! @param type: Type enum
+    //! @return Output method enum
+    OutputMethod GetMessageTypeOutputMethod(GLenum type) const;
+
+    //! @brief Gets the minimal severity that a message of the specified type must have to be processed.
+    //! @param type: Type enum
+    //! @return Minimal severity that a message of the specified type must have to be processed.
+    GLenum GetMessageTypeSeverityLevel(GLenum type) const;
+
     //! @brief Sets the OpenGL debug callback function. This is only done during the first function call. Afterwards it
     //! does nothing to avoid accidentally overwriting user defined debug callbacks.
     void Initialize();
@@ -50,26 +60,25 @@ public:
     //! @return True / False
     bool IsInitialized() const;
 
-    //! @brief Gets the output method of the specified message type
-    //! @param type: Type enum
-    //! @return Output method enum
-    OutputMethod GetOutputMethod(GLenum type) const;
-
     //! @brief Sets the output method of the specified message type
     //! @param type: Type enum
     //! @param outputMethod: Output method enum
-    void SetOutputMethod(GLenum type, OutputMethod outputMethod);
-
-    //! @brief Gets the minimal severity that a message of the specified type must have to be processed.
-    //! @param type: Type enum
-    //! @return Minimal severity that a message of the specified type must have to be processed.
-    GLenum GetMinimalSeverityLevel(GLenum type) const;
+    void SetMessageTypeOutputMethod(GLenum type, OutputMethod outputMethod);
 
     //! @brief Sets the minimal severity level for the message type. If the severity of a message is lower it will be
     //! ignored.
     //! @param type: Type enum
     //! @param severity: Severity enum
-    void SetMinimalSeverityLevel(GLenum type, GLenum severity);
+    void SetMessageTypeSeverityLevel(GLenum type, GLenum severity);
+
+    //! @brief Sets the output method for all message types
+    //! @param outputMethod: Output method enum
+    void SetOutputMethod(OutputMethod outputMethod);
+
+    //! @brief Sets the minimal severity level for all message types. If the severity of a message is lower it will be
+    //! ignored.
+    //! @param severity: Severity enum
+    void SetSeverityLevel(GLenum severity);
 
 private:
     //! @brief Debug callback function that is regitered to the debug context if a instance of this class is initialized
@@ -83,6 +92,20 @@ private:
     //! @remark The interface of this class is prescribed by the OpenGL API
     static void DebugCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length,
                               const GLchar* message, const void* userParam);
+
+    //! @brief Forwards the output message to the specified output system
+    //! @param outputMethod: Output method enum
+    //! @param outputMessage: Output message
+    static void ForwardOutputMessage(OutputMethod outputMethod, const String& outputMessage);
+
+    //! @brief Generates a debug message from the debug callbacks input parameters
+    //! @param source: Source enum
+    //! @param type: Type enum
+    //! @param id: Message id
+    //! @param severity: Severity enum
+    //! @param message: The error message
+    //! @return Debug message
+    static String GenerateMessage(GLenum source, GLenum type, GLuint id, GLenum severity, const GLchar* message);
 
     //! @brief Gets the setup struct for the specified message type
     //! @param type: Type enum
@@ -115,19 +138,10 @@ private:
     //! @return Type enum as string
     static const char* GetTypeString(GLenum type);
 
-    //! @brief Generates a debug message from the debug callbacks input parameters
-    //! @param source: Source enum
-    //! @param type: Type enum
-    //! @param id: Message id
+    //! @brief Checks if the enum value represents a severity level
     //! @param severity: Severity enum
-    //! @param message: The error message
-    //! @return Debug message
-    static String GenerateMessage(GLenum source, GLenum type, GLuint id, GLenum severity, const GLchar* message);
-
-    //! @brief Forwards the output message to the specified output system
-    //! @param outputMethod: Output method enum
-    //! @param outputMessage: Output message
-    static void ForwardOutputMessage(OutputMethod outputMethod, const String& outputMessage);
+    //! @return True / False
+    static bool IsSeverityValid(GLenum severity);
 };
 
 
