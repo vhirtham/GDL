@@ -1,17 +1,16 @@
 #pragma once
 
 #include "gdl/base/fundamentalTypes.h"
+#include "gdl/base/container/vector.h"
 
 #include <GL/glew.h>
 
-#include <cassert>
 #include <vector>
 
-namespace GDL
-{
-namespace OpenGL
+namespace GDL::OpenGL
 {
 
+//! @brief Wrapper class for OpenGL buffer objects
 class BufferObject
 {
 
@@ -29,52 +28,45 @@ public:
 
     //! @brief Constructs a buffer object with the given size. All values are set to 0.
     //! @param size: Desired size of the buffer object
-    //! @param usage: Enum that specifies the buffer objects usage (have a look at the official reference for
-    //! glNamedBufferData)
-    BufferObject(GLuint size, GLenum usage);
+    //! @param usage: Usage enum
+    BufferObject(GLsizei size, GLenum usage);
 
     //! @brief Constructs a buffer object with the passed data
     //! @param bufferData: Vector of data that should be used for initialization
-    //! @param usage: Enum that specifies the buffer objects usage (have a look at the official reference for
-    //! glNamedBufferData)
-    template <typename _dataType>
-    explicit BufferObject(const std::vector<_dataType>& bufferData, GLenum usage);
+    //! @param usage: Usage enum
+    BufferObject(const Vector<F32>& bufferData, GLenum usage);
 
     //! @brief Gets the handle of the buffer object
     //! @return Handle of the buffer object
-    GLuint GetHandle() const
-    {
-        return mHandle;
-    }
+    GLuint GetHandle() const;
 
-    //! @brief Gets the size of the buffer object
-    //! @return Size of the buffer object
-    GLsizei GetSize() const
-    {
-        return mSize;
-    }
+    //! @brief Gets the size of the buffer object in bytes
+    //! @return Size of the buffer object in bytes
+    GLsizei GetSize() const;
 
     //! @brief Gets the usage enum of the buffer object
-    //! @return usage enum of the buffer object
-    GLenum GetUsage() const
-    {
-        return mUsage;
-    }
+    //! @return Usage enum of the buffer object
+    GLenum GetUsage() const;
 
     //! @brief Writes data to the buffer object starting at the given offset
-    //! @tparam TDataType: Data type of the provided data
     //! @param data: The data that should be written to the buffer object
     //! @param offset: Location inside the buffer where the data should be written
-    template <typename _dataType>
-    void SetData(_dataType data, GLint offset = 0) const;
+    void SetData(Vector<F32> data, GLint offset = 0);
 
 private:
+
     //! @brief Initializes the buffer object
     //! @param bufferData: Data that should be used for initialization
-    //! @param usage: Enum that specifies the buffer objects usage (have a look at the official reference for
-    //! glNamedBufferData)
     template <typename _dataType>
-    void Initialize(const std::vector<_dataType>& bufferData, GLenum usage);
+    void Initialize(const _dataType* bufferData);
+
+    //! @brief Writes data to the buffer object starting at the given offset
+    //! @param data: The data that should be written to the buffer object
+    //! @param size: Size of the data
+    //! @param offset: Location inside the buffer where the data should be written
+    template <typename _dataType>
+    void SetData(const _dataType* data, GLsizei size, GLint offset);
 };
-} // namespace OpenGL
-} // namespace GDL
+
+} // namespace GDL::OpenGL
+

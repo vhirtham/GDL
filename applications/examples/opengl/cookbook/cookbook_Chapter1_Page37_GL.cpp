@@ -8,9 +8,10 @@
 
 #include "gdl/base/time.h"
 #include "gdl/base/timer.h"
+#include "gdl/base/container/vector.h"
 #include "gdl/math/mat4.inl"
 #include "gdl/math/transformationMatrix.h"
-#include "gdl/rendering/openGL/core/bufferObjectGL.h"
+#include "gdl/rendering/openGL/core/bufferObject.h"
 #include "gdl/rendering/openGL/core/contextGLUT.h"
 #include "gdl/rendering/openGL/core/program.h"
 #include "gdl/rendering/openGL/core/renderWindowGLUT.h"
@@ -105,13 +106,13 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
 
     // Create Buffer Objects ####################
     // clang-format off
-    std::vector<F32> positionData
+    Vector<F32> positionData
     {
         -1.0f, -0.6f,  0.0f,
          1.0f, -0.6f,  0.0f,
          0.0f,  1.0f,  0.0f
     };
-    std::vector<F32> colorData
+    Vector<F32> colorData
     {
          1.f,  0.f,  0.f,
          0.f,  1.f,  0.f,

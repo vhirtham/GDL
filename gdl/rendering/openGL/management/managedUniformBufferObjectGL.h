@@ -33,7 +33,7 @@ public:
     //! @param uniformBlock: A uniform block that contains the structure that should be matched
     //! @param usage: Enum that specifies the UBOs usage (have a look at the official reference for glNamedBufferData)
     //! @param buffer: Vector of U8 containing the byte data that should be used for initialization
-    ManagedUniformBufferObject(const UniformBlock& uniformBlock, GLenum usage, const std::vector<U8>& buffer);
+    ManagedUniformBufferObject(const UniformBlock& uniformBlock, GLenum usage, const Vector<U8>& buffer);
 
     //! @brief Constructs a uniform buffer object from a referenced uniform block
     //! @param uniformBlock: A uniform block that contains the structure that should be matched

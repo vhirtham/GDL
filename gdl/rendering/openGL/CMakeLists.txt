@@ -1,4 +1,4 @@
 
 add_subdirectory(core)
-add_subdirectory(management)
+#add_subdirectory(management)
 

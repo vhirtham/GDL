@@ -20,8 +20,8 @@ BOOST_AUTO_TEST_CASE(Construct_From_UniformBlock)
     GetRenderWindowGLUT();
 
     constexpr U32 bufferSize = 160;
-    std::vector<U8> buffer(bufferSize, 0);
-    std::vector<U8> bufferMismatched(bufferSize + 1, 0);
+    Vector<U8> buffer(bufferSize, 0);
+    Vector<U8> bufferMismatched(bufferSize + 1, 0);
 
     std::map<std::string, UniformBlockVariable> uBVars = {
             {"TranslationVec", UniformBlockVariable(0, 0, GL_FLOAT_VEC4, 1)},

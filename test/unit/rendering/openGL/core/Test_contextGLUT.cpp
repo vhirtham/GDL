@@ -29,6 +29,7 @@ BOOST_AUTO_TEST_CASE(TestContextGLUT)
 }
 
 
+
 BOOST_AUTO_TEST_CASE(TestDebugMessageHandler)
 {
     DebugMessageHandler& debugMessageHandler = ContextGLUT::Instance().GetDebugMessageHandler();

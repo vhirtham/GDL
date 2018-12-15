@@ -1,7 +1,7 @@
 #pragma once
 
 #include "gdl/base/fundamentalTypes.h"
-#include "gdl/rendering/openGL/core/bufferObjectGL.h"
+#include "gdl/rendering/openGL/core/bufferObject.h"
 #include <GL/glew.h>
 
 #include <vector>
@@ -33,7 +33,7 @@ public:
     //! @param usage: Enum that specifies the buffer objects usage (have a look at the official reference for
     //! glNamedBufferData)
     template <typename _dataType>
-    UniformBufferObject(const std::vector<_dataType>& buffer, GLenum usage)
+    UniformBufferObject(const Vector<_dataType>& buffer, GLenum usage)
         : mBufferObject(buffer, usage)
     {
     }

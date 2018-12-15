@@ -2,7 +2,7 @@
 // Tutorials to go on: http://openglbook.com/chapter-1-getting-started.html
 
 #include "gdl/base/time.h"
-#include "gdl/rendering/openGL/core/bufferObjectGL.h"
+#include "gdl/rendering/openGL/core/bufferObject.h"
 #include "gdl/rendering/openGL/core/contextGLUT.h"
 #include "gdl/rendering/openGL/core/program.h"
 #include "gdl/rendering/openGL/core/renderWindowGLUT.h"
@@ -222,8 +222,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
     Shader vertexShader(GL_VERTEX_SHADER, VertexShaderCode);
     Shader fragmentShader(GL_FRAGMENT_SHADER, FragmentShaderCode);
 
-    std::vector<F32> perspectiveMatValues{1.2f, 0.f, 0.f, 0.f, 0.f, 0.9f, 0.f, 0.f,
-                                          0.f,  0.f, 1.f, 0.f, 0.f, 0.f,  0.f, 1.f};
+    Vector<F32> perspectiveMatValues{1.2f, 0.f, 0.f, 0.f, 0.f, 0.9f, 0.f, 0.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 0.f, 1.f};
 
     Program program(vertexShader, fragmentShader);
     ProgramDataManager programDM(program);
@@ -231,7 +230,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
     ubo.SetData("perspectiveMatrix", perspectiveMatValues);
     programDM.SetUniform<GL_FLOAT>("frequency", 10.f);
     programDM.SetUniform<GL_FLOAT>("colMod[0]", 1.f);
-    programDM.SetUniformArray<GL_FLOAT>("colMod[1]", std::vector<F32>{1.f, 1.f}.data(), 2);
+    programDM.SetUniformArray<GL_FLOAT>("colMod[1]", Vector<F32>{1.f, 1.f}.data(), 2);
 
     glUseProgram(program.GetHandle());
 
@@ -245,11 +244,11 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
 
     CreateVBO();
 
-    std::vector<F32> Vertices{-0.8f, -1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.8f, -1.0f, 0.0f, 1.0f};
-    std::vector<F32> Colors{1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f};
-    std::vector<F32> TexCoords{0.0f, 0.0f, 0.5f, 1.0f, 1.0f, 0.0f};
-    std::vector<F32> VerticesAndColors{-0.8f, -1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.8f, -1.0f, 0.0f, 1.0f,
-                                       1.0f,  0.0f,  0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f,  1.0f, 0.0f};
+    Vector<F32> Vertices{-0.8f, -1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.8f, -1.0f, 0.0f, 1.0f};
+    Vector<F32> Colors{1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f};
+    Vector<F32> TexCoords{0.0f, 0.0f, 0.5f, 1.0f, 1.0f, 0.0f};
+    Vector<F32> VerticesAndColors{-0.8f, -1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.8f, -1.0f, 0.0f, 1.0f,
+                                  1.0f,  0.0f,  0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f,  1.0f, 0.0f};
     BufferObject bufferVertices(48, GL_STATIC_DRAW);
     BufferObject bufferColors(48, GL_STATIC_DRAW);
     BufferObject bufferTexCoords(24, GL_STATIC_DRAW);

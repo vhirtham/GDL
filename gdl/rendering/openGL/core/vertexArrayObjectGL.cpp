@@ -1,6 +1,6 @@
 #include "gdl/rendering/openGL/core/vertexArrayObjectGL.h"
 
-#include "gdl/rendering/openGL/core/bufferObjectGL.h"
+#include "gdl/rendering/openGL/core/bufferObject.h"
 
 #include <cassert>
 

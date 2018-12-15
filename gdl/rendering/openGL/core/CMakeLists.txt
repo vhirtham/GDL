@@ -1,5 +1,5 @@
 addGDLLib(OpenGLCore
-    bufferObjectGL.cpp
+    bufferObject.cpp
     contextGLUT.cpp
     debugMessageHandler.cpp
     glewController.cpp

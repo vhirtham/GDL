@@ -2,7 +2,7 @@
 
 #include "gdl/base/exception.h"
 #include "gdl/base/fundamentalTypes.h"
-#include "gdl/rendering/openGL/core/bufferObjectGL.h"
+#include "gdl/rendering/openGL/core/bufferObject.h"
 #include "gdl/rendering/openGL/core/vertexArrayObjectGL.h"
 
 #include "test/tools/GetRenderWindowGLUT.h"

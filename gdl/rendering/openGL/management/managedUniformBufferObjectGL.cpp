@@ -7,7 +7,7 @@
 #include <cassert>
 
 GDL::OpenGL::ManagedUniformBufferObject::ManagedUniformBufferObject(const UniformBlock& uniformBlock, GLenum usage,
-                                                                    const std::vector<U8>& buffer)
+                                                                    const Vector<U8>& buffer)
     : mUBO(buffer, usage)
     , mVariables(uniformBlock.GetVariables())
 {
@@ -30,9 +30,8 @@ GDL::OpenGL::ManagedUniformBufferObject::GetVariable(std::string variableName) c
 {
     auto iterator = mVariables.find(variableName);
     if (iterator == mVariables.end())
-        throw Exception(__PRETTY_FUNCTION__,
-                        "Did not find uniform \"" + variableName +
-                                "\". GLSL compiler optimization might be the reason.");
+        throw Exception(__PRETTY_FUNCTION__, "Did not find uniform \"" + variableName +
+                                                     "\". GLSL compiler optimization might be the reason.");
     return iterator->second;
 }
 
