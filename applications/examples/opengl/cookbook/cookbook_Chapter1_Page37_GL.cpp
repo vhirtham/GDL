@@ -16,7 +16,7 @@
 #include "gdl/rendering/openGL/core/program.h"
 #include "gdl/rendering/openGL/core/renderWindowGLUT.h"
 #include "gdl/rendering/openGL/core/shader.h"
-#include "gdl/rendering/openGL/core/vertexArrayObjectGL.h"
+#include "gdl/rendering/openGL/core/vertexArrayObject.h"
 
 
 #include <chrono>

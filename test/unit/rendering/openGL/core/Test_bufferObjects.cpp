@@ -107,17 +107,17 @@ BOOST_AUTO_TEST_CASE(UBO_binding_point)
     constexpr GLenum usage = GL_STATIC_DRAW;
     constexpr GLuint bindingPoint = 2;
 
-    UniformBufferObject UBO(size, usage);
+    UniformBufferObject ubo(size, usage);
 
 
     GLint queriedBufferHandle = -1;
     glGetIntegeri_v(GL_UNIFORM_BUFFER_BINDING, bindingPoint, &queriedBufferHandle);
-    BOOST_CHECK(UBO.GetBindingPoint() != bindingPoint);
-    BOOST_CHECK(UBO.GetHandle() != static_cast<GLuint>(queriedBufferHandle));
+    BOOST_CHECK(ubo.GetBindingPoint() != bindingPoint);
+    BOOST_CHECK(ubo.GetHandle() != static_cast<GLuint>(queriedBufferHandle));
 
-    UBO.SetBindingPoint(bindingPoint);
+    ubo.SetBindingPoint(bindingPoint);
 
     glGetIntegeri_v(GL_UNIFORM_BUFFER_BINDING, bindingPoint, &queriedBufferHandle);
-    BOOST_CHECK(UBO.GetBindingPoint() == bindingPoint);
-    BOOST_CHECK(UBO.GetHandle() == static_cast<GLuint>(queriedBufferHandle));
+    BOOST_CHECK(ubo.GetBindingPoint() == bindingPoint);
+    BOOST_CHECK(ubo.GetHandle() == static_cast<GLuint>(queriedBufferHandle));
 }

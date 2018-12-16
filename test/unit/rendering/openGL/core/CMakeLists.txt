@@ -28,8 +28,8 @@ addTest(shader
     )
 
 
-addTest(vertexArrayObjectGL
-    rendering/openGL/core/vertexArrayObjectGL.cpp
+addTest(vertexArrayObject
+    rendering/openGL/core/vertexArrayObject.cpp
     rendering/openGL/core/bufferObject.cpp
     ${OpenGLTestDefaultLibs}
     )
