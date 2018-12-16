@@ -30,15 +30,7 @@ void VertexArrayObject::Bind() const
 
 
 
-void VertexArrayObject::EnableAttribute(GLuint attributeIndex, GLint numVertexValues, GLenum type, GLuint relOffset,
-                                        GLboolean normalized)
-{
-    EnableAttribute(attributeIndex, attributeIndex, numVertexValues, type, relOffset, normalized);
-}
-
-
-
-void VertexArrayObject::EnableAttribute(GLuint attributeIndex, GLuint bindingPoint, GLint numVertexValues, GLenum type,
+void VertexArrayObject::EnableAttribute(GLuint attributeIndex, GLuint bindingPoint, GLenum type, GLint numVertexValues,
                                         GLuint relOffset, GLboolean normalized)
 {
     DEV_EXCEPTION(QueryIsAttributeEnabled(attributeIndex), "Attribute already enabled!");
@@ -50,22 +42,12 @@ void VertexArrayObject::EnableAttribute(GLuint attributeIndex, GLuint bindingPoi
 
 
 
-void VertexArrayObject::EnableAttribute(GLuint attributeIndex, const BufferObject& bufferObject, GLint numVertexValues,
-                                        GLenum type, GLsizei stride, GLint offset, GLuint relOffset,
-                                        GLboolean normalized)
-{
-    EnableAttribute(attributeIndex, attributeIndex, bufferObject, numVertexValues, type, stride, offset, relOffset,
-                    normalized);
-}
-
-
-
 void VertexArrayObject::EnableAttribute(GLuint attributeIndex, GLuint bindingPoint, const BufferObject& bufferObject,
-                                        GLint numVertexValues, GLenum type, GLsizei stride, GLint offset,
+                                        GLenum type, GLint numVertexValues, GLsizei stride, GLint offset,
                                         GLuint relOffset, GLboolean normalized)
 {
-    EnableAttribute(attributeIndex, bindingPoint, numVertexValues, type, relOffset, normalized);
-    SetAttributeBuffer(attributeIndex, bindingPoint, bufferObject, stride, offset);
+    EnableAttribute(attributeIndex, bindingPoint, type, numVertexValues, relOffset, normalized);
+    SetBufferBinding(bindingPoint, bufferObject, stride, offset);
 }
 
 
@@ -129,25 +111,13 @@ U32 VertexArrayObject::QueryNumEnabledAttributes() const
 
 
 
-void VertexArrayObject::SetAttributeBuffer(GLuint attributeIndex, const BufferObject& bufferObject, GLsizei stride,
-                                           GLint offset)
-{
-    SetAttributeBuffer(attributeIndex, attributeIndex, bufferObject, stride, offset);
-}
-
-
-
-void VertexArrayObject::SetAttributeBuffer([[maybe_unused]] GLuint attributeIndex, GLuint bindingPoint,
-                                           const BufferObject& bufferObject, GLsizei stride, GLint offset)
+void VertexArrayObject::SetBufferBinding(GLuint bindingPoint, const BufferObject& bufferObject, GLsizei stride,
+                                         GLint offset)
 {
     DEV_EXCEPTION(stride <= 0, "Stride must be a >= 0.");
     DEV_EXCEPTION(offset < 0, "Offset can't be negative.");
-    DEV_EXCEPTION(!QueryIsAttributeEnabled(attributeIndex), "Attribute is not enabled");
 
     glVertexArrayVertexBuffer(mHandle, bindingPoint, bufferObject.GetHandle(), offset, stride);
-
-    DEV_EXCEPTION(QueryAttributeBuffer(attributeIndex) != bufferObject.GetHandle(),
-                  "Bimdimg point mismatch - the attribute is not bound to the same binding point as the buffer");
 }
 
 

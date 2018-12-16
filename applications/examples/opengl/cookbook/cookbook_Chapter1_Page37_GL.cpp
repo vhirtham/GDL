@@ -126,8 +126,8 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
 
     // Create Vertex Array Object ###############
     VertexArrayObject vao;
-    vao.EnableAttribute(0, positionBuffer, 3, GL_FLOAT, 12);
-    vao.EnableAttribute(1, colorBuffer, 3, GL_FLOAT, 12);
+    vao.EnableAttribute(0, 0, positionBuffer, GL_FLOAT, 3, 12);
+    vao.EnableAttribute(1, 1, colorBuffer, GL_FLOAT, 3, 12);
 
 
 

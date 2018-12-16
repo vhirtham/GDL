@@ -29,57 +29,31 @@ public:
     //! @brief Binds the vertex array object
     void Bind() const;
 
-    //! @brief Enables an attribute without binding a buffer object to the attributes binding Point. In this function
-    //! overload the binding point equals the attribute index.
-    //! @param attributeIndex: The index of the attribute that should be enabled
-    //! @param numVertexValues: The attributes number of values per vertex
-    //! @param type: Value type enum
-    //! @param relOffset: The distance between elements within the buffer
-    //! @param normalized: Specifies whether fixed-point data values should be normalized (GL_TRUE) or converted
-    //! directly as fixed-point values (GL_FALSE) when they are accessed. This parameter is ignored if type is GL_FIXED.
-    void EnableAttribute(GLuint attributeIndex, GLint numVertexValues, GLenum type, GLuint relOffset = 0,
-                         GLboolean normalized = GL_FALSE);
-
-    //! @brief Enables an attribute without binding a buffer object to the attributes binding Point.
+    //! @brief Enables an attribute
     //! @param attributeIndex: The index of the attribute that should be enabled
     //! @param bindingPoint: Binding point to which the enabled attribute should be bound to.
-    //! @param numVertexValues: The attributes number of values per vertex
     //! @param type: Value type enum
+    //! @param numVertexValues: The attributes number of values per vertex
     //! @param relOffset: The distance between elements within the buffer
     //! @param normalized: Specifies whether fixed-point data values should be normalized (GL_TRUE) or converted
     //! directly as fixed-point values (GL_FALSE) when they are accessed. This parameter is ignored if type is GL_FIXED.
-    void EnableAttribute(GLuint attributeIndex, GLuint bindingPoint, GLint numVertexValues, GLenum type,
-                         GLuint relOffset, GLboolean normalized);
-
-    //! @brief Enables an attribute and connects it with the provided buffer object. In this function
-    //! overload the used binding point equals the attributes index.
-    //! @param attributeIndex: The index of the attribute that should be enabled
-    //! @param bufferObject: Buffer object that provides the data for the attribute
-    //! @param numVertexValues: The attributes number of values per vertex
-    //! @param type: Value type enum
-    //! @param stride: Stride in bytes between two vertices in the buffer
-    //! @param offset: Offset of the attributes first vertex data
-    //! @param relOffset: The distance between elements within the buffer
-    //! @param normalized: Specifies whether fixed-point data values should be normalized (GL_TRUE) or converted
-    //! directly as fixed-point values (GL_FALSE) when they are accessed. This parameter is ignored if type is GL_FIXED.
-    void EnableAttribute(GLuint attributeIndex, const BufferObject& bufferObject, GLint numVertexValues, GLenum type,
-                         GLsizei stride, GLint offset = 0, GLuint relOffset = 0, GLboolean normalized = GL_FALSE);
+    void EnableAttribute(GLuint attributeIndex, GLuint bindingPoint, GLenum type, GLint numVertexValues,
+                         GLuint relOffset = 0, GLboolean normalized = GL_FALSE);
 
     //! @brief Enables an attribute and connects it with the provided buffer object via the specified binding point
     //! @param attributeIndex: The index of the attribute that should be enabled
     //! @param bindingPoint: Binding point to which the enabled attribute and the buffer should be bound.
     //! @param bufferObject: Buffer object that provides the data for the attribute
-    //! @param numVertexValues: The attributes number of values per vertex
     //! @param type: Value type enum
+    //! @param numVertexValues: The attributes number of values per vertex
     //! @param stride: Stride in bytes between two vertices in the buffer
     //! @param offset: Offset of the attributes first vertex data
     //! @param relOffset: The distance between elements within the buffer
     //! @param normalized: Specifies whether fixed-point data values should be normalized (GL_TRUE) or converted
     //! directly as fixed-point values (GL_FALSE) when they are accessed. This parameter is ignored if type is GL_FIXED.
-    void EnableAttribute(GLuint attributeIndex, GLuint bindingPoint, const BufferObject& bufferObject,
-                         GLint numVertexValues, GLenum type, GLsizei stride, GLint offset = 0, GLuint relOffset = 0,
+    void EnableAttribute(GLuint attributeIndex, GLuint bindingPoint, const BufferObject& bufferObject, GLenum type,
+                         GLint numVertexValues, GLsizei stride, GLint offset = 0, GLuint relOffset = 0,
                          GLboolean normalized = GL_FALSE);
-
 
     //! @brief Checks if all active attributes are bound to a buffer
     //! @return True / False
@@ -100,28 +74,15 @@ public:
 
     //! @brief Queries the number of enabled attributes
     //! @return Number of enabled attributes
+    //! @remark This function is potentially slow. You should only use it for debugging purposes
     U32 QueryNumEnabledAttributes() const;
 
-    //! @brief Binds a buffer object to an attribute. This function overload assumes that the binding point of the
-    //! attribute equals its index.
-    //! @param attributeIndex: The index of the attribute that should be connected with the buffer
-    //! @param bufferObject: Buffer object that provides the data for the attribute
-    //! @param stride: Stride in bytes between two vertices in the buffer
-    //! @param offset: Offset of the attributes first vertex data
-    void SetAttributeBuffer(GLuint attributeIndex, const BufferObject& bufferObject, GLsizei stride,
-                            GLint offset = 0);
-
-    //! @brief Binds a buffer object to an attribute
-    //! @param attributeIndex: The index of the attribute that should be connected with the buffer
+    //! @brief Binds a buffer object to a bindingpoint of the vertex array object
     //! @param bindingPoint: Binding point to which the buffer will be bound.
     //! @param bufferObject: Buffer object that provides the data for the attribute
     //! @param stride: Stride in bytes between two vertices in the buffer
     //! @param offset: Offset of the attributes first vertex data
-    //! @remark The attribute index is only used for debugging purposes inside of this function. If the DEV_EXCEPTION
-    //! macro is disabled, it has no effect
-    void SetAttributeBuffer(GLuint attributeIndex, GLuint bindingPoint, const BufferObject& bufferObject,
-                            GLsizei stride, GLint offset = 0);
-
+    void SetBufferBinding(GLuint bindingPoint, const BufferObject& bufferObject, GLsizei stride, GLint offset = 0);
 
 private:
     //! @brief Initializes the vertex array object
