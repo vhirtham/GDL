@@ -33,6 +33,36 @@ GLuint Program::GetHandle() const
 
 
 
+GLuint Program::QueryUniformBlockBinding(GLuint uniformBlockIndex) const
+{
+    GLint blockBinding = -1;
+    glGetActiveUniformBlockiv(mHandle, uniformBlockIndex, GL_UNIFORM_BLOCK_BINDING, &blockBinding);
+    DEV_EXCEPTION(blockBinding < 0, "Could not query uniform block binding.");
+    return static_cast<GLuint>(blockBinding);
+}
+
+
+
+GLuint Program::QueryUniformBlockIndex(const char* uniformBlockName) const
+{
+    GLuint blockIndex = glGetUniformBlockIndex(mHandle, uniformBlockName);
+    DEV_EXCEPTION(blockIndex == GL_INVALID_INDEX,
+                  MakeString("Could not find uniform with name \"", uniformBlockName, "\"").c_str());
+    return blockIndex;
+}
+
+
+
+GLint Program::QueryUniformBlockSize(GLuint uniformBlockIndex) const
+{
+    GLint blockSize = -1;
+    glGetActiveUniformBlockiv(mHandle, uniformBlockIndex, GL_UNIFORM_BLOCK_DATA_SIZE, &blockSize);
+    DEV_EXCEPTION(blockSize < 0, "Could not query uniform block size.");
+    return blockSize;
+}
+
+
+
 GLint Program::QueryUniformLocation(const char* uniformName) const
 {
     GLint uniformLocation = glGetUniformLocation(mHandle, uniformName);
@@ -95,23 +125,30 @@ void Program::Initialize(std::initializer_list<std::reference_wrapper<const Shad
 
 
 
-void Program::SetUniform(GLint uniformLocation, F32 value) const
+void Program::SetUniform(GLint uniformLocation, F32 value)
 {
     glProgramUniform1f(mHandle, uniformLocation, value);
 }
 
 
 
-void Program::SetUniform(GLint uniformLocation, const Mat4f& value) const
+void Program::SetUniform(GLint uniformLocation, const Mat4f& value)
 {
     glProgramUniformMatrix4fv(mHandle, uniformLocation, 1, GL_FALSE, value.Data().data());
 }
 
 
 
-void Program::SetUniformArray(GLint uniformLocation, const F32* const values, U32 size) const
+void Program::SetUniformArray(GLint uniformLocation, const F32* const values, U32 size)
 {
     glProgramUniform1fv(mHandle, uniformLocation, size, values);
+}
+
+
+
+void Program::SetUniformBlockBinding(GLuint uniformBlockIndex, GLuint bindingPoint)
+{
+    glUniformBlockBinding(mHandle, uniformBlockIndex, bindingPoint);
 }
 
 } // namespace GDL::OpenGL

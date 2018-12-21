@@ -20,7 +20,7 @@ UniformBufferObject::UniformBufferObject(const Vector<GDL::F32>& bufferData, GLe
 
 
 
-GLint UniformBufferObject::GetBindingPoint() const
+GLuint UniformBufferObject::GetBindingPoint() const
 {
     return mBindingPoint;
 }
@@ -48,7 +48,7 @@ GLenum UniformBufferObject::GetUsage() const
 
 
 
-void UniformBufferObject::SetBindingPoint(GLint bindingPoint)
+void UniformBufferObject::SetBindingPoint(GLuint bindingPoint)
 {
     mBindingPoint = bindingPoint;
     glBindBufferBase(GL_UNIFORM_BUFFER, mBindingPoint, mBufferObject.GetHandle());
@@ -57,7 +57,14 @@ void UniformBufferObject::SetBindingPoint(GLint bindingPoint)
 
 
 
-void UniformBufferObject::SetData(Vector<GDL::F32> data, GLint offset)
+void UniformBufferObject::SetData(const Vector<U8>& data, GLint offset)
+{
+    mBufferObject.SetData(data, offset);
+}
+
+
+
+void UniformBufferObject::SetData(const Vector<GDL::F32>& data, GLint offset)
 {
     mBufferObject.SetData(data, offset);
 }

@@ -50,10 +50,20 @@ public:
     //! @brief Writes data to the buffer object starting at the given offset
     //! @param data: The data that should be written to the buffer object
     //! @param offset: Location inside the buffer where the data should be written
-    void SetData(Vector<F32> data, GLint offset = 0);
+    template <U32 _size>
+    void SetData(const std::array<U8, _size>& data, GLint offset = 0);
+
+    //! @brief Writes data to the buffer object starting at the given offset
+    //! @param data: The data that should be written to the buffer object
+    //! @param offset: Location inside the buffer where the data should be written
+    void SetData(const Vector<U8>& data, GLint offset = 0);
+
+    //! @brief Writes data to the buffer object starting at the given offset
+    //! @param data: The data that should be written to the buffer object
+    //! @param offset: Location inside the buffer where the data should be written
+    void SetData(const Vector<F32>& data, GLint offset = 0);
 
 private:
-
     //! @brief Initializes the buffer object
     //! @param bufferData: Data that should be used for initialization
     template <typename _dataType>
@@ -67,5 +77,14 @@ private:
     void SetData(const _dataType* data, GLsizei size, GLint offset);
 };
 
-} // namespace GDL::OpenGL
 
+
+// Template definitions ---------------------------------------------------------------------------
+
+template <U32 _size>
+void BufferObject::SetData(const std::array<U8, _size>& data, GLint offset)
+{
+    SetData(data.data(), static_cast<GLsizei>(data.size()), offset);
+}
+
+} // namespace GDL::OpenGL

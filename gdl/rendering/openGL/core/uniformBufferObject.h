@@ -13,7 +13,7 @@ namespace GDL::OpenGL
 
 class UniformBufferObject
 {
-    GLint mBindingPoint = -1;
+    GLuint mBindingPoint = 0;
     BufferObject mBufferObject;
 
 public:
@@ -36,7 +36,7 @@ public:
 
     //! @brief Gets the binding point of the uniform buffer object
     //! @return Binding point of the uniform buffer object
-    GLint GetBindingPoint() const;
+    GLuint GetBindingPoint() const;
 
     //! @brief Gets the handle of the uniform buffer object
     //! @return Handle of the uniform buffer object
@@ -52,17 +52,38 @@ public:
 
     //! @brief Sets the binding point of the uniform buffer object
     //! @param bindingPoint: New binding point
-    void SetBindingPoint(GLint bindingPoint);
+    void SetBindingPoint(GLuint bindingPoint);
 
     //! @brief Writes data to the uniform buffer object starting at the given offset
     //! @param data: The data that should be written to the uniform buffer object
     //! @param offset: Location inside the buffer where the data should be written
-    void SetData(Vector<F32> data, GLint offset = 0);
+    template <U32 _size>
+    void SetData(const std::array<U8, _size>& data, GLint offset = 0);
+
+    //! @brief Writes data to the uniform buffer object starting at the given offset
+    //! @param data: The data that should be written to the uniform buffer object
+    //! @param offset: Location inside the buffer where the data should be written
+    void SetData(const Vector<U8>& data, GLint offset = 0);
+
+    //! @brief Writes data to the uniform buffer object starting at the given offset
+    //! @param data: The data that should be written to the uniform buffer object
+    //! @param offset: Location inside the buffer where the data should be written
+    void SetData(const Vector<F32>& data, GLint offset = 0);
 
 private:
     //! @brief Checks if the buffer is still bound to its binding point
     //! @return True / False
     bool IsBindingPointValid() const;
 };
+
+
+
+// Template definitions ---------------------------------------------------------------------------
+
+template <U32 _size>
+void UniformBufferObject::SetData(const std::array<U8, _size>& data, GLint offset)
+{
+    mBufferObject.SetData(data, offset);
+}
 
 } // namespace GDL::OpenGL

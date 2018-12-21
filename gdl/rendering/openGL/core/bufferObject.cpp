@@ -52,7 +52,14 @@ GLenum BufferObject::GetUsage() const
 
 
 
-void BufferObject::SetData(Vector<F32> data, GLint offset)
+void BufferObject::SetData(const Vector<U8>& data, GLint offset)
+{
+    SetData(data.data(), static_cast<GLsizei>(data.size()), offset);
+}
+
+
+
+void BufferObject::SetData(const Vector<F32>& data, GLint offset)
 {
     SetData(data.data(), static_cast<GLsizei>(data.size() * sizeof(F32)), offset);
 }
