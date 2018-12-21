@@ -1,6 +1,5 @@
 addTest(bufferObjects
     rendering/openGL/core/bufferObject.cpp
-    rendering/openGL/core/uniformBufferObject.cpp
     ${OpenGLTestDefaultLibs}
     )
 

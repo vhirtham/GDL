@@ -24,6 +24,15 @@ BufferObject::BufferObject(const Vector<F32>& bufferData, GLenum usage)
 
 
 
+void BufferObject::BindAsUniformBuffer(GLuint bindingPoint) const
+{
+    glBindBufferBase(GL_UNIFORM_BUFFER, bindingPoint, mHandle);
+    DEV_EXCEPTION(QueryUniformBufferBinding(bindingPoint) != mHandle,
+                  "Binding point mismatch - API did not return the set value");
+}
+
+
+
 BufferObject::~BufferObject()
 {
     glDeleteBuffers(1, &mHandle);
@@ -48,6 +57,22 @@ GLsizei BufferObject::GetSize() const
 GLenum BufferObject::GetUsage() const
 {
     return mUsage;
+}
+
+
+
+bool BufferObject::IsBoundToUniformBufferBindingPoint(GLuint bindingPoint) const
+{
+    return mHandle == QueryUniformBufferBinding(bindingPoint);
+}
+
+
+
+GLuint BufferObject::QueryUniformBufferBinding(GLuint bindingPoint)
+{
+    GLint boundBufferHandle = -1;
+    glGetIntegeri_v(GL_UNIFORM_BUFFER_BINDING, bindingPoint, &boundBufferHandle);
+    return static_cast<GLuint>(boundBufferHandle);
 }
 
 

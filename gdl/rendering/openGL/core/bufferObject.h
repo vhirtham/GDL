@@ -35,6 +35,10 @@ public:
     //! @param usage: Usage enum
     BufferObject(const Vector<F32>& bufferData, GLenum usage);
 
+    //! @brief Binds the buffer to the specified uniform buffer binding point
+    //! @param bindingPoint: Uniform buffer binding point
+    void BindAsUniformBuffer(GLuint bindingPoint) const;
+
     //! @brief Gets the handle of the buffer object
     //! @return Handle of the buffer object
     GLuint GetHandle() const;
@@ -46,6 +50,16 @@ public:
     //! @brief Gets the usage enum of the buffer object
     //! @return Usage enum of the buffer object
     GLenum GetUsage() const;
+
+    //! @return Returns if the buffer object is bound to the specified uniform buffer binding point
+    //! @param bindingPoint: Uniform buffer binding point
+    //! @return True / False
+    //! @remark This involves querying data from the OpenGL API which might be slow.
+    bool IsBoundToUniformBufferBindingPoint(GLuint bindingPoint) const;
+
+    //! Queries the handle of the buffer that is currently bound to the specified uniform buffer binding point
+    //! @param bindingPoint: Uniform buffer binding point
+    static GLuint QueryUniformBufferBinding(GLuint bindingPoint);
 
     //! @brief Writes data to the buffer object starting at the given offset
     //! @param data: The data that should be written to the buffer object
@@ -62,6 +76,7 @@ public:
     //! @param data: The data that should be written to the buffer object
     //! @param offset: Location inside the buffer where the data should be written
     void SetData(const Vector<F32>& data, GLint offset = 0);
+
 
 private:
     //! @brief Initializes the buffer object

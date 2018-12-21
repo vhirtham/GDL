@@ -2,7 +2,6 @@
 
 #include "gdl/base/exception.h"
 #include "gdl/rendering/openGL/core/bufferObject.h"
-#include "gdl/rendering/openGL/core/uniformBufferObject.h"
 
 #include "test/tools/ExceptionChecks.h"
 #include "test/tools/GetRenderWindowGLUT.h"
@@ -47,7 +46,6 @@ BOOST_AUTO_TEST_CASE(Construction_without_data)
     ContextGLUT::Instance().GetDebugMessageHandler().SetSeverityLevel(GL_DEBUG_SEVERITY_LOW);
 
     TestConstructionWithoutData<BufferObject>();
-    TestConstructionWithoutData<UniformBufferObject>();
 }
 
 
@@ -69,7 +67,6 @@ void TestConstructionWithData()
 BOOST_AUTO_TEST_CASE(Construction_with_data)
 {
     TestConstructionWithData<BufferObject>();
-    TestConstructionWithData<UniformBufferObject>();
 }
 
 
@@ -96,7 +93,6 @@ void TestSetData()
 BOOST_AUTO_TEST_CASE(Set_Data)
 {
     TestSetData<BufferObject>();
-    TestSetData<UniformBufferObject>();
 }
 
 
@@ -107,17 +103,15 @@ BOOST_AUTO_TEST_CASE(UBO_binding_point)
     constexpr GLenum usage = GL_STATIC_DRAW;
     constexpr GLuint bindingPoint = 2;
 
-    UniformBufferObject ubo(size, usage);
+    BufferObject ubo(size, usage);
 
 
     GLint queriedBufferHandle = -1;
     glGetIntegeri_v(GL_UNIFORM_BUFFER_BINDING, bindingPoint, &queriedBufferHandle);
-    BOOST_CHECK(ubo.GetBindingPoint() != bindingPoint);
-    BOOST_CHECK(ubo.GetHandle() != static_cast<GLuint>(queriedBufferHandle));
+    BOOST_CHECK(!ubo.IsBoundToUniformBufferBindingPoint(bindingPoint));
 
-    ubo.SetBindingPoint(bindingPoint);
+    ubo.BindAsUniformBuffer(bindingPoint);
 
     glGetIntegeri_v(GL_UNIFORM_BUFFER_BINDING, bindingPoint, &queriedBufferHandle);
-    BOOST_CHECK(ubo.GetBindingPoint() == bindingPoint);
-    BOOST_CHECK(ubo.GetHandle() == static_cast<GLuint>(queriedBufferHandle));
+    BOOST_CHECK(ubo.IsBoundToUniformBufferBindingPoint(bindingPoint));
 }

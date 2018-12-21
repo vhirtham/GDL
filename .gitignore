@@ -1,3 +1,4 @@
 *.user*
 *applications/custom*
 *documentation/doxygen/output*
+*.autosave

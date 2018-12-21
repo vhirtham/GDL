@@ -9,7 +9,6 @@
 #include "gdl/base/container/vector.h"
 #include "gdl/math/transformationMatrix.h"
 #include "gdl/rendering/openGL/core/bufferObject.h"
-#include "gdl/rendering/openGL/core/uniformBufferObject.h"
 #include "gdl/rendering/openGL/core/contextGLUT.h"
 #include "gdl/rendering/openGL/core/program.h"
 #include "gdl/rendering/openGL/core/renderWindowGLUT.h"
@@ -61,7 +60,7 @@ class TransformationsUBO
 
 
     Vector<U8> mData;
-    UniformBufferObject mUBO;
+    BufferObject mUBO;
     std::array<GLint, numUniforms> mUniformOffsets;
 
 public:
@@ -70,7 +69,7 @@ public:
         , mUBO(static_cast<GLint>(mData.size()), GL_DYNAMIC_DRAW)
         , mUniformOffsets{program.QueryUniformBlockUniformOffsets<numUniforms>(CreateUniformNameArray())}
     {
-        mUBO.SetBindingPoint(program.QueryUniformBlockBinding(uniformBlockIndex));
+        mUBO.BindAsUniformBuffer(program.QueryUniformBlockBinding(uniformBlockIndex));
     }
 
     void SetProjectionMatrix(const Mat4f& matrix)
@@ -261,6 +260,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
         transformationsUBO.Submit();
 
         glDrawArrays(GL_TRIANGLES, 0, 6);
-        glutSwapBuffers();
+        if (RunProgramm)
+            glutSwapBuffers();
     }
 }
