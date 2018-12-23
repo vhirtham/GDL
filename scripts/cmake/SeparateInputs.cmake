@@ -8,7 +8,7 @@ function(SeparateInputs Inputs)
     foreach(Input ${Inputs})
         string(FIND "${Input}" ".cpp" FindCppResult)
         if(${FindCppResult} EQUAL "-1")
-            string(FIND ${Input} "-" FindDefResult)
+            string(FIND ${Input} "-D" FindDefResult)
             if(NOT ${FindDefResult} EQUAL "-1")
                 set(Definitions
                     "${Definitions};${Input}")

@@ -3,39 +3,41 @@
 #include "gdl/base/fundamentalTypes.h"
 #include "gdl/base/string.h"
 
+
+#include "GL/glew.h"
+#include "GLFW/glfw3.h"
+
 namespace GDL::OpenGL
 {
 
-class ContextGLUT;
+class ContextManagerGLFW;
 
-//! @brief This class creates and manages a render window by using thr glut library. It is implemented as a singleton
-class RenderWindowGLUT
+//! @brief This class creates and manages a render window by using the GLFW library. It is implemented as a singleton
+class RenderWindowGLFW
 {
-    I32 mWindowHandle = 0;
+    GLFWwindow* mWindow;
     U32 mWidth = 800;
     U32 mHeight = 600;
     bool mInitialized = false;
-    String mTitle = "GLUT Window";
-    ContextGLUT& mContextGLUT;
+    String mTitle = "GLFW Window";
+    ContextManagerGLFW& mContextManagerGLFW;
 
 
 public:
-    RenderWindowGLUT() = delete;
-    RenderWindowGLUT(const RenderWindowGLUT& other) = delete;
-    RenderWindowGLUT(RenderWindowGLUT&& other) = delete;
-    RenderWindowGLUT& operator=(const RenderWindowGLUT& other) = delete;
-    RenderWindowGLUT& operator=(RenderWindowGLUT&& other) = delete;
-    ~RenderWindowGLUT() = default;
+    RenderWindowGLFW() = delete;
+    RenderWindowGLFW(const RenderWindowGLFW& other) = delete;
+    RenderWindowGLFW(RenderWindowGLFW&& other) = delete;
+    RenderWindowGLFW& operator=(const RenderWindowGLFW& other) = delete;
+    RenderWindowGLFW& operator=(RenderWindowGLFW&& other) = delete;
+    ~RenderWindowGLFW();
 
     //! @brief Constructor
-    //! @param contextGLUT: Reference to the GLUT context
-    RenderWindowGLUT(ContextGLUT& contextGLUT);
+    //! @param contextManagerGLFW: Reference to the GLFW context manager
+    RenderWindowGLFW(ContextManagerGLFW& contextManagerGLFW);
 
 
 
     //! @brief Initializes the render window
-    //! @param argc: Additional argument count
-    //! @param argv: Additional arguments
     void Initialize();
 
     //! @brief Sets the title

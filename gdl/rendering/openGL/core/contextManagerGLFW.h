@@ -5,26 +5,29 @@
 #include "gdl/rendering/openGL/core/debugMessageHandler.h"
 
 
+
 namespace GDL::OpenGL
 {
 
 
-//! @brief Singleton class that manages a GLUT context
-class ContextGLUT
+//! @brief Singleton class that manages GLFW contexts
+class ContextManagerGLFW
 {
+
     bool mDebug = false;
-    I32 mGlutContextFlags;
+    bool mInitialized = false;
+    // I32 mGlutContextFlags;
     DebugMessageHandler mDebugMessageHandler;
 
 
-    ContextGLUT();
+    ContextManagerGLFW();
 
 public:
-    ContextGLUT(const ContextGLUT&) = delete;
-    ContextGLUT(ContextGLUT&&) = delete;
-    ContextGLUT& operator=(const ContextGLUT&) = delete;
-    ContextGLUT& operator=(ContextGLUT&&) = delete;
-    ~ContextGLUT() = default;
+    ContextManagerGLFW(const ContextManagerGLFW&) = delete;
+    ContextManagerGLFW(ContextManagerGLFW&&) = delete;
+    ContextManagerGLFW& operator=(const ContextManagerGLFW&) = delete;
+    ContextManagerGLFW& operator=(ContextManagerGLFW&&) = delete;
+    ~ContextManagerGLFW() = default;
 
     //! @brief Initializes the debug context and activates the OpenGL debug system on the render window
     //! @param argc: Additional argument count
@@ -33,7 +36,7 @@ public:
 
 
     //! @brief Gets the singleton instance
-    static ContextGLUT& Instance();
+    static ContextManagerGLFW& Instance();
 
     //! @brief Returns if the context is running in debug mode
     //! @return True / False

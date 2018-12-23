@@ -33,7 +33,7 @@ void RenderWindowGLUT::Initialize()
 
 
     mWindowHandle = glutCreateWindow(mTitle.c_str());
-    EXCEPTION(mWindowHandle < 1, "Could not create OpenGL Window!");
+    EXCEPTION(mWindowHandle < 1, "Could not create GLUT Window!");
 
     glutReshapeFunc(ResizeCallback);
 

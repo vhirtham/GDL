@@ -4,10 +4,17 @@ addTest(bufferObjects
     )
 
 
-addTest(contextGLUT
-    ${OpenGLTestDefaultLibs}
-    )
+if(${GLUT_FOUND})
+    addTest(contextGLUT
+        ${OpenGLTestDefaultLibs}
+        )
+endif()
 
+if(${GLFW_FOUND})
+    addTest(GLFW
+        ${OpenGLTestDefaultLibs}
+        )
+endif()
 
 addTest(program
     rendering/openGL/core/program.cpp

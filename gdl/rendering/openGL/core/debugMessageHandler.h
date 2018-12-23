@@ -22,6 +22,7 @@ enum class OutputMethod
 class DebugMessageHandler
 {
     friend class ContextGLUT;
+    friend class ContextManagerGLFW;
 
     struct MessageTypeSetup
     {
