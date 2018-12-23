@@ -26,11 +26,17 @@ public:
     ContextGLUT& operator=(ContextGLUT&&) = delete;
     ~ContextGLUT() = default;
 
+    //! @brief Enables the OpenGL 4.3 debug mechanism
+    void EnableDebug();
+
+    //! @brief Gets the debug message handler
+    //! @return Debug message handler
+    DebugMessageHandler& GetDebugMessageHandler();
+
     //! @brief Initializes the debug context and activates the OpenGL debug system on the render window
     //! @param argc: Additional argument count
     //! @param argv: Additional arguments
     void Initialize(int argc = 1, char* argv = nullptr);
-
 
     //! @brief Gets the singleton instance
     static ContextGLUT& Instance();
@@ -43,12 +49,11 @@ public:
     //! @return True / False
     bool IsInitialized() const;
 
-    //! @brief Enables the OpenGL 4.3 debug mechanism
-    void EnableDebug();
+    //! @brief Polls current events.
+    void PollEvents() const;
 
-    //! @brief Gets the debug message handler
-    //! @return Debug message handler
-    DebugMessageHandler& GetDebugMessageHandler();
+    //! @brief Swaps the buffers
+    void SwapBuffers() const;
 };
 
 } // namespace GDL::OpenGL

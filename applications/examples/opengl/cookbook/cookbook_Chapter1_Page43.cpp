@@ -19,20 +19,6 @@ using namespace GDL;
 using namespace GDL::OpenGL;
 using namespace GDL::TransformationMatrix4;
 
-static bool RunProgramm = true;
-
-void Close()
-{
-    RunProgramm = false;
-}
-
-
-void RenderFunction()
-{
-    glutPostRedisplay();
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-}
-
 
 
 // Support classes --------------------------------------------------------------------------------
@@ -134,10 +120,6 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
     renderWindow.Initialize();
 
 
-    glutDisplayFunc(RenderFunction);
-    glutCloseFunc(Close);
-
-
 
     // Shader Code ------------------------------
 
@@ -149,7 +131,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
 
             out vec2 texCoordinate;
 
-            layout (binding = 3, std140) uniform Transformations
+            layout (std140) uniform Transformations
             {
                 mat4 ProjectionMatrix;
                 mat4 ModelWorldMatrix;
@@ -162,7 +144,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
             }
             )glsl";
 
-    const char* fragmentShaderCode = R"glsl(
+    const char* fragmentShaderCircleCode = R"glsl(
             #version 450
 
             in vec2 texCoordinate;
@@ -175,15 +157,33 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
             }
             )glsl";
 
+    const char* fragmentShaderSquareCode = R"glsl(
+            #version 450
+
+            in vec2 texCoordinate;
+
+            out vec4 FragColor;
+            void main(void)
+            {
+                FragColor = vec4(vec3(0.0,0.2,1.0),1.0);
+            }
+            )glsl";
+
 
 
     // Create Shader and Program ----------------
 
     Shader vertexShader(GL_VERTEX_SHADER, vertexShaderCode);
-    Shader fragmentShader(GL_FRAGMENT_SHADER, fragmentShaderCode);
-    Program program(vertexShader, fragmentShader);
+    Shader fragmentShaderCircle(GL_FRAGMENT_SHADER, fragmentShaderCircleCode);
+    Shader fragmentShaderSquare(GL_FRAGMENT_SHADER, fragmentShaderSquareCode);
+
+    Program programCircle(vertexShader, fragmentShaderCircle);
+    Program programSquare(vertexShader, fragmentShaderSquare);
 
 
+    constexpr U32 bindingPoint = 2;
+    programCircle.SetUniformBlockBinding(programCircle.QueryUniformBlockIndex("Transformations"), bindingPoint);
+    programSquare.SetUniformBlockBinding(programSquare.QueryUniformBlockIndex("Transformations"), bindingPoint);
 
     // Create Buffer Objects --------------------
     // clang-format off
@@ -219,15 +219,12 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
 
 
 
-    // Bind program and vertex array object -----
+    // Bind vertex array object -----------------
     vao.Bind();
-    program.Use();
-
-
 
     // Uniform buffer object --------------------
 
-    TransformationsUBO transformationsUBO(program, program.QueryUniformBlockIndex("Transformations"));
+    TransformationsUBO transformationsUBO(programCircle, programCircle.QueryUniformBlockIndex("Transformations"));
 
     // Constant rotation setup ------------------
 
@@ -239,16 +236,16 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
     F32 translateX = 0.;
     F32 translateY = 0.;
 
-    while (RunProgramm)
+    while (renderWindow.IsOpen())
     {
-        glutMainLoopEvent();
+        contextGLUT.PollEvents();
         prevTime = currTime;
         currTime = CurrentTime();
 
         F32 frameTimeMS = std::chrono::duration_cast<Microseconds>(currTime - prevTime).count();
         F32 elapsedTimeMS = std::chrono::duration_cast<Microseconds>(currTime - startTime).count();
 
-        angle += 3.14f * frameTimeMS / 5.e5f * 0;
+        angle += 3.14f * frameTimeMS / 5.e5f;
         translateX = std::sin(elapsedTimeMS / 3.e6f) * renderWindow.GetWidth() / 3.f;
         translateY = std::sin(elapsedTimeMS / 4.e6f) * renderWindow.GetHeight() / 3.f;
 
@@ -259,8 +256,13 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
         transformationsUBO.SetModelWorldMatrix(modelWorldMatrix);
         transformationsUBO.Submit();
 
+        if (translateX > 0)
+            programCircle.Use();
+        else
+            programSquare.Use();
+
         glDrawArrays(GL_TRIANGLES, 0, 6);
-        if (RunProgramm)
-            glutSwapBuffers();
+        if (renderWindow.IsOpen())
+            contextGLUT.SwapBuffers();
     }
 }

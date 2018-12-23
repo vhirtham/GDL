@@ -18,6 +18,8 @@ class RenderWindowGLUT
     String mTitle = "GLUT Window";
     ContextGLUT& mContextGLUT;
 
+    static bool mIsOpen;
+
 
 public:
     RenderWindowGLUT() = delete;
@@ -54,10 +56,22 @@ public:
     //! @return True / False
     bool IsInitialized() const;
 
+    bool IsOpen() const;
+
+
 private:
+    //! @brief Callback function that should be called after the window is closed
+    static void CloseCallback();
+
+    //! @brief Callback function that should be called whenever the display event is triggered
+    static void DisplayCallback();
+
     //! @brief Callback function that should be called after the window is resized
     //! @param width: New window width
     //! @param height: New window width
     static void ResizeCallback(I32 width, I32 height);
 };
+
+
+
 } // namespace GDL::OpenGL

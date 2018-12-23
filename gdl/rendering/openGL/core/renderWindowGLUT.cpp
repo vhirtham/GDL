@@ -11,6 +11,8 @@
 namespace GDL::OpenGL
 {
 
+bool RenderWindowGLUT::mIsOpen = true;
+
 
 
 RenderWindowGLUT::RenderWindowGLUT(ContextGLUT& contextGLUT)
@@ -36,6 +38,8 @@ void RenderWindowGLUT::Initialize()
     EXCEPTION(mWindowHandle < 1, "Could not create GLUT Window!");
 
     glutReshapeFunc(ResizeCallback);
+    glutCloseFunc(CloseCallback);
+    glutDisplayFunc(DisplayCallback);
 
     GLEWController& glewController = GLEWController::Instance();
     if (!glewController.IsInitialized())
@@ -77,9 +81,28 @@ bool RenderWindowGLUT::IsInitialized() const
 
 
 
+bool RenderWindowGLUT::IsOpen() const
+{
+    return mIsOpen;
+}
+
+
+
 void RenderWindowGLUT::ResizeCallback(I32 width, I32 height)
 {
     glViewport(0, 0, width, height);
+}
+
+
+
+void RenderWindowGLUT::CloseCallback()
+{
+    mIsOpen = false;
+}
+
+void RenderWindowGLUT::DisplayCallback()
+{
+    glutPostRedisplay();
 }
 
 
