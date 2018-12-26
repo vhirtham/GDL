@@ -4,7 +4,7 @@
 #include "gdl/rendering/openGL/core/bufferObject.h"
 
 #include "test/tools/ExceptionChecks.h"
-#include "test/tools/GetRenderWindowGLUT.h"
+#include "test/tools/GetRenderWindow.h"
 
 using namespace GDL;
 using namespace GDL::OpenGL;
@@ -42,8 +42,8 @@ void TestConstructionWithoutData()
 
 BOOST_AUTO_TEST_CASE(Construction_without_data)
 {
-    GetRenderWindowGLUT();
-    ContextManagerGLUT::Instance().GetDebugMessageHandler().SetSeverityLevel(GL_DEBUG_SEVERITY_LOW);
+    GetRenderWindow();
+    ContextManager::Instance().GetDebugMessageHandler().SetSeverityLevel(GL_DEBUG_SEVERITY_LOW);
 
     TestConstructionWithoutData<BufferObject>();
 }

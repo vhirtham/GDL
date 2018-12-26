@@ -5,7 +5,7 @@
 #include "gdl/rendering/openGL/core/shader.h"
 
 #include "test/tools/ExceptionChecks.h"
-#include "test/tools/GetRenderWindowGLUT.h"
+#include "test/tools/GetRenderWindow.h"
 
 using namespace GDL;
 using namespace GDL::OpenGL;
@@ -14,7 +14,7 @@ using namespace GDL::OpenGL;
 
 BOOST_AUTO_TEST_CASE(LinkProgram)
 {
-    GetRenderWindowGLUT();
+    GetRenderWindow();
 
 
     const char vertexShaderCode[] = R"glsl(
@@ -48,7 +48,7 @@ BOOST_AUTO_TEST_CASE(LinkProgram)
 
 BOOST_AUTO_TEST_CASE(Uniforms)
 {
-    GetRenderWindowGLUT();
+    GetRenderWindow();
 
     const char vertexShaderCode[] = R"glsl(
                                     #version 430

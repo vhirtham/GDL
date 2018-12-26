@@ -3,14 +3,14 @@
 #include "gdl/base/exception.h"
 #include "gdl/rendering/openGL/core/shader.h"
 
-#include "test/tools/GetRenderWindowGLUT.h"
+#include "test/tools/GetRenderWindow.h"
 
 using namespace GDL;
 using namespace GDL::OpenGL;
 
 BOOST_AUTO_TEST_CASE(Construction)
 {
-    GetRenderWindowGLUT();
+    GetRenderWindow();
 
     BOOST_CHECK_THROW(Shader shader(GL_VERTEX_SHADER, "fail"), Exception);
 
