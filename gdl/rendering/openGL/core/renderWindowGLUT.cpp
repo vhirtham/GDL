@@ -88,6 +88,14 @@ bool RenderWindowGLUT::IsOpen() const
 
 
 
+void RenderWindowGLUT::SwapBuffers() const
+{
+    glutSwapBuffers();
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+}
+
+
+
 void RenderWindowGLUT::ResizeCallback(I32 width, I32 height)
 {
     glViewport(0, 0, width, height);

@@ -1,10 +1,10 @@
 add_subdirectory(cookbook)
 
-#add_executable(FragmentShaderIntegrationGL
-#    fragmentShaderIntegrationGL.cpp)
+add_executable(FragmentShaderIntegrationGL
+    fragmentShaderIntegrationGL.cpp)
 
-#target_link_libraries(FragmentShaderIntegrationGL
-#    GDL::OpenGLCore
-#    )
+target_link_libraries(FragmentShaderIntegrationGL
+    GDL::OpenGLCore
+    )
 
-#TargetDefaultBuildSetup(FragmentShaderIntegrationGL)
+TargetDefaultBuildSetup(FragmentShaderIntegrationGL)

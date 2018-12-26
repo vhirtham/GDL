@@ -42,8 +42,7 @@ bool ContextManagerGLFW::IsInitialized() const
 
 void ContextManagerGLFW::EnableDebug()
 {
-    glEnable(GL_DEBUG_OUTPUT);
-    glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, 1);
+    EXCEPTION(IsInitialized(), "Context is already initialized. Can not enable debug mode.");
     mDebug = true;
 }
 
@@ -52,6 +51,13 @@ void ContextManagerGLFW::EnableDebug()
 DebugMessageHandler& ContextManagerGLFW::GetDebugMessageHandler()
 {
     return mDebugMessageHandler;
+}
+
+
+
+void ContextManagerGLFW::PollEvents() const
+{
+    glfwPollEvents();
 }
 
 
@@ -65,6 +71,13 @@ void ContextManagerGLFW::Initialize([[maybe_unused]] int argc, [[maybe_unused]] 
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+
+    if (mDebug)
+    {
+        glEnable(GL_DEBUG_OUTPUT);
+        glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
+    }
+
     mInitialized = true;
 }
 

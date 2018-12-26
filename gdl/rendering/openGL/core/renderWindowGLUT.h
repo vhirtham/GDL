@@ -56,8 +56,12 @@ public:
     //! @return True / False
     bool IsInitialized() const;
 
+    //! @brief Returns if the render window is open
+    //! @return True / False
     bool IsOpen() const;
 
+    //! @brief Swaps the buffers
+    void SwapBuffers() const;
 
 private:
     //! @brief Callback function that should be called after the window is closed

@@ -56,10 +56,18 @@ public:
     //! @return True / False
     bool IsInitialized() const;
 
+    //! @brief Returns if the render window is open
+    //! @return True / False
+    bool IsOpen() const;
+
+    //! @brief Swaps the buffers
+    void SwapBuffers() const;
+
 private:
     //! @brief Callback function that should be called after the window is resized
+    //! @param window: Render window
     //! @param width: New window width
     //! @param height: New window width
-    static void ResizeCallback(I32 width, I32 height);
+    static void ResizeCallback(GLFWwindow* window, I32 width, I32 height);
 };
 } // namespace GDL::OpenGL

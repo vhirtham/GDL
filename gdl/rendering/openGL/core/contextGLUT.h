@@ -51,9 +51,6 @@ public:
 
     //! @brief Polls current events.
     void PollEvents() const;
-
-    //! @brief Swaps the buffers
-    void SwapBuffers() const;
 };
 
 } // namespace GDL::OpenGL

@@ -52,6 +52,9 @@ public:
     //! @brief Gets the debug message handler
     //! @return Debug message handler
     DebugMessageHandler& GetDebugMessageHandler();
+
+    //! @brief Polls current events.
+    void PollEvents() const;
 };
 
 } // namespace GDL::OpenGL

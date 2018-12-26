@@ -35,7 +35,7 @@ void RenderWindowGLFW::Initialize()
     EXCEPTION(mWindow == nullptr, "Could not create GLFW Window");
 
     glfwMakeContextCurrent(mWindow);
-
+    glfwSetWindowSizeCallback(mWindow, ResizeCallback);
 
     GLEWController& glewController = GLEWController::Instance();
     if (!glewController.IsInitialized())
@@ -56,9 +56,51 @@ void RenderWindowGLFW::SetTitle(const char* title)
 
 
 
+U32 RenderWindowGLFW::GetHeight() const
+{
+    I32 height = 0;
+    I32 width = 0;
+    glfwGetWindowSize(mWindow, &width, &height);
+    return static_cast<U32>(height);
+}
+
+
+
+U32 RenderWindowGLFW::GetWidth() const
+{
+    I32 height = 0;
+    I32 width = 0;
+    glfwGetWindowSize(mWindow, &width, &height);
+    return static_cast<U32>(width);
+}
+
+
+
 bool RenderWindowGLFW::IsInitialized() const
 {
     return mInitialized;
+}
+
+
+
+bool RenderWindowGLFW::IsOpen() const
+{
+    return !glfwWindowShouldClose(mWindow);
+}
+
+
+
+void RenderWindowGLFW::SwapBuffers() const
+{
+    glfwSwapBuffers(mWindow);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+}
+
+
+
+void RenderWindowGLFW::ResizeCallback([[maybe_unused]] GLFWwindow* window, I32 width, I32 height)
+{
+    glViewport(0, 0, width, height);
 }
 
 

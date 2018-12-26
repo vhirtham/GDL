@@ -5,7 +5,6 @@
 #include "gdl/base/string.h"
 
 #include <GL/glew.h>
-#include <GL/freeglut.h>
 
 namespace GDL::OpenGL
 {
@@ -60,6 +59,10 @@ public:
     //! @brief Returns if the class is already initialized
     //! @return True / False
     bool IsInitialized() const;
+
+
+    //! Checks if the OpenGL context is a debug context
+    static bool IsContextDebug();
 
     //! @brief Sets the output method of the specified message type
     //! @param type: Type enum

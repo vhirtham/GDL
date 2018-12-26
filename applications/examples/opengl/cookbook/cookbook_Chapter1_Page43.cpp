@@ -10,7 +10,9 @@
 #include "gdl/math/transformationMatrix.h"
 #include "gdl/rendering/openGL/core/bufferObject.h"
 #include "gdl/rendering/openGL/core/contextGLUT.h"
+#include "gdl/rendering/openGL/core/contextManagerGLFW.h"
 #include "gdl/rendering/openGL/core/program.h"
+#include "gdl/rendering/openGL/core/renderWindowGLFW.h"
 #include "gdl/rendering/openGL/core/renderWindowGLUT.h"
 #include "gdl/rendering/openGL/core/shader.h"
 #include "gdl/rendering/openGL/core/vertexArrayObject.h"
@@ -113,9 +115,9 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
 {
     // Setup Render Context ---------------------
 
-    ContextGLUT& contextGLUT = ContextGLUT::Instance();
+    ContextManagerGLFW& contextGLUT = ContextManagerGLFW::Instance();
     contextGLUT.EnableDebug();
-    RenderWindowGLUT renderWindow(contextGLUT);
+    RenderWindowGLFW renderWindow(contextGLUT);
     renderWindow.SetTitle(TITLE);
     renderWindow.Initialize();
 
@@ -263,6 +265,6 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
 
         glDrawArrays(GL_TRIANGLES, 0, 6);
         if (renderWindow.IsOpen())
-            contextGLUT.SwapBuffers();
+            renderWindow.SwapBuffers();
     }
 }

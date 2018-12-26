@@ -39,11 +39,16 @@ GLenum DebugMessageHandler::GetMessageTypeSeverityLevel(GLenum type) const
 
 void DebugMessageHandler::Initialize()
 {
+    EXCEPTION(!IsContextDebug(),
+              "Can not initialize the debug message handler. The OpenGL context is not a debug context.");
+
     if (mInitialized)
         return;
 
-    glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
     glDebugMessageCallback(DebugCallback, this);
+    glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+    glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
+
 
     mInitialized = true;
 }
@@ -53,6 +58,15 @@ void DebugMessageHandler::Initialize()
 bool DebugMessageHandler::IsInitialized() const
 {
     return mInitialized;
+}
+
+
+
+bool DebugMessageHandler::IsContextDebug()
+{
+    GLint contextFlags;
+    glGetIntegerv(GL_CONTEXT_FLAGS, &contextFlags);
+    return (contextFlags & GL_CONTEXT_FLAG_DEBUG_BIT);
 }
 
 
@@ -117,6 +131,7 @@ void DebugMessageHandler::ForwardOutputMessage(OutputMethod outputMethod, const 
     {
     case OutputMethod::COUT:
         std::cout << outputMessage << std::endl;
+        std::cout.flush();
         break;
     default:
         THROW(MakeString("\nCritical OpenGL debug message occurred:\n", outputMessage).c_str());
