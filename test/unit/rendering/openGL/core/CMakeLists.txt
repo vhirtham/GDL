@@ -5,7 +5,7 @@ addTest(bufferObjects
 
 
 if(${GLUT_FOUND})
-    addTest(contextGLUT
+    addTest(GLUT
         ${OpenGLTestDefaultLibs}
         )
 endif()
@@ -19,11 +19,6 @@ endif()
 addTest(program
     rendering/openGL/core/program.cpp
     rendering/openGL/core/shader.cpp
-    ${OpenGLTestDefaultLibs}
-    )
-
-
-addTest(renderWindowGLUT
     ${OpenGLTestDefaultLibs}
     )
 

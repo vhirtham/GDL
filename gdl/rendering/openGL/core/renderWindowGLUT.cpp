@@ -1,6 +1,6 @@
 #include "gdl/rendering/openGL/core/renderWindowGLUT.h"
 
-#include "gdl/rendering/openGL/core/contextGLUT.h"
+#include "gdl/rendering/openGL/core/contextManagerGLUT.h"
 #include "gdl/rendering/openGL/core/glewController.h"
 #include "gdl/base/exception.h"
 
@@ -15,8 +15,8 @@ bool RenderWindowGLUT::mIsOpen = true;
 
 
 
-RenderWindowGLUT::RenderWindowGLUT(ContextGLUT& contextGLUT)
-    : mContextGLUT{contextGLUT}
+RenderWindowGLUT::RenderWindowGLUT(ContextManagerGLUT& contextGLUT)
+    : mContextManagerGLUT{contextGLUT}
 {
 }
 
@@ -27,8 +27,8 @@ void RenderWindowGLUT::Initialize()
     EXCEPTION(mInitialized, "Render window is already initialized");
 
 
-    if (!mContextGLUT.IsInitialized())
-        mContextGLUT.Initialize();
+    if (!mContextManagerGLUT.IsInitialized())
+        mContextManagerGLUT.Initialize();
 
     glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE, GLUT_ACTION_GLUTMAINLOOP_RETURNS);
     glutInitWindowSize(static_cast<I32>(mWidth), static_cast<I32>(mHeight));
@@ -45,8 +45,8 @@ void RenderWindowGLUT::Initialize()
     if (!glewController.IsInitialized())
         glewController.Initialize();
 
-    if (mContextGLUT.IsDebug())
-        mContextGLUT.GetDebugMessageHandler().Initialize();
+    if (mContextManagerGLUT.IsDebug())
+        mContextManagerGLUT.GetDebugMessageHandler().Initialize();
 
     mInitialized = true;
 }
@@ -90,8 +90,11 @@ bool RenderWindowGLUT::IsOpen() const
 
 void RenderWindowGLUT::SwapBuffers() const
 {
-    glutSwapBuffers();
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    if (IsOpen())
+    {
+        glutSwapBuffers();
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    }
 }
 
 

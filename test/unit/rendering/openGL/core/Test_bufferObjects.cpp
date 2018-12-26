@@ -43,7 +43,7 @@ void TestConstructionWithoutData()
 BOOST_AUTO_TEST_CASE(Construction_without_data)
 {
     GetRenderWindowGLUT();
-    ContextGLUT::Instance().GetDebugMessageHandler().SetSeverityLevel(GL_DEBUG_SEVERITY_LOW);
+    ContextManagerGLUT::Instance().GetDebugMessageHandler().SetSeverityLevel(GL_DEBUG_SEVERITY_LOW);
 
     TestConstructionWithoutData<BufferObject>();
 }

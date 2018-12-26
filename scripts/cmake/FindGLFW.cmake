@@ -20,7 +20,7 @@ function(findGLFW)
                 # Find dependencies of GLFW
                 execute_process(COMMAND "pkg-config" "--static" "--libs" "glfw3" OUTPUT_VARIABLE GLFW_DEPENDENCIES)
                 string(REGEX REPLACE "\n$" "" GLFW_DEPENDENCIES ${GLFW_DEPENDENCIES}) #remove trailing whitespace
-                set(GLFW_DEPENDENCIES ${GLFW_DEPENDENCIES} CACHE INTERNAL "")
+                set(GLFW_LIBRARIES ${GLFW_LIBRARIES} ${GLFW_DEPENDENCIES} CACHE INTERNAL "")
 
                 include_directories(${GLFW_INCLUDE_DIRS})
                 #add_library(GLFW::GLFW ALIAS ${GLFW_LIBRARIES}) # Not possible yet

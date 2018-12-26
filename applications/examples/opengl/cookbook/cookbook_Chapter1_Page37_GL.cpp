@@ -12,9 +12,9 @@
 #include "gdl/math/mat4.inl"
 #include "gdl/math/transformationMatrix.h"
 #include "gdl/rendering/openGL/core/bufferObject.h"
-#include "gdl/rendering/openGL/core/contextGLUT.h"
+#include "gdl/rendering/openGL/core/contextManager.h"
 #include "gdl/rendering/openGL/core/program.h"
-#include "gdl/rendering/openGL/core/renderWindowGLUT.h"
+#include "gdl/rendering/openGL/core/renderWindow.h"
 #include "gdl/rendering/openGL/core/shader.h"
 #include "gdl/rendering/openGL/core/vertexArrayObject.h"
 
@@ -28,36 +28,15 @@ using namespace GDL;
 using namespace GDL::OpenGL;
 
 
-static bool RunProgramm = true;
-
-void Close()
-{
-    RunProgramm = false;
-}
-
-
-void RenderFunction()
-{
-
-    glutSwapBuffers();
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glutPostRedisplay();
-}
-
-
 
 int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
 {
     // Setup Render Context #####################
 
-    ContextGLUT& contextGLUT = ContextGLUT::Instance();
-    RenderWindowGLUT renderWindow(contextGLUT);
+    ContextManager& contextManager = ContextManager::Instance();
+    RenderWindow renderWindow(contextManager);
     renderWindow.SetTitle(TITLE);
     renderWindow.Initialize();
-
-
-    glutDisplayFunc(RenderFunction);
-    glutCloseFunc(Close);
 
 
 
@@ -139,8 +118,8 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
 
     // Get uniform location ####################
 
-    GLuint uniformProjection = program.QueryUniformLocation("ProjectionMatrix");
-    GLuint uniformModelWorld = program.QueryUniformLocation("ModelWorldMatrix");
+    GLint uniformProjection = program.QueryUniformLocation("ProjectionMatrix");
+    GLint uniformModelWorld = program.QueryUniformLocation("ModelWorldMatrix");
 
 
 
@@ -158,8 +137,9 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
     // glutFullScreen();
 
     // Start main loop ##########################
-    while (RunProgramm)
+    while (renderWindow.IsOpen())
     {
+        contextManager.PollEvents();
         prevTime = currTime;
         currTime = CurrentTime();
 
@@ -180,7 +160,8 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
         program.SetUniform(static_cast<I32>(uniformModelWorld), ModelWorldMatrix);
 
         glDrawArrays(GL_TRIANGLES, 0, 3);
-        glutMainLoopEvent();
+
+        renderWindow.SwapBuffers();
     }
 
     exit(EXIT_SUCCESS);

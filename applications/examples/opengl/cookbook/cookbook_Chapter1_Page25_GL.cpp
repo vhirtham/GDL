@@ -8,9 +8,9 @@
 
 #include "gdl/base/container/vector.h"
 #include "gdl/rendering/openGL/core/bufferObject.h"
-#include "gdl/rendering/openGL/core/contextGLUT.h"
+#include "gdl/rendering/openGL/core/contextManager.h"
 #include "gdl/rendering/openGL/core/program.h"
-#include "gdl/rendering/openGL/core/renderWindowGLUT.h"
+#include "gdl/rendering/openGL/core/renderWindow.h"
 #include "gdl/rendering/openGL/core/shader.h"
 #include "gdl/rendering/openGL/core/vertexArrayObject.h"
 
@@ -20,34 +20,16 @@
 using namespace GDL;
 using namespace GDL::OpenGL;
 
-void ResizeFunction(int Width, int Height)
-{
-    glViewport(0, 0, Width, Height);
-}
-
-
-void RenderFunction()
-{
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glDrawArrays(GL_TRIANGLES, 0, 3);
-
-    glutSwapBuffers();
-    glutPostRedisplay();
-}
-
 
 
 int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
 {
     // Setup Render Context #####################
 
-    ContextGLUT& contextGLUT = ContextGLUT::Instance();
-    RenderWindowGLUT renderWindow(contextGLUT);
+    ContextManager& contextManager = ContextManager::Instance();
+    RenderWindow renderWindow(contextManager);
     renderWindow.SetTitle(TITLE);
     renderWindow.Initialize();
-
-    glutReshapeFunc(ResizeFunction);
-    glutDisplayFunc(RenderFunction);
 
 
 
@@ -125,7 +107,14 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
 
 
     // Start main loop ##########################
-    glutMainLoop();
+    while (renderWindow.IsOpen())
+    {
+        contextManager.PollEvents();
+
+        glDrawArrays(GL_TRIANGLES, 0, 3);
+
+        renderWindow.SwapBuffers();
+    }
 
 
     exit(EXIT_SUCCESS);

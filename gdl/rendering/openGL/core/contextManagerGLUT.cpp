@@ -1,4 +1,4 @@
-#include "gdl/rendering/openGL/core/contextGLUT.h"
+#include "gdl/rendering/openGL/core/contextManagerGLUT.h"
 
 #include "gdl/base/exception.h"
 #include "gdl/base/fundamentalTypes.h"
@@ -12,14 +12,14 @@ namespace GDL::OpenGL
 
 
 
-ContextGLUT::ContextGLUT()
+ContextManagerGLUT::ContextManagerGLUT()
     : mGlutContextFlags{GLUT_FORWARD_COMPATIBLE}
 {
 }
 
 
 
-void ContextGLUT::Initialize(int argc, char* argv)
+void ContextManagerGLUT::Initialize(int argc, char* argv)
 {
     EXCEPTION(IsInitialized(), "Context is already initialized");
 
@@ -33,14 +33,14 @@ void ContextGLUT::Initialize(int argc, char* argv)
 
 
 
-bool ContextGLUT::IsInitialized() const
+bool ContextManagerGLUT::IsInitialized() const
 {
     return glutGet(GLUT_INIT_STATE);
 }
 
 
 
-void ContextGLUT::EnableDebug()
+void ContextManagerGLUT::EnableDebug()
 {
     EXCEPTION(IsInitialized(), "Context is already initialized. Can not enable debug mode.");
     glEnable(GL_DEBUG_OUTPUT);
@@ -50,29 +50,29 @@ void ContextGLUT::EnableDebug()
 
 
 
-DebugMessageHandler& ContextGLUT::GetDebugMessageHandler()
+DebugMessageHandler& ContextManagerGLUT::GetDebugMessageHandler()
 {
     return mDebugMessageHandler;
 }
 
 
 
-ContextGLUT& ContextGLUT::Instance()
+ContextManagerGLUT& ContextManagerGLUT::Instance()
 {
-    static ContextGLUT contextGLUT;
+    static ContextManagerGLUT contextGLUT;
     return contextGLUT;
 }
 
 
 
-bool ContextGLUT::IsDebug() const
+bool ContextManagerGLUT::IsDebug() const
 {
     return mDebug;
 }
 
 
 
-void ContextGLUT::PollEvents() const
+void ContextManagerGLUT::PollEvents() const
 {
     glutMainLoopEvent();
 }

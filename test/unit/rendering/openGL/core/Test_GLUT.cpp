@@ -1,6 +1,6 @@
 #include <boost/test/unit_test.hpp>
 
-#include "gdl/rendering/openGL/core/contextGLUT.h"
+#include "gdl/rendering/openGL/core/contextManagerGLUT.h"
 #include "gdl/rendering/openGL/core/renderWindowGLUT.h"
 #include "test/tools/ExceptionChecks.h"
 
@@ -9,30 +9,33 @@ using namespace GDL;
 using namespace GDL::OpenGL;
 
 
-BOOST_AUTO_TEST_CASE(TestContextGLUT)
+BOOST_AUTO_TEST_CASE(TestContextManagerAndWindow)
 {
-    ContextGLUT& contextGLUT = ContextGLUT::Instance();
-    BOOST_CHECK(contextGLUT.IsDebug() == false);
-    contextGLUT.EnableDebug();
-    BOOST_CHECK(contextGLUT.IsDebug() == true);
+    ContextManagerGLUT& contextManagerGLUT = ContextManagerGLUT::Instance();
+    BOOST_CHECK(contextManagerGLUT.IsDebug() == false);
+    contextManagerGLUT.EnableDebug();
+    BOOST_CHECK(contextManagerGLUT.IsDebug() == true);
 
-    BOOST_CHECK(contextGLUT.IsInitialized() == false);
-    contextGLUT.Initialize();
-    BOOST_CHECK(contextGLUT.IsInitialized() == true);
+    BOOST_CHECK(contextManagerGLUT.IsInitialized() == false);
+    contextManagerGLUT.Initialize();
+    BOOST_CHECK(contextManagerGLUT.IsInitialized() == true);
 
-    DebugMessageHandler& debugMessageHandler = ContextGLUT::Instance().GetDebugMessageHandler();
+    DebugMessageHandler& debugMessageHandler = ContextManagerGLUT::Instance().GetDebugMessageHandler();
 
     BOOST_CHECK(debugMessageHandler.IsInitialized() == false);
-    RenderWindowGLUT renderWindow(contextGLUT);
+    RenderWindowGLUT renderWindow(contextManagerGLUT);
+    renderWindow.SetTitle("render window test");
     renderWindow.Initialize();
     BOOST_CHECK(debugMessageHandler.IsInitialized() == true);
+    renderWindow.GetHeight();
+    renderWindow.GetWidth();
 }
 
 
 
 BOOST_AUTO_TEST_CASE(TestDebugMessageHandler)
 {
-    DebugMessageHandler& debugMessageHandler = ContextGLUT::Instance().GetDebugMessageHandler();
+    DebugMessageHandler& debugMessageHandler = ContextManagerGLUT::Instance().GetDebugMessageHandler();
 
 
 

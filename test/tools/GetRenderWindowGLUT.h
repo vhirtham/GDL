@@ -1,6 +1,6 @@
 #pragma once
 
-#include "gdl/rendering/openGL/core/contextGLUT.h"
+#include "gdl/rendering/openGL/core/contextManagerGLUT.h"
 #include "gdl/rendering/openGL/core/renderWindowGLUT.h"
 
 namespace GDL::OpenGL
@@ -10,7 +10,7 @@ namespace GDL::OpenGL
 //! @return GLUT render window
 RenderWindowGLUT& GetRenderWindowGLUT()
 {
-    ContextGLUT& contextGLUT = ContextGLUT::Instance();
+    ContextManagerGLUT& contextGLUT = ContextManagerGLUT::Instance();
     static RenderWindowGLUT renderWindow(contextGLUT);
 
     if (!renderWindow.IsInitialized())

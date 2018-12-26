@@ -10,21 +10,21 @@ namespace GDL::OpenGL
 
 
 //! @brief Singleton class that manages a GLUT context
-class ContextGLUT
+class ContextManagerGLUT
 {
     bool mDebug = false;
     I32 mGlutContextFlags;
     DebugMessageHandler mDebugMessageHandler;
 
 
-    ContextGLUT();
+    ContextManagerGLUT();
 
 public:
-    ContextGLUT(const ContextGLUT&) = delete;
-    ContextGLUT(ContextGLUT&&) = delete;
-    ContextGLUT& operator=(const ContextGLUT&) = delete;
-    ContextGLUT& operator=(ContextGLUT&&) = delete;
-    ~ContextGLUT() = default;
+    ContextManagerGLUT(const ContextManagerGLUT&) = delete;
+    ContextManagerGLUT(ContextManagerGLUT&&) = delete;
+    ContextManagerGLUT& operator=(const ContextManagerGLUT&) = delete;
+    ContextManagerGLUT& operator=(ContextManagerGLUT&&) = delete;
+    ~ContextManagerGLUT() = default;
 
     //! @brief Enables the OpenGL 4.3 debug mechanism
     void EnableDebug();
@@ -39,7 +39,7 @@ public:
     void Initialize(int argc = 1, char* argv = nullptr);
 
     //! @brief Gets the singleton instance
-    static ContextGLUT& Instance();
+    static ContextManagerGLUT& Instance();
 
     //! @brief Returns if the context is running in debug mode
     //! @return True / False

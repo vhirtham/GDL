@@ -9,11 +9,9 @@
 #include "gdl/base/container/vector.h"
 #include "gdl/math/transformationMatrix.h"
 #include "gdl/rendering/openGL/core/bufferObject.h"
-#include "gdl/rendering/openGL/core/contextGLUT.h"
-#include "gdl/rendering/openGL/core/contextManagerGLFW.h"
+#include "gdl/rendering/openGL/core/contextManager.h"
 #include "gdl/rendering/openGL/core/program.h"
-#include "gdl/rendering/openGL/core/renderWindowGLFW.h"
-#include "gdl/rendering/openGL/core/renderWindowGLUT.h"
+#include "gdl/rendering/openGL/core/renderWindow.h"
 #include "gdl/rendering/openGL/core/shader.h"
 #include "gdl/rendering/openGL/core/vertexArrayObject.h"
 
@@ -115,9 +113,9 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
 {
     // Setup Render Context ---------------------
 
-    ContextManagerGLFW& contextGLUT = ContextManagerGLFW::Instance();
-    contextGLUT.EnableDebug();
-    RenderWindowGLFW renderWindow(contextGLUT);
+    ContextManager& contextManager = ContextManager::Instance();
+    contextManager.EnableDebug();
+    RenderWindow renderWindow(contextManager);
     renderWindow.SetTitle(TITLE);
     renderWindow.Initialize();
 
@@ -240,7 +238,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
 
     while (renderWindow.IsOpen())
     {
-        contextGLUT.PollEvents();
+        contextManager.PollEvents();
         prevTime = currTime;
         currTime = CurrentTime();
 
@@ -264,7 +262,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
             programSquare.Use();
 
         glDrawArrays(GL_TRIANGLES, 0, 6);
-        if (renderWindow.IsOpen())
-            renderWindow.SwapBuffers();
+
+        renderWindow.SwapBuffers();
     }
 }

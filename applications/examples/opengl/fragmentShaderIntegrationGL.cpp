@@ -1,13 +1,9 @@
 
-// Tutorials to go on: http://openglbook.com/chapter-1-getting-started.html
-
 #include "gdl/base/time.h"
 #include "gdl/rendering/openGL/core/bufferObject.h"
-#include "gdl/rendering/openGL/core/contextGLUT.h"
-#include "gdl/rendering/openGL/core/contextManagerGLFW.h"
+#include "gdl/rendering/openGL/core/contextManager.h"
 #include "gdl/rendering/openGL/core/program.h"
-#include "gdl/rendering/openGL/core/renderWindowGLUT.h"
-#include "gdl/rendering/openGL/core/renderWindowGLFW.h"
+#include "gdl/rendering/openGL/core/renderWindow.h"
 #include "gdl/rendering/openGL/core/shader.h"
 #include "gdl/rendering/openGL/core/vertexArrayObject.h"
 #include "gdl/rendering/openGL/management/programDataManagerGL.h"
@@ -24,10 +20,9 @@ using namespace GDL::OpenGL;
 
 int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
 {
-    ContextManagerGLFW& contextManager = ContextManagerGLFW::Instance();
+    ContextManager& contextManager = ContextManager::Instance();
     contextManager.EnableDebug();
-    RenderWindowGLFW renderWindow(contextManager);
-    renderWindow.SetTitle("OpenGL Triangle Test");
+    RenderWindow renderWindow(contextManager);
     renderWindow.Initialize();
 
 
@@ -148,7 +143,6 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
 
         glDrawArrays(GL_TRIANGLES, 0, 3);
 
-        if (renderWindow.IsOpen())
-            renderWindow.SwapBuffers();
+        renderWindow.SwapBuffers();
     }
 }
