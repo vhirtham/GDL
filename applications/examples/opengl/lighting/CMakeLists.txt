@@ -1,8 +1,2 @@
-add_executable(DiffusePerVertexShading
+addGDLOpenGLApp(DiffusePerVertexShading
     diffusePerVertexShading.cpp)
-
-target_link_libraries(DiffusePerVertexShading
-    GDL::OpenGLCore
-    )
-
-TargetDefaultBuildSetup(DiffusePerVertexShading)
