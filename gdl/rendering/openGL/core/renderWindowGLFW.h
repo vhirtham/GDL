@@ -35,7 +35,11 @@ public:
     //! @param contextManagerGLFW: Reference to the GLFW context manager
     RenderWindowGLFW(ContextManagerGLFW& contextManagerGLFW);
 
+    //! @brief Enables depth testing
+    void EnableDepthTest();
 
+    //! @brief Enables the wireframe mode.
+    void EnableWireframeMode();
 
     //! @brief Initializes the render window
     void Initialize();

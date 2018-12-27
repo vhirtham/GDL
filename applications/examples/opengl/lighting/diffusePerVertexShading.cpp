@@ -1,4 +1,5 @@
 #include "gdl/base/container/vector.h"
+#include "gdl/base/timer.h"
 #include "gdl/math/transformationMatrix.h"
 #include "gdl/rendering/openGL/core/bufferObject.h"
 #include "gdl/rendering/openGL/core/contextManager.h"
@@ -43,29 +44,29 @@ Vector<F32> CreateTorusMesh(F32 radiusMajor, F32 radiusMinor, U32 numMajorSegmen
 
             std::array<std::array<F32, 3>, 4> points;
             std::array<std::array<F32, 3>, 4> normals;
-            points[0][0] = (xMajorStart + xMajorStart * xMinorStart * radiusMinor) * radiusMajor;
-            points[0][1] = (yMajorStart + yMajorStart * xMinorStart * radiusMinor) * radiusMajor;
+            points[0][0] = (xMajorStart * radiusMajor + xMajorStart * xMinorStart * radiusMinor);
+            points[0][1] = (yMajorStart * radiusMajor + yMajorStart * xMinorStart * radiusMinor);
             points[0][2] = yMinorStart * radiusMinor;
             normals[0][0] = xMajorStart * xMinorStart;
             normals[0][1] = yMajorStart * xMinorStart;
             normals[0][2] = yMinorStart;
 
-            points[1][0] = (xMajorStart + xMajorStart * xMinorEnd * radiusMinor) * radiusMajor;
-            points[1][1] = (yMajorStart + yMajorStart * xMinorEnd * radiusMinor) * radiusMajor;
+            points[1][0] = (xMajorStart * radiusMajor + xMajorStart * xMinorEnd * radiusMinor);
+            points[1][1] = (yMajorStart * radiusMajor + yMajorStart * xMinorEnd * radiusMinor);
             points[1][2] = yMinorEnd * radiusMinor;
             normals[1][0] = xMajorStart * xMinorEnd;
             normals[1][1] = yMajorStart * xMinorEnd;
             normals[1][2] = yMinorEnd;
 
-            points[2][0] = (xMajorEnd + xMajorEnd * xMinorStart * radiusMinor) * radiusMajor;
-            points[2][1] = (yMajorEnd + yMajorEnd * xMinorStart * radiusMinor) * radiusMajor;
+            points[2][0] = (xMajorEnd * radiusMajor + xMajorEnd * xMinorStart * radiusMinor);
+            points[2][1] = (yMajorEnd * radiusMajor + yMajorEnd * xMinorStart * radiusMinor);
             points[2][2] = yMinorStart * radiusMinor;
             normals[2][0] = xMajorEnd * xMinorStart;
             normals[2][1] = yMajorEnd * xMinorStart;
             normals[2][2] = yMinorStart;
 
-            points[3][0] = (xMajorEnd + xMajorEnd * xMinorEnd * radiusMinor) * radiusMajor;
-            points[3][1] = (yMajorEnd + yMajorEnd * xMinorEnd * radiusMinor) * radiusMajor;
+            points[3][0] = (xMajorEnd * radiusMajor + xMajorEnd * xMinorEnd * radiusMinor);
+            points[3][1] = (yMajorEnd * radiusMajor + yMajorEnd * xMinorEnd * radiusMinor);
             points[3][2] = yMinorEnd * radiusMinor;
             normals[3][0] = xMajorEnd * xMinorEnd;
             normals[3][1] = yMajorEnd * xMinorEnd;
@@ -101,12 +102,13 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
     // Setup Render Context ---------------------
 
     ContextManager& contextManager = ContextManager::Instance();
+    contextManager.Initialize();
+
     RenderWindow renderWindow(contextManager);
     renderWindow.SetTitle("Diffuse per vertex shading");
     renderWindow.Initialize();
+    renderWindow.EnableDepthTest();
 
-
-    Vector<F32> vertexData = CreateTorusMesh(2.f, 0.5f, 80, 80);
 
     // Shader Code ------------------------------
 
@@ -114,20 +116,23 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
             #version 430
 
             layout (location=0) in vec3 VertexPosition;
-            layout (location=1) in vec3 VertexNormals;
+            layout (location=1) in vec3 VertexNormal;
 
             uniform mat4 ProjectionMatrix;
+            uniform mat4 RotationMatrix;
             uniform mat4 ModelWorldMatrix;
 
             out vec3 lightIntensity;
 
             void main(void)
             {
-                vec4 lightPosition = vec4(-300,-300,-500,1);
+                vec4 lightPosition = vec4(0,0,-10,1);
                 vec3 Kd = vec3(0.0,0.0,1.0);
                 vec3 Ld = vec3(1.0,1.0,1.0);
 
-                vec3 normal = normalize(VertexNormals);
+                mat3 normalMatrix = mat3(RotationMatrix);
+
+                vec3 normal = normalize(normalMatrix * VertexNormal);
                 vec4 positionWorld = ModelWorldMatrix * vec4(VertexPosition, 1.0);
 
                 vec3 s = normalize(vec3(lightPosition - positionWorld));
@@ -161,6 +166,8 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
 
 
     // Create Buffer Objects ####################
+
+    Vector<F32> vertexData = CreateTorusMesh(1.f, 0.5f, 40, 40);
     BufferObject vertexBuffer(vertexData, GL_STATIC_DRAW);
 
 
@@ -175,12 +182,15 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
     // Bind program and vertex array object #####
     vao.Bind();
     program.Use();
-    glClearColor(0.5, 0.5, 0.5, 1.0);
+    glClearColor(0.2f, 0.2f, 0.2f, 1.f);
 
 
     GLint uniformProjection = program.QueryUniformLocation("ProjectionMatrix");
+    GLint uniformRotation = program.QueryUniformLocation("RotationMatrix");
     GLint uniformModelWorld = program.QueryUniformLocation("ModelWorldMatrix");
 
+
+    Timer timer;
 
 
     // Start main loop ##########################
@@ -188,13 +198,24 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
     {
         contextManager.PollEvents();
 
-        Mat4f ProjectionMatrix =
-                TransformationMatrix4::OrthogonalProjection(renderWindow.GetWidth(), renderWindow.GetHeight());
-        Mat4f ModelWorldMatrix = TransformationMatrix4::Scale(100.f, 100.f, 1.f);
+        F32 elapsedMS = timer.GetElapsedTime<Microseconds>().count();
+        F32 angle = elapsedMS / 1.e6f;
+        F32 x = -std::sin(angle) * 3.f;
+        F32 y = -std::sin(angle / 3.f);
+        F32 z = -std::cos(angle) * 3.f - 10.f;
+
+        Mat4f ProjectionMatrix = TransformationMatrix4::PerspectiveProjection(65.f, renderWindow.GetWidth(),
+                                                                              renderWindow.GetHeight(), 0.1f, 100.f);
+        Mat4f RotationMatrix =
+                TransformationMatrix4::RotationY(angle * 1.5f) * TransformationMatrix4::RotationX(angle * 2.f);
+        Mat4f TranslationMatrix = TransformationMatrix4::Translation(x, y, z);
+        Mat4f ModelWorldMatrix = TranslationMatrix * RotationMatrix;
+
         program.SetUniform(static_cast<I32>(uniformProjection), ProjectionMatrix);
+        program.SetUniform(static_cast<I32>(uniformRotation), RotationMatrix);
         program.SetUniform(static_cast<I32>(uniformModelWorld), ModelWorldMatrix);
 
-        glDrawArrays(GL_TRIANGLES, 0, vertexData.size() / 6);
+        glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(vertexData.size() / 6));
 
         renderWindow.SwapBuffers();
     }

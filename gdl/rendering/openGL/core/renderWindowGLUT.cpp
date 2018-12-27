@@ -22,6 +22,22 @@ RenderWindowGLUT::RenderWindowGLUT(ContextManagerGLUT& contextGLUT)
 
 
 
+void RenderWindowGLUT::EnableDepthTest()
+{
+    DEV_EXCEPTION(!IsInitialized(), "Render window needs to be initialized to enable depth testing.");
+    glEnable(GL_DEPTH_TEST);
+}
+
+
+
+void RenderWindowGLUT::EnableWireframeMode()
+{
+    DEV_EXCEPTION(!IsInitialized(), "Render window needs to be initialized to enable wire frame mode.");
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+}
+
+
+
 void RenderWindowGLUT::Initialize()
 {
     EXCEPTION(mInitialized, "Render window is already initialized");

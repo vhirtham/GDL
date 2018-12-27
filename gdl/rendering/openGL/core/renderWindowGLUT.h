@@ -34,6 +34,11 @@ public:
     RenderWindowGLUT(ContextManagerGLUT& contextGLUT);
 
 
+    //! @brief Enables depth testing
+    void EnableDepthTest();
+
+    //! @brief Enables the wireframe mode.
+    void EnableWireframeMode();
 
     //! @brief Initializes the render window
     //! @param argc: Additional argument count

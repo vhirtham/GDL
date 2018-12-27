@@ -18,6 +18,14 @@ ContextManagerGLFW::ContextManagerGLFW()
 
 
 
+void ContextManagerGLFW::EnableDebug()
+{
+    EXCEPTION(IsInitialized(), "Context is already initialized. Can not enable debug mode.");
+    mDebug = true;
+}
+
+
+
 ContextManagerGLFW& ContextManagerGLFW::Instance()
 {
     static ContextManagerGLFW contextManagerGLFW;
@@ -36,14 +44,6 @@ bool ContextManagerGLFW::IsDebug() const
 bool ContextManagerGLFW::IsInitialized() const
 {
     return mInitialized;
-}
-
-
-
-void ContextManagerGLFW::EnableDebug()
-{
-    EXCEPTION(IsInitialized(), "Context is already initialized. Can not enable debug mode.");
-    mDebug = true;
 }
 
 

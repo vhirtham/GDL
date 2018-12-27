@@ -17,6 +17,22 @@ RenderWindowGLFW::RenderWindowGLFW(ContextManagerGLFW& contextManagerGLFW)
 
 
 
+void RenderWindowGLFW::EnableDepthTest()
+{
+    DEV_EXCEPTION(!IsInitialized(), "Render window needs to be initialized to enable depth testing.");
+    glEnable(GL_DEPTH_TEST);
+}
+
+
+
+void RenderWindowGLFW::EnableWireframeMode()
+{
+    DEV_EXCEPTION(!IsInitialized(), "Render window needs to be initialized to enable wire frame mode.");
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+}
+
+
+
 RenderWindowGLFW::~RenderWindowGLFW()
 {
     glfwTerminate();
@@ -36,6 +52,7 @@ void RenderWindowGLFW::Initialize()
 
     glfwMakeContextCurrent(mWindow);
     glfwSetWindowSizeCallback(mWindow, ResizeCallback);
+
 
     GLEWController& glewController = GLEWController::Instance();
     if (!glewController.IsInitialized())
