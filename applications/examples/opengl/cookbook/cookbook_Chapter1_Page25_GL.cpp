@@ -14,8 +14,6 @@
 #include "gdl/rendering/openGL/core/shader.h"
 #include "gdl/rendering/openGL/core/vertexArrayObject.h"
 
-#include <GL/glew.h>
-#include <GL/freeglut.h>
 
 using namespace GDL;
 using namespace GDL::OpenGL;
