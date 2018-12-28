@@ -84,6 +84,8 @@ public:
     //! @param offset: Offset of the attributes first vertex data
     void SetBufferBinding(GLuint bindingPoint, const BufferObject& bufferObject, GLsizei stride, GLint offset = 0);
 
+    void SetElementBuffer(const BufferObject& bufferObject);
+
 private:
     //! @brief Initializes the vertex array object
     void Initialize();

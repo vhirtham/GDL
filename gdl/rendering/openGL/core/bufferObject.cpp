@@ -24,6 +24,15 @@ BufferObject::BufferObject(const Vector<F32>& bufferData, GLenum usage)
 
 
 
+BufferObject::BufferObject(const Vector<U32>& bufferData, GLenum usage)
+    : mSize(static_cast<GLsizei>(bufferData.size() * sizeof(U32)))
+    , mUsage(usage)
+{
+    Initialize(bufferData.data());
+}
+
+
+
 void BufferObject::BindAsUniformBuffer(GLuint bindingPoint) const
 {
     glBindBufferBase(GL_UNIFORM_BUFFER, bindingPoint, mHandle);

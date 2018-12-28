@@ -1,0 +1,2 @@
+addGDLOpenGLApp(IndexedDrawing
+    indexedDrawing.cpp)

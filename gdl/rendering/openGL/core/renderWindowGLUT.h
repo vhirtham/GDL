@@ -34,6 +34,9 @@ public:
     RenderWindowGLUT(ContextManagerGLUT& contextGLUT);
 
 
+    //! @brief Disables the wireframe mode.
+    void DisableWireframeMode();
+
     //! @brief Enables depth testing
     void EnableDepthTest();
 

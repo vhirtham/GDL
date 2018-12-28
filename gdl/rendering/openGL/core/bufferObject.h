@@ -35,6 +35,11 @@ public:
     //! @param usage: Usage enum
     BufferObject(const Vector<F32>& bufferData, GLenum usage);
 
+    //! @brief Constructs a buffer object with the passed data
+    //! @param bufferData: Vector of data that should be used for initialization
+    //! @param usage: Usage enum
+    BufferObject(const Vector<U32>& bufferData, GLenum usage);
+
     //! @brief Binds the buffer to the specified uniform buffer binding point
     //! @param bindingPoint: Uniform buffer binding point
     void BindAsUniformBuffer(GLuint bindingPoint) const;

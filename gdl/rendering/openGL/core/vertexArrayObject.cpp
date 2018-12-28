@@ -122,6 +122,13 @@ void VertexArrayObject::SetBufferBinding(GLuint bindingPoint, const BufferObject
 
 
 
+void VertexArrayObject::SetElementBuffer(const BufferObject& bufferObject)
+{
+    glVertexArrayElementBuffer(mHandle, bufferObject.GetHandle());
+}
+
+
+
 void VertexArrayObject::Initialize()
 {
     glCreateVertexArrays(1, &mHandle);
