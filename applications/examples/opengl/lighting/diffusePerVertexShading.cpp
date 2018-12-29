@@ -102,6 +102,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
     // Setup Render Context ---------------------
 
     ContextManager& contextManager = ContextManager::Instance();
+    contextManager.EnableDebug();
     contextManager.Initialize();
 
     RenderWindow renderWindow(contextManager);
@@ -111,6 +112,20 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
 
 
     // Shader Code ------------------------------
+    const char diffuseLightIntensityShaderCode[] = R"glsl(
+            #version 430
+
+            uniform vec4 lightPosition;
+            uniform vec3 lightSourceIntensity;
+            uniform vec3 reflectionCoefficient;
+
+            vec3 DiffuseLightIntensity(in const vec4 surfaceWorldPosition, in vec3 normalWorld)
+            {
+                vec3 s = normalize(vec3(lightPosition - surfaceWorldPosition));
+                return lightSourceIntensity * reflectionCoefficient * max(dot(s, normalWorld), 0.);
+            }
+            )glsl";
+
 
     const char vertexShaderCode[] = R"glsl(
             #version 430
@@ -124,24 +139,20 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
 
             out vec3 lightIntensity;
 
+            // Forward declaration of lighting function
+            vec3 DiffuseLightIntensity(in const vec4 surfaceWorldPosition, in vec3 normalWorld);
+
             void main(void)
             {
-                vec4 lightPosition = vec4(0,0,-10,1);
-                vec3 Kd = vec3(0.0,0.0,1.0);
-                vec3 Ld = vec3(1.0,1.0,1.0);
-
                 mat3 normalMatrix = mat3(RotationMatrix);
-
-                vec3 normal = normalize(normalMatrix * VertexNormal);
+                vec3 normalWorld = normalize(normalMatrix * VertexNormal);
                 vec4 positionWorld = ModelWorldMatrix * vec4(VertexPosition, 1.0);
 
-                vec3 s = normalize(vec3(lightPosition - positionWorld));
-
-                lightIntensity = Ld * Kd * max(dot(s,normal),0.);
-
+                lightIntensity = DiffuseLightIntensity(positionWorld, normalWorld);
                 gl_Position = ProjectionMatrix * positionWorld;
             }
             )glsl";
+
 
     const char fragmentShaderCode[] = R"glsl(
             #version 430
@@ -157,43 +168,60 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
 
 
 
-    // Create Shader and Program ################
+    // Create Shader and Program ----------------
 
+    Shader diffuseLightIntensityShader(GL_VERTEX_SHADER, diffuseLightIntensityShaderCode);
     Shader vertexShader(GL_VERTEX_SHADER, vertexShaderCode);
     Shader fragmentShader(GL_FRAGMENT_SHADER, fragmentShaderCode);
-    Program program(vertexShader, fragmentShader);
+    Program program(diffuseLightIntensityShader, vertexShader, fragmentShader);
 
 
 
-    // Create Buffer Objects ####################
+    // Create Buffer Objects --------------------
 
     Vector<F32> vertexData = CreateTorusMesh(1.f, 0.5f, 40, 40);
     BufferObject vertexBuffer(vertexData, GL_STATIC_DRAW);
 
 
 
-    // Create Vertex Array Object ###############
+    // Create Vertex Array Object ---------------
     VertexArrayObject vao;
     vao.EnableAttribute(0, 0, vertexBuffer, GL_FLOAT, 3, 24);
     vao.EnableAttribute(1, 0, GL_FLOAT, 3, 12);
 
 
 
-    // Bind program and vertex array object #####
+    // Bind program and vertex array object -----
     vao.Bind();
     program.Use();
-    glClearColor(0.2f, 0.2f, 0.2f, 1.f);
+    glClearColor(0.1f, 0.1f, 0.1f, 1.f);
 
 
+
+    // Get uniform locations --------------------
     GLint uniformProjection = program.QueryUniformLocation("ProjectionMatrix");
     GLint uniformRotation = program.QueryUniformLocation("RotationMatrix");
     GLint uniformModelWorld = program.QueryUniformLocation("ModelWorldMatrix");
+    GLint uniformLightPosition = program.QueryUniformLocation("lightPosition");
+    GLint uniformLightSourceIntensity = program.QueryUniformLocation("lightSourceIntensity");
+    GLint uniformReflectionCoefficient = program.QueryUniformLocation("reflectionCoefficient");
+
+    // Set light values ------------------------
+    // Optimize this section as soon as vec3 and vec4 classes are implemented
+    std::array<F32, 4> lightPositionData = {{0.f, 0.f, -10.f, 1.f}};
+    std::array<F32, 3> lightSourceIntensityData = {{1.f, 1.f, 1.f}};
+    std::array<F32, 3> reflectionCoefficientData = {{0.f, 0.5f, 1.f}};
+
+    glProgramUniform4fv(program.GetHandle(), uniformLightPosition, 1, lightPositionData.data());
+    glProgramUniform3fv(program.GetHandle(), uniformLightSourceIntensity, 1, lightSourceIntensityData.data());
+    glProgramUniform3fv(program.GetHandle(), uniformReflectionCoefficient, 1, reflectionCoefficientData.data());
 
 
+    // Create Timer -----------------------------
     Timer timer;
 
 
-    // Start main loop ##########################
+    // Start main loop --------------------------
     while (renderWindow.IsOpen())
     {
         contextManager.PollEvents();
