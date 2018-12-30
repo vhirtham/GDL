@@ -8,7 +8,43 @@
 
 namespace GDL::OpenGL::MeshGenerator
 {
-std::pair<Vector<F32>,Vector<U32>> CreateTorusMesh(F32 radiusMajor, F32 radiusMinor, U32 numMajorSegments, U32 numMinorSegments)
+
+template <bool _addTexCoordinates = false>
+std::pair<Vector<F32>, Vector<U32>> CreateRectangle(F32 width = 1, F32 height = 1)
+{
+    constexpr U32 numPositionValuesPerVertex = 3;
+    constexpr U32 numTexCoordinatesPerVertex = _addTexCoordinates ? 2 : 0;
+
+    constexpr U32 numValuesPerVertex = numPositionValuesPerVertex + numTexCoordinatesPerVertex;
+
+    constexpr U32 sizeVertexData = numValuesPerVertex * 4;
+
+    Vector<U32> elementData = {{0, 1, 2, 2, 1, 3}};
+    Vector<F32> vertexData;
+    vertexData.reserve(sizeVertexData);
+
+    for (U32 i = 0; i < 2; ++i)
+        for (U32 j = 0; j < 2; ++j)
+        {
+            vertexData.push_back((static_cast<F32>(i) - 0.5f) * width);
+            vertexData.push_back((static_cast<F32>(j) - 0.5f) * height);
+            vertexData.push_back(0.f);
+            if constexpr (_addTexCoordinates == true)
+            {
+                vertexData.push_back(static_cast<F32>(i));
+                vertexData.push_back(static_cast<F32>(j));
+            }
+        }
+
+    assert(sizeVertexData == vertexData.size());
+    assert(6 == elementData.size());
+
+
+    return std::make_pair(vertexData, elementData);
+}
+
+std::pair<Vector<F32>, Vector<U32>> CreateTorus(F32 radiusMajor, F32 radiusMinor, U32 numMajorSegments,
+                                                U32 numMinorSegments)
 {
     const U32 valuesPerVertex = 6;
     const U32 indicesPerRectangularSegment = 6;
@@ -56,12 +92,12 @@ std::pair<Vector<F32>,Vector<U32>> CreateTorusMesh(F32 radiusMajor, F32 radiusMi
 
             // Store index data
             U32 segmentIndex1 = i * numMinorSegments;
-            U32 segmentIndex2 = (i+1) * numMinorSegments;
-            U32 j2 = j+1;
+            U32 segmentIndex2 = (i + 1) * numMinorSegments;
+            U32 j2 = j + 1;
 
-            if(segmentIndex2 >= numPoints)
+            if (segmentIndex2 >= numPoints)
                 segmentIndex2 = 0;
-            if(j2==numMinorSegments)
+            if (j2 == numMinorSegments)
                 j2 = 0;
 
             indexData.push_back(segmentIndex1 + j);
@@ -76,6 +112,6 @@ std::pair<Vector<F32>,Vector<U32>> CreateTorusMesh(F32 radiusMajor, F32 radiusMi
     assert(sizeVertexData == vertexData.size());
     assert(sizeIndexData == indexData.size());
 
-    return std::make_pair(vertexData,indexData);
+    return std::make_pair(vertexData, indexData);
 }
 } // namespace GDL::OpenGL::MeshGenerator
