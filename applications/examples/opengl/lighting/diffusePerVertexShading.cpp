@@ -1,5 +1,3 @@
-
-
 #include "gdl/base/fundamentalTypes.h"
 #include "gdl/base/timer.h"
 #include "gdl/base/container/vector.h"
@@ -12,7 +10,7 @@
 #include "gdl/rendering/openGL/core/vertexArrayObject.h"
 
 #include "applications/examples/opengl/utility/meshGenerator.h"
-
+#include "applications/examples/opengl/utility/lightSourceVisualizer.h"
 
 #include <cmath>
 
@@ -86,56 +84,18 @@ const char* FragmentShaderCode()
 }
 
 
-const char* VertexShaderCodeLightSource()
-{
-    return R"glsl(
-            #version 450
-
-            layout (location=0) in vec3 VertexPosition;
-            layout (location=1) in vec2 vertexTexCoordinate;
-
-            out vec2 texCoordinate;
-
-            uniform vec4 lightPosition;
-            uniform mat4 ProjectionMatrix;
-
-            void main(void)
-            {
-                texCoordinate = vertexTexCoordinate;
-                gl_Position = ProjectionMatrix * (vec4(VertexPosition + vec3(lightPosition), 1.0));
-            }
-            )glsl";
-}
-
-
-const char* FragmentShaderCodeLightSource()
-{
-    return R"glsl(
-            #version 450
-
-            uniform vec3 lightSourceIntensity;
-
-            in vec2 texCoordinate;
-
-            out vec4 FragColor;
-            void main(void)
-            {
-                float x = texCoordinate.x * 2 - 1;
-                float y = texCoordinate.y * 2 - 1;
-                float r = sqrt((x * x + y * y));
-                vec3 intensity = max((0.5 - r * r) * vec3(3,3,3),0);
-                float alpha = max(2 - r * r - r ,0);
-                FragColor = vec4(lightSourceIntensity + intensity, alpha);
-            }
-            )glsl";
-}
-
-
 
 // Main Program -------------------------------------------------------------------------------------------------------
 
 int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
 {
+    // Light source configuration ----------------------------------------
+
+    // Optimize this section as soon as vec3 and vec4 classes are implemented
+    std::array<F32, 4> lightPositionData = {{0.f, 0.f, -10.f, 1.f}};
+    std::array<F32, 3> lightSourceIntensityData = {{1.f, 0.1f, 0.4f}};
+    std::array<F32, 3> reflectionCoefficientData = {{1.f, 1.f, 1.f}};
+
     // Setup Render Context ----------------------------------------------
 
     ContextManager& contextManager = ContextManager::Instance();
@@ -156,71 +116,54 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
     // Create Shader and Program -----------------------------------------
 
     Shader diffuseLightIntensityShader(GL_VERTEX_SHADER, DiffuseLightIntensityShaderCode());
-    Shader vertexShaderTorus(GL_VERTEX_SHADER, VertexShaderCode());
-    Shader fragmentShaderTorus(GL_FRAGMENT_SHADER, FragmentShaderCode());
-    Program programTorus(diffuseLightIntensityShader, vertexShaderTorus, fragmentShaderTorus);
-
-    Shader vertexShaderLightSource(GL_VERTEX_SHADER, VertexShaderCodeLightSource());
-    Shader fragmentShaderLightSource(GL_FRAGMENT_SHADER, FragmentShaderCodeLightSource());
-    Program programLightSource(vertexShaderLightSource, fragmentShaderLightSource);
+    Shader vertexShader(GL_VERTEX_SHADER, VertexShaderCode());
+    Shader fragmentShader(GL_FRAGMENT_SHADER, FragmentShaderCode());
+    Program program(diffuseLightIntensityShader, vertexShader, fragmentShader);
 
 
 
     // Create Buffer Objects ---------------------------------------------
 
-    auto [vertexDataTorus, elementDataTorus] = MeshGenerator::CreateTorus(1.f, 0.5f, 40, 40);
-    BufferObject vertexBufferTorus(vertexDataTorus, GL_STATIC_DRAW);
-    BufferObject elementBufferTorus(elementDataTorus, GL_STATIC_DRAW);
-
-    auto [vertexDataLightSource, elementDataLightSource] = MeshGenerator::CreateRectangle<true>(0.5, 0.5);
-    BufferObject vertexBufferLightSource(vertexDataLightSource, GL_STATIC_DRAW);
-    BufferObject elementBufferLightSource(elementDataLightSource, GL_STATIC_DRAW);
+    auto [vertexData, elementData] = MeshGenerator::CreateTorus(1.f, 0.5f, 40, 40);
+    BufferObject vertexBuffer(vertexData, GL_STATIC_DRAW);
+    BufferObject elementBuffer(elementData, GL_STATIC_DRAW);
 
 
 
     // Create Vertex Array Object ----------------------------------------
 
-    VertexArrayObject vaoTorus;
-    vaoTorus.EnableAttribute(0, 0, vertexBufferTorus, GL_FLOAT, 3, 24);
-    vaoTorus.EnableAttribute(1, 0, GL_FLOAT, 3, 12);
-    vaoTorus.SetElementBuffer(elementBufferTorus);
+    VertexArrayObject vao;
+    vao.EnableAttribute(0, 0, vertexBuffer, GL_FLOAT, 3, 24);
+    vao.EnableAttribute(1, 0, GL_FLOAT, 3, 12);
+    vao.SetElementBuffer(elementBuffer);
 
-    VertexArrayObject vaoLightSource;
-    vaoLightSource.EnableAttribute(0, 0, vertexBufferLightSource, GL_FLOAT, 3, 20);
-    vaoLightSource.EnableAttribute(1, 0, GL_FLOAT, 2, 12);
-    vaoLightSource.SetElementBuffer(elementBufferLightSource);
+
+
+    // Create light source visualizer ------------------------------------
+    LightSourceVisualizer lsv;
 
 
 
     // Get uniform locations ---------------------------------------------
 
-    GLint uniformProjection = programTorus.QueryUniformLocation("ProjectionMatrix");
-    GLint uniformRotation = programTorus.QueryUniformLocation("RotationMatrix");
-    GLint uniformModelWorld = programTorus.QueryUniformLocation("ModelWorldMatrix");
-    GLint uniformLightPosition = programTorus.QueryUniformLocation("lightPosition");
-    GLint uniformLightSourceIntensity = programTorus.QueryUniformLocation("lightSourceIntensity");
-    GLint uniformReflectionCoefficient = programTorus.QueryUniformLocation("reflectionCoefficient");
-
-    GLint uniformProjectionLightSource = programLightSource.QueryUniformLocation("ProjectionMatrix");
-    GLint uniformLightPositionLightSource = programLightSource.QueryUniformLocation("lightPosition");
-    GLint uniformLightSourceIntensityLightSource = programLightSource.QueryUniformLocation("lightSourceIntensity");
+    GLint uniformProjection = program.QueryUniformLocation("ProjectionMatrix");
+    GLint uniformRotation = program.QueryUniformLocation("RotationMatrix");
+    GLint uniformModelWorld = program.QueryUniformLocation("ModelWorldMatrix");
+    GLint uniformLightPosition = program.QueryUniformLocation("lightPosition");
+    GLint uniformLightSourceIntensity = program.QueryUniformLocation("lightSourceIntensity");
+    GLint uniformReflectionCoefficient = program.QueryUniformLocation("reflectionCoefficient");
 
 
 
     // Set light values --------------------------------------------------
 
-    // Optimize this section as soon as vec3 and vec4 classes are implemented
-    std::array<F32, 4> lightPositionData = {{0.f, 0.f, -10.f, 1.f}};
-    std::array<F32, 3> lightSourceIntensityData = {{1.f, 0.1f, 0.4f}};
-    std::array<F32, 3> reflectionCoefficientData = {{1.f, 1.f, 1.f}};
+    glProgramUniform4fv(program.GetHandle(), uniformLightPosition, 1, lightPositionData.data());
+    glProgramUniform3fv(program.GetHandle(), uniformLightSourceIntensity, 1, lightSourceIntensityData.data());
+    glProgramUniform3fv(program.GetHandle(), uniformReflectionCoefficient, 1, reflectionCoefficientData.data());
 
-    glProgramUniform4fv(programTorus.GetHandle(), uniformLightPosition, 1, lightPositionData.data());
-    glProgramUniform3fv(programTorus.GetHandle(), uniformLightSourceIntensity, 1, lightSourceIntensityData.data());
-    glProgramUniform3fv(programTorus.GetHandle(), uniformReflectionCoefficient, 1, reflectionCoefficientData.data());
+    lsv.SetPosition(lightPositionData);
+    lsv.SetIntensity(lightSourceIntensityData);
 
-    glProgramUniform4fv(programLightSource.GetHandle(), uniformLightPositionLightSource, 1, lightPositionData.data());
-    glProgramUniform3fv(programLightSource.GetHandle(), uniformLightSourceIntensityLightSource, 1,
-                        lightSourceIntensityData.data());
 
 
     // Create Timer ------------------------------------------------------
@@ -246,19 +189,16 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
         Mat4f TranslationMatrix = TransformationMatrix4::Translation(x, y, z);
         Mat4f ModelWorldMatrix = TranslationMatrix * RotationMatrix;
 
-        programTorus.SetUniform(uniformProjection, ProjectionMatrix);
-        programTorus.SetUniform(uniformRotation, RotationMatrix);
-        programTorus.SetUniform(uniformModelWorld, ModelWorldMatrix);
-        programLightSource.SetUniform(uniformProjectionLightSource, ProjectionMatrix);
+        program.SetUniform(uniformProjection, ProjectionMatrix);
+        program.SetUniform(uniformRotation, RotationMatrix);
+        program.SetUniform(uniformModelWorld, ModelWorldMatrix);
+        lsv.SetProjection(ProjectionMatrix);
 
-        vaoTorus.Bind();
-        programTorus.Use();
-        glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(elementDataTorus.size()), GL_UNSIGNED_INT, nullptr);
+        vao.Bind();
+        program.Use();
+        glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(elementData.size()), GL_UNSIGNED_INT, nullptr);
 
-
-        vaoLightSource.Bind();
-        programLightSource.Use();
-        glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(elementDataLightSource.size()), GL_UNSIGNED_INT, nullptr);
+        lsv.RenderLightSource();
 
         renderWindow.SwapBuffers();
     }
