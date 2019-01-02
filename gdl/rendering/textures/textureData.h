@@ -46,6 +46,13 @@ public:
     //! @param data: Texture data as array of bytes
     TextureData(U32 width, U32 height, U32 numChannels, const Vector<U8>& data);
 
+    //! @brief Ctor
+    //! @param width: Texture width
+    //! @param height: Texture height
+    //! @param numChannels: Number of date channels
+    //! @param data: Texture data as array of bytes
+    TextureData(U32 width, U32 height, U32 numChannels, const U8* data);
+
     //! @brief Gets the height of the texture
     //! @return Height of the texture
     U32 GetHeight() const;

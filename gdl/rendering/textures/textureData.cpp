@@ -2,6 +2,10 @@
 
 #include "gdl/base/exception.h"
 
+#include <cstring>
+
+
+
 namespace GDL
 {
 
@@ -21,6 +25,18 @@ TextureData::TextureData(U32 width, U32 height, U32 numChannels, const Vector<U8
     , mNumChannels{numChannels}
     , mPixelData{data}
 {
+    DEV_EXCEPTION(!IsDataValid(), "Data size and texture attributes are not compatible.");
+}
+
+
+
+TextureData::TextureData(U32 width, U32 height, U32 numChannels, const U8* data)
+    : mWidth{width}
+    , mHeight{height}
+    , mNumChannels{numChannels}
+    , mPixelData(mWidth * mHeight * mNumChannels)
+{
+    std::memcpy(mPixelData.data(), data, mPixelData.size());
     DEV_EXCEPTION(!IsDataValid(), "Data size and texture attributes are not compatible.");
 }
 

@@ -1,33 +1,64 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "external/stb_image.h"
 
-#ifndef DATA_DIRECTORY
-#define DATA_DIRECTORY "data"
-#endif
-
+#include "gdl/base/exception.h"
+#include "gdl/base/string.h"
+#include "gdl/resources/memory/memoryManager.h"
+#include "gdl/rendering/textures/textureData.h"
+#include "gdl/rendering/textures/textureFile.h"
 
 // reminder: Paint clone ---> Pinta
 
+#include <experimental/filesystem>
 #include <iostream>
-#include <cstring>
 #include <vector>
+
+
+
+using namespace GDL;
+namespace filesystem = std::experimental::filesystem;
+
 
 int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
 {
-    int width, height, channels;
+    MemoryManager& memoryManager = MemoryManager::Instance();
+    memoryManager.CreateGeneralPurposeMemory(50_MB);
+    memoryManager.Initialize();
 
-    std::string fileName{DATA_DIRECTORY};
-    fileName.append("/testImage.png");
+    if (!filesystem::exists("input"))
+    {
+        bool success = filesystem::create_directory("input");
+        EXCEPTION(!success, "Could not create input directory");
+    }
+    if (!filesystem::exists("output"))
+    {
+        bool success = filesystem::create_directory("output");
+        EXCEPTION(!success, "Could not create output directory");
+    }
+
 
     stbi_set_flip_vertically_on_load(true);
-    unsigned char* image = stbi_load(fileName.c_str(), &width, &height, &channels, STBI_rgb);
+    for (const auto& entry : filesystem::directory_iterator("input"))
+    {
+        String fileName{entry.path().filename().c_str()};
+        String filePath{entry.path().c_str()};
+        String convertedName{MakeString(entry.path().stem().c_str(), ".tex")};
+        String convertedRelPath{MakeString("output/", convertedName)};
+        std::cout << "Converting \"" << entry.path().filename().c_str() << "\" to \"" << convertedName << "\""
+                  << std::endl;
 
-    unsigned int dataSize = static_cast<unsigned int>(width * height * channels);
-    std::vector<unsigned char> data(dataSize);
-    std::memcpy(data.data(), image, dataSize);
+        I32 width, height, channels;
 
-    stbi_image_free(image);
+        U8* pixelData = stbi_load(filePath.c_str(), &width, &height, &channels, STBI_default);
+        EXCEPTION(pixelData == nullptr, MakeString("Failed to load image:\n", filePath).c_str());
+        TextureData textureData(static_cast<U32>(width), static_cast<U32>(height), static_cast<U32>(channels),
+                                pixelData);
 
-    std::cout << width << " / " << height << std::endl;
+        TextureFile::Write(convertedRelPath.c_str(), textureData);
+
+        stbi_image_free(pixelData);
+    }
+
+    memoryManager.Deinitialize();
     return 0;
 }
