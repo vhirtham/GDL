@@ -22,7 +22,7 @@ void ReadPixelData(std::ifstream& textureFile, Vector<U8>& data, U32 numValues)
 void ReadU32(std::ifstream& textureFile, U32& value)
 {
     textureFile.read(reinterpret_cast<char*>(&value), sizeof(U32));
-};
+}
 
 
 
@@ -36,7 +36,7 @@ void WritePixelData(std::ofstream& textureFile, const Vector<U8>& data)
 void WriteU32(std::ofstream& textureFile, U32 value)
 {
     textureFile.write(reinterpret_cast<const char*>(&value), sizeof(U32));
-};
+}
 
 
 
