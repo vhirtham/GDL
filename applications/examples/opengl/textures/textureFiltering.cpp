@@ -1,4 +1,5 @@
 #include "gdl/base/container/vector.h"
+#include "gdl/base/timer.h"
 #include "gdl/math/transformationMatrix.h"
 #include "gdl/rendering/openGL/core/bufferObject.h"
 #include "gdl/rendering/openGL/core/contextManager.h"
@@ -43,9 +44,11 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
             uniform mat4 projection;
             uniform mat4 modelWorld;
 
+            uniform float factor;
+
             void main(void)
             {
-                texCoord = vertexTexCoord * 3 - 1;
+                texCoord = vertexTexCoord * factor;
                 gl_Position = projection * modelWorld * vec4(vertexPosition,1.0);
             }
             )glsl";
@@ -101,6 +104,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
 
     GLint uniformProjection = program.QueryUniformLocation("projection");
     GLint uniformModelWorld = program.QueryUniformLocation("modelWorld");
+    GLint uniformFactor = program.QueryUniformLocation("factor");
 
 
 
@@ -110,48 +114,57 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
     texture.Bind(0);
     program.Use();
 
+    // Other -------------------------------------------------------------
+
+    Timer timer;
+    F32 factor = 1.f;
+    bool increasing = false;
 
 
     // Start main loop ---------------------------------------------------
 
     while (renderWindow.IsOpen())
     {
-        contextManager.PollEvents();
+        F32 deltaFactor = timer.GetElapsedTime<Milliseconds>().count() / 1000.f / ((factor < 1.f) ? 10.f : 10.f) *
+                          ((increasing) ? 1.f : -1.f);
+        timer.Reset();
 
-        F32 width = renderWindow.GetWidth() / 2.2f;
-        F32 height = renderWindow.GetHeight() / 2.2f;
+        factor += deltaFactor;
+        if (increasing)
+        {
+            if (factor >= 3.f)
+                increasing = false;
+        }
+        else if (factor <= 0.2f)
+            increasing = true;
+
+
+
+        program.SetUniform(uniformFactor, factor);
+
+        F32 width = textureData.GetWidth() * 2;
+        F32 height = textureData.GetHeight() * 2;
         F32 translateX = width * 0.55f;
-        F32 translateY = height * 0.55f;
+
+
+        contextManager.PollEvents();
 
         program.SetUniform(uniformProjection, TransformationMatrix4::OrthogonalProjection(renderWindow.GetWidth(),
                                                                                           renderWindow.GetHeight()));
 
-        // Lower left texture ---> repeat
-        texture.SetWrappingXY(GL_REPEAT);
+        // Right texture ---> Nearest
+        texture.SetMinifyingFilter(GL_NEAREST);
+        texture.SetMagnifyingFilter(GL_NEAREST);
         program.SetUniform(uniformModelWorld,
-                           TransformationMatrix4::ScaleTranslate(width, height, 1, -translateX, -translateY, 0));
+                           TransformationMatrix4::ScaleTranslate(width, height, 1, -translateX, 0, 0));
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
 
 
-        // Upper left texture ---> mirrored repeat
-        texture.SetWrappingXY(GL_MIRRORED_REPEAT);
+        // Left texture ---> Linear
+        texture.SetMinifyingFilter(GL_LINEAR);
+        texture.SetMagnifyingFilter(GL_LINEAR);
         program.SetUniform(uniformModelWorld,
-                           TransformationMatrix4::ScaleTranslate(width, height, 1, -translateX, translateY, 0));
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
-
-
-        // Upper right texture ---> clamp to edge
-        texture.SetWrappingXY(GL_CLAMP_TO_EDGE);
-        program.SetUniform(uniformModelWorld,
-                           TransformationMatrix4::ScaleTranslate(width, height, 1, translateX, translateY, 0));
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
-
-
-        // Lower right texture ---> clamp to border
-        texture.SetWrappingXY(GL_CLAMP_TO_BORDER);
-        texture.SetBorderColor({{0.f, 0.f, 1.f, 1.f}});
-        program.SetUniform(uniformModelWorld,
-                           TransformationMatrix4::ScaleTranslate(width, height, 1, translateX, -translateY, 0));
+                           TransformationMatrix4::ScaleTranslate(width, height, 1, translateX, 0, 0));
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
 
 

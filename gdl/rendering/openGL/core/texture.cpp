@@ -36,6 +36,20 @@ void Texture::SetBorderColor(std::array<F32, 4> borderColor)
 
 
 
+void Texture::SetMagnifyingFilter(GLenum filter)
+{
+    glTextureParameteri(mHandle, GL_TEXTURE_MAG_FILTER, filter);
+}
+
+
+
+void Texture::SetMinifyingFilter(GLenum filter)
+{
+    glTextureParameteri(mHandle, GL_TEXTURE_MIN_FILTER, filter);
+}
+
+
+
 void Texture::SetWrappingX(GLenum wrapping)
 {
     glTextureParameteri(mHandle, GL_TEXTURE_WRAP_S, wrapping);

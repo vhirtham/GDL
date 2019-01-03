@@ -43,6 +43,14 @@ public:
     //! @param borderColor: Border color
     void SetBorderColor(std::array<F32,4> borderColor);
 
+    //! @brief Sets the filter that is used when magnifying the texture
+    //! @param filter: Filter enum value
+    void SetMagnifyingFilter(GLenum filter);
+
+    //! @brief Sets the filter that is used when minifying the texture
+    //! @param filter: Filter enum value
+    void SetMinifyingFilter(GLenum filter);
+
     //! @brief Sets the wrapping in x-direction
     //! @param wrapping: Wrapping method enum
     void SetWrappingX(GLenum wrapping);

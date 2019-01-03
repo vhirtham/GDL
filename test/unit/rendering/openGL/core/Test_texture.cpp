@@ -31,4 +31,6 @@ BOOST_AUTO_TEST_CASE(Test_Texture2d)
     texture.Bind(0);
     texture.SetWrappingXY(GL_CLAMP_TO_BORDER);
     texture.SetBorderColor({{1.f, 0.f, 1.f, 1.f}});
+    texture.SetMinifyingFilter(GL_LINEAR);
+    texture.SetMagnifyingFilter(GL_LINEAR);
 }
