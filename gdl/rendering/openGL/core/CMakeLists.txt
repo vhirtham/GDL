@@ -23,7 +23,10 @@ addGDLLib(OpenGLCore
     glewController.cpp
     program.cpp
     shader.cpp
+    texture.cpp
     vertexArrayObject.cpp
+    ../../textures/textureData.cpp
+    ../../textures/textureFile.cpp
     ${ConfigDependentSources}
     GDL::Resources
 

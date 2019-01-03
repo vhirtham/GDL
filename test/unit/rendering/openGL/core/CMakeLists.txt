@@ -28,6 +28,12 @@ addTest(shader
     ${OpenGLTestDefaultLibs}
     )
 
+addTest(texture
+    rendering/openGL/core/texture.cpp
+    rendering/textures/textureData.cpp
+    ${OpenGLTestDefaultLibs}
+    )
+
 
 addTest(vertexArrayObject
     rendering/openGL/core/vertexArrayObject.cpp

@@ -22,7 +22,7 @@ namespace filesystem = std::experimental::filesystem;
 int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
 {
     MemoryManager& memoryManager = MemoryManager::Instance();
-    memoryManager.CreateGeneralPurposeMemory(50_MB);
+    memoryManager.CreateGeneralPurposeMemory(100_MB);
     memoryManager.Initialize();
 
     if (!filesystem::exists("input"))

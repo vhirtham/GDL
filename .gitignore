@@ -1,4 +1,10 @@
-*.user*
+data/*
 *applications/custom*
 *documentation/doxygen/output*
+
+*.user*
 *.autosave
+
+
+*.tex
+
