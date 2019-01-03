@@ -134,6 +134,23 @@ _mat4 Translation(F32 x, F32 y, F32 z)
 
 
 
+template<typename _mat4>
+_mat4 ScaleTranslate(F32 sx, F32 sy, F32 sz, F32 tx, F32 ty, F32 tz)
+{
+    static_assert(IsMat4<_mat4>(), "Template parameter is no valid 4x4 matrix type.");
+
+    // clang-format off
+    return _mat4(
+        sx,     0.,     0.,     0.,
+        0.,     sy,     0.,     0.,
+        0.,     0.,     sz,     0.,
+        tx,     ty,     tz,     1.);
+    // clang-format on
+}
+
+
+
+
 
 
 } // namespace GDL::TransformationMatrix4

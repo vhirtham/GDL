@@ -22,9 +22,36 @@ void Texture::Bind(GLuint textureUnit) const
 
 
 
-GLuint Texture::GetHandle()
+GLuint Texture::GetHandle() const
 {
     return mHandle;
+}
+
+
+
+void Texture::SetBorderColor(std::array<F32, 4> borderColor)
+{
+    glTextureParameterfv(mHandle, GL_TEXTURE_BORDER_COLOR, borderColor.data());
+}
+
+
+
+void Texture::SetWrappingX(GLenum wrapping)
+{
+    glTextureParameteri(mHandle, GL_TEXTURE_WRAP_S, wrapping);
+}
+
+
+
+void Texture::SetWrappingY(GLenum wrapping)
+{
+    glTextureParameteri(mHandle, GL_TEXTURE_WRAP_T, wrapping);
+}
+
+void Texture::SetWrappingXY(GLenum wrapping)
+{
+    SetWrappingX(wrapping);
+    SetWrappingY(wrapping);
 }
 
 

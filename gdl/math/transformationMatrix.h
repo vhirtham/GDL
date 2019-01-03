@@ -51,6 +51,17 @@ inline _mat4 RotationZ(F32 angle);
 template <typename _mat4 = Mat4f>
 inline _mat4 Scale(F32 x, F32 y, F32 z);
 
+//! @brief Creates a matrix that scales and translates
+//! @param sx: Scaling factor in x direction
+//! @param sy: Scaling factor in y direction
+//! @param sz: Scaling factor in z direction
+//! @param tx: Translation in x direction
+//! @param ty: Translation in y direction
+//! @param tz: Translation in z direction
+//! @return Transformation matrix
+template <typename _mat4 = Mat4f>
+inline _mat4 ScaleTranslate(F32 sx, F32 sy, F32 sz, F32 tx, F32 ty, F32 tz);
+
 //! @brief Creates a translation matrix
 //! @param x: Translation in x direction
 //! @param y: Translation in y direction

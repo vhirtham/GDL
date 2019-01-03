@@ -2,6 +2,7 @@
 
 #include "gdl/base/fundamentalTypes.h"
 
+#include <array>
 #include <GL/glew.h>
 
 
@@ -36,7 +37,23 @@ public:
 
     //! @brief Gets the textures handle
     //! @return The textures handle
-    GLuint GetHandle();
+    GLuint GetHandle() const;
+
+    //! @brief Sets the border color for the corresponding wrapping method
+    //! @param borderColor: Border color
+    void SetBorderColor(std::array<F32,4> borderColor);
+
+    //! @brief Sets the wrapping in x-direction
+    //! @param wrapping: Wrapping method enum
+    void SetWrappingX(GLenum wrapping);
+
+    //! @brief Sets the wrapping in y-direction
+    //! @param wrapping: Wrapping method enum
+    void SetWrappingY(GLenum wrapping);
+
+    //! @brief Sets the wrapping in x- and y-direction
+    //! @param wrapping: Wrapping method enum
+    void SetWrappingXY(GLenum wrapping);
 
 private:
 
