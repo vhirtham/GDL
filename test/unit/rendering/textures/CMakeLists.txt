@@ -1,5 +1,5 @@
 addTest(textures
-    rendering/textures/textureData.cpp
+    rendering/textures/textureData2d.cpp
     rendering/textures/textureFile.cpp
     GDL::Resources
     )

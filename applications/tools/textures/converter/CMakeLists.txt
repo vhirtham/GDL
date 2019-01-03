@@ -1,6 +1,6 @@
 add_executable(TextureConverter
     textureConverter.cpp
-    ${GDL_ROOT_DIR}/gdl/rendering/textures/textureData.cpp
+    ${GDL_ROOT_DIR}/gdl/rendering/textures/textureData2d.cpp
     ${GDL_ROOT_DIR}/gdl/rendering/textures/textureFile.cpp
     )
 

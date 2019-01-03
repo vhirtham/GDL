@@ -25,7 +25,7 @@ addGDLLib(OpenGLCore
     shader.cpp
     texture.cpp
     vertexArrayObject.cpp
-    ../../textures/textureData.cpp
+    ../../textures/textureData2d.cpp
     ../../textures/textureFile.cpp
     ${ConfigDependentSources}
     GDL::Resources

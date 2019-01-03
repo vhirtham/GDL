@@ -2,7 +2,7 @@
 
 #include "gdl/base/exception.h"
 #include "gdl/rendering/openGL/core/texture.h"
-#include "gdl/rendering/textures/textureData.h"
+#include "gdl/rendering/textures/textureData2d.h"
 
 #include "test/tools/GetRenderWindow.h"
 
@@ -25,7 +25,7 @@ BOOST_AUTO_TEST_CASE(Test_Texture2d)
                         255, 255, 255};
     // clang-format on
 
-    TextureData textureData(width, height, numChannels, data);
+    TextureData2d textureData(width, height, numChannels, data);
 
     Texture texture(textureData);
 }

@@ -8,7 +8,7 @@
 namespace GDL
 {
 
-class TextureData;
+class TextureData2d;
 
 namespace OpenGL
 {
@@ -28,7 +28,7 @@ public:
 
     //! @brief Ctor
     //! @param textureData: Texture data that should be used to create the texture object
-    Texture(const TextureData& textureData);
+    Texture(const TextureData2d& textureData);
 
     //! @brief Binds the texture to the specified texture unit
     //! @param textureUnit: Texture unit
@@ -42,7 +42,7 @@ private:
 
     //! @brief Initializes the texture
     //! @param textureData: Texture data that should be used to initialize the texture object
-    void Initialize(const TextureData& textureData, GLenum textureTarget);
+    void Initialize(const TextureData2d& textureData, GLenum textureTarget);
 };
 
 } // namespace OpenGL

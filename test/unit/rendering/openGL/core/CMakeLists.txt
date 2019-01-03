@@ -30,7 +30,7 @@ addTest(shader
 
 addTest(texture
     rendering/openGL/core/texture.cpp
-    rendering/textures/textureData.cpp
+    rendering/textures/textureData2d.cpp
     ${OpenGLTestDefaultLibs}
     )
 

@@ -6,7 +6,7 @@
 #include "gdl/rendering/openGL/core/shader.h"
 #include "gdl/rendering/openGL/core/texture.h"
 #include "gdl/rendering/openGL/core/vertexArrayObject.h"
-#include "gdl/rendering/textures/textureData.h"
+#include "gdl/rendering/textures/textureData2d.h"
 
 #include "applications/examples/opengl/utility/meshGenerator.h"
 
@@ -80,7 +80,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
 
     // Create Texture ----------------------------------------------------
 
-    TextureData textureData = TextureFile::Read(MakeString(TEXTURE_DIRECTORY, "/testImage.tex").c_str());
+    TextureData2d textureData = TextureFile::Read(MakeString(TEXTURE_DIRECTORY, "/testImage.tex").c_str());
     Texture texture(textureData);
 
     glTextureParameteri(texture.GetHandle(), GL_TEXTURE_MAG_FILTER, GL_LINEAR);

@@ -7,19 +7,19 @@
 namespace GDL
 {
 
-class TextureData;
+class TextureData2d;
 
 namespace TextureFile
 {
-TextureData Read(const char*);
+TextureData2d Read(const char*);
 } // namespace TextureFile
 
 
 
 //! @brief Class that stores all relevant data to create a texture
-class TextureData
+class TextureData2d
 {
-    friend TextureData GDL::TextureFile::Read(const char*);
+    friend TextureData2d GDL::TextureFile::Read(const char*);
 
 
     U32 mWidth;
@@ -30,28 +30,28 @@ class TextureData
 
     //! @brief ctor
     //! @remark: It is private since only the TextureFile::Read function should use this ctor
-    TextureData();
+    TextureData2d();
 
 public:
-    TextureData(const TextureData&) = default;
-    TextureData(TextureData&&) = default;
-    TextureData& operator=(const TextureData&) = default;
-    TextureData& operator=(TextureData&&) = default;
-    ~TextureData() = default;
+    TextureData2d(const TextureData2d&) = default;
+    TextureData2d(TextureData2d&&) = default;
+    TextureData2d& operator=(const TextureData2d&) = default;
+    TextureData2d& operator=(TextureData2d&&) = default;
+    ~TextureData2d() = default;
 
     //! @brief Ctor
     //! @param width: Texture width
     //! @param height: Texture height
     //! @param numChannels: Number of date channels
     //! @param data: Texture data as array of bytes
-    TextureData(U32 width, U32 height, U32 numChannels, const Vector<U8>& data);
+    TextureData2d(U32 width, U32 height, U32 numChannels, const Vector<U8>& data);
 
     //! @brief Ctor
     //! @param width: Texture width
     //! @param height: Texture height
     //! @param numChannels: Number of date channels
     //! @param data: Texture data as array of bytes
-    TextureData(U32 width, U32 height, U32 numChannels, const U8* data);
+    TextureData2d(U32 width, U32 height, U32 numChannels, const U8* data);
 
     //! @brief Gets the height of the texture
     //! @return Height of the texture

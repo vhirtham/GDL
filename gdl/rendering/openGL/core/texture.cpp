@@ -1,13 +1,13 @@
 #include "gdl/rendering/openGL/core/texture.h"
 
 
-#include "gdl/rendering/textures/textureData.h"
+#include "gdl/rendering/textures/textureData2d.h"
 
 
 namespace GDL::OpenGL
 {
 
-Texture::Texture(const TextureData& textureData)
+Texture::Texture(const TextureData2d& textureData)
     : mHandle{0}
 {
     Initialize(textureData, GL_TEXTURE_2D);
@@ -36,7 +36,7 @@ Texture::~Texture()
 
 
 
-void Texture::Initialize(const TextureData& textureData, GLenum textureTarget)
+void Texture::Initialize(const TextureData2d& textureData, GLenum textureTarget)
 {
     glCreateTextures(textureTarget, 1, &mHandle);
 

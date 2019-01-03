@@ -2,7 +2,7 @@
 
 #include "gdl/base/exception.h"
 #include "gdl/base/string.h"
-#include "gdl/rendering/textures/textureData.h"
+#include "gdl/rendering/textures/textureData2d.h"
 
 #include <fstream>
 
@@ -40,12 +40,12 @@ void WriteU32(std::ofstream& textureFile, U32 value)
 
 
 
-TextureData Read(const char* fileName)
+TextureData2d Read(const char* fileName)
 {
     std::ifstream textureFile(fileName, std::ifstream::in | std::ifstream::binary);
     EXCEPTION(!textureFile.is_open(), MakeString("Could not open output texture file:\n", fileName).c_str());
 
-    TextureData textureData;
+    TextureData2d textureData;
 
     ReadU32(textureFile, textureData.mWidth);
     ReadU32(textureFile, textureData.mHeight);
@@ -62,7 +62,7 @@ TextureData Read(const char* fileName)
 
 
 
-void Write(const char* fileName, const TextureData& textureData)
+void Write(const char* fileName, const TextureData2d& textureData)
 {
     std::ofstream textureFile(fileName, std::ofstream::out | std::ofstream::trunc | std::ofstream::binary);
     EXCEPTION(!textureFile.is_open(), MakeString("Could not open output texture file:\n", fileName).c_str());

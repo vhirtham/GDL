@@ -1,4 +1,4 @@
-#include "gdl/rendering/textures/textureData.h"
+#include "gdl/rendering/textures/textureData2d.h"
 
 #include "gdl/base/exception.h"
 
@@ -9,7 +9,7 @@
 namespace GDL
 {
 
-TextureData::TextureData()
+TextureData2d::TextureData2d()
     : mWidth{0}
     , mHeight{0}
     , mNumChannels{0}
@@ -19,7 +19,7 @@ TextureData::TextureData()
 
 
 
-TextureData::TextureData(U32 width, U32 height, U32 numChannels, const Vector<U8>& data)
+TextureData2d::TextureData2d(U32 width, U32 height, U32 numChannels, const Vector<U8>& data)
     : mWidth{width}
     , mHeight{height}
     , mNumChannels{numChannels}
@@ -30,7 +30,7 @@ TextureData::TextureData(U32 width, U32 height, U32 numChannels, const Vector<U8
 
 
 
-TextureData::TextureData(U32 width, U32 height, U32 numChannels, const U8* data)
+TextureData2d::TextureData2d(U32 width, U32 height, U32 numChannels, const U8* data)
     : mWidth{width}
     , mHeight{height}
     , mNumChannels{numChannels}
@@ -42,35 +42,35 @@ TextureData::TextureData(U32 width, U32 height, U32 numChannels, const U8* data)
 
 
 
-U32 TextureData::GetHeight() const
+U32 TextureData2d::GetHeight() const
 {
     return mHeight;
 }
 
 
 
-U32 TextureData::GetNumChannels() const
+U32 TextureData2d::GetNumChannels() const
 {
     return mNumChannels;
 }
 
 
 
-const Vector<U8>& TextureData::GetPixelData() const
+const Vector<U8>& TextureData2d::GetPixelData() const
 {
     return mPixelData;
 }
 
 
 
-U32 TextureData::GetWidth() const
+U32 TextureData2d::GetWidth() const
 {
     return mWidth;
 }
 
 
 
-bool TextureData::IsDataValid() const
+bool TextureData2d::IsDataValid() const
 {
     return mWidth * mHeight * mNumChannels == mPixelData.size();
 }

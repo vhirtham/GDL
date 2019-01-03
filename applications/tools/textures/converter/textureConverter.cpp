@@ -4,7 +4,7 @@
 #include "gdl/base/exception.h"
 #include "gdl/base/string.h"
 #include "gdl/resources/memory/memoryManager.h"
-#include "gdl/rendering/textures/textureData.h"
+#include "gdl/rendering/textures/textureData2d.h"
 #include "gdl/rendering/textures/textureFile.h"
 
 // reminder: Paint clone ---> Pinta
@@ -51,8 +51,8 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
 
         U8* pixelData = stbi_load(filePath.c_str(), &width, &height, &channels, STBI_default);
         EXCEPTION(pixelData == nullptr, MakeString("Failed to load image:\n", filePath).c_str());
-        TextureData textureData(static_cast<U32>(width), static_cast<U32>(height), static_cast<U32>(channels),
-                                pixelData);
+        TextureData2d textureData(static_cast<U32>(width), static_cast<U32>(height), static_cast<U32>(channels),
+                                  pixelData);
 
         TextureFile::Write(convertedRelPath.c_str(), textureData);
 
