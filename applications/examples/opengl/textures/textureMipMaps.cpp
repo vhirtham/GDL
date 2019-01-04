@@ -18,6 +18,51 @@ using namespace GDL;
 using namespace GDL::OpenGL;
 
 
+// ShaderCode ---------------------------------------------------------------------------------------------------------
+
+const char* GetVertexShaderCode()
+{
+    return R"glsl(
+           #version 430
+
+           layout (location=0) in vec3 vertexPosition;
+           layout (location=1) in vec2 vertexTexCoord;
+
+           out vec2 texCoord;
+
+           uniform mat4 projection;
+           uniform mat4 modelWorld;
+
+           void main(void)
+           {
+               texCoord = vertexTexCoord;
+               gl_Position = projection * modelWorld * vec4(vertexPosition,1.0);
+           }
+           )glsl";
+}
+
+
+
+const char* GetFragmentShaderCode()
+{
+    return R"glsl(
+           #version 430
+
+           in vec2 texCoord;
+           out vec4 fragColor;
+
+           uniform sampler2D texture0;
+
+           void main(void)
+           {
+               fragColor = texture(texture0,texCoord);
+           }
+           )glsl";
+}
+
+
+
+// Main ---------------------------------------------------------------------------------------------------------------
 
 int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
 {
@@ -31,46 +76,10 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
 
 
 
-    // Shader Code -------------------------------------------------------
-
-    const char* vertexShaderCode = R"glsl(
-            #version 430
-
-            layout (location=0) in vec3 vertexPosition;
-            layout (location=1) in vec2 vertexTexCoord;
-
-            out vec2 texCoord;
-
-            uniform mat4 projection;
-            uniform mat4 modelWorld;
-
-            void main(void)
-            {
-                texCoord = vertexTexCoord;
-                gl_Position = projection * modelWorld * vec4(vertexPosition,1.0);
-            }
-            )glsl";
-
-    const char* fragmentShaderCode = R"glsl(
-            #version 430
-
-            in vec2 texCoord;
-            out vec4 fragColor;
-
-            uniform sampler2D texture0;
-
-            void main(void)
-            {
-                fragColor = texture(texture0,texCoord);
-            }
-            )glsl";
-
-
-
     // Create Shader and Program -----------------------------------------
 
-    Shader vertexShader(GL_VERTEX_SHADER, vertexShaderCode);
-    Shader fragmentShader(GL_FRAGMENT_SHADER, fragmentShaderCode);
+    Shader vertexShader(GL_VERTEX_SHADER, GetVertexShaderCode());
+    Shader fragmentShader(GL_FRAGMENT_SHADER, GetFragmentShaderCode());
     Program program(vertexShader, fragmentShader);
 
 
