@@ -95,6 +95,29 @@ void CheckNoAllocations<ThreadPrivateStackAllocator>(const HeapAllocationCounter
 
 
 
+// Comparison operators -----------------------------------------------------------------------------------------------
+
+template <template <typename> class _allocator>
+void ComparisonOperatorsTest()
+{
+    BOOST_CHECK(_allocator<U32>() == _allocator<F32>());
+    BOOST_CHECK(!(_allocator<U32>() != _allocator<F32>()));
+}
+
+
+BOOST_AUTO_TEST_CASE(ComparisonOperators)
+{
+    InitializeMemoryManager();
+
+    BOOST_CHECK_NO_THROW(ComparisonOperatorsTest<GeneralPurposeAllocator>());
+    BOOST_CHECK_NO_THROW(ComparisonOperatorsTest<PoolAllocator>());
+    BOOST_CHECK_NO_THROW(ComparisonOperatorsTest<StackAllocator>());
+    BOOST_CHECK_NO_THROW(ComparisonOperatorsTest<ThreadPrivateStackAllocator>());
+
+    DeinitializeMemoryManager();
+}
+
+
 // Vector -------------------------------------------------------------------------------------------------------------
 
 template <template <typename> class _allocator>
