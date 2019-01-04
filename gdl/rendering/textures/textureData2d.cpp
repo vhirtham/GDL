@@ -121,6 +121,15 @@ bool TextureData2d::IsDataValid() const
 
 
 
+void TextureData2d::SetMipMapData(U32 level, Vector<U8> pixelData)
+{
+    DEV_EXCEPTION(level < 1 || level >= mPixelData.size(), "Invalid mipmap level");
+    DEV_EXCEPTION(pixelData.size() != mPixelData[level].size(), "Provided pixel data has wrong size");
+    std::memcpy(mPixelData[level].data(), pixelData.data(), mPixelData[level].size());
+}
+
+
+
 void TextureData2d::CalculateLinearMipMap(U32 level)
 {
     DEV_EXCEPTION(level < 1, "Invalid mipmap level.");

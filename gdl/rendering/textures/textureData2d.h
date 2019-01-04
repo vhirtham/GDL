@@ -92,6 +92,11 @@ public:
     //! @return True / False
     bool IsDataValid() const;
 
+    //! @brief Sets the data for the specified mipmap level. The mipmap level must be created first with CreateMipMaps.
+    //! @param level: Mipmap level
+    //! @param pixelData: Data for mipmap level
+    void SetMipMapData(U32 level, Vector<U8> pixelData);
+
 private:
     //! @brief Calculates a mipmap for the chosen level by linear interpolation of the previous level
     //! @param level: Level of the mipmap

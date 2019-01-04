@@ -81,10 +81,22 @@ BOOST_AUTO_TEST_CASE(Texture_Data_Mipmaps)
 
     TextureData2d textureData2(width, height, numChannels, data);
     textureData2.CreateMipMaps(Interpolation::NONE);
-    pixelData = textureData2.GetPixelData(1);
-    BOOST_CHECK(pixelData.size() == numChannels);
-    for (U32 i = 0; i < pixelData.size(); ++i)
-        BOOST_CHECK(pixelData[i] == 0);
+    Vector<U8> pixelData2 = textureData2.GetPixelData(1);
+    BOOST_CHECK(pixelData2.size() == numChannels);
+    for (U32 i = 0; i < pixelData2.size(); ++i)
+        BOOST_CHECK(pixelData2[i] == 0);
+
+    textureData.SetMipMapData(1, pixelData2);
+    Vector<U8> pixelData3 = textureData.GetPixelData(1);
+    BOOST_CHECK(pixelData3.size() == numChannels);
+    for (U32 i = 0; i < pixelData3.size(); ++i)
+        BOOST_CHECK(pixelData3[i] == 0);
+
+    TextureData2d textureData3(width, height, numChannels, data);
+    GDL_CHECK_THROW_DEV_DISABLE(textureData3.SetMipMapData(0, textureData.GetPixelData()), Exception);
+    GDL_CHECK_THROW_DEV_DISABLE(textureData3.SetMipMapData(1, textureData.GetPixelData(1)), Exception);
+    textureData3.CreateMipMaps(Interpolation::NONE);
+    GDL_CHECK_THROW_DEV_DISABLE(textureData3.SetMipMapData(1, textureData.GetPixelData(0)), Exception);
 }
 
 

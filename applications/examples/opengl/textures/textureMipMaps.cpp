@@ -87,6 +87,21 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
 
     TextureData2d textureData = TextureFile::Read(MakeString(TEXTURE_DIRECTORY, "/testImage.tex").c_str());
     textureData.CreateMipMaps();
+
+    //    constexpr U32 level = 1;
+    //    Vector<U8> pixelData(textureData.GetWidth(level) * textureData.GetHeight(level) *
+    //    textureData.GetNumChannels()); for (U32 i = 0; i < pixelData.size(); ++i)
+    //        switch (i % 4)
+    //        {
+    //        case 0:
+    //        case 3:
+    //            pixelData[i] = 255;
+    //            break;
+    //        default:
+    //            pixelData[i] = 0;
+    //        }
+    //    textureData.SetMipMapData(level, pixelData);
+
     Texture texture(textureData);
 
 
