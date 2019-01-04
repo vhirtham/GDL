@@ -44,11 +44,9 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
             uniform mat4 projection;
             uniform mat4 modelWorld;
 
-            uniform float factor;
-
             void main(void)
             {
-                texCoord = vertexTexCoord * factor;
+                texCoord = vertexTexCoord;
                 gl_Position = projection * modelWorld * vec4(vertexPosition,1.0);
             }
             )glsl";
@@ -88,6 +86,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
     // Create Texture ----------------------------------------------------
 
     TextureData2d textureData = TextureFile::Read(MakeString(TEXTURE_DIRECTORY, "/testImage.tex").c_str());
+    textureData.CreateMipMaps();
     Texture texture(textureData);
 
 
@@ -104,7 +103,6 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
 
     GLint uniformProjection = program.QueryUniformLocation("projection");
     GLint uniformModelWorld = program.QueryUniformLocation("modelWorld");
-    GLint uniformFactor = program.QueryUniformLocation("factor");
 
 
 
@@ -114,57 +112,71 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
     texture.Bind(0);
     program.Use();
 
+
+
     // Other -------------------------------------------------------------
 
     Timer timer;
-    F32 factor = 1.f;
+    F32 scale = 1.f;
     bool increasing = false;
+
+    F32 translateX = textureData.GetWidth() * 0.55f;
+    F32 translateY = textureData.GetHeight() * 0.55f;
+
 
 
     // Start main loop ---------------------------------------------------
 
     while (renderWindow.IsOpen())
     {
-        F32 deltaFactor = timer.GetElapsedTime<Milliseconds>().count() / 1000.f / ((factor < 1.f) ? 10.f : 10.f) *
+        F32 deltaFactor = timer.GetElapsedTime<Milliseconds>().count() / 1000.f / ((scale < 1.f) ? 10.f : 10.f) *
                           ((increasing) ? 1.f : -1.f);
         timer.Reset();
 
-        factor += deltaFactor;
+        scale += deltaFactor;
         if (increasing)
         {
-            if (factor >= 3.f)
+            if (scale >= 1.f)
                 increasing = false;
         }
-        else if (factor <= 0.2f)
+        else if (scale <= 0.1f)
             increasing = true;
 
 
-
-        program.SetUniform(uniformFactor, factor);
-
-        F32 width = textureData.GetWidth() * 2;
-        F32 height = textureData.GetHeight() * 2;
-        F32 translateX = width * 0.55f;
-
+        F32 width = textureData.GetWidth() * scale;
+        F32 height = textureData.GetHeight() * scale;
 
         contextManager.PollEvents();
 
         program.SetUniform(uniformProjection, TransformationMatrix4::OrthogonalProjection(renderWindow.GetWidth(),
                                                                                           renderWindow.GetHeight()));
 
-        // Right texture ---> Nearest
-        texture.SetMinifyingFilter(GL_NEAREST);
-        texture.SetMagnifyingFilter(GL_NEAREST);
-        program.SetUniform(uniformModelWorld,
-                           TransformationMatrix4::ScaleTranslate(width, height, 1, -translateX, 0, 0));
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
-
-
-        // Left texture ---> Linear
-        texture.SetMinifyingFilter(GL_LINEAR);
+        // Lower left texture ---> Linerar - linear
+        texture.SetMinifyingFilter(GL_LINEAR_MIPMAP_LINEAR);
         texture.SetMagnifyingFilter(GL_LINEAR);
         program.SetUniform(uniformModelWorld,
-                           TransformationMatrix4::ScaleTranslate(width, height, 1, translateX, 0, 0));
+                           TransformationMatrix4::ScaleTranslate(width, height, 1, -translateX, -translateY, 0));
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+
+        // Upper left texture ---> Linear - nearest
+        texture.SetMinifyingFilter(GL_LINEAR_MIPMAP_NEAREST);
+        texture.SetMagnifyingFilter(GL_LINEAR);
+        program.SetUniform(uniformModelWorld,
+                           TransformationMatrix4::ScaleTranslate(width, height, 1, -translateX, translateY, 0));
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+
+        // Upper right texture ---> Nearest - linear
+        texture.SetMinifyingFilter(GL_NEAREST_MIPMAP_LINEAR);
+        texture.SetMagnifyingFilter(GL_NEAREST);
+        program.SetUniform(uniformModelWorld,
+                           TransformationMatrix4::ScaleTranslate(width, height, 1, translateX, translateY, 0));
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+
+        // Lower right texture ---> Nearest - nearest
+        texture.SetMinifyingFilter(GL_NEAREST_MIPMAP_NEAREST);
+        texture.SetMagnifyingFilter(GL_NEAREST);
+        program.SetUniform(uniformModelWorld,
+                           TransformationMatrix4::ScaleTranslate(width, height, 1, translateX, -translateY, 0));
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
 
 

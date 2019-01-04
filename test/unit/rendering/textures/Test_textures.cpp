@@ -40,7 +40,6 @@ BOOST_AUTO_TEST_CASE(Texture_Data)
     for (U32 i = 0; i < textureData2.GetPixelData().size(); ++i)
         BOOST_CHECK(textureData2.GetPixelData()[i] == data[i]);
 
-    GDL_CHECK_THROW_DEV_DISABLE(textureData2.GetPixelData(1), Exception);
 
     GDL_CHECK_THROW_DEV_DISABLE(TextureData2d(0, 4, 3, data), Exception);
     GDL_CHECK_THROW_DEV_DISABLE(TextureData2d(4, 0, 3, data), Exception);
@@ -48,6 +47,45 @@ BOOST_AUTO_TEST_CASE(Texture_Data)
     GDL_CHECK_THROW_DEV_DISABLE(TextureData2d(2, 3, 3, data), Exception);
 }
 
+
+BOOST_AUTO_TEST_CASE(Texture_Data_Mipmaps)
+{
+    constexpr U32 width = 2;
+    constexpr U32 height = 2;
+    constexpr U32 numChannels = 3;
+
+    // clang-format off
+    Vector<U8> data = { 254,   0,   0,
+                          0, 254,   0,
+                          0,   0, 254,
+                        254, 254, 254};
+    // clang-format on
+
+    TextureData2d textureData(width, height, numChannels, data);
+    BOOST_CHECK(textureData.GetNumTextureLevels() == 1);
+    GDL_CHECK_THROW_DEV_DISABLE(textureData.GetWidth(1), Exception);
+    GDL_CHECK_THROW_DEV_DISABLE(textureData.GetHeight(1), Exception);
+    GDL_CHECK_THROW_DEV_DISABLE(textureData.GetPixelData(1), Exception);
+
+    textureData.CreateMipMaps(Interpolation::LINEAR);
+    GDL_CHECK_THROW_DEV_DISABLE(textureData.CreateMipMaps(), Exception);
+
+    BOOST_CHECK(textureData.GetNumTextureLevels() == 2);
+    BOOST_CHECK(textureData.GetWidth(1) == 1);
+    BOOST_CHECK(textureData.GetHeight(1) == 1);
+
+    Vector<U8> pixelData = textureData.GetPixelData(1);
+    BOOST_CHECK(pixelData.size() == numChannels);
+    for (U32 i = 0; i < pixelData.size(); ++i)
+        BOOST_CHECK(pixelData[i] == 254 / 2);
+
+    TextureData2d textureData2(width, height, numChannels, data);
+    textureData2.CreateMipMaps(Interpolation::NONE);
+    pixelData = textureData2.GetPixelData(1);
+    BOOST_CHECK(pixelData.size() == numChannels);
+    for (U32 i = 0; i < pixelData.size(); ++i)
+        BOOST_CHECK(pixelData[i] == 0);
+}
 
 
 BOOST_AUTO_TEST_CASE(Texture_File)

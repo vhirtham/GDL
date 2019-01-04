@@ -26,6 +26,7 @@ BOOST_AUTO_TEST_CASE(Test_Texture2d)
     // clang-format on
 
     TextureData2d textureData(width, height, numChannels, data);
+    textureData.CreateMipMaps();
 
     Texture texture(textureData);
     texture.Bind(0);

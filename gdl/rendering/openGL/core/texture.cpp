@@ -7,10 +7,10 @@
 namespace GDL::OpenGL
 {
 
-Texture::Texture(const TextureData2d& textureData)
+Texture::Texture(const TextureData2d& textureData, U32 numLevels)
     : mHandle{0}
 {
-    Initialize(textureData, GL_TEXTURE_2D);
+    Initialize(textureData, GL_TEXTURE_2D, numLevels);
 }
 
 
@@ -62,6 +62,8 @@ void Texture::SetWrappingY(GLenum wrapping)
     glTextureParameteri(mHandle, GL_TEXTURE_WRAP_T, wrapping);
 }
 
+
+
 void Texture::SetWrappingXY(GLenum wrapping)
 {
     SetWrappingX(wrapping);
@@ -77,38 +79,42 @@ Texture::~Texture()
 
 
 
-void Texture::Initialize(const TextureData2d& textureData, GLenum textureTarget)
+std::pair<GLenum, GLenum> Texture::GetTextureFormat(U32 numChannels)
+{
+    switch (numChannels)
+    {
+    case 1:
+        return std::make_pair(GL_RED, GL_R8);
+    case 2:
+        return std::make_pair(GL_RG, GL_RG8);
+    case 3:
+        return std::make_pair(GL_RGB, GL_RGB8);
+    case 4:
+        return std::make_pair(GL_RGBA, GL_RGBA8);
+    default:
+        THROW("Unsupported number of channels");
+    }
+}
+
+
+
+void Texture::Initialize(const TextureData2d& textureData, GLenum textureTarget, U32 numLevels)
 {
     glCreateTextures(textureTarget, 1, &mHandle);
 
-    GLenum format = GL_NONE;
-    GLenum internalFormat = GL_NONE;
 
-    switch (textureData.GetNumChannels())
-    {
-    case 1:
-        format = GL_RED;
-        internalFormat = GL_R8;
-        break;
-    case 2:
-        format = GL_RG;
-        internalFormat = GL_RG8;
-        break;
-    case 3:
-        format = GL_RGB;
-        internalFormat = GL_RGB8;
-        break;
-    case 4:
-        format = GL_RGBA;
-        internalFormat = GL_RGBA8;
-        break;
-    default:
-        THROW("The texture data contains an unsupported number of channels");
-    }
+    auto [format, internalFormat] = GetTextureFormat(textureData.GetNumChannels());
 
-    glTextureStorage2D(mHandle, 1, internalFormat, textureData.GetWidth(), textureData.GetHeight());
-    glTextureSubImage2D(mHandle, 0, 0, 0, textureData.GetWidth(), textureData.GetHeight(), format, GL_UNSIGNED_BYTE,
-                        textureData.GetPixelData().data());
+    if (numLevels == 0)
+        numLevels = textureData.GetNumTextureLevels();
+
+    glTextureStorage2D(mHandle, numLevels, internalFormat, textureData.GetWidth(), textureData.GetHeight());
+
+    for (U32 level = 0; level < std::min(numLevels, textureData.GetNumTextureLevels()); ++level)
+        glTextureSubImage2D(mHandle, level, 0, 0, textureData.GetWidth(level), textureData.GetHeight(level), format,
+                            GL_UNSIGNED_BYTE, textureData.GetPixelData(level).data());
 }
+
+
 
 } // namespace GDL::OpenGL

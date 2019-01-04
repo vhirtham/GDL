@@ -11,6 +11,7 @@ namespace GDL
 
 class TextureData2d;
 
+
 namespace OpenGL
 {
 //! @brief Wrapper class for OpenGL textures
@@ -29,7 +30,10 @@ public:
 
     //! @brief Ctor
     //! @param textureData: Texture data that should be used to create the texture object
-    Texture(const TextureData2d& textureData);
+    //! @param numLevels: Number of texture levels that should be created. 0 creates a level for each texture level in
+    //! the provided texture data. If you provide a fixed number all levels that have a corresponding data set in the
+    //! passed texture data will be initialized with this data. Levels without data will be left uninitialized.
+    Texture(const TextureData2d& textureData, U32 numLevels = 0);
 
     //! @brief Binds the texture to the specified texture unit
     //! @param textureUnit: Texture unit
@@ -41,7 +45,7 @@ public:
 
     //! @brief Sets the border color for the corresponding wrapping method
     //! @param borderColor: Border color
-    void SetBorderColor(std::array<F32,4> borderColor);
+    void SetBorderColor(std::array<F32, 4> borderColor);
 
     //! @brief Sets the filter that is used when magnifying the texture
     //! @param filter: Filter enum value
@@ -64,10 +68,19 @@ public:
     void SetWrappingXY(GLenum wrapping);
 
 private:
-
     //! @brief Initializes the texture
     //! @param textureData: Texture data that should be used to initialize the texture object
-    void Initialize(const TextureData2d& textureData, GLenum textureTarget);
+    //! @param numLevels: Number of texture levels that should be created. 0 creates a level for each texture level in
+    //! the provided texture data. If you provide a fixed number all levels that have a corresponding data set in the
+    //! passed texture data will be initialized with this data. Levels without data will be left uninitialized.
+    void Initialize(const TextureData2d& textureData, GLenum textureTarget, U32 numLevels);
+
+    //! @brief Gets the texture format enums for a given number of channels
+    //! @param numChannels: Number of channels of the texture
+    //! @return Pair of texture format enums (format, internalFormat)
+    //! @remark: Have a look at the OpenGL documentations of glTextureStorage2D and glTextureSubImage2D to understand
+    //! the differences between both format enums
+    static std::pair<GLenum, GLenum> GetTextureFormat(U32 numChannels);
 };
 
 } // namespace OpenGL
