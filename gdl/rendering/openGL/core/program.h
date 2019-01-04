@@ -93,7 +93,22 @@ public:
     //! @brief Sets the value of a uniform
     //! @param uniformLocation: Location of the uniform
     //! @param value: New value
+    void SetUniform(GLint uniformLocation, I32 value);
+
+    //! @brief Sets the value of a uniform
+    //! @param uniformLocation: Location of the uniform
+    //! @param value: New value
+    void SetUniform(GLint uniformLocation, U32 value);
+
+    //! @brief Sets the value of a uniform
+    //! @param uniformLocation: Location of the uniform
+    //! @param value: New value
     void SetUniform(GLint uniformLocation, const Mat4f& value);
+
+    //! @brief Sets the texture unit of a uniform sampler
+    //! @param uniformName: Name of the uniform sampler
+    //! @param textureUnit: Texture unit
+    void SetUniformSamplerTextureUnit(const char* uniformName, U32 textureUnit);
 
     //! @brief Sets the values of a uniform array
     //! @param uniformLocation: location of the first uniform array member that should be set

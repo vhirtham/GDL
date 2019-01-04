@@ -1,3 +1,5 @@
+#define USE_GLUT
+
 #include "gdl/base/container/vector.h"
 #include "gdl/rendering/openGL/core/bufferObject.h"
 #include "gdl/rendering/openGL/core/contextManager.h"
@@ -22,19 +24,19 @@ using namespace GDL::OpenGL;
 const char* GetVertexShaderCode()
 {
     return R"glsl(
-           #version 430
+            #version 430
 
-           layout (location=0) in vec3 vertexPosition;
-           layout (location=1) in vec2 vertexTexCoord;
+            layout (location=0) in vec3 vertexPosition;
+            layout (location=1) in vec2 vertexTexCoord;
 
-           out vec2 texCoord;
+            out vec2 texCoord;
 
-           void main(void)
-           {
-               texCoord = vertexTexCoord;
-               gl_Position = vec4(vertexPosition,1.0);
-           }
-           )glsl";
+            void main(void)
+            {
+                texCoord = vertexTexCoord;
+                gl_Position = vec4(vertexPosition,1.0);
+            }
+            )glsl";
 }
 
 
@@ -42,18 +44,26 @@ const char* GetVertexShaderCode()
 const char* GetFragmentShaderCode()
 {
     return R"glsl(
-           #version 430
+            #version 430
 
-           in vec2 texCoord;
-           out vec4 fragColor;
+            in vec2 texCoord;
+            out vec4 fragColor;
 
-           uniform sampler2D texture0;
+            uniform sampler2D texture0;
+            uniform sampler2D texture1;
 
-           void main(void)
-           {
-               fragColor = texture(texture0,texCoord);
-           }
-           )glsl";
+            void main(void)
+            {
+                vec4 color0 = texture(texture0, texCoord);
+                vec4 color1 = texture(texture1, texCoord);
+
+                vec2 coords = texCoord * 2 - 1;
+
+                float factor = min(1, sqrt(coords.x * coords.x + coords.y * coords.y));
+
+                fragColor = mix(color0, color1, factor);
+            }
+            )glsl";
 }
 
 
@@ -67,7 +77,6 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
     ContextManager& contextManager = ContextManager::Instance();
     contextManager.EnableDebug();
     RenderWindow renderWindow(contextManager);
-    renderWindow.SetTitle("Indexed Drawing");
     renderWindow.Initialize();
 
 
@@ -80,6 +89,13 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
 
 
 
+    // Set uniform sampler texture units ---------------------------------
+
+    program.SetUniformSamplerTextureUnit("texture0", 0);
+    program.SetUniformSamplerTextureUnit("texture1", 1);
+
+
+
     // Create Buffer Objects ---------------------------------------------
     auto [vertexData, elementData] = MeshGenerator::CreateRectangle<true>();
 
@@ -88,12 +104,14 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
 
 
 
-    // Create Texture ----------------------------------------------------
+    // Create Textures ---------------------------------------------------
 
-    TextureData2d textureData = TextureFile::Read(MakeString(TEXTURE_DIRECTORY, "/testImage.tex").c_str());
-    Texture texture(textureData);
+    TextureData2d textureData0 = TextureFile::Read(MakeString(TEXTURE_DIRECTORY, "/testImage.tex").c_str());
+    TextureData2d textureData1 = TextureFile::Read(MakeString(TEXTURE_DIRECTORY, "/brickWall.tex").c_str());
+    Texture texture0(textureData0);
+    Texture texture1(textureData1);
 
-    glTextureParameteri(texture.GetHandle(), GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
 
     // Create Vertex Array Object ----------------------------------------
 
@@ -107,7 +125,8 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
     // Set state ---------------------------------------------------------
 
     vao.Bind();
-    texture.Bind(0);
+    texture0.Bind(0);
+    texture1.Bind(1);
     program.Use();
 
 

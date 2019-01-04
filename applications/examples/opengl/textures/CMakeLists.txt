@@ -1,3 +1,11 @@
+addGDLOpenGLApp(MultipleTextures
+    multipleTextures.cpp)
+
+target_compile_definitions(MultipleTextures
+    PRIVATE
+    TEXTURE_DIRECTORY="${GDL_ROOT_DIR}/applications/examples/data/textures")
+
+
 addGDLOpenGLApp(TexturedRectangle
     texturedRectangle.cpp)
 

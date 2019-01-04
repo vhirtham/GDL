@@ -132,6 +132,20 @@ void Program::SetUniform(GLint uniformLocation, F32 value)
 
 
 
+void Program::SetUniform(GLint uniformLocation, I32 value)
+{
+    glProgramUniform1i(mHandle, uniformLocation, value);
+}
+
+
+
+void Program::SetUniform(GLint uniformLocation, U32 value)
+{
+    glProgramUniform1ui(mHandle, uniformLocation, value);
+}
+
+
+
 void Program::SetUniform(GLint uniformLocation, const Mat4f& value)
 {
     glProgramUniformMatrix4fv(mHandle, uniformLocation, 1, GL_FALSE, value.Data().data());
@@ -149,6 +163,14 @@ void Program::SetUniformArray(GLint uniformLocation, const F32* const values, U3
 void Program::SetUniformBlockBinding(GLuint uniformBlockIndex, GLuint bindingPoint)
 {
     glUniformBlockBinding(mHandle, uniformBlockIndex, bindingPoint);
+}
+
+
+
+void Program::SetUniformSamplerTextureUnit(const char* uniformName, U32 textureUnit)
+{
+    GLint uniformLocation = QueryUniformLocation(uniformName);
+    SetUniform(uniformLocation, static_cast<I32>(textureUnit));
 }
 
 } // namespace GDL::OpenGL

@@ -67,11 +67,13 @@ BOOST_AUTO_TEST_CASE(Uniforms)
                                     #version 430
 
                                     uniform float x;
+                                    uniform sampler2D texture0;
 
                                     out vec4 out_Color;
                                     void main(void)
                                     {
-                                        out_Color = vec4(x,1.,1.,1.);
+                                        vec2 texCoord = vec2(1., 1.);
+                                        out_Color = mix(vec4(x,1.,1.,1.), texture(texture0, texCoord), 0.5);
                                     }
                                     )glsl";
 
@@ -85,4 +87,5 @@ BOOST_AUTO_TEST_CASE(Uniforms)
 
     program.SetUniform(xLocation, 2.f);
     program.SetUniform(transformationMatLocation, Mat4f());
+    program.SetUniformSamplerTextureUnit("texture0", 0);
 }
