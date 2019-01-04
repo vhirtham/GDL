@@ -50,7 +50,9 @@ TextureData2d Read(const char* fileName)
     ReadU32(textureFile, textureData.mWidth);
     ReadU32(textureFile, textureData.mHeight);
     ReadU32(textureFile, textureData.mNumChannels);
-    ReadPixelData(textureFile, textureData.mPixelData,
+
+    textureData.mPixelData.emplace_back();
+    ReadPixelData(textureFile, textureData.mPixelData[0],
                   textureData.mWidth * textureData.mHeight * textureData.mNumChannels);
 
     textureFile.close();

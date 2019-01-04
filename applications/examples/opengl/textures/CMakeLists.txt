@@ -20,3 +20,10 @@ addGDLOpenGLApp(TextureFiltering
 target_compile_definitions(TextureFiltering
     PRIVATE
     TEXTURE_DIRECTORY="${GDL_ROOT_DIR}/applications/examples/data/textures")
+
+addGDLOpenGLApp(TextureMipMaps
+    textureMipMaps.cpp)
+
+target_compile_definitions(TextureMipMaps
+    PRIVATE
+    TEXTURE_DIRECTORY="${GDL_ROOT_DIR}/applications/examples/data/textures")

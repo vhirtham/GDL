@@ -25,7 +25,7 @@ class TextureData2d
     U32 mWidth;
     U32 mHeight;
     U32 mNumChannels;
-    Vector<U8> mPixelData;
+    std::vector<Vector<U8>> mPixelData;
 
 
     //! @brief ctor
@@ -61,9 +61,10 @@ public:
     //! @return Number of channels of the texture
     U32 GetNumChannels() const;
 
-    //! @brief Gets the pixel data of the texture
+    //! @brief Gets the pixel data of the specified texture level
+    //! @param level: Texture level.
     //! @return Pixel data of the texture
-    const Vector<U8>& GetPixelData() const;
+    const Vector<U8>& GetPixelData(U32 level = 0) const;
 
     //! @brief Gets the width of the texture
     //! @return Width of the texture

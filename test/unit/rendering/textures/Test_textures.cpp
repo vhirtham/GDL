@@ -40,6 +40,7 @@ BOOST_AUTO_TEST_CASE(Texture_Data)
     for (U32 i = 0; i < textureData2.GetPixelData().size(); ++i)
         BOOST_CHECK(textureData2.GetPixelData()[i] == data[i]);
 
+    GDL_CHECK_THROW_DEV_DISABLE(textureData2.GetPixelData(1), Exception);
 
     GDL_CHECK_THROW_DEV_DISABLE(TextureData2d(0, 4, 3, data), Exception);
     GDL_CHECK_THROW_DEV_DISABLE(TextureData2d(4, 0, 3, data), Exception);
