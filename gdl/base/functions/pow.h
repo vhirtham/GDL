@@ -21,6 +21,8 @@ constexpr _type Pow(const _type, std::integral_constant<I32, 0>)
     return 1;
 }
 
+
+
 //! @brief Overloaded helper function to calculate the power of a given base (spezialization exponent = 1)
 //! @tparam _type: Type of the base
 //! @param base: Base
@@ -32,16 +34,7 @@ constexpr _type Pow(const _type base, std::integral_constant<I32, 1>)
     return base;
 }
 
-//! @brief Overloaded helper function to calculate the power of a given base (spezialization exponent = -1)
-//! @tparam _type: Type of the base
-//! @param base: Base
-//! @return Base;
-//! @remark: std::integral_constant is used for recursive function overloading
-template <typename _type>
-constexpr _type Pow(const _type base, std::integral_constant<I32, -1>)
-{
-    return 1 / base;
-}
+
 
 //! @brief Overloaded helper function to calculate the power of a given base
 //! @tparam _type: Type of the base
@@ -56,11 +49,12 @@ constexpr _type Pow(const _type base, std::integral_constant<I32, _exponent>)
     {
         static_assert(std::is_floating_point<_type>::value,
                       "Negative exponents are only supported for floating point types");
-        return Pow(base, std::integral_constant<I32, _exponent + 1>()) / base;
+        return 1 / Pow(base, std::integral_constant<I32, -1 * _exponent>());
     }
     else
         return Pow(base, std::integral_constant<I32, _exponent - 1>()) * base;
 }
+
 
 
 //! @brief Calculates the power of a given base with an integer exponent (compile time version)
@@ -75,6 +69,7 @@ constexpr _type Pow(const _type base)
 }
 
 
+
 //! @brief Calculates the power of a given base with an integer exponent (run time version)
 //! @tparam _type: Type of the base
 //! @param base: Base
@@ -83,17 +78,19 @@ constexpr _type Pow(const _type base)
 template <typename _type>
 constexpr _type Pow(const _type base, const I32 exponent)
 {
-    if (exponent > 0)
-        return (exponent == 1) ? base : (Pow(base, exponent - 1) * base);
+    _type result = 1;
 
+    for (I32 i = 0; i < std::abs(exponent); ++i)
+        result *= base;
+
+    DEV_EXCEPTION(exponent < 0 && !std::is_floating_point<_type>::value,
+                  "Negative exponents are only supported for floating point types");
     if (exponent < 0)
-    {
-        DEV_EXCEPTION(!std::is_floating_point<_type>::value,
-                      "Negative exponents are only supported for floating point types");
-        return (exponent == -1) ? 1 / base : (Pow(base, exponent + 1) / base);
-    }
-    return 1;
+        return 1 / result;
+
+    return result;
 }
+
 
 
 //! @brief Calculates the square of a given base

@@ -26,6 +26,8 @@ BOOST_AUTO_TEST_CASE(Alignment_Functions)
     BOOST_CHECK(IsAligned(misAlignedPointer, alignment) == false);
 }
 
+
+
 BOOST_AUTO_TEST_CASE(Power_Functions)
 {
     BOOST_CHECK(Pow<3>(3) == 27);
