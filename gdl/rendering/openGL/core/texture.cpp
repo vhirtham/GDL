@@ -3,6 +3,8 @@
 
 #include "gdl/rendering/textures/textureData2d.h"
 
+#include <cmath>
+
 
 namespace GDL::OpenGL
 {
@@ -25,6 +27,13 @@ void Texture::Bind(GLuint textureUnit) const
 GLuint Texture::GetHandle() const
 {
     return mHandle;
+}
+
+
+
+U32 Texture::GetMaxNumTextureLevels2d(U32 width, U32 height)
+{
+    return static_cast<U32>(std::floor(std::log2(std::max(width, height))) + 1);
 }
 
 
@@ -107,6 +116,9 @@ void Texture::Initialize(const TextureData2d& textureData, GLenum textureTarget,
 
     if (numLevels == 0)
         numLevels = textureData.GetNumTextureLevels();
+
+    DEV_EXCEPTION(GetMaxNumTextureLevels2d(textureData.GetWidth(), textureData.GetHeight()) < numLevels,
+                  "Number of texture levels too high");
 
     glTextureStorage2D(mHandle, numLevels, internalFormat, textureData.GetWidth(), textureData.GetHeight());
 

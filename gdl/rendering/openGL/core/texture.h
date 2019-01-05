@@ -44,6 +44,12 @@ public:
     //! @return The textures handle
     GLuint GetHandle() const;
 
+    //! @brief Returnes the maximum number of texture levels for a given width-height combination
+    //! @param width: Texture width
+    //! @param height: Texture height
+    //! @return Maximum number of texture levels
+    static U32 GetMaxNumTextureLevels2d(U32 width, U32 height);
+
     //! @brief Sets the border color for the corresponding wrapping method
     //! @param borderColor: Border color
     void SetBorderColor(std::array<F32, 4> borderColor);

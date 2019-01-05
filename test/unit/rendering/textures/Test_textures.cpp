@@ -48,6 +48,7 @@ BOOST_AUTO_TEST_CASE(Texture_Data)
 }
 
 
+
 BOOST_AUTO_TEST_CASE(Texture_Data_Mipmaps)
 {
     constexpr U32 width = 2;
@@ -98,6 +99,7 @@ BOOST_AUTO_TEST_CASE(Texture_Data_Mipmaps)
     textureData3.CreateMipMaps(Interpolation::NONE);
     GDL_CHECK_THROW_DEV_DISABLE(textureData3.SetMipMapData(1, textureData.GetPixelData(0)), Exception);
 }
+
 
 
 BOOST_AUTO_TEST_CASE(Texture_File)
