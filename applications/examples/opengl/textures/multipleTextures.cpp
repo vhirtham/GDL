@@ -1,5 +1,3 @@
-#define USE_GLUT
-
 #include "gdl/base/container/vector.h"
 #include "gdl/rendering/openGL/core/bufferObject.h"
 #include "gdl/rendering/openGL/core/contextManager.h"

@@ -31,9 +31,9 @@ class TextureData2d
     friend TextureData2d GDL::TextureFile::Read(const char*);
 
 
+    U32 mWidth;
+    U32 mHeight;
     U32 mNumChannels;
-    std::vector<U32> mWidth;
-    std::vector<U32> mHeight;
     std::vector<Vector<U8>> mPixelData;
 
 
@@ -69,7 +69,12 @@ public:
 
     //! @brief Gets the height of the texture
     //! @return Height of the texture
-    U32 GetHeight(U32 level = 0) const;
+    U32 GetHeight() const;
+
+    //! @brief Gets the height of the specified texture level
+    //! @param level: Texture level
+    //! @return Height of the texture
+    U32 GetHeight(U32 level) const;
 
     //! @brief Gets the number of channels of the texture
     //! @return Number of channels of the texture
@@ -86,7 +91,12 @@ public:
 
     //! @brief Gets the width of the texture
     //! @return Width of the texture
-    U32 GetWidth(U32 level = 0) const;
+    U32 GetWidth() const;
+
+    //! @brief Gets the width of the specified texture level
+    //! @param level: Texture level
+    //! @return Width of the texture
+    U32 GetWidth(U32 level) const;
 
     //! @brief Checks if the internally storid data is valid and consistent
     //! @return True / False
@@ -99,8 +109,10 @@ public:
 
 private:
     //! @brief Calculates a mipmap for the chosen level by linear interpolation of the previous level
+    //! @param width: Width of the mipmap
+    //! @param height: Height of the mipmap
     //! @param level: Level of the mipmap
-    void CalculateLinearMipMap(U32 level);
+    void CalculateLinearMipMap(U32 level, U32 width, U32 height);
 };
 
 } // namespace GDL
