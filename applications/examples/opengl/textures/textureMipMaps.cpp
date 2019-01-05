@@ -95,7 +95,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
     // Create Texture ----------------------------------------------------
 
     TextureData2d textureData = TextureFile::Read(MakeString(TEXTURE_DIRECTORY, "/testImage.tex").c_str());
-    textureData.CreateMipMaps();
+    textureData.CreateMipMaps(Interpolation::LINEAR);
 
     //    constexpr U32 level = 1;
     //    Vector<U8> pixelData(textureData.GetWidth(level) * textureData.GetHeight(level) *
@@ -112,6 +112,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
     //    textureData.SetMipMapData(level, pixelData);
 
     Texture texture(textureData);
+    //    texture.CreateMipMaps();
 
 
 

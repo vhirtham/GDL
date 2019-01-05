@@ -28,15 +28,15 @@ BOOST_AUTO_TEST_CASE(Test_Texture2d)
     // clang-format on
 
     TextureData2d textureData(width, height, numChannels, data);
-    textureData.CreateMipMaps();
 
-    Texture texture(textureData);
-    texture.Bind(0);
+    Texture texture(textureData, 3);
+    texture.CreateMipMaps();
     texture.SetWrappingXY(GL_CLAMP_TO_BORDER);
     texture.SetBorderColor({{1.f, 0.f, 1.f, 1.f}});
     texture.SetMinifyingFilter(GL_LINEAR);
     texture.SetMagnifyingFilter(GL_LINEAR);
 
+    texture.Bind(0);
     // Too many texture levels
     GDL_CHECK_THROW_DEV_DISABLE(Texture(textureData, 5), Exception);
 }

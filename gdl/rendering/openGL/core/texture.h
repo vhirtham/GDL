@@ -40,6 +40,10 @@ public:
     //! @param textureUnit: Texture unit
     void Bind(GLuint textureUnit) const;
 
+    //! @brief Creates mipmaps for the texture with the corresponding OpenGL function
+    void CreateMipMaps();
+
+
     //! @brief Gets the textures handle
     //! @return The textures handle
     GLuint GetHandle() const;

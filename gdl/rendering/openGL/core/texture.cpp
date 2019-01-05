@@ -24,6 +24,13 @@ void Texture::Bind(GLuint textureUnit) const
 
 
 
+void Texture::CreateMipMaps()
+{
+    glGenerateTextureMipmap(mHandle);
+}
+
+
+
 GLuint Texture::GetHandle() const
 {
     return mHandle;
