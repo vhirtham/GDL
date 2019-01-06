@@ -1,5 +1,6 @@
 #pragma once
 
+#include "gdl/base/exception.h"
 #include "gdl/base/fundamentalTypes.h"
 
 #include <array>
