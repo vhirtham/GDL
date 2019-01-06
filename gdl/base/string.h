@@ -67,9 +67,67 @@ _stringType MakeString(const _args&... args)
     return string;
 }
 
+
+// GetFormatString ----------------------------------------------------------------------------------------------------
+
+
+//! @brief Gets a format string that can be used with std::printf functions to cast a I32 into a string
+//! @return Format string
+constexpr const char* GetFormatStringI32()
+{
+    if constexpr (sizeof(long) == 4)
+        return "%li";
+    else if constexpr (sizeof(int) == 4)
+        return "%i";
+    else
+        THROW("Could not determine std::snprintf format string for I32");
+}
+
+
+
+//! @brief Gets a format string that can be used with std::printf functions to cast a I64 into a string
+//! @return Format string
+constexpr const char* GetFormatStringI64()
+{
+    if constexpr (sizeof(long long) == 8)
+        return "%lli";
+    else if constexpr (sizeof(long) == 8)
+        return "%li";
+    else
+        THROW("Could not determine std::snprintf format string for I32");
+}
+
+
+
+//! @brief Gets a format string that can be used with std::printf functions to cast a U32 into a string
+//! @return Format string
+constexpr const char* GetFormatStringU32()
+{
+    if constexpr (sizeof(unsigned long) == 4)
+        return "%lu";
+    else if constexpr (sizeof(unsigned int) == 4)
+        return "%u";
+    else
+        THROW("Could not determine std::snprintf format string for I32");
+}
+
+
+
+//! @brief Gets a format string that can be used with std::printf functions to cast a U64 into a string
+//! @return Format string
+constexpr const char* GetFormatStringU64()
+{
+    if constexpr (sizeof(unsigned long long) == 8)
+        return "%llu";
+    else if constexpr (sizeof(unsigned long) == 8)
+        return "%lu";
+    else
+        THROW("Could not determine std::snprintf format string for I32");
+}
+
+
+
 // ToString functions -------------------------------------------------------------------------------------------------
-
-
 
 //! @brief Converts an F32 number into a human readable string
 //! @tparam _bufferSize: Size of the temporary char buffer. Use the default value unless memory size is critical.
@@ -132,7 +190,7 @@ String ToString(I16 value, const char* format = "%hi")
 //! @param value: Number that should be converted
 //! @param format: Char array to specify the output format. Have a look at the std::snprintf documentation.
 template <U32 _bufferSize = 16>
-String ToString(I32 value, const char* format = "%i")
+String ToString(I32 value, const char* format = GetFormatStringI32())
 {
     std::array<char, _bufferSize> buffer;
     std::snprintf(buffer.data(), buffer.size(), format, value);
@@ -146,7 +204,7 @@ String ToString(I32 value, const char* format = "%i")
 //! @param value: Number that should be converted
 //! @param format: Char array to specify the output format. Have a look at the std::snprintf documentation.
 template <U32 _bufferSize = 32>
-String ToString(I64 value, const char* format = "%li")
+String ToString(I64 value, const char* format = GetFormatStringI64())
 {
     std::array<char, _bufferSize> buffer;
     std::snprintf(buffer.data(), buffer.size(), format, value);
@@ -188,7 +246,7 @@ String ToString(U16 value, const char* format = "%hu")
 //! @param value: Number that should be converted
 //! @param format: Char array to specify the output format. Have a look at the std::snprintf documentation.
 template <U32 _bufferSize = 16>
-String ToString(U32 value, const char* format = "%u")
+String ToString(U32 value, const char* format = GetFormatStringU32())
 {
     std::array<char, _bufferSize> buffer;
     std::snprintf(buffer.data(), buffer.size(), format, value);
@@ -202,7 +260,7 @@ String ToString(U32 value, const char* format = "%u")
 //! @param value: Number that should be converted
 //! @param format: Char array to specify the output format. Have a look at the std::snprintf documentation.
 template <U32 _bufferSize = 32>
-String ToString(U64 value, const char* format = "%lu")
+String ToString(U64 value, const char* format = GetFormatStringU64())
 {
     std::array<char, _bufferSize> buffer;
     std::snprintf(buffer.data(), buffer.size(), format, value);
