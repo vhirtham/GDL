@@ -699,7 +699,7 @@ BOOST_AUTO_TEST_CASE(Deallocation_Exceptions)
     GDL_CHECK_THROW_DEV_DISABLE(gpm.Deallocate(address), Exception);
 }
 
-
+#include <iostream>
 
 //! @brief This test checks if the allocated total memory size is corrected if it is smaller than the space needed for
 //! free memory block data. If no correction takes place, deallocation of a block which is to small will destroy the
@@ -710,7 +710,7 @@ BOOST_AUTO_TEST_CASE(Total_size_smaller_than_free_memory_block_data)
     constexpr size_t alignment = 1;
     constexpr size_t headerSize = sizeof(size_t) + alignment;
     constexpr size_t freeMemoryBlockSize = 2 * sizeof(size_t);
-    constexpr size_t totalAllocationSize = 10;
+    constexpr size_t totalAllocationSize = freeMemoryBlockSize - 1;
     constexpr size_t allocationSize = totalAllocationSize - headerSize;
     constexpr MemorySize memorySize = numAllocations * freeMemoryBlockSize * 1_B;
 
