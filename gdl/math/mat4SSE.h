@@ -4,9 +4,7 @@
 #include "gdl/base/sse/utility.h"
 #include "gdl/base/sse/intrinsics.h"
 
-#include <x86intrin.h>
 #include <array>
-#include <cmath> // Temporary as long as rotation matrix is stored here!
 #include <iostream>
 
 
@@ -30,13 +28,13 @@ public:
     //! @param data: Array containing the data
     inline explicit Mat4SSE(std::array<F32, 16> data);
 
-    //! @brief Constructor that initializes full matrix with specific values (column major)
+    //! @brief Constructor that initializes the full matrix with specific values (column major)
     //! @param v0-v15: Matrix values in column major ordering
     inline Mat4SSE(F32 v0, F32 v1, F32 v2, F32 v3, F32 v4, F32 v5, F32 v6, F32 v7, F32 v8, F32 v9, F32 v10, F32 v11,
                    F32 v12, F32 v13, F32 v14, F32 v15);
 
 private:
-    //! @brief Constructor that initializes full matrix with specific columns
+    //! @brief Constructor that initializes the full matrix with specific columns
     //! @param col0: first column
     //! @param col1: second column
     //! @param col2: third column
@@ -48,7 +46,7 @@ public:
     //! @param row: Row of the accessed value
     //! @param col: Column of the accessed value
     //! @return Accessed value
-    inline F32 operator()(const U32 row, const U32 col) const;
+    [[nodiscard]] inline F32 operator()(const U32 row, const U32 col) const;
 
     //! @brief Compares if two matrices are equal
     //! @param rhs: Matrix that should be compared
@@ -88,8 +86,9 @@ public:
     [[nodiscard]] inline const std::array<F32, 16> Data() const;
 
 private:
-    //! @brief Checks if the matrix was constructed as expected
-    inline void ConstructionChecks() const;
+    //! @brief Checks if the matrix internal data is aligned
+    //! @return True / False
+    inline bool IsDataAligned() const;
 };
 
 

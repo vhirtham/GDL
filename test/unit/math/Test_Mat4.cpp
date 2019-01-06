@@ -164,7 +164,7 @@ BOOST_FIXTURE_TEST_CASE(Parentheses_Operator_Single, Fixture<Mat4Single<F32>>)
 
 
 
-BOOST_FIXTURE_TEST_CASE(Parentheses_Operator_SSE, Fixture<Mat4Single<F32>>)
+BOOST_FIXTURE_TEST_CASE(Parentheses_Operator_SSE, Fixture<Mat4SSE>)
 {
     ParenthesesOperatorTest(A, B);
 }

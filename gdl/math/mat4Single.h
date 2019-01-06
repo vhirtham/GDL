@@ -32,7 +32,7 @@ public:
     //! @param data: Array containing the data
     inline explicit Mat4Single(std::array<_type, 16> data);
 
-    //! @brief Constructor that initializes full matrix with specific values (column major)
+    //! @brief Constructor that initializes the full matrix with specific values (column major)
     //! @param v0-v16: Matrix values in column major ordering
     inline Mat4Single(_type v0, _type v1, _type v2, _type v3, _type v4, _type v5, _type v6, _type v7, _type v8,
                       _type v9, _type v10, _type v11, _type v12, _type v13, _type v14, _type v15);
@@ -41,7 +41,7 @@ public:
     //! @param row: Row of the accessed value
     //! @param col: Column of the accessed value
     //! @return Accessed value
-    inline _type operator()(const U32 row, const U32 col) const;
+    [[nodiscard]] inline _type operator()(const U32 row, const U32 col) const;
 
     //! @brief Compares if two matrices are equal
     //! @param rhs: Matrix that should be compared

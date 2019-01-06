@@ -24,7 +24,7 @@ Mat4SSE::Mat4SSE()
               {_mmx_setzero_p<__m128>()},
               {_mmx_setzero_p<__m128>()}}})
 {
-    ConstructionChecks();
+    DEV_EXCEPTION(!IsDataAligned(), "One or more registers of Mat4SSE are not 16 byte aligned");
 }
 
 
@@ -34,7 +34,7 @@ Mat4SSE::Mat4SSE(std::array<F32, 16> data)
               {_mmx_setr_p<__m128>(data[8], data[9], data[10], data[11])},
               {_mmx_setr_p<__m128>(data[12], data[13], data[14], data[15])}}})
 {
-    ConstructionChecks();
+    DEV_EXCEPTION(!IsDataAligned(), "One or more registers of Mat4SSE are not 16 byte aligned");
 }
 
 
@@ -46,7 +46,7 @@ Mat4SSE::Mat4SSE(F32 v0, F32 v1, F32 v2, F32 v3, F32 v4, F32 v5, F32 v6, F32 v7,
               {_mmx_setr_p<__m128>(v8, v9, v10, v11)},
               {_mmx_setr_p<__m128>(v12, v13, v14, v15)}}})
 {
-    ConstructionChecks();
+    DEV_EXCEPTION(!IsDataAligned(), "One or more registers of Mat4SSE are not 16 byte aligned");
 }
 
 
@@ -54,7 +54,7 @@ Mat4SSE::Mat4SSE(F32 v0, F32 v1, F32 v2, F32 v3, F32 v4, F32 v5, F32 v6, F32 v7,
 Mat4SSE::Mat4SSE(__m128 col0, __m128 col1, __m128 col2, __m128 col3)
     : mData({{col0, col1, col2, col3}})
 {
-    ConstructionChecks();
+    DEV_EXCEPTION(!IsDataAligned(), "One or more registers of Mat4SSE are not 16 byte aligned");
 }
 
 
@@ -62,7 +62,7 @@ Mat4SSE::Mat4SSE(__m128 col0, __m128 col1, __m128 col2, __m128 col3)
 Mat4SSE::Mat4SSE(const Mat4SSE& other)
     : mData(other.mData)
 {
-    ConstructionChecks();
+    DEV_EXCEPTION(!IsDataAligned(), "One or more registers of Mat4SSE are not 16 byte aligned");
 }
 
 
@@ -168,11 +168,10 @@ const std::array<F32, 16> Mat4SSE::Data() const
 
 
 
-void Mat4SSE::ConstructionChecks() const
+bool Mat4SSE::IsDataAligned() const
 {
-    DEV_EXCEPTION(!(IsAligned(&mData[0], 16) && IsAligned(&mData[1], 16) && IsAligned(&mData[2], 16) &&
-                    IsAligned(&mData[3], 16)),
-                  "One or more registers of Mat4SSE are not 16 byte aligned");
+    return (IsAligned(&mData[0], 16) && IsAligned(&mData[1], 16) && IsAligned(&mData[2], 16) &&
+            IsAligned(&mData[3], 16));
 }
 
 
