@@ -180,3 +180,40 @@ BOOST_FIXTURE_TEST_CASE(Comparison_SSE, Fixture<Vec4SSE>)
     ComparisonTest(cA, cB);
     ComparisonTest(rA, rB);
 }
+
+
+
+// Dot ----------------------------------------------------------------------------------------------------------------
+
+template <typename _vector, typename _vector2>
+void DotProductTest(_vector& A, _vector2& B)
+{
+    std::array<F32, 4> vecAData = A.Data();
+    std::array<F32, 4> vecBData = B.Data();
+
+    F32 expectedResult = 0;
+    for (U32 i = 0; i < 4; ++i)
+        expectedResult += vecAData[i] * vecBData[i];
+
+    BOOST_CHECK(A.Dot(B) == Approx(expectedResult));
+}
+
+
+
+BOOST_FIXTURE_TEST_CASE(Dot_Product_Single, Fixture<Vec4fSingle>)
+{
+    DotProductTest(cA, cB);
+    DotProductTest(cA, rA);
+    DotProductTest(rA, rB);
+    DotProductTest(rA, cA);
+}
+
+
+
+BOOST_FIXTURE_TEST_CASE(Dot_Product_SSE, Fixture<Vec4SSE>)
+{
+    DotProductTest(cA, cB);
+    DotProductTest(cA, rA);
+    DotProductTest(rA, rB);
+    DotProductTest(rA, cA);
+}

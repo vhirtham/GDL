@@ -44,9 +44,8 @@ bool Vec3Single<_type, _isCol>::operator==(const Vec3Single& rhs) const
 
 
 
-
-template<typename _type, bool _isCol>
-bool Vec3Single<_type, _isCol>::operator!=(const Vec3Single &rhs) const
+template <typename _type, bool _isCol>
+bool Vec3Single<_type, _isCol>::operator!=(const Vec3Single& rhs) const
 {
     return !(operator==(rhs));
 }
@@ -70,6 +69,15 @@ const std::array<_type, 3> Vec3Single<_type, _isCol>::Data() const
 
 
 
+template <typename _type, bool _isCol>
+template <bool _isColRhs>
+F32 Vec3Single<_type, _isCol>::Dot(Vec3Single<_type, _isColRhs> rhs) const
+{
+    return mData[0] * rhs.mData[0] + mData[1] * rhs.mData[1] + mData[2] * rhs.mData[2];
+}
+
+
+
 template <typename _type>
 std::ostream& operator<<(std::ostream& os, const Vec3Single<_type, true>& vec)
 {
@@ -85,6 +93,7 @@ std::ostream& operator<<(std::ostream& os, const Vec3Single<_type, false>& vec)
     os << "| " << vec[0] << " " << vec[1] << " " << vec[2] << " |" << std::endl;
     return os;
 }
+
 
 
 } // namespace GDL

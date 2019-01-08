@@ -69,6 +69,15 @@ const std::array<_type, 4> Vec4Single<_type, _isCol>::Data() const
 
 
 
+template <typename _type, bool _isCol>
+template <bool _isColRhs>
+F32 Vec4Single<_type, _isCol>::Dot(Vec4Single<_type, _isColRhs> rhs) const
+{
+    return mData[0] * rhs.mData[0] + mData[1] * rhs.mData[1] + mData[2] * rhs.mData[2] + mData[3] * rhs.mData[3];
+}
+
+
+
 template <typename _type>
 std::ostream& operator<<(std::ostream& os, const Vec4Single<_type, true>& vec)
 {

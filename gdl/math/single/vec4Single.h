@@ -15,6 +15,9 @@ namespace GDL
 template <typename _type, bool _isCol = true>
 class Vec4Single
 {
+    template <typename, bool>
+    friend class Vec4Single;
+
     std::array<_type, 4> mData;
 
 public:
@@ -56,6 +59,13 @@ public:
     //! @brief Gets the data array
     //! @return Data
     [[nodiscard]] inline const std::array<_type, 4> Data() const;
+
+    //! @brief Calculates the dot product of two vectors
+    //! @tparam _isColRhs: True if the rhs vector is a column vector, false otherwise
+    //! @param rhs: Right hand side vector
+    //! @return Dot product
+    template <bool _isColRhs>
+    [[nodiscard]] inline F32 Dot(Vec4Single<_type, _isColRhs> rhs) const;
 };
 
 template <bool _isCol>

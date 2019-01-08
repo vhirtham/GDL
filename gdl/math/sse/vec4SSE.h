@@ -17,6 +17,9 @@ namespace GDL
 template <bool _isCol = true>
 class alignas(sse::alignmentBytes<__m128>) Vec4SSE
 {
+    template <bool>
+    friend class Vec4SSE;
+
     alignas(sse::alignmentBytes<__m128>) __m128 mData;
 
 public:
@@ -63,6 +66,13 @@ public:
     //! @brief Gets the data array
     //! @return Data
     [[nodiscard]] inline const std::array<F32, 4> Data() const;
+
+    //! @brief Calculates the dot product of two vectors
+    //! @tparam _isColRhs: True if the rhs vector is a column vector, false otherwise
+    //! @param rhs: Right hand side vector
+    //! @return Dot product
+    template <bool _isColRhs>
+    [[nodiscard]] inline F32 Dot(Vec4SSE<_isColRhs> rhs) const;
 
 private:
     //! @brief Checks if the vectors internal data is aligned

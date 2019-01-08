@@ -5,6 +5,7 @@
 #include "gdl/base/approx.h"
 #include "gdl/base/functions/alignment.h"
 #include "gdl/base/sse/directAccess.h"
+#include "gdl/base/sse/dotProduct.h"
 
 #include <cassert>
 
@@ -97,6 +98,18 @@ const std::array<F32, 3> Vec3SSE<_isCol>::Data() const
 
 
 template <bool _isCol>
+template<bool _isColRhs>
+F32 Vec3SSE<_isCol>::Dot(Vec3SSE<_isColRhs> rhs) const
+{
+    return sse::DotProduct<__m128,3>(mData,rhs.mData);
+}
+
+
+
+
+
+
+template <bool _isCol>
 bool Vec3SSE<_isCol>::IsDataAligned() const
 {
     return IsAligned(&mData, 16);
@@ -119,6 +132,8 @@ std::ostream& operator<<(std::ostream& os, const Vec3SSE<false>& vec)
     os << "| " << vec[0] << " " << vec[1] << " " << vec[2] << " |" << std::endl;
     return os;
 }
+
+
 
 
 

@@ -4,6 +4,7 @@
 
 #include "gdl/base/functions/alignment.h"
 #include "gdl/base/sse/directAccess.h"
+#include "gdl/base/sse/dotProduct.h"
 
 #include <cassert>
 
@@ -98,6 +99,19 @@ const std::array<F32, 4> Vec4SSE<_isCol>::Data() const
     std::memcpy(&data, &mData, sizeof(data));
     return data;
 }
+
+
+
+
+
+
+template <bool _isCol>
+template<bool _isColRhs>
+F32 Vec4SSE<_isCol>::Dot(Vec4SSE<_isColRhs> rhs) const
+{
+    return sse::DotProduct(mData,rhs.mData);
+}
+
 
 
 
