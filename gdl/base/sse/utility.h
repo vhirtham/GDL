@@ -81,14 +81,6 @@ auto GetFittingRegister();
 template <typename _registerType, bool _returnTypeIfNoTARegister = false>
 constexpr auto GetDataType();
 
-
-template <I32 _i0, I32 _i1, I32 _i2, I32 _i3>
-constexpr I32 ShuffleMask();
-
-template <I32 _i0, I32 _i1>
-constexpr I32 ShuffleMask();
-
-
 //! @brief Returns if the template type is a sse register type
 //! @tparam _registerType: Register type
 //! @return Inatance of  the underlying data type of a register

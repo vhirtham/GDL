@@ -1,6 +1,7 @@
 addTest(abs)
 addTest(compareAll)
 addTest(directAccess)
+addTest(dotProduct)
 addTest(maskMacros)
 addTest(transpose)
 addTest(utility)

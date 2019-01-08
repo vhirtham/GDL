@@ -191,6 +191,19 @@ inline _registerType _mmx_fmadd_p(_registerType lhsM, _registerType rhsM, _regis
 
 
 
+template <U32 _mask, typename _registerType>
+_registerType _mmx_dp_p(_registerType lhs, _registerType rhs)
+{
+    if constexpr (std::is_same<_registerType, __m128>::value)
+        return _mm_dp_ps(lhs, rhs, _mask);
+    else if constexpr (std::is_same<_registerType, __m128d>::value)
+        return _mm_dp_pd(lhs, rhs, _mask);
+    else
+        throw Exception(__PRETTY_FUNCTION__, "Not defined for selected register type.");
+}
+
+
+
 template <typename _registerType>
 inline auto _mmx_cmpeq_p(_registerType lhs, _registerType rhs)
 {
@@ -313,6 +326,25 @@ inline auto _mmx_movemask_epi8(_registerType reg)
 #ifdef __AVX2__
     else if constexpr (std::is_same<_registerType, __m256i>::value)
         return static_cast<U32>(_mm256_movemask_epi8(reg));
+#endif // __AVX2__
+    else
+        throw Exception(__PRETTY_FUNCTION__, "Not defined for selected register type.");
+}
+
+
+
+template <typename _registerType>
+inline auto _mmx_cvtsx_fx(_registerType reg)
+{
+    if constexpr (std::is_same<_registerType, __m128>::value)
+        return _mm_cvtss_f32(reg);
+    else if constexpr (std::is_same<_registerType, __m128d>::value)
+        return _mm_cvtsd_f64(reg);
+#ifdef __AVX2__
+    else if constexpr (std::is_same<_registerType, __m256>::value)
+        return _mm256_cvtss_f32(reg);
+    else if constexpr (std::is_same<_registerType, __m256d>::value)
+        return _mm256_cvtsd_f64(reg);
 #endif // __AVX2__
     else
         throw Exception(__PRETTY_FUNCTION__, "Not defined for selected register type.");

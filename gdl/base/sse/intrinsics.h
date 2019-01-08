@@ -6,6 +6,7 @@
 
 #include <x86intrin.h>
 
+#include <gdl/base/fundamentalTypes.h>
 
 
 namespace GDL
@@ -44,6 +45,11 @@ inline _registerType _mmx_set1_p(_type value);
 template <typename _registerType, typename... _args>
 inline _registerType _mmx_setr_p(_args... args);
 
+
+
+template <typename _registerType>
+inline auto _mmx_cvtsx_fx(_registerType reg);
+
 //! @brief Template for register addition
 //! @tparam _registerType: Register type
 //! @param lhs: Left hand side value
@@ -79,6 +85,15 @@ inline _registerType _mmx_mul_p(_registerType lhs, _registerType rhs);
 //! seperately.
 template <typename _registerType>
 inline _registerType _mmx_fmadd_p(_registerType lhsM, _registerType rhsM, _registerType add);
+
+//! @brief Template for register dot product
+//! @tparam _mask: Mask for the calculation of the dot product
+//! @tparam _registerType: Register type
+//! @param lhs: Left hand side value
+//! @param rhs: Right hand side value
+//! @return Dot product
+template <U32 _mask, typename _registerType>
+inline _registerType _mmx_dp_p(_registerType lhs, _registerType rhs);
 
 //! @brief Compares two registers for equality
 //! @tparam _registerType: Register type
