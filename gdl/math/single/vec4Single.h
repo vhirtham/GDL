@@ -34,6 +34,20 @@ public:
     inline Vec4Single(_type v0, _type v1, _type v2, _type v3);
 
 public:
+    //! @brief Compares if two vectors are equal
+    //! @param rhs: Vector that should be compared
+    //! @return True / False
+    //! @remark This function uses the Approx class internally. The default minimal base is used. This might be changed
+    //! in the future. A global minimal base for linear algebra comparison might be introduced.
+    [[nodiscard]] inline bool operator==(const Vec4Single& rhs) const;
+
+    //! @brief Compares if two vectors are NOT equal
+    //! @param rhs: Vector that should be compared
+    //! @return True / False
+    //! @remark This function uses the Approx class internally. The default minimal base is used. This might be changed
+    //! in the future. A global minimal base for linear algebra comparison might be introduced.
+    [[nodiscard]] inline bool operator!=(const Vec4Single& rhs) const;
+
     //! @brief Direct access operator
     //! @param index: Index of the accessed value
     //! @return Accessed value

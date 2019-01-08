@@ -56,6 +56,8 @@ BOOST_AUTO_TEST_CASE(Construction_SSE)
     ConstructionTest<Vec3fSSE<false>>();
 }
 
+
+
 // Operator[] test ----------------------------------------------------------------------------------------------------
 
 template <bool _isCol, template <bool> class _vector>
@@ -91,4 +93,92 @@ BOOST_AUTO_TEST_CASE(Parentheses_Operator_Single)
 BOOST_AUTO_TEST_CASE(Parentheses_Operator_SSE)
 {
     DirectAccessOperatorTest<Vec3fSSE>();
+}
+
+
+
+// Comparison ---------------------------------------------------------------------------------------------------------
+
+template <typename _vector>
+void ComparisonTest(_vector& A, _vector& B)
+{
+    BOOST_CHECK(A == A);
+    BOOST_CHECK(!(A != A));
+
+    BOOST_CHECK(A != B);
+    BOOST_CHECK(!(A == B));
+
+
+    // Check Tolerances
+    constexpr F32 epsilon = std::numeric_limits<F32>::epsilon();
+    std::array<F32, 3> vecAData = A.Data();
+    std::array<F32, 3> vecEps1Data, vecEps2Data;
+
+
+    for (U32 i = 0; i < 3; ++i)
+    {
+        if (static_cast<I32>(vecAData[i]) == 0)
+        {
+            vecEps1Data[i] = vecAData[i] + epsilon;
+            vecEps2Data[i] = vecAData[i] + 10 * epsilon;
+        }
+        else
+        {
+            vecEps1Data[i] = vecAData[i] + epsilon * vecAData[i];
+            vecEps2Data[i] = vecAData[i] + 10 * epsilon * vecAData[i];
+        }
+    }
+
+    _vector vecEps1(vecEps1Data);
+    _vector vecEps2(vecEps2Data);
+
+    BOOST_CHECK(A == vecEps1);
+    BOOST_CHECK(!(A != vecEps1));
+
+    BOOST_CHECK(A != vecEps2);
+    BOOST_CHECK(!(A == vecEps2));
+
+
+    // Only a single value differs
+    for (U32 i = 0; i < 3; ++i)
+    {
+        vecEps1Data = A.Data();
+        vecEps2Data = A.Data();
+
+        if (static_cast<I32>(vecAData[i]) == 0)
+        {
+            vecEps1Data[i] = vecAData[i] + epsilon;
+            vecEps2Data[i] = vecAData[i] + 10 * epsilon;
+        }
+        else
+        {
+            vecEps1Data[i] = vecAData[i] + epsilon * vecAData[i];
+            vecEps2Data[i] = vecAData[i] + 10 * epsilon * vecAData[i];
+        }
+
+        vecEps1 = _vector(vecEps1Data);
+        vecEps2 = _vector(vecEps2Data);
+
+        BOOST_CHECK(A == vecEps1);
+        BOOST_CHECK(!(A != vecEps1));
+
+        BOOST_CHECK(A != vecEps2);
+        BOOST_CHECK(!(A == vecEps2));
+    }
+}
+
+
+
+BOOST_FIXTURE_TEST_CASE(Comparison_Single, Fixture<Vec3fSingle>)
+{
+    ComparisonTest(cA, cB);
+    ComparisonTest(rA, rB);
+}
+
+
+
+BOOST_FIXTURE_TEST_CASE(Comparison_SSE, Fixture<Vec3SSE>)
+{
+    ComparisonTest(cA, cB);
+    ComparisonTest(rA, rB);
 }

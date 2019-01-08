@@ -57,6 +57,28 @@ Vec4SSE<_isCol>::Vec4SSE(__m128 data)
 
 
 
+
+
+template<bool _isCol>
+bool Vec4SSE<_isCol>::operator==(const Vec4SSE &rhs) const
+{
+    return mData == Approx(rhs.mData);
+}
+
+
+
+
+
+
+template<bool _isCol>
+bool Vec4SSE<_isCol>::operator!=(const Vec4SSE &rhs) const
+{
+    return !(operator==(rhs));
+}
+
+
+
+
 template <bool _isCol>
 F32 Vec4SSE<_isCol>::operator[](const U32 index) const
 {

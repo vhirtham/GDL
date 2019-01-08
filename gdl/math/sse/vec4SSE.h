@@ -1,5 +1,6 @@
 #pragma once
 
+#include "gdl/base/approx.h"
 #include "gdl/base/fundamentalTypes.h"
 #include "gdl/base/sse/utility.h"
 #include "gdl/base/sse/intrinsics.h"
@@ -40,6 +41,20 @@ private:
     inline Vec4SSE(__m128 data);
 
 public:
+    //! @brief Compares if two vectors are equal
+    //! @param rhs: Vector that should be compared
+    //! @return True / False
+    //! @remark This function uses the Approx class internally. The default minimal base is used. This might be changed
+    //! in the future. A global minimal base for linear algebra comparison might be introduced.
+    [[nodiscard]] inline bool operator==(const Vec4SSE& rhs) const;
+
+    //! @brief Compares if two vectors are NOT equal
+    //! @param rhs: Vector that should be compared
+    //! @return True / False
+    //! @remark This function uses the Approx class internally. The default minimal base is used. This might be changed
+    //! in the future. A global minimal base for linear algebra comparison might be introduced.
+    [[nodiscard]] inline bool operator!=(const Vec4SSE& rhs) const;
+
     //! @brief Direct access operator
     //! @param index: Index of the accessed value
     //! @return Accessed value
@@ -59,7 +74,6 @@ private:
 
 template <bool _isCol>
 using Vec4fSSE = Vec4SSE<_isCol>;
-
 
 
 

@@ -2,6 +2,7 @@
 
 #include "gdl/math/single/vec3Single.h"
 
+#include "gdl/base/approx.h"
 #include "gdl/base/exception.h"
 
 
@@ -28,6 +29,26 @@ template <typename _type, bool _isCol>
 Vec3Single<_type, _isCol>::Vec3Single(_type v0, _type v1, _type v2)
     : mData{{v0, v1, v2}}
 {
+}
+
+
+
+template <typename _type, bool _isCol>
+bool Vec3Single<_type, _isCol>::operator==(const Vec3Single& rhs) const
+{
+    bool result = true;
+    for (U32 i = 0; i < 3; ++i)
+        result = result && mData[i] == Approx(rhs.mData[i]);
+    return result;
+}
+
+
+
+
+template<typename _type, bool _isCol>
+bool Vec3Single<_type, _isCol>::operator!=(const Vec3Single &rhs) const
+{
+    return !(operator==(rhs));
 }
 
 

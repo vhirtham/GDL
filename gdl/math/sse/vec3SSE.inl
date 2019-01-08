@@ -2,6 +2,7 @@
 
 #include "gdl/math/sse/vec3SSE.h"
 
+#include "gdl/base/approx.h"
 #include "gdl/base/functions/alignment.h"
 #include "gdl/base/sse/directAccess.h"
 
@@ -53,6 +54,22 @@ Vec3SSE<_isCol>::Vec3SSE(__m128 data)
     : mData{data}
 {
     DEV_EXCEPTION(!IsDataAligned(), "Register of Vec3SSE is not aligned");
+}
+
+
+
+template <bool _isCol>
+bool Vec3SSE<_isCol>::operator==(const Vec3SSE& rhs) const
+{
+    return mData == Approx<__m128, 3>(rhs.mData);
+}
+
+
+
+template <bool _isCol>
+bool Vec3SSE<_isCol>::operator!=(const Vec3SSE& rhs) const
+{
+    return !(operator==(rhs));
 }
 
 

@@ -1,5 +1,7 @@
 #pragma once
 
+
+
 #include "gdl/base/fundamentalTypes.h"
 #include "gdl/base/sse/utility.h"
 #include "gdl/base/sse/intrinsics.h"
@@ -13,7 +15,7 @@ namespace GDL
 
 //! @brief Vector class with 3 entries and SSE support
 //! @tparam _isCol: If true, the vector is treated as column vector, otherwise as row vector
-template<bool _isCol = true>
+template <bool _isCol = true>
 class alignas(sse::alignmentBytes<__m128>) Vec3SSE
 {
     alignas(sse::alignmentBytes<__m128>) __m128 mData;
@@ -40,6 +42,19 @@ private:
     inline Vec3SSE(__m128 data);
 
 public:
+    //! @brief Compares if two vectors are equal
+    //! @param rhs: Vector that should be compared
+    //! @return True / False
+    //! @remark This function uses the Approx class internally. The default minimal base is used. This might be changed
+    //! in the future. A global minimal base for linear algebra comparison might be introduced.
+    [[nodiscard]] inline bool operator==(const Vec3SSE& rhs) const;
+
+    //! @brief Compares if two vectors are NOT equal
+    //! @param rhs: Vector that should be compared
+    //! @return True / False
+    //! @remark This function uses the Approx class internally. The default minimal base is used. This might be changed
+    //! in the future. A global minimal base for linear algebra comparison might be introduced.
+    [[nodiscard]] inline bool operator!=(const Vec3SSE& rhs) const;
 
     //! @brief Direct access operator
     //! @param index: Index of the accessed value
@@ -63,15 +78,12 @@ using Vec3fSSE = Vec3SSE<_isCol>;
 
 
 
-
-
-
 //! @brief Offstream operator
 //! @tparam _isCol: If true, the vector is treated as column vector, otherwise as row vector
 //! @param os: Reference to offstream object
 //! @param vec: Vector
 //! @return Reference to offstream object
-template<bool _isCol = true>
+template <bool _isCol = true>
 inline std::ostream& operator<<(std::ostream& os, const Vec3SSE<_isCol>& vec);
 
 } // namespace GDL
