@@ -78,6 +78,8 @@ F32 Vec3Single<_type, _isCol>::Dot(Vec3Single<_type, _isColRhs> rhs) const
 
 
 
+// LCOV_EXCL_START
+
 template <typename _type>
 std::ostream& operator<<(std::ostream& os, const Vec3Single<_type, true>& vec)
 {
@@ -94,6 +96,6 @@ std::ostream& operator<<(std::ostream& os, const Vec3Single<_type, false>& vec)
     return os;
 }
 
-
+// LCOV_EXCL_STOP
 
 } // namespace GDL

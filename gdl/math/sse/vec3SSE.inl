@@ -117,6 +117,9 @@ bool Vec3SSE<_isCol>::IsDataAligned() const
 
 
 
+
+// LCOV_EXCL_START
+
 template <>
 std::ostream& operator<<(std::ostream& os, const Vec3SSE<true>& vec)
 {
@@ -134,7 +137,7 @@ std::ostream& operator<<(std::ostream& os, const Vec3SSE<false>& vec)
 }
 
 
-
+// LCOV_EXCL_STOP
 
 
 } // namespace GDL
