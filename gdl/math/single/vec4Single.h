@@ -72,7 +72,8 @@ public:
     [[nodiscard]] inline F32 Length() const;
 
     //! @brief Normalizes the vector
-    void Normalize();
+    //! @return Reference to this
+    Vec4Single& Normalize();
 };
 
 template <bool _isCol>

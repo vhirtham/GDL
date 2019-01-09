@@ -6,6 +6,7 @@
 #include "gdl/base/functions/alignment.h"
 #include "gdl/base/sse/directAccess.h"
 #include "gdl/base/sse/dotProduct.h"
+#include "gdl/base/sse/maskMacros.h"
 
 #include <cassert>
 
@@ -86,6 +87,23 @@ F32 Vec3SSE<_isCol>::operator[](const U32 index) const
 
 
 template <bool _isCol>
+Vec3SSE<_isCol> Vec3SSE<_isCol>::Cross(Vec3SSE rhs) const
+{
+    DEV_EXCEPTION(*this == Vec3SSE(), "Length of this vector is 0. Can't calculate the cross product.");
+    DEV_EXCEPTION(rhs == Vec3SSE(), "Length of rhs vector is 0. Can't calculate the cross product.");
+
+    // source: http://threadlocalmutex.com/?p=8
+    __m128 lhs_yzx = _mm_shuffle_ps(mData, mData, SHUFFLE_4_MASK(1, 2, 0, 3));
+    __m128 rhs_yzx = _mm_shuffle_ps(rhs.mData, rhs.mData, SHUFFLE_4_MASK(1, 2, 0, 3));
+
+    __m128 tmp = _mmx_sub_p(_mmx_mul_p(mData, rhs_yzx), _mmx_mul_p(lhs_yzx, rhs.mData));
+
+    return Vec3SSE<_isCol>(_mm_shuffle_ps(tmp, tmp, SHUFFLE_4_MASK(1, 2, 0, 3)));
+}
+
+
+
+template <bool _isCol>
 const std::array<F32, 3> Vec3SSE<_isCol>::Data() const
 {
     std::array<F32, 3> data;
@@ -106,10 +124,12 @@ F32 Vec3SSE<_isCol>::Length() const
 
 
 template <bool _isCol>
-void Vec3SSE<_isCol>::Normalize()
+Vec3SSE<_isCol>& Vec3SSE<_isCol>::Normalize()
 {
     DEV_EXCEPTION(*this == Vec3SSE(), "Vector length is 0. Can't normalize the vector.");
     mData = _mmx_div_p(mData, _mmx_sqrt_p(sse::DotProduct<__m128, 3, true>(mData, mData)));
+
+    return *this;
 }
 
 

@@ -302,3 +302,48 @@ BOOST_AUTO_TEST_CASE(Normalize_SSE)
 {
     NormalizeTest<Vec3fSSE>();
 }
+
+
+
+// Cross --------------------------------------------------------------------------------------------------------------
+
+template <typename _vector>
+void CrossProductTest()
+{
+    _vector a1{7, 1, 0};
+    _vector a2{2, 5, 0};
+
+    _vector aExpNorm{0, 0, 1};
+    _vector aCross = a1.Cross(a2);
+
+    BOOST_CHECK(aCross.Normalize() == aExpNorm);
+
+    _vector b1{2, 0, 2};
+    _vector b2{0, 2, 0};
+
+    _vector bExpNorm{_vector(-2, 0, 2).Normalize()};
+    _vector bCross = b1.Cross(b2);
+
+    BOOST_CHECK(bCross.Normalize() == bExpNorm);
+
+    _vector zeroVec;
+
+    GDL_CHECK_THROW_DEV_DISABLE([[maybe_unused]] _vector tmp = zeroVec.Cross(a1), Exception);
+    GDL_CHECK_THROW_DEV_DISABLE([[maybe_unused]] _vector tmp = a1.Cross(zeroVec), Exception);
+}
+
+
+
+BOOST_FIXTURE_TEST_CASE(Cross_Product_Single, Fixture<Vec3fSingle>)
+{
+    CrossProductTest<Vec3fSingle<true>>();
+    CrossProductTest<Vec3fSingle<false>>();
+}
+
+
+
+BOOST_FIXTURE_TEST_CASE(Cross_Product_SSE, Fixture<Vec3SSE>)
+{
+    CrossProductTest<Vec3fSSE<true>>();
+    CrossProductTest<Vec3fSSE<false>>();
+}

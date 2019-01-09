@@ -3,8 +3,8 @@
 
 
 #include "gdl/base/fundamentalTypes.h"
-#include "gdl/base/sse/utility.h"
 #include "gdl/base/sse/intrinsics.h"
+#include "gdl/base/sse/utility.h"
 
 #include <array>
 #include <iostream>
@@ -64,6 +64,12 @@ public:
     //! @return Accessed value
     [[nodiscard]] inline F32 operator[](const U32 index) const;
 
+    //! @brief Calculates the cross product of two vectors
+    //! @tparam _isColRhs: True if the rhs vector is a column vector, false otherwise
+    //! @param rhs: Right hand side vector
+    //! @return Cross product
+    [[nodiscard]] inline Vec3SSE Cross(Vec3SSE rhs) const;
+
     //! @brief Gets the data array
     //! @return Data
     [[nodiscard]] inline const std::array<F32, 3> Data() const;
@@ -80,7 +86,8 @@ public:
     [[nodiscard]] inline F32 Length() const;
 
     //! @brief Normalizes the vector
-    void Normalize();
+    //! @return Reference to this
+    Vec3SSE& Normalize();
 
 private:
     //! @brief Checks if the vectors internal data is aligned

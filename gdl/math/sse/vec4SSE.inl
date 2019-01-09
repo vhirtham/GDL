@@ -105,10 +105,12 @@ F32 Vec4SSE<_isCol>::Length() const
 
 
 template <bool _isCol>
-void Vec4SSE<_isCol>::Normalize()
+Vec4SSE<_isCol>& Vec4SSE<_isCol>::Normalize()
 {
     DEV_EXCEPTION(*this == Vec4SSE(), "Vector length is 0. Can't normalize the vector.");
     mData = _mmx_div_p(mData, _mmx_sqrt_p(sse::DotProduct<__m128, 4, true>(mData, mData)));
+
+    return *this;
 }
 
 

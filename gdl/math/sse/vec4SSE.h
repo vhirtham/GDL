@@ -79,7 +79,8 @@ public:
     [[nodiscard]] inline F32 Length() const;
 
     //! @brief Normalizes the vector
-    void Normalize();
+    //! @return Reference to this
+    Vec4SSE& Normalize();
 
 private:
     //! @brief Checks if the vectors internal data is aligned

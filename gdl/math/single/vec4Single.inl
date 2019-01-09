@@ -78,12 +78,14 @@ F32 Vec4Single<_type, _isCol>::Length() const
 
 
 template <typename _type, bool _isCol>
-void Vec4Single<_type, _isCol>::Normalize()
+Vec4Single<_type, _isCol>& Vec4Single<_type, _isCol>::Normalize()
 {
     const F32 length = Length();
     DEV_EXCEPTION(length == ApproxZero<F32>(), "Vector length is 0. Can't normalize the vector.");
     for (U32 i = 0; i < 4; ++i)
         mData[i] /= length;
+
+    return *this;
 }
 
 
