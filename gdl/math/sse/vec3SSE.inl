@@ -98,14 +98,28 @@ const std::array<F32, 3> Vec3SSE<_isCol>::Data() const
 
 
 template <bool _isCol>
-template<bool _isColRhs>
-F32 Vec3SSE<_isCol>::Dot(Vec3SSE<_isColRhs> rhs) const
+F32 Vec3SSE<_isCol>::Length() const
 {
-    return sse::DotProduct<__m128,3>(mData,rhs.mData);
+    return _mmx_cvtsx_fx(_mmx_sqrt_p(sse::DotProduct<__m128, 3, true, 0>(mData, mData)));
 }
 
 
 
+template <bool _isCol>
+void Vec3SSE<_isCol>::Normalize()
+{
+    DEV_EXCEPTION(*this == Vec3SSE(), "Vector length is 0. Can't normalize the vector.");
+    mData = _mmx_div_p(mData, _mmx_sqrt_p(sse::DotProduct<__m128, 3, true>(mData, mData)));
+}
+
+
+
+template <bool _isCol>
+template <bool _isColRhs>
+F32 Vec3SSE<_isCol>::Dot(Vec3SSE<_isColRhs> rhs) const
+{
+    return sse::DotProduct<__m128, 3>(mData, rhs.mData);
+}
 
 
 
@@ -114,7 +128,6 @@ bool Vec3SSE<_isCol>::IsDataAligned() const
 {
     return IsAligned(&mData, 16);
 }
-
 
 
 

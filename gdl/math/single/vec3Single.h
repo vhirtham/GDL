@@ -66,6 +66,13 @@ public:
     //! @return Dot product
     template <bool _isColRhs>
     [[nodiscard]] inline F32 Dot(Vec3Single<_type, _isColRhs> rhs) const;
+
+    //! @brief Calculates the length of the vector
+    //! @return Length of the vector
+    [[nodiscard]] inline F32 Length() const;
+
+    //! @brief Normalizes the vector
+    void Normalize();
 };
 
 

@@ -75,6 +75,13 @@ public:
     template <bool _isColRhs>
     [[nodiscard]] inline F32 Dot(Vec3SSE<_isColRhs> rhs) const;
 
+    //! @brief Calculates the length of the vector
+    //! @return Length of the vector
+    [[nodiscard]] inline F32 Length() const;
+
+    //! @brief Normalizes the vector
+    void Normalize();
+
 private:
     //! @brief Checks if the vectors internal data is aligned
     //! @return True / False

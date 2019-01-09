@@ -58,25 +58,19 @@ Vec4SSE<_isCol>::Vec4SSE(__m128 data)
 
 
 
-
-
-template<bool _isCol>
-bool Vec4SSE<_isCol>::operator==(const Vec4SSE &rhs) const
+template <bool _isCol>
+bool Vec4SSE<_isCol>::operator==(const Vec4SSE& rhs) const
 {
     return mData == Approx(rhs.mData);
 }
 
 
 
-
-
-
-template<bool _isCol>
-bool Vec4SSE<_isCol>::operator!=(const Vec4SSE &rhs) const
+template <bool _isCol>
+bool Vec4SSE<_isCol>::operator!=(const Vec4SSE& rhs) const
 {
     return !(operator==(rhs));
 }
-
 
 
 
@@ -102,16 +96,29 @@ const std::array<F32, 4> Vec4SSE<_isCol>::Data() const
 
 
 
+template <bool _isCol>
+F32 Vec4SSE<_isCol>::Length() const
+{
+    return _mmx_cvtsx_fx<__m128>(_mmx_sqrt_p<__m128>(sse::DotProduct<__m128, 4, true, 0>(mData, mData)));
+}
 
 
 
 template <bool _isCol>
-template<bool _isColRhs>
-F32 Vec4SSE<_isCol>::Dot(Vec4SSE<_isColRhs> rhs) const
+void Vec4SSE<_isCol>::Normalize()
 {
-    return sse::DotProduct(mData,rhs.mData);
+    DEV_EXCEPTION(*this == Vec4SSE(), "Vector length is 0. Can't normalize the vector.");
+    mData = _mmx_div_p(mData, _mmx_sqrt_p(sse::DotProduct<__m128, 4, true>(mData, mData)));
 }
 
+
+
+template <bool _isCol>
+template <bool _isColRhs>
+F32 Vec4SSE<_isCol>::Dot(Vec4SSE<_isColRhs> rhs) const
+{
+    return sse::DotProduct(mData, rhs.mData);
+}
 
 
 

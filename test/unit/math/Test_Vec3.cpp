@@ -6,6 +6,7 @@
 #include "gdl/math/single/vec3Single.h"
 
 #include "test/tools/arrayValueComparison.h"
+#include "test/tools/ExceptionChecks.h"
 
 using namespace GDL;
 
@@ -218,4 +219,86 @@ BOOST_FIXTURE_TEST_CASE(Dot_Product_SSE, Fixture<Vec3SSE>)
     DotProductTest(cA, rA);
     DotProductTest(rA, rB);
     DotProductTest(rA, cA);
+}
+
+
+
+// Length -------------------------------------------------------------------------------------------------------------
+
+template <bool _isCol, template <bool> class _vector>
+void LengthTest()
+{
+    _vector<_isCol> vec1{{3, 2, 6}};
+    BOOST_CHECK(vec1.Length() == Approx(7.f));
+
+    for (U32 i = 0; i < 3; ++i)
+    {
+        std::array<F32, 3> data{{0, 0, 0}};
+        data[i] = 1.f;
+        _vector<_isCol> vec2{data};
+        BOOST_CHECK(vec2.Length() == Approx(1.f));
+    }
+}
+
+
+
+BOOST_AUTO_TEST_CASE(Length_Test_Single)
+{
+    LengthTest<true, Vec3fSingle>();
+    LengthTest<false, Vec3fSingle>();
+}
+
+
+
+BOOST_AUTO_TEST_CASE(Length_Test_SSE)
+{
+    LengthTest<true, Vec3fSSE>();
+    LengthTest<false, Vec3fSSE>();
+}
+
+
+
+// Normalize ----------------------------------------------------------------------------------------------------------
+
+template <typename _vector>
+void NormalizeTestVector(_vector& a)
+{
+    _vector b = a;
+    b.Normalize();
+
+    BOOST_CHECK(b.Length() == Approx(1.f));
+
+    F32 lengthA = a.Length();
+    for (U32 i = 0; i < 3; ++i)
+        BOOST_CHECK(b[i] * lengthA == Approx(a[i]));
+}
+
+
+
+template <template <bool> class _vector>
+void NormalizeTest()
+{
+    Fixture<_vector> fixture;
+
+    GDL_CHECK_THROW_DEV_DISABLE(_vector<true>().Normalize(), Exception);
+    GDL_CHECK_THROW_DEV_DISABLE(_vector<false>().Normalize(), Exception);
+
+    NormalizeTestVector(fixture.cA);
+    NormalizeTestVector(fixture.cB);
+    NormalizeTestVector(fixture.rA);
+    NormalizeTestVector(fixture.rB);
+}
+
+
+
+BOOST_AUTO_TEST_CASE(Normalize_Single)
+{
+    NormalizeTest<Vec3fSingle>();
+}
+
+
+
+BOOST_AUTO_TEST_CASE(Normalize_SSE)
+{
+    NormalizeTest<Vec3fSSE>();
 }

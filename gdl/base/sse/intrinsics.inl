@@ -169,6 +169,25 @@ inline _registerType _mmx_mul_p(_registerType lhs, _registerType rhs)
 
 
 template <typename _registerType>
+_registerType _mmx_div_p(_registerType lhs, _registerType rhs)
+{
+    if constexpr (std::is_same<_registerType, __m128>::value)
+        return _mm_div_ps(lhs, rhs);
+    else if constexpr (std::is_same<_registerType, __m128d>::value)
+        return _mm_div_pd(lhs, rhs);
+#ifdef __AVX2__
+    if constexpr (std::is_same<_registerType, __m256>::value)
+        return _mm256_div_ps(lhs, rhs);
+    else if constexpr (std::is_same<_registerType, __m256d>::value)
+        return _mm256_div_pd(lhs, rhs);
+#endif // __AVX2__
+    else
+        throw Exception(__PRETTY_FUNCTION__, "Not defined for selected register type.");
+}
+
+
+
+template <typename _registerType>
 inline _registerType _mmx_fmadd_p(_registerType lhsM, _registerType rhsM, _registerType add)
 {
 #ifndef __FMA__
@@ -198,6 +217,44 @@ _registerType _mmx_dp_p(_registerType lhs, _registerType rhs)
         return _mm_dp_ps(lhs, rhs, _mask);
     else if constexpr (std::is_same<_registerType, __m128d>::value)
         return _mm_dp_pd(lhs, rhs, _mask);
+    else
+        throw Exception(__PRETTY_FUNCTION__, "Not defined for selected register type.");
+}
+
+
+
+template <typename _registerType>
+_registerType _mmx_sqrt_p(_registerType reg)
+{
+    if constexpr (std::is_same<_registerType, __m128>::value)
+        return _mm_sqrt_ps(reg);
+    else if constexpr (std::is_same<_registerType, __m128d>::value)
+        return _mm_sqrt_pd(reg);
+#ifdef __AVX2__
+    else if constexpr (std::is_same<_registerType, __m256>::value)
+        return _mm256_sqrt_ps(reg);
+    else if constexpr (std::is_same<_registerType, __m256d>::value)
+        return _mm256_sqrt_pd(reg);
+#endif // __AVX2__
+    else
+        throw Exception(__PRETTY_FUNCTION__, "Not defined for selected register type.");
+}
+
+
+
+template <typename _registerType>
+_registerType _mmx_rsqrt_p(_registerType reg)
+{
+    if constexpr (std::is_same<_registerType, __m128>::value)
+        return _mm_rsqrt_ps(reg);
+    else if constexpr (std::is_same<_registerType, __m128d>::value)
+        return _mm_rsqrt_pd(reg);
+#ifdef __AVX2__
+    else if constexpr (std::is_same<_registerType, __m256>::value)
+        return _mm256_rsqrt_ps(reg);
+    else if constexpr (std::is_same<_registerType, __m256d>::value)
+        return _mm256_rsqrt_pd(reg);
+#endif // __AVX2__
     else
         throw Exception(__PRETTY_FUNCTION__, "Not defined for selected register type.");
 }

@@ -70,6 +70,25 @@ const std::array<_type, 4> Vec4Single<_type, _isCol>::Data() const
 
 
 template <typename _type, bool _isCol>
+F32 Vec4Single<_type, _isCol>::Length() const
+{
+    return std::sqrt(Dot(*this));
+}
+
+
+
+template <typename _type, bool _isCol>
+void Vec4Single<_type, _isCol>::Normalize()
+{
+    const F32 length = Length();
+    DEV_EXCEPTION(length == ApproxZero<F32>(), "Vector length is 0. Can't normalize the vector.");
+    for (U32 i = 0; i < 4; ++i)
+        mData[i] /= length;
+}
+
+
+
+template <typename _type, bool _isCol>
 template <bool _isColRhs>
 F32 Vec4Single<_type, _isCol>::Dot(Vec4Single<_type, _isColRhs> rhs) const
 {

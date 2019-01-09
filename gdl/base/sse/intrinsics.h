@@ -46,7 +46,11 @@ template <typename _registerType, typename... _args>
 inline _registerType _mmx_setr_p(_args... args);
 
 
-
+//! @brief Extracts the lowest element of a register. In case of 256 bit registers, the lowest element of the first
+//! 128bit is returned.
+//! @tparam _registerType: Register type
+//! @param reg: Source register
+//! @return Lowest element of a register
 template <typename _registerType>
 inline auto _mmx_cvtsx_fx(_registerType reg);
 
@@ -74,6 +78,14 @@ inline _registerType _mmx_sub_p(_registerType lhs, _registerType rhs);
 template <typename _registerType>
 inline _registerType _mmx_mul_p(_registerType lhs, _registerType rhs);
 
+//! @brief Template for register division
+//! @tparam _registerType: Register type
+//! @param lhs: Left hand side value
+//! @param rhs: Right hand side value
+//! @return Result of the division
+template <typename _registerType>
+inline _registerType _mmx_div_p(_registerType lhs, _registerType rhs);
+
 //! @brief Template for multiplication of two registers with subsequent addition of a third register (fused multiply
 //! add)
 //! @tparam _registerType: Register type
@@ -94,6 +106,20 @@ inline _registerType _mmx_fmadd_p(_registerType lhsM, _registerType rhsM, _regis
 //! @return Dot product
 template <U32 _mask, typename _registerType>
 inline _registerType _mmx_dp_p(_registerType lhs, _registerType rhs);
+
+//! @brief Calculates the square root of a register
+//! @tparam _registerType: Register type
+//! @param reg: Source register
+//! @return Result register
+template <typename _registerType>
+inline _registerType _mmx_sqrt_p(_registerType reg);
+
+//! @brief Calculates the reciprocal square root of a register
+//! @tparam _registerType: Register type
+//! @param reg: Source register
+//! @return Result register
+template <typename _registerType>
+inline _registerType _mmx_rsqrt_p(_registerType reg);
 
 //! @brief Compares two registers for equality
 //! @tparam _registerType: Register type
