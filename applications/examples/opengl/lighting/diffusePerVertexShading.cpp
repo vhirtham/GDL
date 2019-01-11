@@ -124,7 +124,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
 
     // Create Buffer Objects ---------------------------------------------
 
-    auto [vertexData, elementData] = MeshGenerator::CreateTorus(1.f, 0.5f, 40, 40);
+    auto [vertexData, elementData] = MeshGenerator::CreateTorus(1.f, 0.5f, 32, 32);
     BufferObject vertexBuffer(vertexData, GL_STATIC_DRAW);
     BufferObject elementBuffer(elementData, GL_STATIC_DRAW);
 

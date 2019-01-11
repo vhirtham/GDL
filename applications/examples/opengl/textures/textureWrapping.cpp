@@ -75,7 +75,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
 
 
     // Create Buffer Objects ---------------------------------------------
-    auto [vertexData, elementData] = MeshGenerator::CreateRectangle<true>();
+    auto [vertexData, elementData] = MeshGenerator::CreateRectangle<false, true>();
 
     BufferObject vertexBuffer(vertexData, GL_STATIC_DRAW);
     BufferObject elementBuffer(elementData, GL_STATIC_DRAW);

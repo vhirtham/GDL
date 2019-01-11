@@ -54,7 +54,7 @@ public:
 
     void SetProjection(const Mat4f& matrix)
     {
-        mProgram.SetUniform(mUniformProjection,matrix);
+        mProgram.SetUniform(mUniformProjection, matrix);
     }
 
     void RenderLightSource()
@@ -67,7 +67,7 @@ public:
 private:
     void Initialize()
     {
-        auto [vertexDataLightSource, elementDataLightSource] = MeshGenerator::CreateRectangle<true>(0.5, 0.5);
+        auto [vertexDataLightSource, elementDataLightSource] = MeshGenerator::CreateRectangle<false, true>(0.5, 0.5);
         mVBO = MakeUnique<BufferObject>(vertexDataLightSource, GL_STATIC_DRAW);
         mEBO = MakeUnique<BufferObject>(elementDataLightSource, GL_STATIC_DRAW);
         mVAO.EnableAttribute(0, 0, *mVBO, GL_FLOAT, 3, 20);
