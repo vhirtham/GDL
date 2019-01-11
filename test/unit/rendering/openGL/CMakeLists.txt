@@ -32,6 +32,7 @@ TargetDefaultBuildSetup(OpenGLTestDefaultSourcesLib)
 # -----------------------------------------------------
 set(OpenGLTestDefaultLibs
     OpenGLTestDefaultSourcesLib
+    GDL::Input
     GDL::Resources
     OpenGL::GL
     OpenGL::GLU

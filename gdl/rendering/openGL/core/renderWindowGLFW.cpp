@@ -1,10 +1,15 @@
 #include "gdl/rendering/openGL/core/renderWindowGLFW.h"
 
+#include "gdl/base/exception.h"
+#include "gdl/input/inputState.h"
+#include "gdl/input/keyMappingGLFW.h"
 #include "gdl/rendering/openGL/core/contextManagerGLFW.h"
 #include "gdl/rendering/openGL/core/glewController.h"
-#include "gdl/base/exception.h"
 
 
+
+#include "gdl/input/key.h"
+#include <iostream>
 
 namespace GDL::OpenGL
 {
@@ -59,6 +64,7 @@ void RenderWindowGLFW::Initialize()
     EXCEPTION(mWindow == nullptr, "Could not create GLFW Window");
 
     glfwMakeContextCurrent(mWindow);
+    glfwSetKeyCallback(mWindow, KeyCallback);
     glfwSetWindowSizeCallback(mWindow, ResizeCallback);
 
 
@@ -122,6 +128,17 @@ void RenderWindowGLFW::SwapBuffers() const
         glfwSwapBuffers(mWindow);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     }
+}
+
+
+
+void RenderWindowGLFW::KeyCallback([[maybe_unused]] GLFWwindow* window, I32 key, [[maybe_unused]] I32 scancode,
+                                   I32 action, [[maybe_unused]] I32 mode)
+{
+    if (action == GLFW_PRESS)
+        Input::InputState::SetKeyPressed(Input::GLFWKeyToGDLKey(key), true);
+    else if (action == GLFW_RELEASE)
+        Input::InputState::SetKeyPressed(Input::GLFWKeyToGDLKey(key), false);
 }
 
 

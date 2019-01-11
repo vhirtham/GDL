@@ -28,6 +28,7 @@ addGDLLib(OpenGLCore
     ../../textures/textureData2d.cpp
     ../../textures/textureFile.cpp
     ${ConfigDependentSources}
+    GDL::Input
     GDL::Resources
 
     # External libs

@@ -1,4 +1,7 @@
+#include "gdl/base/timer.h"
 #include "gdl/base/container/vector.h"
+#include "gdl/input/inputState.h"
+#include "gdl/input/key.h"
 #include "gdl/rendering/openGL/core/bufferObject.h"
 #include "gdl/rendering/openGL/core/program.h"
 #include "gdl/rendering/openGL/core/shader.h"
@@ -12,6 +15,7 @@
 
 
 using namespace GDL;
+using namespace GDL::Input;
 using namespace GDL::OpenGL;
 
 
@@ -29,6 +33,7 @@ const char* GetVertexShaderCode()
 
             uniform mat4 projectionMatrix;
             uniform mat4 modelWorldMatrix;
+            uniform mat4 worldCameraMatrix;
             uniform float textureScaleX;
             uniform float textureScaleY;
 
@@ -37,7 +42,7 @@ const char* GetVertexShaderCode()
             void main(void)
             {
                 texCoord = vertexTexCoord * vec2(textureScaleX, textureScaleY);
-                gl_Position = projectionMatrix * modelWorldMatrix * vec4(vertexPosition, 1) ;
+                gl_Position =  projectionMatrix * worldCameraMatrix * modelWorldMatrix * vec4(vertexPosition, 1);
             }
             )glsl";
 }
@@ -99,12 +104,39 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
     program.Use();
 
 
+    // Misc --------------------------------------------------------------
+
+
+    GLint worldCameraLocation = program.QueryUniformLocation("worldCameraMatrix");
+
+    F32 camX = 0;
+    F32 camY = 0;
+    F32 camZ = 0;
+
 
     // Start main loop ---------------------------------------------------
 
+    Timer timer;
     while (renderWindow.IsOpen())
     {
+        F32 deltaTime = timer.GetElapsedTime<Microseconds>().count() / 1000000.f;
+        timer.Reset();
+
         contextManager.PollEvents();
+        if (InputState::GetKeyPressed(Key::W))
+            camZ += deltaTime;
+        if (InputState::GetKeyPressed(Key::S))
+            camZ -= deltaTime;
+        if (InputState::GetKeyPressed(Key::A))
+            camX += deltaTime;
+        if (InputState::GetKeyPressed(Key::D))
+            camX -= deltaTime;
+
+
+
+        program.SetUniform(worldCameraLocation, TransformationMatrix4::Translation(camX, camY, camZ));
+
+
         scene.UpdateProjection(renderWindow.GetWidth(), renderWindow.GetHeight());
         scene.Render();
         renderWindow.SwapBuffers();
