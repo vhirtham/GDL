@@ -15,6 +15,7 @@ class RenderWindowGLUT
     U32 mWidth = 800;
     U32 mHeight = 600;
     bool mInitialized = false;
+    bool mLockCursor = false;
     String mTitle = "GLUT Window";
     ContextManagerGLUT& mContextManagerGLUT;
 
@@ -33,6 +34,8 @@ public:
     //! @param contextGLUT: Reference to the GLUT context
     RenderWindowGLUT(ContextManagerGLUT& contextGLUT);
 
+    //! @brief Binds the cursor to the window and hides it
+    void CaptureCursor();
 
     //! @brief Disables the wireframe mode.
     void DisableWireframeMode();
@@ -47,6 +50,9 @@ public:
     //! @param argc: Additional argument count
     //! @param argv: Additional arguments
     void Initialize();
+
+    //! @brief Releases the cursor from the window
+    void ReleaseCursor();
 
     //! @brief Sets the title
     //! @param title: New Window Title
@@ -77,6 +83,23 @@ private:
 
     //! @brief Callback function that should be called whenever the display event is triggered
     static void DisplayCallback();
+
+    //! @brief Mouse callback function
+    //! @param mouseX: Mouse x position
+    //! @param mouseY: Mouse y position
+    static void MouseCallback(I32 mouseX, I32 mouseY);
+
+    //! @brief Key down callback
+    //! @param key: Keycode
+    //! @param mouseX: Mouse x position
+    //! @param mouseY: Mouse y position
+    static void KeyDownCallback(U8 key, I32 mouseX, I32 mouseY);
+
+    //! @brief Key up callback
+    //! @param key: Keycode
+    //! @param mouseX: Mouse x position
+    //! @param mouseY: Mouse y position
+    static void KeyUpCallback(U8 key, I32 mouseX, I32 mouseY);
 
     //! @brief Callback function that should be called after the window is resized
     //! @param width: New window width

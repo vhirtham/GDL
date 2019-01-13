@@ -5,16 +5,13 @@
 #include <GLFW/glfw3.h>
 
 #include <array>
-#include <cstring>
 
 namespace GDL::Input
 {
 
-
-auto GetMappingArray()
+constexpr auto GetMappingArray()
 {
-    std::array<Key, 1024> keyMapping;
-    std::memset(&keyMapping, 0, sizeof(Key) * keyMapping.size());
+    std::array<Key, 1024> keyMapping = {};
 
     keyMapping[GLFW_KEY_ESCAPE] = Key::ESC;
     keyMapping[GLFW_KEY_A] = Key::A;
@@ -50,10 +47,8 @@ auto GetMappingArray()
 
 Key GLFWKeyToGDLKey(I32 glfwKey)
 {
-    static auto keyMapping = GetMappingArray();
-
+    constexpr auto keyMapping = GetMappingArray();
     DEV_EXCEPTION(static_cast<U32>(glfwKey) >= keyMapping.size(), "Invalid key code");
-
     return keyMapping[static_cast<U32>(glfwKey)];
 }
 

@@ -1,13 +1,15 @@
 #include "gdl/rendering/openGL/core/renderWindowGLUT.h"
 
+#include "gdl/base/exception.h"
+#include "gdl/input/inputState.h"
+#include "gdl/input/keyMappingGLUT.h"
 #include "gdl/rendering/openGL/core/contextManagerGLUT.h"
 #include "gdl/rendering/openGL/core/glewController.h"
-#include "gdl/base/exception.h"
 
 #include <GL/freeglut.h>
 
 
-
+#include <iostream>
 namespace GDL::OpenGL
 {
 
@@ -18,6 +20,14 @@ bool RenderWindowGLUT::mIsOpen = true;
 RenderWindowGLUT::RenderWindowGLUT(ContextManagerGLUT& contextGLUT)
     : mContextManagerGLUT{contextGLUT}
 {
+}
+
+
+
+void RenderWindowGLUT::CaptureCursor()
+{
+    mLockCursor = true;
+    glutSetCursor(GLUT_CURSOR_NONE);
 }
 
 
@@ -64,6 +74,10 @@ void RenderWindowGLUT::Initialize()
     glutReshapeFunc(ResizeCallback);
     glutCloseFunc(CloseCallback);
     glutDisplayFunc(DisplayCallback);
+    glutKeyboardFunc(KeyDownCallback);
+    glutKeyboardUpFunc(KeyUpCallback);
+    glutMotionFunc(MouseCallback);
+    glutPassiveMotionFunc(MouseCallback);
 
     GLEWController& glewController = GLEWController::Instance();
     if (!glewController.IsInitialized())
@@ -73,6 +87,14 @@ void RenderWindowGLUT::Initialize()
         mContextManagerGLUT.GetDebugMessageHandler().Initialize();
 
     mInitialized = true;
+}
+
+
+
+void RenderWindowGLUT::ReleaseCursor()
+{
+    mLockCursor = false;
+    glutSetCursor(GLUT_CURSOR_INHERIT);
 }
 
 
@@ -123,21 +145,44 @@ void RenderWindowGLUT::SwapBuffers() const
 
 
 
-void RenderWindowGLUT::ResizeCallback(I32 width, I32 height)
-{
-    glViewport(0, 0, width, height);
-}
-
-
-
 void RenderWindowGLUT::CloseCallback()
 {
     mIsOpen = false;
 }
 
+
+
 void RenderWindowGLUT::DisplayCallback()
 {
     glutPostRedisplay();
+}
+
+
+
+void RenderWindowGLUT::MouseCallback(I32 mouseX, I32 mouseY)
+{
+    Input::InputState::SetMousePosition(static_cast<F64>(mouseX), static_cast<F64>(mouseY));
+}
+
+
+
+void RenderWindowGLUT::KeyDownCallback(U8 key, [[maybe_unused]] I32 mouseX, [[maybe_unused]] I32 mouseY)
+{
+    Input::InputState::SetKeyPressed(Input::GLUTKeyToGDLKey(key), true);
+}
+
+
+
+void RenderWindowGLUT::KeyUpCallback(U8 key, [[maybe_unused]] I32 mouseX, [[maybe_unused]] I32 mouseY)
+{
+    Input::InputState::SetKeyPressed(Input::GLUTKeyToGDLKey(key), false);
+}
+
+
+
+void RenderWindowGLUT::ResizeCallback(I32 width, I32 height)
+{
+    glViewport(0, 0, width, height);
 }
 
 

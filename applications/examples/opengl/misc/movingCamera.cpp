@@ -77,6 +77,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
     // Setup Render Context ----------------------------------------------
 
     auto [renderWindow, contextManager] = DefaultRenderSetup();
+    renderWindow.SetTitle("movement: W,A,S,D - capture mouse: C - release mouse: ESC");
 
 
     // Create Shader and Program -----------------------------------------
@@ -113,6 +114,13 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
     F32 camY = 0;
     F32 camZ = 0;
 
+    F32 prevMouseX = 0;
+    F32 prevMouseY = 0;
+
+    F32 mouseSensitivity = 1.f / 100.f;
+
+    F32 yaw = 0;
+    F32 pitch = 0;
 
     // Start main loop ---------------------------------------------------
 
@@ -123,18 +131,52 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
         timer.Reset();
 
         contextManager.PollEvents();
+
+        // Mouse inputs -------------------------
+        F32 mouseDeltaX = static_cast<F32>(InputState::GetMousePositionX()) - prevMouseX;
+        F32 mouseDeltaY = static_cast<F32>(InputState::GetMousePositionY()) - prevMouseY;
+        prevMouseX = static_cast<F32>(InputState::GetMousePositionX());
+        prevMouseY = static_cast<F32>(InputState::GetMousePositionY());
+
+        yaw += (mouseDeltaX * mouseSensitivity);
+        pitch += (mouseDeltaY * mouseSensitivity);
+        if (pitch > static_cast<F32>(M_PI) / 2.f)
+            pitch = static_cast<F32>(M_PI) / 2.f;
+        if (pitch < static_cast<F32>(-M_PI) / 2.f)
+            pitch = static_cast<F32>(-M_PI) / 2.f;
+
+
+        // Keyboard inputs ----------------------
+        F32 moveCamZ = 0;
+        F32 moveCamX = 0;
+
         if (InputState::GetKeyPressed(Key::W))
-            camZ += deltaTime;
+            moveCamZ += 1;
         if (InputState::GetKeyPressed(Key::S))
-            camZ -= deltaTime;
+            moveCamZ -= 1;
         if (InputState::GetKeyPressed(Key::A))
-            camX += deltaTime;
+            moveCamX += 1;
         if (InputState::GetKeyPressed(Key::D))
-            camX -= deltaTime;
+            moveCamX -= 1;
+        if (InputState::GetKeyPressed(Key::ESC))
+            renderWindow.ReleaseCursor();
+        if (InputState::GetKeyPressed(Key::C))
+            renderWindow.CaptureCursor();
 
 
+        // Calculate movement -------------------
+        F32 sinYaw = std::sin(yaw);
+        F32 cosYaw = std::cos(yaw);
+        F32 moveLength = std::sqrt(moveCamX * moveCamX + moveCamZ * moveCamZ);
+        F32 normalizeFactor = (moveLength != ApproxZero<F32>()) ? 1.f / moveLength : 1.f;
+        camZ += (moveCamZ * cosYaw + moveCamX * sinYaw) * normalizeFactor * deltaTime;
+        camX += (moveCamZ * -sinYaw + moveCamX * cosYaw) * normalizeFactor * deltaTime;
 
-        program.SetUniform(worldCameraLocation, TransformationMatrix4::Translation(camX, camY, camZ));
+
+        // Update worldCam matrix ---------------
+        program.SetUniform(worldCameraLocation, TransformationMatrix4::RotationX(pitch) *
+                                                        TransformationMatrix4::RotationY(yaw) *
+                                                        TransformationMatrix4::Translation(camX, camY, camZ));
 
 
         scene.UpdateProjection(renderWindow.GetWidth(), renderWindow.GetHeight());

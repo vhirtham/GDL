@@ -8,9 +8,6 @@
 
 
 
-#include "gdl/input/key.h"
-#include <iostream>
-
 namespace GDL::OpenGL
 {
 
@@ -18,6 +15,13 @@ namespace GDL::OpenGL
 RenderWindowGLFW::RenderWindowGLFW(ContextManagerGLFW& contextManagerGLFW)
     : mContextManagerGLFW{contextManagerGLFW}
 {
+}
+
+
+
+void RenderWindowGLFW::CaptureCursor()
+{
+    glfwSetInputMode(mWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 }
 
 
@@ -65,6 +69,7 @@ void RenderWindowGLFW::Initialize()
 
     glfwMakeContextCurrent(mWindow);
     glfwSetKeyCallback(mWindow, KeyCallback);
+    glfwSetCursorPosCallback(mWindow, MouseCallback);
     glfwSetWindowSizeCallback(mWindow, ResizeCallback);
 
 
@@ -78,11 +83,18 @@ void RenderWindowGLFW::Initialize()
     mInitialized = true;
 }
 
+void RenderWindowGLFW::ReleaseCursor()
+{
+    glfwSetInputMode(mWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+}
+
 
 
 void RenderWindowGLFW::SetTitle(const char* title)
 {
     mTitle = title;
+    if (mInitialized)
+        glfwSetWindowTitle(mWindow, mTitle.c_str());
 }
 
 
@@ -128,6 +140,13 @@ void RenderWindowGLFW::SwapBuffers() const
         glfwSwapBuffers(mWindow);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     }
+}
+
+
+
+void RenderWindowGLFW::MouseCallback([[maybe_unused]] GLFWwindow* window, F64 mouseX, F64 mouseY)
+{
+    Input::InputState::SetMousePosition(mouseX, mouseY);
 }
 
 

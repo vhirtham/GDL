@@ -6,15 +6,13 @@
 #include "gdl/input/key.h"
 
 
-#include <cstring>
-
 
 namespace GDL::Input
 {
 
 InputState::InputState()
+    : mKeyPressed{{0}}
 {
-    std::memset(&mKeyPressed, 0, sizeof(bool) * mKeyPressed.size());
 }
 
 
@@ -22,15 +20,22 @@ InputState::InputState()
 bool InputState::GetKeyPressed(Key key)
 {
     InputState& inputState = Instance();
+    DEV_EXCEPTION(static_cast<U32>(key) >= inputState.mKeyPressed.size(), "Invalid key code");
     return inputState.mKeyPressed[static_cast<U32>(key)];
 }
 
 
 
-InputState& InputState::Instance()
+F64 InputState::GetMousePositionX()
 {
-    static InputState inputState;
-    return inputState;
+    return Instance().mMouseX;
+}
+
+
+
+F64 InputState::GetMousePositionY()
+{
+    return Instance().mMouseY;
 }
 
 
@@ -43,4 +48,19 @@ void InputState::SetKeyPressed(Key key, bool keyPressed)
 }
 
 
+
+void InputState::SetMousePosition(F64 mouseX, F64 mouseY)
+{
+    InputState& inputState = Instance();
+    inputState.mMouseX = mouseX;
+    inputState.mMouseY = mouseY;
+}
+
+
+
+InputState& InputState::Instance()
+{
+    static InputState inputState;
+    return inputState;
+}
 } // namespace GDL::Input
