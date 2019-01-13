@@ -34,14 +34,14 @@ const char* GetVertexShaderCode()
             uniform mat4 projectionMatrix;
             uniform mat4 modelWorldMatrix;
             uniform mat4 worldCameraMatrix;
-            uniform float textureScaleX;
-            uniform float textureScaleY;
+            uniform vec2 textureScale;
+            uniform vec2 textureOffset;
 
             out vec2 texCoord;
 
             void main(void)
             {
-                texCoord = vertexTexCoord * vec2(textureScaleX, textureScaleY);
+                texCoord = (vertexTexCoord + textureOffset) * textureScale;
                 gl_Position =  projectionMatrix * worldCameraMatrix * modelWorldMatrix * vec4(vertexPosition, 1);
             }
             )glsl";
@@ -111,7 +111,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
 
     F32 camX = 0;
     F32 camY = 0;
-    F32 camZ = 0;
+    F32 camZ = 1;
 
     F32 prevMouseX = 0;
     F32 prevMouseY = 0;
@@ -146,16 +146,16 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
 
 
         // Keyboard inputs ----------------------
-        F32 moveCamZ = 0;
         F32 moveCamX = 0;
+        F32 moveCamY = 0;
 
         if (InputState::GetKeyPressed(Key::W))
-            moveCamZ += 1;
+            moveCamY += 1;
         if (InputState::GetKeyPressed(Key::S))
-            moveCamZ -= 1;
-        if (InputState::GetKeyPressed(Key::A))
-            moveCamX += 1;
+            moveCamY -= 1;
         if (InputState::GetKeyPressed(Key::D))
+            moveCamX += 1;
+        if (InputState::GetKeyPressed(Key::A))
             moveCamX -= 1;
         if (InputState::GetKeyPressed(Key::ESC))
             renderWindow.ReleaseCursor();
@@ -166,16 +166,17 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
         // Calculate movement -------------------
         F32 sinYaw = std::sin(yaw);
         F32 cosYaw = std::cos(yaw);
-        F32 moveLength = std::sqrt(moveCamX * moveCamX + moveCamZ * moveCamZ);
+        F32 moveLength = std::sqrt(moveCamX * moveCamX + moveCamY * moveCamY);
         F32 normalizeFactor = (moveLength != ApproxZero<F32>()) ? 1.f / moveLength : 1.f;
-        camZ += (moveCamZ * cosYaw + moveCamX * sinYaw) * normalizeFactor * deltaTime;
-        camX += (moveCamZ * -sinYaw + moveCamX * cosYaw) * normalizeFactor * deltaTime;
+        camX += (moveCamY * sinYaw + moveCamX * cosYaw) * normalizeFactor * deltaTime;
+        camY += (moveCamY * cosYaw + moveCamX * -sinYaw) * normalizeFactor * deltaTime;
 
 
         // Update worldCam matrix ---------------
-        program.SetUniform(worldCameraLocation, TransformationMatrix4::RotationX(pitch) *
-                                                        TransformationMatrix4::RotationY(yaw) *
-                                                        TransformationMatrix4::Translation(camX, camY, camZ));
+        program.SetUniform(worldCameraLocation,
+                           TransformationMatrix4::RotationX(pitch) * TransformationMatrix4::RotationY(yaw) *
+                                   TransformationMatrix4::RotationX(static_cast<F32>(-M_PI) / 2.f) *
+                                   TransformationMatrix4::Translation(-camX, -camY, -camZ));
 
 
         scene.UpdateProjection(renderWindow.GetWidth(), renderWindow.GetHeight());

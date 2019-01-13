@@ -21,6 +21,7 @@ std::pair<RenderWindow&, ContextManager&> DefaultRenderSetup()
 
     glClearColor(0.1f, 0.1f, 0.1f, 1.f);
     glEnable(GL_BLEND);
+    glEnable(GL_CULL_FACE);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     return std::pair<RenderWindow&, ContextManager&>(renderWindow, contextManager);

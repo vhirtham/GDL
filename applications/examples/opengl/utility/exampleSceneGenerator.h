@@ -64,8 +64,8 @@ class ExampleSceneGenerator
     Vector<Object> mObjects;
     GLint mProjectionLocation;
     GLint mModelWorldLocation;
-    GLint mTextureScaleXLocation;
-    GLint mTextureScaleYLocation;
+    GLint mTextureScaleLocation;
+    GLint mTextureOffsetLocation;
 
 
 public:

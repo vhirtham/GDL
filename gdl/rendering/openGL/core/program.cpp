@@ -146,9 +146,16 @@ void Program::SetUniform(GLint uniformLocation, U32 value)
 
 
 
-void Program::SetUniform(GLint uniformLocation, const Mat4f& value)
+void Program::SetUniform(GLint uniformLocation, const std::array<F32, 2>& values)
 {
-    glProgramUniformMatrix4fv(mHandle, uniformLocation, 1, GL_FALSE, value.Data().data());
+    glProgramUniform2fv(mHandle, uniformLocation, 1, values.data());
+}
+
+
+
+void Program::SetUniform(GLint uniformLocation, const Mat4f& values)
+{
+    glProgramUniformMatrix4fv(mHandle, uniformLocation, 1, GL_FALSE, values.Data().data());
 }
 
 

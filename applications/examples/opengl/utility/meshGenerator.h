@@ -9,6 +9,16 @@
 namespace GDL::OpenGL::MeshGenerator
 {
 
+//! @brief Creates an array of vertex data and a corresbonding index array to render a cuboid
+//! @tparam _addNormals: If true, normals are added to the vertex data
+//! @tparam _addTexCoordinates: If true, texture coordinates are added to the vertex data
+//! @param width: Width of the rectangle
+//! @param height: Height of the rectangle
+//! @param depth: Depth of the rectangle
+//! @return Pair with vertex and element (index) array
+template <bool _addNormals = true, bool _addTexCoordinates = false>
+std::pair<Vector<F32>, Vector<U32>> CreateCuboid(F32 width = 1, F32 height = 1, F32 depth = 1);
+
 //! @brief Creates an array of vertex data and a corresbonding index array to render a rectangle
 //! @tparam _addNormals: If true, normals are added to the vertex data
 //! @tparam _addTexCoordinates: If true, texture coordinates are added to the vertex data

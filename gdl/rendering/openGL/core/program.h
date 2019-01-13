@@ -85,25 +85,30 @@ public:
     //! @return Location of the uniform
     GLint QueryUniformLocation(const char* uniformName) const;
 
-    //! @brief Sets the value of a uniform
+    //! @brief Sets the value of a uniform float
     //! @param uniformLocation: Location of the uniform
     //! @param value: New value
     void SetUniform(GLint uniformLocation, F32 value);
 
-    //! @brief Sets the value of a uniform
+    //! @brief Sets the value of a uniform int
     //! @param uniformLocation: Location of the uniform
     //! @param value: New value
     void SetUniform(GLint uniformLocation, I32 value);
 
-    //! @brief Sets the value of a uniform
+    //! @brief Sets the value of a uniform unsigned int
     //! @param uniformLocation: Location of the uniform
     //! @param value: New value
     void SetUniform(GLint uniformLocation, U32 value);
 
-    //! @brief Sets the value of a uniform
+    //! @brief Sets the value of a uniform vec2
+    //! @param uniformLocation: Location of the uniform
+    //! @param values: New values
+    void SetUniform(GLint uniformLocation, const std::array<F32, 2>& values);
+
+    //! @brief Sets the value of a uniform mat4
     //! @param uniformLocation: Location of the uniform
     //! @param value: New value
-    void SetUniform(GLint uniformLocation, const Mat4f& value);
+    void SetUniform(GLint uniformLocation, const Mat4f& values);
 
     //! @brief Sets the texture unit of a uniform sampler
     //! @param uniformName: Name of the uniform sampler

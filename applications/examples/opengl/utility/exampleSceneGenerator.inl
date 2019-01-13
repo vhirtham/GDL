@@ -45,9 +45,9 @@ void ExampleSceneGenerator::AddObject(const char* meshName, const char* textureN
 
     mObjects.emplace_back(meshIterator->second, textureIterator->second);
     mObjects.back().modelWorld = TransformationMatrix4::Translation(position[0], position[1], position[2]) *
-                                 TransformationMatrix4::RotationZ(eulerAngles[2]) *
-                                 TransformationMatrix4::RotationX(eulerAngles[1]) *
-                                 TransformationMatrix4::RotationY(eulerAngles[0]) *
+                                 TransformationMatrix4::RotationZ(-eulerAngles[0]) *
+                                 TransformationMatrix4::RotationX(-eulerAngles[1]) *
+                                 TransformationMatrix4::RotationY(-eulerAngles[2]) *
                                  TransformationMatrix4::Scale(scale[0], scale[1], scale[2]);
     mObjects.back().textureScale = texScale;
     mObjects.back().textureOffset = texOffset;
@@ -57,8 +57,12 @@ void ExampleSceneGenerator::AddObject(const char* meshName, const char* textureN
 
 void ExampleSceneGenerator::CreateExampleScene01()
 {
-    AddObject("rectangle", "gravel", {{20, 20, 1}}, {{0, -1, -10}}, {{0, static_cast<F32>(-M_PI) / 2.f, 0}}, {{5, 5}});
-    AddObject("torus", "redBrick02", {{1, 1, 1}}, {{0, 0, -10}}, {{static_cast<F32>(-M_PI) / 4.f, 0, 0}}, {{2, 1}});
+    constexpr F32 pi = static_cast<F32>(M_PI);
+
+    AddObject("rectangle", "gravel", {{20, 20, 1}}, {{0, 0, 0}}, {{0, 0, 0}}, {{2, 2}}, {{0, 0}});
+    AddObject("torus", "redBrick02", {{1, 1, 1}}, {{0, 5, 1}}, {{0, -pi / 2.f, pi / 4.f}}, {{2, 1}});
+
+    AddObject("cuboid", "brickPavement02", {{3, 3, 5}}, {{3, 8, 2.5}}, {{0, 0, 0}}, {{1.5, 2.5}}, {{0,0}});
 }
 
 
@@ -73,8 +77,8 @@ void ExampleSceneGenerator::Render()
         object.meshDataRef.VAO.Bind();
         object.textureRef.Bind(0);
         mProgram.SetUniform(mModelWorldLocation, object.modelWorld);
-        mProgram.SetUniform(mTextureScaleXLocation, object.textureScale[0]);
-        mProgram.SetUniform(mTextureScaleYLocation, object.textureScale[1]);
+        mProgram.SetUniform(mTextureScaleLocation, object.textureScale);
+        mProgram.SetUniform(mTextureOffsetLocation, object.textureOffset);
         glDrawElements(GL_TRIANGLES, object.meshDataRef.numIndices, GL_UNSIGNED_INT, nullptr);
     }
 }
@@ -101,9 +105,14 @@ void ExampleSceneGenerator::Initialize()
 
 void ExampleSceneGenerator::LoadMeshes()
 {
+    auto [vertexDataCuboid, elementDataCuboid] = MeshGenerator::CreateCuboid<true, true>();
+    mMeshes.emplace(std::piecewise_construct, std::forward_as_tuple("cuboid"),
+                    std::forward_as_tuple(vertexDataCuboid, elementDataCuboid));
+
     auto [vertexDataRectagle, elementDataRectangle] = MeshGenerator::CreateRectangle<true, true>();
     mMeshes.emplace(std::piecewise_construct, std::forward_as_tuple("rectangle"),
                     std::forward_as_tuple(vertexDataRectagle, elementDataRectangle));
+
 
     auto [vertexDataTorus, elementDataTorus] = MeshGenerator::CreateTorus<true, true>(0.7f, 0.3f, 32, 32);
     mMeshes.emplace(std::piecewise_construct, std::forward_as_tuple("torus"),
@@ -114,6 +123,7 @@ void ExampleSceneGenerator::LoadMeshes()
 
 void ExampleSceneGenerator::LoadTextures()
 {
+    mTextures.emplace("test", TextureFile::Read(MakeString(TEXTURE_DIRECTORY, "/testImage.tex").c_str()));
     mTextures.emplace("redBrick01", TextureFile::Read(MakeString(TEXTURE_DIRECTORY, "/redBrick01_2k.tex").c_str()));
     mTextures.emplace("redBrick02", TextureFile::Read(MakeString(TEXTURE_DIRECTORY, "/redBrick02_2k.tex").c_str()));
     mTextures.emplace("brickPavement01",
@@ -140,8 +150,8 @@ void ExampleSceneGenerator::QueryProgramUniformLocations()
 {
     mProjectionLocation = mProgram.QueryUniformLocation("projectionMatrix");
     mModelWorldLocation = mProgram.QueryUniformLocation("modelWorldMatrix");
-    mTextureScaleXLocation = mProgram.QueryUniformLocation("textureScaleX");
-    mTextureScaleYLocation = mProgram.QueryUniformLocation("textureScaleY");
+    mTextureScaleLocation = mProgram.QueryUniformLocation("textureScale");
+    mTextureOffsetLocation = mProgram.QueryUniformLocation("textureOffset");
 }
 
 } // namespace GDL::OpenGL
