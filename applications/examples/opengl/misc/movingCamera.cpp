@@ -10,7 +10,7 @@
 #include "gdl/rendering/textures/textureData2d.h"
 
 #include "applications/examples/opengl/utility/defaultRenderSetup.h"
-#include "applications/examples/opengl/utility/defaultScene01.h"
+#include "applications/examples/opengl/utility/exampleSceneGenerator.h"
 #include "applications/examples/opengl/utility/meshGenerator.h"
 
 
@@ -96,13 +96,12 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
 
     // Create default scene ----------------------------------------------
 
-    DefaultScene01 scene(program);
-    scene.CreateDefaultScene01();
+    ExampleSceneGenerator scene(program);
+    scene.CreateExampleScene01();
 
 
     // Set state ---------------------------------------------------------
 
-    program.Use();
 
 
     // Misc --------------------------------------------------------------
