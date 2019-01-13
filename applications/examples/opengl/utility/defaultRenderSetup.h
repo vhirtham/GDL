@@ -8,6 +8,9 @@
 
 namespace GDL::OpenGL
 {
+
+//! @brief Creates a default context and render window
+//! @return Pair containing a reference to the render window and the context
 std::pair<RenderWindow&, ContextManager&> DefaultRenderSetup()
 {
     ContextManager& contextManager = ContextManager::Instance();
