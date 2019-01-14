@@ -59,6 +59,16 @@ Vec4SSE<_isCol>::Vec4SSE(__m128 data)
 
 
 template <bool _isCol>
+F32 Vec4SSE<_isCol>::operator[](const U32 index) const
+{
+    DEV_EXCEPTION(index > 3, "Invalid index value! [0..3]");
+
+    return sse::GetValue(mData, index);
+}
+
+
+
+template <bool _isCol>
 bool Vec4SSE<_isCol>::operator==(const Vec4SSE& rhs) const
 {
     return mData == Approx(rhs.mData);
@@ -75,11 +85,28 @@ bool Vec4SSE<_isCol>::operator!=(const Vec4SSE& rhs) const
 
 
 template <bool _isCol>
-F32 Vec4SSE<_isCol>::operator[](const U32 index) const
+Vec4SSE<_isCol>& Vec4SSE<_isCol>::operator+=(const Vec4SSE& rhs)
 {
-    DEV_EXCEPTION(index > 3, "Invalid index value! [0..3]");
+    mData = _mmx_add_p(mData, rhs.mData);
+    return *this;
+}
 
-    return sse::GetValue(mData, index);
+
+
+template <bool _isCol>
+Vec4SSE<_isCol>& Vec4SSE<_isCol>::operator-=(const Vec4SSE& rhs)
+{
+    mData = _mmx_sub_p(mData, rhs.mData);
+    return *this;
+}
+
+
+
+
+template<bool _isCol>
+Vec4SSE<_isCol> Vec4SSE<_isCol>::operator*(F32 rhs)
+{
+    return Vec4SSE<_isCol>(_mmx_mul_p(mData,_mmx_set1_p<__m128>(rhs)));
 }
 
 
@@ -132,10 +159,22 @@ bool Vec4SSE<_isCol>::IsDataAligned() const
 
 
 
+
+
+
+
+template <bool _isCol>
+inline Vec4SSE<_isCol> operator*(F32 lhs, Vec4SSE<_isCol> rhs)
+{
+    return rhs * lhs;
+}
+
+
+
 // LCOV_EXCL_START
 
 template <>
-std::ostream& operator<<(std::ostream& os, const Vec4SSE<true>& vec)
+inline std::ostream& operator<<(std::ostream& os, const Vec4SSE<true>& vec)
 {
     os << "| " << vec[0] << " |\n| " << vec[1] << " |\n| " << vec[2] << " |\n| " << vec[3] << " |" << std::endl;
     return os;
@@ -144,7 +183,7 @@ std::ostream& operator<<(std::ostream& os, const Vec4SSE<true>& vec)
 
 
 template <>
-std::ostream& operator<<(std::ostream& os, const Vec4SSE<false>& vec)
+inline std::ostream& operator<<(std::ostream& os, const Vec4SSE<false>& vec)
 {
     os << "| " << vec[0] << " " << vec[1] << " " << vec[2] << " " << vec[3] << " |" << std::endl;
     return os;

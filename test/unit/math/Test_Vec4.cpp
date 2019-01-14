@@ -300,3 +300,120 @@ BOOST_AUTO_TEST_CASE(Normalize_SSE)
 {
     NormalizeTest<Vec4fSSE>();
 }
+
+
+
+// Addition assignment ------------------------------------------------------------------------------------------------
+
+template <typename _vector>
+void AdditionAssignmentTestVector()
+{
+    _vector a(8, 3, 7, 2);
+    _vector b(3, 2, 5, 7);
+
+    _vector expResult(11, 5, 12, 9);
+
+    b += a;
+    BOOST_CHECK(b == expResult);
+}
+
+
+
+template <template <bool> class _vector>
+void AdditionAssignmentTest()
+{
+    AdditionAssignmentTestVector<_vector<true>>();
+    AdditionAssignmentTestVector<_vector<false>>();
+}
+
+
+
+BOOST_AUTO_TEST_CASE(Addition_Assignment_Single)
+{
+    AdditionAssignmentTest<Vec4fSingle>();
+}
+
+
+
+BOOST_AUTO_TEST_CASE(Addition_Assignment_SSE)
+{
+    AdditionAssignmentTest<Vec4fSSE>();
+}
+
+
+
+// Substraction assignment --------------------------------------------------------------------------------------------
+
+template <typename _vector>
+void SubstractionAssignmentTestVector()
+{
+    _vector a(8, 3, 7, 2);
+    _vector b(3, 2, 5, 7);
+
+    _vector expResult(-5, -1, -2, 5);
+
+    b -= a;
+    BOOST_CHECK(b == expResult);
+}
+
+
+
+template <template <bool> class _vector>
+void SubstractionAssignmentTest()
+{
+    SubstractionAssignmentTestVector<_vector<true>>();
+    SubstractionAssignmentTestVector<_vector<false>>();
+}
+
+
+
+BOOST_AUTO_TEST_CASE(Substraction_Assignment_Single)
+{
+    SubstractionAssignmentTest<Vec4fSingle>();
+}
+
+
+
+BOOST_AUTO_TEST_CASE(Substraction_Assignment_SSE)
+{
+    SubstractionAssignmentTest<Vec4fSSE>();
+}
+
+
+
+// Multiplication with scalar -----------------------------------------------------------------------------------------
+
+template <typename _vector>
+void MultiplicationWithScalarTestVector()
+{
+    _vector a(8, -3, 7, 2);
+    _vector b(-3, 2, 5, 7);
+
+    _vector expResultA(16, -6, 14, 4);
+    _vector expResultB(-9, 6, 15, 21);
+    BOOST_CHECK(a * 2 == expResultA);
+    BOOST_CHECK(3 * b == expResultB);
+}
+
+
+
+template <template <bool> class _vector>
+void MultiplicationWithScalarTest()
+{
+    MultiplicationWithScalarTestVector<_vector<true>>();
+    MultiplicationWithScalarTestVector<_vector<false>>();
+}
+
+
+
+BOOST_AUTO_TEST_CASE(Multiplication_With_Scalar_Single)
+{
+    MultiplicationWithScalarTest<Vec4fSingle>();
+}
+
+
+
+BOOST_AUTO_TEST_CASE(Multiplication_With_Scalar_SSE)
+{
+    MultiplicationWithScalarTest<Vec4fSSE>();
+}

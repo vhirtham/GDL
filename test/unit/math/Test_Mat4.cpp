@@ -4,6 +4,8 @@
 #include "gdl/base/fundamentalTypes.h"
 #include "gdl/math/mat4SSE.h"
 #include "gdl/math/mat4Single.h"
+#include "gdl/math/single/vec4Single.h"
+#include "gdl/math/sse/vec4SSE.h"
 
 
 #include "test/tools/arrayValueComparison.h"
@@ -235,6 +237,39 @@ BOOST_FIXTURE_TEST_CASE(Multiplication_Single, Fixture<Mat4Single<F32>>)
 BOOST_FIXTURE_TEST_CASE(Multiplication_SSE, Fixture<Mat4SSE>)
 {
     MultiplicationTest<Mat4SSE>(A, B);
+}
+
+
+
+// Matrix-Vector Multiplication ---------------------------------------------------------------------------------------
+
+template <typename _matrix, typename _vector>
+void MatrixVectorMultiplicationTest(const _matrix& a, const _matrix& b)
+{
+
+    _vector vec(2, 3, 2, 5);
+
+    auto c = a * vec;
+    _vector expC(22, 70, 118, 166);
+    BOOST_CHECK(c == expC);
+
+    auto d = b * vec;
+    _vector expD{67, 88, 59, 47};
+    BOOST_CHECK(d == expD);
+}
+
+
+
+BOOST_FIXTURE_TEST_CASE(Matrix_Vector_Multiplication_Single, Fixture<Mat4Single<F32>>)
+{
+    MatrixVectorMultiplicationTest<Mat4Single<F32>, Vec4fSingle<true>>(A, B);
+}
+
+
+
+BOOST_FIXTURE_TEST_CASE(Matrix_Vector_Multiplication_SSE, Fixture<Mat4SSE>)
+{
+    MatrixVectorMultiplicationTest<Mat4SSE, Vec4fSSE<true>>(A, B);
 }
 
 

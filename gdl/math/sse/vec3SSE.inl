@@ -61,6 +61,16 @@ Vec3SSE<_isCol>::Vec3SSE(__m128 data)
 
 
 template <bool _isCol>
+F32 Vec3SSE<_isCol>::operator[](const U32 index) const
+{
+    DEV_EXCEPTION(index > 2, "Invalid index value! [0..2]");
+
+    return sse::GetValue(mData, index);
+}
+
+
+
+template <bool _isCol>
 bool Vec3SSE<_isCol>::operator==(const Vec3SSE& rhs) const
 {
     return mData == Approx<__m128, 3>(rhs.mData);
@@ -77,11 +87,19 @@ bool Vec3SSE<_isCol>::operator!=(const Vec3SSE& rhs) const
 
 
 template <bool _isCol>
-F32 Vec3SSE<_isCol>::operator[](const U32 index) const
+Vec3SSE<_isCol>& Vec3SSE<_isCol>::operator+=(const Vec3SSE& rhs)
 {
-    DEV_EXCEPTION(index > 2, "Invalid index value! [0..2]");
+    mData = _mmx_add_p(mData, rhs.mData);
+    return *this;
+}
 
-    return sse::GetValue(mData, index);
+
+
+template <bool _isCol>
+Vec3SSE<_isCol>& Vec3SSE<_isCol>::operator-=(const Vec3SSE& rhs)
+{
+    mData = _mmx_sub_p(mData, rhs.mData);
+    return *this;
 }
 
 

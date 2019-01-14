@@ -34,6 +34,15 @@ Vec3Single<_type, _isCol>::Vec3Single(_type v0, _type v1, _type v2)
 
 
 template <typename _type, bool _isCol>
+_type Vec3Single<_type, _isCol>::operator[](const U32 index) const
+{
+    DEV_EXCEPTION(index > 3, "Invalid index value! [0..2]");
+    return mData[index];
+}
+
+
+
+template <typename _type, bool _isCol>
 bool Vec3Single<_type, _isCol>::operator==(const Vec3Single& rhs) const
 {
     bool result = true;
@@ -53,10 +62,23 @@ bool Vec3Single<_type, _isCol>::operator!=(const Vec3Single& rhs) const
 
 
 template <typename _type, bool _isCol>
-_type Vec3Single<_type, _isCol>::operator[](const U32 index) const
+Vec3Single<_type, _isCol>& Vec3Single<_type, _isCol>::operator+=(const Vec3Single& rhs)
 {
-    DEV_EXCEPTION(index > 3, "Invalid index value! [0..2]");
-    return mData[index];
+    mData[0] += rhs.mData[0];
+    mData[1] += rhs.mData[1];
+    mData[2] += rhs.mData[2];
+    return *this;
+}
+
+
+
+template <typename _type, bool _isCol>
+Vec3Single<_type, _isCol>& Vec3Single<_type, _isCol>::operator-=(const Vec3Single& rhs)
+{
+    mData[0] -= rhs.mData[0];
+    mData[1] -= rhs.mData[1];
+    mData[2] -= rhs.mData[2];
+    return *this;
 }
 
 

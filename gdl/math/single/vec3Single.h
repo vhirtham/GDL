@@ -37,6 +37,11 @@ public:
     inline Vec3Single(_type v0, _type v1, _type v2);
 
 public:
+    //! @brief Direct access operator
+    //! @param index: Index the accessed value
+    //! @return Accessed value
+    [[nodiscard]] inline _type operator[](const U32 index) const;
+
     //! @brief Compares if two vectors are equal
     //! @param rhs: Vector that should be compared
     //! @return True / False
@@ -51,10 +56,15 @@ public:
     //! in the future. A global minimal base for linear algebra comparison might be introduced.
     [[nodiscard]] inline bool operator!=(const Vec3Single& rhs) const;
 
-    //! @brief Direct access operator
-    //! @param index: Index the accessed value
-    //! @return Accessed value
-    [[nodiscard]] inline _type operator[](const U32 index) const;
+    //! @brief Vector - vector addition assignment
+    //! @param rhs: Rhs vector
+    //! @return Result of the addition (this)
+    inline Vec3Single& operator+=(const Vec3Single& rhs);
+
+    //! @brief Vector - vector substraction assignment
+    //! @param rhs: Rhs vector
+    //! @return Result of the substraction (this)
+    inline Vec3Single& operator-=(const Vec3Single& rhs);
 
     //! @brief Calculates the cross product of two vectors
     //! @tparam _isColRhs: True if the rhs vector is a column vector, false otherwise

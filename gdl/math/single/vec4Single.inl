@@ -34,6 +34,15 @@ Vec4Single<_type, _isCol>::Vec4Single(_type v0, _type v1, _type v2, _type v3)
 
 
 template <typename _type, bool _isCol>
+_type Vec4Single<_type, _isCol>::operator[](const U32 index) const
+{
+    DEV_EXCEPTION(index > 4, "Invalid index value! [0..3]");
+    return mData[index];
+}
+
+
+
+template <typename _type, bool _isCol>
 bool Vec4Single<_type, _isCol>::operator==(const Vec4Single& rhs) const
 {
     bool result = true;
@@ -53,10 +62,33 @@ bool Vec4Single<_type, _isCol>::operator!=(const Vec4Single& rhs) const
 
 
 template <typename _type, bool _isCol>
-_type Vec4Single<_type, _isCol>::operator[](const U32 index) const
+Vec4Single<_type, _isCol>& Vec4Single<_type, _isCol>::operator+=(const Vec4Single& rhs)
 {
-    DEV_EXCEPTION(index > 4, "Invalid index value! [0..3]");
-    return mData[index];
+    mData[0] += rhs.mData[0];
+    mData[1] += rhs.mData[1];
+    mData[2] += rhs.mData[2];
+    mData[3] += rhs.mData[3];
+    return *this;
+}
+
+
+
+template <typename _type, bool _isCol>
+Vec4Single<_type, _isCol>& Vec4Single<_type, _isCol>::operator-=(const Vec4Single& rhs)
+{
+    mData[0] -= rhs.mData[0];
+    mData[1] -= rhs.mData[1];
+    mData[2] -= rhs.mData[2];
+    mData[3] -= rhs.mData[3];
+    return *this;
+}
+
+
+
+template <typename _type, bool _isCol>
+Vec4Single<_type, _isCol> Vec4Single<_type, _isCol>::operator*(F32 rhs)
+{
+    return Vec4Single<_type, _isCol>(mData[0] * rhs, mData[1] * rhs, mData[2] * rhs, mData[3] * rhs);
 }
 
 
@@ -95,6 +127,14 @@ template <bool _isColRhs>
 F32 Vec4Single<_type, _isCol>::Dot(Vec4Single<_type, _isColRhs> rhs) const
 {
     return mData[0] * rhs.mData[0] + mData[1] * rhs.mData[1] + mData[2] * rhs.mData[2] + mData[3] * rhs.mData[3];
+}
+
+
+
+template <typename _type, bool _isCol>
+inline Vec4Single<_type, _isCol> operator*(F32 lhs, Vec4Single<_type, _isCol> rhs)
+{
+    return rhs * lhs;
 }
 
 

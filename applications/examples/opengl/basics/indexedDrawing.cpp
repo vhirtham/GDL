@@ -1,6 +1,6 @@
 #include "gdl/base/timer.h"
 #include "gdl/base/container/vector.h"
-#include "gdl/math/mat4.inl"
+#include "gdl/math/mat4.h"
 #include "gdl/math/transformationMatrix.h"
 #include "gdl/rendering/openGL/core/bufferObject.h"
 #include "gdl/rendering/openGL/core/contextManager.h"

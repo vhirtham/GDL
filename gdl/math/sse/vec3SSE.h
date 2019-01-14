@@ -45,6 +45,11 @@ private:
     inline Vec3SSE(__m128 data);
 
 public:
+    //! @brief Direct access operator
+    //! @param index: Index of the accessed value
+    //! @return Accessed value
+    [[nodiscard]] inline F32 operator[](const U32 index) const;
+
     //! @brief Compares if two vectors are equal
     //! @param rhs: Vector that should be compared
     //! @return True / False
@@ -59,10 +64,15 @@ public:
     //! in the future. A global minimal base for linear algebra comparison might be introduced.
     [[nodiscard]] inline bool operator!=(const Vec3SSE& rhs) const;
 
-    //! @brief Direct access operator
-    //! @param index: Index of the accessed value
-    //! @return Accessed value
-    [[nodiscard]] inline F32 operator[](const U32 index) const;
+    //! @brief Vector - vector addition assignment
+    //! @param other: Rhs vector
+    //! @return Result of the addition (this)
+    inline Vec3SSE& operator+=(const Vec3SSE& rhs);
+
+    //! @brief Vector - vector substraction assignment
+    //! @param other: Rhs vector
+    //! @return Result of the substraction (this)
+    inline Vec3SSE& operator-=(const Vec3SSE& rhs);
 
     //! @brief Calculates the cross product of two vectors
     //! @tparam _isColRhs: True if the rhs vector is a column vector, false otherwise

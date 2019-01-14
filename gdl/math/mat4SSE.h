@@ -4,12 +4,16 @@
 #include "gdl/base/sse/utility.h"
 #include "gdl/base/sse/intrinsics.h"
 
+
 #include <array>
 #include <iostream>
 
 
 namespace GDL
 {
+
+template <bool>
+class Vec4SSE;
 
 //! @brief 4x4 Matrix with SSE support
 class alignas(sse::alignmentBytes<__m128>) Mat4SSE
@@ -73,9 +77,14 @@ public:
     [[nodiscard]] inline Mat4SSE operator+(const Mat4SSE& other);
 
     //! @brief Matrix - matrix multiplication
-    //! @param other: Rhs matrix
+    //! @param rhs: Rhs matrix
     //! @return Result of the multiplication
-    [[nodiscard]] inline Mat4SSE operator*(const Mat4SSE& other) const;
+    [[nodiscard]] inline Mat4SSE operator*(const Mat4SSE& rhs) const;
+
+    //! @brief Matrix - vector multiplication
+    //! @param rhs: Rhs matrix
+    //! @return Result of the multiplication
+    [[nodiscard]] inline Vec4SSE<true> operator*(const Vec4SSE<true>& rhs) const;
 
     //! @brief Returns the transposed matrix
     //! @return Transposed matrix

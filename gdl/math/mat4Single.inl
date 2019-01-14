@@ -89,34 +89,48 @@ Mat4Single<_type>& Mat4Single<_type>::operator+=(const Mat4Single<_type>& rhs)
 
 
 template <typename _type>
-Mat4Single<_type> Mat4Single<_type>::operator*(const Mat4Single<_type>& other) const
+Mat4Single<_type> Mat4Single<_type>::operator*(const Mat4Single<_type>& rhs) const
 {
-    return Mat4Single<_type>(
-            mD[0] * other.mD[0] + mD[4] * other.mD[1] + mD[8] * other.mD[2] + mD[12] * other.mD[3],
-            mD[1] * other.mD[0] + mD[5] * other.mD[1] + mD[9] * other.mD[2] + mD[13] * other.mD[3],
-            mD[2] * other.mD[0] + mD[6] * other.mD[1] + mD[10] * other.mD[2] + mD[14] * other.mD[3],
-            mD[3] * other.mD[0] + mD[7] * other.mD[1] + mD[11] * other.mD[2] + mD[15] * other.mD[3],
+    return Mat4Single<_type>(mD[0] * rhs.mD[0] + mD[4] * rhs.mD[1] + mD[8] * rhs.mD[2] + mD[12] * rhs.mD[3],
+                             mD[1] * rhs.mD[0] + mD[5] * rhs.mD[1] + mD[9] * rhs.mD[2] + mD[13] * rhs.mD[3],
+                             mD[2] * rhs.mD[0] + mD[6] * rhs.mD[1] + mD[10] * rhs.mD[2] + mD[14] * rhs.mD[3],
+                             mD[3] * rhs.mD[0] + mD[7] * rhs.mD[1] + mD[11] * rhs.mD[2] + mD[15] * rhs.mD[3],
 
-            mD[0] * other.mD[4] + mD[4] * other.mD[5] + mD[8] * other.mD[6] + mD[12] * other.mD[7],
-            mD[1] * other.mD[4] + mD[5] * other.mD[5] + mD[9] * other.mD[6] + mD[13] * other.mD[7],
-            mD[2] * other.mD[4] + mD[6] * other.mD[5] + mD[10] * other.mD[6] + mD[14] * other.mD[7],
-            mD[3] * other.mD[4] + mD[7] * other.mD[5] + mD[11] * other.mD[6] + mD[15] * other.mD[7],
+                             mD[0] * rhs.mD[4] + mD[4] * rhs.mD[5] + mD[8] * rhs.mD[6] + mD[12] * rhs.mD[7],
+                             mD[1] * rhs.mD[4] + mD[5] * rhs.mD[5] + mD[9] * rhs.mD[6] + mD[13] * rhs.mD[7],
+                             mD[2] * rhs.mD[4] + mD[6] * rhs.mD[5] + mD[10] * rhs.mD[6] + mD[14] * rhs.mD[7],
+                             mD[3] * rhs.mD[4] + mD[7] * rhs.mD[5] + mD[11] * rhs.mD[6] + mD[15] * rhs.mD[7],
 
-            mD[0] * other.mD[8] + mD[4] * other.mD[9] + mD[8] * other.mD[10] + mD[12] * other.mD[11],
-            mD[1] * other.mD[8] + mD[5] * other.mD[9] + mD[9] * other.mD[10] + mD[13] * other.mD[11],
-            mD[2] * other.mD[8] + mD[6] * other.mD[9] + mD[10] * other.mD[10] + mD[14] * other.mD[11],
-            mD[3] * other.mD[8] + mD[7] * other.mD[9] + mD[11] * other.mD[10] + mD[15] * other.mD[11],
+                             mD[0] * rhs.mD[8] + mD[4] * rhs.mD[9] + mD[8] * rhs.mD[10] + mD[12] * rhs.mD[11],
+                             mD[1] * rhs.mD[8] + mD[5] * rhs.mD[9] + mD[9] * rhs.mD[10] + mD[13] * rhs.mD[11],
+                             mD[2] * rhs.mD[8] + mD[6] * rhs.mD[9] + mD[10] * rhs.mD[10] + mD[14] * rhs.mD[11],
+                             mD[3] * rhs.mD[8] + mD[7] * rhs.mD[9] + mD[11] * rhs.mD[10] + mD[15] * rhs.mD[11],
 
-            mD[0] * other.mD[12] + mD[4] * other.mD[13] + mD[8] * other.mD[14] + mD[12] * other.mD[15],
-            mD[1] * other.mD[12] + mD[5] * other.mD[13] + mD[9] * other.mD[14] + mD[13] * other.mD[15],
-            mD[2] * other.mD[12] + mD[6] * other.mD[13] + mD[10] * other.mD[14] + mD[14] * other.mD[15],
-            mD[3] * other.mD[12] + mD[7] * other.mD[13] + mD[11] * other.mD[14] + mD[15] * other.mD[15]);
+                             mD[0] * rhs.mD[12] + mD[4] * rhs.mD[13] + mD[8] * rhs.mD[14] + mD[12] * rhs.mD[15],
+                             mD[1] * rhs.mD[12] + mD[5] * rhs.mD[13] + mD[9] * rhs.mD[14] + mD[13] * rhs.mD[15],
+                             mD[2] * rhs.mD[12] + mD[6] * rhs.mD[13] + mD[10] * rhs.mD[14] + mD[14] * rhs.mD[15],
+                             mD[3] * rhs.mD[12] + mD[7] * rhs.mD[13] + mD[11] * rhs.mD[14] + mD[15] * rhs.mD[15]);
 }
 
-template<typename _type>
+
+
+template <typename _type>
+Vec4Single<_type, true> Mat4Single<_type>::operator*(const Vec4Single<_type, true>& rhs) const
+{
+    return Vec4Single<_type, true>(
+            mD[0] * rhs.mData[0] + mD[4] * rhs.mData[1] + mD[8] * rhs.mData[2] + mD[12] * rhs.mData[3],
+            mD[1] * rhs.mData[0] + mD[5] * rhs.mData[1] + mD[9] * rhs.mData[2] + mD[13] * rhs.mData[3],
+            mD[2] * rhs.mData[0] + mD[6] * rhs.mData[1] + mD[10] * rhs.mData[2] + mD[14] * rhs.mData[3],
+            mD[3] * rhs.mData[0] + mD[7] * rhs.mData[1] + mD[11] * rhs.mData[2] + mD[15] * rhs.mData[3]);
+}
+
+
+
+template <typename _type>
 Mat4Single<_type> Mat4Single<_type>::Transpose() const
 {
-    return Mat4Single<_type>(mD[0],mD[4],mD[8],mD[12],mD[1],mD[5],mD[9],mD[13],mD[2],mD[6],mD[10],mD[14],mD[3],mD[7],mD[11],mD[15]);
+    return Mat4Single<_type>(mD[0], mD[4], mD[8], mD[12], mD[1], mD[5], mD[9], mD[13], mD[2], mD[6], mD[10], mD[14],
+                             mD[3], mD[7], mD[11], mD[15]);
 }
 
 

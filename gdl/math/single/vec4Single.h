@@ -17,6 +17,8 @@ class Vec4Single
 {
     template <typename, bool>
     friend class Vec4Single;
+    template <typename>
+    friend class Mat4Single;
 
     std::array<_type, 4> mData;
 
@@ -37,6 +39,11 @@ public:
     inline Vec4Single(_type v0, _type v1, _type v2, _type v3);
 
 public:
+    //! @brief Direct access operator
+    //! @param index: Index of the accessed value
+    //! @return Accessed value
+    [[nodiscard]] inline _type operator[](const U32 index) const;
+
     //! @brief Compares if two vectors are equal
     //! @param rhs: Vector that should be compared
     //! @return True / False
@@ -51,10 +58,20 @@ public:
     //! in the future. A global minimal base for linear algebra comparison might be introduced.
     [[nodiscard]] inline bool operator!=(const Vec4Single& rhs) const;
 
-    //! @brief Direct access operator
-    //! @param index: Index of the accessed value
-    //! @return Accessed value
-    [[nodiscard]] inline _type operator[](const U32 index) const;
+    //! @brief Vector - vector addition assignment
+    //! @param rhs: Rhs vector
+    //! @return Result of the addition (this)
+    inline Vec4Single& operator+=(const Vec4Single& rhs);
+
+    //! @brief Vector - vector substraction assignment
+    //! @param rhs: Rhs vector
+    //! @return Result of the substraction (this)
+    inline Vec4Single& operator-=(const Vec4Single& rhs);
+
+    //! @brief Vector - scalar multiplication
+    //! @param rhs: Rhs scalar
+    //! @return Result of the multiplication
+    [[nodiscard]] inline Vec4Single operator*(F32 rhs);
 
     //! @brief Gets the data array
     //! @return Data
@@ -80,6 +97,14 @@ template <bool _isCol>
 using Vec4fSingle = Vec4Single<F32, _isCol>;
 
 
+//! @brief Vector - scalar multiplication
+//! @tparam _type: Data type of the vector
+//! @tparam _isCol: If true, the vector is treated as column vector, otherwise as row vector
+//! @param lhs: Lhs scalar
+//! @param rhs: Rhs vector
+//! @return Result of the multiplication
+template <typename _type, bool _isCol>
+[[nodiscard]] inline Vec4Single<_type, _isCol> operator*(F32 lhs, Vec4Single<_type, _isCol> rhs);
 
 //! @brief Offstream operator
 //! @tparam _type: Data type of the vector

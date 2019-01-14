@@ -8,6 +8,9 @@
 namespace GDL
 {
 
+template <typename, bool>
+class Vec4Single;
+
 //! @brief 4x4 Matrix
 //! @tparam T: Data type
 template <typename _type>
@@ -68,9 +71,14 @@ public:
     [[nodiscard]] inline Mat4Single operator+(const Mat4Single& rhs) const;
 
     //! @brief Matrix - matrix multiplication
-    //! @param other: Rhs matrix
+    //! @param rhs: Rhs matrix
     //! @return Result of the multiplication
-    [[nodiscard]] inline Mat4Single operator*(const Mat4Single& other) const;
+    [[nodiscard]] inline Mat4Single operator*(const Mat4Single& rhs) const;
+
+    //! @brief Matrix - vector multiplication
+    //! @param rhs: Rhs matrix
+    //! @return Result of the multiplication
+    [[nodiscard]] inline Vec4Single<_type, true> operator*(const Vec4Single<_type, true>& rhs) const;
 
     //! @brief Returns the transposed matrix
     //! @return Transposed matrix

@@ -347,3 +347,82 @@ BOOST_FIXTURE_TEST_CASE(Cross_Product_SSE, Fixture<Vec3SSE>)
     CrossProductTest<Vec3fSSE<true>>();
     CrossProductTest<Vec3fSSE<false>>();
 }
+
+
+
+// Addition assignment ------------------------------------------------------------------------------------------------
+
+template <typename _vector>
+void AdditionAssignmentTestVector()
+{
+    _vector a(8, 3, 7);
+    _vector b(3, 2, 5);
+
+    _vector expResult(11, 5, 12);
+
+    b += a;
+    BOOST_CHECK(b == expResult);
+}
+
+
+
+template <template <bool> class _vector>
+void AdditionAssignmentTest()
+{
+    AdditionAssignmentTestVector<_vector<true>>();
+    AdditionAssignmentTestVector<_vector<false>>();
+}
+
+
+
+BOOST_AUTO_TEST_CASE(Addition_Assignment_Single)
+{
+    AdditionAssignmentTest<Vec3fSingle>();
+}
+
+
+
+BOOST_AUTO_TEST_CASE(Addition_Assignment_SSE)
+{
+    AdditionAssignmentTest<Vec3fSSE>();
+}
+
+
+
+// Substraction assignment
+// ------------------------------------------------------------------------------------------------
+
+template <typename _vector>
+void SubstractionAssignmentTestVector()
+{
+    _vector a(8, 3, 7);
+    _vector b(3, 2, 5);
+
+    _vector expResult(-5, -1, -2);
+
+    b -= a;
+    BOOST_CHECK(b == expResult);
+}
+
+
+
+template <template <bool> class _vector>
+void SubstractionAssignmentTest()
+{
+    SubstractionAssignmentTestVector<_vector<true>>();
+    SubstractionAssignmentTestVector<_vector<false>>();
+}
+
+
+
+BOOST_AUTO_TEST_CASE(Substraction_Assignment_Single)
+{
+    SubstractionAssignmentTest<Vec3fSingle>();
+}
+
+
+
+BOOST_AUTO_TEST_CASE(Substraction_Assignment_SSE)
+{
+    SubstractionAssignmentTest<Vec3fSSE>();
+}
