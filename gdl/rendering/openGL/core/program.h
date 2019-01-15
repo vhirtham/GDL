@@ -58,6 +58,11 @@ public:
     //! @return Program handle
     GLuint GetHandle() const;
 
+    //! @brief Queries if uniform with the given name exists
+    //! @param uniformName: Name of the uniform
+    //! @return True / False
+    bool QueryHasUniform(const char* uniformName) const;
+
     //! @brief Queries the binding point of a uniform block
     //! @param uniformBlockIndex: Index of the uniform block
     //! @return Binding point of the uniform block

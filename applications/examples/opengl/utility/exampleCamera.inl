@@ -35,7 +35,14 @@ void ExampleCamera::MoveCamera(F32 deltaTime)
 
 
 
-    mPosition += TransformationMatrix4::RotationZ(-mYaw) * GetMovementDirection() * deltaTime;
+    mPosition += TransformationMatrix4::RotationZ(-mYaw) * GetMovementDirection() * mMovementSpeed * deltaTime;
+}
+
+
+
+void ExampleCamera::SetMovementSpeed(F32 movementSpeed)
+{
+    mMovementSpeed = movementSpeed;
 }
 
 
@@ -45,14 +52,12 @@ Mat4f ExampleCamera::GetWorldToCamMatrix() const
     std::array<F32, 4> translation = mPosition.Data();
     return TransformationMatrix4::RotationX(mPitch) * TransformationMatrix4::RotationY(mYaw) *
            TransformationMatrix4::RotationX(-PI<F32> / 2.f) *
-            TransformationMatrix4::Translation(-translation[0], -translation[1], -translation[2]);
+           TransformationMatrix4::Translation(-translation[0], -translation[1], -translation[2]);
 }
 
 
 
-
-
-const Vec4f &ExampleCamera::GetCameraPosition() const
+const Vec4f& ExampleCamera::GetCameraPosition() const
 {
     return mPosition;
 }

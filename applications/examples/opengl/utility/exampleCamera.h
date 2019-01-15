@@ -20,6 +20,7 @@ class ExampleCamera
     F32 mPitch;
     F32 mYaw;
     F32 mMouseSensitivity = 1.f / 100.f;
+    F32 mMovementSpeed = 1.f;
 
 
 public:
@@ -47,6 +48,10 @@ public:
     //! @brief Calculates the new camera position
     //! @param deltaTime: Passed time in seconds
     void MoveCamera(F32 deltaTime);
+
+    //! @brief Sets the cameras movement speed
+    //! @param movementSpeed: New movement speed
+    void SetMovementSpeed(F32 movementSpeed);
 
 private:
     //! @brief Gets the movement direction vector depending on the input state

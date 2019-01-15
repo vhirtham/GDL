@@ -2,6 +2,8 @@
 
 #include "applications/examples/opengl/utility/exampleSceneGenerator.h"
 
+#include "gdl/rendering/textures/textureData2d.h"
+
 namespace GDL::OpenGL
 {
 
@@ -19,9 +21,9 @@ MeshData::MeshData(const Vector<F32>& vertexData, const Vector<U32>& elementData
 
 
 
-Object::Object(MeshData& meshData, Texture& texture)
+Object::Object(MeshData& meshData, Material& texture)
     : meshDataRef{meshData}
-    , textureRef{texture}
+    , materialRef{texture}
 {
 }
 
@@ -33,17 +35,27 @@ ExampleSceneGenerator::ExampleSceneGenerator(Program& program)
     Initialize();
 }
 
+
+
+void ExampleSceneGenerator::AddMaterial(const char* materialName, Texture& albedo, Texture& specular, F32 reflectivity)
+{
+    mMaterials.emplace(std::piecewise_construct, std::forward_as_tuple(materialName),
+                       std::forward_as_tuple(albedo, specular, reflectivity));
+}
+
+
+
 void ExampleSceneGenerator::AddObject(const char* meshName, const char* textureName, std::array<F32, 3> scale,
                                       std::array<F32, 3> position, std::array<F32, 3> eulerAngles,
                                       std::array<F32, 2> texScale, std::array<F32, 2> texOffset)
 {
     auto meshIterator = mMeshes.find(meshName);
-    auto textureIterator = mTextures.find(textureName);
+    auto materialIterator = mMaterials.find(textureName);
 
     EXCEPTION(meshIterator == mMeshes.end(), "Could not find mesh");
-    EXCEPTION(textureIterator == mTextures.end(), "Could not find texture");
+    EXCEPTION(materialIterator == mMaterials.end(), "Could not find material");
 
-    mObjects.emplace_back(meshIterator->second, textureIterator->second);
+    mObjects.emplace_back(meshIterator->second, materialIterator->second);
     mObjects.back().modelWorld = TransformationMatrix4::Translation(position[0], position[1], position[2]) *
                                  TransformationMatrix4::RotationZ(-eulerAngles[0]) *
                                  TransformationMatrix4::RotationX(-eulerAngles[1]) *
@@ -68,6 +80,13 @@ void ExampleSceneGenerator::CreateExampleScene01()
     AddObject("cuboid", "brickPavement01", {{1, 1, 1}}, {{2, 6., 0}}, {{0, 0, 0}}, {{1, 1}}, {{0, 0}});
 }
 
+Texture& ExampleSceneGenerator::GetTexture(const char* textureName)
+{
+    auto textureIterator = mTextures.find(textureName);
+    EXCEPTION(textureIterator == mTextures.end(), MakeString("Could not find texture \"", textureName, "\"").c_str());
+    return textureIterator->second;
+}
+
 
 
 void ExampleSceneGenerator::Render()
@@ -78,21 +97,28 @@ void ExampleSceneGenerator::Render()
     {
 
         object.meshDataRef.VAO.Bind();
-        object.textureRef.Bind(0);
+        object.materialRef.albedo.Bind(mAlbedoTextureUnit);
+        object.materialRef.specular.Bind(mSpecularTextureUnit);
+
+        // Set uniforms
         mProgram.SetUniform(mModelWorldLocation, object.modelWorld);
-        mProgram.SetUniform(mTextureScaleLocation, object.textureScale);
-        mProgram.SetUniform(mTextureOffsetLocation, object.textureOffset);
+
+        if (mMaterialReflectivityLocation>-1)
+            mProgram.SetUniform(mMaterialReflectivityLocation, object.materialRef.reflectivity);
+        if (mTextureScaleLocation > -1)
+            mProgram.SetUniform(mTextureScaleLocation, object.textureScale);
+        if (mTextureOffsetLocation > -1)
+            mProgram.SetUniform(mTextureOffsetLocation, object.textureOffset);
+
         glDrawElements(GL_TRIANGLES, object.meshDataRef.numIndices, GL_UNSIGNED_INT, nullptr);
     }
 }
 
 
 
-void ExampleSceneGenerator::UpdateProjection(U32 width, U32 height)
+void ExampleSceneGenerator::UpdateProjection(Mat4f projectionMatrix)
 {
-    mProgram.SetUniform(mProjectionLocation,
-                        TransformationMatrix4::PerspectiveProjection(45.f, static_cast<F32>(width),
-                                                                     static_cast<F32>(height), 0.1f, 100.f));
+    mProgram.SetUniform(mProjectionLocation, projectionMatrix);
 }
 
 
@@ -100,6 +126,7 @@ void ExampleSceneGenerator::UpdateProjection(U32 width, U32 height)
 void ExampleSceneGenerator::Initialize()
 {
     LoadTextures();
+    CreateMaterials();
     LoadMeshes();
     QueryProgramUniformLocations();
 }
@@ -112,7 +139,7 @@ void ExampleSceneGenerator::LoadMeshes()
     mMeshes.emplace(std::piecewise_construct, std::forward_as_tuple("cuboid"),
                     std::forward_as_tuple(vertexDataCuboid, elementDataCuboid));
 
-    auto [vertexDataSphere, elementDataSphere] = MeshGenerator::CreateSphere<true, true>(32,32,1);
+    auto [vertexDataSphere, elementDataSphere] = MeshGenerator::CreateSphere<true, true>(32, 32, 1);
     mMeshes.emplace(std::piecewise_construct, std::forward_as_tuple("sphere"),
                     std::forward_as_tuple(vertexDataSphere, elementDataSphere));
 
@@ -130,6 +157,8 @@ void ExampleSceneGenerator::LoadMeshes()
 
 void ExampleSceneGenerator::LoadTextures()
 {
+
+    mTextures.emplace("white", TextureData2d(1, 1, 4, {{255, 255, 255, 255}}));
     mTextures.emplace("test", TextureFile::Read(MakeString(TEXTURE_DIRECTORY, "/testImage.tex").c_str()));
     mTextures.emplace("redBrick01", TextureFile::Read(MakeString(TEXTURE_DIRECTORY, "/redBrick01_2k.tex").c_str()));
     mTextures.emplace("redBrick02", TextureFile::Read(MakeString(TEXTURE_DIRECTORY, "/redBrick02_2k.tex").c_str()));
@@ -153,12 +182,39 @@ void ExampleSceneGenerator::LoadTextures()
 
 
 
+void ExampleSceneGenerator::CreateMaterials()
+{
+    AddMaterial("gravel", GetTexture("gravel"), GetTexture("gravel"), 1);
+    AddMaterial("redBrick01", GetTexture("redBrick01"), GetTexture("redBrick01"), 32);
+    AddMaterial("redBrick02", GetTexture("redBrick02"), GetTexture("white"), 32);
+    AddMaterial("brickPavement01", GetTexture("brickPavement01"), GetTexture("brickPavement01"), 32);
+    AddMaterial("brickPavement02", GetTexture("brickPavement02"), GetTexture("brickPavement02"), 32);
+    AddMaterial("brickPavement03", GetTexture("brickPavement03"), GetTexture("brickPavement03"), 32);
+    AddMaterial("brickPavement04", GetTexture("brickPavement04"), GetTexture("brickPavement04"), 32);
+}
+
+
+
 void ExampleSceneGenerator::QueryProgramUniformLocations()
 {
-    mProjectionLocation = mProgram.QueryUniformLocation("projectionMatrix");
-    mModelWorldLocation = mProgram.QueryUniformLocation("modelWorldMatrix");
-    mTextureScaleLocation = mProgram.QueryUniformLocation("textureScale");
-    mTextureOffsetLocation = mProgram.QueryUniformLocation("textureOffset");
+    mProjectionLocation = mProgram.QueryUniformLocation("projection");
+    mModelWorldLocation = mProgram.QueryUniformLocation("modelWorld");
+
+    // Optional uniforms
+    if (mProgram.QueryHasUniform("textureScale"))
+        mTextureScaleLocation = mProgram.QueryUniformLocation("textureScale");
+    else
+        mTextureScaleLocation = -1;
+
+    if (mProgram.QueryHasUniform("textureOffset"))
+        mTextureOffsetLocation = mProgram.QueryUniformLocation("textureOffset");
+    else
+        mTextureOffsetLocation = -1;
+
+    if (mProgram.QueryHasUniform("material.reflectivity"))
+        mMaterialReflectivityLocation = mProgram.QueryUniformLocation("material.reflectivity");
+    else
+        mMaterialReflectivityLocation = -1;
 }
 
 } // namespace GDL::OpenGL

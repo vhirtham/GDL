@@ -17,6 +17,7 @@
 using namespace GDL;
 using namespace GDL::Input;
 using namespace GDL::OpenGL;
+using namespace GDL::TransformationMatrix4;
 
 
 
@@ -31,9 +32,9 @@ const char* GetVertexShaderCode()
             layout (location=1) in vec3 vertexNormal;
             layout (location=2) in vec2 vertexTexCoord;
 
-            uniform mat4 projectionMatrix;
-            uniform mat4 modelWorldMatrix;
-            uniform mat4 worldCameraMatrix;
+            uniform mat4 projection;
+            uniform mat4 modelWorld;
+            uniform mat4 worldCamera;
             uniform vec2 textureScale;
             uniform vec2 textureOffset;
 
@@ -42,7 +43,7 @@ const char* GetVertexShaderCode()
             void main(void)
             {
                 texCoord = (vertexTexCoord + textureOffset) * textureScale;
-                gl_Position =  projectionMatrix * worldCameraMatrix * modelWorldMatrix * vec4(vertexPosition, 1);
+                gl_Position =  projection * worldCamera * modelWorld * vec4(vertexPosition, 1);
             }
             )glsl";
 }
@@ -107,7 +108,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
     // Misc --------------------------------------------------------------
 
 
-    GLint worldCameraLocation = program.QueryUniformLocation("worldCameraMatrix");
+    GLint worldCameraLocation = program.QueryUniformLocation("worldCamera");
 
     F32 camX = 0;
     F32 camY = 0;
@@ -173,14 +174,15 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
 
 
         // Update worldCam matrix ---------------
-        program.SetUniform(worldCameraLocation,
-                           TransformationMatrix4::RotationX(pitch) * TransformationMatrix4::RotationY(yaw) *
-                                   TransformationMatrix4::RotationX(static_cast<F32>(-M_PI) / 2.f) *
-                                   TransformationMatrix4::Translation(-camX, -camY, -camZ));
+        program.SetUniform(worldCameraLocation, RotationX(pitch) * RotationY(yaw) *
+                                                        RotationX(static_cast<F32>(-M_PI) / 2.f) *
+                                                        Translation(-camX, -camY, -camZ));
 
 
-        scene.UpdateProjection(renderWindow.GetWidth(), renderWindow.GetHeight());
+        scene.UpdateProjection(
+                PerspectiveProjection(45.f, renderWindow.GetWidth(), renderWindow.GetHeight(), 0.1f, 100.f));
         scene.Render();
+
         renderWindow.SwapBuffers();
     }
 

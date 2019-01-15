@@ -38,6 +38,13 @@ GLuint Program::GetHandle() const
 
 
 
+bool Program::QueryHasUniform(const char* uniformName) const
+{
+    return 0 < glGetUniformLocation(mHandle, uniformName);
+}
+
+
+
 GLuint Program::QueryUniformBlockBinding(GLuint uniformBlockIndex) const
 {
     GLint blockBinding = -1;
