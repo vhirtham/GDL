@@ -1,13 +1,30 @@
 #pragma once
 
 #include "gdl/base/fundamentalTypes.h"
-#include "gdl/math/mat4.h"
+
 
 #include <GL/glew.h>
 #include <array>
 #include <functional>
 
-namespace GDL::OpenGL
+namespace GDL
+{
+
+class Mat4SSE;
+template <typename>
+class Mat4Single;
+template <typename, bool>
+class Vec3Single;
+template <bool>
+class Vec3SSE;
+template <typename, bool>
+class Vec4Single;
+template <bool>
+class Vec4SSE;
+
+
+
+namespace OpenGL
 {
 
 class Shader;
@@ -105,10 +122,55 @@ public:
     //! @param values: New values
     void SetUniform(GLint uniformLocation, const std::array<F32, 2>& values);
 
+    //! @brief Sets the value of a uniform vec3
+    //! @param uniformLocation: Location of the uniform
+    //! @param values: New value
+    void SetUniform(GLint uniformLocation, const Vec3Single<F32, true>& value);
+
+    //! @brief Sets the value of a uniform vec3
+    //! @param uniformLocation: Location of the uniform
+    //! @param values: New values
+    void SetUniform(GLint uniformLocation, const Vec3Single<F32, false>& value);
+
+    //! @brief Sets the value of a uniform vec3
+    //! @param uniformLocation: Location of the uniform
+    //! @param values: New value
+    void SetUniform(GLint uniformLocation, const Vec3SSE<true>& value);
+
+    //! @brief Sets the value of a uniform vec3
+    //! @param uniformLocation: Location of the uniform
+    //! @param values: New values
+    void SetUniform(GLint uniformLocation, const Vec3SSE<false>& value);
+
+    //! @brief Sets the value of a uniform vec4
+    //! @param uniformLocation: Location of the uniform
+    //! @param values: New value
+    void SetUniform(GLint uniformLocation, const Vec4Single<F32, true>& value);
+
+    //! @brief Sets the value of a uniform vec4
+    //! @param uniformLocation: Location of the uniform
+    //! @param values: New values
+    void SetUniform(GLint uniformLocation, const Vec4Single<F32, false>& value);
+
+    //! @brief Sets the value of a uniform vec4
+    //! @param uniformLocation: Location of the uniform
+    //! @param values: New value
+    void SetUniform(GLint uniformLocation, const Vec4SSE<true>& value);
+
+    //! @brief Sets the value of a uniform vec4
+    //! @param uniformLocation: Location of the uniform
+    //! @param values: New values
+    void SetUniform(GLint uniformLocation, const Vec4SSE<false>& value);
+
     //! @brief Sets the value of a uniform mat4
     //! @param uniformLocation: Location of the uniform
     //! @param value: New value
-    void SetUniform(GLint uniformLocation, const Mat4f& values);
+    void SetUniform(GLint uniformLocation, const Mat4SSE& values);
+
+    //! @brief Sets the value of a uniform mat4
+    //! @param uniformLocation: Location of the uniform
+    //! @param value: New value
+    void SetUniform(GLint uniformLocation, const Mat4Single<F32>& values);
 
     //! @brief Sets the texture unit of a uniform sampler
     //! @param uniformName: Name of the uniform sampler
@@ -182,4 +244,5 @@ Program::QueryUniformBlockUniformOffsets(const std::array<const char*, _numUnifo
     return QueryUniformBlockUniformOffsets<_numUniforms>(QueryUniformBlockUniformIndices<_numUniforms>(uniformNames));
 }
 
-} // namespace GDL::OpenGL
+} // namespace OpenGL
+} // namespace GDL

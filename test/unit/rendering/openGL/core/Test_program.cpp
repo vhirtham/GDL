@@ -1,6 +1,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include "gdl/base/exception.h"
+#include "gdl/math/mat4.h"
 #include "gdl/rendering/openGL/core/program.h"
 #include "gdl/rendering/openGL/core/shader.h"
 

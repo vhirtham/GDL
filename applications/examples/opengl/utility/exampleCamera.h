@@ -36,13 +36,17 @@ public:
     //! @param z: Z-position
     ExampleCamera(F32 x, F32 y, F32 z, F32 yaw = 0.f, F32 pitch = 0.f);
 
-    //! @brief Calculates the new camera position
-    //! @param deltaTime: Passed time in seconds
-    void MoveCamera(F32 deltaTime);
-
     //! @brief Calculates and returns the world-to-camera-space matrix
     //! @return World-to-camera-space matrix
     Mat4f GetWorldToCamMatrix() const;
+
+    //! @brief Gets the cameras position
+    //! @return Camera position
+    const Vec4f& GetCameraPosition() const;
+
+    //! @brief Calculates the new camera position
+    //! @param deltaTime: Passed time in seconds
+    void MoveCamera(F32 deltaTime);
 
 private:
     //! @brief Gets the movement direction vector depending on the input state

@@ -16,8 +16,8 @@ class ContextManagerGLFW;
 class RenderWindowGLFW
 {
     GLFWwindow* mWindow;
-    U32 mWidth = 800;
-    U32 mHeight = 600;
+    U32 mWidth = 1200;
+    U32 mHeight = 800;
     bool mInitialized = false;
     String mTitle = "GLFW Window";
     ContextManagerGLFW& mContextManagerGLFW;

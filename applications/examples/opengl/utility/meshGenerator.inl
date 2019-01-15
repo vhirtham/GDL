@@ -2,6 +2,8 @@
 
 #include "applications/examples/opengl/utility/meshGenerator.h"
 
+#include "gdl/math/constants.h"
+
 #include <cassert>
 #include <cmath>
 
@@ -14,7 +16,8 @@ std::pair<Vector<F32>, Vector<U32>> CreateCuboid(F32 width, F32 height, F32 dept
     constexpr U32 numPositionValuesPerVertex = 3;
     constexpr U32 numNormalValuesPerVertex = _addNormals ? 3 : 0;
     constexpr U32 numTexCoordinatesPerVertex = _addTexCoordinates ? 2 : 0;
-    constexpr U32 numValuesPerVertex = numPositionValuesPerVertex + numNormalValuesPerVertex + numTexCoordinatesPerVertex;
+    constexpr U32 numValuesPerVertex =
+            numPositionValuesPerVertex + numNormalValuesPerVertex + numTexCoordinatesPerVertex;
 
     constexpr U32 numIndicesPerRectangle = 6;
     constexpr U32 numPointsPerRectangle = 4;
@@ -78,7 +81,7 @@ std::pair<Vector<F32>, Vector<U32>> CreateCuboid(F32 width, F32 height, F32 dept
                     for (U32 i = 0; i < numNormalValuesPerVertex; ++i)
                     {
                         if (i == zIndex)
-                            vertexData.push_back(directionMod);
+                            vertexData.push_back(directionMod * directionMod2);
                         else
                             vertexData.push_back(0.f);
                     }
@@ -100,7 +103,7 @@ std::pair<Vector<F32>, Vector<U32>> CreateCuboid(F32 width, F32 height, F32 dept
         elementData.push_back(2 + f * numPointsPerRectangle);
         elementData.push_back(3 + f * numPointsPerRectangle);
     }
-    assert(vertexData.size()==numValuesPerVertex * numPointsPerRectangle * numFaces);
+    assert(vertexData.size() == numValuesPerVertex * numPointsPerRectangle * numFaces);
     assert(elementData.size() == numIndicesPerRectangle * numFaces);
 
     return std::make_pair(vertexData, elementData);
@@ -149,6 +152,100 @@ std::pair<Vector<F32>, Vector<U32>> CreateRectangle(F32 width, F32 height)
 
 
     return std::make_pair(vertexData, elementData);
+}
+
+
+
+template <bool _addNormals, bool _addTexCoordinates>
+std::pair<Vector<F32>, Vector<U32>> CreateSphere(U32 numHorizontalSegments, U32 numVerticalSegments, F32 radius)
+{
+    constexpr U32 numPositionValuesPerVertex = 3;
+    constexpr U32 numNormalValuesPerVertex = _addNormals ? 3 : 0;
+    constexpr U32 numTexCoordinatesPerVertex = _addTexCoordinates ? 2 : 0;
+    constexpr U32 numValuesPerVertex =
+            numPositionValuesPerVertex + numNormalValuesPerVertex + numTexCoordinatesPerVertex;
+
+
+    const U32 numTotalPoints = 2 + (numHorizontalSegments + 1) * (numVerticalSegments - 1);
+
+
+    if (numHorizontalSegments < 3)
+        numHorizontalSegments = 3;
+    if (numVerticalSegments < 2)
+        numVerticalSegments = 2;
+
+
+    Vector<F32> vertexData;
+    Vector<U32> indexData;
+
+    vertexData.reserve(numTotalPoints * numValuesPerVertex);
+    indexData.reserve(numVerticalSegments * (numHorizontalSegments - 1) * 6);
+
+    F32 deltaPositionHorizontal = 2 * PI<F32> / numHorizontalSegments;
+    F32 deltaPositionVertical = PI<F32> / numVerticalSegments;
+
+
+
+    // Create Points
+    for (U32 v = 0; v < numVerticalSegments + 1; ++v)
+        for (U32 h = 0; h < numHorizontalSegments + 1; ++h)
+        {
+            F32 normalX = std::sin(v * deltaPositionVertical) * std::cos(h * deltaPositionHorizontal);
+            F32 normalY = std::sin(v * deltaPositionVertical) * std::sin(h * deltaPositionHorizontal);
+            F32 normalZ = std::cos(v * deltaPositionVertical);
+            vertexData.push_back(normalX * radius);
+            vertexData.push_back(normalY * radius);
+            vertexData.push_back(normalZ * radius);
+            if constexpr (_addNormals)
+            {
+                vertexData.push_back(normalX);
+                vertexData.push_back(normalY);
+                vertexData.push_back(normalZ);
+            }
+            if constexpr (_addTexCoordinates)
+            {
+                vertexData.push_back(h * 1.f / static_cast<F32>(numHorizontalSegments));
+                vertexData.push_back(normalZ / PI<F32> + 0.5f);
+            }
+            if (v == 0 || v == numVerticalSegments)
+                break;
+        }
+
+
+
+    // Create indices
+    for (U32 h = 0; h < numHorizontalSegments; ++h)
+    {
+        indexData.push_back(0);
+        indexData.push_back(h + 1);
+        indexData.push_back(h + 2);
+    }
+
+    for (U32 v = 0; v < numVerticalSegments - 2; ++v)
+        for (U32 h = 0; h < numHorizontalSegments; ++h)
+        {
+            U32 index1 = h + 1 + v * (numHorizontalSegments + 1);
+            U32 index2 = h + 2 + v * (numHorizontalSegments + 1);
+
+            indexData.push_back(index1 + numHorizontalSegments + 1);
+            indexData.push_back(index2 + numHorizontalSegments + 1);
+            indexData.push_back(index1);
+            indexData.push_back(index1);
+            indexData.push_back(index2 + numHorizontalSegments + 1);
+            indexData.push_back(index2);
+        }
+
+    for (U32 h = 0; h < numHorizontalSegments; ++h)
+    {
+        indexData.push_back(numTotalPoints - 1);
+        indexData.push_back(numTotalPoints - numHorizontalSegments + h - 1);
+        indexData.push_back(numTotalPoints - numHorizontalSegments + h - 2);
+    }
+
+    assert(vertexData.size() == numTotalPoints * numValuesPerVertex);
+    assert(indexData.size() == numVerticalSegments * (numHorizontalSegments - 1) * 6);
+
+    return std::make_pair(vertexData, indexData);
 }
 
 

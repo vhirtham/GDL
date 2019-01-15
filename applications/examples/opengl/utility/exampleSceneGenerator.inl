@@ -59,10 +59,13 @@ void ExampleSceneGenerator::CreateExampleScene01()
 {
     constexpr F32 pi = static_cast<F32>(M_PI);
 
-    AddObject("rectangle", "gravel", {{20, 20, 1}}, {{0, 0, 0}}, {{0, 0, 0}}, {{2, 2}}, {{0, 0}});
+    AddObject("rectangle", "gravel", {{20, 20, 1}}, {{0, 0, 0}}, {{0, 0, 0}}, {{5, 5}}, {{0, 0}});
+    AddObject("rectangle", "redBrick01", {{20, 2, 1}}, {{0, 10, 1}}, {{0, -pi / 2.f, 0}}, {{10, 1}}, {{0, 0}});
     AddObject("torus", "redBrick02", {{1, 1, 1}}, {{0, 5, 1}}, {{0, -pi / 2.f, pi / 4.f}}, {{2, 1}});
+    AddObject("sphere", "brickPavement04", {{1, 1, 1}}, {{-3, 3, 1}}, {{0, 0, 0}}, {{2, 1}});
 
-    AddObject("cuboid", "brickPavement02", {{3, 3, 5}}, {{3, 8, 2.5}}, {{0, 0, 0}}, {{1.5, 2.5}}, {{0,0}});
+    AddObject("cuboid", "brickPavement02", {{3, 3, 5}}, {{3, 8, 2.5}}, {{0, 0, 0}}, {{1.5, 2.5}}, {{0, 0}});
+    AddObject("cuboid", "brickPavement01", {{1, 1, 1}}, {{2, 6., 0}}, {{0, 0, 0}}, {{1, 1}}, {{0, 0}});
 }
 
 
@@ -108,6 +111,10 @@ void ExampleSceneGenerator::LoadMeshes()
     auto [vertexDataCuboid, elementDataCuboid] = MeshGenerator::CreateCuboid<true, true>();
     mMeshes.emplace(std::piecewise_construct, std::forward_as_tuple("cuboid"),
                     std::forward_as_tuple(vertexDataCuboid, elementDataCuboid));
+
+    auto [vertexDataSphere, elementDataSphere] = MeshGenerator::CreateSphere<true, true>(32,32,1);
+    mMeshes.emplace(std::piecewise_construct, std::forward_as_tuple("sphere"),
+                    std::forward_as_tuple(vertexDataSphere, elementDataSphere));
 
     auto [vertexDataRectagle, elementDataRectangle] = MeshGenerator::CreateRectangle<true, true>();
     mMeshes.emplace(std::piecewise_construct, std::forward_as_tuple("rectangle"),

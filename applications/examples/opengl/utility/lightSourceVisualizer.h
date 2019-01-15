@@ -1,6 +1,7 @@
 #pragma once
 
 #include "gdl/math/mat4.h"
+#include "gdl/math/vec3.h"
 #include "gdl/rendering/openGL/core/bufferObject.h"
 #include "gdl/rendering/openGL/core/program.h"
 #include "gdl/rendering/openGL/core/shader.h"
@@ -42,9 +43,20 @@ public:
     LightSourceVisualizer& operator=(LightSourceVisualizer&&) = delete;
     ~LightSourceVisualizer() = default;
 
+    void SetPosition(const Vec3f& data)
+    {
+        std::array<F32, 4> arrayData = {{data[0], data[1], data[2], 1.f}};
+        glProgramUniform4fv(mProgram.GetHandle(), mUniformPosition, 1, arrayData.data());
+    }
+
     void SetPosition(const std::array<F32, 4>& data)
     {
         glProgramUniform4fv(mProgram.GetHandle(), mUniformPosition, 1, data.data());
+    }
+
+    void SetIntensity(const Vec3f& data)
+    {
+        glProgramUniform3fv(mProgram.GetHandle(), mUniformIntensity, 1, data.Data().data());
     }
 
     void SetIntensity(const std::array<F32, 3>& data)

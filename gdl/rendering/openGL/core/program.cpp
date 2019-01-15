@@ -3,7 +3,12 @@
 #include "gdl/base/exception.h"
 #include "gdl/base/string.h"
 #include "gdl/base/container/vector.h"
-#include "gdl/math/mat4.h"
+#include "gdl/math/mat4Single.h"
+#include "gdl/math/mat4SSE.h"
+#include "gdl/math/single/vec3Single.h"
+#include "gdl/math/sse/vec3SSE.h"
+#include "gdl/math/single/vec4Single.h"
+#include "gdl/math/sse/vec4SSE.h"
 #include "gdl/rendering/openGL/core/shader.h"
 
 
@@ -153,7 +158,70 @@ void Program::SetUniform(GLint uniformLocation, const std::array<F32, 2>& values
 
 
 
-void Program::SetUniform(GLint uniformLocation, const Mat4f& values)
+void Program::SetUniform(GLint uniformLocation, const Vec3Single<F32, true>& values)
+{
+    glProgramUniform3fv(mHandle, uniformLocation, 1, values.Data().data());
+}
+
+
+
+void Program::SetUniform(GLint uniformLocation, const Vec3Single<F32, false>& values)
+{
+    glProgramUniform3fv(mHandle, uniformLocation, 1, values.Data().data());
+}
+
+
+
+void Program::SetUniform(GLint uniformLocation, const Vec3SSE<true>& values)
+{
+    glProgramUniform3fv(mHandle, uniformLocation, 1, values.Data().data());
+}
+
+
+
+void Program::SetUniform(GLint uniformLocation, const Vec3SSE<false>& values)
+{
+    glProgramUniform3fv(mHandle, uniformLocation, 1, values.Data().data());
+}
+
+
+
+void Program::SetUniform(GLint uniformLocation, const Vec4Single<F32, true>& values)
+{
+    glProgramUniform4fv(mHandle, uniformLocation, 1, values.Data().data());
+}
+
+
+
+void Program::SetUniform(GLint uniformLocation, const Vec4Single<F32, false>& values)
+{
+    glProgramUniform4fv(mHandle, uniformLocation, 1, values.Data().data());
+}
+
+
+
+void Program::SetUniform(GLint uniformLocation, const Vec4SSE<true>& values)
+{
+    glProgramUniform4fv(mHandle, uniformLocation, 1, values.Data().data());
+}
+
+
+
+void Program::SetUniform(GLint uniformLocation, const Vec4SSE<false>& values)
+{
+    glProgramUniform4fv(mHandle, uniformLocation, 1, values.Data().data());
+}
+
+
+
+void Program::SetUniform(GLint uniformLocation, const Mat4SSE& values)
+{
+    glProgramUniformMatrix4fv(mHandle, uniformLocation, 1, GL_FALSE, values.Data().data());
+}
+
+
+
+void Program::SetUniform(GLint uniformLocation, const Mat4Single<F32>& values)
 {
     glProgramUniformMatrix4fv(mHandle, uniformLocation, 1, GL_FALSE, values.Data().data());
 }
@@ -179,5 +247,7 @@ void Program::SetUniformSamplerTextureUnit(const char* uniformName, U32 textureU
     GLint uniformLocation = QueryUniformLocation(uniformName);
     SetUniform(uniformLocation, static_cast<I32>(textureUnit));
 }
+
+
 
 } // namespace GDL::OpenGL

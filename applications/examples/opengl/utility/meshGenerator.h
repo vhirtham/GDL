@@ -28,7 +28,15 @@ std::pair<Vector<F32>, Vector<U32>> CreateCuboid(F32 width = 1, F32 height = 1, 
 template <bool _addNormals = false, bool _addTexCoordinates = false>
 std::pair<Vector<F32>, Vector<U32>> CreateRectangle(F32 width = 1, F32 height = 1);
 
-
+//! @brief Creates an array of vertex data and a corresbonding index array to render a sphere
+//! @tparam _addNormals: If true, normals are added to the vertex data
+//! @tparam _addTexCoordinates: If true, texture coordinates are added to the vertex data
+//! @param numHorizontalSegments: Number of segments in horizontal direction
+//! @param numVerticalSegments: Number of segments in vertical direction
+//! @param radius: Radius of the sphere
+//! @remark The created sphere creates texturing artifacts at the poles
+template <bool _addNormals = false, bool _addTexCoordinates = false>
+std::pair<Vector<F32>, Vector<U32>> CreateSphere(U32 numHorizontalSegments, U32 numVerticalSegments, F32 radius = 1);
 
 //! @brief Creates an array of vertex data and a corresbonding index array to render a torus
 //! @tparam _addNormals: If true, normals are added to the vertex data

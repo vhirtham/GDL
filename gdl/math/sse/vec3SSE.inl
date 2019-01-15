@@ -172,7 +172,7 @@ bool Vec3SSE<_isCol>::IsDataAligned() const
 // LCOV_EXCL_START
 
 template <>
-std::ostream& operator<<(std::ostream& os, const Vec3SSE<true>& vec)
+inline std::ostream& operator<<(std::ostream& os, const Vec3SSE<true>& vec)
 {
     os << "| " << vec[0] << " |\n| " << vec[1] << " |\n| " << vec[2] << " |" << std::endl;
     return os;
@@ -181,7 +181,7 @@ std::ostream& operator<<(std::ostream& os, const Vec3SSE<true>& vec)
 
 
 template <>
-std::ostream& operator<<(std::ostream& os, const Vec3SSE<false>& vec)
+inline std::ostream& operator<<(std::ostream& os, const Vec3SSE<false>& vec)
 {
     os << "| " << vec[0] << " " << vec[1] << " " << vec[2] << " |" << std::endl;
     return os;
