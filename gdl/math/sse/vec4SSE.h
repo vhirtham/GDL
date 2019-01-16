@@ -18,6 +18,8 @@ template <bool _isCol = true>
 class alignas(sse::alignmentBytes<__m128>) Vec4SSE
 {
     template <bool>
+    friend class Vec3SSE;
+    template <bool>
     friend class Vec4SSE;
     friend class Mat4SSE;
 

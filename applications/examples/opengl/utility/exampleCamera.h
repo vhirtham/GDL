@@ -45,6 +45,10 @@ public:
     //! @return Camera position
     const Vec4f& GetCameraPosition() const;
 
+    //! @brief Gets the cameras position
+    //! @return Camera position
+    Vec4f GetCameraDirection() const;
+
     //! @brief Calculates the new camera position
     //! @param deltaTime: Passed time in seconds
     void MoveCamera(F32 deltaTime);

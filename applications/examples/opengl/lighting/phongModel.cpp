@@ -115,7 +115,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
     // Setup Render Context ----------------------------------------------
 
     auto [renderWindow, contextManager] = DefaultRenderSetup();
-    renderWindow.SetTitle("movement: W,A,S,D - capture mouse: C - release mouse: ESC");
+    renderWindow.SetTitle("movement: W,A,S,D - flashlight: F - capture mouse: C - release mouse: ESC");
 
 
 
@@ -146,10 +146,12 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
 
     ExamplePhongLightManager phongLightManager(program);
 
-    Vec3f ambientColor(0.05f, 0.05f, 0.25f);
+    Vec3f ambientColor(0.025f, 0.025f, 0.125f);
     phongLightManager.SetDirectionalLight(Vec3f(-2.f, 2.f, -2.f), ambientColor, ambientColor, ambientColor);
     phongLightManager.AddPointLight(Vec3f(2, 6, 2), Vec3f(1, 1, 1), 1.f, 0.22f, 0.2f);
-    phongLightManager.AddPointLight(Vec3f(-7, 8, 2), Vec3f(1.f, 0.1f, 0.1f), 1.f, 0.22f, 0.2f);
+    phongLightManager.AddPointLight(Vec3f(-7, 8, 2.5), Vec3f(1.f, 0.1f, 0.1f), 1.f, 0.22f, 0.2f);
+    phongLightManager.SetSpotlight(Vec3f(0, 0, 1.5), Vec3f(0.f, 1.f, -0.1f), Vec3f(1.f, 1.f, 1.f),
+                                   4.5f * PI<F32> / 180.f, 10.f * PI<F32> / 180.f);
 
 
 
@@ -163,8 +165,13 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
 
     // Create light source manager ---------------------------------------
 
+    bool flashLightOn = false;
     ExampleLightSourceVisualizer lightSourceVisualizer;
 
+
+
+    // Misc --------------------------------------------------------------
+    bool prefKeyStateF = false;
 
 
     // Start main loop ---------------------------------------------------
@@ -181,6 +188,12 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
             renderWindow.ReleaseCursor();
         if (InputState::GetKeyPressed(Key::C))
             renderWindow.CaptureCursor();
+        if (InputState::GetKeyPressed(Key::F))
+        {
+            if (!prefKeyStateF)
+                flashLightOn = !flashLightOn;
+        }
+        prefKeyStateF = InputState::GetKeyPressed(Key::F);
 
         // Camera movement
         camera.MoveCamera(deltaTime);
@@ -195,6 +208,14 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
         scene.UpdateProjection(projectionMatrix);
 
 
+        // Update lights
+        phongLightManager.SetSpotlightPosition(camera.GetCameraPosition());
+        phongLightManager.SetSpotlightDirection(camera.GetCameraDirection());
+        if (flashLightOn)
+            phongLightManager.SetSpotlightColor(Vec3f(1.f, 1.f, 1.f));
+        else
+            phongLightManager.SetSpotlightColor(Vec3f(0.f, 0.f, 0.f));
+        phongLightManager.UpdateLights();
         lightSourceVisualizer.UpdateCamera(camera.GetWorldToCamMatrix());
         for (U32 i = 0; i < phongLightManager.GetNumPointLights(); ++i)
             lightSourceVisualizer.RenderPointLight(phongLightManager.GetPointLightPosition(i),

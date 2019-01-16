@@ -13,6 +13,11 @@
 namespace GDL
 {
 
+template <bool>
+class Vec4SSE;
+
+
+
 //! @brief Vector class with 3 entries and SSE support
 //! @tparam _isCol: If true, the vector is treated as column vector, otherwise as row vector
 template <bool _isCol = true>
@@ -20,6 +25,8 @@ class alignas(sse::alignmentBytes<__m128>) Vec3SSE
 {
     template <bool>
     friend class Vec3SSE;
+    template <bool>
+    friend class Vec4SSE;
 
     alignas(sse::alignmentBytes<__m128>) __m128 mData;
 
@@ -38,6 +45,10 @@ public:
     //! @brief Constructor that initializes the vector with specific values
     //! @param v0-v2: Vector values
     inline Vec3SSE(F32 v0, F32 v1, F32 v2);
+
+    //! @brief Constructor that initializes the vector with a Vec4. The last value of the vec 4 is dropped.
+    //! @param other: Other Vector
+    inline Vec3SSE(const Vec4SSE<_isCol>& other);
 
 private:
     //! @brief Constructor that initializes the vector

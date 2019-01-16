@@ -33,6 +33,26 @@ class ExamplePhongLightManager
 
 
 
+    struct Spotlight
+    {
+        Vec3f mPosition;
+        Vec3f mDirection;
+        Vec3f mAmbient;
+        Vec3f mDiffuse;
+        Vec3f mSpecular;
+        F32 mInnerCutOffCos;
+        F32 mOuterCutOffCos;
+
+        GLint mUniformPosition;
+        GLint mUniformDirection;
+        GLint mUniformAmbient;
+        GLint mUniformDiffuse;
+        GLint mUniformSpecular;
+        GLint mUniformInnerCutOffCos;
+        GLint mUniformOuterCutOffCos;
+    };
+
+
     struct PointLight
     {
         Vec3f mPosition;
@@ -56,6 +76,7 @@ class ExamplePhongLightManager
 
     Program& mProgram;
     DirectionalLight mDirectionalLight;
+    Spotlight mSpotlight;
     Vector<PointLight> mPointLights;
 
 public:
@@ -83,9 +104,26 @@ public:
     void SetDirectionalLight(const Vec3f& direction, const Vec3f& ambient, const Vec3f& diffuse, const Vec3f& specular);
 
 
+    void SetSpotlight(const Vec3f& position, const Vec3f& direction, const Vec3f& color, F32 innerCutOff,
+                      F32 outerCutOff);
+
+    void SetSpotlight(const Vec3f& position, const Vec3f& direction, const Vec3f& ambient, const Vec3f& diffuse,
+                      const Vec3f& specular, F32 innerCutOff, F32 outerCutOff);
+
+    void SetSpotlightColor(const Vec3f& color);
+
+    void SetSpotlightDirection(const Vec3f& direction);
+
+    void SetSpotlightPosition(const Vec3f& position);
+
+
+    void UpdateLights();
+
     void UpdateDirectionalLight();
 
     void UpdatePointLight(U32 index);
+
+    void UpdateSpotlight();
 
 private:
     void Initialize();

@@ -90,6 +90,63 @@ void ExamplePhongLightManager::SetDirectionalLight(const Vec3f& direction, const
     UpdateDirectionalLight();
 }
 
+
+
+void ExamplePhongLightManager::SetSpotlight(const Vec3f& position, const Vec3f& direction, const Vec3f& color,
+                                            F32 innerCutOff, F32 outerCutOff)
+{
+    SetSpotlight(position, direction, color, color, color, innerCutOff, outerCutOff);
+}
+
+
+
+void ExamplePhongLightManager::SetSpotlight(const Vec3f& position, const Vec3f& direction, const Vec3f& ambient,
+                                            const Vec3f& diffuse, const Vec3f& specular, F32 innerCutOff,
+                                            F32 outerCutOff)
+{
+    mSpotlight.mDirection = direction;
+    mSpotlight.mPosition = position;
+    mSpotlight.mAmbient = ambient;
+    mSpotlight.mDiffuse = diffuse;
+    mSpotlight.mSpecular = specular;
+    mSpotlight.mInnerCutOffCos = std::cos(innerCutOff);
+    mSpotlight.mOuterCutOffCos = std::cos(outerCutOff);
+    UpdateSpotlight();
+}
+
+void ExamplePhongLightManager::SetSpotlightColor(const Vec3f& color)
+{
+    mSpotlight.mAmbient = color;
+    mSpotlight.mDiffuse = color;
+    mSpotlight.mSpecular = color;
+}
+
+
+
+void ExamplePhongLightManager::SetSpotlightDirection(const Vec3f& direction)
+{
+    mSpotlight.mDirection = direction;
+}
+
+
+
+void ExamplePhongLightManager::SetSpotlightPosition(const Vec3f& position)
+{
+    mSpotlight.mPosition = position;
+}
+
+
+
+void ExamplePhongLightManager::UpdateLights()
+{
+    UpdateDirectionalLight();
+    UpdateSpotlight();
+    for (U32 i = 0; i < mPointLights.size(); ++i)
+        UpdatePointLight(i);
+}
+
+
+
 void ExamplePhongLightManager::UpdateDirectionalLight()
 {
     mProgram.SetUniform(mDirectionalLight.mUniformDirection, mDirectionalLight.mDirection);
@@ -111,6 +168,21 @@ void ExamplePhongLightManager::UpdatePointLight(U32 index)
     mProgram.SetUniform(mPointLights[index].mUniformAttenuationQuadratic, mPointLights[index].mAttenuationQuadratic);
 }
 
+
+
+void ExamplePhongLightManager::UpdateSpotlight()
+{
+    mProgram.SetUniform(mSpotlight.mUniformPosition, mSpotlight.mPosition);
+    mProgram.SetUniform(mSpotlight.mUniformDirection, mSpotlight.mDirection);
+    mProgram.SetUniform(mSpotlight.mUniformAmbient, mSpotlight.mAmbient);
+    mProgram.SetUniform(mSpotlight.mUniformDiffuse, mSpotlight.mDiffuse);
+    mProgram.SetUniform(mSpotlight.mUniformSpecular, mSpotlight.mSpecular);
+    mProgram.SetUniform(mSpotlight.mUniformInnerCutOffCos, mSpotlight.mInnerCutOffCos);
+    mProgram.SetUniform(mSpotlight.mUniformOuterCutOffCos, mSpotlight.mOuterCutOffCos);
+}
+
+
+
 void ExamplePhongLightManager::Initialize()
 {
     mDirectionalLight.mUniformDirection = mProgram.QueryUniformLocation("directionalLight.direction");
@@ -118,7 +190,13 @@ void ExamplePhongLightManager::Initialize()
     mDirectionalLight.mUniformDiffuse = mProgram.QueryUniformLocation("directionalLight.diffuse");
     mDirectionalLight.mUniformSpecular = mProgram.QueryUniformLocation("directionalLight.specular");
 
-
+    mSpotlight.mUniformPosition = mProgram.QueryUniformLocation("spotlight.position");
+    mSpotlight.mUniformDirection = mProgram.QueryUniformLocation("spotlight.direction");
+    mSpotlight.mUniformAmbient = mProgram.QueryUniformLocation("spotlight.ambient");
+    mSpotlight.mUniformDiffuse = mProgram.QueryUniformLocation("spotlight.diffuse");
+    mSpotlight.mUniformSpecular = mProgram.QueryUniformLocation("spotlight.specular");
+    mSpotlight.mUniformInnerCutOffCos = mProgram.QueryUniformLocation("spotlight.innerCutOffCos");
+    mSpotlight.mUniformOuterCutOffCos = mProgram.QueryUniformLocation("spotlight.outerCutOffCos");
 }
 
 
@@ -143,12 +221,22 @@ const char* ExamplePhongLightManager::GetLightShaderCode()
                 vec3 ambient;
                 vec3 diffuse;
                 vec3 specular;
-
                 float attenuationConstant;
                 float attenuationLinear;
                 float attenuationQuadratic;
             };
 
+
+            struct Spotlight
+            {
+                vec3 direction;
+                vec3 position;
+                vec3 ambient;
+                vec3 diffuse;
+                vec3 specular;
+                float innerCutOffCos;
+                float outerCutOffCos;
+            };
 
 
             vec3 CalculateAmbient(in vec3 lightAmbient,
@@ -255,9 +343,47 @@ const char* ExamplePhongLightManager::GetLightShaderCode()
 
 
 
+
+            vec3 CalculateSpotlight(in Spotlight spotlight,
+                                    in vec3 fragmentPosition,
+                                    in vec3 cameraPosition,
+                                    in vec3 unitNormal,
+                                    in vec3 materialAlbedo,
+                                    in vec3 materialSpecular,
+                                    float materialReflectivity)
+            {
+                vec3 lightDirection = normalize(spotlight.position - fragmentPosition);
+                float theta = dot(lightDirection, normalize(-spotlight.direction));
+                float epsilon = spotlight.innerCutOffCos - spotlight.outerCutOffCos;
+                float intensity = clamp((theta - spotlight.outerCutOffCos) / epsilon,0.f, 1.f);
+
+
+                    vec3 ambient = CalculateAmbient(spotlight.ambient,
+                                                    materialAlbedo);
+
+                    vec3 diffuse = CalculateDiffuse(unitNormal,
+                                                    lightDirection,
+                                                    spotlight.diffuse,
+                                                    materialAlbedo);
+
+                    vec3 specular = CalculateSpecular(fragmentPosition,
+                                                      cameraPosition,
+                                                      unitNormal,
+                                                      lightDirection,
+                                                      spotlight.specular,
+                                                      materialSpecular,
+                                                      materialReflectivity);
+
+
+                    return (ambient + diffuse + specular) * intensity;
+
+            }
+
             #define NUM_POINT_LIGHTS 8
+
             uniform DirectionalLight directionalLight;
             uniform PointLight[NUM_POINT_LIGHTS] pointLights;
+            uniform Spotlight spotlight;
 
 
 
@@ -284,6 +410,15 @@ const char* ExamplePhongLightManager::GetLightShaderCode()
                                                        materialAlbedo,
                                                        materialSpecular,
                                                        materialReflectivity);
+
+                resultColor += CalculateSpotlight(spotlight,
+                                                  fragmentPosition,
+                                                  cameraPosition,
+                                                  unitNormal,
+                                                  materialAlbedo,
+                                                  materialSpecular,
+                                                  materialReflectivity);
+
                 return resultColor;
             }
 

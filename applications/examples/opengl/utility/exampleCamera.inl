@@ -62,6 +62,11 @@ const Vec4f& ExampleCamera::GetCameraPosition() const
     return mPosition;
 }
 
+Vec4f ExampleCamera::GetCameraDirection() const
+{
+    return TransformationMatrix4::RotationZ(-mYaw) * TransformationMatrix4::RotationX(-mPitch) * Vec4f(0, 1, 0, 0);
+}
+
 
 
 Vec4f ExampleCamera::GetMovementDirection()

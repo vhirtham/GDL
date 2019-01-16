@@ -52,6 +52,14 @@ Vec3SSE<_isCol>::Vec3SSE(F32 v0, F32 v1, F32 v2)
 
 
 template <bool _isCol>
+Vec3SSE<_isCol>::Vec3SSE(const Vec4SSE<_isCol>& other)
+    : mData{_mmx_mul_p(other.mData, _mmx_setr_p<__m128>(1, 1, 1, 0))}
+{
+}
+
+
+
+template <bool _isCol>
 Vec3SSE<_isCol>::Vec3SSE(__m128 data)
     : mData{data}
 {
