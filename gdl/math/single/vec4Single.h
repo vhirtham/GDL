@@ -16,6 +16,8 @@ template <typename _type, bool _isCol = true>
 class Vec4Single
 {
     template <typename, bool>
+    friend class Vec3Single;
+    template <typename, bool>
     friend class Vec4Single;
     template <typename>
     friend class Mat4Single;

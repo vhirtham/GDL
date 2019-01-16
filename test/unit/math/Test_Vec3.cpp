@@ -4,6 +4,8 @@
 #include "gdl/base/fundamentalTypes.h"
 #include "gdl/math/sse/vec3SSE.h"
 #include "gdl/math/single/vec3Single.h"
+#include "gdl/math/sse/vec4SSE.h"
+#include "gdl/math/single/vec4Single.h"
 
 #include "test/tools/arrayValueComparison.h"
 #include "test/tools/ExceptionChecks.h"
@@ -28,6 +30,21 @@ struct Fixture
 // Construction -------------------------------------------------------------------------------------------------------
 
 template <typename _vector>
+constexpr auto GetVec4()
+{
+    if constexpr (std::is_same<_vector, Vec3fSSE<true>>::value)
+        return Vec4fSSE<true>();
+    if constexpr (std::is_same<_vector, Vec3fSSE<false>>::value)
+        return Vec4fSSE<false>();
+    if constexpr (std::is_same<_vector, Vec3fSingle<true>>::value)
+        return Vec4fSingle<true>();
+    if constexpr (std::is_same<_vector, Vec3fSingle<false>>::value)
+        return Vec4fSingle<false>();
+}
+
+
+
+template <typename _vector>
 void ConstructionTest()
 {
     _vector a;
@@ -39,6 +56,12 @@ void ConstructionTest()
 
     _vector b1(expB);
     BOOST_CHECK(CheckCloseArray(b1.Data(), expB));
+
+    using _vector4 = decltype(GetVec4<_vector>());
+
+    _vector c(_vector4(3.f, 5.f, 1.f, 2.f));
+    std::array<F32, 3> expC{{3.f, 5.f, 1.f}};
+    BOOST_CHECK(CheckCloseArray(c.Data(), expC));
 }
 
 
