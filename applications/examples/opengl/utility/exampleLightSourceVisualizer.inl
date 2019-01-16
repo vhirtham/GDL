@@ -1,6 +1,6 @@
 #pragma once
 
-#include "applications/examples/opengl/utility/exampleLightSourceManager.h"
+#include "applications/examples/opengl/utility/exampleLightSourceVisualizer.h"
 
 
 namespace GDL::OpenGL
@@ -8,22 +8,24 @@ namespace GDL::OpenGL
 
 
 
-ExampleLightSourceManager::ExampleLightSourceManager()
-    : mVertexShader(GL_VERTEX_SHADER, VertexShaderCode())
-    , mFragmentShader(GL_FRAGMENT_SHADER, FragmentShaderCode())
+ExampleLightSourceVisualizer::ExampleLightSourceVisualizer()
+    : mVertexShader(GL_VERTEX_SHADER, GetVertexShaderCode())
+    , mFragmentShader(GL_FRAGMENT_SHADER, GetFragmentShaderCode())
     , mProgram(mVertexShader, mFragmentShader)
     , mUniformLightColor(mProgram.QueryUniformLocation("lightColor"))
     , mUniformProjection(mProgram.QueryUniformLocation("projectionMatrix"))
     , mUniformLightPosition(mProgram.QueryUniformLocation("lightPosition"))
     , mUniformWorldCamera(mProgram.QueryUniformLocation("worldCameraMatrix"))
+    , mUniformDiameter(mProgram.QueryUniformLocation("diameter"))
 {
     Initialize();
 }
 
-void ExampleLightSourceManager::RenderPointLight(const Vec3f& lightPosition, const Vec3f& lightColor)
+void ExampleLightSourceVisualizer::RenderPointLight(const Vec3f& lightPosition, const Vec3f& lightColor, F32 diameter)
 {
     mProgram.SetUniform(mUniformLightPosition, lightPosition);
     mProgram.SetUniform(mUniformLightColor, lightColor);
+    mProgram.SetUniform(mUniformDiameter, diameter);
 
     mVAO.Bind();
     mProgram.Use();
@@ -32,9 +34,9 @@ void ExampleLightSourceManager::RenderPointLight(const Vec3f& lightPosition, con
 
 
 
-void ExampleLightSourceManager::Initialize()
+void ExampleLightSourceVisualizer::Initialize()
 {
-    auto [vertexDataLightSource, elementDataLightSource] = MeshGenerator::CreateSphere<false, true>(32, 32,0.1);
+    auto [vertexDataLightSource, elementDataLightSource] = MeshGenerator::CreateSphere<false, true>(32, 32, 0.5);
     mNumIndices = static_cast<U32>(elementDataLightSource.size());
     mVBO = MakeUnique<BufferObject>(vertexDataLightSource, GL_STATIC_DRAW);
     mEBO = MakeUnique<BufferObject>(elementDataLightSource, GL_STATIC_DRAW);
@@ -45,21 +47,21 @@ void ExampleLightSourceManager::Initialize()
 
 
 
-void ExampleLightSourceManager::UpdateProjectionMatrix(const Mat4f& projectionMatrix)
+void ExampleLightSourceVisualizer::UpdateProjectionMatrix(const Mat4f& projectionMatrix)
 {
     mProgram.SetUniform(mUniformProjection, projectionMatrix);
 }
 
 
 
-void ExampleLightSourceManager::UpdateCamera(const Mat4f& worldCameraMatrix)
+void ExampleLightSourceVisualizer::UpdateCamera(const Mat4f& worldCameraMatrix)
 {
     mProgram.SetUniform(mUniformWorldCamera, worldCameraMatrix);
 }
 
 
 
-const char* ExampleLightSourceManager::VertexShaderCode()
+const char* ExampleLightSourceVisualizer::GetVertexShaderCode()
 {
     return R"glsl(
             #version 450
@@ -71,17 +73,18 @@ const char* ExampleLightSourceManager::VertexShaderCode()
             uniform vec3 lightPosition;
             uniform mat4 projectionMatrix;
             uniform mat4 worldCameraMatrix;
+            uniform float diameter;
 
             void main(void)
             {
-                gl_Position = projectionMatrix * worldCameraMatrix * (vec4(VertexPosition + lightPosition, 1.f));
+                gl_Position = projectionMatrix * worldCameraMatrix * (vec4(VertexPosition * diameter + lightPosition, 1.f));
             }
             )glsl";
 }
 
 
 
-const char* ExampleLightSourceManager::FragmentShaderCode()
+const char* ExampleLightSourceVisualizer::GetFragmentShaderCode()
 {
     return R"glsl(
             #version 450

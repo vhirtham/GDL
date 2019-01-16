@@ -10,7 +10,7 @@
 #include "gdl/rendering/openGL/core/vertexArrayObject.h"
 
 #include "applications/examples/opengl/utility/meshGenerator.h"
-#include "applications/examples/opengl/utility/lightSourceVisualizer.h"
+#include "applications/examples/opengl/utility/exampleLightSourceVisualizer.h"
 
 #include <cmath>
 
@@ -140,7 +140,9 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
 
 
     // Create light source visualizer ------------------------------------
-    LightSourceVisualizer lsv;
+
+    ExampleLightSourceVisualizer lightSourceVisualizer;
+    lightSourceVisualizer.UpdateCamera(Mat4f(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1));
 
 
 
@@ -160,9 +162,6 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
     glProgramUniform4fv(program.GetHandle(), uniformLightPosition, 1, lightPositionData.data());
     glProgramUniform3fv(program.GetHandle(), uniformLightSourceIntensity, 1, lightSourceIntensityData.data());
     glProgramUniform3fv(program.GetHandle(), uniformReflectionCoefficient, 1, reflectionCoefficientData.data());
-
-    lsv.SetPosition(lightPositionData);
-    lsv.SetIntensity(lightSourceIntensityData);
 
 
 
@@ -192,13 +191,13 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
         program.SetUniform(uniformProjection, ProjectionMatrix);
         program.SetUniform(uniformRotation, RotationMatrix);
         program.SetUniform(uniformModelWorld, ModelWorldMatrix);
-        lsv.SetProjection(ProjectionMatrix);
+        lightSourceVisualizer.UpdateProjectionMatrix(ProjectionMatrix);
 
         vao.Bind();
         program.Use();
         glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(elementData.size()), GL_UNSIGNED_INT, nullptr);
 
-        lsv.RenderLightSource();
+        lightSourceVisualizer.RenderPointLight(Vec3f(0.f, 0.f, -10.f), Vec3f(lightSourceIntensityData), 0.3f);
 
         renderWindow.SwapBuffers();
     }

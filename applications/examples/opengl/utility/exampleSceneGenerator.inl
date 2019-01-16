@@ -74,7 +74,7 @@ void ExampleSceneGenerator::CreateExampleScene01()
     AddObject("rectangle", "gravel", {{20, 20, 1}}, {{0, 0, 0}}, {{0, 0, 0}}, {{5, 5}}, {{0, 0}});
     AddObject("rectangle", "redBrick01", {{20, 2, 1}}, {{0, 10, 1}}, {{0, -pi / 2.f, 0}}, {{10, 1}}, {{0, 0}});
     AddObject("torus", "redBrick02", {{1, 1, 1}}, {{0, 5, 1}}, {{0, -pi / 2.f, pi / 4.f}}, {{2, 1}});
-    AddObject("sphere", "brickPavement04", {{1, 1, 1}}, {{-3, 3, 1}}, {{0, 0, 0}}, {{2, 1}});
+    AddObject("sphere", "brickPavement04", {{1, 1, 1}}, {{-6, 6, 1}}, {{0, 0, 0}}, {{2, 1}});
 
     AddObject("cuboid", "brickPavement02", {{3, 3, 5}}, {{3, 8, 2.5}}, {{0, 0, 0}}, {{1.5, 2.5}}, {{0, 0}});
     AddObject("cuboid", "brickPavement01", {{1, 1, 1}}, {{2, 6., 0}}, {{0, 0, 0}}, {{1, 1}}, {{0, 0}});

@@ -9,7 +9,8 @@
 #include "applications/examples/opengl/utility/defaultRenderSetup.h"
 #include "applications/examples/opengl/utility/exampleSceneGenerator.h"
 #include "applications/examples/opengl/utility/exampleCamera.h"
-#include "applications/examples/opengl/utility/exampleLightSourceManager.h"
+#include "applications/examples/opengl/utility/examplePhongLightManager.h"
+#include "applications/examples/opengl/utility/exampleLightSourceVisualizer.h"
 
 
 using namespace GDL;
@@ -20,94 +21,6 @@ using namespace GDL::TransformationMatrix4;
 
 
 // ShaderCode ---------------------------------------------------------------------------------------------------------
-
-const char* GetADSLightShaderCode()
-{
-    return R"glsl(
-            #version 450
-
-
-            struct PointLight
-            {
-                vec3 position;
-                vec3 ambient;
-                vec3 diffuse;
-                vec3 specular;
-
-                float attenuationConstant;
-                float attenuationLinear;
-                float attenuationQuadratic;
-            };
-
-
-
-            uniform PointLight pointLight;
-
-
-
-
-            vec3 CalculatePointLight(in PointLight pointLight,
-                                     in vec3 albedo,
-                                     in vec3 fragmentPosition,
-                                     in vec3 cameraPosition,
-                                     in vec3 unitNormal,
-                                     in vec3 materialSpecular,
-                                     float materialReflectivity)
-            {
-                // Attenuation
-                // -----------
-                float distance = length(pointLight.position - fragmentPosition);
-                float attenuation = 1.f / (pointLight.attenuationConstant +
-                                           pointLight.attenuationLinear * distance +
-                                           pointLight.attenuationQuadratic * distance * distance);
-
-
-                // Ambient light component
-                // -----------------------
-                vec3 ambient = albedo * pointLight.ambient * 0.1;
-
-
-                // Diffuse light component
-                // -----------------------
-                vec3 lightDirection = normalize(pointLight.position - fragmentPosition);
-                float diff = max(dot(unitNormal, lightDirection), 0.f);
-                vec3 diffuse = albedo * pointLight.diffuse * diff;
-
-
-                // Specular light component
-                // ------------------------
-                vec3 reflectionDirection = reflect(-lightDirection, unitNormal);
-                vec3 cameraDirection = normalize(cameraPosition - fragmentPosition);
-                float spec = pow(max(dot(cameraDirection, reflectionDirection), 0.f), materialReflectivity);
-                vec3 specular = materialSpecular * pointLight.specular * spec;
-
-
-                return attenuation * (ambient + diffuse + specular);
-           }
-
-
-
-           vec3 CalculateLight(in vec3 albedo,
-                               in vec3 fragmentPosition,
-                               in vec3 cameraPosition,
-                               in vec3 unitNormal,
-                               in vec3 materialSpecular,
-                               float materialReflectivity)
-            {
-                return CalculatePointLight(pointLight,
-                                           albedo,
-                                           fragmentPosition,
-                                           cameraPosition,
-                                           unitNormal,
-                                           materialSpecular,
-                                           materialReflectivity);
-            }
-
-
-           )glsl";
-}
-
-
 
 const char* GetVertexShaderCode()
 {
@@ -177,18 +90,18 @@ const char* GetFragmentShaderCode()
             void main(void)
             {
                 vec3 unitNormal = normalize(normal);
-                vec4 albedo = texture(material.albedo, texCoord);
+                vec4 materialAlbedo = texture(material.albedo, texCoord);
                 vec4 materialSpecular = texture(material.specular, texCoord);
 
-                vec3 resultColor = CalculateLight(albedo.xyz,
-                                                  positionWorld,
+                vec3 resultColor = CalculateLight(positionWorld,
                                                   cameraPosition.xyz,
                                                   unitNormal,
+                                                  materialAlbedo.xyz,
                                                   materialSpecular.xyz,
                                                   material.reflectivity);
 
 
-                fragColor = vec4(resultColor, albedo.w);
+                fragColor = vec4(resultColor, materialAlbedo.w);
             }
             )glsl";
 }
@@ -209,9 +122,9 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
     // Create Shader and Program -----------------------------------------
 
     Shader vertexShader(GL_VERTEX_SHADER, GetVertexShaderCode());
-    Shader adsLightShader(GL_FRAGMENT_SHADER, GetADSLightShaderCode());
+    Shader lightShader(GL_FRAGMENT_SHADER, ExamplePhongLightManager::GetLightShaderCode());
     Shader fragmentShader(GL_FRAGMENT_SHADER, GetFragmentShaderCode());
-    Program program(vertexShader, adsLightShader, fragmentShader);
+    Program program(vertexShader, lightShader, fragmentShader);
 
 
 
@@ -231,22 +144,12 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
 
     // Light source ------------------------------------------------------
 
-    Vec3f lightPosition(0, 3, 3);
-    Vec3f lightColor(1, 1, 1);
-    Vec3f lightAmbient(lightColor);
-    Vec3f lightDiffuse(lightColor);
-    Vec3f lightSpecular(lightColor);
-    F32 attenuationConstant = 1;
-    F32 attenuationLinear = 0.09f;
-    F32 attenuationQuadratic = 0.032f;
+    ExamplePhongLightManager phongLightManager(program);
 
-    program.SetUniform(program.QueryUniformLocation("pointLight.position"), lightPosition);
-    program.SetUniform(program.QueryUniformLocation("pointLight.ambient"), lightAmbient);
-    program.SetUniform(program.QueryUniformLocation("pointLight.diffuse"), lightDiffuse);
-    program.SetUniform(program.QueryUniformLocation("pointLight.specular"), lightSpecular);
-    program.SetUniform(program.QueryUniformLocation("pointLight.attenuationConstant"), attenuationConstant);
-    program.SetUniform(program.QueryUniformLocation("pointLight.attenuationLinear"), attenuationLinear);
-    program.SetUniform(program.QueryUniformLocation("pointLight.attenuationQuadratic"), attenuationQuadratic);
+    Vec3f ambientColor(0.05f, 0.05f, 0.25f);
+    phongLightManager.SetDirectionalLight(Vec3f(-2.f, 2.f, -2.f), ambientColor, ambientColor, ambientColor);
+    phongLightManager.AddPointLight(Vec3f(2, 6, 2), Vec3f(1, 1, 1), 1.f, 0.22f, 0.2f);
+    phongLightManager.AddPointLight(Vec3f(-7, 8, 2), Vec3f(1.f, 0.1f, 0.1f), 1.f, 0.22f, 0.2f);
 
 
 
@@ -260,7 +163,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
 
     // Create light source manager ---------------------------------------
 
-    ExampleLightSourceManager lightSourceManager;
+    ExampleLightSourceVisualizer lightSourceVisualizer;
 
 
 
@@ -279,19 +182,23 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
         if (InputState::GetKeyPressed(Key::C))
             renderWindow.CaptureCursor();
 
-
+        // Camera movement
         camera.MoveCamera(deltaTime);
         program.SetUniform(program.QueryUniformLocation("cameraPosition"), camera.GetCameraPosition());
         program.SetUniform(worldCameraLocation, camera.GetWorldToCamMatrix());
 
+
         // Update projection
         Mat4f projectionMatrix = PerspectiveProjection(45.f, static_cast<F32>(renderWindow.GetWidth()),
                                                        static_cast<F32>(renderWindow.GetHeight()), 0.1f, 100.f);
-        lightSourceManager.UpdateProjectionMatrix(projectionMatrix);
+        lightSourceVisualizer.UpdateProjectionMatrix(projectionMatrix);
         scene.UpdateProjection(projectionMatrix);
 
-        lightSourceManager.UpdateCamera(camera.GetWorldToCamMatrix());
-        lightSourceManager.RenderPointLight(lightPosition, lightColor);
+
+        lightSourceVisualizer.UpdateCamera(camera.GetWorldToCamMatrix());
+        for (U32 i = 0; i < phongLightManager.GetNumPointLights(); ++i)
+            lightSourceVisualizer.RenderPointLight(phongLightManager.GetPointLightPosition(i),
+                                                   phongLightManager.GetPointLightDiffuse(i));
 
         scene.Render();
 
