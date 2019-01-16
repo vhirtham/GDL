@@ -21,6 +21,94 @@ using namespace GDL::TransformationMatrix4;
 
 // ShaderCode ---------------------------------------------------------------------------------------------------------
 
+const char* GetADSLightShaderCode()
+{
+    return R"glsl(
+            #version 450
+
+
+            struct PointLight
+            {
+                vec3 position;
+                vec3 ambient;
+                vec3 diffuse;
+                vec3 specular;
+
+                float attenuationConstant;
+                float attenuationLinear;
+                float attenuationQuadratic;
+            };
+
+
+
+            uniform PointLight pointLight;
+
+
+
+
+            vec3 CalculatePointLight(in PointLight pointLight,
+                                     in vec3 albedo,
+                                     in vec3 fragmentPosition,
+                                     in vec3 cameraPosition,
+                                     in vec3 unitNormal,
+                                     in vec3 materialSpecular,
+                                     float materialReflectivity)
+            {
+                // Attenuation
+                // -----------
+                float distance = length(pointLight.position - fragmentPosition);
+                float attenuation = 1.f / (pointLight.attenuationConstant +
+                                           pointLight.attenuationLinear * distance +
+                                           pointLight.attenuationQuadratic * distance * distance);
+
+
+                // Ambient light component
+                // -----------------------
+                vec3 ambient = albedo * pointLight.ambient * 0.1;
+
+
+                // Diffuse light component
+                // -----------------------
+                vec3 lightDirection = normalize(pointLight.position - fragmentPosition);
+                float diff = max(dot(unitNormal, lightDirection), 0.f);
+                vec3 diffuse = albedo * pointLight.diffuse * diff;
+
+
+                // Specular light component
+                // ------------------------
+                vec3 reflectionDirection = reflect(-lightDirection, unitNormal);
+                vec3 cameraDirection = normalize(cameraPosition - fragmentPosition);
+                float spec = pow(max(dot(cameraDirection, reflectionDirection), 0.f), materialReflectivity);
+                vec3 specular = materialSpecular * pointLight.specular * spec;
+
+
+                return attenuation * (ambient + diffuse + specular);
+           }
+
+
+
+           vec3 CalculateLight(in vec3 albedo,
+                               in vec3 fragmentPosition,
+                               in vec3 cameraPosition,
+                               in vec3 unitNormal,
+                               in vec3 materialSpecular,
+                               float materialReflectivity)
+            {
+                return CalculatePointLight(pointLight,
+                                           albedo,
+                                           fragmentPosition,
+                                           cameraPosition,
+                                           unitNormal,
+                                           materialSpecular,
+                                           materialReflectivity);
+            }
+
+
+           )glsl";
+}
+
+
+
 const char* GetVertexShaderCode()
 {
     return R"glsl(
@@ -65,20 +153,6 @@ const char* GetFragmentShaderCode()
     return R"glsl(
             #version 450
 
-            struct PointLight
-            {
-                vec3 position;
-                vec3 color;
-
-                float ambientStrength;
-                float specularStrength;
-                float specularPower;
-
-                float attenuationConstant;
-                float attenuationLinear;
-                float attenuationQuadratic;
-            };
-
             struct Material
             {
                 sampler2D albedo;
@@ -88,7 +162,6 @@ const char* GetFragmentShaderCode()
 
 
             uniform vec4 cameraPosition;
-            uniform PointLight pointLight;
             uniform Material material;
 
             in vec3 positionWorld;
@@ -98,42 +171,24 @@ const char* GetFragmentShaderCode()
             out vec4 fragColor;
 
 
+            vec3 CalculateLight(vec3, vec3, vec3, vec3, vec3, float);
+
+
             void main(void)
             {
-                // Albedo and specular
-                // -------------------
+                vec3 unitNormal = normalize(normal);
                 vec4 albedo = texture(material.albedo, texCoord);
                 vec4 materialSpecular = texture(material.specular, texCoord);
 
-                // Attenuation
-                // -----------
-                float distance = length(pointLight.position - positionWorld);
-                float attenuation = 1.f / (pointLight.attenuationConstant +
-                                           pointLight.attenuationLinear * distance +
-                                           pointLight.attenuationQuadratic * distance * distance);
-
-                // Ambient light component
-                // -----------------------
-                vec3 ambient = albedo.xyz * pointLight.color * 0.1;
+                vec3 resultColor = CalculateLight(albedo.xyz,
+                                                  positionWorld,
+                                                  cameraPosition.xyz,
+                                                  unitNormal,
+                                                  materialSpecular.xyz,
+                                                  material.reflectivity);
 
 
-                // Diffuse light component
-                // -----------------------
-                vec3 unitNormal = normalize(normal);
-                vec3 lightDirection = normalize(pointLight.position - positionWorld);
-                float diffuseStrength = max(dot(unitNormal, lightDirection), 0.f);
-                vec3 diffuse = albedo.xyz * pointLight.color * diffuseStrength;
-
-                // Specular light component
-                // ------------------------
-                vec3 cameraDirection = normalize(cameraPosition.xyz - positionWorld);
-                vec3 reflectionDirection = reflect(-lightDirection, unitNormal);
-                float spec = pow(max(dot(cameraDirection, reflectionDirection), 0.f), material.reflectivity);
-                vec3 specular = materialSpecular.xyz * pointLight.color * spec;
-
-
-
-                fragColor = vec4(attenuation * (ambient + diffuse + specular), albedo.w);
+                fragColor = vec4(resultColor, albedo.w);
             }
             )glsl";
 }
@@ -154,8 +209,9 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
     // Create Shader and Program -----------------------------------------
 
     Shader vertexShader(GL_VERTEX_SHADER, GetVertexShaderCode());
+    Shader adsLightShader(GL_FRAGMENT_SHADER, GetADSLightShaderCode());
     Shader fragmentShader(GL_FRAGMENT_SHADER, GetFragmentShaderCode());
-    Program program(vertexShader, fragmentShader);
+    Program program(vertexShader, adsLightShader, fragmentShader);
 
 
 
@@ -177,12 +233,17 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
 
     Vec3f lightPosition(0, 3, 3);
     Vec3f lightColor(1, 1, 1);
+    Vec3f lightAmbient(lightColor);
+    Vec3f lightDiffuse(lightColor);
+    Vec3f lightSpecular(lightColor);
     F32 attenuationConstant = 1;
     F32 attenuationLinear = 0.09f;
     F32 attenuationQuadratic = 0.032f;
 
     program.SetUniform(program.QueryUniformLocation("pointLight.position"), lightPosition);
-    program.SetUniform(program.QueryUniformLocation("pointLight.color"), lightColor);
+    program.SetUniform(program.QueryUniformLocation("pointLight.ambient"), lightAmbient);
+    program.SetUniform(program.QueryUniformLocation("pointLight.diffuse"), lightDiffuse);
+    program.SetUniform(program.QueryUniformLocation("pointLight.specular"), lightSpecular);
     program.SetUniform(program.QueryUniformLocation("pointLight.attenuationConstant"), attenuationConstant);
     program.SetUniform(program.QueryUniformLocation("pointLight.attenuationLinear"), attenuationLinear);
     program.SetUniform(program.QueryUniformLocation("pointLight.attenuationQuadratic"), attenuationQuadratic);
