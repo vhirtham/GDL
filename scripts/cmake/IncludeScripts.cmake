@@ -1,9 +1,10 @@
+include(ExternalDependencies)
+
+### Functions
 include(AddBenchmark)
 include(AddExecutable)
 include(AddTest)
 include(AddGDLLib)
 include(AddGDLOpenGLApp)
-include(ExternalDependencies)
-include(FindGLFW)
 include(SeparateInputs)
 include(TargetDefaultBuildSetup)

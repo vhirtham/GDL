@@ -63,6 +63,7 @@ U32 ExamplePhongLightManager::GetNumPointLights() const
 
 const Vec3f& ExamplePhongLightManager::GetPointLightDiffuse(U32 index) const
 {
+    EXCEPTION(index >= mPointLights.size(), "Invalid index");
     return mPointLights[index].mDiffuse;
 }
 
@@ -70,6 +71,7 @@ const Vec3f& ExamplePhongLightManager::GetPointLightDiffuse(U32 index) const
 
 const Vec3f& ExamplePhongLightManager::GetPointLightPosition(U32 index) const
 {
+    EXCEPTION(index >= mPointLights.size(), "Invalid index");
     return mPointLights[index].mPosition;
 }
 

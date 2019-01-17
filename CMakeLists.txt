@@ -21,6 +21,7 @@ option(ENABLE_BENCHMARKS "Enables the benchmarks" FALSE)
 option(ENABLE_CUSTOM_APPS "Enables applications that are located in the applications/custom directory" FALSE)
 option(ENABLE_DEV_TOOLS "Enables extea tools for the development process" TRUE)
 option(ENABLE_OPENGL "Enables OpenGL API" FALSE)
+option(ENABLE_GUI_APPLICATIONS "Enables QT GUI applications" FALSE)
 option(ENABLE_TESTS "Enables the testfiles" TRUE)
 option(ENABLE_VULKAN "Enables Vulkan API" FALSE)
 
@@ -50,12 +51,6 @@ endif()
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/scripts/cmake ${CMAKE_MODULE_PATH})
 include(IncludeScripts)
 
-
-# EXTERNAL LIBRARIES
-# ------------------
-externalDependencies()
-
-message("${GDL_COMPILE_DEFINITIONS}")
 
 # SUBDIRECTORIES
 # --------------
