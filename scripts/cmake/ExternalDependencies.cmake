@@ -57,3 +57,13 @@ if(ENABLE_GUI_APPLICATIONS)
         message("Qt5Widgets found")
     endif(Qt5Widgets_FOUND )
 endif(ENABLE_GUI_APPLICATIONS)
+
+
+### Assimp ########################################################################################
+
+find_package(assimp)
+if(assimp_FOUND)
+    message("Assimp found")
+else()
+    message("Assimp NOT found")
+endif()
