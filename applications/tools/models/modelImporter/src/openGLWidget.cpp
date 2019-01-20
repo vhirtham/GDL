@@ -11,7 +11,7 @@ using namespace GDL;
 
 Model& GetModel()
 {
-    static Model model(MakeString(MODEL_DIRECTORY, "/table/table.obj").c_str());
+    static Model model(MakeString(MODEL_DIRECTORY, "/drawer/drawer.obj").c_str());
     return model;
 }
 
