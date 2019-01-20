@@ -20,7 +20,7 @@ class VertexArrayObject
 public:
     VertexArrayObject();
     VertexArrayObject(const VertexArrayObject&) = delete;
-    VertexArrayObject(VertexArrayObject&&) = delete;
+    VertexArrayObject(VertexArrayObject&& other);
     VertexArrayObject& operator=(const VertexArrayObject&) = delete;
     VertexArrayObject& operator=(VertexArrayObject&&) = delete;
     ~VertexArrayObject();

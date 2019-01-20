@@ -42,6 +42,14 @@ void BufferObject::BindAsUniformBuffer(GLuint bindingPoint) const
 
 
 
+BufferObject::BufferObject(BufferObject&& other)
+    : mHandle{other.mHandle}
+    , mSize(other.mSize)
+    , mUsage(other.mUsage)
+{
+    other.mHandle = 0;
+}
+
 BufferObject::~BufferObject()
 {
     glDeleteBuffers(1, &mHandle);

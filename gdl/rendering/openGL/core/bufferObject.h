@@ -20,7 +20,7 @@ class BufferObject
 public:
     BufferObject() = delete;
     BufferObject(const BufferObject&) = delete;
-    BufferObject(BufferObject&&) = delete;
+    BufferObject(BufferObject&& other);
     BufferObject& operator=(const BufferObject&) = delete;
     BufferObject& operator=(BufferObject&&) = delete;
     ~BufferObject();

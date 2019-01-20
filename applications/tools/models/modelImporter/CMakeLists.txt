@@ -7,6 +7,8 @@ add_executable(ModelImporter
     modelImporter.cpp
     src/mainWindow.cpp
     src/openGLWidget.cpp
+    src/model.cpp
+    src/mesh.cpp
     ${MainWindow_H_MOC}
      ${OpenGLWidget_H_MOC}
     )
@@ -22,5 +24,9 @@ target_link_libraries (ModelImporter
 target_include_directories(ModelImporter
     PRIVATE
         ${CMAKE_CURRENT_BINARY_DIR})
+
+target_compile_definitions(ModelImporter
+    PRIVATE
+        MODEL_DIRECTORY="${CMAKE_CURRENT_SOURCE_DIR}/data")
 
 

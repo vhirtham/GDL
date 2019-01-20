@@ -1,10 +1,24 @@
 
 #include "openGLWidget.h"
+
+#include "gdl/base/string.h"
 #include "gdl/rendering/openGL/core/glewController.h"
+#include "applications/tools/models/modelImporter/src/model.h"
+
+
+using namespace MI;
+using namespace GDL;
+
+Model& GetModel()
+{
+    static Model model(MakeString(MODEL_DIRECTORY, "/table/table.obj").c_str());
+    return model;
+}
 
 
 OpenGLWidget::OpenGLWidget(QWidget* parent)
     : QOpenGLWidget(parent)
+
 {
 }
 
@@ -31,5 +45,9 @@ void OpenGLWidget::initializeGL()
 
 void OpenGLWidget::paintGL()
 {
-    glDrawArrays(GL_TRIANGLES, 0, 3);
+    glClearColor(1, 1, 1, 1);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glEnable(GL_DEPTH_TEST);
+    GetModel().Draw();
+    // glDrawArrays(GL_TRIANGLES, 0, 3);
 }

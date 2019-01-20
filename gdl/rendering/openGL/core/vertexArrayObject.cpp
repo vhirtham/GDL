@@ -15,6 +15,14 @@ VertexArrayObject::VertexArrayObject()
 
 
 
+VertexArrayObject::VertexArrayObject(VertexArrayObject&& other)
+    : mHandle{other.mHandle}
+{
+    other.mHandle = 0;
+}
+
+
+
 VertexArrayObject::~VertexArrayObject()
 {
     glDeleteVertexArrays(1, &mHandle);
