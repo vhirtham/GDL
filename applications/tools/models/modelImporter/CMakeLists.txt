@@ -9,6 +9,7 @@ add_executable(ModelImporter
     src/openGLWidget.cpp
     src/model.cpp
     src/mesh.cpp
+    src/setupOpenGLContext.cpp
     ${MainWindow_H_MOC}
      ${OpenGLWidget_H_MOC}
     )

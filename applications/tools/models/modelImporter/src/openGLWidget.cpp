@@ -1,9 +1,12 @@
 
+
 #include "openGLWidget.h"
 
 #include "gdl/base/string.h"
 #include "gdl/rendering/openGL/core/glewController.h"
 #include "applications/tools/models/modelImporter/src/model.h"
+#include "applications/tools/models/modelImporter/src/setupOpenGLContext.h"
+
 
 
 using namespace MI;
@@ -39,12 +42,14 @@ void OpenGLWidget::resizeGL([[maybe_unused]] int w, [[maybe_unused]] int h)
 void OpenGLWidget::initializeGL()
 {
     GDL::OpenGL::GLEWController::Instance().Initialize();
+    SetupOpenGLContext(context());
 }
 
 
 
 void OpenGLWidget::paintGL()
 {
+    mDebugMessageHandler.Initialize();
     glClearColor(1, 1, 1, 1);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glEnable(GL_DEPTH_TEST);
