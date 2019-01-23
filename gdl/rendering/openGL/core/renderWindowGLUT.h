@@ -37,14 +37,26 @@ public:
     //! @brief Binds the cursor to the window and hides it
     void CaptureCursor();
 
+    //! @brief Enables depth testing
+    void DisableDepthTest();
+
+    //! @brief Enables stencil testing
+    void DisableStencilTest();
+
     //! @brief Disables the wireframe mode.
     void DisableWireframeMode();
 
     //! @brief Enables depth testing
     void EnableDepthTest();
 
+    //! @brief Enables stencil testing
+    void EnableStencilTest();
+
     //! @brief Enables the wireframe mode.
     void EnableWireframeMode();
+
+    //! @brief Enables writing to the stencil buffer by setting the stencil mask to 0xFF
+    void EnableWriteToStencilBuffer();
 
     //! @brief Initializes the render window
     //! @param argc: Additional argument count

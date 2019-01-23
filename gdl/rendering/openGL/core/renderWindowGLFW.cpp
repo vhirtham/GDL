@@ -26,10 +26,31 @@ void RenderWindowGLFW::CaptureCursor()
 
 
 
+void RenderWindowGLFW::DisableDepthTest()
+{
+    glDisable(GL_DEPTH_TEST);
+}
+
+
+
+void RenderWindowGLFW::DisableStencilTest()
+{
+    glDisable(GL_STENCIL_TEST);
+}
+
+
+
 void RenderWindowGLFW::DisableWireframeMode()
 {
     DEV_EXCEPTION(!IsInitialized(), "Render window needs to be initialized to disable wire frame mode.");
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+}
+
+
+
+void RenderWindowGLFW::DisableWriteToStencilBuffer()
+{
+    SetStencilMask(0x00);
 }
 
 
@@ -40,12 +61,24 @@ void RenderWindowGLFW::EnableDepthTest()
     glEnable(GL_DEPTH_TEST);
 }
 
+void RenderWindowGLFW::EnableStencilTest()
+{
+    glEnable(GL_STENCIL_TEST);
+}
+
 
 
 void RenderWindowGLFW::EnableWireframeMode()
 {
     DEV_EXCEPTION(!IsInitialized(), "Render window needs to be initialized to enable wire frame mode.");
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+}
+
+
+
+void RenderWindowGLFW::EnableWriteToStencilBuffer()
+{
+    SetStencilMask(0xFF);
 }
 
 
@@ -83,9 +116,33 @@ void RenderWindowGLFW::Initialize()
     mInitialized = true;
 }
 
+
+
 void RenderWindowGLFW::ReleaseCursor()
 {
     glfwSetInputMode(mWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+}
+
+
+
+void RenderWindowGLFW::SetStencilFunction(GLenum function, GLint referenceValue, GLuint mask)
+{
+    glStencilFunc(function, referenceValue, mask);
+}
+
+
+
+void RenderWindowGLFW::SetStencilMask(GLuint mask)
+{
+    glStencilMask(mask);
+}
+
+
+
+void RenderWindowGLFW::SetStencilTestAction(GLenum actionOnStencilFail, GLenum actionOnDepthFail,
+                                            GLenum actionOnStencilDepthPass)
+{
+    glStencilOp(actionOnStencilFail, actionOnDepthFail, actionOnStencilDepthPass);
 }
 
 
@@ -138,7 +195,7 @@ void RenderWindowGLFW::SwapBuffers() const
     if (IsOpen())
     {
         glfwSwapBuffers(mWindow);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
     }
 }
 

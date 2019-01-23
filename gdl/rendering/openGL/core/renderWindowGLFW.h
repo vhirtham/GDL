@@ -38,20 +38,54 @@ public:
     //! @brief Binds the cursor to the window and hides it
     void CaptureCursor();
 
+    //! @brief Enables depth testing
+    void DisableDepthTest();
+
+    //! @brief Enables stencil testing
+    void DisableStencilTest();
+
     //! @brief Disables the wireframe mode.
     void DisableWireframeMode();
+
+    //! @brief Disables writing to the stencil buffer by setting the stencil mask to 0x00
+    void DisableWriteToStencilBuffer();
 
     //! @brief Enables depth testing
     void EnableDepthTest();
 
+    //! @brief Enables stencil testing
+    void EnableStencilTest();
+
     //! @brief Enables the wireframe mode.
     void EnableWireframeMode();
+
+    //! @brief Enables writing to the stencil buffer by setting the stencil mask to 0xFF
+    void EnableWriteToStencilBuffer();
 
     //! @brief Initializes the render window
     void Initialize();
 
     //! @brief Releases the cursor from the window
     void ReleaseCursor();
+
+    //! @brief Sets the stencil function which determines if a fragment passes the stencil test or not.
+    //! @param function: Function enum which defines the comparison operator between the current buffer value and the
+    //! provided reference value
+    //! @param: referenceValue: Reference value that is compared to the buffer value
+    //! @param: mask: Mask that is used to perform an AND operation with buffer and reference value before the stencil
+    //! test
+    void SetStencilFunction(GLenum function, GLint referenceValue, GLuint mask = 0xFF);
+
+    //! @brief Sets the stencil mask which modifies the value that should be written to the buffer by performing an AND
+    //! operation.
+    //! @param mask: Bitmask
+    void SetStencilMask(GLuint mask);
+
+    //! @brief Sets the stencil test actions
+    //! @param actionOnStencilFail: Enum that describes the action when the stencil test fails
+    //! @param actionOnDepthFail: Enum that describes the action when the stencil test passes, but the depth test fails
+    //! @param actionOnStencilDepthPass: Enum that describes the action when stencil test and depth test pass
+    void SetStencilTestAction(GLenum actionOnStencilFail, GLenum actionOnDepthFail, GLenum actionOnStencilDepthPass);
 
     //! @brief Sets the title
     //! @param title: New Window Title

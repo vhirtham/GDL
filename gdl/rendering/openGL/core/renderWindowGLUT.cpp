@@ -32,6 +32,20 @@ void RenderWindowGLUT::CaptureCursor()
 
 
 
+void RenderWindowGLUT::DisableDepthTest()
+{
+    glDisable(GL_DEPTH_TEST);
+}
+
+
+
+void RenderWindowGLUT::DisableStencilTest()
+{
+    glDisable(GL_STENCIL_TEST);
+}
+
+
+
 void RenderWindowGLUT::DisableWireframeMode()
 {
     DEV_EXCEPTION(!IsInitialized(), "Render window needs to be initialized to disable wire frame mode.");
@@ -44,6 +58,13 @@ void RenderWindowGLUT::EnableDepthTest()
 {
     DEV_EXCEPTION(!IsInitialized(), "Render window needs to be initialized to enable depth testing.");
     glEnable(GL_DEPTH_TEST);
+}
+
+
+
+void RenderWindowGLUT::EnableStencilTest()
+{
+    glEnable(GL_STENCIL_TEST);
 }
 
 
