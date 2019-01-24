@@ -8,6 +8,9 @@
 #include "gdl/base/sse/transpose.h"
 #include "gdl/math/vec4.h"
 
+#include "gdl/base/sse/maskMacros.h"
+#include "gdl/base/sse/swizzle.h"
+
 #include <cassert>
 #include <cstring>
 #include <type_traits>
@@ -117,46 +120,30 @@ Mat4SSE Mat4SSE::operator+(const Mat4SSE& other)
 Mat4SSE Mat4SSE::operator*(const Mat4SSE& rhs) const
 {
 
-    alignas(sse::alignmentBytes<__m128>) F32 colValsRhs[4];
-
-    _mm_store_ps(colValsRhs, rhs.mData[0]);
-    alignas(sse::alignmentBytes<__m128>) __m128 Col0 =
-            _mmx_fmadd_p(_mmx_set1_p<__m128>(colValsRhs[0]), mData[0],
-                         _mmx_fmadd_p(_mmx_set1_p<__m128>(colValsRhs[1]), mData[1],
-                                      _mmx_fmadd_p(_mmx_set1_p<__m128>(colValsRhs[2]), mData[2],
-                                                   _mm_mul_ps(_mmx_set1_p<__m128>(colValsRhs[3]), mData[3]))));
-    _mm_store_ps(colValsRhs, rhs.mData[1]);
-    alignas(sse::alignmentBytes<__m128>) __m128 Col1 =
-            _mmx_fmadd_p(_mmx_set1_p<__m128>(colValsRhs[0]), mData[0],
-                         _mmx_fmadd_p(_mmx_set1_p<__m128>(colValsRhs[1]), mData[1],
-                                      _mmx_fmadd_p(_mmx_set1_p<__m128>(colValsRhs[2]), mData[2],
-                                                   _mm_mul_ps(_mmx_set1_p<__m128>(colValsRhs[3]), mData[3]))));
-    _mm_store_ps(colValsRhs, rhs.mData[2]);
-    alignas(sse::alignmentBytes<__m128>) __m128 Col2 =
-            _mmx_fmadd_p(_mmx_set1_p<__m128>(colValsRhs[0]), mData[0],
-                         _mmx_fmadd_p(_mmx_set1_p<__m128>(colValsRhs[1]), mData[1],
-                                      _mmx_fmadd_p(_mmx_set1_p<__m128>(colValsRhs[2]), mData[2],
-                                                   _mm_mul_ps(_mmx_set1_p<__m128>(colValsRhs[3]), mData[3]))));
-    _mm_store_ps(colValsRhs, rhs.mData[3]);
-    alignas(sse::alignmentBytes<__m128>) __m128 Col3 =
-            _mmx_fmadd_p(_mmx_set1_p<__m128>(colValsRhs[0]), mData[0],
-                         _mmx_fmadd_p(_mmx_set1_p<__m128>(colValsRhs[1]), mData[1],
-                                      _mmx_fmadd_p(_mmx_set1_p<__m128>(colValsRhs[2]), mData[2],
-                                                   _mm_mul_ps(_mmx_set1_p<__m128>(colValsRhs[3]), mData[3]))));
-
-    return Mat4SSE(Col0, Col1, Col2, Col3);
+    return Mat4SSE(_mmx_fmadd_p(Swizzle1<0>(rhs.mData[0]), mData[0],
+                                _mmx_fmadd_p(Swizzle1<1>(rhs.mData[0]), mData[1],
+                                             _mmx_fmadd_p(Swizzle1<2>(rhs.mData[0]), mData[2],
+                                                          _mm_mul_ps(Swizzle1<3>(rhs.mData[0]), mData[3])))),
+                   _mmx_fmadd_p(Swizzle1<0>(rhs.mData[1]), mData[0],
+                                _mmx_fmadd_p(Swizzle1<1>(rhs.mData[1]), mData[1],
+                                             _mmx_fmadd_p(Swizzle1<2>(rhs.mData[1]), mData[2],
+                                                          _mm_mul_ps(Swizzle1<3>(rhs.mData[1]), mData[3])))),
+                   _mmx_fmadd_p(Swizzle1<0>(rhs.mData[2]), mData[0],
+                                _mmx_fmadd_p(Swizzle1<1>(rhs.mData[2]), mData[1],
+                                             _mmx_fmadd_p(Swizzle1<2>(rhs.mData[2]), mData[2],
+                                                          _mm_mul_ps(Swizzle1<3>(rhs.mData[2]), mData[3])))),
+                   _mmx_fmadd_p(Swizzle1<0>(rhs.mData[3]), mData[0],
+                                _mmx_fmadd_p(Swizzle1<1>(rhs.mData[3]), mData[1],
+                                             _mmx_fmadd_p(Swizzle1<2>(rhs.mData[3]), mData[2],
+                                                          _mm_mul_ps(Swizzle1<3>(rhs.mData[3]), mData[3])))));
 }
 
 Vec4SSE<true> Mat4SSE::operator*(const Vec4SSE<true>& rhs) const
 {
-    alignas(sse::alignmentBytes<__m128>) F32 colValsRhs[4];
-
-    _mm_store_ps(colValsRhs, rhs.mData);
-    return Vec4fSSE<true>(
-            _mmx_fmadd_p(_mmx_set1_p<__m128>(colValsRhs[0]), mData[0],
-                         _mmx_fmadd_p(_mmx_set1_p<__m128>(colValsRhs[1]), mData[1],
-                                      _mmx_fmadd_p(_mmx_set1_p<__m128>(colValsRhs[2]), mData[2],
-                                                   _mm_mul_ps(_mmx_set1_p<__m128>(colValsRhs[3]), mData[3])))));
+    return Vec4fSSE<true>(_mmx_fmadd_p(Swizzle1<0>(rhs.mData), mData[0],
+                                       _mmx_fmadd_p(Swizzle1<1>(rhs.mData), mData[1],
+                                                    _mmx_fmadd_p(Swizzle1<2>(rhs.mData), mData[2],
+                                                                 _mm_mul_ps(Swizzle1<3>(rhs.mData), mData[3])))));
 }
 
 
