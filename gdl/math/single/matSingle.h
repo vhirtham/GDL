@@ -111,4 +111,4 @@ std::ostream& operator<<(std::ostream& os, const MatSingle<_type, _rows, _cols>&
 
 
 
-#include "gdl/math/matSingle.inl"
+#include "gdl/math/single/matSingle.inl"

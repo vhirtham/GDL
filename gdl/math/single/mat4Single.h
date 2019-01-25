@@ -104,4 +104,4 @@ inline std::ostream& operator<<(std::ostream& os, const Mat4Single<_type>& mat);
 
 
 
-#include "gdl/math/mat4Single.inl"
+#include "gdl/math/single/mat4Single.inl"

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "gdl/math/matSingle.h"
+#include "gdl/math/single/matSingle.h"
 
 #include <algorithm>
 #include <cassert>

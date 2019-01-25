@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "gdl/math/matSSE.h"
+#include "gdl/math/sse/matSSE.h"
 
 #include "gdl/base/approx.h"
 #include "gdl/base/exception.h"

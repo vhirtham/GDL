@@ -173,4 +173,4 @@ std::ostream& operator<<(std::ostream& os, const MatSSE<_type, _rows, _cols>& ma
 
 
 
-#include "gdl/math/matSSE.inl"
+#include "gdl/math/sse/matSSE.inl"

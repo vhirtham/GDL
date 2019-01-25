@@ -1,6 +1,6 @@
 #pragma once
 
-#include "gdl/math/mat4SSE.h"
+#include "gdl/math/sse/mat4SSE.h"
 
 namespace GDL
 {

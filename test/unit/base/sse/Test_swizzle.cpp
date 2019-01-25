@@ -71,6 +71,8 @@ BOOST_AUTO_TEST_CASE(Test_Swizzle1)
 {
     TestSwizzle1<__m128>();
     TestSwizzle1<__m128d>();
+#ifdef __AVX2__
     TestSwizzle1<__m256>();
     TestSwizzle1<__m256d>();
+#endif // __AVX2__
 }
