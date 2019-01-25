@@ -4,7 +4,7 @@
 #include "gdl/base/fundamentalTypes.h"
 
 
-namespace GDL
+namespace GDL::sse
 {
 
 //! @brief Creates a new register with arbitrary value combination from the source register
@@ -22,11 +22,11 @@ inline __m128 Swizzle(__m128 source);
 //! register
 //! @param source: Source register
 //! @return Register with a single arbitrary value from the source register
-template <U32 _index>
-inline __m128 Swizzle1(__m128 reg);
+template <U32 _index, typename _registerType>
+inline _registerType Swizzle1(_registerType reg);
 
 
-} // namespace GDL
+} // namespace GDL::sse
 
 
 #include "gdl/base/sse/swizzle.inl"

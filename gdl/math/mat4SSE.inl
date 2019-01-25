@@ -5,11 +5,11 @@
 #include "gdl/base/exception.h"
 #include "gdl/base/functions/alignment.h"
 #include "gdl/base/sse/directAccess.h"
+#include "gdl/base/sse/swizzle.h"
 #include "gdl/base/sse/transpose.h"
 #include "gdl/math/vec4.h"
 
-#include "gdl/base/sse/maskMacros.h"
-#include "gdl/base/sse/swizzle.h"
+
 
 #include <cassert>
 #include <cstring>
@@ -119,8 +119,8 @@ Mat4SSE Mat4SSE::operator+(const Mat4SSE& other)
 
 Mat4SSE Mat4SSE::operator*(const Mat4SSE& rhs) const
 {
-
-    return Mat4SSE(_mmx_fmadd_p(Swizzle1<0>(rhs.mData[0]), mData[0],
+    using namespace GDL::sse;
+    return Mat4SSE(_mmx_fmadd_p(sse::Swizzle1<0>(rhs.mData[0]), mData[0],
                                 _mmx_fmadd_p(Swizzle1<1>(rhs.mData[0]), mData[1],
                                              _mmx_fmadd_p(Swizzle1<2>(rhs.mData[0]), mData[2],
                                                           _mm_mul_ps(Swizzle1<3>(rhs.mData[0]), mData[3])))),
@@ -140,6 +140,7 @@ Mat4SSE Mat4SSE::operator*(const Mat4SSE& rhs) const
 
 Vec4SSE<true> Mat4SSE::operator*(const Vec4SSE<true>& rhs) const
 {
+    using namespace GDL::sse;
     return Vec4fSSE<true>(_mmx_fmadd_p(Swizzle1<0>(rhs.mData), mData[0],
                                        _mmx_fmadd_p(Swizzle1<1>(rhs.mData), mData[1],
                                                     _mmx_fmadd_p(Swizzle1<2>(rhs.mData), mData[2],

@@ -143,13 +143,14 @@ private:
     //! between values that depend on the number of values in the used register and adds them to the current solution.
     //! @tparam _numOperations: Number of recursive function calls.
     //! @tparam _count: Internal counter to keep track of the number of recursive function calls.
-    //! @param values: Array of registers which should be multiplied and added to the result.
+    //! @param rhsValues: Rhs register that is needed for the current multiplication step
     //! @param currentValue: Current value in the result register
     //! @param currentBlockIndex: Index of the currently used register of the lhs matrix.
     //! @return Updated solution register
     template <U32 _numOperations = mNumRegisterEntries, U32 _count = 0>
-    inline RegisterType MultiplyAddRegisters(const std::array<RegisterType, _numOperations>& values,
-                                             const RegisterType currentValue, const U32 currentBlockIndex) const;
+    inline RegisterType MultiplyAddRegisters(const RegisterType rhsValues, const RegisterType currentValue,
+                                             const U32 currentBlockIndex) const;
+
 
     //! @brief Checks if the matrix was constructed as expected
     void ConstructionChecks() const;

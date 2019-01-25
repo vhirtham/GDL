@@ -6,6 +6,7 @@
 #include "gdl/base/exception.h"
 #include "gdl/base/functions/alignment.h"
 #include "gdl/base/sse/directAccess.h"
+#include "gdl/base/sse/swizzle.h"
 #include "gdl/base/sse/transpose.h"
 
 #include <algorithm>
@@ -345,20 +346,13 @@ inline void MatSSE<_type, _rows, _cols>::MultiplicationInnerLoops(MatSSE<_type, 
     for (U32 i = 0; i < _colsRhs; ++i)
     {
         const U32 indexRegisterRhs = i * registersPerColRhs + j;
-        alignas(mAlignment) std::array<_type, mNumRegisterEntries> rhsRegisterValues;
-        _mmx_store_p(rhsRegisterValues.data(), rhs.mData[indexRegisterRhs]);
-
-        alignas(mAlignment) std::array<RegisterType, _numMultipliedRegisters> tmp;
-        for (U32 k = 0; k < _numMultipliedRegisters; ++k)
-            tmp[k] = _mmx_set1_p<RegisterType>(rhsRegisterValues[k]);
-
         // loop over LHS rows (column registers)
         for (U32 k = 0; k < mNumRegistersPerCol; ++k)
         {
             const U32 indexRegisterResult = i * mNumRegistersPerCol + k;
             const U32 indexFirstRegisterLhsBlock = j * mNumRegisterEntries * mNumRegistersPerCol + k;
             result.mData[indexRegisterResult] = MultiplyAddRegisters<_numMultipliedRegisters>(
-                    tmp, result.mData[indexRegisterResult], indexFirstRegisterLhsBlock);
+                    rhs.mData[indexRegisterRhs], result.mData[indexRegisterResult], indexFirstRegisterLhsBlock);
         }
     }
 }
@@ -368,17 +362,19 @@ inline void MatSSE<_type, _rows, _cols>::MultiplicationInnerLoops(MatSSE<_type, 
 template <typename _type, I32 _rows, I32 _cols>
 template <U32 _numOperations, U32 _count>
 typename MatSSE<_type, _rows, _cols>::RegisterType
-MatSSE<_type, _rows, _cols>::MultiplyAddRegisters(const std::array<RegisterType, _numOperations>& values,
-                                                  const RegisterType currentValue, const U32 currentBlockIndex) const
+MatSSE<_type, _rows, _cols>::MultiplyAddRegisters(const RegisterType rhsValues, const RegisterType currentValue,
+                                                  const U32 currentBlockIndex) const
 {
     static_assert(_numOperations <= mNumRegisterEntries && _numOperations > 0, "Invalid number of operations.");
 
 
     if constexpr (_count + 1 == _numOperations)
-        return _mmx_fmadd_p(mData[currentBlockIndex + _count * mNumRegistersPerCol], values[_count], currentValue);
+        return _mmx_fmadd_p(mData[currentBlockIndex + _count * mNumRegistersPerCol], sse::Swizzle1<_count>(rhsValues),
+                            currentValue);
     else
-        return _mmx_fmadd_p(mData[currentBlockIndex + _count * mNumRegistersPerCol], values[_count],
-                            MultiplyAddRegisters<_numOperations, _count + 1>(values, currentValue, currentBlockIndex));
+        return _mmx_fmadd_p(
+                mData[currentBlockIndex + _count * mNumRegistersPerCol], sse::Swizzle1<_count>(rhsValues),
+                MultiplyAddRegisters<_numOperations, _count + 1>(rhsValues, currentValue, currentBlockIndex));
 }
 
 
