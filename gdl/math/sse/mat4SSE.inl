@@ -123,19 +123,19 @@ Mat4SSE Mat4SSE::operator*(const Mat4SSE& rhs) const
     return Mat4SSE(_mmx_fmadd_p(sse::Swizzle1<0>(rhs.mData[0]), mData[0],
                                 _mmx_fmadd_p(Swizzle1<1>(rhs.mData[0]), mData[1],
                                              _mmx_fmadd_p(Swizzle1<2>(rhs.mData[0]), mData[2],
-                                                          _mm_mul_ps(Swizzle1<3>(rhs.mData[0]), mData[3])))),
+                                                          _mmx_mul_p(Swizzle1<3>(rhs.mData[0]), mData[3])))),
                    _mmx_fmadd_p(Swizzle1<0>(rhs.mData[1]), mData[0],
                                 _mmx_fmadd_p(Swizzle1<1>(rhs.mData[1]), mData[1],
                                              _mmx_fmadd_p(Swizzle1<2>(rhs.mData[1]), mData[2],
-                                                          _mm_mul_ps(Swizzle1<3>(rhs.mData[1]), mData[3])))),
+                                                          _mmx_mul_p(Swizzle1<3>(rhs.mData[1]), mData[3])))),
                    _mmx_fmadd_p(Swizzle1<0>(rhs.mData[2]), mData[0],
                                 _mmx_fmadd_p(Swizzle1<1>(rhs.mData[2]), mData[1],
                                              _mmx_fmadd_p(Swizzle1<2>(rhs.mData[2]), mData[2],
-                                                          _mm_mul_ps(Swizzle1<3>(rhs.mData[2]), mData[3])))),
+                                                          _mmx_mul_p(Swizzle1<3>(rhs.mData[2]), mData[3])))),
                    _mmx_fmadd_p(Swizzle1<0>(rhs.mData[3]), mData[0],
                                 _mmx_fmadd_p(Swizzle1<1>(rhs.mData[3]), mData[1],
                                              _mmx_fmadd_p(Swizzle1<2>(rhs.mData[3]), mData[2],
-                                                          _mm_mul_ps(Swizzle1<3>(rhs.mData[3]), mData[3])))));
+                                                          _mmx_mul_p(Swizzle1<3>(rhs.mData[3]), mData[3])))));
 }
 
 Vec4SSE<true> Mat4SSE::operator*(const Vec4SSE<true>& rhs) const
@@ -144,7 +144,7 @@ Vec4SSE<true> Mat4SSE::operator*(const Vec4SSE<true>& rhs) const
     return Vec4fSSE<true>(_mmx_fmadd_p(Swizzle1<0>(rhs.mData), mData[0],
                                        _mmx_fmadd_p(Swizzle1<1>(rhs.mData), mData[1],
                                                     _mmx_fmadd_p(Swizzle1<2>(rhs.mData), mData[2],
-                                                                 _mm_mul_ps(Swizzle1<3>(rhs.mData), mData[3])))));
+                                                                 _mmx_mul_p(Swizzle1<3>(rhs.mData), mData[3])))));
 }
 
 
@@ -171,8 +171,8 @@ const std::array<F32, 16> Mat4SSE::Data() const
 
 bool Mat4SSE::IsDataAligned() const
 {
-    return (IsAligned(&mData[0], 16) && IsAligned(&mData[1], 16) && IsAligned(&mData[2], 16) &&
-            IsAligned(&mData[3], 16));
+    return (IsAligned(&mData[0], sse::alignmentBytes<__m128>) && IsAligned(&mData[1], sse::alignmentBytes<__m128>) &&
+            IsAligned(&mData[2], sse::alignmentBytes<__m128>) && IsAligned(&mData[3], sse::alignmentBytes<__m128>));
 }
 
 

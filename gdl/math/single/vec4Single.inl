@@ -36,7 +36,7 @@ Vec4Single<_type, _isCol>::Vec4Single(_type v0, _type v1, _type v2, _type v3)
 template <typename _type, bool _isCol>
 _type Vec4Single<_type, _isCol>::operator[](const U32 index) const
 {
-    DEV_EXCEPTION(index > 4, "Invalid index value! [0..3]");
+    DEV_EXCEPTION(index > 3, "Invalid index value! [0..3]");
     return mData[index];
 }
 

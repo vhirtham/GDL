@@ -65,6 +65,8 @@ void DirectAccessOperatorVectorTest(const _vector<_isCol>& vector)
 
     for (U32 i = 0; i < 4; ++i)
         BOOST_CHECK(vector[i] == Approx(data[i]));
+
+    GDL_CHECK_THROW_DEV_DISABLE([[maybe_unused]] F32 test = vector[4], Exception);
 }
 
 

@@ -102,11 +102,10 @@ Vec4SSE<_isCol>& Vec4SSE<_isCol>::operator-=(const Vec4SSE& rhs)
 
 
 
-
-template<bool _isCol>
+template <bool _isCol>
 Vec4SSE<_isCol> Vec4SSE<_isCol>::operator*(F32 rhs)
 {
-    return Vec4SSE<_isCol>(_mmx_mul_p(mData,_mmx_set1_p<__m128>(rhs)));
+    return Vec4SSE<_isCol>(_mmx_mul_p(mData, _mmx_set1_p<__m128>(rhs)));
 }
 
 
@@ -154,12 +153,8 @@ F32 Vec4SSE<_isCol>::Dot(Vec4SSE<_isColRhs> rhs) const
 template <bool _isCol>
 bool Vec4SSE<_isCol>::IsDataAligned() const
 {
-    return IsAligned(&mData, 16);
+    return IsAligned(&mData, IsAligned(&mData, sse::alignmentBytes<__m128>));
 }
-
-
-
-
 
 
 

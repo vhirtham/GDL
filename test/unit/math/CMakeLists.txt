@@ -1,4 +1,7 @@
-addTest(Mat4)
 addTest(Mat)
+addTest(Mat2)
+addTest(Mat3)
+addTest(Mat4)
+addTest(Vec2)
 addTest(Vec3)
 addTest(Vec4)
