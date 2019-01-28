@@ -136,17 +136,6 @@ Vec3SSE<true> Mat3SSE::operator*(const Vec3SSE<true>& rhs) const
 
 
 
-Mat3SSE Mat3SSE::Transpose() const
-{
-    __m128 tmp0 = _mm_unpacklo_ps(mData[0], mData[1]);
-    __m128 tmp1 = _mm_unpackhi_ps(mData[0], mData[1]);
-
-    return Mat3SSE(_mm_movelh_ps(tmp0, mData[2]), _mm_shuffle_ps(tmp0, mData[2], SHUFFLE_4_MASK(2, 3, 1, 3)),
-                   _mm_shuffle_ps(tmp1, mData[2], SHUFFLE_4_MASK(0, 1, 2, 3)));
-}
-
-
-
 const std::array<F32, 9> Mat3SSE::Data() const
 {
     std::array<F32, 9> data;
@@ -156,6 +145,29 @@ const std::array<F32, 9> Mat3SSE::Data() const
     std::memcpy(&data[3], &mData[1], 3 * sizeof(F32));
     std::memcpy(&data[6], &mData[2], 3 * sizeof(F32));
     return data;
+}
+
+
+
+F32 Mat3SSE::Det() const
+{
+    __m128 r1_yzx = _mm_shuffle_ps(mData[1], mData[1], SHUFFLE_4_MASK(1, 2, 0, 3));
+    __m128 r2_yzx = _mm_shuffle_ps(mData[2], mData[2], SHUFFLE_4_MASK(1, 2, 0, 3));
+
+    __m128 tmp = _mmx_sub_p(_mmx_mul_p(mData[1], r2_yzx), _mmx_mul_p(r1_yzx, mData[2]));
+
+    return sse::DotProduct<__m128, 3>(mData[0], _mm_shuffle_ps(tmp, tmp, SHUFFLE_4_MASK(1, 2, 0, 3)));
+}
+
+
+
+Mat3SSE Mat3SSE::Transpose() const
+{
+    __m128 tmp0 = _mm_unpacklo_ps(mData[0], mData[1]);
+    __m128 tmp1 = _mm_unpackhi_ps(mData[0], mData[1]);
+
+    return Mat3SSE(_mm_movelh_ps(tmp0, mData[2]), _mm_shuffle_ps(tmp0, mData[2], SHUFFLE_4_MASK(2, 3, 1, 3)),
+                   _mm_shuffle_ps(tmp1, mData[2], SHUFFLE_4_MASK(0, 1, 2, 3)));
 }
 
 

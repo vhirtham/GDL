@@ -119,17 +119,26 @@ Vec3Single<_type, true> Mat3Single<_type>::operator*(const Vec3Single<_type, tru
 
 
 template <typename _type>
-Mat3Single<_type> Mat3Single<_type>::Transpose() const
+const std::array<_type, 9> Mat3Single<_type>::Data() const
 {
-    return Mat3Single<_type>(mD[0], mD[3], mD[6], mD[1], mD[4], mD[7], mD[2], mD[5], mD[8]);
+    return mD;
 }
 
 
 
 template <typename _type>
-const std::array<_type, 9> Mat3Single<_type>::Data() const
+F32 Mat3Single<_type>::Det() const
 {
-    return mD;
+    return mD[0] * (mD[4] * mD[8] - mD[5] * mD[7]) + mD[3] * (mD[7] * mD[2] - mD[8] * mD[1]) +
+           mD[6] * (mD[1] * mD[5] - mD[2] * mD[4]);
+}
+
+
+
+template <typename _type>
+Mat3Single<_type> Mat3Single<_type>::Transpose() const
+{
+    return Mat3Single<_type>(mD[0], mD[3], mD[6], mD[1], mD[4], mD[7], mD[2], mD[5], mD[8]);
 }
 
 
