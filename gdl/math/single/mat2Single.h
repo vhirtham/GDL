@@ -79,13 +79,17 @@ public:
     //! @return Result of the multiplication
     [[nodiscard]] inline Vec2Single<_type, true> operator*(const Vec2Single<_type, true>& rhs) const;
 
-    //! @brief Returns the transposed matrix
-    //! @return Transposed matrix
-    [[nodiscard]] inline Mat2Single Transpose() const;
-
     //! @brief Gets the data array in column major ordering
     //! @return Data
     [[nodiscard]] inline const std::array<_type, 4> Data() const;
+
+    //! @brief Calculates the determinant of the matrix
+    //! @return Determinant of the matrix
+    [[nodiscard]] inline F32 Det() const;
+
+    //! @brief Returns the transposed matrix
+    //! @return Transposed matrix
+    [[nodiscard]] inline Mat2Single Transpose() const;
 };
 
 

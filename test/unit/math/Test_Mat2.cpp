@@ -300,3 +300,31 @@ BOOST_FIXTURE_TEST_CASE(Transpose_SSE, Fixture<Mat2SSE>)
 {
     Transpose<Mat2SSE>(A);
 }
+
+
+// Determinant --------------------------------------------------------------------------------------------------------
+
+template <typename matrix>
+void Determinant(const matrix& A, const matrix& B)
+{
+    BOOST_CHECK(A.Det() == Approx(-2.f));
+    BOOST_CHECK(B.Det() == Approx(-50.f));
+    BOOST_CHECK(A.Transpose().Det() == Approx(-2.f));
+    BOOST_CHECK(B.Transpose().Det() == Approx(-50.f));
+
+    BOOST_CHECK(matrix(1, 2, 1, 2).Det() == ApproxZero<F32>());
+}
+
+
+
+BOOST_FIXTURE_TEST_CASE(Determinant_Single, Fixture<Mat2Single<F32>>)
+{
+    Determinant<Mat2Single<F32>>(A, B);
+}
+
+
+
+BOOST_FIXTURE_TEST_CASE(Determinant_SSE, Fixture<Mat2SSE>)
+{
+    Determinant<Mat2SSE>(A, B);
+}

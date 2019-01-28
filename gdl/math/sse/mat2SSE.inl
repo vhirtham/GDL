@@ -118,13 +118,6 @@ Vec2SSE<true> Mat2SSE::operator*(const Vec2SSE<true>& rhs) const
 
 
 
-Mat2SSE Mat2SSE::Transpose() const
-{
-    return Mat2SSE(sse::Swizzle<0, 2, 1, 3>(mData));
-}
-
-
-
 const std::array<F32, 4> Mat2SSE::Data() const
 {
     alignas(sse::alignmentBytes<__m128>) std::array<F32, 4> data;
@@ -132,6 +125,21 @@ const std::array<F32, 4> Mat2SSE::Data() const
 
     _mmx_store_p(&data[0], mData);
     return data;
+}
+
+
+
+inline F32 Mat2SSE::Det() const
+{
+    __m128 tmp = _mmx_mul_p(mData, sse::Swizzle<3, 2, 1, 0>(mData));
+    return _mm_cvtss_f32(_mm_sub_ps(tmp, sse::Swizzle<1, 0, 3, 1>(tmp)));
+}
+
+
+
+Mat2SSE Mat2SSE::Transpose() const
+{
+    return Mat2SSE(sse::Swizzle<0, 2, 1, 3>(mData));
 }
 
 

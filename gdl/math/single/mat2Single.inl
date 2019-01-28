@@ -111,17 +111,25 @@ Vec2Single<_type, true> Mat2Single<_type>::operator*(const Vec2Single<_type, tru
 
 
 template <typename _type>
-Mat2Single<_type> Mat2Single<_type>::Transpose() const
+const std::array<_type, 4> Mat2Single<_type>::Data() const
 {
-    return Mat2Single<_type>(mD[0], mD[2], mD[1], mD[3]);
+    return mD;
 }
 
 
 
 template <typename _type>
-const std::array<_type, 4> Mat2Single<_type>::Data() const
+F32 Mat2Single<_type>::Det() const
 {
-    return mD;
+    return mD[0] * mD[3] - mD[1] * mD[2];
+}
+
+
+
+template <typename _type>
+Mat2Single<_type> Mat2Single<_type>::Transpose() const
+{
+    return Mat2Single<_type>(mD[0], mD[2], mD[1], mD[3]);
 }
 
 
