@@ -210,6 +210,29 @@ inline _registerType _mmx_fmadd_p(_registerType lhsM, _registerType rhsM, _regis
 
 
 
+template <typename _registerType>
+inline _registerType _mmx_fmsub_p(_registerType lhsM, _registerType rhsM, _registerType sub)
+{
+#ifndef __FMA__
+    return _mmx_sub_p(_mmx_mul_p(lhsM, rhsM), sub);
+#else
+    if constexpr (std::is_same<_registerType, __m128>::value)
+        return _mm_fmsub_ps(lhsM, rhsM, sub);
+    else if constexpr (std::is_same<_registerType, __m128d>::value)
+        return _mm_fmsub_pd(lhsM, rhsM, sub);
+#ifdef __AVX2__
+    else if constexpr (std::is_same<_registerType, __m256>::value)
+        return _mm256_fmsub_ps(lhsM, rhsM, sub);
+    else if constexpr (std::is_same<_registerType, __m256d>::value)
+        return _mm256_fmsub_pd(lhsM, rhsM, sub);
+#endif // __AVX2__
+    else
+        throw Exception(__PRETTY_FUNCTION__, "Not defined for selected register type.");
+#endif // __FMA__
+}
+
+
+
 template <U32 _mask, typename _registerType>
 _registerType _mmx_dp_p(_registerType lhs, _registerType rhs)
 {

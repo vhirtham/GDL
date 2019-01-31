@@ -127,18 +127,36 @@ Vec4Single<_type, true> Mat4Single<_type>::operator*(const Vec4Single<_type, tru
 
 
 template <typename _type>
-Mat4Single<_type> Mat4Single<_type>::Transpose() const
+const std::array<_type, 16> Mat4Single<_type>::Data() const
 {
-    return Mat4Single<_type>(mD[0], mD[4], mD[8], mD[12], mD[1], mD[5], mD[9], mD[13], mD[2], mD[6], mD[10], mD[14],
-                             mD[3], mD[7], mD[11], mD[15]);
+    return mD;
 }
 
 
 
 template <typename _type>
-const std::array<_type, 16> Mat4Single<_type>::Data() const
+F32 Mat4Single<_type>::Det() const
 {
-    return mD;
+    F32 cd12 = mD[8] * mD[13] - mD[9] * mD[12];
+    F32 cd13 = mD[8] * mD[14] - mD[10] * mD[12];
+    F32 cd14 = mD[8] * mD[15] - mD[11] * mD[12];
+    F32 cd23 = mD[9] * mD[14] - mD[10] * mD[13];
+    F32 cd24 = mD[9] * mD[15] - mD[11] * mD[13];
+    F32 cd34 = mD[10] * mD[15] - mD[11] * mD[14];
+
+
+    return mD[0] * (mD[5] * cd34 - mD[6] * cd24 + mD[7] * cd23) +
+           mD[1] * (-mD[4] * cd34 + mD[6] * cd14 - mD[7] * cd13) +
+           mD[2] * (mD[4] * cd24 - mD[5] * cd14 + mD[7] * cd12) + mD[3] * (-mD[4] * cd23 + mD[5] * cd13 - mD[6] * cd12);
+}
+
+
+
+template <typename _type>
+Mat4Single<_type> Mat4Single<_type>::Transpose() const
+{
+    return Mat4Single<_type>(mD[0], mD[4], mD[8], mD[12], mD[1], mD[5], mD[9], mD[13], mD[2], mD[6], mD[10], mD[14],
+                             mD[3], mD[7], mD[11], mD[15]);
 }
 
 

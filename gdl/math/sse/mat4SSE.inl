@@ -149,15 +149,6 @@ Vec4SSE<true> Mat4SSE::operator*(const Vec4SSE<true>& rhs) const
 
 
 
-Mat4SSE Mat4SSE::Transpose() const
-{
-    Mat4SSE t;
-    sse::Transpose(mData[0], mData[1], mData[2], mData[3], t.mData[0], t.mData[1], t.mData[2], t.mData[3]);
-    return t;
-}
-
-
-
 const std::array<F32, 16> Mat4SSE::Data() const
 {
     std::array<F32, 16> data;
@@ -165,6 +156,38 @@ const std::array<F32, 16> Mat4SSE::Data() const
 
     std::memcpy(&data, &mData, sizeof(data));
     return data;
+}
+
+
+
+F32 Mat4SSE::Det() const
+{
+    using namespace GDL::sse;
+
+    __m128 d1032 = Swizzle<1, 0, 3, 2>(mData[3]);
+    __m128 c1032 = Swizzle<1, 0, 3, 2>(mData[2]);
+
+    __m128 tmp1 = Swizzle<2, 3, 0, 1>(_mmx_fmsub_p(mData[2], d1032, _mmx_mul_p(mData[3], c1032)));
+    __m128 tmp2 = _mmx_fmsub_p(Swizzle<3, 2, 0, 1>(mData[2]), d1032, _mmx_mul_p(Swizzle<3, 2, 0, 1>(mData[3]), c1032));
+
+    __m128 tmp3 = _mm_xor_ps(tmp2, _mmx_setr_p<__m128>(-0.f, -0.f, 0.f, 0.f));
+
+    __m128 b1032 = Swizzle<1, 0, 3, 2>(mData[1]);
+    __m128 b2310 = Swizzle<2, 3, 1, 0>(mData[1]);
+    __m128 tmp4 = Swizzle<3, 2, 0, 1>(_mmx_mul_p((mData[1]), tmp3));
+
+    __m128 tmp5 = _mmx_fmsub_p(b1032, tmp1, _mmx_fmsub_p(b2310, tmp3, tmp4));
+
+    return DotProduct(mData[0], tmp5);
+}
+
+
+
+Mat4SSE Mat4SSE::Transpose() const
+{
+    Mat4SSE t;
+    sse::Transpose(mData[0], mData[1], mData[2], mData[3], t.mData[0], t.mData[1], t.mData[2], t.mData[3]);
+    return t;
 }
 
 

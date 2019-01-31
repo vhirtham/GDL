@@ -304,3 +304,33 @@ BOOST_FIXTURE_TEST_CASE(Transpose_SSE, Fixture<Mat4SSE>)
 {
     Transpose<Mat4SSE>(A);
 }
+
+
+
+// Determinant --------------------------------------------------------------------------------------------------------
+
+template <typename matrix>
+void Determinant(const matrix& A, const matrix& B)
+{
+
+    BOOST_CHECK(A.Det() == ApproxZero<F32>());
+    BOOST_CHECK(B.Det() == Approx(-1004.f));
+    BOOST_CHECK(A.Transpose().Det() == ApproxZero<F32>());
+    BOOST_CHECK(B.Transpose().Det() == Approx(-1004.f));
+
+    //    BOOST_CHECK(matrix(1, 2, 3, 1, 2, 7, 2, 4, 5).Det() == ApproxZero<F32>());
+}
+
+
+
+BOOST_FIXTURE_TEST_CASE(Determinant_Single, Fixture<Mat4Single<F32>>)
+{
+    Determinant<Mat4Single<F32>>(A, B);
+}
+
+
+
+BOOST_FIXTURE_TEST_CASE(Determinant_SSE, Fixture<Mat4SSE>)
+{
+    Determinant<Mat4SSE>(A, B);
+}

@@ -98,6 +98,18 @@ inline _registerType _mmx_div_p(_registerType lhs, _registerType rhs);
 template <typename _registerType>
 inline _registerType _mmx_fmadd_p(_registerType lhsM, _registerType rhsM, _registerType add);
 
+//! @brief Template for multiplication of two registers with subsequent substraction of a third register (fused multiply
+//! sub)
+//! @tparam _registerType: Register type
+//! @param lhsM: Left hand side value of the multiplication
+//! @param rhsM: Right hand side value of the multiplication
+//! @param add: Value that is substracted from the result of the multiplication
+//! @return Result of the operation
+//! @remark If fmsub intrinsics are not available the function still works. It performs the necessary operations
+//! seperately.
+template <typename _registerType>
+inline _registerType _mmx_fmsub_p(_registerType lhsM, _registerType rhsM, _registerType sub);
+
 //! @brief Template for register dot product
 //! @tparam _mask: Mask for the calculation of the dot product
 //! @tparam _registerType: Register type
