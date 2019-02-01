@@ -6,13 +6,13 @@ namespace GDL
 {
 
 // forward declarations
-class Mat4SSE;
+class Mat4fSSE;
 template <typename _type>
 class Mat4Single;
 
 
 
-using Mat4f = Mat4SSE;
+using Mat4f = Mat4fSSE;
 
 
 
@@ -22,7 +22,7 @@ using Mat4f = Mat4SSE;
 template <typename _type>
 constexpr bool IsMat4()
 {
-    return std::is_same<_type, Mat4SSE>::value || std::is_same<_type, Mat4Single<F32>>::value ||
+    return std::is_same<_type, Mat4fSSE>::value || std::is_same<_type, Mat4Single<F32>>::value ||
            std::is_same<_type, Mat4Single<F64>>::value;
 }
 } // namespace GDL

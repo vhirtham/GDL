@@ -21,50 +21,50 @@ namespace GDL
 
 
 
-Mat3SSE::Mat3SSE()
+Mat3fSSE::Mat3fSSE()
     : mData({{{_mmx_setzero_p<__m128>()}, {_mmx_setzero_p<__m128>()}, {_mmx_setzero_p<__m128>()}}})
 {
-    DEV_EXCEPTION(!IsDataAligned(), "One or more registers of Mat3SSE are not 16 byte aligned");
+    DEV_EXCEPTION(!IsDataAligned(), "One or more registers of Mat3fSSE are not 16 byte aligned");
 }
 
 
-Mat3SSE::Mat3SSE(std::array<F32, 9> data)
+Mat3fSSE::Mat3fSSE(std::array<F32, 9> data)
     : mData({{{_mmx_setr_p<__m128>(data[0], data[1], data[2], 0)},
               {_mmx_setr_p<__m128>(data[3], data[4], data[5], 0)},
               {_mmx_setr_p<__m128>(data[6], data[7], data[8], 0)}}})
 {
-    DEV_EXCEPTION(!IsDataAligned(), "One or more registers of Mat3SSE are not 16 byte aligned");
+    DEV_EXCEPTION(!IsDataAligned(), "One or more registers of Mat3fSSE are not 16 byte aligned");
 }
 
 
 
-Mat3SSE::Mat3SSE(F32 v0, F32 v1, F32 v2, F32 v3, F32 v4, F32 v5, F32 v6, F32 v7, F32 v8)
+Mat3fSSE::Mat3fSSE(F32 v0, F32 v1, F32 v2, F32 v3, F32 v4, F32 v5, F32 v6, F32 v7, F32 v8)
     : mData({{{_mmx_setr_p<__m128>(v0, v1, v2, 0)},
               {_mmx_setr_p<__m128>(v3, v4, v5, 0)},
               {_mmx_setr_p<__m128>(v6, v7, v8, 0)}}})
 {
-    DEV_EXCEPTION(!IsDataAligned(), "One or more registers of Mat3SSE are not 16 byte aligned");
+    DEV_EXCEPTION(!IsDataAligned(), "One or more registers of Mat3fSSE are not 16 byte aligned");
 }
 
 
 
-Mat3SSE::Mat3SSE(__m128 col0, __m128 col1, __m128 col2)
+Mat3fSSE::Mat3fSSE(__m128 col0, __m128 col1, __m128 col2)
     : mData({{col0, col1, col2}})
 {
-    DEV_EXCEPTION(!IsDataAligned(), "One or more registers of Mat3SSE are not 16 byte aligned");
+    DEV_EXCEPTION(!IsDataAligned(), "One or more registers of Mat3fSSE are not 16 byte aligned");
 }
 
 
 
-Mat3SSE::Mat3SSE(const Mat3SSE& other)
+Mat3fSSE::Mat3fSSE(const Mat3fSSE& other)
     : mData(other.mData)
 {
-    DEV_EXCEPTION(!IsDataAligned(), "One or more registers of Mat3SSE are not 16 byte aligned");
+    DEV_EXCEPTION(!IsDataAligned(), "One or more registers of Mat3fSSE are not 16 byte aligned");
 }
 
 
 
-F32 Mat3SSE::operator()(const U32 row, const U32 col) const
+F32 Mat3fSSE::operator()(const U32 row, const U32 col) const
 {
     DEV_EXCEPTION(row > 2, "row - invalid value! [0..2]");
     DEV_EXCEPTION(col > 2, "col - invalid value! [0..2]");
@@ -74,7 +74,7 @@ F32 Mat3SSE::operator()(const U32 row, const U32 col) const
 
 
 
-bool Mat3SSE::operator==(const Mat3SSE& rhs) const
+bool Mat3fSSE::operator==(const Mat3fSSE& rhs) const
 {
     bool result = true;
     for (U32 i = 0; i < 3; ++i)
@@ -84,14 +84,14 @@ bool Mat3SSE::operator==(const Mat3SSE& rhs) const
 
 
 
-bool Mat3SSE::operator!=(const Mat3SSE& rhs) const
+bool Mat3fSSE::operator!=(const Mat3fSSE& rhs) const
 {
     return !(operator==(rhs));
 }
 
 
 
-Mat3SSE& Mat3SSE::operator+=(const Mat3SSE& other)
+Mat3fSSE& Mat3fSSE::operator+=(const Mat3fSSE& other)
 {
     mData[0] = _mmx_add_p(mData[0], other.mData[0]);
     mData[1] = _mmx_add_p(mData[1], other.mData[1]);
@@ -101,19 +101,19 @@ Mat3SSE& Mat3SSE::operator+=(const Mat3SSE& other)
 
 
 
-Mat3SSE Mat3SSE::operator+(const Mat3SSE& other)
+Mat3fSSE Mat3fSSE::operator+(const Mat3fSSE& other)
 
 {
-    return Mat3SSE(_mmx_add_p(mData[0], other.mData[0]), _mmx_add_p(mData[1], other.mData[1]),
+    return Mat3fSSE(_mmx_add_p(mData[0], other.mData[0]), _mmx_add_p(mData[1], other.mData[1]),
                    _mmx_add_p(mData[2], other.mData[2]));
 }
 
 
 
-Mat3SSE Mat3SSE::operator*(const Mat3SSE& rhs) const
+Mat3fSSE Mat3fSSE::operator*(const Mat3fSSE& rhs) const
 {
     using namespace GDL::sse;
-    return Mat3SSE(_mmx_fmadd_p(sse::Swizzle1<0>(rhs.mData[0]), mData[0],
+    return Mat3fSSE(_mmx_fmadd_p(sse::Swizzle1<0>(rhs.mData[0]), mData[0],
                                 _mmx_fmadd_p(Swizzle1<1>(rhs.mData[0]), mData[1],
                                              _mmx_mul_p(Swizzle1<2>(rhs.mData[0]), mData[2]))),
                    _mmx_fmadd_p(Swizzle1<0>(rhs.mData[1]), mData[0],
@@ -126,7 +126,7 @@ Mat3SSE Mat3SSE::operator*(const Mat3SSE& rhs) const
 
 
 
-Vec3SSE<true> Mat3SSE::operator*(const Vec3SSE<true>& rhs) const
+Vec3fSSE<true> Mat3fSSE::operator*(const Vec3fSSE<true>& rhs) const
 {
     using namespace GDL::sse;
     return Vec3fSSE<true>(
@@ -136,7 +136,7 @@ Vec3SSE<true> Mat3SSE::operator*(const Vec3SSE<true>& rhs) const
 
 
 
-const std::array<F32, 9> Mat3SSE::Data() const
+const std::array<F32, 9> Mat3fSSE::Data() const
 {
     std::array<F32, 9> data;
     assert(sizeof(mData) - 3 * sizeof(F32) == sizeof(data));
@@ -149,7 +149,7 @@ const std::array<F32, 9> Mat3SSE::Data() const
 
 
 
-F32 Mat3SSE::Det() const
+F32 Mat3fSSE::Det() const
 {
     __m128 r1_yzx = _mm_shuffle_ps(mData[1], mData[1], SHUFFLE_4_MASK(1, 2, 0, 3));
     __m128 r2_yzx = _mm_shuffle_ps(mData[2], mData[2], SHUFFLE_4_MASK(1, 2, 0, 3));
@@ -161,18 +161,18 @@ F32 Mat3SSE::Det() const
 
 
 
-Mat3SSE Mat3SSE::Transpose() const
+Mat3fSSE Mat3fSSE::Transpose() const
 {
     __m128 tmp0 = _mm_unpacklo_ps(mData[0], mData[1]);
     __m128 tmp1 = _mm_unpackhi_ps(mData[0], mData[1]);
 
-    return Mat3SSE(_mm_movelh_ps(tmp0, mData[2]), _mm_shuffle_ps(tmp0, mData[2], SHUFFLE_4_MASK(2, 3, 1, 3)),
+    return Mat3fSSE(_mm_movelh_ps(tmp0, mData[2]), _mm_shuffle_ps(tmp0, mData[2], SHUFFLE_4_MASK(2, 3, 1, 3)),
                    _mm_shuffle_ps(tmp1, mData[2], SHUFFLE_4_MASK(0, 1, 2, 3)));
 }
 
 
 
-bool Mat3SSE::IsDataAligned() const
+bool Mat3fSSE::IsDataAligned() const
 {
     return (IsAligned(&mData[0], sse::alignmentBytes<__m128>) && IsAligned(&mData[1], sse::alignmentBytes<__m128>) &&
             IsAligned(&mData[2], sse::alignmentBytes<__m128>));
@@ -180,7 +180,7 @@ bool Mat3SSE::IsDataAligned() const
 
 
 
-inline std::ostream& operator<<(std::ostream& os, const Mat3SSE& mat)
+inline std::ostream& operator<<(std::ostream& os, const Mat3fSSE& mat)
 {
     for (U32 i = 0; i < 3; ++i)
         os << "| " << mat(i, 0) << " " << mat(i, 1) << " " << mat(i, 2) << " |" << std::endl;

@@ -14,35 +14,35 @@ namespace GDL
 
 
 template <bool>
-class Vec3SSE;
+class Vec3fSSE;
 
 //! @brief 3x3 Matrix with SSE support
-class alignas(sse::alignmentBytes<__m128>) Mat3SSE
+class alignas(sse::alignmentBytes<__m128>) Mat3fSSE
 {
     alignas(sse::alignmentBytes<__m128>) std::array<__m128, 3> mData;
 
 public:
-    inline Mat3SSE();
-    inline Mat3SSE(const Mat3SSE& other);
-    inline Mat3SSE(Mat3SSE&& other) = default;
-    inline Mat3SSE& operator=(const Mat3SSE& other) = default;
-    inline Mat3SSE& operator=(Mat3SSE&& other) = default;
-    inline ~Mat3SSE() = default;
+    inline Mat3fSSE();
+    inline Mat3fSSE(const Mat3fSSE& other);
+    inline Mat3fSSE(Mat3fSSE&& other) = default;
+    inline Mat3fSSE& operator=(const Mat3fSSE& other) = default;
+    inline Mat3fSSE& operator=(Mat3fSSE&& other) = default;
+    inline ~Mat3fSSE() = default;
 
     //! @brief Constructor which initializes the matrix with the provided array
     //! @param data: Array containing the data
-    inline explicit Mat3SSE(std::array<F32, 9> data);
+    inline explicit Mat3fSSE(std::array<F32, 9> data);
 
     //! @brief Constructor that initializes the full matrix with specific values (column major)
     //! @param v0-v8: Matrix values in column major ordering
-    inline Mat3SSE(F32 v0, F32 v1, F32 v2, F32 v3, F32 v4, F32 v5, F32 v6, F32 v7, F32 v8);
+    inline Mat3fSSE(F32 v0, F32 v1, F32 v2, F32 v3, F32 v4, F32 v5, F32 v6, F32 v7, F32 v8);
 
 private:
     //! @brief Constructor that initializes the full matrix with specific columns
     //! @param col0: first column
     //! @param col1: second column
     //! @param col2: third column
-    inline Mat3SSE(__m128 col0, __m128 col1, __m128 col2);
+    inline Mat3fSSE(__m128 col0, __m128 col1, __m128 col2);
 
 public:
     //! @brief Direct access operator
@@ -56,34 +56,34 @@ public:
     //! @return TRUE/FALSE
     //! @remark This function uses the Approx class internally. The default minimal base is used. This might be changed
     //! in the future. A global minimal base for linear algebra comparison might be introduced.
-    [[nodiscard]] inline bool operator==(const Mat3SSE& rhs) const;
+    [[nodiscard]] inline bool operator==(const Mat3fSSE& rhs) const;
 
     //! @brief Compares if two matrices are NOT equal
     //! @param rhs: Matrix that should be compared
     //! @return TRUE/FALSE
     //! @remark This function uses the Approx class internally. The default minimal base is used. This might be changed
     //! in the future. A global minimal base for linear algebra comparison might be introduced.
-    [[nodiscard]] inline bool operator!=(const Mat3SSE& rhs) const;
+    [[nodiscard]] inline bool operator!=(const Mat3fSSE& rhs) const;
 
     //! @brief Matrix - matrix addition assignment
     //! @param other: Rhs matrix
     //! @return Result of the addition (this)
-    inline Mat3SSE& operator+=(const Mat3SSE& other);
+    inline Mat3fSSE& operator+=(const Mat3fSSE& other);
 
     //! @brief Matrix - matrix addition
     //! @param other: Rhs matrix
     //! @return Result of the addition (this)
-    [[nodiscard]] inline Mat3SSE operator+(const Mat3SSE& other);
+    [[nodiscard]] inline Mat3fSSE operator+(const Mat3fSSE& other);
 
     //! @brief Matrix - matrix multiplication
     //! @param rhs: Rhs matrix
     //! @return Result of the multiplication
-    [[nodiscard]] inline Mat3SSE operator*(const Mat3SSE& rhs) const;
+    [[nodiscard]] inline Mat3fSSE operator*(const Mat3fSSE& rhs) const;
 
     //! @brief Matrix - vector multiplication
     //! @param rhs: Rhs matrix
     //! @return Result of the multiplication
-    [[nodiscard]] inline Vec3SSE<true> operator*(const Vec3SSE<true>& rhs) const;
+    [[nodiscard]] inline Vec3fSSE<true> operator*(const Vec3fSSE<true>& rhs) const;
 
     //! @brief Gets the data array in column major ordering
     //! @return Data
@@ -95,7 +95,7 @@ public:
 
     //! @brief Returns the transposed matrix
     //! @return Transposed matrix
-    [[nodiscard]] inline Mat3SSE Transpose() const;
+    [[nodiscard]] inline Mat3fSSE Transpose() const;
 
 private:
     //! @brief Checks if the matrix internal data is aligned
@@ -109,7 +109,7 @@ private:
 //! @param os: Reference to offstream object
 //! @param mat: Matrix
 //! @return Reference to offstream object
-inline std::ostream& operator<<(std::ostream& os, const Mat3SSE& mat);
+inline std::ostream& operator<<(std::ostream& os, const Mat3fSSE& mat);
 
 } // namespace GDL
 

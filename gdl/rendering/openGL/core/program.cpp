@@ -179,14 +179,14 @@ void Program::SetUniform(GLint uniformLocation, const Vec3Single<F32, false>& va
 
 
 
-void Program::SetUniform(GLint uniformLocation, const Vec3SSE<true>& values)
+void Program::SetUniform(GLint uniformLocation, const Vec3fSSE<true>& values)
 {
     glProgramUniform3fv(mHandle, uniformLocation, 1, values.Data().data());
 }
 
 
 
-void Program::SetUniform(GLint uniformLocation, const Vec3SSE<false>& values)
+void Program::SetUniform(GLint uniformLocation, const Vec3fSSE<false>& values)
 {
     glProgramUniform3fv(mHandle, uniformLocation, 1, values.Data().data());
 }
@@ -207,21 +207,21 @@ void Program::SetUniform(GLint uniformLocation, const Vec4Single<F32, false>& va
 
 
 
-void Program::SetUniform(GLint uniformLocation, const Vec4SSE<true>& values)
+void Program::SetUniform(GLint uniformLocation, const Vec4fSSE<true>& values)
 {
     glProgramUniform4fv(mHandle, uniformLocation, 1, values.Data().data());
 }
 
 
 
-void Program::SetUniform(GLint uniformLocation, const Vec4SSE<false>& values)
+void Program::SetUniform(GLint uniformLocation, const Vec4fSSE<false>& values)
 {
     glProgramUniform4fv(mHandle, uniformLocation, 1, values.Data().data());
 }
 
 
 
-void Program::SetUniform(GLint uniformLocation, const Mat4SSE& values)
+void Program::SetUniform(GLint uniformLocation, const Mat4fSSE& values)
 {
     glProgramUniformMatrix4fv(mHandle, uniformLocation, 1, GL_FALSE, values.Data().data());
 }

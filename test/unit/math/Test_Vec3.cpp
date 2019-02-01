@@ -203,7 +203,7 @@ BOOST_FIXTURE_TEST_CASE(Comparison_Single, Fixture<Vec3fSingle>)
 
 
 
-BOOST_FIXTURE_TEST_CASE(Comparison_SSE, Fixture<Vec3SSE>)
+BOOST_FIXTURE_TEST_CASE(Comparison_SSE, Fixture<Vec3fSSE>)
 {
     ComparisonTest(cA, cB);
     ComparisonTest(rA, rB);
@@ -238,7 +238,7 @@ BOOST_FIXTURE_TEST_CASE(Dot_Product_Single, Fixture<Vec3fSingle>)
 
 
 
-BOOST_FIXTURE_TEST_CASE(Dot_Product_SSE, Fixture<Vec3SSE>)
+BOOST_FIXTURE_TEST_CASE(Dot_Product_SSE, Fixture<Vec3fSSE>)
 {
     DotProductTest(cA, cB);
     DotProductTest(cA, rA);
@@ -367,7 +367,7 @@ BOOST_FIXTURE_TEST_CASE(Cross_Product_Single, Fixture<Vec3fSingle>)
 
 
 
-BOOST_FIXTURE_TEST_CASE(Cross_Product_SSE, Fixture<Vec3SSE>)
+BOOST_FIXTURE_TEST_CASE(Cross_Product_SSE, Fixture<Vec3fSSE>)
 {
     CrossProductTest<Vec3fSSE<true>>();
     CrossProductTest<Vec3fSSE<false>>();

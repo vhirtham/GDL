@@ -18,36 +18,36 @@ namespace GDL
 //! @brief Vector class with 2 entries and SSE support
 //! @tparam _isCol: If true, the vector is treated as column vector, otherwise as row vector
 template <bool _isCol = true>
-class alignas(sse::alignmentBytes<__m128>) Vec2SSE
+class alignas(sse::alignmentBytes<__m128>) Vec2fSSE
 {
     template <bool>
-    friend class Vec2SSE;
-    friend class Mat2SSE;
+    friend class Vec2fSSE;
+    friend class Mat2fSSE;
 
     alignas(sse::alignmentBytes<__m128>) __m128 mData;
 
 public:
-    inline Vec2SSE();
-    inline Vec2SSE(const Vec2SSE& other);
-    inline Vec2SSE(Vec2SSE&& other) = default;
-    inline Vec2SSE& operator=(const Vec2SSE& other) = default;
-    inline Vec2SSE& operator=(Vec2SSE&& other) = default;
-    inline ~Vec2SSE() = default;
+    inline Vec2fSSE();
+    inline Vec2fSSE(const Vec2fSSE& other);
+    inline Vec2fSSE(Vec2fSSE&& other) = default;
+    inline Vec2fSSE& operator=(const Vec2fSSE& other) = default;
+    inline Vec2fSSE& operator=(Vec2fSSE&& other) = default;
+    inline ~Vec2fSSE() = default;
 
     //! @brief Constructor which initializes the vector with the provided array
     //! @param data: Array containing the data
-    inline explicit Vec2SSE(std::array<F32, 2> data);
+    inline explicit Vec2fSSE(std::array<F32, 2> data);
 
     //! @brief Constructor that initializes the vector with specific values
     //! @param v0-v1: Vector values
-    inline Vec2SSE(F32 v0, F32 v1);
+    inline Vec2fSSE(F32 v0, F32 v1);
 
 
 
 private:
     //! @brief Constructor that initializes the vector
     //! @param data: Data
-    inline Vec2SSE(__m128 data);
+    inline Vec2fSSE(__m128 data);
 
 public:
     //! @brief Direct access operator
@@ -60,24 +60,24 @@ public:
     //! @return True / False
     //! @remark This function uses the Approx class internally. The default minimal base is used. This might be changed
     //! in the future. A global minimal base for linear algebra comparison might be introduced.
-    [[nodiscard]] inline bool operator==(const Vec2SSE& rhs) const;
+    [[nodiscard]] inline bool operator==(const Vec2fSSE& rhs) const;
 
     //! @brief Compares if two vectors are NOT equal
     //! @param rhs: Vector that should be compared
     //! @return True / False
     //! @remark This function uses the Approx class internally. The default minimal base is used. This might be changed
     //! in the future. A global minimal base for linear algebra comparison might be introduced.
-    [[nodiscard]] inline bool operator!=(const Vec2SSE& rhs) const;
+    [[nodiscard]] inline bool operator!=(const Vec2fSSE& rhs) const;
 
     //! @brief Vector - vector addition assignment
     //! @param other: Rhs vector
     //! @return Result of the addition (this)
-    inline Vec2SSE& operator+=(const Vec2SSE& rhs);
+    inline Vec2fSSE& operator+=(const Vec2fSSE& rhs);
 
     //! @brief Vector - vector substraction assignment
     //! @param other: Rhs vector
     //! @return Result of the substraction (this)
-    inline Vec2SSE& operator-=(const Vec2SSE& rhs);
+    inline Vec2fSSE& operator-=(const Vec2fSSE& rhs);
 
     //! @brief Gets the data array
     //! @return Data
@@ -88,7 +88,7 @@ public:
     //! @param rhs: Right hand side vector
     //! @return Dot product
     template <bool _isColRhs>
-    [[nodiscard]] inline F32 Dot(Vec2SSE<_isColRhs> rhs) const;
+    [[nodiscard]] inline F32 Dot(Vec2fSSE<_isColRhs> rhs) const;
 
     //! @brief Calculates the length of the vector
     //! @return Length of the vector
@@ -96,7 +96,7 @@ public:
 
     //! @brief Normalizes the vector
     //! @return Reference to this
-    Vec2SSE& Normalize();
+    Vec2fSSE& Normalize();
 
 private:
     //! @brief Checks if the vectors internal data is aligned
@@ -106,18 +106,13 @@ private:
 
 
 
-template <bool _isCol>
-using Vec2fSSE = Vec2SSE<_isCol>;
-
-
-
 //! @brief Offstream operator
 //! @tparam _isCol: If true, the vector is treated as column vector, otherwise as row vector
 //! @param os: Reference to offstream object
 //! @param vec: Vector
 //! @return Reference to offstream object
 template <bool _isCol = true>
-inline std::ostream& operator<<(std::ostream& os, const Vec2SSE<_isCol>& vec);
+inline std::ostream& operator<<(std::ostream& os, const Vec2fSSE<_isCol>& vec);
 
 } // namespace GDL
 

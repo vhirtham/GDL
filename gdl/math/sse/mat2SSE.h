@@ -14,33 +14,33 @@ namespace GDL
 {
 
 template <bool>
-class Vec2SSE;
+class Vec2fSSE;
 
 //! @brief 2x2 Matrix with SSE support
-class alignas(sse::alignmentBytes<__m128>) Mat2SSE
+class alignas(sse::alignmentBytes<__m128>) Mat2fSSE
 {
     alignas(sse::alignmentBytes<__m128>) __m128 mData;
 
 public:
-    inline Mat2SSE();
-    inline Mat2SSE(const Mat2SSE& other);
-    inline Mat2SSE(Mat2SSE&& other) = default;
-    inline Mat2SSE& operator=(const Mat2SSE& other) = default;
-    inline Mat2SSE& operator=(Mat2SSE&& other) = default;
-    inline ~Mat2SSE() = default;
+    inline Mat2fSSE();
+    inline Mat2fSSE(const Mat2fSSE& other);
+    inline Mat2fSSE(Mat2fSSE&& other) = default;
+    inline Mat2fSSE& operator=(const Mat2fSSE& other) = default;
+    inline Mat2fSSE& operator=(Mat2fSSE&& other) = default;
+    inline ~Mat2fSSE() = default;
 
     //! @brief Constructor which initializes the matrix with the provided array
     //! @param data: Array containing the data
-    inline explicit Mat2SSE(std::array<F32, 4> data);
+    inline explicit Mat2fSSE(std::array<F32, 4> data);
 
     //! @brief Constructor that initializes the full matrix with specific values (column major)
     //! @param v0-v3: Matrix values in column major ordering
-    inline Mat2SSE(F32 v0, F32 v1, F32 v2, F32 v3);
+    inline Mat2fSSE(F32 v0, F32 v1, F32 v2, F32 v3);
 
 private:
     //! @brief Constructor that initializes the matrix with a register
     //! @param reg: first column
-    inline Mat2SSE(__m128 reg);
+    inline Mat2fSSE(__m128 reg);
 
 public:
     //! @brief Direct access operator
@@ -54,34 +54,34 @@ public:
     //! @return TRUE/FALSE
     //! @remark This function uses the Approx class internally. The default minimal base is used. This might be changed
     //! in the future. A global minimal base for linear algebra comparison might be introduced.
-    [[nodiscard]] inline bool operator==(const Mat2SSE& rhs) const;
+    [[nodiscard]] inline bool operator==(const Mat2fSSE& rhs) const;
 
     //! @brief Compares if two matrices are NOT equal
     //! @param rhs: Matrix that should be compared
     //! @return TRUE/FALSE
     //! @remark This function uses the Approx class internally. The default minimal base is used. This might be changed
     //! in the future. A global minimal base for linear algebra comparison might be introduced.
-    [[nodiscard]] inline bool operator!=(const Mat2SSE& rhs) const;
+    [[nodiscard]] inline bool operator!=(const Mat2fSSE& rhs) const;
 
     //! @brief Matrix - matrix addition assignment
     //! @param other: Rhs matrix
     //! @return Result of the addition (this)
-    inline Mat2SSE& operator+=(const Mat2SSE& other);
+    inline Mat2fSSE& operator+=(const Mat2fSSE& other);
 
     //! @brief Matrix - matrix addition
     //! @param other: Rhs matrix
     //! @return Result of the addition (this)
-    [[nodiscard]] inline Mat2SSE operator+(const Mat2SSE& other);
+    [[nodiscard]] inline Mat2fSSE operator+(const Mat2fSSE& other);
 
     //! @brief Matrix - matrix multiplication
     //! @param rhs: Rhs matrix
     //! @return Result of the multiplication
-    [[nodiscard]] inline Mat2SSE operator*(const Mat2SSE& rhs) const;
+    [[nodiscard]] inline Mat2fSSE operator*(const Mat2fSSE& rhs) const;
 
     //! @brief Matrix - vector multiplication
     //! @param rhs: Rhs matrix
     //! @return Result of the multiplication
-    [[nodiscard]] inline Vec2SSE<true> operator*(const Vec2SSE<true>& rhs) const;
+    [[nodiscard]] inline Vec2fSSE<true> operator*(const Vec2fSSE<true>& rhs) const;
 
     //! @brief Gets the data array in column major ordering
     //! @return Data
@@ -93,7 +93,7 @@ public:
 
     //! @brief Returns the transposed matrix
     //! @return Transposed matrix
-    [[nodiscard]] inline Mat2SSE Transpose() const;
+    [[nodiscard]] inline Mat2fSSE Transpose() const;
 
 private:
     //! @brief Checks if the matrix internal data is aligned
@@ -107,7 +107,7 @@ private:
 //! @param os: Reference to offstream object
 //! @param mat: Matrix
 //! @return Reference to offstream object
-inline std::ostream& operator<<(std::ostream& os, const Mat2SSE& mat);
+inline std::ostream& operator<<(std::ostream& os, const Mat2fSSE& mat);
 
 } // namespace GDL
 

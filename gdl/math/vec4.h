@@ -5,7 +5,7 @@
 namespace GDL
 {
 
-using Vec4f = Vec4SSE<true>;
-using Vec4rf = Vec4SSE<false>;
+using Vec4f = Vec4fSSE<true>;
+using Vec4rf = Vec4fSSE<false>;
 
 } // namespace GDL

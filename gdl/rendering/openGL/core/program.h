@@ -10,17 +10,17 @@
 namespace GDL
 {
 
-class Mat4SSE;
+class Mat4fSSE;
 template <typename>
 class Mat4Single;
 template <typename, bool>
 class Vec3Single;
 template <bool>
-class Vec3SSE;
+class Vec3fSSE;
 template <typename, bool>
 class Vec4Single;
 template <bool>
-class Vec4SSE;
+class Vec4fSSE;
 
 
 
@@ -140,12 +140,12 @@ public:
     //! @brief Sets the value of a uniform vec3
     //! @param uniformLocation: Location of the uniform
     //! @param values: New value
-    void SetUniform(GLint uniformLocation, const Vec3SSE<true>& value);
+    void SetUniform(GLint uniformLocation, const Vec3fSSE<true>& value);
 
     //! @brief Sets the value of a uniform vec3
     //! @param uniformLocation: Location of the uniform
     //! @param values: New values
-    void SetUniform(GLint uniformLocation, const Vec3SSE<false>& value);
+    void SetUniform(GLint uniformLocation, const Vec3fSSE<false>& value);
 
     //! @brief Sets the value of a uniform vec4
     //! @param uniformLocation: Location of the uniform
@@ -160,17 +160,17 @@ public:
     //! @brief Sets the value of a uniform vec4
     //! @param uniformLocation: Location of the uniform
     //! @param values: New value
-    void SetUniform(GLint uniformLocation, const Vec4SSE<true>& value);
+    void SetUniform(GLint uniformLocation, const Vec4fSSE<true>& value);
 
     //! @brief Sets the value of a uniform vec4
     //! @param uniformLocation: Location of the uniform
     //! @param values: New values
-    void SetUniform(GLint uniformLocation, const Vec4SSE<false>& value);
+    void SetUniform(GLint uniformLocation, const Vec4fSSE<false>& value);
 
     //! @brief Sets the value of a uniform mat4
     //! @param uniformLocation: Location of the uniform
     //! @param value: New value
-    void SetUniform(GLint uniformLocation, const Mat4SSE& values);
+    void SetUniform(GLint uniformLocation, const Mat4fSSE& values);
 
     //! @brief Sets the value of a uniform mat4
     //! @param uniformLocation: Location of the uniform

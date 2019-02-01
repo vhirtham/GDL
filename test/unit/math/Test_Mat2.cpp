@@ -51,7 +51,7 @@ BOOST_AUTO_TEST_CASE(Construction_Single)
 
 BOOST_AUTO_TEST_CASE(Construction_SSE)
 {
-    ConstructionTest<Mat2SSE>();
+    ConstructionTest<Mat2fSSE>();
 }
 
 
@@ -107,7 +107,7 @@ BOOST_FIXTURE_TEST_CASE(Comparison_Single, Fixture<Mat2Single<F32>>)
 
 
 
-BOOST_FIXTURE_TEST_CASE(Comparison_SSE, Fixture<Mat2SSE>)
+BOOST_FIXTURE_TEST_CASE(Comparison_SSE, Fixture<Mat2fSSE>)
 {
     ComparisonTest(A, B);
 }
@@ -147,7 +147,7 @@ BOOST_FIXTURE_TEST_CASE(Parentheses_Operator_Single, Fixture<Mat2Single<F32>>)
 
 
 
-BOOST_FIXTURE_TEST_CASE(Parentheses_Operator_SSE, Fixture<Mat2SSE>)
+BOOST_FIXTURE_TEST_CASE(Parentheses_Operator_SSE, Fixture<Mat2fSSE>)
 {
     ParenthesesOperatorTest(A, B);
 }
@@ -178,7 +178,7 @@ BOOST_FIXTURE_TEST_CASE(Addition_Assignment_Single, Fixture<Mat2Single<F32>>)
 
 
 
-BOOST_FIXTURE_TEST_CASE(Addition_Assignment_SSE, Fixture<Mat2SSE>)
+BOOST_FIXTURE_TEST_CASE(Addition_Assignment_SSE, Fixture<Mat2fSSE>)
 {
     AdditionAssignmentTest(A, B);
 }
@@ -205,7 +205,7 @@ BOOST_FIXTURE_TEST_CASE(Addition_Single, Fixture<Mat2Single<F32>>)
 
 
 
-BOOST_FIXTURE_TEST_CASE(Addition_SSE, Fixture<Mat2SSE>)
+BOOST_FIXTURE_TEST_CASE(Addition_SSE, Fixture<Mat2fSSE>)
 {
     AdditionTest(A, B);
 }
@@ -235,9 +235,9 @@ BOOST_FIXTURE_TEST_CASE(Multiplication_Single, Fixture<Mat2Single<F32>>)
 
 
 
-BOOST_FIXTURE_TEST_CASE(Multiplication_SSE, Fixture<Mat2SSE>)
+BOOST_FIXTURE_TEST_CASE(Multiplication_SSE, Fixture<Mat2fSSE>)
 {
-    MultiplicationTest<Mat2SSE>(A, B);
+    MultiplicationTest<Mat2fSSE>(A, B);
 }
 
 
@@ -267,9 +267,9 @@ BOOST_FIXTURE_TEST_CASE(Matrix_Vector_Multiplication_Single, Fixture<Mat2Single<
 
 
 
-BOOST_FIXTURE_TEST_CASE(Matrix_Vector_Multiplication_SSE, Fixture<Mat2SSE>)
+BOOST_FIXTURE_TEST_CASE(Matrix_Vector_Multiplication_SSE, Fixture<Mat2fSSE>)
 {
-    MatrixVectorMultiplicationTest<Mat2SSE, Vec2fSSE<true>>(A, B);
+    MatrixVectorMultiplicationTest<Mat2fSSE, Vec2fSSE<true>>(A, B);
 }
 
 
@@ -296,9 +296,9 @@ BOOST_FIXTURE_TEST_CASE(Transpose_Single, Fixture<Mat2Single<F32>>)
 
 
 
-BOOST_FIXTURE_TEST_CASE(Transpose_SSE, Fixture<Mat2SSE>)
+BOOST_FIXTURE_TEST_CASE(Transpose_SSE, Fixture<Mat2fSSE>)
 {
-    Transpose<Mat2SSE>(A);
+    Transpose<Mat2fSSE>(A);
 }
 
 
@@ -324,7 +324,7 @@ BOOST_FIXTURE_TEST_CASE(Determinant_Single, Fixture<Mat2Single<F32>>)
 
 
 
-BOOST_FIXTURE_TEST_CASE(Determinant_SSE, Fixture<Mat2SSE>)
+BOOST_FIXTURE_TEST_CASE(Determinant_SSE, Fixture<Mat2fSSE>)
 {
-    Determinant<Mat2SSE>(A, B);
+    Determinant<Mat2fSSE>(A, B);
 }
