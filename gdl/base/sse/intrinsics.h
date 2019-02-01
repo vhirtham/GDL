@@ -188,6 +188,15 @@ inline _registerType _mmx_andnot_p(_registerType lhs, _registerType rhs);
 template <typename _registerType>
 inline auto _mmx_movemask_epi8(_registerType reg);
 
+//! @brief Returns a register with an arbitrary combination of values from the input register.
+//! @tparam _permuteMask: Bitmask that determines the value composition. Have a look at Intels documentation of
+//! _mm_permute_ps or_mm_shuffle_ps for detailed informations
+//! @tparam _registerType: Register type
+//! @param reg: Register which serves as source
+//! @return Register with an arbitrary combination of values from the input register.
+template <I32 _permuteMask, typename _registerType>
+inline auto _mmx_permute_p(_registerType reg);
+
 
 } // namespace GDL
 

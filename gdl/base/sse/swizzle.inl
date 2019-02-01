@@ -1,6 +1,7 @@
 #pragma once
 #include "gdl/base/sse/swizzle.h"
 
+#include "gdl/base/sse/intrinsics.h"
 #include "gdl/base/sse/maskMacros.h"
 #include "gdl/base/sse/utility.h"
 
@@ -12,7 +13,7 @@ template <U32 _x0, U32 _x1, U32 _x2, U32 _x3>
 inline __m128 Swizzle(__m128 source)
 {
     static_assert(_x0 < 4 && _x1 < 4 && _x2 < 4 && _x3 < 4, "Values _x0-_x3 must be in the interval [0, 3]");
-    return _mm_permute_ps(source, SHUFFLE_4_MASK(_x0, _x1, _x2, _x3));
+    return _mmx_permute_p<SHUFFLE_4_MASK(_x0, _x1, _x2, _x3)>(source);
 }
 
 
@@ -24,10 +25,10 @@ inline _registerType Swizzle1(_registerType reg)
                   "Value x0-x3 must be in the interval [0, numRegisterValues]");
 
     if constexpr (std::is_same<_registerType, __m128>::value)
-        return _mm_permute_ps(reg, SHUFFLE_4_MASK(_index, _index, _index, _index));
+        return _mmx_permute_p<SHUFFLE_4_MASK(_index, _index, _index, _index)>(reg);
 
     if constexpr (std::is_same<_registerType, __m128d>::value)
-        return _mm_permute_pd(reg, SHUFFLE_2_MASK(_index, _index));
+        return _mmx_permute_p<SHUFFLE_2_MASK(_index, _index)>(reg);
 
 #ifdef __AVX2__
     else if constexpr (std::is_same<_registerType, __m256>::value)

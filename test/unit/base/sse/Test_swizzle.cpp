@@ -57,11 +57,9 @@ void TestSwizzle1()
 
     _registerType b = Swizzle1<_index>(a);
     for (U32 i = 0; i < numRegisterValues<_registerType>; ++i)
-    {
         BOOST_CHECK(sse::GetValue(b, i) == Approx(sse::GetValue<_index>(a)));
-        std::cout << sse::GetValue(b, i) << std::endl;
-    }
-    std::cout << std::endl;
+
+
     if constexpr (_index + 1 < numRegisterValues<_registerType>)
         TestSwizzle1<_registerType, _index + 1>();
 }

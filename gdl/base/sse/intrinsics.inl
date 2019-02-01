@@ -3,7 +3,6 @@
 #include "gdl/base/sse/intrinsics.h"
 
 #include "gdl/base/exception.h"
-#include "gdl/base/fundamentalTypes.h"
 
 #include <x86intrin.h>
 
@@ -425,6 +424,26 @@ inline auto _mmx_cvtsx_fx(_registerType reg)
         return _mm256_cvtss_f32(reg);
     else if constexpr (std::is_same<_registerType, __m256d>::value)
         return _mm256_cvtsd_f64(reg);
+#endif // __AVX2__
+    else
+        throw Exception(__PRETTY_FUNCTION__, "Not defined for selected register type.");
+}
+
+
+
+template <I32 _permuteMask, typename _registerType>
+inline auto _mmx_permute_p(_registerType reg)
+{
+#ifndef __AVX2__
+    if constexpr (std::is_same<_registerType, __m128>::value)
+        return _mm_shuffle_ps(reg, reg, _permuteMask);
+    else if constexpr (std::is_same<_registerType, __m128d>::value)
+        return _mm_shuffle_pd(reg, reg, _permuteMask);
+#else // __AVX2__
+    if constexpr (std::is_same<_registerType, __m128>::value)
+        return _mm_permute_ps(reg, _permuteMask);
+    else if constexpr (std::is_same<_registerType, __m128d>::value)
+        return _mm_permute_pd(reg, _permuteMask);
 #endif // __AVX2__
     else
         throw Exception(__PRETTY_FUNCTION__, "Not defined for selected register type.");
