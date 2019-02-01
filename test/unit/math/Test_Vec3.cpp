@@ -2,9 +2,9 @@
 
 
 #include "gdl/base/fundamentalTypes.h"
-#include "gdl/math/sse/vec3SSE.h"
+#include "gdl/math/sse/vec3fSSE.h"
 #include "gdl/math/single/vec3Single.h"
-#include "gdl/math/sse/vec4SSE.h"
+#include "gdl/math/sse/vec4fSSE.h"
 #include "gdl/math/single/vec4Single.h"
 
 #include "test/tools/arrayValueComparison.h"

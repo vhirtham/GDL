@@ -114,4 +114,4 @@ inline std::ostream& operator<<(std::ostream& os, const Mat3fSSE& mat);
 } // namespace GDL
 
 
-#include "gdl/math/sse/mat3SSE.inl"
+#include "gdl/math/sse/mat3fSSE.inl"

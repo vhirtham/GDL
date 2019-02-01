@@ -4,8 +4,8 @@
 #include "gdl/base/fundamentalTypes.h"
 #include "gdl/math/single/mat3Single.h"
 #include "gdl/math/single/vec3Single.h"
-#include "gdl/math/sse/mat3SSE.h"
-#include "gdl/math/sse/vec3SSE.h"
+#include "gdl/math/sse/mat3fSSE.h"
+#include "gdl/math/sse/vec3fSSE.h"
 
 
 #include "test/tools/arrayValueComparison.h"

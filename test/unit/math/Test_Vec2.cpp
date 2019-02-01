@@ -2,7 +2,7 @@
 
 
 #include "gdl/base/fundamentalTypes.h"
-#include "gdl/math/sse/vec2SSE.h"
+#include "gdl/math/sse/vec2fSSE.h"
 #include "gdl/math/single/vec2Single.h"
 
 

@@ -1,5 +1,5 @@
 #pragma once
-#include "gdl/math/sse/mat3SSE.h"
+#include "gdl/math/sse/mat3fSSE.h"
 
 #include "gdl/base/approx.h"
 #include "gdl/base/exception.h"

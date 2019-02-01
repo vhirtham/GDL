@@ -130,4 +130,4 @@ inline std::ostream& operator<<(std::ostream& os, const Vec3fSSE<_isCol>& vec);
 } // namespace GDL
 
 
-#include "gdl/math/sse/vec3SSE.inl"
+#include "gdl/math/sse/vec3fSSE.inl"

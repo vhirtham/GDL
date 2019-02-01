@@ -1,4 +1,4 @@
-#include "gdl/math/sse/mat4SSE.h"
+#include "gdl/math/sse/mat4fSSE.h"
 #include "gdl/math/single/mat4Single.h"
 #include <benchmark/benchmark.h>
 

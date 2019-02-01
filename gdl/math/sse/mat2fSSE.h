@@ -3,6 +3,7 @@
 #include "gdl/base/fundamentalTypes.h"
 #include "gdl/base/sse/utility.h"
 #include "gdl/base/sse/intrinsics.h"
+#include "gdl/math/sse/vec2fSSE.h"
 
 
 #include <array>
@@ -13,37 +14,33 @@ namespace GDL
 {
 
 template <bool>
-class Vec4fSSE;
+class Vec2fSSE;
 
-//! @brief 4x4 Matrix with SSE support
-class alignas(sse::alignmentBytes<__m128>) Mat4fSSE
+//! @brief 2x2 Matrix with SSE support
+class alignas(sse::alignmentBytes<__m128>) Mat2fSSE
 {
-    alignas(sse::alignmentBytes<__m128>) std::array<__m128, 4> mData;
+    alignas(sse::alignmentBytes<__m128>) __m128 mData;
 
 public:
-    inline Mat4fSSE();
-    inline Mat4fSSE(const Mat4fSSE& other);
-    inline Mat4fSSE(Mat4fSSE&& other) = default;
-    inline Mat4fSSE& operator=(const Mat4fSSE& other) = default;
-    inline Mat4fSSE& operator=(Mat4fSSE&& other) = default;
-    inline ~Mat4fSSE() = default;
+    inline Mat2fSSE();
+    inline Mat2fSSE(const Mat2fSSE& other);
+    inline Mat2fSSE(Mat2fSSE&& other) = default;
+    inline Mat2fSSE& operator=(const Mat2fSSE& other) = default;
+    inline Mat2fSSE& operator=(Mat2fSSE&& other) = default;
+    inline ~Mat2fSSE() = default;
 
     //! @brief Constructor which initializes the matrix with the provided array
     //! @param data: Array containing the data
-    inline explicit Mat4fSSE(std::array<F32, 16> data);
+    inline explicit Mat2fSSE(std::array<F32, 4> data);
 
     //! @brief Constructor that initializes the full matrix with specific values (column major)
-    //! @param v0-v15: Matrix values in column major ordering
-    inline Mat4fSSE(F32 v0, F32 v1, F32 v2, F32 v3, F32 v4, F32 v5, F32 v6, F32 v7, F32 v8, F32 v9, F32 v10, F32 v11,
-                    F32 v12, F32 v13, F32 v14, F32 v15);
+    //! @param v0-v3: Matrix values in column major ordering
+    inline Mat2fSSE(F32 v0, F32 v1, F32 v2, F32 v3);
 
 private:
-    //! @brief Constructor that initializes the full matrix with specific columns
-    //! @param col0: first column
-    //! @param col1: second column
-    //! @param col2: third column
-    //! @param col3: fourth column
-    inline Mat4fSSE(__m128 col0, __m128 col1, __m128 col2, __m128 col3);
+    //! @brief Constructor that initializes the matrix with a register
+    //! @param reg: first column
+    inline Mat2fSSE(__m128 reg);
 
 public:
     //! @brief Direct access operator
@@ -57,38 +54,38 @@ public:
     //! @return TRUE/FALSE
     //! @remark This function uses the Approx class internally. The default minimal base is used. This might be changed
     //! in the future. A global minimal base for linear algebra comparison might be introduced.
-    [[nodiscard]] inline bool operator==(const Mat4fSSE& rhs) const;
+    [[nodiscard]] inline bool operator==(const Mat2fSSE& rhs) const;
 
     //! @brief Compares if two matrices are NOT equal
     //! @param rhs: Matrix that should be compared
     //! @return TRUE/FALSE
     //! @remark This function uses the Approx class internally. The default minimal base is used. This might be changed
     //! in the future. A global minimal base for linear algebra comparison might be introduced.
-    [[nodiscard]] inline bool operator!=(const Mat4fSSE& rhs) const;
+    [[nodiscard]] inline bool operator!=(const Mat2fSSE& rhs) const;
 
     //! @brief Matrix - matrix addition assignment
     //! @param other: Rhs matrix
     //! @return Result of the addition (this)
-    inline Mat4fSSE& operator+=(const Mat4fSSE& other);
+    inline Mat2fSSE& operator+=(const Mat2fSSE& other);
 
     //! @brief Matrix - matrix addition
     //! @param other: Rhs matrix
     //! @return Result of the addition (this)
-    [[nodiscard]] inline Mat4fSSE operator+(const Mat4fSSE& other);
+    [[nodiscard]] inline Mat2fSSE operator+(const Mat2fSSE& other);
 
     //! @brief Matrix - matrix multiplication
     //! @param rhs: Rhs matrix
     //! @return Result of the multiplication
-    [[nodiscard]] inline Mat4fSSE operator*(const Mat4fSSE& rhs) const;
+    [[nodiscard]] inline Mat2fSSE operator*(const Mat2fSSE& rhs) const;
 
     //! @brief Matrix - vector multiplication
     //! @param rhs: Rhs matrix
     //! @return Result of the multiplication
-    [[nodiscard]] inline Vec4fSSE<true> operator*(const Vec4fSSE<true>& rhs) const;
+    [[nodiscard]] inline Vec2fSSE<true> operator*(const Vec2fSSE<true>& rhs) const;
 
     //! @brief Gets the data array in column major ordering
     //! @return Data
-    [[nodiscard]] inline const std::array<F32, 16> Data() const;
+    [[nodiscard]] inline const std::array<F32, 4> Data() const;
 
     //! @brief Calculates the determinant of the matrix
     //! @return Determinant of the matrix
@@ -96,9 +93,7 @@ public:
 
     //! @brief Returns the transposed matrix
     //! @return Transposed matrix
-    [[nodiscard]] inline Mat4fSSE Transpose() const;
-
-
+    [[nodiscard]] inline Mat2fSSE Transpose() const;
 
 private:
     //! @brief Checks if the matrix internal data is aligned
@@ -112,9 +107,9 @@ private:
 //! @param os: Reference to offstream object
 //! @param mat: Matrix
 //! @return Reference to offstream object
-inline std::ostream& operator<<(std::ostream& os, const Mat4fSSE& mat);
+inline std::ostream& operator<<(std::ostream& os, const Mat2fSSE& mat);
 
 } // namespace GDL
 
 
-#include "gdl/math/sse/mat4SSE.inl"
+#include "gdl/math/sse/mat2fSSE.inl"

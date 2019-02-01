@@ -1,6 +1,6 @@
 #pragma once
 
-#include "gdl/math/sse/vec3SSE.h"
+#include "gdl/math/sse/vec3fSSE.h"
 
 #include "gdl/base/approx.h"
 #include "gdl/base/functions/alignment.h"
