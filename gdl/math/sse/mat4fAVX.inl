@@ -1,4 +1,7 @@
 #pragma once
+
+#ifdef __AVX__
+
 #include "gdl/math/sse/mat4fAVX.h"
 
 #include "gdl/base/approx.h"
@@ -204,3 +207,4 @@ inline std::ostream& operator<<(std::ostream& os, const Mat4fAVX& mat)
 
 
 } // namespace GDL
+#endif //__AVX__
