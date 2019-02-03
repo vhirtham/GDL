@@ -1,6 +1,6 @@
 #pragma once
 
-#ifdef __AVX__
+#ifdef __AVX2__
 
 #include "gdl/base/fundamentalTypes.h"
 #include "gdl/base/sse/utility.h"
@@ -118,4 +118,4 @@ inline std::ostream& operator<<(std::ostream& os, const Mat4fAVX& mat);
 
 #include "gdl/math/sse/mat4fAVX.inl"
 
-#endif //__AVX__
+#endif //__AVX2__

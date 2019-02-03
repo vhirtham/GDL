@@ -12,7 +12,7 @@ using namespace GDL;
 // Fixture declaration %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-#ifdef __AVX__
+#ifdef __AVX2__
 class AVX : public benchmark::Fixture
 {
 public:
@@ -27,7 +27,7 @@ public:
     {
     }
 };
-#endif // __AVX__
+#endif // __AVX2__
 
 
 
@@ -80,13 +80,13 @@ BENCHMARK_F(SIMD, Construction)(benchmark::State& state)
 }
 
 
-#ifdef __AVX__
+#ifdef __AVX2__
 BENCHMARK_F(AVX, Construction)(benchmark::State& state)
 {
     for (auto _ : state)
         Mat4fAVX C(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15);
 }
-#endif // __AVX__
+#endif // __AVX2__
 
 
 
@@ -105,13 +105,13 @@ BENCHMARK_F(SIMD, Comparison_Equal)(benchmark::State& state)
 }
 
 
-#ifdef __AVX__
+#ifdef __AVX2__
 BENCHMARK_F(AVX, Comparison_Equal)(benchmark::State& state)
 {
     for (auto _ : state)
         benchmark::DoNotOptimize(A == A);
 }
-#endif // __AVX__
+#endif // __AVX2__
 
 
 
@@ -127,13 +127,13 @@ BENCHMARK_F(SIMD, Comparison_Not_Equal)(benchmark::State& state)
         benchmark::DoNotOptimize(A == B);
 }
 
-#ifdef __AVX__
+#ifdef __AVX2__
 BENCHMARK_F(AVX, Comparison_Not_Equal)(benchmark::State& state)
 {
     for (auto _ : state)
         benchmark::DoNotOptimize(A == B);
 }
-#endif // __AVX__
+#endif // __AVX2__
 
 
 
@@ -151,13 +151,13 @@ BENCHMARK_F(SIMD, Addition_Assignment)(benchmark::State& state)
         benchmark::DoNotOptimize(A += B);
 }
 
-#ifdef __AVX__
+#ifdef __AVX2__
 BENCHMARK_F(AVX, Addition_Assignment)(benchmark::State& state)
 {
     for (auto _ : state)
         benchmark::DoNotOptimize(A += B);
 }
-#endif // __AVX__
+#endif // __AVX2__
 
 
 
@@ -175,13 +175,13 @@ BENCHMARK_F(SIMD, Addition)(benchmark::State& state)
         benchmark::DoNotOptimize(A + B);
 }
 
-#ifdef __AVX__
+#ifdef __AVX2__
 BENCHMARK_F(AVX, Addition)(benchmark::State& state)
 {
     for (auto _ : state)
         benchmark::DoNotOptimize(A + B);
 }
-#endif // __AVX__
+#endif // __AVX2__
 
 
 
@@ -200,14 +200,14 @@ BENCHMARK_F(SIMD, Multiplication)(benchmark::State& state)
         benchmark::DoNotOptimize(A * B);
 }
 
-#ifdef __AVX__
+#ifdef __AVX2__
 BENCHMARK_F(AVX, Multiplication)(benchmark::State& state)
 {
     for (auto _ : state)
         benchmark::DoNotOptimize(A * B);
 }
 
-#endif // __AVX__
+#endif // __AVX2__
 
 
 
@@ -226,14 +226,14 @@ BENCHMARK_F(SIMD, Multiplication_Matrix_Vector)(benchmark::State& state)
         benchmark::DoNotOptimize(A * V);
 }
 
-#ifdef __AVX__
+#ifdef __AVX2__
 BENCHMARK_F(AVX, Multiplication_Matrix_Vector)(benchmark::State& state)
 {
     for (auto _ : state)
         benchmark::DoNotOptimize(A * V);
 }
 
-#endif // __AVX__
+#endif // __AVX2__
 
 
 
@@ -252,8 +252,8 @@ BENCHMARK_F(SIMD, Determinant)(benchmark::State& state)
         benchmark::DoNotOptimize(B.Det());
 }
 
-#ifdef __AVX__
-#endif // __AVX__
+#ifdef __AVX2__
+#endif // __AVX2__
 
 // Transpose %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -270,8 +270,8 @@ BENCHMARK_F(SIMD, Transpose)(benchmark::State& state)
         benchmark::DoNotOptimize(A.Transpose());
 }
 
-#ifdef __AVX__
-#endif // __AVX__
+#ifdef __AVX2__
+#endif // __AVX2__
 
 // Main %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 BENCHMARK_MAIN();

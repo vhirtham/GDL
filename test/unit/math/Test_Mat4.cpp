@@ -57,12 +57,12 @@ BOOST_AUTO_TEST_CASE(Construction_SSE)
     ConstructionTest<Mat4fSSE>();
 }
 
-#ifdef __AVX__
+#ifdef __AVX2__
 BOOST_AUTO_TEST_CASE(Construction_AVX)
 {
     ConstructionTest<Mat4fAVX>();
 }
-#endif // __AVX__
+#endif // __AVX2__
 
 
 // Comparison ---------------------------------------------------------------------------------------------------------
@@ -122,12 +122,12 @@ BOOST_FIXTURE_TEST_CASE(Comparison_SSE, Fixture<Mat4fSSE>)
 }
 
 
-#ifdef __AVX__
+#ifdef __AVX2__
 BOOST_FIXTURE_TEST_CASE(Comparison_AVX, Fixture<Mat4fAVX>)
 {
     ComparisonTest(A, B);
 }
-#endif // __AVX__
+#endif // __AVX2__
 
 
 
@@ -170,12 +170,12 @@ BOOST_FIXTURE_TEST_CASE(Parentheses_Operator_SSE, Fixture<Mat4fSSE>)
 }
 
 
-#ifdef __AVX__
+#ifdef __AVX2__
 BOOST_FIXTURE_TEST_CASE(Parentheses_Operator_AVX, Fixture<Mat4fAVX>)
 {
     ParenthesesOperatorTest(A, B);
 }
-#endif // __AVX__
+#endif // __AVX2__
 
 
 
@@ -210,12 +210,12 @@ BOOST_FIXTURE_TEST_CASE(Addition_Assignment_SSE, Fixture<Mat4fSSE>)
 }
 
 
-#ifdef __AVX__
+#ifdef __AVX2__
 BOOST_FIXTURE_TEST_CASE(Addition_Assignment_AVX, Fixture<Mat4fAVX>)
 {
     AdditionAssignmentTest(A, B);
 }
-#endif // __AVX__
+#endif // __AVX2__
 
 
 
@@ -246,12 +246,12 @@ BOOST_FIXTURE_TEST_CASE(Addition_SSE, Fixture<Mat4fSSE>)
 
 
 
-#ifdef __AVX__
+#ifdef __AVX2__
 BOOST_FIXTURE_TEST_CASE(Addition_AVX, Fixture<Mat4fAVX>)
 {
     AdditionTest(A, B);
 }
-#endif // __AVX__
+#endif // __AVX2__
 
 
 
@@ -285,12 +285,12 @@ BOOST_FIXTURE_TEST_CASE(Multiplication_SSE, Fixture<Mat4fSSE>)
 
 
 
-#ifdef __AVX__
+#ifdef __AVX2__
 BOOST_FIXTURE_TEST_CASE(Multiplication_AVX, Fixture<Mat4fAVX>)
 {
     MultiplicationTest<Mat4fAVX>(A, B);
 }
-#endif // __AVX__
+#endif // __AVX2__
 
 
 
@@ -325,12 +325,12 @@ BOOST_FIXTURE_TEST_CASE(Matrix_Vector_Multiplication_SSE, Fixture<Mat4fSSE>)
     MatrixVectorMultiplicationTest<Mat4fSSE, Vec4fSSE<true>>(A, B);
 }
 
-#ifdef __AVX__
+#ifdef __AVX2__
 BOOST_FIXTURE_TEST_CASE(Matrix_Vector_Multiplication_AVX, Fixture<Mat4fAVX>)
 {
     MatrixVectorMultiplicationTest<Mat4fAVX, Vec4fSSE<true>>(A, B);
 }
-#endif // __AVX__
+#endif // __AVX2__
 
 // Transpose ----------------------------------------------------------------------------------------------------------
 
@@ -359,8 +359,8 @@ BOOST_FIXTURE_TEST_CASE(Transpose_SSE, Fixture<Mat4fSSE>)
     Transpose<Mat4fSSE>(A);
 }
 
-#ifdef __AVX__
-#endif // __AVX__
+#ifdef __AVX2__
+#endif // __AVX2__
 
 // Determinant --------------------------------------------------------------------------------------------------------
 
@@ -391,5 +391,5 @@ BOOST_FIXTURE_TEST_CASE(Determinant_SSE, Fixture<Mat4fSSE>)
 }
 
 
-#ifdef __AVX__
-#endif // __AVX__
+#ifdef __AVX2__
+#endif // __AVX2__
