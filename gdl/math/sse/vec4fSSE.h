@@ -22,6 +22,7 @@ class alignas(sse::alignmentBytes<__m128>) Vec4fSSE
     template <bool>
     friend class Vec4fSSE;
     friend class Mat4fSSE;
+    friend class Mat4fAVX;
 
     alignas(sse::alignmentBytes<__m128>) __m128 mData;
 
