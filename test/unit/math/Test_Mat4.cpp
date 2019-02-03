@@ -360,6 +360,10 @@ BOOST_FIXTURE_TEST_CASE(Transpose_SSE, Fixture<Mat4fSSE>)
 }
 
 #ifdef __AVX2__
+BOOST_FIXTURE_TEST_CASE(Transpose_AVX, Fixture<Mat4fAVX>)
+{
+    Transpose<Mat4fAVX>(A);
+}
 #endif // __AVX2__
 
 // Determinant --------------------------------------------------------------------------------------------------------

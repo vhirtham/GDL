@@ -253,7 +253,7 @@ BOOST_FIXTURE_TEST_CASE(Dot_Product_SSE, Fixture<Vec3fSSE>)
 template <bool _isCol, template <bool> class _vector>
 void LengthTest()
 {
-    _vector<_isCol> vec1{{3, 2, 6}};
+    _vector<_isCol> vec1{3, 2, 6};
     BOOST_CHECK(vec1.Length() == Approx(7.f));
 
     for (U32 i = 0; i < 3; ++i)

@@ -37,6 +37,18 @@
 #define BLEND_8_MASK(a, b, c, d, e, f, g, h)                                                                           \
     (((h) << 7) | ((g) << 6) | ((f) << 5) | ((e) << 4) | ((d) << 3) | ((c) << 2) | ((b) << 1) | (a))
 
+//! @brief Creates a mask for permute intrinsics
+//! @param a: Index of a value that is used as first result value
+//! @param b: Index of a value that is used as second result value
+#define PERMUTE_2_MASK(a, b) (((b) << 1) | (a))
+
+//! @brief Creates a mask for permute intrinsics
+//! @param a: Index of a value that is used as first result value
+//! @param b: Index of a value that is used as second result value
+//! @param c: Index of a value that is used as third result value
+//! @param d: Index of a value that is used as fourth result value
+#define PERMUTE_4_MASK(a, b, c, d) (((d) << 6) | ((c) << 4) | ((b) << 2) | (a))
+
 //! @brief Creates a mask for _mm256_permute_pd
 //! @param a: First result value of first lane is: 0 = first value, 1 = second value of source registers first lane
 //! @param b: Second result value of first lane is: 0 = first value, 1 = second value of source registers first lane

@@ -271,6 +271,11 @@ BENCHMARK_F(SIMD, Transpose)(benchmark::State& state)
 }
 
 #ifdef __AVX2__
+BENCHMARK_F(AVX, Transpose)(benchmark::State& state)
+{
+    for (auto _ : state)
+        benchmark::DoNotOptimize(A.Transpose());
+}
 #endif // __AVX2__
 
 // Main %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

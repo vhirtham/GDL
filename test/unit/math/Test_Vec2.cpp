@@ -232,7 +232,7 @@ BOOST_FIXTURE_TEST_CASE(Dot_Product_SSE, Fixture<Vec2fSSE>)
 template <bool _isCol, template <bool> class _vector>
 void LengthTest()
 {
-    _vector<_isCol> vec1{{3.f, 4.f}};
+    _vector<_isCol> vec1{3.f, 4.f};
     BOOST_CHECK(vec1.Length() == Approx(5.f));
 
     for (U32 i = 0; i < 2; ++i)

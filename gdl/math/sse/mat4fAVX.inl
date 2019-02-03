@@ -181,12 +181,22 @@ const std::array<F32, 16> Mat4fAVX::Data() const
 
 
 
-// Mat4fAVX Mat4fAVX::Transpose() const
-//{
-//    Mat4fAVX t;
-//    sse::Transpose(mData[0], mData[1], mData[2], mData[3], t.mData[0], t.mData[1], t.mData[2], t.mData[3]);
-//    return t;
-//}
+Mat4fAVX Mat4fAVX::Transpose() const
+{
+    __m256 tmp0 = _mm256_shuffle_ps(mData[0], mData[1], SHUFFLE_4_MASK(0, 2, 0, 2));
+    __m256 tmp1 = _mm256_shuffle_ps(mData[0], mData[1], SHUFFLE_4_MASK(1, 3, 1, 3));
+
+    __m256 tmp2 = _mm256_blend_ps(tmp0, tmp1, BLEND_8_MASK(0, 0, 0, 0, 1, 1, 1, 1));
+    __m256 tmp3 = _mm256_permute2f128_ps(tmp0, tmp1, PERMUTE_2F128_MASK(0, 1, 1, 0));
+
+    tmp0 = _mm256_shuffle_ps(tmp2, tmp3, SHUFFLE_4_MASK(0, 2, 0, 2));
+    tmp1 = _mm256_shuffle_ps(tmp2, tmp3, SHUFFLE_4_MASK(1, 3, 1, 3));
+
+    tmp2 = _mm256_permutevar_ps(tmp0, _mm256_setr_epi32(0, 2, 1, 3, 2, 0, 3, 1));
+    tmp3 = _mm256_permutevar_ps(tmp1, _mm256_setr_epi32(0, 2, 1, 3, 2, 0, 3, 1));
+
+    return Mat4fAVX(tmp2, tmp3);
+}
 
 
 
