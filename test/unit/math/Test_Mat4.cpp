@@ -396,4 +396,8 @@ BOOST_FIXTURE_TEST_CASE(Determinant_SSE, Fixture<Mat4fSSE>)
 
 
 #ifdef __AVX2__
+BOOST_FIXTURE_TEST_CASE(Determinant_AVX, Fixture<Mat4fAVX>)
+{
+    Determinant<Mat4fAVX>(A, B);
+}
 #endif // __AVX2__

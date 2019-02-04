@@ -9,6 +9,7 @@
 #include "gdl/base/functions/alignment.h"
 #include "gdl/base/sse/directAccess.h"
 #include "gdl/base/sse/maskMacros.h"
+#include "gdl/base/sse/swizzle.h"
 #include "gdl/base/sse/transpose.h"
 #include "gdl/math/vec4.h"
 
@@ -157,27 +158,36 @@ const std::array<F32, 16> Mat4fAVX::Data() const
 
 
 
-// F32 Mat4fAVX::Det() const
-//{
-//    using namespace GDL::sse;
+F32 Mat4fAVX::Det() const
+{
+    using namespace GDL::sse;
 
-//    __m256 d1032 = Swizzle<1, 0, 3, 2>(mData[3]);
-//    __m256 c1032 = Swizzle<1, 0, 3, 2>(mData[2]);
+    __m256 tmp0P1230 = _mm256_permute_ps(mData[0], PERMUTE_4_MASK(1, 2, 3, 0));
+    __m256 tmp1P1230 = _mm256_permute_ps(mData[1], PERMUTE_4_MASK(1, 2, 3, 0));
+    __m256 tmp0 = _mmx_fmsub_p(mData[0], tmp1P1230, _mmx_mul_p(mData[1], tmp0P1230));
+    tmp0 = _mm256_xor_ps(tmp0, _mmx_setr_p<__m256>(-0.f, 0.f, -0.f, 0.f, 0.f, 0.f, 0.f, 0.f));
 
-//    __m256 tmp1 = Swizzle<2, 3, 0, 1>(_mmx_fmsub_p(mData[2], d1032, _mmx_mul_p(mData[3], c1032)));
-//    __m256 tmp2 = _mmx_fmsub_p(Swizzle<3, 2, 0, 1>(mData[2]), d1032, _mmx_mul_p(Swizzle<3, 2, 0, 1>(mData[3]),
-//    c1032));
+    __m256 tmp0P2323 = _mm256_permute_ps(mData[0], PERMUTE_4_MASK(2, 3, 2, 3));
+    __m256 tmp1P2323 = _mm256_permute_ps(mData[1], PERMUTE_4_MASK(2, 3, 2, 3));
+    __m256 tmp1 = _mmx_fmsub_p(mData[0], tmp1P2323, _mmx_mul_p(mData[1], tmp0P2323));
 
-//    __m256 tmp3 = _mm_xor_ps(tmp2, _mmx_setr_p<__m256>(-0.f, -0.f, 0.f, 0.f));
+    __m256 tmp2 = _mm256_permute2f128_ps(tmp0, tmp1, PERMUTE_2F128_MASK(0, 0, 1, 0));
+    __m256 tmp3 = _mm256_permute2f128_ps(tmp0, tmp1, PERMUTE_2F128_MASK(0, 1, 1, 1));
+    tmp2 = _mm256_permutevar_ps(tmp2, _mm256_setr_epi32(2, 3, 0, 1, 1, 0, 2, 3));
 
-//    __m256 b1032 = Swizzle<1, 0, 3, 2>(mData[1]);
-//    __m256 b2310 = Swizzle<2, 3, 1, 0>(mData[1]);
-//    __m256 tmp4 = Swizzle<3, 2, 0, 1>(_mmx_mul_p((mData[1]), tmp3));
+    __m256 tmp4 = _mmx_dp_p<GetDotProductMask<__m256, 4, 0>()>(tmp2, tmp3);
 
-//    __m256 tmp5 = _mmx_fmsub_p(b1032, tmp1, _mmx_fmsub_p(b2310, tmp3, tmp4));
 
-//    return DotProduct(mData[0], tmp5);
-//}
+    //    __m128 tmpA = _mm256_extractf128_ps(tmp0, 0);
+    //    __m128 tmpB = _mm256_extractf128_ps(tmp0, 1);
+    //    __m128 tmpC = Swizzle<2, 3, 0, 1>(tmpA);
+
+    //    __m128 tmpE = _mm256_extractf128_ps(tmp1, 0);
+    //    __m128 tmpF = _mm256_extractf128_ps(tmp1, 1);
+    //    __m128 tmpG = _mm_permute_ps(tmpE, PERMUTE_4_MASK(1, 0, 2, 3));
+
+    return _mm256_cvtss_f32(tmp4) + _mm_cvtss_f32(_mm256_extractf128_ps(tmp4, 1));
+}
 
 
 

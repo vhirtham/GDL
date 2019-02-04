@@ -239,6 +239,12 @@ _registerType _mmx_dp_p(_registerType lhs, _registerType rhs)
         return _mm_dp_ps(lhs, rhs, _mask);
     else if constexpr (std::is_same<_registerType, __m128d>::value)
         return _mm_dp_pd(lhs, rhs, _mask);
+#ifdef __AVX2__
+    else if constexpr (std::is_same<_registerType, __m256>::value)
+        return _mm256_dp_ps(lhs, rhs, _mask);
+    else if constexpr (std::is_same<_registerType, __m256d>::value)
+        return _mm256_dp_pd(lhs, rhs, _mask);
+#endif // __AVX2__
     else
         throw Exception(__PRETTY_FUNCTION__, "Not defined for selected register type.");
 }
