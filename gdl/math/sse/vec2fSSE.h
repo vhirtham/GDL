@@ -83,6 +83,10 @@ public:
     //! @return Data
     [[nodiscard]] inline const std::array<F32, 2> Data() const;
 
+    //! @brief Gets the data register
+    //! @return Data
+    inline __m128 DataSSE() const;
+
     //! @brief Calculates the dot product of two vectors
     //! @tparam _isColRhs: True if the rhs vector is a column vector, false otherwise
     //! @param rhs: Right hand side vector

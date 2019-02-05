@@ -1,5 +1,6 @@
 add_subdirectory(base)
 add_subdirectory(input)
 add_subdirectory(math)
+add_subdirectory(physics)
 add_subdirectory(rendering)
 add_subdirectory(resources)
