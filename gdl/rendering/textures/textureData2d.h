@@ -34,7 +34,7 @@ class TextureData2d
     U32 mWidth;
     U32 mHeight;
     U32 mNumChannels;
-    std::vector<Vector<U8>> mPixelData;
+    Vector<Vector<U8>> mPixelData;
 
 
     //! @brief ctor

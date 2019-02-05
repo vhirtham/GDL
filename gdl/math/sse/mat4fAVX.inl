@@ -177,15 +177,6 @@ F32 Mat4fAVX::Det() const
 
     __m256 tmp4 = _mmx_dp_p<GetDotProductMask<__m256, 4, 0>()>(tmp2, tmp3);
 
-
-    //    __m128 tmpA = _mm256_extractf128_ps(tmp0, 0);
-    //    __m128 tmpB = _mm256_extractf128_ps(tmp0, 1);
-    //    __m128 tmpC = Swizzle<2, 3, 0, 1>(tmpA);
-
-    //    __m128 tmpE = _mm256_extractf128_ps(tmp1, 0);
-    //    __m128 tmpF = _mm256_extractf128_ps(tmp1, 1);
-    //    __m128 tmpG = _mm_permute_ps(tmpE, PERMUTE_4_MASK(1, 0, 2, 3));
-
     return _mm256_cvtss_f32(tmp4) + _mm_cvtss_f32(_mm256_extractf128_ps(tmp4, 1));
 }
 
