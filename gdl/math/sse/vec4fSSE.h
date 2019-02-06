@@ -80,7 +80,7 @@ public:
     //! @brief Vector - scalar multiplication
     //! @param rhs: Rhs scalar
     //! @return Result of the multiplication
-    [[nodiscard]] inline Vec4fSSE operator*(F32 rhs);
+    [[nodiscard]] inline Vec4fSSE operator*(F32 rhs) const;
 
     //! @brief Gets the data array
     //! @return Data

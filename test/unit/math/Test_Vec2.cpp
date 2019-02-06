@@ -384,3 +384,117 @@ BOOST_AUTO_TEST_CASE(Substraction_Assignment_SSE)
 {
     SubstractionAssignmentTest<Vec2fSSE>();
 }
+
+
+
+// Addition -----------------------------------------------------------------------------------------------------------
+
+template <typename _vector>
+void AdditionTestVector()
+{
+    _vector a(8, 3);
+    _vector b(3, 2);
+    _vector expResult(11, 5);
+
+    BOOST_CHECK(a + b == expResult);
+}
+
+
+
+template <template <bool> class _vector>
+void AdditionTest()
+{
+    AdditionTestVector<_vector<true>>();
+    AdditionTestVector<_vector<false>>();
+}
+
+
+
+BOOST_AUTO_TEST_CASE(Addition_Single)
+{
+    AdditionTest<Vec2fSingle>();
+}
+
+
+
+BOOST_AUTO_TEST_CASE(Addition_SSE)
+{
+    AdditionTest<Vec2fSSE>();
+}
+
+
+
+// Substraction -------------------------------------------------------------------------------------------------------
+
+template <typename _vector>
+void SubstractionTestVector()
+{
+    _vector a(8, 3);
+    _vector b(3, 2);
+
+    _vector expResult(-5, -1);
+
+    BOOST_CHECK(b - a == expResult);
+}
+
+
+
+template <template <bool> class _vector>
+void SubstractionTest()
+{
+    SubstractionTestVector<_vector<true>>();
+    SubstractionTestVector<_vector<false>>();
+}
+
+
+
+BOOST_AUTO_TEST_CASE(Substraction_Single)
+{
+    SubstractionTest<Vec2fSingle>();
+}
+
+
+
+BOOST_AUTO_TEST_CASE(Substraction_SSE)
+{
+    SubstractionTest<Vec2fSSE>();
+}
+
+
+
+// Multiplication with scalar -----------------------------------------------------------------------------------------
+
+template <typename _vector>
+void MultiplicationWithScalarTestVector()
+{
+    _vector a(8, -3);
+    _vector b(-3, 2);
+
+    _vector expResultA(16, -6);
+    _vector expResultB(-9, 6);
+    BOOST_CHECK(a * 2 == expResultA);
+    BOOST_CHECK(3 * b == expResultB);
+}
+
+
+
+template <template <bool> class _vector>
+void MultiplicationWithScalarTest()
+{
+    MultiplicationWithScalarTestVector<_vector<true>>();
+    MultiplicationWithScalarTestVector<_vector<false>>();
+}
+
+
+
+BOOST_AUTO_TEST_CASE(Multiplication_With_Scalar_Single)
+{
+    MultiplicationWithScalarTest<Vec2fSingle>();
+}
+
+
+
+BOOST_AUTO_TEST_CASE(Multiplication_With_Scalar_SSE)
+{
+    MultiplicationWithScalarTest<Vec2fSSE>();
+}

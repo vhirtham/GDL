@@ -105,6 +105,30 @@ Vec2fSSE<_isCol>& Vec2fSSE<_isCol>::operator-=(const Vec2fSSE& rhs)
 
 
 template <bool _isCol>
+Vec2fSSE<_isCol> Vec2fSSE<_isCol>::operator+(const Vec2fSSE& rhs) const
+{
+    return _mmx_add_p(mData, rhs.mData);
+}
+
+
+
+template <bool _isCol>
+Vec2fSSE<_isCol> Vec2fSSE<_isCol>::operator-(const Vec2fSSE& rhs) const
+{
+    return _mmx_sub_p(mData, rhs.mData);
+}
+
+
+
+template <bool _isCol>
+Vec2fSSE<_isCol> Vec2fSSE<_isCol>::operator*(F32 rhs) const
+{
+    return _mmx_mul_p(mData, _mmx_setr_p<__m128>(rhs, rhs, 0.f, 0.f));
+}
+
+
+
+template <bool _isCol>
 const std::array<F32, 2> Vec2fSSE<_isCol>::Data() const
 {
     std::array<F32, 2> data;
@@ -156,6 +180,14 @@ template <bool _isCol>
 bool Vec2fSSE<_isCol>::IsDataAligned() const
 {
     return IsAligned(&mData, sse::alignmentBytes<__m128>);
+}
+
+
+
+template <bool _isCol>
+[[nodiscard]] inline Vec2fSSE<_isCol> operator*(F32 lhs, Vec2fSSE<_isCol> rhs)
+{
+    return rhs * lhs;
 }
 
 

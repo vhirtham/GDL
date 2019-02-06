@@ -79,6 +79,21 @@ public:
     //! @return Result of the substraction (this)
     inline Vec2fSSE& operator-=(const Vec2fSSE& rhs);
 
+    //! @brief Vector - vector addition
+    //! @param other: Rhs vector
+    //! @return Result of the addition
+    [[nodiscard]] inline Vec2fSSE operator+(const Vec2fSSE& rhs) const;
+
+    //! @brief Vector - vector substraction
+    //! @param other: Rhs vector
+    //! @return Result of the substraction
+    [[nodiscard]] inline Vec2fSSE operator-(const Vec2fSSE& rhs) const;
+
+    //! @brief Vector - scalar multiplication
+    //! @param rhs: Rhs scalar
+    //! @return Result of the multiplication
+    [[nodiscard]] inline Vec2fSSE operator*(F32 rhs) const;
+
     //! @brief Gets the data array
     //! @return Data
     [[nodiscard]] inline const std::array<F32, 2> Data() const;
@@ -108,6 +123,16 @@ private:
     inline bool IsDataAligned() const;
 };
 
+
+
+//! @brief Vector - scalar multiplication
+//! @tparam _type: Data type of the vector
+//! @tparam _isCol: If true, the vector is treated as column vector, otherwise as row vector
+//! @param lhs: Lhs scalar
+//! @param rhs: Rhs vector
+//! @return Result of the multiplication
+template <bool _isCol>
+[[nodiscard]] inline Vec2fSSE<_isCol> operator*(F32 lhs, Vec2fSSE<_isCol> rhs);
 
 
 //! @brief Offstream operator

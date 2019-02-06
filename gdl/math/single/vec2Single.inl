@@ -83,6 +83,30 @@ Vec2Single<_type, _isCol>& Vec2Single<_type, _isCol>::operator-=(const Vec2Singl
 
 
 template <typename _type, bool _isCol>
+Vec2Single<_type, _isCol> Vec2Single<_type, _isCol>::operator+(const Vec2Single& rhs) const
+{
+    return Vec2Single<_type, _isCol>(mData[0] + rhs.mData[0], mData[1] + rhs.mData[1]);
+}
+
+
+
+template <typename _type, bool _isCol>
+Vec2Single<_type, _isCol> Vec2Single<_type, _isCol>::operator-(const Vec2Single& rhs) const
+{
+    return Vec2Single<_type, _isCol>(mData[0] - rhs.mData[0], mData[1] - rhs.mData[1]);
+}
+
+
+
+template <typename _type, bool _isCol>
+Vec2Single<_type, _isCol> Vec2Single<_type, _isCol>::operator*(F32 rhs) const
+{
+    return Vec2Single<_type, _isCol>(mData[0] * rhs, mData[1] * rhs);
+}
+
+
+
+template <typename _type, bool _isCol>
 const std::array<_type, 2> Vec2Single<_type, _isCol>::Data() const
 {
     return mData;
@@ -116,6 +140,14 @@ Vec2Single<_type, _isCol>& Vec2Single<_type, _isCol>::Normalize()
         mData[i] /= length;
 
     return *this;
+}
+
+
+
+template <typename _type, bool _isCol>
+[[nodiscard]] inline Vec2Single<_type, _isCol> operator*(F32 lhs, Vec2Single<_type, _isCol> rhs)
+{
+    return rhs * lhs;
 }
 
 

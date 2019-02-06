@@ -103,7 +103,7 @@ Vec4fSSE<_isCol>& Vec4fSSE<_isCol>::operator-=(const Vec4fSSE& rhs)
 
 
 template <bool _isCol>
-Vec4fSSE<_isCol> Vec4fSSE<_isCol>::operator*(F32 rhs)
+Vec4fSSE<_isCol> Vec4fSSE<_isCol>::operator*(F32 rhs) const
 {
     return Vec4fSSE<_isCol>(_mmx_mul_p(mData, _mmx_set1_p<__m128>(rhs)));
 }
