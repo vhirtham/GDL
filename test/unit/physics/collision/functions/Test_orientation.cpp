@@ -36,21 +36,24 @@ BOOST_AUTO_TEST_CASE(Orientation_2D)
                 if (k < 0) // c is at the right hand side of the line a-b
                     BOOST_CHECK(result < 0);
                 else if (k == 0) // c is on the line a-b
-                    BOOST_CHECK(result == ApproxZero<F32>(1.f, 50));
+                    BOOST_CHECK(result == ApproxZero<F32>(1.f, 100));
                 else // c is at the left hand side of the line a-b
                     BOOST_CHECK(result > 0);
 
                 // Calculate twice of the triangles area
-                F32 lA = (c - b).Length();
-                F32 lB = (c - a).Length();
-                F32 lC = (b - a).Length();
-                // source: http://mathworld.wolfram.com/TriangleArea.html
-                F32 doubleArea = 0.5f * std::sqrt((lA + lB + lC) * (lB + lC - lA) * (lC + lA - lB) * (lA + lB - lC));
-
                 if (k != 0)
-                    // The high tolerance (1000 *epsilon) is needed because the comparison formular has high floating
-                    // point errors
+                {
+                    F32 lA = (c - b).Length();
+                    F32 lB = (c - a).Length();
+                    F32 lC = (b - a).Length();
+                    // source: http://mathworld.wolfram.com/TriangleArea.html
+                    F32 doubleArea =
+                            0.5f * std::sqrt((lA + lB + lC) * (lB + lC - lA) * (lC + lA - lB) * (lA + lB - lC));
+
+                    // The high tolerance (1000 *epsilon) is needed because the comparison formular has significant
+                    // floating point errors
                     BOOST_CHECK(std::abs(result) == Approx(doubleArea, 1000));
+                }
             }
     }
 }

@@ -37,12 +37,10 @@ public:
     //! @param v0-v3: Matrix values in column major ordering
     inline Mat2fSSE(F32 v0, F32 v1, F32 v2, F32 v3);
 
-private:
     //! @brief Constructor that initializes the matrix with a register
     //! @param reg: first column
     inline Mat2fSSE(__m128 reg);
 
-public:
     //! @brief Direct access operator
     //! @param row: Row of the accessed value
     //! @param col: Column of the accessed value
