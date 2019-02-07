@@ -105,7 +105,7 @@ Mat3fSSE Mat3fSSE::operator+(const Mat3fSSE& other)
 
 {
     return Mat3fSSE(_mmx_add_p(mData[0], other.mData[0]), _mmx_add_p(mData[1], other.mData[1]),
-                   _mmx_add_p(mData[2], other.mData[2]));
+                    _mmx_add_p(mData[2], other.mData[2]));
 }
 
 
@@ -114,14 +114,14 @@ Mat3fSSE Mat3fSSE::operator*(const Mat3fSSE& rhs) const
 {
     using namespace GDL::sse;
     return Mat3fSSE(_mmx_fmadd_p(sse::Swizzle1<0>(rhs.mData[0]), mData[0],
-                                _mmx_fmadd_p(Swizzle1<1>(rhs.mData[0]), mData[1],
-                                             _mmx_mul_p(Swizzle1<2>(rhs.mData[0]), mData[2]))),
-                   _mmx_fmadd_p(Swizzle1<0>(rhs.mData[1]), mData[0],
-                                _mmx_fmadd_p(Swizzle1<1>(rhs.mData[1]), mData[1],
-                                             _mmx_mul_p(Swizzle1<2>(rhs.mData[1]), mData[2]))),
-                   _mmx_fmadd_p(Swizzle1<0>(rhs.mData[2]), mData[0],
-                                _mmx_fmadd_p(Swizzle1<1>(rhs.mData[2]), mData[1],
-                                             _mmx_mul_p(Swizzle1<2>(rhs.mData[2]), mData[2]))));
+                                 _mmx_fmadd_p(Swizzle1<1>(rhs.mData[0]), mData[1],
+                                              _mmx_mul_p(Swizzle1<2>(rhs.mData[0]), mData[2]))),
+                    _mmx_fmadd_p(Swizzle1<0>(rhs.mData[1]), mData[0],
+                                 _mmx_fmadd_p(Swizzle1<1>(rhs.mData[1]), mData[1],
+                                              _mmx_mul_p(Swizzle1<2>(rhs.mData[1]), mData[2]))),
+                    _mmx_fmadd_p(Swizzle1<0>(rhs.mData[2]), mData[0],
+                                 _mmx_fmadd_p(Swizzle1<1>(rhs.mData[2]), mData[1],
+                                              _mmx_mul_p(Swizzle1<2>(rhs.mData[2]), mData[2]))));
 }
 
 
@@ -156,7 +156,7 @@ F32 Mat3fSSE::Det() const
 
     __m128 tmp = _mmx_sub_p(_mmx_mul_p(mData[1], r2_yzx), _mmx_mul_p(r1_yzx, mData[2]));
 
-    return sse::DotProduct<__m128, 3>(mData[0], _mm_shuffle_ps(tmp, tmp, SHUFFLE_4_MASK(1, 2, 0, 3)));
+    return sse::DotProductF32<1, 1, 1, 0>(mData[0], _mm_shuffle_ps(tmp, tmp, SHUFFLE_4_MASK(1, 2, 0, 3)));
 }
 
 
@@ -167,7 +167,7 @@ Mat3fSSE Mat3fSSE::Transpose() const
     __m128 tmp1 = _mm_unpackhi_ps(mData[0], mData[1]);
 
     return Mat3fSSE(_mm_movelh_ps(tmp0, mData[2]), _mm_shuffle_ps(tmp0, mData[2], SHUFFLE_4_MASK(2, 3, 1, 3)),
-                   _mm_shuffle_ps(tmp1, mData[2], SHUFFLE_4_MASK(0, 1, 2, 3)));
+                    _mm_shuffle_ps(tmp1, mData[2], SHUFFLE_4_MASK(0, 1, 2, 3)));
 }
 
 

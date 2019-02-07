@@ -7,40 +7,40 @@
 namespace GDL::sse
 {
 
-template <I32 _dstIndex>
-constexpr U32 GetDotProductDestinationMask()
+
+template <U32 _src0, U32 _src1, U32 _src2, U32 _src3, U32 _dst0, U32 _dst1, U32 _dst2, U32 _dst3>
+constexpr inline U32 GetDotProductMask4()
 {
-    static_assert(_dstIndex < 4, "Invalid destination index. Valid values: [0..3]");
-    if constexpr (_dstIndex < 0)
-        return ((1 << 3) | (1 << 2) | (1 << 1) | (1 << 0));
-    else
-        return (1 << _dstIndex);
-}
+    static_assert(_src0 < 2 && _src1 < 2 && _src2 < 2 && _src3 < 2 && _dst0 < 2 && _dst1 < 2 && _dst2 < 2 && _dst3 < 2,
+                  "Destination and source template parameters can only be 0 or 1.");
 
-
-
-template <typename _registerType, U32 _numValues, I32 _dstIndex>
-constexpr U32 GetDotProductMask()
-{
-    U32 mask = GetDotProductDestinationMask<_dstIndex>();
-    for (U32 i = 0; i < _numValues; ++i)
-        mask |= 1 << (i + 4);
+    U32 mask = ((_src3 << 7) | (_src2 << 6) | (_src1 << 5) | (_src0 << 4) | (_dst3 << 3) | (_dst2 << 2) | (_dst1 << 1) |
+                (_dst0 << 0));
     return mask;
 }
 
 
 
-template <typename _registerType, U32 _numValues, bool _returnRegister, I32 _dstIndex>
-auto DotProduct(const _registerType& lhs, const _registerType& rhs)
+template <U32 _src0, U32 _src1, U32 _src2, U32 _src3, U32 _dst0, U32 _dst1, U32 _dst2, U32 _dst3>
+inline __m128 DotProduct(const __m128& lhs, const __m128& rhs)
 {
-    static_assert(_numValues <= sse::numRegisterValues<_registerType>, "Invalid number of values");
-
-    if constexpr (_returnRegister)
-        return _mmx_dp_p<GetDotProductMask<_registerType, _numValues, _dstIndex>()>(lhs, rhs);
-    else
-        return _mmx_cvtsx_fx<_registerType>(DotProduct<_registerType, _numValues, true, 0>(lhs, rhs));
+    return _mmx_dp_p<GetDotProductMask4<_src0, _src1, _src2, _src3, _dst0, _dst1, _dst2, _dst3>()>(lhs, rhs);
 }
 
 
+
+template <U32 _src0, U32 _src1, U32 _src2, U32 _src3>
+inline F32 DotProductF32(const __m128& lhs, const __m128& rhs)
+{
+    return _mmx_cvtsx_fx(DotProduct<_src0, _src1, _src2, _src3>(lhs, rhs));
+}
+
+
+
+template <U32 _src0, U32 _src1, U32 _src2, U32 _src3, U32 _dst0, U32 _dst1, U32 _dst2, U32 _dst3>
+inline __m256 DotProduct(const __m256& lhs, const __m256& rhs)
+{
+    return _mmx_dp_p<GetDotProductMask4<_src0, _src1, _src2, _src3, _dst0, _dst1, _dst2, _dst3>()>(lhs, rhs);
+}
 
 } // namespace GDL::sse

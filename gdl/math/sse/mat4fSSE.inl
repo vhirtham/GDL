@@ -178,7 +178,7 @@ F32 Mat4fSSE::Det() const
 
     __m128 tmp5 = _mmx_fmsub_p(b1032, tmp1, _mmx_fmsub_p(b2310, tmp3, tmp4));
 
-    return DotProduct(mData[0], tmp5);
+    return DotProductF32(mData[0], tmp5);
 }
 
 

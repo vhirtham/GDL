@@ -123,9 +123,18 @@ const std::array<F32, 4> Vec4fSSE<_isCol>::Data() const
 
 
 template <bool _isCol>
+template <bool _isColRhs>
+F32 Vec4fSSE<_isCol>::Dot(Vec4fSSE<_isColRhs> rhs) const
+{
+    return sse::DotProductF32(mData, rhs.mData);
+}
+
+
+
+template <bool _isCol>
 F32 Vec4fSSE<_isCol>::Length() const
 {
-    return _mmx_cvtsx_fx<__m128>(_mmx_sqrt_p<__m128>(sse::DotProduct<__m128, 4, true, 0>(mData, mData)));
+    return _mmx_cvtsx_fx<__m128>(_mmx_sqrt_p<__m128>(sse::DotProduct(mData, mData)));
 }
 
 
@@ -134,18 +143,9 @@ template <bool _isCol>
 Vec4fSSE<_isCol>& Vec4fSSE<_isCol>::Normalize()
 {
     DEV_EXCEPTION(*this == Vec4fSSE(), "Vector length is 0. Can't normalize the vector.");
-    mData = _mmx_div_p(mData, _mmx_sqrt_p(sse::DotProduct<__m128, 4, true>(mData, mData)));
+    mData = _mmx_div_p(mData, _mmx_sqrt_p(sse::DotProduct(mData, mData)));
 
     return *this;
-}
-
-
-
-template <bool _isCol>
-template <bool _isColRhs>
-F32 Vec4fSSE<_isCol>::Dot(Vec4fSSE<_isColRhs> rhs) const
-{
-    return sse::DotProduct(mData, rhs.mData);
 }
 
 

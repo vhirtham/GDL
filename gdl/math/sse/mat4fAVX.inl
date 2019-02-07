@@ -175,7 +175,7 @@ F32 Mat4fAVX::Det() const
     __m256 tmp3 = _mm256_permute2f128_ps(tmp0, tmp1, PERMUTE_2F128_MASK(0, 1, 1, 1));
     tmp2 = _mm256_permutevar_ps(tmp2, _mm256_setr_epi32(2, 3, 0, 1, 1, 0, 2, 3));
 
-    __m256 tmp4 = _mmx_dp_p<GetDotProductMask<__m256, 4, 0>()>(tmp2, tmp3);
+    __m256 tmp4 = DotProduct(tmp2, tmp3);
 
     return _mm256_cvtss_f32(tmp4) + _mm_cvtss_f32(_mm256_extractf128_ps(tmp4, 1));
 }

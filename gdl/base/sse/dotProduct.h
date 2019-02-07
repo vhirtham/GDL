@@ -7,39 +7,57 @@
 
 namespace GDL::sse
 {
+//! @brief Creates a mask for the dot product intrinsics with 4 floating point values per 128bit (__m128 and __m256).
+//! The template parameters specify the register values that should be used to calculate the dot product and the
+//! positions in the result register where the dot product should be stored.
+//! @tparam _src0 - _src3: If the value is set to 1 the corresponding values of the two source registers take part in
+//! the calculation of the dot product. Otherwise the value must be set to 0.
+//! @tparam _dst0 - _dst3: If the value is set to 1 the dot product will be written to the corresponding location in the
+//! result register. If 0, the value is set to zero.
+//! @return Mask for dot product intrinsics
+template <U32 _src0, U32 _src1, U32 _src2, U32 _src3, U32 _dst0, U32 _dst1, U32 _dst2, U32 _dst3>
+constexpr inline U32 GetDotProductMask4();
 
-//! @brief Creates the destination part of the dot product mask.
-//! @tparam _dstIndex: Index of an element from the result register wherethe dot product should be stored. If the value
-//! is -1, the result will e stored in every element.
-//! @return Destination part of the dot product mask.
-template <I32 _dstIndex = -1>
-constexpr U32 GetDotProductDestinationMask();
 
-//! @brief Returns a mask that can be used with the dot product intrinsics.
-//! @tparam _registerType: Register type
-//! @tparam _numValues: Number of values (starting at the first one) that should be used.
-//! @tparam _dstIndex: Index of an element from the result register wherethe dot product should be stored. If the value
-//! is -1, the result will e stored in every element.
-//! @return Mask
-template <typename _registerType, U32 _numValues, I32 _dstIndex = -1>
-constexpr U32 GetDotProductMask();
+//! @brief Calculates the dot product of two registers and returns a register with the dot product written to the
+//! specified positions.
+//! @tparam _src0 - _src3: If the value is set to 1 the corresponding values of the two source registers take part in
+//! the calculation of the dot product. Otherwise the value must be set to 0.
+//! @tparam _dst0 - _dst3: If the value is set to 1 the dot product will be written to the corresponding location in the
+//! result register. If 0, the value is set to zero.
+//! @param lhs: Left hand side register
+//! @param rhs: Right hand side register
+//! @return Register containing the dot product
+template <U32 _src0 = 1, U32 _src1 = 1, U32 _src2 = 1, U32 _src3 = 1, U32 _dst0 = 1, U32 _dst1 = 1, U32 _dst2 = 1,
+          U32 _dst3 = 1>
+inline __m128 DotProduct(const __m128& lhs, const __m128& rhs);
 
-//! @brief Calculates the dot product of a specified number of values from two registers
-//! @tparam _registerType: Register type
-//! @tparam _numValues: Number of values (starting at the first one) that should be used.
-//! @tparam _returnRegister: If true the function returns an sse register where the lowest element contains the result.
-//! If false (default) a literal containing the value is returned.
-//! @tparam _dstIndex: Index of an element from the result register wherethe dot product should be stored. If the value
-//! is -1, the result will e stored in every element. This value has no effect if _returnRegister is false
+
+//! @brief Calculates the dot product of two registers
+//! @tparam _src0 - _src3: If the value is set to 1 the corresponding values of the two source registers take part in
+//! the calculation of the dot product. Otherwise the value must be set to 0.
 //! @param lhs: Left hand side register
 //! @param rhs: Right hand side register
 //! @return Dot product
-template <typename _registerType, U32 _numValues = numRegisterValues<_registerType>, bool _returnRegister = false,
-          I32 _dstIndex = -1>
-inline auto DotProduct(const _registerType& lhs, const _registerType& rhs);
+template <U32 _src0 = 1, U32 _src1 = 1, U32 _src2 = 1, U32 _src3 = 1>
+inline F32 DotProductF32(const __m128& lhs, const __m128& rhs);
+
+
+
+//! @brief Calculates the dot products of the higher and lower 128 bit lane of two registers and returns a register with
+//! the dot products written to the specified positions.
+//! @tparam _src0 - _src3: If the value is set to 1 the corresponding values of the two source registers 128 bit lanes
+//! take part in the calculation of the dot product. Otherwise the value must be set to 0.
+//! @tparam _dst0 - _dst3: If the value is set to 1 the dot products will be written to the corresponding location in
+//! the result registers 128bit lanes. If 0, the value is set to zero.
+//! @param lhs: Left hand side register
+//! @param rhs: Right hand side register
+//! @return Register containing the dot products
+template <U32 _src0 = 1, U32 _src1 = 1, U32 _src2 = 1, U32 _src3 = 1, U32 _dst0 = 1, U32 _dst1 = 1, U32 _dst2 = 1,
+          U32 _dst3 = 1>
+inline __m256 DotProduct(const __m256& lhs, const __m256& rhs);
 
 } // namespace GDL::sse
-
 
 
 #include "gdl/base/sse/dotProduct.inl"
