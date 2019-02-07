@@ -112,7 +112,7 @@ BOOST_AUTO_TEST_CASE(Dot_Product_m128)
 
 
 // __m256 -------------------------------------------------------------------------------------------------------------
-
+#ifdef __AVX2__
 
 //! @brief Tests that the data is (only) written to the register locations specified by the _dst template parameters
 template <U32 _src0, U32 _src1, U32 _src2, U32 _src3, U32 _dst0 = 1, U32 _dst1 = 0, U32 _dst2 = 0, U32 _dst3 = 0>
@@ -234,3 +234,5 @@ BOOST_AUTO_TEST_CASE(Dot_Product_m256)
 {
     TestDotProduct256();
 }
+
+#endif // __AVX2__

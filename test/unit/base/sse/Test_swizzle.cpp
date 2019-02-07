@@ -49,6 +49,36 @@ BOOST_AUTO_TEST_CASE(Test_Swizzle)
 #include <iostream>
 
 template <typename _registerType, U32 _index = 0>
+void TestSwizzle1AcrossLanes()
+{
+    _registerType a = _mmx_setzero_p<_registerType>();
+    for (U32 i = 0; i < numRegisterValues<_registerType>; ++i)
+        SetValue(a, i, i);
+
+    _registerType b = Swizzle1AcrossLanes<_index>(a);
+    for (U32 i = 0; i < numRegisterValues<_registerType>; ++i)
+        BOOST_CHECK(sse::GetValue(b, i) == Approx(sse::GetValue<_index>(a)));
+
+
+    if constexpr (_index + 1 < numRegisterValues<_registerType>)
+        TestSwizzle1AcrossLanes<_registerType, _index + 1>();
+}
+
+
+BOOST_AUTO_TEST_CASE(Test_Swizzle1_Across_Lanes)
+{
+    TestSwizzle1AcrossLanes<__m128>();
+    TestSwizzle1AcrossLanes<__m128d>();
+#ifdef __AVX2__
+    TestSwizzle1AcrossLanes<__m256>();
+    TestSwizzle1AcrossLanes<__m256d>();
+#endif // __AVX2__
+}
+
+// Swizzle1 -----------------------------------------------------------------------------------------------------------
+#include <iostream>
+
+template <typename _registerType, U32 _index = 0>
 void TestSwizzle1()
 {
     _registerType a = _mmx_setzero_p<_registerType>();
@@ -56,11 +86,15 @@ void TestSwizzle1()
         SetValue(a, i, i);
 
     _registerType b = Swizzle1<_index>(a);
-    for (U32 i = 0; i < numRegisterValues<_registerType>; ++i)
+    for (U32 i = 0; i < numValuesPerLane<_registerType>; ++i)
+    {
         BOOST_CHECK(sse::GetValue(b, i) == Approx(sse::GetValue<_index>(a)));
+        if constexpr (numRegisterValues<_registerType> / numValuesPerLane<_registerType> == 2)
+            BOOST_CHECK(sse::GetValue(b, i + numValuesPerLane<_registerType>) ==
+                        Approx(sse::GetValue<_index + numValuesPerLane<_registerType>>(a)));
+    }
 
-
-    if constexpr (_index + 1 < numRegisterValues<_registerType>)
+    if constexpr (_index + 1 < numValuesPerLane<_registerType>)
         TestSwizzle1<_registerType, _index + 1>();
 }
 
@@ -70,7 +104,7 @@ BOOST_AUTO_TEST_CASE(Test_Swizzle1)
     TestSwizzle1<__m128>();
     TestSwizzle1<__m128d>();
 #ifdef __AVX2__
-    TestSwizzle1<__m256>();
+    // TestSwizzle1<__m256>();
     TestSwizzle1<__m256d>();
 #endif // __AVX2__
 }

@@ -21,8 +21,32 @@ inline __m128 Swizzle(__m128 source)
 template <U32 _index, typename _registerType>
 inline _registerType Swizzle1(_registerType reg)
 {
-    static_assert(_index < numRegisterValues<_registerType>,
-                  "Value x0-x3 must be in the interval [0, numRegisterValues]");
+    static_assert(_index < numValuesPerLane<_registerType>, "_index must be in the interval [0, numValuesPerLane]");
+
+    if constexpr (std::is_same<_registerType, __m128>::value)
+        return _mmx_permute_p<PERMUTE_4_MASK(_index, _index, _index, _index)>(reg);
+
+    if constexpr (std::is_same<_registerType, __m128d>::value)
+        return _mmx_permute_p<PERMUTE_2_MASK(_index, _index)>(reg);
+
+#ifdef __AVX2__
+    else if constexpr (std::is_same<_registerType, __m256>::value)
+        return _mm256_permute_ps(reg, PERMUTE_4_MASK(_index, _index, _index, _index));
+
+    else if constexpr (std::is_same<_registerType, __m256d>::value)
+        return _mm256_permute_pd(reg, PERMUTE256_PD_MASK(_index % 2, _index % 2, _index % 2, _index % 2));
+
+#endif // __AVX2__
+    else
+        throw Exception(__PRETTY_FUNCTION__, "Not defined for selected register type.");
+} // namespace GDL::sse
+
+
+
+template <U32 _index, typename _registerType>
+inline _registerType Swizzle1AcrossLanes(_registerType reg)
+{
+    static_assert(_index < numRegisterValues<_registerType>, "_index must be in the interval [0, numRegisterValues]");
 
     if constexpr (std::is_same<_registerType, __m128>::value)
         return _mmx_permute_p<PERMUTE_4_MASK(_index, _index, _index, _index)>(reg);

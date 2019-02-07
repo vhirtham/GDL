@@ -54,6 +54,23 @@ constexpr const U32 numRegisterValues<__m256d> = 4;
 
 
 
+//! @brief Constant which stores the number of values in a register SIMD lane
+//! @tparam _registerType: RegisterType
+template <typename _registerType>
+constexpr const U32 numValuesPerLane = 0;
+template <>
+constexpr const U32 numValuesPerLane<__m128> = 4;
+template <>
+constexpr const U32 numValuesPerLane<__m128d> = 2;
+#ifdef __AVX2__
+template <>
+constexpr const U32 numValuesPerLane<__m256> = 4;
+template <>
+constexpr const U32 numValuesPerLane<__m256d> = 2;
+#endif // __AVX2__
+
+
+
 // Functions ----------------------------------------------------------------------------------------------------------
 
 

@@ -17,13 +17,21 @@ namespace GDL::sse
 template <U32 _x0, U32 _x1, U32 _x2, U32 _x3>
 inline __m128 Swizzle(__m128 source);
 
+//! @brief Creates a new register with a single arbitrary value from the source register in each lane
+//! @tparam _index: Index of the value from the source register that should be stored in all elements of the new
+//! register
+//! @param source: Source register
+//! @return Register with a single arbitrary value from the source register in each lane
+template <U32 _index, typename _registerType>
+inline _registerType Swizzle1(_registerType reg);
+
 //! @brief Creates a new register with a single arbitrary value from the source register
 //! @tparam _index: Index of the value from the source register that should be stored in all elements of the new
 //! register
 //! @param source: Source register
 //! @return Register with a single arbitrary value from the source register
 template <U32 _index, typename _registerType>
-inline _registerType Swizzle1(_registerType reg);
+inline _registerType Swizzle1AcrossLanes(_registerType reg);
 
 
 } // namespace GDL::sse
