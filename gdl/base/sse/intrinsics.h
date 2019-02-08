@@ -188,7 +188,8 @@ inline _registerType _mmx_andnot_p(_registerType lhs, _registerType rhs);
 template <typename _registerType>
 inline auto _mmx_movemask_epi8(_registerType reg);
 
-//! @brief Returns a register with an arbitrary combination of values from the input register.
+//! @brief Returns a register with an arbitrary combination of values from the input register as long as the source
+//! values and the destination are in the same SIMD lane.
 //! @tparam _permuteMask: Bitmask that determines the value composition. Have a look at Intels documentation of
 //! _mm_permute_ps or_mm_shuffle_ps for detailed informations
 //! @tparam _registerType: Register type
@@ -196,6 +197,20 @@ inline auto _mmx_movemask_epi8(_registerType reg);
 //! @return Register with an arbitrary combination of values from the input register.
 template <I32 _permuteMask, typename _registerType>
 inline auto _mmx_permute_p(_registerType reg);
+
+#ifdef __AVX2__
+
+//! @brief Returns a 256 bit AVX register with an arbitrary combination of the two source registers lanes
+//! @tparam _permuteMask: Bitmask that determines the value composition. Have a look at Intels documentation of
+//! _mm_permute_ps or_mm_shuffle_ps for detailed informations
+//! @tparam _registerType: Register type
+//! @param src0: First register which serves as source
+//! @param src1: Second register which serves as source
+//! @return AVX register with an arbitrary combination of the two source registers lanes
+template <I32 _permuteMask, typename _registerType>
+inline auto _mmx_permute2f128_p(_registerType src0, _registerType src1);
+
+#endif // __AVX2__
 
 
 } // namespace GDL

@@ -449,11 +449,31 @@ inline auto _mmx_permute_p(_registerType reg)
         return _mm_permute_ps(reg, _permuteMask);
     else if constexpr (std::is_same<_registerType, __m128d>::value)
         return _mm_permute_pd(reg, _permuteMask);
+    else if constexpr (std::is_same<_registerType, __m256>::value)
+        return _mm256_permute_ps(reg, _permuteMask);
+    else if constexpr (std::is_same<_registerType, __m256d>::value)
+        return _mm256_permute_pd(reg, _permuteMask);
 #endif // __AVX2__
     else
         throw Exception(__PRETTY_FUNCTION__, "Not defined for selected register type.");
 }
 
+
+
+#ifdef __AVX2__
+
+template <I32 _permuteMask, typename _registerType>
+inline auto _mmx_permute2f128_p(_registerType src0, _registerType src1)
+{
+    if constexpr (std::is_same<_registerType, __m256>::value)
+        return _mm256_permute2f128_ps(src0, src1, _permuteMask);
+    else if constexpr (std::is_same<_registerType, __m256d>::value)
+        return _mm256_permute2f128_pd(src0, src1, _permuteMask);
+    else
+        throw Exception(__PRETTY_FUNCTION__, "Not defined for selected register type.");
+}
+
+#endif // __AVX2__
 
 
 } // namespace GDL

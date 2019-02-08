@@ -9,32 +9,21 @@ namespace GDL::sse
 {
 
 
-template <U32 _x0, U32 _x1, U32 _x2, U32 _x3>
-inline __m128 Swizzle(__m128 source)
-{
-    static_assert(_x0 < 4 && _x1 < 4 && _x2 < 4 && _x3 < 4, "Values _x0-_x3 must be in the interval [0, 3]");
-    return _mmx_permute_p<PERMUTE_4_MASK(_x0, _x1, _x2, _x3)>(source);
-}
-
-
 
 template <U32 _index, typename _registerType>
-inline _registerType Swizzle1(_registerType reg)
+inline _registerType Broadcast(_registerType reg)
 {
     static_assert(_index < numValuesPerLane<_registerType>, "_index must be in the interval [0, numValuesPerLane]");
 
-    if constexpr (std::is_same<_registerType, __m128>::value)
-        return _mmx_permute_p<PERMUTE_4_MASK(_index, _index, _index, _index)>(reg);
+    if constexpr (numValuesPerLane<_registerType> == 4)
+        return Permute<_index, _index, _index, _index>(reg);
 
-    if constexpr (std::is_same<_registerType, __m128d>::value)
+    else if constexpr (std::is_same<_registerType, __m128d>::value)
         return _mmx_permute_p<PERMUTE_2_MASK(_index, _index)>(reg);
 
 #ifdef __AVX2__
-    else if constexpr (std::is_same<_registerType, __m256>::value)
-        return _mm256_permute_ps(reg, PERMUTE_4_MASK(_index, _index, _index, _index));
-
     else if constexpr (std::is_same<_registerType, __m256d>::value)
-        return _mm256_permute_pd(reg, PERMUTE256_PD_MASK(_index % 2, _index % 2, _index % 2, _index % 2));
+        return _mm256_permute_pd(reg, PERMUTE256_PD_MASK(_index, _index, _index, _index));
 
 #endif // __AVX2__
     else
@@ -44,32 +33,81 @@ inline _registerType Swizzle1(_registerType reg)
 
 
 template <U32 _index, typename _registerType>
-inline _registerType Swizzle1AcrossLanes(_registerType reg)
+inline _registerType BroadcastAcrossLanes(_registerType reg)
 {
     static_assert(_index < numRegisterValues<_registerType>, "_index must be in the interval [0, numRegisterValues]");
 
-    if constexpr (std::is_same<_registerType, __m128>::value)
-        return _mmx_permute_p<PERMUTE_4_MASK(_index, _index, _index, _index)>(reg);
-
-    if constexpr (std::is_same<_registerType, __m128d>::value)
-        return _mmx_permute_p<PERMUTE_2_MASK(_index, _index)>(reg);
+    if constexpr (std::is_same<_registerType, __m128>::value || std::is_same<_registerType, __m128d>::value)
+        return Broadcast<_index>(reg);
 
 #ifdef __AVX2__
-    else if constexpr (std::is_same<_registerType, __m256>::value)
+    else if constexpr (std::is_same<_registerType, __m256>::value || std::is_same<_registerType, __m256d>::value)
     {
-        _registerType tmp = _mm256_permute_ps(reg, PERMUTE_4_MASK(_index % 4, _index % 4, _index % 4, _index % 4));
-        return _mm256_permute2f128_ps(tmp, tmp, PERMUTE_2F128_MASK(0, _index / 4, 0, _index / 4));
-    }
-
-    else if constexpr (std::is_same<_registerType, __m256d>::value)
-    {
-        _registerType tmp = _mm256_permute_pd(reg, PERMUTE256_PD_MASK(_index % 2, _index % 2, _index % 2, _index % 2));
-        return _mm256_permute2f128_pd(tmp, tmp, PERMUTE_2F128_MASK(0, _index / 2, 0, _index / 2));
+        constexpr U32 valueIndex = _index % numValuesPerLane<_registerType>;
+        constexpr U32 laneIndex = _index / numValuesPerLane<_registerType>;
+        return Permute2F128<laneIndex, laneIndex>(Broadcast<valueIndex>(reg));
     }
 #endif // __AVX2__
     else
         throw Exception(__PRETTY_FUNCTION__, "Not defined for selected register type.");
 }
+
+
+
+template <U32 _src0, U32 _src1, U32 _src2, U32 _src3>
+inline __m128 Permute(__m128 source)
+{
+    static_assert(_src0 < 4 && _src1 < 4 && _src2 < 4 && _src3 < 4,
+                  "Values _src0-_src3 must be in the interval [0, 3]");
+    return _mmx_permute_p<PERMUTE_4_MASK(_src0, _src1, _src2, _src3)>(source);
+}
+
+
+#ifdef __AVX2__
+
+
+template <U32 _src0, U32 _src1, U32 _src2, U32 _src3>
+inline __m256 Permute(__m256 source)
+{
+    static_assert(_src0 < 4 && _src1 < 4 && _src2 < 4 && _src3 < 4,
+                  "Values _src0-_src3 must be in the interval [0, 3]");
+    return _mmx_permute_p<PERMUTE_4_MASK(_src0, _src1, _src2, _src3)>(source);
+}
+
+
+
+template <U32 _src0, U32 _src1, U32 _src2, U32 _src3, U32 _src4, U32 _src5, U32 _src6, U32 _src7>
+inline __m256 Permute(__m256 source)
+{
+    static_assert(_src0 < 4 && _src1 < 4 && _src2 < 4 && _src3 < 4 && _src4 < 4 && _src5 < 4 && _src6 < 4 && _src7 < 4,
+                  "Values _src0-_src7 must be in the interval [0, 3]");
+    return _mm256_permutevar_ps(source, _mm256_setr_epi32(_src0, _src1, _src2, _src3, _src4, _src5, _src6, _src7));
+}
+
+#endif // __AVX2__
+
+
+#ifdef __AVX2__
+
+template <U32 _lane0SrcLane, U32 _lane1SrcLane, typename _registerType>
+inline _registerType Permute2F128(_registerType source)
+{
+    return Permute2F128<0, _lane0SrcLane, 0, _lane1SrcLane>(source, source);
+}
+
+
+
+template <U32 _lane0SrcReg, U32 _lane0SrcLane, U32 _lane1SrcReg, U32 _lane1SrcLane, typename _registerType>
+inline _registerType Permute2F128(_registerType source0, _registerType source1)
+{
+    if constexpr (std::is_same<_registerType, __m256>::value || std::is_same<_registerType, __m256d>::value)
+        return _mmx_permute2f128_p<PERMUTE_2F128_MASK(_lane0SrcReg, _lane0SrcLane, _lane1SrcReg, _lane1SrcLane)>(
+                source0, source1);
+    else
+        throw Exception(__PRETTY_FUNCTION__, "Not defined for selected register type.");
+}
+
+#endif // __AVX2__
 
 
 

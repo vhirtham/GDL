@@ -113,15 +113,15 @@ Mat3fSSE Mat3fSSE::operator+(const Mat3fSSE& other)
 Mat3fSSE Mat3fSSE::operator*(const Mat3fSSE& rhs) const
 {
     using namespace GDL::sse;
-    return Mat3fSSE(_mmx_fmadd_p(sse::Swizzle1<0>(rhs.mData[0]), mData[0],
-                                 _mmx_fmadd_p(Swizzle1<1>(rhs.mData[0]), mData[1],
-                                              _mmx_mul_p(Swizzle1<2>(rhs.mData[0]), mData[2]))),
-                    _mmx_fmadd_p(Swizzle1<0>(rhs.mData[1]), mData[0],
-                                 _mmx_fmadd_p(Swizzle1<1>(rhs.mData[1]), mData[1],
-                                              _mmx_mul_p(Swizzle1<2>(rhs.mData[1]), mData[2]))),
-                    _mmx_fmadd_p(Swizzle1<0>(rhs.mData[2]), mData[0],
-                                 _mmx_fmadd_p(Swizzle1<1>(rhs.mData[2]), mData[1],
-                                              _mmx_mul_p(Swizzle1<2>(rhs.mData[2]), mData[2]))));
+    return Mat3fSSE(_mmx_fmadd_p(sse::Broadcast<0>(rhs.mData[0]), mData[0],
+                                 _mmx_fmadd_p(Broadcast<1>(rhs.mData[0]), mData[1],
+                                              _mmx_mul_p(Broadcast<2>(rhs.mData[0]), mData[2]))),
+                    _mmx_fmadd_p(Broadcast<0>(rhs.mData[1]), mData[0],
+                                 _mmx_fmadd_p(Broadcast<1>(rhs.mData[1]), mData[1],
+                                              _mmx_mul_p(Broadcast<2>(rhs.mData[1]), mData[2]))),
+                    _mmx_fmadd_p(Broadcast<0>(rhs.mData[2]), mData[0],
+                                 _mmx_fmadd_p(Broadcast<1>(rhs.mData[2]), mData[1],
+                                              _mmx_mul_p(Broadcast<2>(rhs.mData[2]), mData[2]))));
 }
 
 
@@ -129,9 +129,9 @@ Mat3fSSE Mat3fSSE::operator*(const Mat3fSSE& rhs) const
 Vec3fSSE<true> Mat3fSSE::operator*(const Vec3fSSE<true>& rhs) const
 {
     using namespace GDL::sse;
-    return Vec3fSSE<true>(
-            _mmx_fmadd_p(Swizzle1<0>(rhs.mData), mData[0],
-                         _mmx_fmadd_p(Swizzle1<1>(rhs.mData), mData[1], _mmx_mul_p(Swizzle1<2>(rhs.mData), mData[2]))));
+    return Vec3fSSE<true>(_mmx_fmadd_p(
+            Broadcast<0>(rhs.mData), mData[0],
+            _mmx_fmadd_p(Broadcast<1>(rhs.mData), mData[1], _mmx_mul_p(Broadcast<2>(rhs.mData), mData[2]))));
 }
 
 

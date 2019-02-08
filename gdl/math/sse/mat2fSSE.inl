@@ -103,8 +103,8 @@ Mat2fSSE Mat2fSSE::operator+(const Mat2fSSE& other)
 Mat2fSSE Mat2fSSE::operator*(const Mat2fSSE& rhs) const
 {
     using namespace GDL::sse;
-    return Mat2fSSE(_mmx_fmadd_p(mData, Swizzle<0, 0, 3, 3>(rhs.mData),
-                                _mmx_mul_p(Swizzle<2, 3, 0, 1>(mData), Swizzle<1, 1, 2, 2>(rhs.mData))));
+    return Mat2fSSE(_mmx_fmadd_p(mData, Permute<0, 0, 3, 3>(rhs.mData),
+                                 _mmx_mul_p(Permute<2, 3, 0, 1>(mData), Permute<1, 1, 2, 2>(rhs.mData))));
 }
 
 
@@ -112,8 +112,8 @@ Mat2fSSE Mat2fSSE::operator*(const Mat2fSSE& rhs) const
 Vec2fSSE<true> Mat2fSSE::operator*(const Vec2fSSE<true>& rhs) const
 {
     using namespace GDL::sse;
-    return Vec2fSSE<true>(_mmx_fmadd_p(mData, Swizzle<0, 0, 3, 3>(rhs.mData),
-                                       _mmx_mul_p(Swizzle<2, 3, 0, 1>(mData), Swizzle<1, 1, 2, 2>(rhs.mData))));
+    return Vec2fSSE<true>(_mmx_fmadd_p(mData, Permute<0, 0, 3, 3>(rhs.mData),
+                                       _mmx_mul_p(Permute<2, 3, 0, 1>(mData), Permute<1, 1, 2, 2>(rhs.mData))));
 }
 
 
@@ -131,15 +131,15 @@ const std::array<F32, 4> Mat2fSSE::Data() const
 
 inline F32 Mat2fSSE::Det() const
 {
-    __m128 tmp = _mmx_mul_p(mData, sse::Swizzle<3, 2, 1, 0>(mData));
-    return _mm_cvtss_f32(_mm_sub_ps(tmp, sse::Swizzle<1, 0, 3, 1>(tmp)));
+    __m128 tmp = _mmx_mul_p(mData, sse::Permute<3, 2, 1, 0>(mData));
+    return _mm_cvtss_f32(_mm_sub_ps(tmp, sse::Permute<1, 0, 3, 1>(tmp)));
 }
 
 
 
 Mat2fSSE Mat2fSSE::Transpose() const
 {
-    return Mat2fSSE(sse::Swizzle<0, 2, 1, 3>(mData));
+    return Mat2fSSE(sse::Permute<0, 2, 1, 3>(mData));
 }
 
 

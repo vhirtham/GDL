@@ -370,10 +370,10 @@ MatSSE<_type, _rows, _cols>::MultiplyAddRegisters(const RegisterType rhsValues, 
 
     if constexpr (_count + 1 == _numOperations)
         return _mmx_fmadd_p(mData[currentBlockIndex + _count * mNumRegistersPerCol],
-                            sse::Swizzle1AcrossLanes<_count>(rhsValues), currentValue);
+                            sse::BroadcastAcrossLanes<_count>(rhsValues), currentValue);
     else
         return _mmx_fmadd_p(
-                mData[currentBlockIndex + _count * mNumRegistersPerCol], sse::Swizzle1AcrossLanes<_count>(rhsValues),
+                mData[currentBlockIndex + _count * mNumRegistersPerCol], sse::BroadcastAcrossLanes<_count>(rhsValues),
                 MultiplyAddRegisters<_numOperations, _count + 1>(rhsValues, currentValue, currentBlockIndex));
 }
 

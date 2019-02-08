@@ -120,31 +120,31 @@ Mat4fSSE Mat4fSSE::operator+(const Mat4fSSE& other)
 Mat4fSSE Mat4fSSE::operator*(const Mat4fSSE& rhs) const
 {
     using namespace GDL::sse;
-    return Mat4fSSE(_mmx_fmadd_p(sse::Swizzle1<0>(rhs.mData[0]), mData[0],
-                                 _mmx_fmadd_p(Swizzle1<1>(rhs.mData[0]), mData[1],
-                                              _mmx_fmadd_p(Swizzle1<2>(rhs.mData[0]), mData[2],
-                                                           _mmx_mul_p(Swizzle1<3>(rhs.mData[0]), mData[3])))),
-                    _mmx_fmadd_p(Swizzle1<0>(rhs.mData[1]), mData[0],
-                                 _mmx_fmadd_p(Swizzle1<1>(rhs.mData[1]), mData[1],
-                                              _mmx_fmadd_p(Swizzle1<2>(rhs.mData[1]), mData[2],
-                                                           _mmx_mul_p(Swizzle1<3>(rhs.mData[1]), mData[3])))),
-                    _mmx_fmadd_p(Swizzle1<0>(rhs.mData[2]), mData[0],
-                                 _mmx_fmadd_p(Swizzle1<1>(rhs.mData[2]), mData[1],
-                                              _mmx_fmadd_p(Swizzle1<2>(rhs.mData[2]), mData[2],
-                                                           _mmx_mul_p(Swizzle1<3>(rhs.mData[2]), mData[3])))),
-                    _mmx_fmadd_p(Swizzle1<0>(rhs.mData[3]), mData[0],
-                                 _mmx_fmadd_p(Swizzle1<1>(rhs.mData[3]), mData[1],
-                                              _mmx_fmadd_p(Swizzle1<2>(rhs.mData[3]), mData[2],
-                                                           _mmx_mul_p(Swizzle1<3>(rhs.mData[3]), mData[3])))));
+    return Mat4fSSE(_mmx_fmadd_p(sse::Broadcast<0>(rhs.mData[0]), mData[0],
+                                 _mmx_fmadd_p(Broadcast<1>(rhs.mData[0]), mData[1],
+                                              _mmx_fmadd_p(Broadcast<2>(rhs.mData[0]), mData[2],
+                                                           _mmx_mul_p(Broadcast<3>(rhs.mData[0]), mData[3])))),
+                    _mmx_fmadd_p(Broadcast<0>(rhs.mData[1]), mData[0],
+                                 _mmx_fmadd_p(Broadcast<1>(rhs.mData[1]), mData[1],
+                                              _mmx_fmadd_p(Broadcast<2>(rhs.mData[1]), mData[2],
+                                                           _mmx_mul_p(Broadcast<3>(rhs.mData[1]), mData[3])))),
+                    _mmx_fmadd_p(Broadcast<0>(rhs.mData[2]), mData[0],
+                                 _mmx_fmadd_p(Broadcast<1>(rhs.mData[2]), mData[1],
+                                              _mmx_fmadd_p(Broadcast<2>(rhs.mData[2]), mData[2],
+                                                           _mmx_mul_p(Broadcast<3>(rhs.mData[2]), mData[3])))),
+                    _mmx_fmadd_p(Broadcast<0>(rhs.mData[3]), mData[0],
+                                 _mmx_fmadd_p(Broadcast<1>(rhs.mData[3]), mData[1],
+                                              _mmx_fmadd_p(Broadcast<2>(rhs.mData[3]), mData[2],
+                                                           _mmx_mul_p(Broadcast<3>(rhs.mData[3]), mData[3])))));
 }
 
 Vec4fSSE<true> Mat4fSSE::operator*(const Vec4fSSE<true>& rhs) const
 {
     using namespace GDL::sse;
-    return Vec4fSSE<true>(_mmx_fmadd_p(Swizzle1<0>(rhs.mData), mData[0],
-                                       _mmx_fmadd_p(Swizzle1<1>(rhs.mData), mData[1],
-                                                    _mmx_fmadd_p(Swizzle1<2>(rhs.mData), mData[2],
-                                                                 _mmx_mul_p(Swizzle1<3>(rhs.mData), mData[3])))));
+    return Vec4fSSE<true>(_mmx_fmadd_p(Broadcast<0>(rhs.mData), mData[0],
+                                       _mmx_fmadd_p(Broadcast<1>(rhs.mData), mData[1],
+                                                    _mmx_fmadd_p(Broadcast<2>(rhs.mData), mData[2],
+                                                                 _mmx_mul_p(Broadcast<3>(rhs.mData), mData[3])))));
 }
 
 
@@ -164,17 +164,17 @@ F32 Mat4fSSE::Det() const
 {
     using namespace GDL::sse;
 
-    __m128 d1032 = Swizzle<1, 0, 3, 2>(mData[3]);
-    __m128 c1032 = Swizzle<1, 0, 3, 2>(mData[2]);
+    __m128 d1032 = Permute<1, 0, 3, 2>(mData[3]);
+    __m128 c1032 = Permute<1, 0, 3, 2>(mData[2]);
 
-    __m128 tmp1 = Swizzle<2, 3, 0, 1>(_mmx_fmsub_p(mData[2], d1032, _mmx_mul_p(mData[3], c1032)));
-    __m128 tmp2 = _mmx_fmsub_p(Swizzle<3, 2, 0, 1>(mData[2]), d1032, _mmx_mul_p(Swizzle<3, 2, 0, 1>(mData[3]), c1032));
+    __m128 tmp1 = Permute<2, 3, 0, 1>(_mmx_fmsub_p(mData[2], d1032, _mmx_mul_p(mData[3], c1032)));
+    __m128 tmp2 = _mmx_fmsub_p(Permute<3, 2, 0, 1>(mData[2]), d1032, _mmx_mul_p(Permute<3, 2, 0, 1>(mData[3]), c1032));
 
     __m128 tmp3 = _mm_xor_ps(tmp2, _mmx_setr_p<__m128>(-0.f, -0.f, 0.f, 0.f));
 
-    __m128 b1032 = Swizzle<1, 0, 3, 2>(mData[1]);
-    __m128 b2310 = Swizzle<2, 3, 1, 0>(mData[1]);
-    __m128 tmp4 = Swizzle<3, 2, 0, 1>(_mmx_mul_p((mData[1]), tmp3));
+    __m128 b1032 = Permute<1, 0, 3, 2>(mData[1]);
+    __m128 b2310 = Permute<2, 3, 1, 0>(mData[1]);
+    __m128 tmp4 = Permute<3, 2, 0, 1>(_mmx_mul_p((mData[1]), tmp3));
 
     __m128 tmp5 = _mmx_fmsub_p(b1032, tmp1, _mmx_fmsub_p(b2310, tmp3, tmp4));
 
