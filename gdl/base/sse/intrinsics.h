@@ -201,17 +201,27 @@ inline auto _mmx_permute_p(_registerType reg);
 #ifdef __AVX2__
 
 //! @brief Returns a 256 bit AVX register with an arbitrary combination of the two source registers lanes
-//! @tparam _permuteMask: Bitmask that determines the value composition. Have a look at Intels documentation of
+//! @tparam _shuffleMask: Bitmask that determines the value composition. Have a look at Intels documentation of
 //! _mm_permute_ps or_mm_shuffle_ps for detailed informations
 //! @tparam _registerType: Register type
 //! @param src0: First register which serves as source
 //! @param src1: Second register which serves as source
 //! @return AVX register with an arbitrary combination of the two source registers lanes
-template <I32 _permuteMask, typename _registerType>
-inline auto _mmx_permute2f128_p(_registerType src0, _registerType src1);
+template <I32 _shuffleMask, typename _registerType>
+inline auto _mmx_shuffle_p(_registerType src0, _registerType src1);
 
 #endif // __AVX2__
 
+//! @brief Creates a new register with its first 64 bits per lane being selected from the first registers values
+//! from the same lane. The second 64 bits are taken from the second register in the same manner.
+//! @tparam _shuffleMask: Bitmask that determines the value composition. Have a look at Intels documentation of
+//! _mm_shuffle_ps, _mm_shuffle_pd, _mm256_shuffle_ps or _mm256_shuffle_ps for detailed informations.
+//! @tparam _registerType: Register type
+//! @param src0: First source register
+//! @param src1: second source register
+//! @return Register with shuffled values
+template <I32 _shuffleMask, typename _registerType>
+inline auto _mmx_shuffle_p(_registerType src0, _registerType src1);
 
 } // namespace GDL
 

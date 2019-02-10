@@ -75,7 +75,45 @@ inline _registerType Permute2F128(_registerType source0, _registerType source1);
 
 #endif // __AVX2__
 
+//! @brief Creates a new register with its first value per lane being an arbitrary value of the first registers values
+//! from the same lane. The second value is taken from the second register in the same manner.
+//! @tparam _src0 - _src1: Index of the source registers value that should be stored as corresponding element of the new
+//! register
+//! @tparam _registerType: Register type
+//! @param source0: First source register
+//! @param source1: Second source register
+//! @return New register with shuffled values
+template <U32 _src0, U32 _src1, typename _registerType>
+inline _registerType Shuffle(_registerType source0, _registerType source1);
 
+//! @brief Creates a new register 256 bit double precision with its first value per lane being an arbitrary value of
+//! the first registers values from the same lane. The second value is taken from the second register in the same
+//! manner.
+//! @tparam _src0 - _src3: Index of the source registers value that should be stored as corresponding element of the new
+//! register
+//! @param source0: First source register
+//! @param source1: Second source register
+//! @return New register with shuffled values
+template <U32 _src0, U32 _src1, U32 _src2, U32 _src3>
+inline __m256d Shuffle(__m256d source0, __m256d source1);
+
+//! @brief Creates a new register with its first two values per lane being an arbitrary combination of the first
+//! registers values from the same lane. The second two values are taken from the second register in the same manner.
+//! @tparam _src0 - _src3: Index of the source registers value that should be stored as corresponding element of the new
+//! register
+//! @tparam _registerType: Register type
+//! @param source0: First source register
+//! @param source1: Second source register
+//! @return New register with shuffled values
+template <U32 _src0, U32 _src1, U32 _src2, U32 _src3, typename _registerType>
+inline _registerType Shuffle(_registerType source0, _registerType source1);
+
+
+//! @brief creates a shuffle mask for a 256 bit double precision register.
+//! @tparam _src0 - _src3: Index of the source registers value that should be stored as corresponding element of the new
+//! register
+//! @return Shuffle mask
+constexpr U32 ShuffleMask256d(U32 _src0, U32 _src1, U32 _src2, U32 _src3);
 
 } // namespace GDL::sse
 

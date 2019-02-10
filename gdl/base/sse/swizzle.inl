@@ -111,4 +111,51 @@ inline _registerType Permute2F128(_registerType source0, _registerType source1)
 
 
 
+template <U32 _src0, U32 _src1, typename _registerType>
+inline _registerType Shuffle(_registerType source0, _registerType source1)
+{
+    static_assert(std::is_same<_registerType, __m128d>::value || std::is_same<_registerType, __m256d>::value,
+                  "Function only compatible with __m128d and __m256d registers.");
+    static_assert(_src0 < 2 && _src1 < 2, "Values _src0 and _src1 must be in the interval [0, 1]");
+
+    if constexpr (std::is_same<_registerType, __m128d>::value)
+        return _mmx_shuffle_p<SHUFFLE_2_MASK(_src0, _src1)>(source0, source1);
+#ifdef __AVX2__
+    else
+        return _mmx_shuffle_p<ShuffleMask256d(_src0, _src1, _src0, _src1)>(source0, source1);
+#endif // __AVX2__
+}
+
+
+
+template <U32 _src0, U32 _src1, U32 _src2, U32 _src3>
+inline __m256d Shuffle(__m256d source0, __m256d source1)
+{
+    static_assert(_src0 < 2 && _src1 < 2 && _src2 < 2 && _src3 < 2,
+                  "Values _src0 and _src1 must be in the interval [0, 1]");
+    return _mmx_shuffle_p<ShuffleMask256d(_src0, _src1, _src2, _src3)>(source0, source1);
+}
+
+
+
+template <U32 _src0, U32 _src1, U32 _src2, U32 _src3, typename _registerType>
+inline _registerType Shuffle(_registerType source0, _registerType source1)
+{
+    static_assert(std::is_same<_registerType, __m128>::value || std::is_same<_registerType, __m256>::value,
+                  "Function only compatible with __m128 and __m256 float registers.");
+    static_assert(_src0 < 4 && _src1 < 4 && _src2 < 4 && _src3 < 4,
+                  "Values _src0-_src3 must be in the interval [0, 3]");
+
+    return _mmx_shuffle_p<SHUFFLE_4_MASK(_src0, _src1, _src2, _src3)>(source0, source1);
+}
+
+
+
+constexpr U32 ShuffleMask256d(U32 _src0, U32 _src1, U32 _src2, U32 _src3)
+{
+    return (((_src3) << 3) | ((_src2) << 2) | ((_src1) << 1) | (_src0));
+}
+
+
+
 } // namespace GDL::sse

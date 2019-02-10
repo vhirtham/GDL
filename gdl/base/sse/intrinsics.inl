@@ -476,4 +476,24 @@ inline auto _mmx_permute2f128_p(_registerType src0, _registerType src1)
 #endif // __AVX2__
 
 
+
+template <I32 _shuffleMask, typename _registerType>
+inline auto _mmx_shuffle_p(_registerType src0, _registerType src1)
+{
+    if constexpr (std::is_same<_registerType, __m128>::value)
+        return _mm_shuffle_ps(src0, src1, _shuffleMask);
+    else if constexpr (std::is_same<_registerType, __m128d>::value)
+        return _mm_shuffle_pd(src0, src1, _shuffleMask);
+#ifdef __AVX2__
+    else if constexpr (std::is_same<_registerType, __m256>::value)
+        return _mm256_shuffle_ps(src0, src1, _shuffleMask);
+    else if constexpr (std::is_same<_registerType, __m256d>::value)
+        return _mm256_shuffle_pd(src0, src1, _shuffleMask);
+#endif // __AVX2__
+    else
+        throw Exception(__PRETTY_FUNCTION__, "Not defined for selected register type.");
+}
+
+
+
 } // namespace GDL

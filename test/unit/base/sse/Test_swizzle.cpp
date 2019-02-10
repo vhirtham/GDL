@@ -232,3 +232,141 @@ BOOST_AUTO_TEST_CASE(Test_Permute2F128)
     TestPermute2F128<__m256d>();
 }
 #endif // __AVX2__
+
+
+
+// Shuffle ------------------------------------------------------------------------------------------------------------
+
+#include <iostream>
+
+
+template <typename _registerType, U32 _i, U32 _j>
+void TestShuffle2()
+{
+
+
+    _registerType a = _mmx_setzero_p<_registerType>();
+    _registerType b = _mmx_setzero_p<_registerType>();
+    for (U32 i = 0; i < numRegisterValues<_registerType>; ++i)
+    {
+        SetValue(a, i + 1 + numRegisterValues<_registerType>, i);
+        SetValue(b, i + 1 + numRegisterValues<_registerType>, i);
+    }
+
+    const _registerType c = Shuffle<_i, _j>(a, b);
+
+    for (U32 i = 0; i < numLanes<_registerType>; ++i)
+    {
+        U32 offset = +i * numValuesPerLane<_registerType>;
+        BOOST_CHECK(sse::GetValue(c, 0 + offset) == Approx(sse::GetValue(a, _i + offset)));
+        BOOST_CHECK(sse::GetValue(c, 1 + offset) == Approx(sse::GetValue(a, _j + offset)));
+    }
+}
+
+
+
+template <typename _registerType>
+void TestShuffle2()
+{
+    TestShuffle2<_registerType, 0, 0>();
+    TestShuffle2<_registerType, 0, 1>();
+    TestShuffle2<_registerType, 1, 0>();
+    TestShuffle2<_registerType, 1, 1>();
+}
+
+
+
+template <U32 _i, U32 _j, U32 _k, U32 _l>
+void TestShuffle256d()
+{
+
+    __m256d a = _mmx_setr_p<__m256d>(1., 2., 3., 4.);
+    __m256d b = _mmx_setr_p<__m256d>(5., 6., 7., 8.);
+
+    const __m256d c = Shuffle<_i, _j, _k, _l>(a, b);
+
+
+
+    BOOST_CHECK(sse::GetValue(c, 0) == Approx(sse::GetValue(a, _i)));
+    BOOST_CHECK(sse::GetValue(c, 1) == Approx(sse::GetValue(b, _j)));
+    BOOST_CHECK(sse::GetValue(c, 2) == Approx(sse::GetValue(a, _k + 2)));
+    BOOST_CHECK(sse::GetValue(c, 3) == Approx(sse::GetValue(b, _l + 2)));
+}
+
+
+
+#ifdef __AVX2__
+
+void TestShuffle256d()
+{
+    TestShuffle256d<0, 0, 0, 0>();
+    TestShuffle256d<0, 1, 0, 0>();
+    TestShuffle256d<1, 0, 0, 0>();
+    TestShuffle256d<1, 1, 0, 0>();
+
+    TestShuffle256d<0, 0, 0, 1>();
+    TestShuffle256d<0, 1, 0, 1>();
+    TestShuffle256d<1, 0, 0, 1>();
+    TestShuffle256d<1, 1, 0, 1>();
+
+    TestShuffle256d<0, 0, 1, 0>();
+    TestShuffle256d<0, 1, 1, 0>();
+    TestShuffle256d<1, 0, 1, 0>();
+    TestShuffle256d<1, 1, 1, 0>();
+
+    TestShuffle256d<0, 0, 1, 1>();
+    TestShuffle256d<0, 1, 1, 1>();
+    TestShuffle256d<1, 0, 1, 1>();
+    TestShuffle256d<1, 1, 1, 1>();
+}
+
+#endif // __AVX2__
+
+template <typename _registerType, U32 _i, U32 _j, U32 _k, U32 _l>
+void TestShuffle4()
+{
+
+
+    _registerType a = _mmx_setzero_p<_registerType>();
+    _registerType b = _mmx_setzero_p<_registerType>();
+    for (U32 i = 0; i < numRegisterValues<_registerType>; ++i)
+    {
+        SetValue(a, i + 1 + numRegisterValues<_registerType>, i);
+        SetValue(b, i + 1 + numRegisterValues<_registerType>, i);
+    }
+
+    const _registerType c = Shuffle<_i, _j, _k, _l>(a, b);
+
+    for (U32 i = 0; i < numLanes<_registerType>; ++i)
+    {
+        U32 offset = +i * numValuesPerLane<_registerType>;
+        BOOST_CHECK(sse::GetValue(c, 0 + offset) == Approx(sse::GetValue(a, _i + offset)));
+        BOOST_CHECK(sse::GetValue(c, 1 + offset) == Approx(sse::GetValue(a, _j + offset)));
+        BOOST_CHECK(sse::GetValue(c, 2 + offset) == Approx(sse::GetValue(b, _k + offset)));
+        BOOST_CHECK(sse::GetValue(c, 3 + offset) == Approx(sse::GetValue(b, _l + offset)));
+    }
+}
+
+
+
+template <typename _registerType>
+void TestShuffle4()
+{
+    TestShuffle4<_registerType, 1, 3, 2, 2>();
+    TestShuffle4<_registerType, 2, 3, 1, 0>();
+    TestShuffle4<_registerType, 0, 0, 3, 1>();
+    TestShuffle4<_registerType, 1, 1, 1, 3>();
+}
+
+
+
+BOOST_AUTO_TEST_CASE(Test_Shuffle)
+{
+    TestShuffle4<__m128>();
+    TestShuffle2<__m128d>();
+#ifdef __AVX2__
+    TestShuffle256d();
+    TestShuffle4<__m256>();
+    TestShuffle2<__m256d>();
+#endif // __AVX2__
+}
