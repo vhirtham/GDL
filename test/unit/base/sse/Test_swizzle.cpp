@@ -275,6 +275,7 @@ void TestShuffle2()
 }
 
 
+#ifdef __AVX2__
 
 template <U32 _i, U32 _j, U32 _k, U32 _l>
 void TestShuffle256d()
@@ -294,8 +295,6 @@ void TestShuffle256d()
 }
 
 
-
-#ifdef __AVX2__
 
 void TestShuffle256d()
 {
