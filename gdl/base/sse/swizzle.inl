@@ -19,11 +19,11 @@ inline _registerType Broadcast(_registerType reg)
         return Permute<_index, _index, _index, _index>(reg);
 
     else if constexpr (std::is_same<_registerType, __m128d>::value)
-        return _mmx_permute_p<PERMUTE_2_MASK(_index, _index)>(reg);
+        return _mmx_permute_p<PermuteMask<_index, _index>()>(reg);
 
 #ifdef __AVX2__
     else if constexpr (std::is_same<_registerType, __m256d>::value)
-        return _mm256_permute_pd(reg, PERMUTE256_PD_MASK(_index, _index, _index, _index));
+        return Permute<_index, _index, _index, _index>(reg);
 
 #endif // __AVX2__
     else
@@ -54,24 +54,36 @@ inline _registerType BroadcastAcrossLanes(_registerType reg)
 
 
 
+template <U32 _src0, U32 _src1>
+inline __m128d Permute(__m128d source)
+{
+    return _mmx_permute_p<PermuteMask<_src0, _src1>()>(source);
+}
+
+
+
 template <U32 _src0, U32 _src1, U32 _src2, U32 _src3>
 inline __m128 Permute(__m128 source)
 {
-    static_assert(_src0 < 4 && _src1 < 4 && _src2 < 4 && _src3 < 4,
-                  "Values _src0-_src3 must be in the interval [0, 3]");
-    return _mmx_permute_p<PERMUTE_4_MASK(_src0, _src1, _src2, _src3)>(source);
+    return _mmx_permute_p<PermuteMask<_src0, _src1, _src2, _src3>()>(source);
 }
+
 
 
 #ifdef __AVX2__
 
-
 template <U32 _src0, U32 _src1, U32 _src2, U32 _src3>
 inline __m256 Permute(__m256 source)
 {
-    static_assert(_src0 < 4 && _src1 < 4 && _src2 < 4 && _src3 < 4,
-                  "Values _src0-_src3 must be in the interval [0, 3]");
-    return _mmx_permute_p<PERMUTE_4_MASK(_src0, _src1, _src2, _src3)>(source);
+    return _mmx_permute_p<PermuteMask<_src0, _src1, _src2, _src3>()>(source);
+}
+
+
+
+template <U32 _src0, U32 _src1, U32 _src2, U32 _src3>
+inline __m256d Permute(__m256d source)
+{
+    return _mmx_permute_p<Permute256dMask<_src0, _src1, _src2, _src3>()>(source);
 }
 
 
@@ -86,6 +98,44 @@ inline __m256 Permute(__m256 source)
 }
 
 
+
+#endif // __AVX2__
+
+
+
+template <U32 _src0, U32 _src1>
+constexpr U32 PermuteMask()
+{
+    static_assert(_src0 < 2 && _src1 < 2, "Values _src0 ans _src1 must be in the interval [0, 1]");
+
+    return (((_src1) << 1) | (_src0));
+}
+
+
+
+template <U32 _src0, U32 _src1, U32 _src2, U32 _src3>
+constexpr U32 PermuteMask()
+{
+    static_assert(_src0 < 4 && _src1 < 4 && _src2 < 4 && _src3 < 4,
+                  "Values _src0-_src3 must be in the interval [0, 3]");
+
+    return (((_src3) << 6) | ((_src2) << 4) | ((_src1) << 2) | (_src0));
+}
+
+
+
+template <U32 _src0, U32 _src1, U32 _src2, U32 _src3>
+constexpr U32 Permute256dMask()
+{
+    static_assert(_src0 < 2 && _src1 < 2 && _src2 < 2 && _src3 < 2,
+                  "Values _src0-_src3 must be in the interval [0, 1]");
+
+    return (((_src3) << 3) | ((_src2) << 2) | ((_src1) << 1) | (_src0));
+}
+
+
+
+#ifdef __AVX2__
 
 template <U32 _lane0SrcLane, U32 _lane1SrcLane, typename _registerType>
 inline _registerType Permute2F128(_registerType source)

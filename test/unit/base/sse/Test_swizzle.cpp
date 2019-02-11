@@ -80,15 +80,25 @@ BOOST_AUTO_TEST_CASE(Test_Broadcast_Across_Lanes)
 
 // Permute ------------------------------------------------------------------------------------------------------------
 
+template <U32 _i, U32 _j>
+void TestPermute128d()
+{
+    const __m128d a = _mmx_setr_p<__m128d>(1.f, 2.f);
+
+    const __m128d b = Permute<_i, _j>(a);
+
+    BOOST_CHECK(sse::GetValue<0>(b) == Approx(sse::GetValue<_i>(a)));
+    BOOST_CHECK(sse::GetValue<1>(b) == Approx(sse::GetValue<_j>(a)));
+}
+
+
+
 template <U32 _i, U32 _j, U32 _k, U32 _l>
 void TestPermute128()
 {
     const __m128 a = _mmx_setr_p<__m128>(1.f, 2.f, 3.f, 4.f);
 
-
     const __m128 b = Permute<_i, _j, _k, _l>(a);
-
-
 
     BOOST_CHECK(sse::GetValue<0>(b) == Approx(sse::GetValue<_i>(a)));
     BOOST_CHECK(sse::GetValue<1>(b) == Approx(sse::GetValue<_j>(a)));
@@ -100,11 +110,25 @@ void TestPermute128()
 
 #ifdef __AVX2__
 
+template <U32 _i, U32 _j, U32 _k, U32 _l>
+void TestPermute256d()
+{
+    const __m256d a = _mmx_setr_p<__m256d>(1.f, 2.f, 3.f, 4.f);
+
+    const __m256d b = Permute<_i, _j, _k, _l>(a);
+
+    BOOST_CHECK(sse::GetValue<0>(b) == Approx(sse::GetValue<_i>(a)));
+    BOOST_CHECK(sse::GetValue<1>(b) == Approx(sse::GetValue<_j>(a)));
+    BOOST_CHECK(sse::GetValue<2>(b) == Approx(sse::GetValue<_k + 2>(a)));
+    BOOST_CHECK(sse::GetValue<3>(b) == Approx(sse::GetValue<_l + 2>(a)));
+}
+
+
+
 template <U32 _i, U32 _j, U32 _k, U32 _l, U32 _m, U32 _n, U32 _o, U32 _p>
 void TestPermute256()
 {
     const __m256 a = _mmx_setr_p<__m256>(1.f, 2.f, 3.f, 4.f, 5.f, 6.f, 7.f, 8.f);
-
 
     const __m256 b = Permute<_i, _j, _k, _l, _m, _n, _o, _p>(a);
 
@@ -116,7 +140,6 @@ void TestPermute256()
     BOOST_CHECK(sse::GetValue<5>(b) == Approx(sse::GetValue<_n + 4>(a)));
     BOOST_CHECK(sse::GetValue<6>(b) == Approx(sse::GetValue<_o + 4>(a)));
     BOOST_CHECK(sse::GetValue<7>(b) == Approx(sse::GetValue<_p + 4>(a)));
-
 
 
     const __m256 c = Permute<_i, _j, _k, _l>(a);
@@ -140,7 +163,27 @@ BOOST_AUTO_TEST_CASE(Test_Permute)
     TestPermute128<2, 3, 1, 0>();
     TestPermute128<0, 0, 3, 1>();
     TestPermute128<1, 1, 1, 3>();
+    TestPermute128d<0, 0>();
+    TestPermute128d<0, 1>();
+    TestPermute128d<1, 0>();
+    TestPermute128d<1, 1>();
 #ifdef __AVX2__
+    TestPermute256d<0, 0, 0, 0>();
+    TestPermute256d<0, 1, 0, 0>();
+    TestPermute256d<1, 0, 0, 0>();
+    TestPermute256d<1, 1, 0, 0>();
+    TestPermute256d<0, 0, 1, 0>();
+    TestPermute256d<0, 1, 1, 0>();
+    TestPermute256d<1, 0, 1, 0>();
+    TestPermute256d<1, 1, 1, 0>();
+    TestPermute256d<0, 0, 0, 1>();
+    TestPermute256d<0, 1, 0, 1>();
+    TestPermute256d<1, 0, 0, 1>();
+    TestPermute256d<1, 1, 0, 1>();
+    TestPermute256d<0, 0, 1, 1>();
+    TestPermute256d<0, 1, 1, 1>();
+    TestPermute256d<1, 0, 1, 1>();
+    TestPermute256d<1, 1, 1, 1>();
     TestPermute256<1, 3, 2, 2, 1, 3, 2, 2>();
     TestPermute256<2, 3, 1, 0, 1, 3, 2, 2>();
     TestPermute256<2, 3, 1, 0, 2, 3, 1, 0>();

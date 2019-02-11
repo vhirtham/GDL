@@ -162,13 +162,13 @@ F32 Mat4fAVX::Det() const
 {
     using namespace GDL::sse;
 
-    __m256 tmp0P1230 = _mm256_permute_ps(mData[0], PERMUTE_4_MASK(1, 2, 3, 0));
-    __m256 tmp1P1230 = _mm256_permute_ps(mData[1], PERMUTE_4_MASK(1, 2, 3, 0));
+    __m256 tmp0P1230 = Permute<1, 2, 3, 0>(mData[0]);
+    __m256 tmp1P1230 = Permute<1, 2, 3, 0>(mData[1]);
     __m256 tmp0 = _mmx_fmsub_p(mData[0], tmp1P1230, _mmx_mul_p(mData[1], tmp0P1230));
     tmp0 = _mm256_xor_ps(tmp0, _mmx_setr_p<__m256>(-0.f, 0.f, -0.f, 0.f, 0.f, 0.f, 0.f, 0.f));
 
-    __m256 tmp0P2323 = _mm256_permute_ps(mData[0], PERMUTE_4_MASK(2, 3, 2, 3));
-    __m256 tmp1P2323 = _mm256_permute_ps(mData[1], PERMUTE_4_MASK(2, 3, 2, 3));
+    __m256 tmp0P2323 = Permute<2, 3, 2, 3>(mData[0]);
+    __m256 tmp1P2323 = Permute<2, 3, 2, 3>(mData[1]);
     __m256 tmp1 = _mmx_fmsub_p(mData[0], tmp1P2323, _mmx_mul_p(mData[1], tmp0P2323));
 
     __m256 tmp2 = sse::Permute2F128<0, 0, 1, 0>(tmp0, tmp1);

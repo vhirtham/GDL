@@ -26,20 +26,40 @@ inline _registerType Broadcast(_registerType reg);
 template <U32 _index, typename _registerType>
 inline _registerType BroadcastAcrossLanes(_registerType reg);
 
-//! @brief Creates a new 128 bit register with arbitrary value combination from the source register.
+//! @brief Creates a new register with arbitrary value combination from the source register
+//! @tparam _src0 - _src1: Indices of the source register values that should be stored at corresponding position
+//! @param source: Source register
+//! @return Register with arbitrary value combination from the source register
+template <U32 _src0, U32 _src1>
+inline __m128d Permute(__m128d source);
+
+//! @brief Creates a new register with arbitrary value combination from the source register.
 //! @tparam _src0 - _src3: Indices of the source register values that should be stored at corresponding position
+//! @tparam _registerType: Register type
 //! @param source: Source register
 //! @return Register with arbitrary value combination from the source register
 template <U32 _src0, U32 _src1, U32 _src2, U32 _src3>
 inline __m128 Permute(__m128 source);
 
-//! @brief Creates a new 256 bit register with arbitrary value combination from the source register inside each lane.
-//! The permutations specified by the template parameters are equal for both lanes.
+#ifdef __AVX2__
+
+//! @brief Creates a new register with arbitrary value combination from the source register. Values cant be swizzled
+//! across lanes.
 //! @tparam _src0 - _src3: Indices of the source register values that should be stored at corresponding position
+//! @tparam _registerType: Register type
 //! @param source: Source register
 //! @return Register with arbitrary value combination from the source register
 template <U32 _src0, U32 _src1, U32 _src2, U32 _src3>
 inline __m256 Permute(__m256 source);
+
+//! @brief Creates a new register with arbitrary value combination from the source register. Values cant be swizzled
+//! across lanes.
+//! @tparam _src0 - _src3: Indices of the source register values that should be stored at corresponding position
+//! @tparam _registerType: Register type
+//! @param source: Source register
+//! @return Register with arbitrary value combination from the source register
+template <U32 _src0, U32 _src1, U32 _src2, U32 _src3>
+inline __m256d Permute(__m256d source);
 
 //! @brief Creates a new 256 bit register with arbitrary value combination from the source register inside each lane.
 //! The permutations of both lanes specified by the template parameters may differ.
@@ -49,6 +69,26 @@ inline __m256 Permute(__m256 source);
 //! @return Register with arbitrary value combination from the source register
 template <U32 _src0, U32 _src1, U32 _src2, U32 _src3, U32 _src4, U32 _src5, U32 _src6, U32 _src7>
 inline __m256 Permute(__m256 source);
+
+#endif // __AVX2__
+
+//! @brief Creates a mask for permute intrinsics
+//! @tparam _src0 - _src1: Indices of the source register values that should be stored at corresponding position
+//! @return Mask
+template <U32 _src0, U32 _src1>
+constexpr U32 PermuteMask();
+
+//! @brief Creates a mask for permute intrinsics
+//! @tparam _src0 - _src3: Indices of the source register values that should be stored at corresponding position
+//! @return Mask
+template <U32 _src0, U32 _src1, U32 _src2, U32 _src3>
+constexpr U32 PermuteMask();
+
+//! @brief Creates a mask for permute intrinsics for __m256d register. Permutations may differ in each lane.
+//! @tparam _src0 - _src3: Indices of the source register values that should be stored at corresponding position
+//! @return Mask
+template <U32 _src0, U32 _src1, U32 _src2, U32 _src3>
+constexpr U32 Permute256dMask();
 
 #ifdef __AVX2__
 
@@ -95,6 +135,8 @@ constexpr U32 Permute2F128Mask();
 template <U32 _src0, U32 _src1, typename _registerType>
 inline _registerType Shuffle(_registerType source0, _registerType source1);
 
+#ifdef __AVX2__
+
 //! @brief Creates a new register 256 bit double precision with its first value per lane being an arbitrary value of
 //! the first registers values from the same lane. The second value is taken from the second register in the same
 //! manner.
@@ -105,6 +147,8 @@ inline _registerType Shuffle(_registerType source0, _registerType source1);
 //! @return New register with shuffled values
 template <U32 _src0, U32 _src1, U32 _src2, U32 _src3>
 inline __m256d Shuffle(__m256d source0, __m256d source1);
+
+#endif // __AVX2__
 
 //! @brief Creates a new register with its first two values per lane being an arbitrary combination of the first
 //! registers values from the same lane. The second two values are taken from the second register in the same manner.
