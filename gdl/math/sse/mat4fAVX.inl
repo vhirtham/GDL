@@ -113,8 +113,8 @@ Mat4fAVX Mat4fAVX::operator+(const Mat4fAVX& other)
 
 Mat4fAVX Mat4fAVX::operator*(const Mat4fAVX& rhs) const
 {
-    const __m256 tmpBA = _mm256_permute2f128_ps(mData[0], mData[0], PERMUTE_2F128_MASK(0, 1, 0, 0));
-    const __m256 tmpDC = _mm256_permute2f128_ps(mData[1], mData[1], PERMUTE_2F128_MASK(0, 1, 0, 0));
+    const __m256 tmpBA = sse::Permute2F128<0, 1, 0, 0>(mData[0], mData[0]);
+    const __m256 tmpDC = sse::Permute2F128<0, 1, 0, 0>(mData[1], mData[1]);
 
     const __m256i mask01 = _mm256_setr_epi32(0, 0, 0, 0, 1, 1, 1, 1);
     const __m256i mask10 = _mm256_setr_epi32(1, 1, 1, 1, 0, 0, 0, 0);
@@ -171,8 +171,8 @@ F32 Mat4fAVX::Det() const
     __m256 tmp1P2323 = _mm256_permute_ps(mData[1], PERMUTE_4_MASK(2, 3, 2, 3));
     __m256 tmp1 = _mmx_fmsub_p(mData[0], tmp1P2323, _mmx_mul_p(mData[1], tmp0P2323));
 
-    __m256 tmp2 = _mm256_permute2f128_ps(tmp0, tmp1, PERMUTE_2F128_MASK(0, 0, 1, 0));
-    __m256 tmp3 = _mm256_permute2f128_ps(tmp0, tmp1, PERMUTE_2F128_MASK(0, 1, 1, 1));
+    __m256 tmp2 = sse::Permute2F128<0, 0, 1, 0>(tmp0, tmp1);
+    __m256 tmp3 = sse::Permute2F128<0, 1, 1, 1>(tmp0, tmp1);
     tmp2 = _mm256_permutevar_ps(tmp2, _mm256_setr_epi32(2, 3, 0, 1, 1, 0, 2, 3));
 
     __m256 tmp4 = DotProduct(tmp2, tmp3);
@@ -184,14 +184,14 @@ F32 Mat4fAVX::Det() const
 
 Mat4fAVX Mat4fAVX::Transpose() const
 {
-    __m256 tmp0 = _mm256_shuffle_ps(mData[0], mData[1], SHUFFLE_4_MASK(0, 2, 0, 2));
-    __m256 tmp1 = _mm256_shuffle_ps(mData[0], mData[1], SHUFFLE_4_MASK(1, 3, 1, 3));
+    __m256 tmp0 = sse::Shuffle<0, 2, 0, 2>(mData[0], mData[1]);
+    __m256 tmp1 = sse::Shuffle<1, 3, 1, 3>(mData[0], mData[1]);
 
     __m256 tmp2 = _mm256_blend_ps(tmp0, tmp1, BLEND_8_MASK(0, 0, 0, 0, 1, 1, 1, 1));
-    __m256 tmp3 = _mm256_permute2f128_ps(tmp0, tmp1, PERMUTE_2F128_MASK(0, 1, 1, 0));
+    __m256 tmp3 = sse::Permute2F128<0, 1, 1, 0>(tmp0, tmp1);
 
-    tmp0 = _mm256_shuffle_ps(tmp2, tmp3, SHUFFLE_4_MASK(0, 2, 0, 2));
-    tmp1 = _mm256_shuffle_ps(tmp2, tmp3, SHUFFLE_4_MASK(1, 3, 1, 3));
+    tmp0 = sse::Shuffle<0, 2, 0, 2>(tmp2, tmp3);
+    tmp1 = sse::Shuffle<1, 3, 1, 3>(tmp2, tmp3);
 
     tmp2 = _mm256_permutevar_ps(tmp0, _mm256_setr_epi32(0, 2, 1, 3, 2, 0, 3, 1));
     tmp3 = _mm256_permutevar_ps(tmp1, _mm256_setr_epi32(0, 2, 1, 3, 2, 0, 3, 1));

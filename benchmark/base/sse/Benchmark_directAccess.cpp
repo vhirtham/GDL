@@ -2,6 +2,7 @@
 
 #include "gdl/base/sse/directAccess.h"
 #include "gdl/base/sse/intrinsics.h"
+#include "gdl/base/sse/swizzle.h"
 
 #include <array>
 
@@ -88,7 +89,7 @@ ValueType GetterStaticFirstElementShuffle(__m128 reg)
     if constexpr (_index == 0)
         return _mm_cvtss_f32(reg);
     else
-        return _mm_cvtss_f32(_mm_shuffle_ps(reg, reg, _MM_SHUFFLE(_index, _index, _index, _index)));
+        return _mm_cvtss_f32(sse::Broadcast<_index>(reg));
 }
 
 
@@ -209,7 +210,25 @@ ValueType GetterDynamicStore(RegisterType reg, U32 index)
 
 
 
-ValueType GetterDynamicFirstElementShuffle(RegisterType reg, U32 index)
+ValueType GetterDynamicFirstElementShuffle(__m128 reg, U32 index)
+{
+    switch (index)
+    {
+    case 0:
+        return GetterStaticFirstElementShuffle<0>(reg);
+    case 1:
+        return GetterStaticFirstElementShuffle<1>(reg);
+    case 2:
+        return GetterStaticFirstElementShuffle<2>(reg);
+    case 3:
+        return GetterStaticFirstElementShuffle<3>(reg);
+    default:
+        throw(int{0});
+    }
+}
+
+
+ValueType GetterDynamicFirstElementShuffle(__m256 reg, U32 index)
 {
     switch (index)
     {

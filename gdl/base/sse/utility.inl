@@ -102,22 +102,4 @@ inline auto ReinterpretAsIntRegister(_registerType reg)
 
 
 
-template <I32 _i0, I32 _i1, I32 _i2, I32 _i3>
-constexpr I32 ShuffleMask()
-{
-    static_assert(_i0 > -1 && _i1 > -1 && _i2 > -1 && _i3 > -1 && _i0 < 4 && _i1 < 4 && _i2 < 4 && _i3 < 4,
-                  "Invalid indices");
-    return _i0 + _i1 * 4 + _i2 * 16 + _i3 * 64;
-}
-
-
-
-template <I32 _i0, I32 _i1>
-constexpr I32 ShuffleMask()
-{
-    static_assert(_i0 > -1 && _i1 > -1 && _i0 < 2 && _i1 < 2, "Invalid indices");
-    return _i0 + _i1 * 2;
-}
-
-
 } // namespace GDL::sse

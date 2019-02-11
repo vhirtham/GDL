@@ -3,7 +3,7 @@
 #include "gdl/physics/collision/functions/orientation.h"
 
 #include "gdl/base/sse/intrinsics.h"
-#include "gdl/base/sse/maskMacros.h"
+#include "gdl/base/sse/swizzle.h"
 #include "gdl/math/sse/mat2fSSE.h"
 #include "gdl/math/sse/vec2fSSE.h"
 
@@ -15,7 +15,7 @@ inline F32 Orientation(Vec2fSSE<_isCol> a, Vec2fSSE<_isCol> b, Vec2fSSE<_isCol> 
 {
     Vec2fSSE tmp0 = a - c;
     Vec2fSSE tmp1 = b - c;
-    __m128 tmp2 = _mm_shuffle_ps(tmp0.DataSSE(), tmp1.DataSSE(), SHUFFLE_4_MASK(0, 1, 0, 1));
+    __m128 tmp2 = sse::Shuffle<0, 1, 0, 1>(tmp0.DataSSE(), tmp1.DataSSE());
     return Mat2fSSE(tmp2).Det();
 }
 
