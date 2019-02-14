@@ -14,20 +14,14 @@ template <U32 _index, typename _registerType>
 inline _registerType Broadcast(_registerType reg)
 {
     static_assert(_index < numValuesPerLane<_registerType>, "_index must be in the interval [0, numValuesPerLane]");
+    static_assert(IsRegisterType<_registerType>,
+                  "Only __m128, __m128d, __m256 and __m256d registers are supported by this function.");
 
-    if constexpr (numValuesPerLane<_registerType> == 4)
-        return Permute<_index, _index, _index, _index>(reg);
-
-    else if constexpr (std::is_same<_registerType, __m128d>::value)
-        return _mmx_permute_p<PermuteMask<_index, _index>()>(reg);
-
-#ifdef __AVX2__
-    else if constexpr (std::is_same<_registerType, __m256d>::value)
-        return Permute<_index, _index, _index, _index>(reg);
-
-#endif // __AVX2__
+    if constexpr (Is__m128d<_registerType>)
+        return Permute<_index, _index>(reg);
     else
-        throw Exception(__PRETTY_FUNCTION__, "Not defined for selected register type.");
+        return Permute<_index, _index, _index, _index>(reg);
+
 } // namespace GDL::sse
 
 
@@ -35,21 +29,22 @@ inline _registerType Broadcast(_registerType reg)
 template <U32 _index, typename _registerType>
 inline _registerType BroadcastAcrossLanes(_registerType reg)
 {
-    static_assert(_index < numRegisterValues<_registerType>, "_index must be in the interval [0, numRegisterValues]");
+    static_assert(IsRegisterType<_registerType>,
+                  "Only __m128, __m128d, __m256 and __m256d registers are supported by this function.");
 
-    if constexpr (std::is_same<_registerType, __m128>::value || std::is_same<_registerType, __m128d>::value)
+    if constexpr (numLanes<_registerType> == 1)
         return Broadcast<_index>(reg);
-
 #ifdef __AVX2__
-    else if constexpr (std::is_same<_registerType, __m256>::value || std::is_same<_registerType, __m256d>::value)
+    else
     {
+
         constexpr U32 valueIndex = _index % numValuesPerLane<_registerType>;
         constexpr U32 laneIndex = _index / numValuesPerLane<_registerType>;
         return Permute2F128<laneIndex, laneIndex>(Broadcast<valueIndex>(reg));
     }
+
+
 #endif // __AVX2__
-    else
-        throw Exception(__PRETTY_FUNCTION__, "Not defined for selected register type.");
 }
 
 
@@ -148,7 +143,7 @@ inline _registerType Permute2F128(_registerType source)
 template <U32 _lane0SrcReg, U32 _lane0SrcLane, U32 _lane1SrcReg, U32 _lane1SrcLane, typename _registerType>
 inline _registerType Permute2F128(_registerType source0, _registerType source1)
 {
-    static_assert(std::is_same<_registerType, __m256>::value || std::is_same<_registerType, __m256d>::value,
+    static_assert(Is__m256<_registerType> || Is__m256d<_registerType>,
                   "Function only compatible with __m256 and __m256d registers.");
 
     return _mmx_permute2f128_p<Permute2F128Mask<_lane0SrcReg, _lane0SrcLane, _lane1SrcReg, _lane1SrcLane>()>(source0,
@@ -175,10 +170,10 @@ constexpr U32 Permute2F128Mask()
 template <U32 _src0, U32 _src1, typename _registerType>
 inline _registerType Shuffle(_registerType source0, _registerType source1)
 {
-    static_assert(std::is_same<_registerType, __m128d>::value || std::is_same<_registerType, __m256d>::value,
+    static_assert(Is__m128d<_registerType> || Is__m256d<_registerType>,
                   "Function only compatible with __m128d and __m256d registers.");
 
-    if constexpr (std::is_same<_registerType, __m128d>::value)
+    if constexpr (Is__m128d<_registerType>)
         return _mmx_shuffle_p<ShuffleMask<_src0, _src1>()>(source0, source1);
 #ifdef __AVX2__
     else
@@ -199,7 +194,7 @@ inline __m256d Shuffle(__m256d source0, __m256d source1)
 template <U32 _src0, U32 _src1, U32 _src2, U32 _src3, typename _registerType>
 inline _registerType Shuffle(_registerType source0, _registerType source1)
 {
-    static_assert(std::is_same<_registerType, __m128>::value || std::is_same<_registerType, __m256>::value,
+    static_assert(Is__m128<_registerType> || Is__m256<_registerType>,
                   "Function only compatible with __m128 and __m256 float registers.");
 
     return _mmx_shuffle_p<ShuffleMask<_src0, _src1, _src2, _src3>()>(source0, source1);

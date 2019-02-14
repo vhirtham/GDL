@@ -18,7 +18,7 @@ namespace GDL
 template <typename _registerType, U32 _numComparedValuesSSE = sse::numRegisterValues<_registerType>>
 class alignas(sse::alignmentBytes<_registerType>) Tolerance
 {
-    static_assert(sse::IsRegisterType<_registerType>(), "Type is no valid sse register type");
+    static_assert(sse::IsRegisterType<_registerType>, "Type is no valid sse register type");
     static_assert(_numComparedValuesSSE <= sse::numRegisterValues<_registerType>,
                   "_numComparedValues > Number of register elements.");
 

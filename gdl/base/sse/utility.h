@@ -87,6 +87,70 @@ constexpr const U32 numLanes<__m256d> = 2;
 #endif // __AVX2__
 
 
+
+//! @brief Template constant is only true if the type is a supported SSE register
+//! @tparam _registerType: RegisterType
+template <typename _registerType>
+constexpr const bool IsRegisterType = false;
+template <>
+constexpr const bool IsRegisterType<__m128> = true;
+template <>
+constexpr const bool IsRegisterType<__m128d> = true;
+#ifdef __AVX2__
+template <>
+constexpr const bool IsRegisterType<__m256> = true;
+template <>
+constexpr const bool IsRegisterType<__m256d> = true;
+#endif // __AVX2__
+
+
+
+//! @brief Template constant is only true for __m128
+//! @tparam _registerType: RegisterType
+//! @remark One can achieve the same result with std::is_same but the synthax is longer and it needs to be wrapped into
+//! #ifdef blocks in case the architecture does not support SSE/AVX.
+template <typename _registerType>
+constexpr const bool Is__m128 = false;
+template <>
+constexpr const bool Is__m128<__m128> = true;
+
+
+
+//! @brief Template constant is only true for __m128d
+//! @tparam _registerType: RegisterType
+//! @remark One can achieve the same result with std::is_same but the synthax is longer and it needs to be wrapped into
+//! #ifdef blocks in case the architecture does not support SSE/AVX.
+template <typename _registerType>
+constexpr const bool Is__m128d = false;
+template <>
+constexpr const bool Is__m128d<__m128d> = true;
+
+
+
+//! @brief Template constant is only true for __m256
+//! @tparam _registerType: RegisterType
+//! @remark One can achieve the same result with std::is_same but the synthax is longer and it needs to be wrapped into
+//! #ifdef blocks in case the architecture does not support SSE/AVX.
+template <typename _registerType>
+constexpr const bool Is__m256 = false;
+#ifdef __AVX2__
+template <>
+constexpr const bool Is__m256<__m256> = true;
+#endif // __AVX2__
+
+
+
+//! @brief Template constant is only true for __m256d
+//! @tparam _registerType: RegisterType
+//! @remark One can achieve the same result with std::is_same but the synthax is longer and it needs to be wrapped into
+//! #ifdef blocks in case the architecture does not support SSE/AVX.
+template <typename _registerType>
+constexpr const bool Is__m256d = false;
+#ifdef __AVX2__
+template <>
+constexpr const bool Is__m256d<__m256d> = true;
+#endif // __AVX2__
+
 // Functions ----------------------------------------------------------------------------------------------------------
 
 
@@ -113,12 +177,6 @@ auto GetFittingRegister();
 //! @remark A function call should usually be combined with decltype
 template <typename _registerType, bool _returnTypeIfNoTARegister = false>
 constexpr auto GetDataType();
-
-//! @brief Returns if the template type is a sse register type
-//! @tparam _registerType: Register type
-//! @return Inatance of  the underlying data type of a register
-template <typename _registerType>
-constexpr bool IsRegisterType();
 
 //! @brief Gets the bitsize of the largest available register
 //! @return Bitsize of the largest available register

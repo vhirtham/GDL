@@ -81,7 +81,7 @@ template <typename _typeLhs, typename _typeTolerance, U32 _numComparedValuesSSE>
 constexpr bool operator==(const _typeLhs lhs, const Tolerance<_typeTolerance, _numComparedValuesSSE>& rhs)
 {
     static_assert(std::is_floating_point<_typeLhs>::value || std::is_integral<_typeLhs>::value ||
-                          sse::IsRegisterType<_typeLhs>(),
+                          sse::IsRegisterType<_typeLhs>,
                   "Lhs type must be an integral, floating point or sse register type.");
 
     return rhs == lhs;
@@ -93,7 +93,7 @@ template <typename _typeLhs, typename _typeTolerance, U32 _numComparedValuesSSE>
 constexpr bool operator!=(const _typeLhs lhs, const Tolerance<_typeTolerance, _numComparedValuesSSE>& rhs)
 {
     static_assert(std::is_floating_point<_typeLhs>::value || std::is_integral<_typeLhs>::value ||
-                          sse::IsRegisterType<_typeLhs>(),
+                          sse::IsRegisterType<_typeLhs>,
                   "Lhs type must be an integral, floating point or sse register type.");
 
     return rhs != lhs;

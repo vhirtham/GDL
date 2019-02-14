@@ -62,20 +62,6 @@ auto GetFittingRegister()
 
 
 
-template <typename _registerType>
-constexpr bool IsRegisterType()
-{
-    if constexpr (std::is_same<_registerType, __m128>::value || std::is_same<_registerType, __m128d>::value
-#ifdef __AVX2__
-                  || std::is_same<_registerType, __m256>::value || std::is_same<_registerType, __m256d>::value
-#endif // __AVX2__
-    )
-        return true;
-    return false;
-}
-
-
-
 constexpr U32 MaxRegisterSize()
 {
 #ifdef __AVX2__
