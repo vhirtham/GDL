@@ -118,6 +118,17 @@ constexpr const bool Is__m128d<__m128d> = true;
 
 
 
+//! @brief Template constant is only true for __m128i
+//! @tparam _registerType: RegisterType
+//! @remark One can achieve the same result with std::is_same but the synthax is longer and it needs to be wrapped into
+//! #ifdef blocks in case the architecture does not support SSE/AVX.
+template <typename _registerType>
+constexpr const bool Is__m128i = false;
+template <>
+constexpr const bool Is__m128i<__m128i> = true;
+
+
+
 //! @brief Template constant is only true for __m256
 //! @tparam _registerType: RegisterType
 //! @remark One can achieve the same result with std::is_same but the synthax is longer and it needs to be wrapped into
@@ -141,4 +152,19 @@ constexpr const bool Is__m256d = false;
 template <>
 constexpr const bool Is__m256d<__m256d> = true;
 #endif // __AVX2__
+
+
+
+//! @brief Template constant is only true for __m256i
+//! @tparam _registerType: RegisterType
+//! @remark One can achieve the same result with std::is_same but the synthax is longer and it needs to be wrapped into
+//! #ifdef blocks in case the architecture does not support SSE/AVX.
+template <typename _registerType>
+constexpr const bool Is__m256i = false;
+#ifdef __AVX2__
+template <>
+constexpr const bool Is__m256i<__m256i> = true;
+#endif // __AVX2__
+
+
 } // namespace GDL::sse

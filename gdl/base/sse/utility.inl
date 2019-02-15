@@ -16,6 +16,8 @@ namespace GDL::sse
 template <typename _registerType>
 constexpr U32 CalcMinNumArrayRegisters(U32 numValues)
 {
+    static_assert(IsRegisterType<_registerType>, "Function can only be used with compatible register types.");
+
     constexpr U32 registerSize = numRegisterValues<_registerType>;
     return (numValues / registerSize) + ((numValues % registerSize > 0) ? 1 : 0);
 }
@@ -25,14 +27,14 @@ constexpr U32 CalcMinNumArrayRegisters(U32 numValues)
 template <typename _registerType, bool _returnTypeIfNoTARegister>
 constexpr auto GetDataType()
 {
-    if constexpr (std::is_same<_registerType, __m128>::value)
+    if constexpr (Is__m128<_registerType>)
         return F32{0};
-    else if constexpr (std::is_same<_registerType, __m128d>::value)
+    else if constexpr (Is__m128d<_registerType>)
         return F64{0};
 #ifdef __AVX2__
-    else if constexpr (std::is_same<_registerType, __m256>::value)
+    else if constexpr (Is__m256<_registerType>)
         return F32{0};
-    else if constexpr (std::is_same<_registerType, __m256d>::value)
+    else if constexpr (Is__m256d<_registerType>)
         return F64{0};
 #endif // __AVX2__
     else if constexpr (_returnTypeIfNoTARegister)
@@ -77,10 +79,10 @@ constexpr U32 MaxRegisterSize()
 template <typename _registerType>
 inline auto ReinterpretAsIntRegister(_registerType reg)
 {
-    if constexpr (std::is_same<_registerType, __m128>::value || std::is_same<_registerType, __m128d>::value)
+    if constexpr (Is__m128<_registerType> || Is__m128d<_registerType>)
         return reinterpret_cast<__m128i>(reg);
 #ifdef __AVX2__
-    if constexpr (std::is_same<_registerType, __m256>::value || std::is_same<_registerType, __m256d>::value)
+    if constexpr (Is__m256<_registerType> || Is__m256d<_registerType>)
         return reinterpret_cast<__m256i>(reg);
 #endif // __AVX2__
     else

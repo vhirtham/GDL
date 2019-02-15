@@ -7,6 +7,7 @@
 #include <array>
 
 using namespace GDL;
+using namespace GDL::sse;
 
 
 constexpr U32 valueIndex = 3;
@@ -29,14 +30,14 @@ public:
 
     FixtureTemplate()
     {
-        if constexpr (std::is_same<RegisterType, __m128d>::value)
+        if constexpr (Is__m128d<_registerType>)
             reg = _mm_setr_pd(1.f, 2.f);
-        if constexpr (std::is_same<RegisterType, __m128>::value)
+        if constexpr (Is__m128<_registerType>)
             reg = _mm_setr_ps(1.f, 2.f, 3.f, 4.f);
 #ifdef __AVX2__
-        if constexpr (std::is_same<RegisterType, __m256d>::value)
+        if constexpr (Is__m256d<_registerType>)
             reg = _mm256_setr_pd(1., 2., 3., 4.);
-        if constexpr (std::is_same<RegisterType, __m256>::value)
+        if constexpr (Is__m256<_registerType>)
             reg = _mm256_setr_ps(1.f, 2.f, 3.f, 4.f, 5.f, 6.f, 7.f, 8.f);
 #endif // __AVX2__
     }
@@ -228,6 +229,9 @@ ValueType GetterDynamicFirstElementShuffle(__m128 reg, U32 index)
 }
 
 
+
+#ifdef __AVX2__
+
 ValueType GetterDynamicFirstElementShuffle(__m256 reg, U32 index)
 {
     switch (index)
@@ -252,6 +256,8 @@ ValueType GetterDynamicFirstElementShuffle(__m256 reg, U32 index)
         throw(int{0});
     }
 }
+
+#endif // __AVX2__
 
 
 // Dynamic Getter Benchmarks %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
