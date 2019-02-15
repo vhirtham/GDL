@@ -2,11 +2,73 @@
 #include "gdl/base/sse/swizzle.h"
 
 #include "gdl/base/sse/intrinsics.h"
-#include "gdl/base/sse/maskMacros.h"
 #include "gdl/base/sse/utility.h"
 
 namespace GDL::sse
 {
+
+
+template <U32 _src0, U32 _src1>
+inline __m128d Blend(__m128d source0, __m128d source1)
+{
+    return _mmx_blend_p<BlendMask<_src0, _src1>()>(source0, source1);
+}
+
+
+
+template <U32 _src0, U32 _src1, U32 _src2, U32 _src3, typename _registerType>
+inline _registerType Blend(_registerType source0, _registerType source1)
+{
+    static_assert(Is__m128<_registerType> || Is__m256d<_registerType>,
+                  "Function overload only compatble with __m128 and __m256d registers.");
+
+    return _mmx_blend_p<BlendMask<_src0, _src1, _src2, _src3>()>(source0, source1);
+}
+
+
+
+#ifdef __AVX2__
+
+template <U32 _src0, U32 _src1, U32 _src2, U32 _src3, U32 _src4, U32 _src5, U32 _src6, U32 _src7>
+inline __m256 Blend(__m256 source0, __m256 source1)
+{
+    return _mmx_blend_p<BlendMask<_src0, _src1, _src2, _src3, _src4, _src5, _src6, _src7>()>(source0, source1);
+}
+
+#endif // __AVX2__
+
+
+
+template <U32 _src0, U32 _src1>
+constexpr U32 BlendMask()
+{
+    static_assert(_src0 < 2 && _src1 < 2, "Values _src0 ans _src1 must be in the interval [0, 1]");
+
+    return (((_src1) << 1) | (_src0));
+}
+
+
+
+template <U32 _src0, U32 _src1, U32 _src2, U32 _src3>
+constexpr U32 BlendMask()
+{
+    static_assert(_src0 < 2 && _src1 < 2 && _src2 < 2 && _src3 < 2,
+                  "Values _src0-_src3 must be in the interval [0, 1]");
+
+    return (((_src3) << 3) | ((_src2) << 2) | ((_src1) << 1) | (_src0));
+}
+
+
+
+template <U32 _src0, U32 _src1, U32 _src2, U32 _src3, U32 _src4, U32 _src5, U32 _src6, U32 _src7>
+constexpr U32 BlendMask()
+{
+    static_assert(_src0 < 2 && _src1 < 2 && _src2 < 2 && _src3 < 2 && _src4 < 2 && _src5 < 2 && _src6 < 2 && _src7 < 2,
+                  "Values _src0-_src7 must be in the interval [0, 1]");
+
+    return (((_src7) << 7) | ((_src6) << 6) | ((_src5) << 5) | ((_src4) << 4) | ((_src3) << 3) | ((_src2) << 2) |
+            ((_src1) << 1) | (_src0));
+}
 
 
 
@@ -91,8 +153,6 @@ inline __m256 Permute(__m256 source)
 
     return _mm256_permutevar_ps(source, _mm256_setr_epi32(_src0, _src1, _src2, _src3, _src4, _src5, _src6, _src7));
 }
-
-
 
 #endif // __AVX2__
 

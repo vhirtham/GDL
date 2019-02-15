@@ -1,6 +1,7 @@
 #pragma once
 
 #include "gdl/base/exception.h"
+#include "gdl/base/sse/constants.h"
 #include "gdl/base/sse/utility.h"
 
 

@@ -3,8 +3,7 @@
 #include "gdl/base/sse/intrinsics.h"
 
 #include "gdl/base/exception.h"
-
-#include <x86intrin.h>
+#include "gdl/base/sse/constants.h"
 
 
 
@@ -432,6 +431,26 @@ inline auto _mmx_cvtsx_fx(_registerType reg)
 #endif // __AVX2__
     else
         throw Exception(__PRETTY_FUNCTION__, "Not defined for selected register type.");
+}
+
+
+
+template <I32 _blendMask, typename _registerType>
+inline auto _mmx_blend_p(_registerType src0, _registerType src1)
+{
+    using namespace GDL::sse;
+    static_assert(IsRegisterType<_registerType>, "Function can only be used with compatible register types.");
+
+    if constexpr (Is__m128<_registerType>)
+        return _mm_blend_ps(src0, src1, _blendMask);
+    else if constexpr (Is__m128d<_registerType>)
+        return _mm_blend_pd(src0, src1, _blendMask);
+#ifdef __AVX2__
+    else if constexpr (Is__m256<_registerType>)
+        return _mm256_blend_ps(src0, src1, _blendMask);
+    else
+        return _mm256_blend_pd(src0, src1, _blendMask);
+#endif // __AVX2__
 }
 
 

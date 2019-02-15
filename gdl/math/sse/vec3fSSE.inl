@@ -6,7 +6,6 @@
 #include "gdl/base/functions/alignment.h"
 #include "gdl/base/sse/directAccess.h"
 #include "gdl/base/sse/dotProduct.h"
-#include "gdl/base/sse/maskMacros.h"
 #include "gdl/base/sse/swizzle.h"
 
 #include <cassert>
@@ -54,7 +53,7 @@ Vec3fSSE<_isCol>::Vec3fSSE(F32 v0, F32 v1, F32 v2)
 
 template <bool _isCol>
 Vec3fSSE<_isCol>::Vec3fSSE(const Vec4fSSE<_isCol>& other)
-    : mData{_mm_blend_ps(other.mData, _mmx_setzero_p<__m128>(), BLEND_4_MASK(0, 0, 0, 1))}
+    : mData{sse::Blend<0, 0, 0, 1>(other.mData, _mmx_setzero_p<__m128>())}
 {
 }
 

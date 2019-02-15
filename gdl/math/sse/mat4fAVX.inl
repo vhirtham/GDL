@@ -8,7 +8,6 @@
 #include "gdl/base/exception.h"
 #include "gdl/base/functions/alignment.h"
 #include "gdl/base/sse/directAccess.h"
-#include "gdl/base/sse/maskMacros.h"
 #include "gdl/base/sse/swizzle.h"
 #include "gdl/base/sse/transpose.h"
 #include "gdl/math/vec4.h"
@@ -187,7 +186,7 @@ Mat4fAVX Mat4fAVX::Transpose() const
     __m256 tmp0 = sse::Shuffle<0, 2, 0, 2>(mData[0], mData[1]);
     __m256 tmp1 = sse::Shuffle<1, 3, 1, 3>(mData[0], mData[1]);
 
-    __m256 tmp2 = _mm256_blend_ps(tmp0, tmp1, BLEND_8_MASK(0, 0, 0, 0, 1, 1, 1, 1));
+    __m256 tmp2 = sse::Blend<0, 0, 0, 0, 1, 1, 1, 1>(tmp0, tmp1);
     __m256 tmp3 = sse::Permute2F128<0, 1, 1, 0>(tmp0, tmp1);
 
     tmp0 = sse::Shuffle<0, 2, 0, 2>(tmp2, tmp3);

@@ -4,9 +4,9 @@
 #pragma GCC diagnostic ignored "-Wignored-attributes"
 #endif
 
+#include "gdl/base/fundamentalTypes.h"
 #include <x86intrin.h>
 
-#include <gdl/base/fundamentalTypes.h>
 
 
 namespace GDL
@@ -188,6 +188,18 @@ inline _registerType _mmx_andnot_p(_registerType lhs, _registerType rhs);
 template <typename _registerType>
 inline auto _mmx_movemask_epi8(_registerType reg);
 
+
+//! @brief Creates a new register where each value is selected from the two source registers values at the same
+//! position.
+//! @tparam _blendMask: Bitmask that determines the value composition. Have a look at Intels documentation of
+//! _mm_blend_ps, _mm_blend_pd, _mm256_blend_ps or _mm256_blend_ps for detailed informations.
+//! @tparam _registerType: Register type
+//! @param src0: First source register
+//! @param src1: second source register
+//! @return Register with blended values
+template <I32 _blendMask, typename _registerType>
+inline auto _mmx_blend_p(_registerType src0, _registerType src1);
+
 //! @brief Returns a register with an arbitrary combination of values from the input register as long as the source
 //! values and the destination are in the same SIMD lane.
 //! @tparam _permuteMask: Bitmask that determines the value composition. Have a look at Intels documentation of
@@ -207,8 +219,8 @@ inline auto _mmx_permute_p(_registerType reg);
 //! @param src0: First register which serves as source
 //! @param src1: Second register which serves as source
 //! @return AVX register with an arbitrary combination of the two source registers lanes
-template <I32 _shuffleMask, typename _registerType>
-inline auto _mmx_shuffle_p(_registerType src0, _registerType src1);
+template <I32 _permuteMask, typename _registerType>
+inline auto _mmx_permute2f128_p(_registerType src0, _registerType src1);
 
 #endif // __AVX2__
 

@@ -8,6 +8,48 @@ namespace GDL::sse
 {
 
 
+//! @brief Blends two registers into a new register
+//! @tparam _src0 - _src1: Index of the source register that should provide the corresponding value
+//! @param source0: First source register
+//! @param source1: Second source register
+//! @return Register with blended values
+template <U32 _src0, U32 _src1>
+inline __m128d Blend(__m128d source0, __m128d source1);
+
+//! @brief Blends two registers into a new register
+//! @tparam _src0 - _src3: Index of the source register that should provide the corresponding value
+//! @tparam _registerType: Register type
+//! @param source0: First source register
+//! @param source1: Second source register
+//! @return Register with blended values
+template <U32 _src0, U32 _src1, U32 _src2, U32 _src3, typename _registerType>
+inline _registerType Blend(_registerType source0, _registerType source1);
+
+//! @brief Blends two registers into a new register
+//! @tparam _src0 - _src7: Index of the source register that should provide the corresponding value
+//! @param source0: First source register
+//! @param source1: Second source register
+//! @return Register with blended values
+template <U32 _src0, U32 _src1, U32 _src2, U32 _src3, U32 _src4, U32 _src5, U32 _src6, U32 _src7>
+inline __m256 Blend(__m256 source0, __m256 source1);
+
+//! @brief Creates a mask for blend intrinsics
+//! @tparam _src0 - _src1: Index of the source register that should provide the corresponding value
+//! @return Mask
+template <U32 _src0, U32 _src1>
+constexpr U32 BlendMask();
+
+//! @brief Creates a mask for blend intrinsics
+//! @tparam _src0 - _src3: Index of the source register that should provide the corresponding value
+//! @return Mask
+template <U32 _src0, U32 _src1, U32 _src2, U32 _src3>
+constexpr U32 BlendMask();
+
+//! @brief Creates a mask for blend intrinsics
+//! @tparam _src0 - _src7: Index of the source register that should provide the corresponding value
+//! @return Mask
+template <U32 _src0, U32 _src1, U32 _src2, U32 _src3, U32 _src4, U32 _src5, U32 _src6, U32 _src7>
+constexpr U32 BlendMask();
 
 //! @brief Picks the value at position _index in each lane and returns a register where each lane element contains the
 //! selected value

@@ -2,7 +2,6 @@
 
 #include "gdl/base/sse/transpose.h"
 
-#include "gdl/base/sse/maskMacros.h"
 #include "gdl/base/sse/swizzle.h"
 #include "gdl/base/sse/utility.h"
 
@@ -84,17 +83,17 @@ inline void Transpose(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 in4
 
     // Faster than pure shuffle (Around 6-8%). Have a look at the link in the function description
     tmpBlend = Shuffle<2, 3, 0, 1>(out0, out2);
-    tmp0 = _mm256_blend_ps(out0, tmpBlend, BLEND_8_MASK(0, 0, 1, 1, 0, 0, 1, 1));
-    tmp1 = _mm256_blend_ps(out2, tmpBlend, BLEND_8_MASK(1, 1, 0, 0, 1, 1, 0, 0));
+    tmp0 = Blend<0, 0, 1, 1, 0, 0, 1, 1>(out0, tmpBlend);
+    tmp1 = Blend<1, 1, 0, 0, 1, 1, 0, 0>(out2, tmpBlend);
     tmpBlend = Shuffle<2, 3, 0, 1>(out1, out3);
-    tmp2 = _mm256_blend_ps(out1, tmpBlend, BLEND_8_MASK(0, 0, 1, 1, 0, 0, 1, 1));
-    tmp3 = _mm256_blend_ps(out3, tmpBlend, BLEND_8_MASK(1, 1, 0, 0, 1, 1, 0, 0));
+    tmp2 = Blend<0, 0, 1, 1, 0, 0, 1, 1>(out1, tmpBlend);
+    tmp3 = Blend<1, 1, 0, 0, 1, 1, 0, 0>(out3, tmpBlend);
     tmpBlend = Shuffle<2, 3, 0, 1>(out4, out6);
-    tmp4 = _mm256_blend_ps(out4, tmpBlend, BLEND_8_MASK(0, 0, 1, 1, 0, 0, 1, 1));
-    tmp5 = _mm256_blend_ps(out6, tmpBlend, BLEND_8_MASK(1, 1, 0, 0, 1, 1, 0, 0));
+    tmp4 = Blend<0, 0, 1, 1, 0, 0, 1, 1>(out4, tmpBlend);
+    tmp5 = Blend<1, 1, 0, 0, 1, 1, 0, 0>(out6, tmpBlend);
     tmpBlend = Shuffle<2, 3, 0, 1>(out5, out7);
-    tmp6 = _mm256_blend_ps(out5, tmpBlend, BLEND_8_MASK(0, 0, 1, 1, 0, 0, 1, 1));
-    tmp7 = _mm256_blend_ps(out7, tmpBlend, BLEND_8_MASK(1, 1, 0, 0, 1, 1, 0, 0));
+    tmp6 = Blend<0, 0, 1, 1, 0, 0, 1, 1>(out5, tmpBlend);
+    tmp7 = Blend<1, 1, 0, 0, 1, 1, 0, 0>(out7, tmpBlend);
 
     out0 = Permute2F128<0, 0, 1, 0>(tmp0, tmp4);
     out1 = Permute2F128<0, 0, 1, 0>(tmp1, tmp5);
