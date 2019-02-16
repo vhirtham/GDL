@@ -91,7 +91,7 @@ void TestToleranceSSE()
 
             // Not compared values are equal to ref
             for (U32 j = _count; j < numRegisterEntries; ++j)
-                sse::SetValue(cmpAll, sse::GetValue(ref, j), j);
+                sse::SetValue(cmpAll, j, sse::GetValue(ref, j));
 
             if (std::abs(i) <= toleranceValue)
             {
@@ -107,7 +107,7 @@ void TestToleranceSSE()
             // Up to all compared values might be out of tolerance
             for (U32 j = _count; j < numRegisterEntries; ++j)
             {
-                sse::SetValue(cmpAll, -1337, j);
+                sse::SetValue(cmpAll, j, -1337);
                 if (std::abs(i) <= toleranceValue)
                 {
                     BOOST_CHECK(cmpAll == tolerance);
@@ -127,7 +127,7 @@ void TestToleranceSSE()
             {
                 cmpSingle = ref;
 
-                sse::SetValue(cmpSingle, sse::GetValue(cmpSingle, j) + i, j);
+                sse::SetValue(cmpSingle, j, sse::GetValue(cmpSingle, j) + i);
                 if (std::abs(i) <= toleranceValue)
                 {
                     BOOST_CHECK(cmpSingle == tolerance);
@@ -160,7 +160,7 @@ void TestToleranceSSE()
     for (U32 i = 0; i < numRegisterEntries; ++i)
     {
         toleranceValueSSE = _mmx_set1_p<_registerType>(toleranceValue);
-        sse::SetValue(toleranceValueSSE, -1, i);
+        sse::SetValue(toleranceValueSSE, i, -1);
         GDL_CHECK_THROW_DEV(ToleranceType(ref, toleranceValueSSE), Exception);
     }
 

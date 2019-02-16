@@ -23,7 +23,7 @@ void TestCompareAllEqual()
 
     alignas(sse::alignmentBytes<_registerType>) _registerType lhs = _mmx_setzero_p<_registerType>();
     for (U32 i = 0; i < numRegisterEntries; ++i)
-        sse::SetValue(lhs, static_cast<DataType>(i + 1), i);
+        sse::SetValue(lhs, i, static_cast<DataType>(i + 1));
     alignas(sse::alignmentBytes<_registerType>) _registerType rhs;
 
 
@@ -42,22 +42,22 @@ void TestCompareAllEqual()
             // all unused values return true
             rhs = lhs;
             BOOST_CHECK(compEQ(lhs, rhs));
-            sse::SetValue(rhs, sse::GetValue(lhs, i) + std::numeric_limits<DataType>::epsilon() * numRegisterEntries,
-                          i);
+            sse::SetValue(rhs, i,
+                          sse::GetValue(lhs, i) + std::numeric_limits<DataType>::epsilon() * numRegisterEntries);
             BOOST_CHECK(!compEQ(lhs, rhs));
-            sse::SetValue(rhs, sse::GetValue(lhs, i) - std::numeric_limits<DataType>::epsilon() * numRegisterEntries,
-                          i);
+            sse::SetValue(rhs, i,
+                          sse::GetValue(lhs, i) - std::numeric_limits<DataType>::epsilon() * numRegisterEntries);
             BOOST_CHECK(!compEQ(lhs, rhs));
 
             // one unused value returns false
             rhs = lhs;
-            sse::SetValue(rhs, 0, j);
+            sse::SetValue(rhs, j, 0);
             BOOST_CHECK(compEQ(lhs, rhs));
-            sse::SetValue(rhs, sse::GetValue(lhs, i) + std::numeric_limits<DataType>::epsilon() * numRegisterEntries,
-                          i);
+            sse::SetValue(rhs, i,
+                          sse::GetValue(lhs, i) + std::numeric_limits<DataType>::epsilon() * numRegisterEntries);
             BOOST_CHECK(!compEQ(lhs, rhs));
-            sse::SetValue(rhs, sse::GetValue(lhs, i) - std::numeric_limits<DataType>::epsilon() * numRegisterEntries,
-                          i);
+            sse::SetValue(rhs, i,
+                          sse::GetValue(lhs, i) - std::numeric_limits<DataType>::epsilon() * numRegisterEntries);
             BOOST_CHECK(!compEQ(lhs, rhs));
         }
 
@@ -65,15 +65,15 @@ void TestCompareAllEqual()
         rhs = lhs;
         for (U32 j = _count; j < numRegisterEntries; ++j)
         {
-            sse::SetValue(rhs, 0, j);
+            sse::SetValue(rhs, j, 0);
 
-            sse::SetValue(rhs, sse::GetValue(lhs, i) + std::numeric_limits<DataType>::epsilon() * numRegisterEntries,
-                          i);
+            sse::SetValue(rhs, i,
+                          sse::GetValue(lhs, i) + std::numeric_limits<DataType>::epsilon() * numRegisterEntries);
             BOOST_CHECK(!compEQ(lhs, rhs));
-            sse::SetValue(rhs, sse::GetValue(lhs, i) - std::numeric_limits<DataType>::epsilon() * numRegisterEntries,
-                          i);
+            sse::SetValue(rhs, i,
+                          sse::GetValue(lhs, i) - std::numeric_limits<DataType>::epsilon() * numRegisterEntries);
             BOOST_CHECK(!compEQ(lhs, rhs));
-            sse::SetValue(rhs, sse::GetValue(lhs, i), i);
+            sse::SetValue(rhs, i, sse::GetValue(lhs, i));
             BOOST_CHECK(compEQ(lhs, rhs));
         }
     }
@@ -85,11 +85,11 @@ void TestCompareAllEqual()
         for (U32 i = 0; i < _count; ++i)
         {
             // all unused values return true
-            sse::SetValue(rhs, 0, i);
+            sse::SetValue(rhs, i, 0);
             BOOST_CHECK(!compEQ(lhs, rhs));
 
             // one unused value returns false
-            sse::SetValue(rhs, 0, j);
+            sse::SetValue(rhs, j, 0);
             BOOST_CHECK(!compEQ(lhs, rhs));
         }
     }
@@ -129,7 +129,7 @@ void TestCompareAllLessEqual()
 
     alignas(sse::alignmentBytes<_registerType>) _registerType lhs = _mmx_setzero_p<_registerType>();
     for (U32 i = 0; i < numRegisterEntries; ++i)
-        sse::SetValue(lhs, static_cast<DataType>(i + 1), i);
+        sse::SetValue(lhs, i, static_cast<DataType>(i + 1));
     alignas(sse::alignmentBytes<_registerType>) _registerType rhs;
 
 
@@ -148,22 +148,22 @@ void TestCompareAllLessEqual()
             // all unused values return true
             rhs = lhs;
             BOOST_CHECK(compLE(lhs, rhs));
-            sse::SetValue(rhs, sse::GetValue(lhs, i) + std::numeric_limits<DataType>::epsilon() * numRegisterEntries,
-                          i);
+            sse::SetValue(rhs, i,
+                          sse::GetValue(lhs, i) + std::numeric_limits<DataType>::epsilon() * numRegisterEntries);
             BOOST_CHECK(compLE(lhs, rhs));
-            sse::SetValue(rhs, sse::GetValue(lhs, i) - std::numeric_limits<DataType>::epsilon() * numRegisterEntries,
-                          i);
+            sse::SetValue(rhs, i,
+                          sse::GetValue(lhs, i) - std::numeric_limits<DataType>::epsilon() * numRegisterEntries);
             BOOST_CHECK(!compLE(lhs, rhs));
 
             // one unused value returns false
             rhs = lhs;
             sse::SetValue(rhs, 0, j);
             BOOST_CHECK(compLE(lhs, rhs));
-            sse::SetValue(rhs, sse::GetValue(lhs, i) + std::numeric_limits<DataType>::epsilon() * numRegisterEntries,
-                          i);
+            sse::SetValue(rhs, i,
+                          sse::GetValue(lhs, i) + std::numeric_limits<DataType>::epsilon() * numRegisterEntries);
             BOOST_CHECK(compLE(lhs, rhs));
-            sse::SetValue(rhs, sse::GetValue(lhs, i) - std::numeric_limits<DataType>::epsilon() * numRegisterEntries,
-                          i);
+            sse::SetValue(rhs, i,
+                          sse::GetValue(lhs, i) - std::numeric_limits<DataType>::epsilon() * numRegisterEntries);
             BOOST_CHECK(!compLE(lhs, rhs));
         }
 
@@ -171,15 +171,15 @@ void TestCompareAllLessEqual()
         rhs = lhs;
         for (U32 j = _count; j < numRegisterEntries; ++j)
         {
-            sse::SetValue(rhs, 0, j);
+            sse::SetValue(rhs, j, 0);
 
-            sse::SetValue(rhs, sse::GetValue(lhs, i) + std::numeric_limits<DataType>::epsilon() * numRegisterEntries,
-                          i);
+            sse::SetValue(rhs, i,
+                          sse::GetValue(lhs, i) + std::numeric_limits<DataType>::epsilon() * numRegisterEntries);
             BOOST_CHECK(compLE(lhs, rhs));
-            sse::SetValue(rhs, sse::GetValue(lhs, i) - std::numeric_limits<DataType>::epsilon() * numRegisterEntries,
-                          i);
+            sse::SetValue(rhs, i,
+                          sse::GetValue(lhs, i) - std::numeric_limits<DataType>::epsilon() * numRegisterEntries);
             BOOST_CHECK(!compLE(lhs, rhs));
-            sse::SetValue(rhs, sse::GetValue(lhs, i), i);
+            sse::SetValue(rhs, i, sse::GetValue(lhs, i));
             BOOST_CHECK(compLE(lhs, rhs));
         }
     }
@@ -191,11 +191,11 @@ void TestCompareAllLessEqual()
         for (U32 i = 0; i < _count; ++i)
         {
             // all unused values return true
-            sse::SetValue(rhs, 0, i);
+            sse::SetValue(rhs, i, 0);
             BOOST_CHECK(!compLE(lhs, rhs));
 
             // one unused value returns false
-            sse::SetValue(rhs, 0, j);
+            sse::SetValue(rhs, j, 0);
             BOOST_CHECK(!compLE(lhs, rhs));
         }
     }
@@ -235,7 +235,7 @@ void TestCompareAllGreaterThan()
 
     alignas(sse::alignmentBytes<_registerType>) _registerType lhs = _mmx_setzero_p<_registerType>();
     for (U32 i = 0; i < numRegisterEntries; ++i)
-        sse::SetValue(lhs, static_cast<DataType>(i + 1), i);
+        sse::SetValue(lhs, i, static_cast<DataType>(i + 1));
     alignas(sse::alignmentBytes<_registerType>) _registerType rhs;
 
 
@@ -254,18 +254,18 @@ void TestCompareAllGreaterThan()
             // all unused values return true
             rhs = _mmx_sub_p(lhs, _mmx_set1_p<_registerType>(1));
             BOOST_CHECK(compGT(lhs, rhs));
-            sse::SetValue(rhs, sse::GetValue(lhs, i) + 1, i);
+            sse::SetValue(rhs, i, sse::GetValue(lhs, i) + 1);
             BOOST_CHECK(!compGT(lhs, rhs));
-            sse::SetValue(rhs, sse::GetValue(lhs, i) + 10, i);
+            sse::SetValue(rhs, i, sse::GetValue(lhs, i) + 10);
             BOOST_CHECK(!compGT(lhs, rhs));
 
             // one unused value returns false
             rhs = _mmx_sub_p(lhs, _mmx_set1_p<_registerType>(1));
-            sse::SetValue(rhs, sse::GetValue(lhs, i) + 10, j);
+            sse::SetValue(rhs, j, sse::GetValue(lhs, i) + 10);
             BOOST_CHECK(compGT(lhs, rhs));
-            sse::SetValue(rhs, sse::GetValue(lhs, i) + 1, i);
+            sse::SetValue(rhs, i, sse::GetValue(lhs, i) + 1);
             BOOST_CHECK(!compGT(lhs, rhs));
-            sse::SetValue(rhs, sse::GetValue(lhs, i) + 10, i);
+            sse::SetValue(rhs, i, sse::GetValue(lhs, i) + 10);
             BOOST_CHECK(!compGT(lhs, rhs));
         }
 
@@ -273,13 +273,13 @@ void TestCompareAllGreaterThan()
         rhs = _mmx_sub_p(lhs, _mmx_set1_p<_registerType>(1));
         for (U32 j = _count; j < numRegisterEntries; ++j)
         {
-            sse::SetValue(rhs, sse::GetValue(lhs, i) + 10, j);
+            sse::SetValue(rhs, j, sse::GetValue(lhs, i) + 10);
 
-            sse::SetValue(rhs, sse::GetValue(lhs, i) + 1, i);
+            sse::SetValue(rhs, i, sse::GetValue(lhs, i) + 1);
             BOOST_CHECK(!compGT(lhs, rhs));
-            sse::SetValue(rhs, sse::GetValue(lhs, i) + 10, i);
+            sse::SetValue(rhs, i, sse::GetValue(lhs, i) + 10);
             BOOST_CHECK(!compGT(lhs, rhs));
-            sse::SetValue(rhs, sse::GetValue(lhs, i) - 1, i);
+            sse::SetValue(rhs, i, sse::GetValue(lhs, i) - 1);
             BOOST_CHECK(compGT(lhs, rhs));
         }
     }
@@ -291,11 +291,11 @@ void TestCompareAllGreaterThan()
         for (U32 i = 0; i < _count; ++i)
         {
             // all unused values return true
-            sse::SetValue(rhs, sse::GetValue(lhs, i) + 10, i);
+            sse::SetValue(rhs, i, sse::GetValue(lhs, i) + 10);
             BOOST_CHECK(!compGT(lhs, rhs));
 
             // one unused value returns false
-            sse::SetValue(rhs, sse::GetValue(lhs, i) + 10, j);
+            sse::SetValue(rhs, j, sse::GetValue(lhs, i) + 10);
             BOOST_CHECK(!compGT(lhs, rhs));
         }
     }

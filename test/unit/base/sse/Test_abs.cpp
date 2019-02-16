@@ -30,10 +30,10 @@ void TestAbs()
     for (I32 i = 0; i < static_cast<I32>(numRegisterEntries); ++i)
     {
 
-        sse::SetValue(ref, static_cast<DataType>(i), static_cast<U32>(i));
-        sse::SetValue(cmp, static_cast<DataType>(-i), static_cast<U32>(i));
-        sse::SetValue(cmp2, static_cast<DataType>(i * ((i % 2 == 0) ? 1 : -1)), static_cast<U32>(i));
-        sse::SetValue(cmp3, static_cast<DataType>(i * ((i % 3 == 0) ? 1 : -1)), static_cast<U32>(i));
+        sse::SetValue(ref, static_cast<U32>(i), static_cast<DataType>(i));
+        sse::SetValue(cmp, static_cast<U32>(i), static_cast<DataType>(-i));
+        sse::SetValue(cmp2, static_cast<U32>(i), static_cast<DataType>(i * ((i % 2 == 0) ? 1 : -1)));
+        sse::SetValue(cmp3, static_cast<U32>(i), static_cast<DataType>(i * ((i % 3 == 0) ? 1 : -1)));
     }
 
     BOOST_CHECK(cmpAllElementsEqual(ref, sse::Abs(ref)));

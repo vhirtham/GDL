@@ -307,7 +307,7 @@ void TestPermute2F128SingleRegister()
 {
     _registerType a = _mmx_setzero_p<_registerType>();
     for (U32 i = 0; i < numRegisterValues<_registerType>; ++i)
-        SetValue(a, i + 1, i);
+        SetValue(a, i, i + 1);
 
     _registerType b = Permute2F128<_lane0, _lane1>(a);
 
@@ -335,8 +335,8 @@ void TestPermute2F128TwoRegisters()
 
     for (U32 i = 0; i < numRegisterValues<_registerType>; ++i)
     {
-        SetValue(a, i + 1, i);
-        SetValue(a, i + 1 + numRegisterValues<_registerType>, i);
+        SetValue(a, i, i + 1);
+        SetValue(a, i, i + 1 + numRegisterValues<_registerType>);
     }
 
     _registerType c = Permute2F128<_src0, _lane0, _src1, _lane1>(a, b);
@@ -397,8 +397,8 @@ void TestShuffle2()
     _registerType b = _mmx_setzero_p<_registerType>();
     for (U32 i = 0; i < numRegisterValues<_registerType>; ++i)
     {
-        SetValue(a, i + 1 + numRegisterValues<_registerType>, i);
-        SetValue(b, i + 1 + numRegisterValues<_registerType>, i);
+        SetValue(a, i, i + 1 + numRegisterValues<_registerType>);
+        SetValue(b, i, i + 1 + numRegisterValues<_registerType>);
     }
 
     const _registerType c = Shuffle<_i, _j>(a, b);
@@ -478,8 +478,8 @@ void TestShuffle4()
     _registerType b = _mmx_setzero_p<_registerType>();
     for (U32 i = 0; i < numRegisterValues<_registerType>; ++i)
     {
-        SetValue(a, i + 1 + numRegisterValues<_registerType>, i);
-        SetValue(b, i + 1 + numRegisterValues<_registerType>, i);
+        SetValue(a, i, i + 1 + numRegisterValues<_registerType>);
+        SetValue(b, i, i + 1 + numRegisterValues<_registerType>);
     }
 
     const _registerType c = Shuffle<_i, _j, _k, _l>(a, b);

@@ -97,8 +97,8 @@ void TestSetValue()
     _registerType reg2 = _mmx_setzero_p<_registerType>();
     BOOST_CHECK(reg2 == ApproxZero<_registerType>());
     for (U32 i = 0; i < values.size(); ++i)
-        sse::SetValue(reg2, i + 1, i);
-    GDL_CHECK_THROW_DEV(sse::SetValue(reg2, 10, sse::numRegisterValues<_registerType>), Exception);
+        sse::SetValue(reg2, i, i + 1);
+    GDL_CHECK_THROW_DEV(sse::SetValue(reg2, sse::numRegisterValues<_registerType>, 10), Exception);
 
     BOOST_CHECK(reg2 != ApproxZero<_registerType>());
 

@@ -56,7 +56,7 @@ inline auto SetValue(_registerType& reg, const _type value)
 
 
 template <typename _registerType, typename _type>
-inline auto SetValue(_registerType& reg, const _type value, const U32 index)
+inline auto SetValue(_registerType& reg, const U32 index, const _type value)
 {
     using ValueType = decltype(sse::GetDataType<_registerType>());
 

@@ -453,7 +453,7 @@ BENCHMARK_F(FixtureBenchmark, SetterDynamicCurrentImplementation)(benchmark::Sta
 {
     for (auto _ : state)
         for (U32 i = 0; i < 100; ++i)
-            sse::SetValue(reg, static_cast<ValueType>(i), valueIndex);
+            sse::SetValue(reg, valueIndex, static_cast<ValueType>(i));
 }
 
 #endif // DISABLE_BENCHMARK_DYNAMIC_GETTER

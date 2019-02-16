@@ -41,10 +41,10 @@ inline auto SetValue(_registerType& reg, const _type value);
 //! @tparam _registerType: Register type
 //! @tparam _type: Type of the passed value
 //! @param reg: Register
-//! @param value: Value that should be set
 //! @param index: Index of the value
+//! @param value: Value that should be set
 template <typename _registerType, typename _type>
-inline auto SetValue(_registerType& reg, const _type value, const U32 _index);
+inline auto SetValue(_registerType& reg, const U32 _index, const _type value);
 
 } // namespace GDL::sse
 

@@ -71,8 +71,8 @@ void TestDotProduct128()
 
     for (U32 i = 0; i < sse::numRegisterValues<__m128>; ++i)
     {
-        sse::SetValue(reg0, testValues0[i], i);
-        sse::SetValue(reg1, testValues1[i], i);
+        sse::SetValue(reg0, i, testValues0[i]);
+        sse::SetValue(reg1, i, testValues1[i]);
     }
 
     F32 exp = 0;
@@ -187,8 +187,8 @@ void TestDotProduct256()
 
     for (U32 i = 0; i < sse::numRegisterValues<__m256>; ++i)
     {
-        sse::SetValue(reg0, testValues0[i], i);
-        sse::SetValue(reg1, testValues1[i], i);
+        sse::SetValue(reg0, i, testValues0[i]);
+        sse::SetValue(reg1, i, testValues1[i]);
     }
 
     F32 exp0 = 0;
