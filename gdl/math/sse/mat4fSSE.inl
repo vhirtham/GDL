@@ -5,6 +5,7 @@
 #include "gdl/base/exception.h"
 #include "gdl/base/functions/alignment.h"
 #include "gdl/base/sse/directAccess.h"
+#include "gdl/base/sse/negate.h"
 #include "gdl/base/sse/swizzle.h"
 #include "gdl/base/sse/transpose.h"
 #include "gdl/math/vec4.h"
@@ -170,7 +171,7 @@ F32 Mat4fSSE::Det() const
     __m128 tmp1 = Permute<2, 3, 0, 1>(_mmx_fmsub_p(mData[2], d1032, _mmx_mul_p(mData[3], c1032)));
     __m128 tmp2 = _mmx_fmsub_p(Permute<3, 2, 0, 1>(mData[2]), d1032, _mmx_mul_p(Permute<3, 2, 0, 1>(mData[3]), c1032));
 
-    __m128 tmp3 = _mm_xor_ps(tmp2, _mmx_setr_p<__m128>(-0.f, -0.f, 0.f, 0.f));
+    __m128 tmp3 = Negate<1, 1, 0, 0>(tmp2);
 
     __m128 b1032 = Permute<1, 0, 3, 2>(mData[1]);
     __m128 b2310 = Permute<2, 3, 1, 0>(mData[1]);

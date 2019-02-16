@@ -181,6 +181,14 @@ inline _registerType _mmx_min_p(_registerType lhs, _registerType rhs);
 template <typename _registerType>
 inline _registerType _mmx_andnot_p(_registerType lhs, _registerType rhs);
 
+//! @brief Performs a xor operation on the passed registers
+//! @tparam _registerType: Register type
+//! @param lhs: Left hand side register
+//! @param rhs: Right hand side register
+//! @return Result of the xor operation
+template <typename _registerType>
+inline _registerType _mmx_xor_p(_registerType lhs, _registerType rhs);
+
 //! @brief Create mask from the most significant bit of each 8-bit element in a register and returns it
 //! @tparam _registerType: Register type
 //! @param reg: Register which serves as source for the mask

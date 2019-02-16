@@ -1,5 +1,6 @@
 #include <benchmark/benchmark.h>
 
+#include "gdl/base/sse/negate.h"
 #include "gdl/base/sse/swizzle.h"
 #include "gdl/math/sse/mat2fSSE.h"
 #include "gdl/math/sse/vec2fSSE.h"
@@ -46,8 +47,7 @@ inline F32 Orientation_Alternative2(Vec2fSSE<_isCol> a, Vec2fSSE<_isCol> b, Vec2
     __m128 tmp0 = _mmx_sub_p(b.DataSSE(), c.DataSSE());
 
     __m128 tmp1 = sse::Shuffle<1, 0, 1, 0>(tmp0, c.DataSSE());
-    __m128 tmp2 =
-            _mm_xor_ps(sse::Shuffle<0, 1, 0, 1>(a.DataSSE(), b.DataSSE()), _mmx_setr_p<__m128>(0.f, -0.f, 0.f, -0.f));
+    __m128 tmp2 = sse::Negate<0, 1, 0, 1>(sse::Shuffle<0, 1, 0, 1>(a.DataSSE(), b.DataSSE()));
     return sse::DotProductF32(tmp1, tmp2);
 }
 

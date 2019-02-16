@@ -419,6 +419,26 @@ inline _registerType _mmx_andnot_p(_registerType lhs, _registerType rhs)
 
 
 template <typename _registerType>
+inline _registerType _mmx_xor_p(_registerType lhs, _registerType rhs)
+{
+    using namespace GDL::sse;
+    static_assert(IsRegisterType<_registerType>, "Function can only be used with compatible register types.");
+
+    if constexpr (Is__m128<_registerType>)
+        return _mm_xor_ps(lhs, rhs);
+    else if constexpr (Is__m128d<_registerType>)
+        return _mm_xor_pd(lhs, rhs);
+#ifdef __AVX2__
+    else if constexpr (Is__m256<_registerType>)
+        return _mm256_xor_ps(lhs, rhs);
+    else
+        return _mm256_xor_pd(lhs, rhs);
+#endif // __AVX2__
+}
+
+
+
+template <typename _registerType>
 inline auto _mmx_movemask_epi8(_registerType reg)
 {
     using namespace GDL::sse;
