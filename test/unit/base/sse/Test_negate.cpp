@@ -53,6 +53,7 @@ void TestNegate4()
 }
 
 
+#ifdef __AVX2__
 
 template <U32 _i = 0, U32 _j = 0, U32 _k = 0, U32 _l = 0, U32 _m = 0, U32 _n = 0, U32 _o = 0, U32 _p = 0>
 void TestNegate256()
@@ -88,7 +89,7 @@ void TestNegate256()
     if constexpr (pNext < 2)
         TestNegate256<iNext, jNext, kNext, lNext, mNext, nNext, oNext, pNext>();
 }
-
+#endif // __AVX2__
 
 
 BOOST_AUTO_TEST_CASE(Test_Negate)
