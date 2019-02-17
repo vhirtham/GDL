@@ -8,6 +8,7 @@
 #include "gdl/base/exception.h"
 #include "gdl/base/functions/alignment.h"
 #include "gdl/base/sse/directAccess.h"
+#include "gdl/base/sse/determinant.h"
 #include "gdl/base/sse/swizzle.h"
 #include "gdl/base/sse/transpose.h"
 #include "gdl/math/vec4.h"
@@ -132,6 +133,8 @@ Mat4fAVX Mat4fAVX::operator*(const Mat4fAVX& rhs) const
                                                    _mmx_mul_p(tmpDC, _mm256_permutevar_ps(rhs.mData[1], mask32))))));
 }
 
+
+
 Vec4fSSE<true> Mat4fAVX::operator*(const Vec4fSSE<true>& rhs) const
 {
     __m256 tmp = _mm256_broadcast_ps(&rhs.mData);
@@ -159,24 +162,7 @@ const std::array<F32, 16> Mat4fAVX::Data() const
 
 F32 Mat4fAVX::Det() const
 {
-    using namespace GDL::sse;
-
-    __m256 tmp0P1230 = Permute<1, 2, 3, 0>(mData[0]);
-    __m256 tmp1P1230 = Permute<1, 2, 3, 0>(mData[1]);
-    __m256 tmp0 = _mmx_fmsub_p(mData[0], tmp1P1230, _mmx_mul_p(mData[1], tmp0P1230));
-    tmp0 = _mm256_xor_ps(tmp0, _mmx_setr_p<__m256>(-0.f, 0.f, -0.f, 0.f, 0.f, 0.f, 0.f, 0.f));
-
-    __m256 tmp0P2323 = Permute<2, 3, 2, 3>(mData[0]);
-    __m256 tmp1P2323 = Permute<2, 3, 2, 3>(mData[1]);
-    __m256 tmp1 = _mmx_fmsub_p(mData[0], tmp1P2323, _mmx_mul_p(mData[1], tmp0P2323));
-
-    __m256 tmp2 = sse::Permute2F128<0, 0, 1, 0>(tmp0, tmp1);
-    __m256 tmp3 = sse::Permute2F128<0, 1, 1, 1>(tmp0, tmp1);
-    tmp2 = _mm256_permutevar_ps(tmp2, _mm256_setr_epi32(2, 3, 0, 1, 1, 0, 2, 3));
-
-    __m256 tmp4 = DotProduct(tmp2, tmp3);
-
-    return _mm256_cvtss_f32(tmp4) + _mm_cvtss_f32(_mm256_extractf128_ps(tmp4, 1));
+    return sse::Determinant4x4(mData[0], mData[1]);
 }
 
 

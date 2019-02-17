@@ -4,8 +4,8 @@
 #include "gdl/base/approx.h"
 #include "gdl/base/exception.h"
 #include "gdl/base/functions/alignment.h"
+#include "gdl/base/sse/determinant.h"
 #include "gdl/base/sse/directAccess.h"
-#include "gdl/base/sse/negate.h"
 #include "gdl/base/sse/swizzle.h"
 #include "gdl/base/sse/transpose.h"
 #include "gdl/math/vec4.h"
@@ -163,23 +163,7 @@ const std::array<F32, 16> Mat4fSSE::Data() const
 
 F32 Mat4fSSE::Det() const
 {
-    using namespace GDL::sse;
-
-    __m128 d1032 = Permute<1, 0, 3, 2>(mData[3]);
-    __m128 c1032 = Permute<1, 0, 3, 2>(mData[2]);
-
-    __m128 tmp1 = Permute<2, 3, 0, 1>(_mmx_fmsub_p(mData[2], d1032, _mmx_mul_p(mData[3], c1032)));
-    __m128 tmp2 = _mmx_fmsub_p(Permute<3, 2, 0, 1>(mData[2]), d1032, _mmx_mul_p(Permute<3, 2, 0, 1>(mData[3]), c1032));
-
-    __m128 tmp3 = Negate<1, 1, 0, 0>(tmp2);
-
-    __m128 b1032 = Permute<1, 0, 3, 2>(mData[1]);
-    __m128 b2310 = Permute<2, 3, 1, 0>(mData[1]);
-    __m128 tmp4 = Permute<3, 2, 0, 1>(_mmx_mul_p((mData[1]), tmp3));
-
-    __m128 tmp5 = _mmx_fmsub_p(b1032, tmp1, _mmx_fmsub_p(b2310, tmp3, tmp4));
-
-    return DotProductF32(mData[0], tmp5);
+    return sse::Determinant4x4(mData[0], mData[1], mData[2], mData[3]);
 }
 
 
