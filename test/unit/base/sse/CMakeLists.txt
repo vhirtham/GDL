@@ -1,5 +1,6 @@
 addTest(abs)
 addTest(compareAll)
+addTest(determinant)
 addTest(directAccess)
 addTest(dotProduct)
 addTest(negate)

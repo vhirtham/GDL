@@ -4,6 +4,7 @@
 #include "gdl/base/approx.h"
 #include "gdl/base/exception.h"
 #include "gdl/base/functions/alignment.h"
+#include "gdl/base/sse/determinant.h"
 #include "gdl/base/sse/directAccess.h"
 #include "gdl/base/sse/swizzle.h"
 
@@ -131,8 +132,7 @@ const std::array<F32, 4> Mat2fSSE::Data() const
 
 inline F32 Mat2fSSE::Det() const
 {
-    __m128 tmp = _mmx_mul_p(mData, sse::Permute<3, 2, 1, 0>(mData));
-    return _mm_cvtss_f32(_mm_sub_ps(tmp, sse::Permute<1, 0, 3, 1>(tmp)));
+    return sse::Determinant2x2(mData);
 }
 
 

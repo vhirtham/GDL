@@ -4,6 +4,7 @@
 #include "gdl/base/approx.h"
 #include "gdl/base/exception.h"
 #include "gdl/base/functions/alignment.h"
+#include "gdl/base/sse/determinant.h"
 #include "gdl/base/sse/directAccess.h"
 #include "gdl/base/sse/swizzle.h"
 #include "gdl/math/vec3.h"
@@ -151,12 +152,7 @@ const std::array<F32, 9> Mat3fSSE::Data() const
 
 F32 Mat3fSSE::Det() const
 {
-    __m128 r1_yzx = sse::Shuffle<1, 2, 0, 3>(mData[1], mData[1]);
-    __m128 r2_yzx = sse::Shuffle<1, 2, 0, 3>(mData[2], mData[2]);
-
-    __m128 tmp = _mmx_sub_p(_mmx_mul_p(mData[1], r2_yzx), _mmx_mul_p(r1_yzx, mData[2]));
-
-    return sse::DotProductF32<1, 1, 1, 0>(mData[0], sse::Shuffle<1, 2, 0, 3>(tmp, tmp));
+    return sse::Determinant3x3(mData[0], mData[1], mData[2]);
 }
 
 
