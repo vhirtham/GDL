@@ -2,6 +2,7 @@
 
 #include "gdl/math/constants.h"
 #include "gdl/math/vec2.h"
+#include "gdl/math/vec3.h"
 #include "gdl/physics/collision/functions/orientation.h"
 
 #include "test/tools/ExceptionChecks.h"
@@ -56,4 +57,33 @@ BOOST_AUTO_TEST_CASE(Orientation_2D)
                 }
             }
     }
+}
+
+
+
+void TestOrientation3d(Vec3fSSE<> a, Vec3fSSE<> b, Vec3fSSE<> c)
+{
+    Vec3fSSE ba = b - a;
+    Vec3fSSE ca = c - a;
+
+    Vec3fSSE offsetVec = ba.Cross(ca);
+
+    for (I32 i = -10; i < 11; ++i)
+    {
+        Vec3fSSE d = a + i * offsetVec;
+        F32 result = Orientation(a, b, c, d);
+        if (i < 0)
+            BOOST_CHECK(result > 0);
+        else if (i == 0)
+            BOOST_CHECK(result == ApproxZero<F32>());
+        else
+            BOOST_CHECK(result < 0);
+    }
+}
+
+
+
+BOOST_AUTO_TEST_CASE(Orientation_3D)
+{
+    TestOrientation3d({2, 0, 0}, {4, 0, 0}, {2, 2, 0});
 }

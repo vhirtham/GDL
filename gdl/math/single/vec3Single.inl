@@ -92,6 +92,30 @@ Vec3Single<_type, _isCol>& Vec3Single<_type, _isCol>::operator-=(const Vec3Singl
 
 
 template <typename _type, bool _isCol>
+Vec3Single<_type, _isCol> Vec3Single<_type, _isCol>::operator+(const Vec3Single& rhs) const
+{
+    return Vec3Single<_type, _isCol>(mData[0] + rhs.mData[0], mData[1] + rhs.mData[1], mData[2] + rhs.mData[2]);
+}
+
+
+
+template <typename _type, bool _isCol>
+Vec3Single<_type, _isCol> Vec3Single<_type, _isCol>::operator-(const Vec3Single& rhs) const
+{
+    return Vec3Single<_type, _isCol>(mData[0] - rhs.mData[0], mData[1] - rhs.mData[1], mData[2] - rhs.mData[2]);
+}
+
+
+
+template <typename _type, bool _isCol>
+Vec3Single<_type, _isCol> Vec3Single<_type, _isCol>::operator*(F32 rhs) const
+{
+    return Vec3Single<_type, _isCol>(mData[0] * rhs, mData[1] * rhs, mData[2] * rhs);
+}
+
+
+
+template <typename _type, bool _isCol>
 Vec3Single<_type, _isCol> Vec3Single<_type, _isCol>::Cross(Vec3Single rhs) const
 {
     DEV_EXCEPTION(*this == Vec3Single(), "Length of this vector is 0. Can't calculate the cross product.");
@@ -138,6 +162,14 @@ Vec3Single<_type, _isCol>& Vec3Single<_type, _isCol>::Normalize()
         mData[i] /= length;
 
     return *this;
+}
+
+
+
+template <typename _type, bool _isCol>
+[[nodiscard]] inline Vec3Single<_type, _isCol> operator*(F32 lhs, Vec3Single<_type, _isCol> rhs)
+{
+    return rhs * lhs;
 }
 
 

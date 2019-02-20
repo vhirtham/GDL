@@ -113,6 +113,30 @@ Vec3fSSE<_isCol>& Vec3fSSE<_isCol>::operator-=(const Vec3fSSE& rhs)
 
 
 template <bool _isCol>
+Vec3fSSE<_isCol> Vec3fSSE<_isCol>::operator+(const Vec3fSSE& rhs) const
+{
+    return _mmx_add_p(mData, rhs.mData);
+}
+
+
+
+template <bool _isCol>
+Vec3fSSE<_isCol> Vec3fSSE<_isCol>::operator-(const Vec3fSSE& rhs) const
+{
+    return _mmx_sub_p(mData, rhs.mData);
+}
+
+
+
+template <bool _isCol>
+Vec3fSSE<_isCol> Vec3fSSE<_isCol>::operator*(F32 rhs) const
+{
+    return _mmx_mul_p(mData, _mmx_setr_p<__m128>(rhs, rhs, rhs, 0.f));
+}
+
+
+
+template <bool _isCol>
 Vec3fSSE<_isCol> Vec3fSSE<_isCol>::Cross(Vec3fSSE rhs) const
 {
     DEV_EXCEPTION(*this == Vec3fSSE(), "Length of this vector is 0. Can't calculate the cross product.");
@@ -137,6 +161,14 @@ const std::array<F32, 3> Vec3fSSE<_isCol>::Data() const
 
     std::memcpy(&data, &mData, sizeof(data));
     return data;
+}
+
+
+
+template <bool _isCol>
+inline __m128 Vec3fSSE<_isCol>::DataSSE() const
+{
+    return mData;
 }
 
 
@@ -173,6 +205,14 @@ template <bool _isCol>
 bool Vec3fSSE<_isCol>::IsDataAligned() const
 {
     return IsAligned(&mData, IsAligned(&mData, sse::alignmentBytes<__m128>));
+}
+
+
+
+template <bool _isCol>
+[[nodiscard]] inline Vec3fSSE<_isCol> operator*(F32 lhs, Vec3fSSE<_isCol> rhs)
+{
+    return rhs * lhs;
 }
 
 
