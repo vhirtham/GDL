@@ -17,7 +17,7 @@
 using namespace GDL;
 using namespace GDL::Input;
 using namespace GDL::OpenGL;
-using namespace GDL::TransformationMatrix4;
+using namespace GDL::Transformations4;
 
 
 

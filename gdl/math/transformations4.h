@@ -5,7 +5,7 @@
 
 #include <type_traits>
 
-namespace GDL::TransformationMatrix4
+namespace GDL::Transformations4
 {
 //! @brief Creates a orthogonal projection matrix
 //! @param width: Width of the output window
@@ -70,6 +70,6 @@ inline _mat4 ScaleTranslate(F32 sx, F32 sy, F32 sz, F32 tx, F32 ty, F32 tz);
 template <typename _mat4 = Mat4f>
 inline _mat4 Translation(F32 x, F32 y, F32 z);
 
-} // namespace GDL::TransformationMatrix4
+} // namespace GDL::Transformations4
 
-#include "gdl/math/transformationMatrix.inl"
+#include "gdl/math/transformations4.inl"

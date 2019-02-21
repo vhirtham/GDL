@@ -4,10 +4,11 @@
 #include "gdl/base/string.h"
 #include "gdl/base/container/vector.h"
 #include "gdl/math/single/mat4Single.h"
-#include "gdl/math/sse/mat4fSSE.h"
 #include "gdl/math/single/vec3Single.h"
-#include "gdl/math/sse/vec3fSSE.h"
 #include "gdl/math/single/vec4Single.h"
+#include "gdl/math/sse/mat4fAVX.h"
+#include "gdl/math/sse/mat4fSSE.h"
+#include "gdl/math/sse/vec3fSSE.h"
 #include "gdl/math/sse/vec4fSSE.h"
 #include "gdl/rendering/openGL/core/shader.h"
 
@@ -225,6 +226,17 @@ void Program::SetUniform(GLint uniformLocation, const Mat4fSSE& values)
 {
     glProgramUniformMatrix4fv(mHandle, uniformLocation, 1, GL_FALSE, values.Data().data());
 }
+
+
+
+#ifdef __AVX2__
+
+void Program::SetUniform(GLint uniformLocation, const Mat4fAVX& values)
+{
+    glProgramUniformMatrix4fv(mHandle, uniformLocation, 1, GL_FALSE, values.Data().data());
+}
+
+#endif //__AVX2__
 
 
 

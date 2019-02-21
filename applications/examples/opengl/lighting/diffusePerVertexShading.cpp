@@ -1,7 +1,7 @@
 #include "gdl/base/fundamentalTypes.h"
 #include "gdl/base/timer.h"
 #include "gdl/base/container/vector.h"
-#include "gdl/math/transformationMatrix.h"
+#include "gdl/math/transformations4.h"
 #include "gdl/rendering/openGL/core/bufferObject.h"
 #include "gdl/rendering/openGL/core/contextManager.h"
 #include "gdl/rendering/openGL/core/program.h"
@@ -181,11 +181,11 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
         F32 y = -std::sin(angle / 3.f);
         F32 z = -std::cos(angle) * 3.f - 10.f;
 
-        Mat4f ProjectionMatrix = TransformationMatrix4::PerspectiveProjection(65.f, renderWindow.GetWidth(),
+        Mat4f ProjectionMatrix = Transformations4::PerspectiveProjection(65.f, renderWindow.GetWidth(),
                                                                               renderWindow.GetHeight(), 0.1f, 100.f);
         Mat4f RotationMatrix =
-                TransformationMatrix4::RotationY(angle * 1.5f) * TransformationMatrix4::RotationX(angle * 2.f);
-        Mat4f TranslationMatrix = TransformationMatrix4::Translation(x, y, z);
+                Transformations4::RotationY(angle * 1.5f) * Transformations4::RotationX(angle * 2.f);
+        Mat4f TranslationMatrix = Transformations4::Translation(x, y, z);
         Mat4f ModelWorldMatrix = TranslationMatrix * RotationMatrix;
 
         program.SetUniform(uniformProjection, ProjectionMatrix);

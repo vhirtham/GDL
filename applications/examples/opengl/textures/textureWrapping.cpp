@@ -1,5 +1,5 @@
 #include "gdl/base/container/vector.h"
-#include "gdl/math/transformationMatrix.h"
+#include "gdl/math/transformations4.h"
 #include "gdl/rendering/openGL/core/bufferObject.h"
 #include "gdl/rendering/openGL/core/contextManager.h"
 #include "gdl/rendering/openGL/core/program.h"
@@ -123,27 +123,27 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
         F32 translateX = width * 0.55f;
         F32 translateY = height * 0.55f;
 
-        program.SetUniform(uniformProjection, TransformationMatrix4::OrthogonalProjection(renderWindow.GetWidth(),
+        program.SetUniform(uniformProjection, Transformations4::OrthogonalProjection(renderWindow.GetWidth(),
                                                                                           renderWindow.GetHeight()));
 
         // Lower left texture ---> repeat
         texture.SetWrappingXY(GL_REPEAT);
         program.SetUniform(uniformModelWorld,
-                           TransformationMatrix4::ScaleTranslate(width, height, 1, -translateX, -translateY, 0));
+                           Transformations4::ScaleTranslate(width, height, 1, -translateX, -translateY, 0));
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
 
 
         // Upper left texture ---> mirrored repeat
         texture.SetWrappingXY(GL_MIRRORED_REPEAT);
         program.SetUniform(uniformModelWorld,
-                           TransformationMatrix4::ScaleTranslate(width, height, 1, -translateX, translateY, 0));
+                           Transformations4::ScaleTranslate(width, height, 1, -translateX, translateY, 0));
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
 
 
         // Upper right texture ---> clamp to edge
         texture.SetWrappingXY(GL_CLAMP_TO_EDGE);
         program.SetUniform(uniformModelWorld,
-                           TransformationMatrix4::ScaleTranslate(width, height, 1, translateX, translateY, 0));
+                           Transformations4::ScaleTranslate(width, height, 1, translateX, translateY, 0));
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
 
 
@@ -151,7 +151,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
         texture.SetWrappingXY(GL_CLAMP_TO_BORDER);
         texture.SetBorderColor({{0.f, 0.f, 1.f, 1.f}});
         program.SetUniform(uniformModelWorld,
-                           TransformationMatrix4::ScaleTranslate(width, height, 1, translateX, -translateY, 0));
+                           Transformations4::ScaleTranslate(width, height, 1, translateX, -translateY, 0));
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
 
 

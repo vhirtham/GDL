@@ -10,7 +10,7 @@
 #include "gdl/base/timer.h"
 #include "gdl/base/container/vector.h"
 #include "gdl/math/mat4.h"
-#include "gdl/math/transformationMatrix.h"
+#include "gdl/math/transformations4.h"
 #include "gdl/rendering/openGL/core/bufferObject.h"
 #include "gdl/rendering/openGL/core/contextManager.h"
 #include "gdl/rendering/openGL/core/program.h"
@@ -151,10 +151,9 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
         translateY = std::sin(elapsedTimeMS / 4.e5f) * renderWindow.GetHeight() / 3.f;
 
         Mat4f ProjectionMatrix =
-                TransformationMatrix4::OrthogonalProjection(renderWindow.GetWidth(), renderWindow.GetHeight());
-        Mat4f ModelWorldMatrix = TransformationMatrix4::Translation(translateX, translateY, 0.) *
-                                 TransformationMatrix4::RotationZ(angle) *
-                                 TransformationMatrix4::Scale(200.f, 200.f, 1);
+                Transformations4::OrthogonalProjection(renderWindow.GetWidth(), renderWindow.GetHeight());
+        Mat4f ModelWorldMatrix = Transformations4::Translation(translateX, translateY, 0.) *
+                                 Transformations4::RotationZ(angle) * Transformations4::Scale(200.f, 200.f, 1);
 
         program.SetUniform(static_cast<I32>(uniformProjection), ProjectionMatrix);
         program.SetUniform(static_cast<I32>(uniformModelWorld), ModelWorldMatrix);

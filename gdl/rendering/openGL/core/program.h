@@ -9,7 +9,7 @@
 
 namespace GDL
 {
-
+class Mat4fAVX;
 class Mat4fSSE;
 template <typename>
 class Mat4Single;
@@ -171,6 +171,13 @@ public:
     //! @param uniformLocation: Location of the uniform
     //! @param value: New value
     void SetUniform(GLint uniformLocation, const Mat4fSSE& values);
+
+#ifdef __AVX2__
+    //! @brief Sets the value of a uniform mat4
+    //! @param uniformLocation: Location of the uniform
+    //! @param value: New value
+    void SetUniform(GLint uniformLocation, const Mat4fAVX& values);
+#endif //__AVX2__
 
     //! @brief Sets the value of a uniform mat4
     //! @param uniformLocation: Location of the uniform

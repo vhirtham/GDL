@@ -1,28 +1,40 @@
 #pragma once
 
+#ifndef __AVX2__
 #include "gdl/math/sse/mat4fSSE.h"
+#else
+#include "gdl/math/sse/mat4fAVX.h"
+#endif // __AVX2__
+
+
 
 namespace GDL
 {
 
 // forward declarations
+class Mat4fAVX;
 class Mat4fSSE;
 template <typename _type>
 class Mat4Single;
 
-
-
+#ifndef __AVX2__
 using Mat4f = Mat4fSSE;
+#else
+using Mat4f = Mat4fAVX;
+#endif // __AVX2__
 
 
 
-//! @brief Returns if a type is a 4x4 matrix
-//! @tparam _type: Type that should be checked
-//! @return TRUE or FALSE
+//! @brief Constant that specifies if a type is a 4x4 matrix
 template <typename _type>
-constexpr bool IsMat4()
-{
-    return std::is_same<_type, Mat4fSSE>::value || std::is_same<_type, Mat4Single<F32>>::value ||
-           std::is_same<_type, Mat4Single<F64>>::value;
-}
+constexpr const bool IsMat4 = false;
+template <>
+constexpr const bool IsMat4<Mat4Single<F32>> = true;
+template <>
+constexpr const bool IsMat4<Mat4Single<F64>> = true;
+template <>
+constexpr const bool IsMat4<Mat4fSSE> = true;
+template <>
+constexpr const bool IsMat4<Mat4fAVX> = true;
+
 } // namespace GDL

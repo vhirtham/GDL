@@ -1,7 +1,7 @@
 #include "gdl/base/timer.h"
 #include "gdl/base/container/vector.h"
 #include "gdl/math/constants.h"
-#include "gdl/math/transformationMatrix.h"
+#include "gdl/math/transformations4.h"
 #include "gdl/input/inputState.h"
 #include "gdl/input/key.h"
 #include "gdl/rendering/openGL/core/bufferObject.h"
@@ -19,7 +19,7 @@
 using namespace GDL;
 using namespace GDL::Input;
 using namespace GDL::OpenGL;
-using namespace GDL::TransformationMatrix4;
+using namespace GDL::Transformations4;
 
 
 

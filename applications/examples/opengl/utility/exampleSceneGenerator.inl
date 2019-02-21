@@ -56,11 +56,11 @@ void ExampleSceneGenerator::AddObject(const char* meshName, const char* textureN
     EXCEPTION(materialIterator == mMaterials.end(), "Could not find material");
 
     mObjects.emplace_back(meshIterator->second, materialIterator->second);
-    mObjects.back().modelWorld = TransformationMatrix4::Translation(position[0], position[1], position[2]) *
-                                 TransformationMatrix4::RotationZ(-eulerAngles[0]) *
-                                 TransformationMatrix4::RotationX(-eulerAngles[1]) *
-                                 TransformationMatrix4::RotationY(-eulerAngles[2]) *
-                                 TransformationMatrix4::Scale(scale[0], scale[1], scale[2]);
+    mObjects.back().modelWorld = Transformations4::Translation(position[0], position[1], position[2]) *
+                                 Transformations4::RotationZ(-eulerAngles[0]) *
+                                 Transformations4::RotationX(-eulerAngles[1]) *
+                                 Transformations4::RotationY(-eulerAngles[2]) *
+                                 Transformations4::Scale(scale[0], scale[1], scale[2]);
     mObjects.back().textureScale = texScale;
     mObjects.back().textureOffset = texOffset;
 }

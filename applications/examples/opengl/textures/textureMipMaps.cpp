@@ -1,6 +1,6 @@
 #include "gdl/base/container/vector.h"
 #include "gdl/base/timer.h"
-#include "gdl/math/transformationMatrix.h"
+#include "gdl/math/transformations4.h"
 #include "gdl/rendering/openGL/core/bufferObject.h"
 #include "gdl/rendering/openGL/core/contextManager.h"
 #include "gdl/rendering/openGL/core/program.h"
@@ -173,35 +173,35 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
 
         contextManager.PollEvents();
 
-        program.SetUniform(uniformProjection, TransformationMatrix4::OrthogonalProjection(renderWindow.GetWidth(),
+        program.SetUniform(uniformProjection, Transformations4::OrthogonalProjection(renderWindow.GetWidth(),
                                                                                           renderWindow.GetHeight()));
 
         // Lower left texture ---> Linerar - linear
         texture.SetMinifyingFilter(GL_LINEAR_MIPMAP_LINEAR);
         texture.SetMagnifyingFilter(GL_LINEAR);
         program.SetUniform(uniformModelWorld,
-                           TransformationMatrix4::ScaleTranslate(width, height, 1, -translateX, -translateY, 0));
+                           Transformations4::ScaleTranslate(width, height, 1, -translateX, -translateY, 0));
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
 
         // Upper left texture ---> Linear - nearest
         texture.SetMinifyingFilter(GL_LINEAR_MIPMAP_NEAREST);
         texture.SetMagnifyingFilter(GL_LINEAR);
         program.SetUniform(uniformModelWorld,
-                           TransformationMatrix4::ScaleTranslate(width, height, 1, -translateX, translateY, 0));
+                           Transformations4::ScaleTranslate(width, height, 1, -translateX, translateY, 0));
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
 
         // Upper right texture ---> Nearest - linear
         texture.SetMinifyingFilter(GL_NEAREST_MIPMAP_LINEAR);
         texture.SetMagnifyingFilter(GL_NEAREST);
         program.SetUniform(uniformModelWorld,
-                           TransformationMatrix4::ScaleTranslate(width, height, 1, translateX, translateY, 0));
+                           Transformations4::ScaleTranslate(width, height, 1, translateX, translateY, 0));
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
 
         // Lower right texture ---> Nearest - nearest
         texture.SetMinifyingFilter(GL_NEAREST_MIPMAP_NEAREST);
         texture.SetMagnifyingFilter(GL_NEAREST);
         program.SetUniform(uniformModelWorld,
-                           TransformationMatrix4::ScaleTranslate(width, height, 1, translateX, -translateY, 0));
+                           Transformations4::ScaleTranslate(width, height, 1, translateX, -translateY, 0));
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
 
 

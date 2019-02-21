@@ -5,7 +5,7 @@
 #include "gdl/base/container/vector.h"
 #include "gdl/base/string.h"
 #include "gdl/math/vec3.h"
-#include "gdl/math/transformationMatrix.h"
+#include "gdl/math/transformations4.h"
 #include "gdl/rendering/openGL/core/program.h"
 #include "gdl/rendering/openGL/core/shader.h"
 
@@ -107,10 +107,10 @@ int main(int argc, char* argv[])
 
     program.SetUniformSamplerTextureUnit("texture0", 0);
     program.SetUniform(program.QueryUniformLocation("projection"),
-                       TransformationMatrix4::PerspectiveProjection(45, 1000, 800, 0.1f, 100));
+                       Transformations4::PerspectiveProjection(45, 1000, 800, 0.1f, 100));
     program.SetUniform(program.QueryUniformLocation("modelWorld"),
-                       TransformationMatrix4::Translation(0, -1, -7) *
-                               TransformationMatrix4::Scale(scale, scale, scale));
+                       Transformations4::Translation(0, -1, -7) *
+                               Transformations4::Scale(scale, scale, scale));
 
     ogl.update();
 
