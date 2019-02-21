@@ -22,7 +22,7 @@ class Vec3fSSE;
 //! @param b: Second point of the line a-b or the triangle a-b-c
 //! @param c: Point that should be compared to the line or third point of the triangle a-b-c
 //! @return See description
-template <bool _isCol>
+template <bool _isCol = true>
 inline F32 Orientation(Vec2fSSE<_isCol> a, Vec2fSSE<_isCol> b, Vec2fSSE<_isCol> c);
 
 //! @brief Checks the orientation of a 3d point d in relation to a plane described by 3 points a, b and c. If the
@@ -35,7 +35,7 @@ inline F32 Orientation(Vec2fSSE<_isCol> a, Vec2fSSE<_isCol> b, Vec2fSSE<_isCol> 
 //! @param c: Third point of the plane or the tetrahedron
 //! @param d: Point that should be compared to the plane or fourth point of the tetrahedron
 //! @return See description
-template <bool _isCol>
+template <bool _isCol = true>
 inline F32 Orientation(Vec3fSSE<_isCol> a, Vec3fSSE<_isCol> b, Vec3fSSE<_isCol> c, Vec3fSSE<_isCol> d);
 
 } // namespace GDL
