@@ -1,1 +1,2 @@
 addBenchmark(orientation)
+addBenchmark(pointAreaTests)

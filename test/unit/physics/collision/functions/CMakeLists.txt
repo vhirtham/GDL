@@ -1,1 +1,2 @@
 addTest(orientation)
+addTest(pointAreaTests)
