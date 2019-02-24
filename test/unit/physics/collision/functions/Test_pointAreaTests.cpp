@@ -52,7 +52,7 @@ void TestPointInsideCircle(Vec2f c0, Vec2f c1, Vec2f c2)
 
                         F32 result = PointInsideCircle(point, c0so, c1so, c2so);
                         if (scale == j)
-                            // High tolerance since floating point errors add up significantly for some angles
+                            // High tolerance since floating point errors add up significantly for some angles.
                             BOOST_CHECK(result == ApproxZero<F32>(scale, 1e4f));
                         else if (j < scale)
                             BOOST_CHECK(result > 0);
@@ -64,10 +64,6 @@ void TestPointInsideCircle(Vec2f c0, Vec2f c1, Vec2f c2)
     }
 }
 
-
-void TestPointInsideCircle()
-{
-}
 
 
 BOOST_AUTO_TEST_CASE(Test_PointInsideCircle)

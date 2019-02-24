@@ -17,11 +17,11 @@ F32 PointInsideCircle(const Vec2fSSE<_isCol>& point, const Vec2fSSE<_isCol>& c0,
 {
     using namespace GDL::sse;
 
-    DEV_EXCEPTION(Orientation(c0, c1, c2) < 0,
+    DEV_EXCEPTION(Orientation(c0, c1, c2) <= 0,
                   "The passed points c0, c1 and c2 must be in counter clockwise ordering if viewed as triangle");
 
-    __m128 px = Permute<0, 0, 0, 0>(point.DataSSE());
-    __m128 py = Permute<1, 1, 1, 1>(point.DataSSE());
+    __m128 px = Permute<0, 0, 0, 3>(point.DataSSE());
+    __m128 py = Permute<1, 1, 1, 3>(point.DataSSE());
 
     __m128 c01 = _mm_unpacklo_ps(c0.DataSSE(), c1.DataSSE());
 
