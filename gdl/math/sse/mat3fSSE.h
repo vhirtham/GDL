@@ -89,6 +89,10 @@ public:
     //! @return Data
     [[nodiscard]] inline const std::array<F32, 9> Data() const;
 
+    //! @brief Gets the underlying array of SSE registers
+    //! @return Data array
+    const std::array<__m128, 3>& DataSSE() const;
+
     //! @brief Calculates the determinant of the matrix
     //! @return Determinant of the matrix
     [[nodiscard]] inline F32 Det() const;

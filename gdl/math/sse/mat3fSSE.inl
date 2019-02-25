@@ -149,6 +149,11 @@ const std::array<F32, 9> Mat3fSSE::Data() const
 }
 
 
+const std::array<__m128, 3>& Mat3fSSE::DataSSE() const
+{
+    return mData;
+}
+
 
 F32 Mat3fSSE::Det() const
 {

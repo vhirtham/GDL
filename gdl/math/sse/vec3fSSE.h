@@ -51,12 +51,10 @@ public:
     //! @param other: Other Vector
     inline Vec3fSSE(const Vec4fSSE<_isCol>& other);
 
-private:
     //! @brief Constructor that initializes the vector
     //! @param data: Data
     inline Vec3fSSE(__m128 data);
 
-public:
     //! @brief Direct access operator
     //! @param index: Index of the accessed value
     //! @return Accessed value
