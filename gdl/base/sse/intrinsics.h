@@ -98,6 +98,18 @@ inline _registerType _mmx_div_p(_registerType lhs, _registerType rhs);
 template <typename _registerType>
 inline _registerType _mmx_fmadd_p(_registerType lhsM, _registerType rhsM, _registerType add);
 
+//! @brief Template for multiplication of two registers with subsequent negation of the result and addition of a third
+//! register (fused negate multiply add)
+//! @tparam _registerType: Register type
+//! @param lhsM: Left hand side value of the multiplication
+//! @param rhsM: Right hand side value of the multiplication
+//! @param add: Value that is added to the result of the negated multiplication
+//! @return Result of the operation
+//! @remark If fmadd intrinsics are not available the function still works. It performs the necessary operations
+//! seperately.
+template <typename _registerType>
+inline _registerType _mmx_fnmadd_p(_registerType lhsM, _registerType rhsM, _registerType add);
+
 //! @brief Template for multiplication of two registers with subsequent substraction of a third register (fused multiply
 //! sub)
 //! @tparam _registerType: Register type

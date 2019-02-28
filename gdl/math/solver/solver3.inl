@@ -67,7 +67,7 @@ class GaussInternals
         for (U32 i = _idx + 1; i < 4; ++i)
         {
             bc = Broadcast<_idx>(*data[i]);
-            *data[i] = _mm_fnmadd_ps(mult1, bc, Blend<b0, b1, b2, 1>(*data[i], zero));
+            *data[i] = _mmx_fnmadd_p(mult1, bc, Blend<b0, b1, b2, 1>(*data[i], zero));
         }
     }
 };

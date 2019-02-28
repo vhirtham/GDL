@@ -215,6 +215,30 @@ inline _registerType _mmx_fmadd_p(_registerType lhsM, _registerType rhsM, _regis
 
 
 template <typename _registerType>
+inline _registerType _mmx_fnmadd_p(_registerType lhsM, _registerType rhsM, _registerType add)
+{
+    using namespace GDL::sse;
+    static_assert(IsRegisterType<_registerType>, "Function can only be used with compatible register types.");
+
+#ifndef __FMA__
+    return _mmx_sub_p(add, _mmx_mul_p(lhsM, rhsM));
+#else
+    if constexpr (Is__m128<_registerType>)
+        return _mm_fnmadd_ps(lhsM, rhsM, add);
+    else if constexpr (Is__m128d<_registerType>)
+        return _mm_fnmadd_pd(lhsM, rhsM, add);
+#ifdef __AVX2__
+    else if constexpr (Is__m256<_registerType>)
+        return _mm256_fnmadd_ps(lhsM, rhsM, add);
+    else
+        return _mm256_fnmadd_pd(lhsM, rhsM, add);
+#endif // __AVX2__
+#endif // __FMA__
+}
+
+
+
+template <typename _registerType>
 inline _registerType _mmx_fmsub_p(_registerType lhsM, _registerType rhsM, _registerType sub)
 {
     using namespace GDL::sse;
