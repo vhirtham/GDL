@@ -42,12 +42,10 @@ public:
     //! @param v0-v3: Vector values
     inline Vec4fSSE(F32 v0, F32 v1, F32 v2, F32 v3);
 
-private:
     //! @brief Constructor that initializes the vector
     //! @param data: Data
     inline Vec4fSSE(__m128 data);
 
-public:
     //! @brief Direct access operator
     //! @param index: Index of the accessed value
     //! @return Accessed value
@@ -85,6 +83,10 @@ public:
     //! @brief Gets the data array
     //! @return Data
     [[nodiscard]] inline const std::array<F32, 4> Data() const;
+
+    //! @brief Gets the data register
+    //! @return Data
+    inline __m128 DataSSE() const;
 
     //! @brief Calculates the dot product of two vectors
     //! @tparam _isColRhs: True if the rhs vector is a column vector, false otherwise

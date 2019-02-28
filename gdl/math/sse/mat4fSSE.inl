@@ -159,6 +159,10 @@ const std::array<F32, 16> Mat4fSSE::Data() const
     return data;
 }
 
+const std::array<__m128, 4>& Mat4fSSE::DataSSE() const
+{
+    return mData;
+}
 
 
 F32 Mat4fSSE::Det() const

@@ -95,6 +95,10 @@ public:
 
 
 
+using Mat4fSingle = Mat4Single<F32>;
+using Mat4dSingle = Mat4Single<F64>;
+
+
 //! @brief Offstream operator
 //! @tparam _type: Data type of the matrix
 //! @param os: Reference to offstream object

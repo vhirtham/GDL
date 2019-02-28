@@ -1,11 +1,12 @@
 #pragma once
 
+#include "gdl/math/solver/solver3.h"
+
 #include "gdl/base/sse/abs.h"
 #include "gdl/base/sse/crossProduct.h"
 #include "gdl/base/sse/determinant.h"
 #include "gdl/base/sse/dotProduct.h"
 #include "gdl/base/sse/swizzle.h"
-#include "gdl/math/solver/solver3.h"
 #include "gdl/math/sse/mat3fSSE.h"
 #include "gdl/math/sse/vec3fSSE.h"
 
@@ -115,7 +116,7 @@ Vec3fSSE<true> GaussPartialPivot(const Mat3fSSE& A, const Vec3fSSE<true>& b)
 
     // Second pivoting step
     __m128 absCol = Abs(*data[1]);
-    if (_mm_comilt_ss(absCol, Broadcast<2>(absCol)))
+    if (_mm_comilt_ss(Broadcast<1>(absCol), Broadcast<2>(absCol)))
         for (U32 i = 1; i < 4; ++i)
             *data[i] = Permute<0, 2, 1, 3>(*data[i]);
 

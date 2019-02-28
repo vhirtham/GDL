@@ -31,16 +31,20 @@ void TestSolver(_solver solver)
     TestSolverTestcase(solver, Matrix(2, 1, 3, 4, 1, 4, 8, 1, 5), Vector(2, 1, 2), Vector(3, -3, 1));
     TestSolverTestcase(solver, Matrix(-2, -1, -3, -4, -1, -4, -8, -1, -5), Vector(-2, -1, -2), Vector(3, -3, 1));
 
-    Mat3fSSE AThrow(2, 1, 3, 2, 1, 3, 2, 1, 3);
+    Matrix AThrow(2, 1, 3, 2, 1, 3, 2, 1, 3);
     GDL_CHECK_THROW_DEV(solver(AThrow, Vector()), Exception);
 }
 
-BOOST_AUTO_TEST_CASE(TestCramer)
+
+
+BOOST_AUTO_TEST_CASE(TestCramerSSE)
 {
     TestSolver<true>(Solver::Cramer);
 }
 
-BOOST_AUTO_TEST_CASE(TestGaussPartialPivot)
+
+
+BOOST_AUTO_TEST_CASE(TestGaussPartialPivotSSE)
 {
     TestSolver<true>(Solver::GaussPartialPivot);
 }

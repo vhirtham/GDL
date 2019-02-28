@@ -37,7 +37,6 @@ public:
     inline Mat4fSSE(F32 v0, F32 v1, F32 v2, F32 v3, F32 v4, F32 v5, F32 v6, F32 v7, F32 v8, F32 v9, F32 v10, F32 v11,
                     F32 v12, F32 v13, F32 v14, F32 v15);
 
-private:
     //! @brief Constructor that initializes the full matrix with specific columns
     //! @param col0: first column
     //! @param col1: second column
@@ -45,7 +44,6 @@ private:
     //! @param col3: fourth column
     inline Mat4fSSE(__m128 col0, __m128 col1, __m128 col2, __m128 col3);
 
-public:
     //! @brief Direct access operator
     //! @param row: Row of the accessed value
     //! @param col: Column of the accessed value
@@ -89,6 +87,10 @@ public:
     //! @brief Gets the data array in column major ordering
     //! @return Data
     [[nodiscard]] inline const std::array<F32, 16> Data() const;
+
+    //! @brief Gets the underlying array of SSE registers
+    //! @return Data array
+    const std::array<__m128, 4>& DataSSE() const;
 
     //! @brief Calculates the determinant of the matrix
     //! @return Determinant of the matrix

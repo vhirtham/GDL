@@ -123,6 +123,14 @@ const std::array<F32, 4> Vec4fSSE<_isCol>::Data() const
 
 
 template <bool _isCol>
+inline __m128 Vec4fSSE<_isCol>::DataSSE() const
+{
+    return mData;
+}
+
+
+
+template <bool _isCol>
 template <bool _isColRhs>
 F32 Vec4fSSE<_isCol>::Dot(Vec4fSSE<_isColRhs> rhs) const
 {
