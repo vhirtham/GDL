@@ -17,6 +17,13 @@ namespace Solver
 //! @return Result vector x
 Vec3fSSE<true> Cramer(const Mat3fSSE& A, const Vec3fSSE<true>& b);
 
+//! @brief Solves the linear system A * x = b by using Gaussian elimination with partial pivoting.
+//! @param A: Matrix
+//! @param b: Vector
+//! @return Result vector x
+Vec3fSSE<true> GaussPartialPivot(const Mat3fSSE& A, const Vec3fSSE<true>& b);
+
+
 } // namespace Solver
 
 } // namespace GDL

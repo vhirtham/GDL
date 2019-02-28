@@ -12,7 +12,7 @@ namespace GDL::sse
 //! @remark source:
 //! https://stackoverflow.com/questions/23847377/how-does-this-function-compute-the-absolute-value-of-a-float-through-a-not-and-a
 template <typename _registerType>
-_registerType Abs(_registerType reg)
+inline _registerType Abs(_registerType reg)
 {
     const _registerType mask = _mmx_set1_p<_registerType>(-0.0);
     return _mmx_andnot_p(mask, reg);

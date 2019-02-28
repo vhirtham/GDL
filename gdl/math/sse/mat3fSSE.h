@@ -37,14 +37,12 @@ public:
     //! @param v0-v8: Matrix values in column major ordering
     inline Mat3fSSE(F32 v0, F32 v1, F32 v2, F32 v3, F32 v4, F32 v5, F32 v6, F32 v7, F32 v8);
 
-private:
     //! @brief Constructor that initializes the full matrix with specific columns
     //! @param col0: first column
     //! @param col1: second column
     //! @param col2: third column
     inline Mat3fSSE(__m128 col0, __m128 col1, __m128 col2);
 
-public:
     //! @brief Direct access operator
     //! @param row: Row of the accessed value
     //! @param col: Column of the accessed value
