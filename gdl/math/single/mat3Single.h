@@ -94,6 +94,10 @@ public:
 };
 
 
+using Mat3fSingle = Mat3Single<F32>;
+using Mat3dSingle = Mat3Single<F64>;
+
+
 
 //! @brief Offstream operator
 //! @tparam _type: Data type of the matrix

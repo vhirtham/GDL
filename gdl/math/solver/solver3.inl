@@ -22,7 +22,7 @@ Vec3fSSE<true> Cramer(const Mat3fSSE& A, const Vec3fSSE<true>& b)
     __m128 cross12 = CrossProduct(dataA[1], dataA[2]);
     __m128 detA = DotProduct<1, 1, 1, 0>(dataA[0], cross12);
 
-    DEV_EXCEPTION(_mm_cvtss_f32(detA) == ApproxZero<F32>(), "Singular matrix - system not solveable");
+    DEV_EXCEPTION(_mm_cvtss_f32(detA) == ApproxZero<F32>(10), "Singular matrix - system not solveable");
 
     __m128 x = DotProduct<1, 1, 1, 0>(b.DataSSE(), cross12);
     x = Blend<0, 1, 0, 0>(x, DotProduct<1, 1, 1, 0>(dataA[0], CrossProduct(b.DataSSE(), dataA[2])));
@@ -49,6 +49,8 @@ class GaussInternals
     static inline void EliminationStep(const std::array<__m128* const, 4>& data)
     {
         using namespace GDL::sse;
+
+        DEV_EXCEPTION(GetValue<_idx>(*data[_idx]) == ApproxZero<F32>(10), "Singular matrix - system not solveable");
 
         constexpr U32 b0 = (_idx == 0) ? 1 : 0;
         constexpr U32 b1 = (_idx == 1) ? 1 : 0;
