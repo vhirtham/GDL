@@ -33,7 +33,7 @@ Vec3fSSE<true> Cramer(const Mat3fSSE& A, const Vec3fSSE<true>& b)
 }
 
 
-class GaussInternals
+class GaussInternals3
 {
     friend Vec3fSSE<true> GaussPartialPivot(const Mat3fSSE&, const Vec3fSSE<true>&);
 
@@ -105,13 +105,11 @@ Vec3fSSE<true> GaussPartialPivot(const Mat3fSSE& A, const Vec3fSSE<true>& b)
         for (U32 i = 0; i < 4; ++i)
             *data[i] = Permute<2, 1, 0, 3>(*data[i]);
         break;
-    default:
-        THROW("Invalid index");
     }
 
 
     // First elimination
-    GaussInternals::EliminationStep<0>(data);
+    GaussInternals3::EliminationStep<0>(data);
 
 
     // Second pivoting step
@@ -122,11 +120,11 @@ Vec3fSSE<true> GaussPartialPivot(const Mat3fSSE& A, const Vec3fSSE<true>& b)
 
 
     // Second elimination
-    GaussInternals::EliminationStep<1>(data);
+    GaussInternals3::EliminationStep<1>(data);
 
 
     // Final elimination
-    GaussInternals::EliminationStep<2>(data);
+    GaussInternals3::EliminationStep<2>(data);
 
     return Vec3fSSE<true>(rhs);
 }

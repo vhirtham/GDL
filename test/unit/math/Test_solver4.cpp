@@ -16,7 +16,6 @@ template <typename _solver, typename Matrix, typename Vector>
 void TestSolverTestcase(_solver solver, const Matrix& A, const Vector& b, const Vector& exp)
 {
     Vector res = solver(A, b);
-    std::cout << res << std::endl;
     for (U32 i = 0; i < 4; ++i)
         BOOST_CHECK(res[i] == Approx(exp[i], 10));
 }
@@ -24,7 +23,7 @@ void TestSolverTestcase(_solver solver, const Matrix& A, const Vector& b, const 
 
 
 template <bool IsSSE, typename _solver>
-void TestSolver(_solver solver)
+void TestSolver(_solver solver, bool pivot = true)
 {
     using Matrix = typename std::conditional<IsSSE, Mat4fSSE, Mat4fSingle>::type;
     using Vector = typename std::conditional<IsSSE, Vec4fSSE<true>, Vec4fSingle<true>>::type;
@@ -34,8 +33,33 @@ void TestSolver(_solver solver)
     TestSolverTestcase(solver, Matrix(2, 0, 4, 6, 2, 2, -3, 1, 3, 0, 0, -6, 2, 1, 1, -5), Vector(-6, 0, -21, 18),
                        Vector(-1.5, 3, 1, -6));
 
-    //    TestSolverTestcase(solver, Matrix(0, 2, 4, 6, 2, 2, -3, 1, 0, 3, 0, -6, 1, 2, 1, -5), Vector(0, -6, -21, 18),
-    //                       Vector(-1.5, 3, 1, -6));
+    if (pivot)
+    {
+        // 1234
+        TestSolverTestcase(solver, Matrix(0, 2, 4, 6, 2, 2, -3, 1, 0, 3, 0, -6, 1, 2, 1, -5), Vector(0, -6, -21, 18),
+                           Vector(-1.5, 3, 1, -6));
+        // 1243
+        TestSolverTestcase(solver, Matrix(0, 2, 6, 4, 2, 2, 1, -3, 0, 3, -6, 0, 1, 2, -5, 1), Vector(0, -6, 18, -21),
+                           Vector(-1.5, 3, 1, -6));
+        // 1324
+        TestSolverTestcase(solver, Matrix(0, 4, 2, 6, 2, -3, 2, 1, 0, 0, 3, -6, 1, 1, 2, -5), Vector(0, -21, -6, 18),
+                           Vector(-1.5, 3, 1, -6));
+        // 1342
+        TestSolverTestcase(solver, Matrix(0, 4, 6, 2, 2, -3, 1, 2, 0, 0, -6, 3, 1, 1, -5, 2), Vector(0, -21, 18, -6),
+                           Vector(-1.5, 3, 1, -6));
+        // 1423
+        TestSolverTestcase(solver, Matrix(0, 6, 2, 4, 2, 1, 2, -3, 0, -6, 3, 0, 1, -5, 2, 1), Vector(0, 18, -6, -21),
+                           Vector(-1.5, 3, 1, -6));
+        // 1432
+        TestSolverTestcase(solver, Matrix(0, 6, 4, 2, 2, 1, -3, 2, 0, -6, 0, 3, 1, -5, 1, 2), Vector(0, 18, -21, -6),
+                           Vector(-1.5, 3, 1, -6));
+        // 2134
+        TestSolverTestcase(solver, Matrix(2, 0, 4, 6, 2, 2, -3, 1, 3, 0, 0, -6, 2, 1, 1, -5), Vector(-6, 0, -21, 18),
+                           Vector(-1.5, 3, 1, -6));
+        // 2143
+        TestSolverTestcase(solver, Matrix(2, 0, 6, 4, 2, 2, 1, -3, 3, 0, -6, 0, 2, 1, -5, 1), Vector(-6, 0, 18, -21),
+                           Vector(-1.5, 3, 1, -6));
+    }
 
     Matrix AThrow(2, 1, 3, 4, 2, 1, 3, 4, 2, 1, 3, 4, 2, 1, 3, 4);
     GDL_CHECK_THROW_DEV(solver(AThrow, Vector()), Exception);
@@ -52,7 +76,7 @@ BOOST_AUTO_TEST_CASE(TestCramerSSE)
 
 BOOST_AUTO_TEST_CASE(TestGaussNoPivotSSE)
 {
-    TestSolver<true>(Solver::GaussNoPivot);
+    TestSolver<true>(Solver::GaussNoPivot, false);
 }
 
 

@@ -15,8 +15,12 @@ template <typename _solver, typename Matrix, typename Vector>
 void TestSolverTestcase(_solver solver, const Matrix& A, const Vector& b, const Vector& exp)
 {
     Vector res = solver(A, b);
+    Vector b2 = A * res;
     for (U32 i = 0; i < 3; ++i)
+    {
         BOOST_CHECK(res[i] == Approx(exp[i], 10));
+        BOOST_CHECK(b2[i] == Approx(b[i], 10));
+    }
 }
 
 
@@ -28,8 +32,13 @@ void TestSolver(_solver solver)
     using Vector = typename std::conditional<IsSSE, Vec3fSSE<true>, Vec3fSingle<true>>::type;
 
     TestSolverTestcase(solver, Matrix(1, 0, 0, 0, 1, 0, 0, 0, 1), Vector(1, 2, 3), Vector(1, 2, 3));
-    TestSolverTestcase(solver, Matrix(2, 1, 3, 4, 1, 4, 8, 1, 5), Vector(2, 1, 2), Vector(3, -3, 1));
     TestSolverTestcase(solver, Matrix(-2, -1, -3, -4, -1, -4, -8, -1, -5), Vector(-2, -1, -2), Vector(3, -3, 1));
+    TestSolverTestcase(solver, Matrix(2, 1, 3, 4, 1, 4, 8, 1, 5), Vector(2, 1, 2), Vector(3, -3, 1));
+    TestSolverTestcase(solver, Matrix(2, 3, 1, 4, 4, 1, 8, 5, 1), Vector(2, 2, 1), Vector(3, -3, 1));
+    TestSolverTestcase(solver, Matrix(1, 2, 3, 1, 4, 4, 1, 8, 5), Vector(1, 2, 2), Vector(3, -3, 1));
+    TestSolverTestcase(solver, Matrix(1, 3, 2, 1, 4, 4, 1, 5, 8), Vector(1, 2, 2), Vector(3, -3, 1));
+    TestSolverTestcase(solver, Matrix(3, 2, 1, 4, 4, 1, 5, 8, 1), Vector(2, 2, 1), Vector(3, -3, 1));
+    TestSolverTestcase(solver, Matrix(3, 1, 2, 4, 1, 4, 5, 1, 8), Vector(2, 1, 2), Vector(3, -3, 1));
 
     Matrix AThrow(2, 1, 3, 2, 1, 3, 2, 1, 3);
     GDL_CHECK_THROW_DEV(solver(AThrow, Vector()), Exception);

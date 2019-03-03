@@ -31,12 +31,12 @@ Vec4fSSE<true> Cramer(const Mat4fSSE& A, const Vec4fSSE<true>& b)
     detTmp[2] = Determinant4x4(dataA[0], dataA[1], dataB, dataA[3]);
     detTmp[3] = Determinant4x4(dataA[0], dataA[1], dataA[2], dataB);
 
-    return Vec4fSSE<true>(_mmx_div_p(_mmx_load_p<__m128>(detTmp.data()),_mmx_set1_p<__m128>(detA)));
+    return Vec4fSSE<true>(_mmx_div_p(_mmx_load_p<__m128>(detTmp.data()), _mmx_set1_p<__m128>(detA)));
 }
 
 
 
-class GaussInternals
+class GaussInternals4
 {
     friend Vec4fSSE<true> GaussPartialPivot(const Mat4fSSE&, const Vec4fSSE<true>&);
     friend Vec4fSSE<true> GaussNoPivot(const Mat4fSSE&, const Vec4fSSE<true>&);
@@ -115,13 +115,11 @@ Vec4fSSE<true> GaussPartialPivot(const Mat4fSSE& A, const Vec4fSSE<true>& b)
         for (U32 i = 0; i < 5; ++i)
             *data[i] = Permute<3, 1, 2, 0>(*data[i]);
         break;
-    default:
-        THROW("Invalid index");
     }
 
 
     // First elimination
-    GaussInternals::EliminationStep<0>(data);
+    GaussInternals4::EliminationStep<0>(data);
 
 
 
@@ -146,13 +144,11 @@ Vec4fSSE<true> GaussPartialPivot(const Mat4fSSE& A, const Vec4fSSE<true>& b)
         for (U32 i = 1; i < 5; ++i)
             *data[i] = Permute<0, 3, 2, 1>(*data[i]);
         break;
-    default:
-        THROW("Invalid index");
     }
 
 
     // Second elimination
-    GaussInternals::EliminationStep<1>(data);
+    GaussInternals4::EliminationStep<1>(data);
 
 
 
@@ -164,15 +160,14 @@ Vec4fSSE<true> GaussPartialPivot(const Mat4fSSE& A, const Vec4fSSE<true>& b)
 
 
     // Third elimination
-    GaussInternals::EliminationStep<2>(data);
+    GaussInternals4::EliminationStep<2>(data);
 
 
     // Final elimination
-    GaussInternals::EliminationStep<3>(data);
+    GaussInternals4::EliminationStep<3>(data);
 
     return Vec4fSSE<true>(rhs);
 }
-
 
 
 
@@ -186,16 +181,16 @@ Vec4fSSE<true> GaussNoPivot(const Mat4fSSE& A, const Vec4fSSE<true>& b)
 
 
     // First elimination
-    GaussInternals::EliminationStep<0>(data);
+    GaussInternals4::EliminationStep<0>(data);
 
     // Second elimination
-    GaussInternals::EliminationStep<1>(data);
+    GaussInternals4::EliminationStep<1>(data);
 
     // Third elimination
-    GaussInternals::EliminationStep<2>(data);
+    GaussInternals4::EliminationStep<2>(data);
 
     // Final elimination
-    GaussInternals::EliminationStep<3>(data);
+    GaussInternals4::EliminationStep<3>(data);
 
     return Vec4fSSE<true>(rhs);
 }
