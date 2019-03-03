@@ -23,7 +23,7 @@ template <typename _type, I32 _rows, I32 _cols>
 MatSSE<_type, _rows, _cols>::MatSSE()
     : mData{{0}}
 {
-    ConstructionChecks();
+    DEV_EXCEPTION(!IsInternalDataValid(), "Internal data is not valid. Alignment or size is not as expected.");
 }
 
 
@@ -32,7 +32,7 @@ template <typename _type, I32 _rows, I32 _cols>
 template <typename... _args>
 MatSSE<_type, _rows, _cols>::MatSSE(_args... args)
 {
-    assert(sizeof...(args) == _rows * _cols);
+    static_assert(sizeof...(args) == _rows * _cols, "Number of parameters must be equal to rows * columns");
     *this = MatSSE(std::array<_type, _rows * _cols>{{static_cast<_type>(args)...}});
 }
 
@@ -55,7 +55,7 @@ MatSSE<_type, _rows, _cols>::MatSSE(const std::array<_type, _rows * _cols>& data
             std::memcpy(&mData[i * mNumRegistersPerCol], &data[i * _rows], sizeof(_type) * _rows);
         }
 
-    ConstructionChecks();
+    DEV_EXCEPTION(!IsInternalDataValid(), "Internal data is not valid. Alignment or size is not as expected.");
 }
 
 
@@ -301,13 +301,16 @@ const std::array<_type, _rows * _cols> MatSSE<_type, _rows, _cols>::Data() const
 
 
 template <typename _type, I32 _rows, I32 _cols>
-void MatSSE<_type, _rows, _cols>::ConstructionChecks() const
+bool MatSSE<_type, _rows, _cols>::IsInternalDataValid() const
 {
-    assert(sizeof(mData) == sizeof(RegisterType) * mData.size()); // Array needs to be compact
-#ifndef NDEVEXCEPTION
+    static_assert(sizeof(decltype(mData)) == sizeof(RegisterType) * mNumRegisters); // Array needs to be compact
+
+    bool result = true;
+
     for (const auto& reg : mData)
-        DEV_EXCEPTION(!IsAligned(&reg, mAlignment), "One or more registers of the matrix are not aligned correctly");
-#endif
+        result = result && IsAligned(&reg, mAlignment);
+
+    return result;
 }
 
 

@@ -153,7 +153,7 @@ private:
 
 
     //! @brief Checks if the matrix was constructed as expected
-    void ConstructionChecks() const;
+    bool IsInternalDataValid() const;
 };
 
 

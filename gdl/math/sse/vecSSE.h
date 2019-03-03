@@ -4,6 +4,7 @@
 #include "gdl/base/sse/utility.h"
 
 #include <array>
+#include <iostream>
 
 namespace GDL
 {
@@ -37,9 +38,23 @@ public:
     inline VecSSE& operator=(VecSSE&& other) = default;
     inline ~VecSSE() = default;
 
+    //! @brief Constructor to set the whole vector
+    //! @tparam _args: Variadic data type
+    //! @param args: Values
+    template <typename... _args>
+    explicit VecSSE(_args... args);
+
+    //! @brief Constructor to set the whole vector
+    //! @brief Array with values
+    explicit VecSSE(const std::array<_type, _size>& data);
+
     //! @brief Gets the data array
     //! @return Data
     [[nodiscard]] inline std::array<_type, _size> Data() const;
+
+private:
+    //! @brief Checks if the vector was constructed as expected
+    bool IsInternalDataValid() const;
 };
 
 } // namespace GDL

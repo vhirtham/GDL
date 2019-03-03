@@ -27,6 +27,13 @@ void CtorDataTest()
 {
     _vector<_type, 16, _isClol> a;
     BOOST_CHECK(CheckArrayZero(a.Data()));
+
+    _vector<_type, 5, _isClol> b(0., 1., 2., 3., 4.);
+    std::array<_type, 5> expB{{0., 1., 2., 3., 4.}};
+    BOOST_CHECK(CheckCloseArray(b.Data(), expB));
+
+    _vector<_type, 5, _isClol> b1(expB);
+    BOOST_CHECK(CheckCloseArray(b1.Data(), expB));
 }
 
 

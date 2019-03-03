@@ -16,8 +16,12 @@ template <typename _solver, typename Matrix, typename Vector>
 void TestSolverTestcase(_solver solver, const Matrix& A, const Vector& b, const Vector& exp)
 {
     Vector res = solver(A, b);
+    Vector b2 = A * res;
     for (U32 i = 0; i < 4; ++i)
+    {
         BOOST_CHECK(res[i] == Approx(exp[i], 10));
+        BOOST_CHECK(b2[i] == Approx(b[i], 10));
+    }
 }
 
 
