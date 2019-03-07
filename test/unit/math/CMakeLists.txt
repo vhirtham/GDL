@@ -1,3 +1,4 @@
+add_subdirectory(solver)
 addTest(Mat)
 addTest(Mat2)
 addTest(Mat3)

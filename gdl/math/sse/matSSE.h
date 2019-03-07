@@ -22,13 +22,17 @@ class alignas(sse::alignmentBytes<decltype(sse::GetFittingRegister<_type, sse::M
     static_assert(std::is_floating_point<_type>::value, "Matrix can only be created with floating point types");
 
     using RegisterType = decltype(sse::GetFittingRegister<_type, sse::MaxRegisterSize()>());
+
+public:
     constexpr static U32 mAlignment = sse::alignmentBytes<RegisterType>;
     constexpr static U32 mNumRegisterEntries = sse::numRegisterValues<RegisterType>;
     constexpr static U32 mNumRegistersPerCol = sse::CalcMinNumArrayRegisters<RegisterType>(_rows);
     constexpr static U32 mNumRegisters = _cols * mNumRegistersPerCol;
 
+private:
+    using DataArray = std::array<RegisterType, mNumRegisters>;
 
-    alignas(mAlignment) std::array<RegisterType, mNumRegisters> mData;
+    alignas(mAlignment) DataArray mData;
 
     template <typename _typeOther, I32 _rowsOther, I32 _colsOther>
     friend class MatSSE;
@@ -38,14 +42,18 @@ public:
     MatSSE();
 
     //! @brief Constructor to set the whole matrix
-    //! @param args: Values (column major)
     //! @tparam _args: Variadic data type
+    //! @param args: Values (column major)
     template <typename... _args>
     explicit MatSSE(_args... args);
 
     //! @brief Constructor to set the whole matrix
-    //! @brief Array with values (column major)
+    //! @param data: Array with values (column major)
     explicit MatSSE(const std::array<_type, _rows * _cols>& data);
+
+    //! @brief Constructor to set the whole matrix
+    //! @param data: Array with values (column major)
+    explicit MatSSE(const DataArray& data);
 
 private:
     //! @brief Private helper ctor to initialize a MatSSE without initializing the memory to zero or any other value.
@@ -109,6 +117,10 @@ public:
     //! @brief Gets the data array in column major ordering
     //! @return Data
     [[nodiscard]] inline const std::array<_type, _rows * _cols> Data() const;
+
+    //! @brief Gets the underlying array of SSE registers
+    //! @return Data array
+    const DataArray& DataSSE() const;
 
 private:
     //! @brief Transposes all completly filled blocks of the matrix and writes them to the corresponding position of the

@@ -61,6 +61,15 @@ MatSSE<_type, _rows, _cols>::MatSSE(const std::array<_type, _rows * _cols>& data
 
 
 template <typename _type, I32 _rows, I32 _cols>
+MatSSE<_type, _rows, _cols>::MatSSE(const DataArray& data)
+    : mData{data}
+{
+    DEV_EXCEPTION(!IsInternalDataValid(), "Internal data is not valid. Alignment or size is not as expected.");
+}
+
+
+
+template <typename _type, I32 _rows, I32 _cols>
 MatSSE<_type, _rows, _cols>::MatSSE(bool)
 {
 }
@@ -296,6 +305,14 @@ const std::array<_type, _rows * _cols> MatSSE<_type, _rows, _cols>::Data() const
         }
     }
     return data;
+}
+
+
+
+template <typename _type, I32 _rows, I32 _cols>
+const typename MatSSE<_type, _rows, _cols>::DataArray& MatSSE<_type, _rows, _cols>::DataSSE() const
+{
+    return mData;
 }
 
 
