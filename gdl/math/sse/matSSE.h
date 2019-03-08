@@ -21,9 +21,8 @@ class alignas(sse::alignmentBytes<decltype(sse::GetFittingRegister<_type, sse::M
 {
     static_assert(std::is_floating_point<_type>::value, "Matrix can only be created with floating point types");
 
-    using RegisterType = decltype(sse::GetFittingRegister<_type, sse::MaxRegisterSize()>());
-
 public:
+    using RegisterType = decltype(sse::GetFittingRegister<_type, sse::MaxRegisterSize()>());
     constexpr static U32 mAlignment = sse::alignmentBytes<RegisterType>;
     constexpr static U32 mNumRegisterEntries = sse::numRegisterValues<RegisterType>;
     constexpr static U32 mNumRegistersPerCol = sse::CalcMinNumArrayRegisters<RegisterType>(_rows);

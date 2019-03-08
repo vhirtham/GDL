@@ -224,6 +224,14 @@ constexpr U32 ShuffleMask();
 template <U32 _src0, U32 _src1, U32 _src2, U32 _src3>
 constexpr U32 ShuffleMask256d();
 
+//! @brief Creates a new register where 2 values are swapped
+//! @tparam _idx0: Index of the first value that should be swapped
+//! @tparam _idx1: Index of the second value that should be swapped
+//! @param source: Source register
+//! @return New register with swapped values
+template <U32 _idx0, U32 _idx1>
+inline __m256 Swap(__m256 source);
+
 } // namespace GDL::sse
 
 

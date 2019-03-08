@@ -517,3 +517,12 @@ BOOST_AUTO_TEST_CASE(Test_Shuffle)
     TestShuffle2<__m256d>();
 #endif // __AVX2__
 }
+
+
+
+// Swap ---------------------------------------------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(Test_Swap)
+{
+    THROW("Create test!");
+}

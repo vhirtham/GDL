@@ -32,17 +32,20 @@ VecSSE<_type, _size, true> GaussPartialPivot(const MatSSE<_type, _size, _size>& 
 //! @brief Gaussian elimination solver class for dense static systems
 //! @tparam _type: Basic data type. Can either be F32 or F64
 //! @tparam _size: Size of the linear system
-template <typename _type, I32 _size>
+template <typename _registerType, I32 _size>
 class GaussDense
 {
-    using RegisterType = decltype(sse::GetFittingRegister<_type, sse::MaxRegisterSize()>());
-    constexpr static U32 alignment = sse::alignmentBytes<RegisterType>;
-    static constexpr U32 numRegisterValues = sse::numRegisterValues<RegisterType>;
-    static constexpr U32 numColRegisters = sse::CalcMinNumArrayRegisters<RegisterType>(_size);
+    // using RegisterType = decltype(sse::GetFittingRegister<_type, sse::MaxRegisterSize()>());
+    constexpr static U32 alignment = sse::alignmentBytes<_registerType>;
+    static constexpr U32 numRegisterValues = sse::numRegisterValues<_registerType>;
+    static constexpr U32 numColRegisters = sse::CalcMinNumArrayRegisters<_registerType>(_size);
 
-    using MatrixDataArray = std::array<RegisterType, numColRegisters * _size>;
-    using VectorType = VecSSE<_type, _size, true>;
-    using MatrixType = MatSSE<_type, _size, _size>;
+
+    template <typename _registerType2 = _registerType>
+    using MatrixDataArray = std::array<_registerType2, numColRegisters * _size>;
+    using ValueType = decltype(sse::GetDataType<_registerType>());
+    using VectorType = VecSSE<ValueType, _size, true>;
+    using MatrixType = MatSSE<ValueType, _size, _size>;
 
 
 public:
@@ -57,22 +60,24 @@ private:
     //! @param stepCount: Number of performed elimination steps
     //! @param matrixData: Array containing the matrix data
     //! @return Index of the pivot element
-    inline static U32 FindPivot(U32 stepCount, const MatrixDataArray& matrixData);
+    inline static U32 FindPivot(U32 stepCount, const MatrixDataArray<>& matrixData);
 
-    //! @brief Performs the pivoting step of the gauss elimination procedure by modifying the passed data
-    //! @param stepCount: Number of performed elimination steps
-    //! @param matrixData: Array containing the matrix data
-    inline static void PivotingStep(U32 stepCount, MatrixDataArray& matrixData);
+    template <U32 _rowIdx>
+    inline static void PivotingStepRegister(U32 regCount, MatrixDataArray<>& matrixData);
 
-    //! @brief Swaps the pivot element into the first row of the current elimination step
-    //! @param pivotIdx: Current position of the pivot element
-    //! @param stepCount: Number of performed elimination steps
-    //! @param matrixData: Array containing the matrix data
-    inline static void SwapPivot(U32 pivotIdx, U32 stepCount, MatrixDataArray& matrixData);
+    inline static void PivotingStep(U32 regCount, MatrixDataArray<>& matrixData);
 
-    inline static void SwapPivotAcrossRegisters(U32 Idx0, U32 Idx1, MatrixDataArray& matrixData);
+    template <U32 _rowIdx>
+    inline static void SwapPivot(U32 swapIdx, U32 regCount, MatrixDataArray<>& matrixData);
 
-    inline static void SwapPivotInsideRegister(U32 Idx0, U32 Idx1, MatrixDataArray& matrixData);
+
+    inline static void SwapPivotAcrossRegisters(U32 pivotIdx, U32 stepCount, MatrixDataArray<>& matrixData);
+
+    template <U32 _rowIdx>
+    inline static void SwapPivotInsideRegister(U32 swapIdx, U32 regCount, MatrixDataArray<__m256>& matrixData);
+
+    template <U32 _rowPiv, U32 _rowSwap>
+    inline static void SwapMatrixRowsInsideRegister(U32 registerColIdx, MatrixDataArray<>& matrixData);
 };
 
 
