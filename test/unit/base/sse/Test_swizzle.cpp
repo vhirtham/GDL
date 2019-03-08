@@ -522,7 +522,60 @@ BOOST_AUTO_TEST_CASE(Test_Shuffle)
 
 // Swap ---------------------------------------------------------------------------------------------------------------
 
+#ifdef __AVX2__
+
+template <U32 _idx0, U32 _idx1>
+void TestSwap256Testcase()
+{
+    __m256 a = _mmx_setr_p<__m256>(0, 1, 2, 3, 4, 5, 6, 7);
+    __m256 b = Swap<_idx0, _idx1>(a);
+
+    for (U32 i = 0; i < 8; ++i)
+    {
+        F32 bV = GetValue(b, i);
+        switch (i)
+        {
+        case _idx0:
+            BOOST_CHECK(bV == Approx(GetValue<_idx1>(a)));
+            break;
+        case _idx1:
+            BOOST_CHECK(bV == Approx(GetValue<_idx0>(a)));
+            break;
+        default:
+            BOOST_CHECK(bV == Approx(GetValue(a, i)));
+        }
+    }
+}
+
+template <U32 _idx0 = 0>
+void TestSwap256()
+{
+    if constexpr (_idx0 != 0)
+        TestSwap256Testcase<_idx0, 0>();
+    if constexpr (_idx0 != 1)
+        TestSwap256Testcase<_idx0, 1>();
+    if constexpr (_idx0 != 2)
+        TestSwap256Testcase<_idx0, 2>();
+    if constexpr (_idx0 != 3)
+        TestSwap256Testcase<_idx0, 3>();
+    if constexpr (_idx0 != 4)
+        TestSwap256Testcase<_idx0, 4>();
+    if constexpr (_idx0 != 5)
+        TestSwap256Testcase<_idx0, 5>();
+    if constexpr (_idx0 != 6)
+        TestSwap256Testcase<_idx0, 6>();
+    if constexpr (_idx0 != 7)
+        TestSwap256Testcase<_idx0, 7>();
+
+    if constexpr (_idx0 + 1 < 8)
+        TestSwap256<_idx0 + 1>();
+}
+
+#endif // __AVX2__
+
 BOOST_AUTO_TEST_CASE(Test_Swap)
 {
-    THROW("Create test!");
+#ifdef __AVX2__
+    TestSwap256();
+#endif // __AVX2__
 }
