@@ -300,67 +300,106 @@ inline __m256 Swap(__m256 source)
 
     constexpr U32 numLaneValues = numValuesPerLane<__m256>;
 
-    if constexpr (_idx0 < numLaneValues)
+    constexpr U32 lane0 = _idx0 / numLaneValues;
+    constexpr U32 lane1 = _idx1 / numLaneValues;
+
+    if constexpr (lane0 == lane1)
     {
-        if constexpr (_idx1 < numLaneValues)
-        {
-            constexpr U32 s0 = (_idx0 == 0) ? _idx1 : (_idx1 == 0) ? _idx0 : 0;
-            constexpr U32 s1 = (_idx0 == 1) ? _idx1 : (_idx1 == 1) ? _idx0 : 1;
-            constexpr U32 s2 = (_idx0 == 2) ? _idx1 : (_idx1 == 2) ? _idx0 : 2;
-            constexpr U32 s3 = (_idx0 == 3) ? _idx1 : (_idx1 == 3) ? _idx0 : 3;
+        constexpr U32 cIdx0 = _idx0 % numLaneValues;
+        constexpr U32 cIdx1 = _idx1 % numLaneValues;
 
-            return Permute<s0, s1, s2, s3, 0, 1, 2, 3>(source);
-        }
-        else
-        {
-            constexpr U32 cIdx1 = _idx1 - numLaneValues;
+        constexpr U32 s0 = (_idx0 == 0) ? _idx1 : (_idx1 == 0) ? _idx0 : 0;
+        constexpr U32 s1 = (_idx0 == 1) ? _idx1 : (_idx1 == 1) ? _idx0 : 1;
+        constexpr U32 s2 = (_idx0 == 2) ? _idx1 : (_idx1 == 2) ? _idx0 : 2;
+        constexpr U32 s3 = (_idx0 == 3) ? _idx1 : (_idx1 == 3) ? _idx0 : 3;
+        constexpr U32 s4 = (_idx0 == 4) ? cIdx1 : (_idx1 == 4) ? cIdx0 : 0;
+        constexpr U32 s5 = (_idx0 == 5) ? cIdx1 : (_idx1 == 5) ? cIdx0 : 1;
+        constexpr U32 s6 = (_idx0 == 6) ? cIdx1 : (_idx1 == 6) ? cIdx0 : 2;
+        constexpr U32 s7 = (_idx0 == 7) ? cIdx1 : (_idx1 == 7) ? cIdx0 : 3;
 
-            constexpr U32 b00 = (_idx0 == 0) ? 1 : 0;
-            constexpr U32 b01 = (_idx0 == 1) ? 1 : 0;
-            constexpr U32 b02 = (_idx0 == 2) ? 1 : 0;
-            constexpr U32 b03 = (_idx0 == 3) ? 1 : 0;
-            constexpr U32 b10 = (cIdx1 == 0) ? 1 : 0;
-            constexpr U32 b11 = (cIdx1 == 1) ? 1 : 0;
-            constexpr U32 b12 = (cIdx1 == 2) ? 1 : 0;
-            constexpr U32 b13 = (cIdx1 == 3) ? 1 : 0;
-
-            __m256 bc = Permute<_idx0, _idx0, _idx0, _idx0, cIdx1, cIdx1, cIdx1, cIdx1>(source);
-            __m256 tmp = Permute2F128<1, 0>(bc);
-            return Blend<b00, b01, b02, b03, b10, b11, b12, b13>(source, tmp);
-        }
+        return Permute<s0, s1, s2, s3, s4, s5, s6, s7>(source);
     }
     else
     {
-        if constexpr (_idx1 < numLaneValues)
-        {
-            constexpr U32 cIdx0 = _idx0 - numLaneValues;
+        constexpr U32 idxL0 = (_idx0 < _idx1) ? _idx0 : _idx1;
+        constexpr U32 idxL1 = (_idx0 > _idx1) ? _idx0 : _idx1;
+        constexpr U32 cIdxL1 = idxL1 % numLaneValues;
 
-            constexpr U32 b00 = (cIdx0 == 0) ? 1 : 0;
-            constexpr U32 b01 = (cIdx0 == 1) ? 1 : 0;
-            constexpr U32 b02 = (cIdx0 == 2) ? 1 : 0;
-            constexpr U32 b03 = (cIdx0 == 3) ? 1 : 0;
-            constexpr U32 b10 = (_idx1 == 0) ? 1 : 0;
-            constexpr U32 b11 = (_idx1 == 1) ? 1 : 0;
-            constexpr U32 b12 = (_idx1 == 2) ? 1 : 0;
-            constexpr U32 b13 = (_idx1 == 3) ? 1 : 0;
+        constexpr U32 b0 = (idxL0 == 0) ? 1 : 0;
+        constexpr U32 b1 = (idxL0 == 1) ? 1 : 0;
+        constexpr U32 b2 = (idxL0 == 2) ? 1 : 0;
+        constexpr U32 b3 = (idxL0 == 3) ? 1 : 0;
+        constexpr U32 b4 = (idxL1 == 4) ? 1 : 0;
+        constexpr U32 b5 = (idxL1 == 5) ? 1 : 0;
+        constexpr U32 b6 = (idxL1 == 6) ? 1 : 0;
+        constexpr U32 b7 = (idxL1 == 7) ? 1 : 0;
 
-            __m256 bc = Permute<cIdx0, cIdx0, cIdx0, cIdx0, _idx1, _idx1, _idx1, _idx1>(source);
-            __m256 tmp = Permute2F128<1, 0>(bc);
-            return Blend<b00, b01, b02, b03, b10, b11, b12, b13>(source, tmp);
-        }
-        else
-        {
-            constexpr U32 cIdx0 = _idx0 - numLaneValues;
-            constexpr U32 cIdx1 = _idx1 - numLaneValues;
-
-            constexpr U32 s0 = (cIdx0 == 0) ? cIdx1 : (cIdx1 == 0) ? cIdx0 : 0;
-            constexpr U32 s1 = (cIdx0 == 1) ? cIdx1 : (cIdx1 == 1) ? cIdx0 : 1;
-            constexpr U32 s2 = (cIdx0 == 2) ? cIdx1 : (cIdx1 == 2) ? cIdx0 : 2;
-            constexpr U32 s3 = (cIdx0 == 3) ? cIdx1 : (cIdx1 == 3) ? cIdx0 : 3;
-
-            return Permute<0, 1, 2, 3, s0, s1, s2, s3>(source);
-        }
+        __m256 bc = Permute<idxL0, idxL0, idxL0, idxL0, cIdxL1, cIdxL1, cIdxL1, cIdxL1>(source);
+        __m256 tmp = Permute2F128<1, 0>(bc);
+        return Blend<b0, b1, b2, b3, b4, b5, b6, b7>(source, tmp);
     }
+
+    //    if constexpr (_idx0 < numLaneValues)
+    //    {
+    //        if constexpr (_idx1 < numLaneValues)
+    //        {
+    //            constexpr U32 s0 = (_idx0 == 0) ? _idx1 : (_idx1 == 0) ? _idx0 : 0;
+    //            constexpr U32 s1 = (_idx0 == 1) ? _idx1 : (_idx1 == 1) ? _idx0 : 1;
+    //            constexpr U32 s2 = (_idx0 == 2) ? _idx1 : (_idx1 == 2) ? _idx0 : 2;
+    //            constexpr U32 s3 = (_idx0 == 3) ? _idx1 : (_idx1 == 3) ? _idx0 : 3;
+
+    //            return Permute<s0, s1, s2, s3, 0, 1, 2, 3>(source);
+    //        }
+    //        else
+    //        {
+    //            constexpr U32 cIdx1 = _idx1 - numLaneValues;
+
+    //            constexpr U32 b00 = (_idx0 == 0) ? 1 : 0;
+    //            constexpr U32 b01 = (_idx0 == 1) ? 1 : 0;
+    //            constexpr U32 b02 = (_idx0 == 2) ? 1 : 0;
+    //            constexpr U32 b03 = (_idx0 == 3) ? 1 : 0;
+    //            constexpr U32 b10 = (cIdx1 == 0) ? 1 : 0;
+    //            constexpr U32 b11 = (cIdx1 == 1) ? 1 : 0;
+    //            constexpr U32 b12 = (cIdx1 == 2) ? 1 : 0;
+    //            constexpr U32 b13 = (cIdx1 == 3) ? 1 : 0;
+
+    //            __m256 bc = Permute<_idx0, _idx0, _idx0, _idx0, cIdx1, cIdx1, cIdx1, cIdx1>(source);
+    //            __m256 tmp = Permute2F128<1, 0>(bc);
+    //            return Blend<b00, b01, b02, b03, b10, b11, b12, b13>(source, tmp);
+    //        }
+    //    }
+    //    else
+    //    {
+    //        if constexpr (_idx1 < numLaneValues)
+    //        {
+    //            constexpr U32 cIdx0 = _idx0 - numLaneValues;
+
+    //            constexpr U32 b00 = (cIdx0 == 0) ? 1 : 0;
+    //            constexpr U32 b01 = (cIdx0 == 1) ? 1 : 0;
+    //            constexpr U32 b02 = (cIdx0 == 2) ? 1 : 0;
+    //            constexpr U32 b03 = (cIdx0 == 3) ? 1 : 0;
+    //            constexpr U32 b10 = (_idx1 == 0) ? 1 : 0;
+    //            constexpr U32 b11 = (_idx1 == 1) ? 1 : 0;
+    //            constexpr U32 b12 = (_idx1 == 2) ? 1 : 0;
+    //            constexpr U32 b13 = (_idx1 == 3) ? 1 : 0;
+
+    //            __m256 bc = Permute<cIdx0, cIdx0, cIdx0, cIdx0, _idx1, _idx1, _idx1, _idx1>(source);
+    //            __m256 tmp = Permute2F128<1, 0>(bc);
+    //            return Blend<b00, b01, b02, b03, b10, b11, b12, b13>(source, tmp);
+    //        }
+    //        else
+    //        {
+    //            constexpr U32 cIdx0 = _idx0 - numLaneValues;
+    //            constexpr U32 cIdx1 = _idx1 - numLaneValues;
+
+    //            constexpr U32 s0 = (cIdx0 == 0) ? cIdx1 : (cIdx1 == 0) ? cIdx0 : 0;
+    //            constexpr U32 s1 = (cIdx0 == 1) ? cIdx1 : (cIdx1 == 1) ? cIdx0 : 1;
+    //            constexpr U32 s2 = (cIdx0 == 2) ? cIdx1 : (cIdx1 == 2) ? cIdx0 : 2;
+    //            constexpr U32 s3 = (cIdx0 == 3) ? cIdx1 : (cIdx1 == 3) ? cIdx0 : 3;
+
+    //            return Permute<0, 1, 2, 3, s0, s1, s2, s3>(source);
+    //        }
+    //    }
 }
 
 
