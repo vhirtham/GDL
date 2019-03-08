@@ -292,6 +292,7 @@ constexpr U32 ShuffleMask256d()
 }
 
 
+#ifdef __AVX2__
 
 template <U32 _idx0, U32 _idx1>
 inline __m256 Swap(__m256 source)
@@ -341,5 +342,6 @@ inline __m256 Swap(__m256 source)
     }
 }
 
+#endif // __AVX2__
 
 } // namespace GDL::sse
