@@ -111,6 +111,55 @@ inline _registerType BroadcastAcrossLanes(_registerType reg)
 
 
 
+template <U32 _idx0, U32 _idx1>
+inline void Exchange(__m128& reg0, __m128& reg1)
+{
+    constexpr U32 numRegVals = numRegisterValues<std::remove_reference<decltype(reg0)>::type>;
+    static_assert(_idx0 < numRegVals && _idx1 < numRegVals, "Indices must be in the range [0, 3]");
+
+    if constexpr (_idx0 == _idx1)
+    {
+        constexpr U32 b0 = (_idx0 == 0) ? 1 : 0;
+        constexpr U32 b1 = (_idx0 == 1) ? 1 : 0;
+        constexpr U32 b2 = (_idx0 == 2) ? 1 : 0;
+        constexpr U32 b3 = (_idx0 == 3) ? 1 : 0;
+
+        __m128 tmp = reg0;
+        reg0 = Blend<b0, b1, b2, b3>(reg0, reg1);
+        reg1 = Blend<b0, b1, b2, b3>(reg1, tmp);
+    }
+    else
+    {
+        constexpr U32 b00 = (_idx0 == 0) ? 1 : 0;
+        constexpr U32 b01 = (_idx0 == 1) ? 1 : 0;
+        constexpr U32 b02 = (_idx0 == 2) ? 1 : 0;
+        constexpr U32 b03 = (_idx0 == 3) ? 1 : 0;
+
+        constexpr U32 b10 = (_idx1 == 0) ? 1 : 0;
+        constexpr U32 b11 = (_idx1 == 1) ? 1 : 0;
+        constexpr U32 b12 = (_idx1 == 2) ? 1 : 0;
+        constexpr U32 b13 = (_idx1 == 3) ? 1 : 0;
+
+        __m128 tmp = Broadcast<_idx0>(reg0);
+        reg0 = Blend<b00, b01, b02, b03>(reg0, Broadcast<_idx1>(reg1));
+        reg1 = Blend<b10, b11, b12, b13>(reg1, tmp);
+    }
+}
+
+
+
+#ifdef __AVX2__
+
+template <U32 _idx0, U32 _idx1>
+inline void Exchange(__m256& reg0, __m256& reg1)
+{
+    constexpr U32 numRegVals = numRegisterValues<std::remove_reference<decltype(reg0)>::type>;
+    static_assert(_idx0 < numRegVals && _idx1 < numRegVals, "Indices must be in the range [0, 7]");
+}
+
+#endif // __AVX2__
+
+
 template <U32 _src0, U32 _src1>
 inline __m128d Permute(__m128d source)
 {
@@ -292,13 +341,34 @@ constexpr U32 ShuffleMask256d()
 }
 
 
+
+template <U32 _idx0, U32 _idx1>
+inline __m128 Swap(__m128 source)
+{
+    constexpr U32 numRegVals = numRegisterValues<decltype(source)>;
+
+    static_assert(_idx0 != _idx1, "Indices must differ");
+    static_assert(_idx0 < numRegVals && _idx1 < numRegVals, "Indices must be in the range [0, 3]");
+
+    constexpr U32 s0 = (_idx0 == 0) ? _idx1 : (_idx1 == 0) ? _idx0 : 0;
+    constexpr U32 s1 = (_idx0 == 1) ? _idx1 : (_idx1 == 1) ? _idx0 : 1;
+    constexpr U32 s2 = (_idx0 == 2) ? _idx1 : (_idx1 == 2) ? _idx0 : 2;
+    constexpr U32 s3 = (_idx0 == 3) ? _idx1 : (_idx1 == 3) ? _idx0 : 3;
+
+    return Permute<s0, s1, s2, s3>(source);
+}
+
+
+
 #ifdef __AVX2__
 
 template <U32 _idx0, U32 _idx1>
 inline __m256 Swap(__m256 source)
 {
+    constexpr U32 numRegVals = numRegisterValues<decltype(source)>;
+
     static_assert(_idx0 != _idx1, "Indices must differ");
-    static_assert(_idx0 < 8 && _idx1 < 8, "Indices must be in the range [0, 7]");
+    static_assert(_idx0 < numRegVals && _idx1 < numRegVals, "Indices must be in the range [0, 7]");
 
     constexpr U32 numLaneValues = numValuesPerLane<__m256>;
 

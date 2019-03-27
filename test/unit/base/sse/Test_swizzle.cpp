@@ -183,6 +183,89 @@ BOOST_AUTO_TEST_CASE(Test_Broadcast_Across_Lanes)
 
 
 
+// Exchange -----------------------------------------------------------------------------------------------------------
+
+#include <iostream>
+
+template <typename _registerType, U32 _idx0, U32 _idx1>
+void TestExchangeTest()
+{
+    constexpr U32 numRegVals = numRegisterValues<_registerType>;
+
+    _registerType a = _mmx_setzero_p<_registerType>();
+    _registerType b = _mmx_setzero_p<_registerType>();
+
+    for (U32 i = 0; i < numRegVals; ++i)
+    {
+        SetValue(a, i, i);
+        SetValue(b, i, i + numRegVals);
+    }
+
+    _registerType aRef = a;
+    _registerType bRef = b;
+
+    Exchange<_idx0, _idx1>(a, b);
+
+    std::cout << _idx0 << "<->" << _idx1 << std::endl;
+
+    for (U32 i = 0; i < numRegVals; ++i)
+    {
+        F32 aV = GetValue(a, i);
+        if (i == _idx0)
+            BOOST_CHECK(aV == Approx(GetValue<_idx1>(bRef)));
+        else
+            BOOST_CHECK(aV == Approx(GetValue(a, i)));
+
+
+        F32 bV = GetValue(b, i);
+        if (i == _idx1)
+            BOOST_CHECK(bV == Approx(GetValue<_idx0>(aRef)));
+        else
+            BOOST_CHECK(bV == Approx(GetValue(b, i)));
+
+        std::cout << aV << "/" << bV << std::endl;
+    }
+    std::cout << std::endl;
+}
+
+template <typename _registerType, U32 _idx0 = 0>
+void TestExchange()
+{
+    constexpr U32 numRegVals = numRegisterValues<_registerType>;
+
+    TestExchangeTest<_registerType, _idx0, 0>();
+    TestExchangeTest<_registerType, _idx0, 1>();
+
+    if constexpr (numRegVals > 2)
+    {
+        TestExchangeTest<_registerType, _idx0, 2>();
+        TestExchangeTest<_registerType, _idx0, 3>();
+    }
+
+    if constexpr (numRegVals > 4)
+    {
+        TestExchangeTest<_registerType, _idx0, 4>();
+        TestExchangeTest<_registerType, _idx0, 5>();
+        TestExchangeTest<_registerType, _idx0, 6>();
+        TestExchangeTest<_registerType, _idx0, 7>();
+    }
+
+    if constexpr (_idx0 + 1 < numRegVals)
+        TestExchange<_registerType, _idx0 + 1>();
+}
+
+
+
+BOOST_AUTO_TEST_CASE(Test_Exchange)
+{
+    TestExchange<__m128>();
+#ifdef __AVX2__
+    // TestExchange<__m256>();
+#endif // __AVX2__
+}
+
+
+
 // Permute ------------------------------------------------------------------------------------------------------------
 
 template <U32 _i, U32 _j>
@@ -385,9 +468,6 @@ BOOST_AUTO_TEST_CASE(Test_Permute2F128)
 
 // Shuffle ------------------------------------------------------------------------------------------------------------
 
-#include <iostream>
-
-
 template <typename _registerType, U32 _i, U32 _j>
 void TestShuffle2()
 {
@@ -522,17 +602,22 @@ BOOST_AUTO_TEST_CASE(Test_Shuffle)
 
 // Swap ---------------------------------------------------------------------------------------------------------------
 
-#ifdef __AVX2__
 
-template <U32 _idx0, U32 _idx1>
-void TestSwap256Testcase()
+template <typename _registerType, U32 _idx0, U32 _idx1>
+void TestSwapTest()
 {
-    __m256 a = _mmx_setr_p<__m256>(0, 1, 2, 3, 4, 5, 6, 7);
-    __m256 b = Swap<_idx0, _idx1>(a);
+    constexpr U32 numRegVals = numRegisterValues<_registerType>;
 
-    for (U32 i = 0; i < 8; ++i)
+    _registerType a = _mmx_setzero_p<_registerType>();
+    for (U32 i = 0; i < numRegVals; ++i)
+        SetValue(a, i, i);
+
+    _registerType b = Swap<_idx0, _idx1>(a);
+
+    for (U32 i = 0; i < numRegVals; ++i)
     {
         F32 bV = GetValue(b, i);
+
         switch (i)
         {
         case _idx0:
@@ -547,35 +632,48 @@ void TestSwap256Testcase()
     }
 }
 
-template <U32 _idx0 = 0>
-void TestSwap256()
-{
-    if constexpr (_idx0 != 0)
-        TestSwap256Testcase<_idx0, 0>();
-    if constexpr (_idx0 != 1)
-        TestSwap256Testcase<_idx0, 1>();
-    if constexpr (_idx0 != 2)
-        TestSwap256Testcase<_idx0, 2>();
-    if constexpr (_idx0 != 3)
-        TestSwap256Testcase<_idx0, 3>();
-    if constexpr (_idx0 != 4)
-        TestSwap256Testcase<_idx0, 4>();
-    if constexpr (_idx0 != 5)
-        TestSwap256Testcase<_idx0, 5>();
-    if constexpr (_idx0 != 6)
-        TestSwap256Testcase<_idx0, 6>();
-    if constexpr (_idx0 != 7)
-        TestSwap256Testcase<_idx0, 7>();
 
-    if constexpr (_idx0 + 1 < 8)
-        TestSwap256<_idx0 + 1>();
+
+template <typename _registerType, U32 _idx0 = 0>
+void TestSwap()
+{
+    constexpr U32 numRegVals = numRegisterValues<_registerType>;
+
+    if constexpr (_idx0 != 0)
+        TestSwapTest<_registerType, _idx0, 0>();
+    if constexpr (_idx0 != 1)
+        TestSwapTest<_registerType, _idx0, 1>();
+
+    if constexpr (numRegVals > 2)
+    {
+        if constexpr (_idx0 != 2)
+            TestSwapTest<_registerType, _idx0, 2>();
+        if constexpr (_idx0 != 3)
+            TestSwapTest<_registerType, _idx0, 3>();
+    }
+
+    if constexpr (numRegVals > 4)
+    {
+        if constexpr (_idx0 != 4)
+            TestSwapTest<_registerType, _idx0, 4>();
+        if constexpr (_idx0 != 5)
+            TestSwapTest<_registerType, _idx0, 5>();
+        if constexpr (_idx0 != 6)
+            TestSwapTest<_registerType, _idx0, 6>();
+        if constexpr (_idx0 != 7)
+            TestSwapTest<_registerType, _idx0, 7>();
+    }
+
+
+    if constexpr (_idx0 + 1 < numRegVals)
+        TestSwap<_registerType, _idx0 + 1>();
 }
 
-#endif // __AVX2__
 
 BOOST_AUTO_TEST_CASE(Test_Swap)
 {
+    TestSwap<__m128>();
 #ifdef __AVX2__
-    TestSwap256();
+    TestSwap<__m256>();
 #endif // __AVX2__
 }
