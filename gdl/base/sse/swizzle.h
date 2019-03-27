@@ -51,13 +51,24 @@ constexpr U32 BlendMask();
 template <U32 _src0, U32 _src1, U32 _src2, U32 _src3, U32 _src4, U32 _src5, U32 _src6, U32 _src7>
 constexpr U32 BlendMask();
 
-//! @brief Picks the value at position _index in each lane and returns a register where each lane element contains the
-//! selected value
+//! @brief Returns a register with identical values per lane. The value is taken from the source registers lanes at
+//! position _index.
 //! @tparam _index: Index of the value that should be selected in each lane
 //! @tparam _registerType: Register type
 //! @param source: Source register
-//! @return Register where each lane element contains the selected value
+//! @return Register with identical values per lane
 template <U32 _index, typename _registerType>
+inline _registerType Broadcast(_registerType reg);
+
+//! @brief Returns a register with identical values per lane. The value is taken from the source registers lanes at
+//! the positions _idx0 and _idx1.
+//! @tparam _idx0: Index of the value that should be selected in the first lane
+//! @tparam _idx1: Index of the value that should be selected in the second lane
+//! @tparam _registerType: Register type
+//! @param source: Source register
+//! @return Register with identical values per lane
+//! @remark This function is only compatible with registers that consist of exactly 2 lanes.
+template <U32 _idx0, U32 _idx1, typename _registerType>
 inline _registerType Broadcast(_registerType reg);
 
 //! @brief Creates a new register where each element contains the same value selected from the source register

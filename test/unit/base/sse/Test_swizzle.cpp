@@ -122,23 +122,53 @@ BOOST_AUTO_TEST_CASE(Blend2)
 template <typename _registerType, U32 _index = 0>
 void TestBroadcast()
 {
+    constexpr U32 numRegVals = numRegisterValues<_registerType>;
+    constexpr U32 numLaneVals = numValuesPerLane<_registerType>;
+
     _registerType a = _mmx_setzero_p<_registerType>();
-    for (U32 i = 0; i < numRegisterValues<_registerType>; ++i)
+
+    for (U32 i = 0; i < numRegVals; ++i)
         SetValue(a, i, i);
 
     _registerType b = Broadcast<_index>(a);
-    for (U32 i = 0; i < numValuesPerLane<_registerType>; ++i)
+    for (U32 i = 0; i < numLaneVals; ++i)
     {
         BOOST_CHECK(sse::GetValue(b, i) == Approx(sse::GetValue<_index>(a)));
-        if constexpr (numRegisterValues<_registerType> / numValuesPerLane<_registerType> == 2)
-            BOOST_CHECK(sse::GetValue(b, i + numValuesPerLane<_registerType>) ==
-                        Approx(sse::GetValue<_index + numValuesPerLane<_registerType>>(a)));
+        if constexpr (numLanes<_registerType> == 2)
+            BOOST_CHECK(sse::GetValue(b, i + numLaneVals) == Approx(sse::GetValue<_index + numLaneVals>(a)));
     }
 
     if constexpr (_index + 1 < numValuesPerLane<_registerType>)
         TestBroadcast<_registerType, _index + 1>();
 }
 
+
+
+#ifdef __AVX2__
+
+template <typename _registerType, U32 _idx0 = 0, U32 _idx1 = 0>
+void TestBroadcast2Lanes()
+{
+    constexpr U32 numRegVals = numRegisterValues<_registerType>;
+    constexpr U32 numLaneVals = numValuesPerLane<_registerType>;
+
+    _registerType a = _mmx_setzero_p<_registerType>();
+    for (U32 i = 0; i < numRegVals; ++i)
+        SetValue(a, i, i);
+
+    _registerType b = Broadcast<_idx0, _idx1>(a);
+    for (U32 i = 0; i < numLaneVals; ++i)
+    {
+        BOOST_CHECK(sse::GetValue(b, i) == Approx(sse::GetValue<_idx0>(a)));
+        BOOST_CHECK(sse::GetValue(b, i + numLaneVals) == Approx(sse::GetValue<_idx1 + numLaneVals>(a)));
+    }
+
+    if constexpr (_idx0 + 1 < numValuesPerLane<_registerType>)
+        TestBroadcast2Lanes<_registerType, _idx0 + 1, _idx1>();
+    else if constexpr (_idx1 + 1 < numValuesPerLane<_registerType>)
+        TestBroadcast2Lanes<_registerType, 0, _idx1 + 1>();
+}
+#endif // __AVX2__
 
 BOOST_AUTO_TEST_CASE(Test_Broadcast)
 {
@@ -147,6 +177,8 @@ BOOST_AUTO_TEST_CASE(Test_Broadcast)
 #ifdef __AVX2__
     TestBroadcast<__m256>();
     TestBroadcast<__m256d>();
+    TestBroadcast2Lanes<__m256>();
+    TestBroadcast2Lanes<__m256d>();
 #endif // __AVX2__
 }
 
@@ -206,8 +238,6 @@ void TestExchangeTest()
 
     Exchange<_idx0, _idx1>(a, b);
 
-    std::cout << _idx0 << "<->" << _idx1 << std::endl;
-
     for (U32 i = 0; i < numRegVals; ++i)
     {
         F32 aV = GetValue(a, i);
@@ -222,11 +252,10 @@ void TestExchangeTest()
             BOOST_CHECK(bV == Approx(GetValue<_idx0>(aRef)));
         else
             BOOST_CHECK(bV == Approx(GetValue(b, i)));
-
-        std::cout << aV << "/" << bV << std::endl;
     }
-    std::cout << std::endl;
 }
+
+
 
 template <typename _registerType, U32 _idx0 = 0>
 void TestExchange()
@@ -258,9 +287,9 @@ void TestExchange()
 
 BOOST_AUTO_TEST_CASE(Test_Exchange)
 {
-    TestExchange<__m128>();
+    // TestExchange<__m128>();
 #ifdef __AVX2__
-    // TestExchange<__m256>();
+    TestExchange<__m256>();
 #endif // __AVX2__
 }
 
