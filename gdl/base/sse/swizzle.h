@@ -88,6 +88,15 @@ inline _registerType BroadcastAcrossLanes(_registerType reg);
 template <U32 _idx0, U32 _idx1>
 inline void Exchange(__m128& reg0, __m128& reg1);
 
+//! @brief Exchanges 2 values between 2 registers
+//! @tparam _idx0: Index of the first registers value that should be exchanged
+//! @tparam _idx1: Index of the second registers value that should be exchanged
+//! @param reg0: First register
+//! @param reg1: Second register
+//! @remark: Use the swap function to swap 2 values that are in the same register.
+template <U32 _idx0, U32 _idx1>
+inline void Exchange(__m128d& reg0, __m128d& reg1);
+
 #ifdef __AVX2__
 
 //! @brief Exchanges 2 values between 2 registers
@@ -98,6 +107,15 @@ inline void Exchange(__m128& reg0, __m128& reg1);
 //! @remark: Use the swap function to swap 2 values that are in the same register.
 template <U32 _idx0, U32 _idx1>
 inline void Exchange(__m256& reg0, __m256& reg1);
+
+//! @brief Exchanges 2 values between 2 registers
+//! @tparam _idx0: Index of the first registers value that should be exchanged
+//! @tparam _idx1: Index of the second registers value that should be exchanged
+//! @param reg0: First register
+//! @param reg1: Second register
+//! @remark: Use the swap function to swap 2 values that are in the same register.
+template <U32 _idx0, U32 _idx1>
+inline void Exchange(__m256d& reg0, __m256d& reg1);
 
 #endif // __AVX2__
 
@@ -258,9 +276,6 @@ constexpr U32 ShuffleMask();
 template <U32 _src0, U32 _src1, U32 _src2, U32 _src3>
 constexpr U32 ShuffleMask256d();
 
-#ifdef __AVX2__
-
-
 //! @brief Creates a new register where 2 values are swapped
 //! @tparam _idx0: Index of the first value that should be swapped
 //! @tparam _idx1: Index of the second value that should be swapped
@@ -276,8 +291,28 @@ inline __m128 Swap(__m128 source);
 //! @param source: Source register
 //! @return New register with swapped values
 //! @remark: Use the exchange function to swap 2 values that are not in the same register.
+template <U32 _idx0 = 1, U32 _idx1 = 0>
+inline __m128d Swap(__m128d source);
+
+#ifdef __AVX2__
+
+//! @brief Creates a new register where 2 values are swapped
+//! @tparam _idx0: Index of the first value that should be swapped
+//! @tparam _idx1: Index of the second value that should be swapped
+//! @param source: Source register
+//! @return New register with swapped values
+//! @remark: Use the exchange function to swap 2 values that are not in the same register.
 template <U32 _idx0, U32 _idx1>
 inline __m256 Swap(__m256 source);
+
+//! @brief Creates a new register where 2 values are swapped
+//! @tparam _idx0: Index of the first value that should be swapped
+//! @tparam _idx1: Index of the second value that should be swapped
+//! @param source: Source register
+//! @return New register with swapped values
+//! @remark: Use the exchange function to swap 2 values that are not in the same register.
+template <U32 _idx0, U32 _idx1>
+inline __m256d Swap(__m256d source);
 
 #endif // __AVX2__
 

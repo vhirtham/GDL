@@ -131,7 +131,8 @@ inline _registerType BroadcastAcrossLanes(_registerType reg)
 template <U32 _idx0, U32 _idx1>
 inline void Exchange(__m128& reg0, __m128& reg1)
 {
-    constexpr U32 numRegVals = numRegisterValues<std::remove_reference<decltype(reg0)>::type>;
+    using RegisterType = std::remove_reference<decltype(reg0)>::type;
+    constexpr U32 numRegVals = numRegisterValues<RegisterType>;
     static_assert(_idx0 < numRegVals && _idx1 < numRegVals, "Indices must be in the range [0, 3]");
 
     constexpr U32 b00 = (_idx0 == 0) ? 1 : 0;
@@ -146,15 +147,44 @@ inline void Exchange(__m128& reg0, __m128& reg1)
 
     if constexpr (_idx0 == _idx1)
     {
-        __m128 tmp = reg0;
+        RegisterType tmp = reg0;
         reg0 = Blend<b00, b01, b02, b03>(reg0, reg1);
         reg1 = Blend<b10, b11, b12, b13>(reg1, tmp);
     }
     else
     {
-        __m128 tmp = Broadcast<_idx0>(reg0);
+        RegisterType tmp = Broadcast<_idx0>(reg0);
         reg0 = Blend<b00, b01, b02, b03>(reg0, Broadcast<_idx1>(reg1));
         reg1 = Blend<b10, b11, b12, b13>(reg1, tmp);
+    }
+}
+
+
+template <U32 _idx0, U32 _idx1>
+inline void Exchange(__m128d& reg0, __m128d& reg1)
+{
+    using RegisterType = std::remove_reference<decltype(reg0)>::type;
+    constexpr U32 numRegVals = numRegisterValues<RegisterType>;
+
+    static_assert(_idx0 < numRegVals && _idx1 < numRegVals, "Indices must be in the range [0, 1]");
+
+    constexpr U32 b00 = (_idx0 == 0) ? 1 : 0;
+    constexpr U32 b01 = (_idx0 == 1) ? 1 : 0;
+
+    constexpr U32 b10 = (_idx1 == 0) ? 1 : 0;
+    constexpr U32 b11 = (_idx1 == 1) ? 1 : 0;
+
+    if constexpr (_idx0 == _idx1)
+    {
+        RegisterType tmp = reg0;
+        reg0 = Blend<b00, b01>(reg0, reg1);
+        reg1 = Blend<b10, b11>(reg1, tmp);
+    }
+    else
+    {
+        RegisterType tmp = Broadcast<_idx0>(reg0);
+        reg0 = Blend<b00, b01>(reg0, Broadcast<_idx1>(reg1));
+        reg1 = Blend<b10, b11>(reg1, tmp);
     }
 }
 
@@ -165,8 +195,9 @@ inline void Exchange(__m128& reg0, __m128& reg1)
 template <U32 _idx0, U32 _idx1>
 inline void Exchange(__m256& reg0, __m256& reg1)
 {
-    constexpr U32 numRegVals = numRegisterValues<std::remove_reference<decltype(reg0)>::type>;
-    constexpr U32 numLaneVals = numValuesPerLane<__m256>;
+    using RegisterType = std::remove_reference<decltype(reg0)>::type;
+    constexpr U32 numRegVals = numRegisterValues<RegisterType>;
+    constexpr U32 numLaneVals = numValuesPerLane<RegisterType>;
 
     static_assert(_idx0 < numRegVals && _idx1 < numRegVals, "Indices must be in the range [0, 7]");
 
@@ -194,13 +225,13 @@ inline void Exchange(__m256& reg0, __m256& reg1)
 
     if constexpr (_idx0 == _idx1)
     {
-        __m256 tmp = reg0;
+        RegisterType tmp = reg0;
         reg0 = Blend<b00, b01, b02, b03, b04, b05, b06, b07>(reg0, reg1);
         reg1 = Blend<b10, b11, b12, b13, b14, b15, b16, b17>(reg1, tmp);
     }
     else if constexpr (lane0 == lane1)
     {
-        __m256 tmp = Broadcast<_idx0 % numLaneVals>(reg0);
+        RegisterType tmp = Broadcast<_idx0 % numLaneVals>(reg0);
         reg0 = Blend<b00, b01, b02, b03, b04, b05, b06, b07>(reg0, Broadcast<_idx1 % numLaneVals>(reg1));
         reg1 = Blend<b10, b11, b12, b13, b14, b15, b16, b17>(reg1, tmp);
     }
@@ -215,18 +246,80 @@ inline void Exchange(__m256& reg0, __m256& reg1)
 
         if constexpr (cIdx0 == cIdx1)
         {
-            __m256 tmp = Permute2F128<regIdx0, 1, regIdx1, 0>(reg0, reg1);
+            RegisterType tmp = Permute2F128<regIdx0, 1, regIdx1, 0>(reg0, reg1);
             reg0 = Blend<b00, b01, b02, b03, b04, b05, b06, b07>(reg0, tmp);
             reg1 = Blend<b10, b11, b12, b13, b14, b15, b16, b17>(reg1, tmp);
         }
         else
         {
-            __m256 tmp = Broadcast<cIdx0, cIdx1>(Permute2F128<regIdx0, 1, regIdx1, 0>(reg0, reg1));
+            RegisterType tmp = Broadcast<cIdx0, cIdx1>(Permute2F128<regIdx0, 1, regIdx1, 0>(reg0, reg1));
             reg0 = Blend<b00, b01, b02, b03, b04, b05, b06, b07>(reg0, tmp);
             reg1 = Blend<b10, b11, b12, b13, b14, b15, b16, b17>(reg1, tmp);
         }
     }
 }
+
+
+template <U32 _idx0, U32 _idx1>
+inline void Exchange(__m256d& reg0, __m256d& reg1)
+{
+    using RegisterType = std::remove_reference<decltype(reg0)>::type;
+    constexpr U32 numRegVals = numRegisterValues<RegisterType>;
+    constexpr U32 numLaneVals = numValuesPerLane<RegisterType>;
+
+    static_assert(_idx0 < numRegVals && _idx1 < numRegVals, "Indices must be in the range [0, 7]");
+
+
+    constexpr U32 lane0 = _idx0 / numLaneVals;
+    constexpr U32 lane1 = _idx1 / numLaneVals;
+
+    constexpr U32 b00 = (_idx0 == 0) ? 1 : 0;
+    constexpr U32 b01 = (_idx0 == 1) ? 1 : 0;
+    constexpr U32 b02 = (_idx0 == 2) ? 1 : 0;
+    constexpr U32 b03 = (_idx0 == 3) ? 1 : 0;
+
+    constexpr U32 b10 = (_idx1 == 0) ? 1 : 0;
+    constexpr U32 b11 = (_idx1 == 1) ? 1 : 0;
+    constexpr U32 b12 = (_idx1 == 2) ? 1 : 0;
+    constexpr U32 b13 = (_idx1 == 3) ? 1 : 0;
+
+    if constexpr (_idx0 == _idx1)
+    {
+        RegisterType tmp = reg0;
+        reg0 = Blend<b00, b01, b02, b03>(reg0, reg1);
+        reg1 = Blend<b10, b11, b12, b13>(reg1, tmp);
+    }
+    else if constexpr (lane0 == lane1)
+    {
+        RegisterType tmp = Broadcast<_idx0 % numLaneVals>(reg0);
+        reg0 = Blend<b00, b01, b02, b03>(reg0, Broadcast<_idx1 % numLaneVals>(reg1));
+        reg1 = Blend<b10, b11, b12, b13>(reg1, tmp);
+    }
+    else
+    {
+        constexpr U32 regIdx0 = (lane0 == 0) ? 1 : 0;
+        constexpr U32 regIdx1 = (lane1 == 0) ? 1 : 0;
+
+
+        constexpr U32 cIdx0 = (lane0 == 0) ? _idx1 % numLaneVals : _idx0 % numLaneVals;
+        constexpr U32 cIdx1 = (lane0 == 0) ? _idx0 % numLaneVals : _idx1 % numLaneVals;
+
+        if constexpr (cIdx0 == cIdx1)
+        {
+            RegisterType tmp = Permute2F128<regIdx0, 1, regIdx1, 0>(reg0, reg1);
+            reg0 = Blend<b00, b01, b02, b03>(reg0, tmp);
+            reg1 = Blend<b10, b11, b12, b13>(reg1, tmp);
+        }
+        else
+        {
+            RegisterType tmp = Broadcast<cIdx0, cIdx1>(Permute2F128<regIdx0, 1, regIdx1, 0>(reg0, reg1));
+            reg0 = Blend<b00, b01, b02, b03>(reg0, tmp);
+            reg1 = Blend<b10, b11, b12, b13>(reg1, tmp);
+        }
+    }
+}
+
+
 
 #endif // __AVX2__
 
@@ -431,17 +524,29 @@ inline __m128 Swap(__m128 source)
 
 
 
+template <U32 _idx0, U32 _idx1>
+inline __m128d Swap(__m128d source)
+{
+    constexpr U32 numRegVals = numRegisterValues<decltype(source)>;
+
+    static_assert(_idx0 != _idx1, "Indices must differ");
+    static_assert(_idx0 < numRegVals && _idx1 < numRegVals, "Indices must be in the range [0, 1]");
+
+    return Permute<1, 0>(source);
+}
+
+
 #ifdef __AVX2__
 
 template <U32 _idx0, U32 _idx1>
 inline __m256 Swap(__m256 source)
 {
-    constexpr U32 numRegVals = numRegisterValues<decltype(source)>;
+    using RegisterType = decltype(source);
+    constexpr U32 numRegVals = numRegisterValues<RegisterType>;
+    constexpr U32 numLaneValues = numValuesPerLane<RegisterType>;
 
     static_assert(_idx0 != _idx1, "Indices must differ");
     static_assert(_idx0 < numRegVals && _idx1 < numRegVals, "Indices must be in the range [0, 7]");
-
-    constexpr U32 numLaneValues = numValuesPerLane<__m256>;
 
     constexpr U32 lane0 = _idx0 / numLaneValues;
     constexpr U32 lane1 = _idx1 / numLaneValues;
@@ -477,9 +582,53 @@ inline __m256 Swap(__m256 source)
         constexpr U32 b6 = (idxL1 == 6) ? 1 : 0;
         constexpr U32 b7 = (idxL1 == 7) ? 1 : 0;
 
-        __m256 bc = Permute<idxL0, idxL0, idxL0, idxL0, cIdxL1, cIdxL1, cIdxL1, cIdxL1>(source);
-        __m256 tmp = Permute2F128<1, 0>(bc);
+        RegisterType bc = Broadcast<idxL0, cIdxL1>(source);
+        RegisterType tmp = Permute2F128<1, 0>(bc);
         return Blend<b0, b1, b2, b3, b4, b5, b6, b7>(source, tmp);
+    }
+}
+
+
+
+template <U32 _idx0, U32 _idx1>
+inline __m256d Swap(__m256d source)
+{
+    using RegisterType = decltype(source);
+    constexpr U32 numRegVals = numRegisterValues<RegisterType>;
+    constexpr U32 numLaneValues = numValuesPerLane<RegisterType>;
+
+    static_assert(_idx0 != _idx1, "Indices must differ");
+    static_assert(_idx0 < numRegVals && _idx1 < numRegVals, "Indices must be in the range [0, 3]");
+
+    constexpr U32 lane0 = _idx0 / numLaneValues;
+    constexpr U32 lane1 = _idx1 / numLaneValues;
+
+    if constexpr (lane0 == lane1)
+    {
+        constexpr U32 cIdx0 = _idx0 % numLaneValues;
+        constexpr U32 cIdx1 = _idx1 % numLaneValues;
+
+        constexpr U32 s0 = (_idx0 == 0) ? _idx1 : (_idx1 == 0) ? _idx0 : 0;
+        constexpr U32 s1 = (_idx0 == 1) ? _idx1 : (_idx1 == 1) ? _idx0 : 1;
+        constexpr U32 s2 = (_idx0 == 2) ? cIdx1 : (_idx1 == 2) ? cIdx0 : 0;
+        constexpr U32 s3 = (_idx0 == 3) ? cIdx1 : (_idx1 == 3) ? cIdx0 : 1;
+
+        return Permute<s0, s1, s2, s3>(source);
+    }
+    else
+    {
+        constexpr U32 idxL0 = (_idx0 < _idx1) ? _idx0 : _idx1;
+        constexpr U32 idxL1 = (_idx0 > _idx1) ? _idx0 : _idx1;
+        constexpr U32 cIdxL1 = idxL1 % numLaneValues;
+
+        constexpr U32 b0 = (idxL0 == 0) ? 1 : 0;
+        constexpr U32 b1 = (idxL0 == 1) ? 1 : 0;
+        constexpr U32 b2 = (idxL1 == 2) ? 1 : 0;
+        constexpr U32 b3 = (idxL1 == 3) ? 1 : 0;
+
+        RegisterType bc = Broadcast<idxL0, cIdxL1>(source);
+        RegisterType tmp = Permute2F128<1, 0>(bc);
+        return Blend<b0, b1, b2, b3>(source, tmp);
     }
 }
 

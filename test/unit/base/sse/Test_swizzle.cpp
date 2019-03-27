@@ -222,6 +222,7 @@ BOOST_AUTO_TEST_CASE(Test_Broadcast_Across_Lanes)
 template <typename _registerType, U32 _idx0, U32 _idx1>
 void TestExchangeTest()
 {
+    using Type = decltype(GetDataType<_registerType>());
     constexpr U32 numRegVals = numRegisterValues<_registerType>;
 
     _registerType a = _mmx_setzero_p<_registerType>();
@@ -240,14 +241,14 @@ void TestExchangeTest()
 
     for (U32 i = 0; i < numRegVals; ++i)
     {
-        F32 aV = GetValue(a, i);
+        Type aV = GetValue(a, i);
         if (i == _idx0)
             BOOST_CHECK(aV == Approx(GetValue<_idx1>(bRef)));
         else
             BOOST_CHECK(aV == Approx(GetValue(a, i)));
 
 
-        F32 bV = GetValue(b, i);
+        Type bV = GetValue(b, i);
         if (i == _idx1)
             BOOST_CHECK(bV == Approx(GetValue<_idx0>(aRef)));
         else
@@ -287,9 +288,11 @@ void TestExchange()
 
 BOOST_AUTO_TEST_CASE(Test_Exchange)
 {
-    // TestExchange<__m128>();
+    TestExchange<__m128>();
+    TestExchange<__m128d>();
 #ifdef __AVX2__
     TestExchange<__m256>();
+    TestExchange<__m256d>();
 #endif // __AVX2__
 }
 
@@ -635,6 +638,7 @@ BOOST_AUTO_TEST_CASE(Test_Shuffle)
 template <typename _registerType, U32 _idx0, U32 _idx1>
 void TestSwapTest()
 {
+    using Type = decltype(GetDataType<_registerType>());
     constexpr U32 numRegVals = numRegisterValues<_registerType>;
 
     _registerType a = _mmx_setzero_p<_registerType>();
@@ -645,7 +649,7 @@ void TestSwapTest()
 
     for (U32 i = 0; i < numRegVals; ++i)
     {
-        F32 bV = GetValue(b, i);
+        Type bV = GetValue(b, i);
 
         switch (i)
         {
@@ -702,7 +706,9 @@ void TestSwap()
 BOOST_AUTO_TEST_CASE(Test_Swap)
 {
     TestSwap<__m128>();
+    TestSwap<__m128d>();
 #ifdef __AVX2__
     TestSwap<__m256>();
+    TestSwap<__m256d>();
 #endif // __AVX2__
 }
