@@ -30,7 +30,7 @@ template <typename _registerType, I32 _size>
 inline typename GaussDense<_registerType, _size>::VectorType
 GaussDense<_registerType, _size>::SolvePartialPivot(const MatrixType& A, const VectorType& b)
 {
-    alignas(alignment) MatrixDataArray<> matrixData = A.DataSSE();
+    alignas(alignment) MatrixDataArray matrixData = A.DataSSE();
 
     constexpr U32 numFullCollReisters = _size / numRegisterValues;
 
@@ -50,7 +50,7 @@ GaussDense<_registerType, _size>::SolvePartialPivot(const MatrixType& A, const V
 // --------------------------------------------------------------------------------------------------------------------
 
 template <typename _registerType, I32 _size>
-inline U32 GaussDense<_registerType, _size>::FindPivot(U32 stepCount, const MatrixDataArray<>& matrixData)
+inline U32 GaussDense<_registerType, _size>::FindPivot(U32 stepCount, const MatrixDataArray& matrixData)
 {
     // Optimize: First compare all registers and apply result on value vector and index vector. Then store index
     // vector and value vector results and compare elements. Index vector just stores register index. The element
@@ -80,7 +80,7 @@ inline U32 GaussDense<_registerType, _size>::FindPivot(U32 stepCount, const Matr
 template <typename _registerType, I32 _size>
 template <U32 _regValueIdx>
 inline void GaussDense<_registerType, _size>::PivotingStepRegister(U32 stepCount, U32 colRegIdx,
-                                                                   MatrixDataArray<>& matrixData)
+                                                                   MatrixDataArray& matrixData)
 {
     U32 pivotIdx = FindPivot(stepCount, matrixData);
     SwapRows<_regValueIdx>(pivotIdx, stepCount, colRegIdx, matrixData);
@@ -92,7 +92,7 @@ inline void GaussDense<_registerType, _size>::PivotingStepRegister(U32 stepCount
 
 template <typename _registerType, I32 _size>
 template <U32 _regValueIdx>
-inline void GaussDense<_registerType, _size>::GaussStepsRegister(U32 colRegIdx, MatrixDataArray<>& matrixData)
+inline void GaussDense<_registerType, _size>::GaussStepsRegister(U32 colRegIdx, MatrixDataArray& matrixData)
 {
 
     const U32 stepCount = colRegIdx * numRegisterValues + _regValueIdx;
@@ -111,7 +111,7 @@ inline void GaussDense<_registerType, _size>::GaussStepsRegister(U32 colRegIdx, 
 template <typename _registerType, I32 _size>
 template <U32 _regValueIdx>
 inline void GaussDense<_registerType, _size>::SwapRows(U32 pivotIdx, U32 stepCount, U32 colRegIdx,
-                                                       MatrixDataArray<>& matrixData)
+                                                       MatrixDataArray& matrixData)
 {
     // Pivot element is already in place
     if (pivotIdx == stepCount)
@@ -133,7 +133,7 @@ inline void GaussDense<_registerType, _size>::SwapRows(U32 pivotIdx, U32 stepCou
 template <typename _registerType, I32 _size>
 template <U32 _regValueIdx, bool _swapSameReg>
 inline void GaussDense<_registerType, _size>::SwapRowsSwitch(U32 pivotIdx, U32 stepCount, U32 pivotColRegIdx,
-                                                             U32 colRegIdx, MatrixDataArray<>& matrixData)
+                                                             U32 colRegIdx, MatrixDataArray& matrixData)
 {
     static_assert(numRegisterValues == 2 || numRegisterValues == 4 || numRegisterValues == 8,
                   "Only registers with 2,4 or 8 values are supported.");
@@ -203,7 +203,7 @@ inline void GaussDense<_registerType, _size>::SwapRowsSwitch(U32 pivotIdx, U32 s
 template <typename _registerType, I32 _size>
 template <U32 _rowPiv, U32 _rowSwap, bool _swapSameReg>
 inline void GaussDense<_registerType, _size>::SwapRowsAllRegisters(U32 stepCount, U32 pivotColRegIdx, U32 colRegIdx,
-                                                                   MatrixDataArray<>& matrixData)
+                                                                   MatrixDataArray& matrixData)
 {
     if constexpr (_swapSameReg)
     {
