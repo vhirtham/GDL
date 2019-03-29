@@ -56,28 +56,26 @@ public:
     inline static VectorType SolvePartialPivot(const MatrixType& A, const VectorType& b);
 
 private:
-    //! @brief Finds the pivot element of the current elimination step and returns its index
-    //! @param stepCount: Number of performed elimination steps
-    //! @param matrixData: Array containing the matrix data
-    //! @return Index of the pivot element
+    template <U32 _regValueIdx = 0>
+    inline static void GaussStepsRegister(U32 colRegIdx, MatrixDataArray<>& matrixData);
+
+
     inline static U32 FindPivot(U32 stepCount, const MatrixDataArray<>& matrixData);
 
-    template <U32 _rowIdx>
-    inline static void PivotingStepRegister(U32 regCount, MatrixDataArray<>& matrixData);
+    template <U32 _regValueIdx>
+    inline static void PivotingStepRegister(U32 stepCount, U32 colRegIdx, MatrixDataArray<>& matrixData);
 
-    inline static void PivotingStep(U32 regCount, MatrixDataArray<>& matrixData);
-
-    template <U32 _rowIdx>
-    inline static void SwapPivot(U32 swapIdx, U32 regCount, MatrixDataArray<>& matrixData);
+    template <U32 _regValueIdx>
+    inline static void SwapRows(U32 pivotIdx, U32 stepCount, U32 colRegIdx, MatrixDataArray<>& matrixData);
 
 
-    inline static void SwapPivotAcrossRegisters(U32 pivotIdx, U32 stepCount, MatrixDataArray<>& matrixData);
+    template <U32 _regValueIdx, bool _swapSameReg>
+    inline static void SwapRowsSwitch(U32 pivotIdx, U32 stepCount, U32 pivotColRegIdx, U32 colRegIdx,
+                                      MatrixDataArray<>& matrixData);
 
-    template <U32 _rowIdx>
-    inline static void SwapPivotInsideRegister(U32 swapIdx, U32 regCount, MatrixDataArray<__m256>& matrixData);
-
-    template <U32 _rowPiv, U32 _rowSwap>
-    inline static void SwapMatrixRowsInsideRegister(U32 registerColIdx, MatrixDataArray<>& matrixData);
+    template <U32 _rowPiv, U32 _rowSwap, bool _swapSameReg>
+    inline static void SwapRowsAllRegisters(U32 stepCount, U32 pivotColRegIdx, U32 colRegIdx,
+                                            MatrixDataArray<>& matrixData);
 };
 
 

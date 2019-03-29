@@ -90,7 +90,7 @@ public:
 
     //! @brief Gets the underlying array of SSE registers
     //! @return Data array
-    const std::array<__m128, 4>& DataSSE() const;
+    inline const std::array<__m128, 4>& DataSSE() const;
 
     //! @brief Calculates the determinant of the matrix
     //! @return Determinant of the matrix
