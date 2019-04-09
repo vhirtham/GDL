@@ -4,6 +4,7 @@
 
 #include "gdl/base/exception.h"
 #include "gdl/base/sse/constants.h"
+#include "gdl/base/sse/negate.h"
 
 
 
@@ -256,6 +257,30 @@ inline _registerType _mmx_fmsub_p(_registerType lhsM, _registerType rhsM, _regis
         return _mm256_fmsub_ps(lhsM, rhsM, sub);
     else
         return _mm256_fmsub_pd(lhsM, rhsM, sub);
+#endif // __AVX2__
+#endif // __FMA__
+}
+
+
+
+template <typename _registerType>
+inline _registerType _mmx_fnmsub_p(_registerType lhsM, _registerType rhsM, _registerType sub)
+{
+    using namespace GDL::sse;
+    static_assert(IsRegisterType<_registerType>, "Function can only be used with compatible register types.");
+
+#ifndef __FMA__
+    return _mmx_sub_p(_mmx_mul_p(_mmx_mul_p(lhsM, rhsM), _mmx_set1_p<_registerType>(-1)), sub);
+#else
+    if constexpr (Is__m128<_registerType>)
+        return _mm_fnmsub_ps(lhsM, rhsM, sub);
+    else if constexpr (Is__m128d<_registerType>)
+        return _mm_fnmsub_pd(lhsM, rhsM, sub);
+#ifdef __AVX2__
+    else if constexpr (Is__m256<_registerType>)
+        return _mm256_fnmsub_ps(lhsM, rhsM, sub);
+    else
+        return _mm256_fnmsub_pd(lhsM, rhsM, sub);
 #endif // __AVX2__
 #endif // __FMA__
 }

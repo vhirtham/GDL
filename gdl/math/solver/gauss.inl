@@ -50,6 +50,96 @@ GaussDense<_registerType, _size>::SolvePartialPivot(const MatrixType& A, const V
 // --------------------------------------------------------------------------------------------------------------------
 
 template <typename _registerType, I32 _size>
+template <U32 _idx>
+inline _registerType GaussDense<_registerType, _size>::BlendPivot(_registerType reg0, _registerType reg1)
+{
+    using namespace GDL::sse;
+
+    static_assert(numRegisterValues == 2 || numRegisterValues == 4 || numRegisterValues == 8,
+                  "Only registers with 2, 4 or 8 values are supported.");
+
+    if constexpr (numRegisterValues == 2)
+    {
+        constexpr U32 b0 = (_idx == 0) ? 1 : 0;
+        constexpr U32 b1 = (_idx == 1) ? 1 : 0;
+
+        return Blend<b0, b1>(reg0, reg1);
+    }
+    if constexpr (numRegisterValues == 4)
+    {
+        constexpr U32 b0 = (_idx == 0) ? 1 : 0;
+        constexpr U32 b1 = (_idx == 1) ? 1 : 0;
+        constexpr U32 b2 = (_idx == 2) ? 1 : 0;
+        constexpr U32 b3 = (_idx == 3) ? 1 : 0;
+
+        return Blend<b0, b1, b2, b3>(reg0, reg1);
+    }
+    if constexpr (numRegisterValues == 8)
+    {
+        constexpr U32 b0 = (_idx == 0) ? 1 : 0;
+        constexpr U32 b1 = (_idx == 1) ? 1 : 0;
+        constexpr U32 b2 = (_idx == 2) ? 1 : 0;
+        constexpr U32 b3 = (_idx == 3) ? 1 : 0;
+        constexpr U32 b4 = (_idx == 4) ? 1 : 0;
+        constexpr U32 b5 = (_idx == 5) ? 1 : 0;
+        constexpr U32 b6 = (_idx == 6) ? 1 : 0;
+        constexpr U32 b7 = (_idx == 7) ? 1 : 0;
+
+        return Blend<b0, b1, b2, b3, b4, b5, b6, b7>(reg0, reg1);
+    }
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+template <typename _registerType, I32 _size>
+template <U32 _regValueIdx>
+inline void GaussDense<_registerType, _size>::EliminationStepRegister(U32 stepCount, U32 colRegIdx,
+                                                                      MatrixDataArray& matrixData)
+{
+    using namespace GDL::sse;
+
+    const U32 colStartIdx = stepCount * numColRegisters;
+    const U32 pivRegIdx = colStartIdx + colRegIdx;
+
+    DEV_EXCEPTION(GetValue<_regValueIdx>(matrixData[pivRegIdx]) == ApproxZero<F32>(10),
+                  "Singular matrix - system not solveable");
+
+
+
+    // Calculate row multipliers
+    alignas(alignmentBytes<_registerType>) std::array<_registerType, numColRegisters> rowMult;
+    const _registerType one = _mmx_set1_p<_registerType>(1);
+    const _registerType div = _mmx_div_p(one, BroadcastAcrossLanes<_regValueIdx>(matrixData[pivRegIdx]));
+
+    for (U32 i = 0; i < numColRegisters; ++i)
+        if (i == pivRegIdx % numColRegisters)
+        {
+            _registerType absPivM1 = _mmx_sub_p(matrixData[colStartIdx + i], one);
+            rowMult[i] = _mmx_mul_p(div, BlendPivot<_regValueIdx>(matrixData[colStartIdx + i], absPivM1));
+        }
+        else
+            rowMult[i] = _mmx_mul_p(div, matrixData[colStartIdx + i]);
+
+
+
+    // Perform elimination
+    for (U32 i = colStartIdx; i < _size * numColRegisters; i += numColRegisters)
+    {
+        _registerType bc = BroadcastAcrossLanes<_regValueIdx>(matrixData[colRegIdx + i]);
+        for (U32 j = 0; j < numColRegisters; ++j)
+        {
+            const U32 regIdx = i + j;
+            matrixData[regIdx] = _mmx_fnmadd_p(rowMult[j], bc, matrixData[regIdx]);
+        }
+    }
+}
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+template <typename _registerType, I32 _size>
 inline U32 GaussDense<_registerType, _size>::FindPivot(U32 stepCount, const MatrixDataArray& matrixData)
 {
     // Optimize: First compare all registers and apply result on value vector and index vector. Then store index
@@ -97,7 +187,17 @@ inline void GaussDense<_registerType, _size>::GaussStepsRegister(U32 colRegIdx, 
 
     const U32 stepCount = colRegIdx * numRegisterValues + _regValueIdx;
     PivotingStepRegister<_regValueIdx>(stepCount, colRegIdx, matrixData);
+    EliminationStepRegister<_regValueIdx>(stepCount, colRegIdx, matrixData);
 
+    // Temporary output, remove if finished implementation
+    for (U32 i = 0; i < matrixData.size(); ++i)
+    {
+        for (U32 u = 0; u < numRegisterValues; ++u)
+        {
+            if (sse::GetValue(matrixData[i], u) == ApproxZero<F32>(100))
+                sse::SetValue(matrixData[i], u, 0);
+        }
+    }
     std::cout << MatrixType(matrixData) << std::endl;
 
     if constexpr (_regValueIdx + 1 < numRegisterValues)

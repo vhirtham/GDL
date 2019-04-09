@@ -12,7 +12,7 @@ using namespace GDL;
 BOOST_AUTO_TEST_CASE(TestGaussDense)
 {
     // clang-format off
-    MatSSE<F32, 8, 8> A = MatSSE<F32, 8, 8>(1, 7, 1, 1, 1, 1, 1, 8,
+    MatSSE<F64, 8, 8> A = MatSSE<F64, 8, 8>(1, 7, 1, 1, 1, 1, 1, 8,
                                             3, 3, 5, 9, 1, 0, 8, 9,
                                             9, 2, 1, 2, 8, 0, 4, 7,
                                             4, 9, 4, 2, 8, 3, 6, 1,
@@ -22,6 +22,6 @@ BOOST_AUTO_TEST_CASE(TestGaussDense)
                                             5, 2, 1, 9, 0, 7, 3, 8).Transpose();
     // clang-format on
 
-    VecSSE<F32, 8> b(1, 2, 3, 4, 5, 6, 7, 8);
+    VecSSE<F64, 8> b(1, 2, 3, 4, 5, 6, 7, 8);
     Solver::GaussPartialPivot(A, b);
 }

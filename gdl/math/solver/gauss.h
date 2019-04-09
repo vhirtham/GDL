@@ -55,9 +55,14 @@ public:
     inline static VectorType SolvePartialPivot(const MatrixType& A, const VectorType& b);
 
 private:
+    template <U32 _idx>
+    inline static _registerType BlendPivot(_registerType reg0, _registerType reg1);
+
+    template <U32 _regValueIdx>
+    inline static void EliminationStepRegister(U32 stepCount, U32 colRegIdx, MatrixDataArray& matrixData);
+
     template <U32 _regValueIdx = 0>
     inline static void GaussStepsRegister(U32 colRegIdx, MatrixDataArray& matrixData);
-
 
     inline static U32 FindPivot(U32 stepCount, const MatrixDataArray& matrixData);
 
