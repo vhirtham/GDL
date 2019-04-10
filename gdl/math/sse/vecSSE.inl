@@ -1,6 +1,7 @@
 #pragma once
 
 #include "gdl/math/sse/vecSSE.h"
+#include "gdl/base/sse/directAccess.h"
 
 #include "gdl/base/functions/alignment.h"
 
@@ -38,6 +39,23 @@ VecSSE<_type, _size, _isCol>::VecSSE(const std::array<_type, _size>& data)
 
 
 template <typename _type, I32 _size, bool _isCol>
+VecSSE<_type, _size, _isCol>::VecSSE(const DataArray& data)
+    : mData{data}
+{
+    DEV_EXCEPTION(!IsInternalDataValid(), "Internal data is not valid. Alignment or size is not as expected.");
+}
+
+
+
+template <typename _type, I32 _size, bool _isCol>
+inline F32 VecSSE<_type, _size, _isCol>::operator[](const U32 index) const
+{
+    DEV_EXCEPTION(index >= _size, "Invalid index");
+    return sse::GetValue(mData[index / mNumRegisterEntries], index % mNumRegisterEntries);
+}
+
+
+template <typename _type, I32 _size, bool _isCol>
 inline std::array<_type, _size> VecSSE<_type, _size, _isCol>::Data() const
 {
     std::array<_type, _size> data;
@@ -45,6 +63,14 @@ inline std::array<_type, _size> VecSSE<_type, _size, _isCol>::Data() const
     std::memcpy(&data, &mData, sizeof(data));
 
     return data;
+}
+
+
+
+template <typename _type, I32 _size, bool _isCol>
+inline const typename VecSSE<_type, _size, _isCol>::DataArray& VecSSE<_type, _size, _isCol>::DataSSE() const
+{
+    return mData;
 }
 
 
@@ -59,6 +85,17 @@ bool VecSSE<_type, _size, _isCol>::IsInternalDataValid() const
         result = result && IsAligned(&reg, mAlignment);
 
     return result;
+}
+
+
+
+template <typename _type, I32 _size, bool _isCol>
+inline std::ostream& operator<<(std::ostream& os, const VecSSE<_type, _size, _isCol>& vec)
+{
+    for (U32 i = 0; i < _size; ++i)
+        os << "| " << vec[i] << "|" << std::endl;
+
+    return os;
 }
 
 } // namespace GDL

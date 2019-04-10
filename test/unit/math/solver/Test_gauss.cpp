@@ -6,22 +6,37 @@
 #include "gdl/math/solver/gauss.h"
 #include "test/tools/ExceptionChecks.h"
 
+#include "test/tools/arrayValueComparison.h"
+
 
 using namespace GDL;
 
-BOOST_AUTO_TEST_CASE(TestGaussDense)
+template <typename _type>
+void TestGaussDense()
 {
     // clang-format off
-    MatSSE<F64, 8, 8> A = MatSSE<F64, 8, 8>(1, 7, 1, 1, 1, 1, 1, 8,
-                                            3, 3, 5, 9, 1, 0, 8, 9,
-                                            9, 2, 1, 2, 8, 0, 4, 7,
-                                            4, 9, 4, 2, 8, 3, 6, 1,
-                                            2, 2, 3, 3, 3, 7, 7, 9,
-                                            6, 8, 6, 4, 7, 9, 1, 2,
-                                            4, 0, 6, 0, 5, 1, 9, 4,
-                                            5, 2, 1, 9, 0, 7, 3, 8).Transpose();
+    MatSSE<_type, 8, 8> A = MatSSE<_type, 8, 8>(2,  4, -3,  5,  9, -3, -7,  1,
+                                            3, -5,  2, -1,  1,  1, -3,  1,
+                                            9,  1, -7, -6,  7,  2,  5, -7,
+                                            4, -1,  6, -2, -3, -8, -3,  9,
+                                            7,  2,  7,  3,  9, -5, -3, -4,
+                                           -5,  5, -5,  5,  5, -5,  5, -5,
+                                            5, -6,  3, -3,  2,  1, -6,  5,
+                                            1, -2, -3, -4, -5,  6, -7,  8).Transpose();
     // clang-format on
 
-    VecSSE<F64, 8> b(1, 2, 3, 4, 5, 6, 7, 8);
-    Solver::GaussPartialPivot(A, b);
+    VecSSE<_type, 8> b(7, -7, -8, 0, 6, 0, 4, -2);
+    VecSSE<_type, 8> res = Solver::GaussPartialPivot(A, b);
+
+
+    VecSSE<_type, 8> expResult(1, 2, 3, 4, 5, 6, 7, 8);
+
+    BOOST_CHECK(CheckCloseArray(res.Data(), expResult.Data(), 50));
+}
+
+
+BOOST_AUTO_TEST_CASE(Test_Gauss_Dense)
+{
+    TestGaussDense<F32>();
+    TestGaussDense<F64>();
 }

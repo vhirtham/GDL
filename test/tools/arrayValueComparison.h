@@ -6,7 +6,8 @@
 
 #include <cmath>
 
-namespace GDL {
+namespace GDL
+{
 
 
 
@@ -22,12 +23,12 @@ bool CheckArrayZero(const _type& a)
 
 
 template <typename _type>
-bool CheckCloseArray(const _type& a, const _type& b)
+bool CheckCloseArray(const _type& a, const _type& b, U32 tolerance = 10)
 {
     if (a.size() != b.size())
         return false;
     for (U32 i = 0; i < a.size(); ++i)
-        if (a[i] != Approx(b[i]))
+        if (a[i] != Approx(b[i], tolerance))
             return false;
     return true;
 }

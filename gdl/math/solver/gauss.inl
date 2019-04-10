@@ -31,18 +31,18 @@ inline typename GaussDense<_registerType, _size>::VectorType
 GaussDense<_registerType, _size>::SolvePartialPivot(const MatrixType& A, const VectorType& b)
 {
     alignas(alignment) MatrixDataArray matrixData = A.DataSSE();
+    alignas(alignment) VectorDataArray vectorData = b.DataSSE();
 
     constexpr U32 numFullCollReisters = _size / numRegisterValues;
 
     // Size is known! MAYBE recursive template call to eliminate loop and enable more optimizations!
     for (U32 i = 0; i < numFullCollReisters; ++i)
-    {
-        GaussStepsRegister(i, matrixData);
-    }
+        GaussStepsRegister(i, matrixData, vectorData);
+
 
     // Missing: Non full registers at the end of a column!
 
-    return VectorType();
+    return VectorType(vectorData);
 }
 
 
@@ -96,7 +96,8 @@ inline _registerType GaussDense<_registerType, _size>::BlendPivot(_registerType 
 template <typename _registerType, I32 _size>
 template <U32 _regValueIdx>
 inline void GaussDense<_registerType, _size>::EliminationStepRegister(U32 stepCount, U32 colRegIdx,
-                                                                      MatrixDataArray& matrixData)
+                                                                      MatrixDataArray& matrixData,
+                                                                      VectorDataArray& vectorData)
 {
     using namespace GDL::sse;
 
@@ -125,7 +126,7 @@ inline void GaussDense<_registerType, _size>::EliminationStepRegister(U32 stepCo
 
 
     // Perform elimination
-    for (U32 i = colStartIdx; i < _size * numColRegisters; i += numColRegisters)
+    for (U32 i = colStartIdx + numColRegisters; i < _size * numColRegisters; i += numColRegisters)
     {
         _registerType bc = BroadcastAcrossLanes<_regValueIdx>(matrixData[colRegIdx + i]);
         for (U32 j = 0; j < numColRegisters; ++j)
@@ -134,6 +135,9 @@ inline void GaussDense<_registerType, _size>::EliminationStepRegister(U32 stepCo
             matrixData[regIdx] = _mmx_fnmadd_p(rowMult[j], bc, matrixData[regIdx]);
         }
     }
+    _registerType bc = BroadcastAcrossLanes<_regValueIdx>(vectorData[colRegIdx]);
+    for (U32 i = 0; i < numColRegisters; ++i)
+        vectorData[i] = _mmx_fnmadd_p(rowMult[i], bc, vectorData[i]);
 }
 
 
@@ -170,10 +174,11 @@ inline U32 GaussDense<_registerType, _size>::FindPivot(U32 stepCount, const Matr
 template <typename _registerType, I32 _size>
 template <U32 _regValueIdx>
 inline void GaussDense<_registerType, _size>::PivotingStepRegister(U32 stepCount, U32 colRegIdx,
-                                                                   MatrixDataArray& matrixData)
+                                                                   MatrixDataArray& matrixData,
+                                                                   VectorDataArray& vectorData)
 {
     U32 pivotIdx = FindPivot(stepCount, matrixData);
-    SwapRows<_regValueIdx>(pivotIdx, stepCount, colRegIdx, matrixData);
+    SwapRows<_regValueIdx>(pivotIdx, stepCount, colRegIdx, matrixData, vectorData);
 }
 
 
@@ -182,26 +187,28 @@ inline void GaussDense<_registerType, _size>::PivotingStepRegister(U32 stepCount
 
 template <typename _registerType, I32 _size>
 template <U32 _regValueIdx>
-inline void GaussDense<_registerType, _size>::GaussStepsRegister(U32 colRegIdx, MatrixDataArray& matrixData)
+inline void GaussDense<_registerType, _size>::GaussStepsRegister(U32 colRegIdx, MatrixDataArray& matrixData,
+                                                                 VectorDataArray& vectorData)
 {
 
     const U32 stepCount = colRegIdx * numRegisterValues + _regValueIdx;
-    PivotingStepRegister<_regValueIdx>(stepCount, colRegIdx, matrixData);
-    EliminationStepRegister<_regValueIdx>(stepCount, colRegIdx, matrixData);
+    PivotingStepRegister<_regValueIdx>(stepCount, colRegIdx, matrixData, vectorData);
+    EliminationStepRegister<_regValueIdx>(stepCount, colRegIdx, matrixData, vectorData);
 
-    // Temporary output, remove if finished implementation
-    for (U32 i = 0; i < matrixData.size(); ++i)
-    {
-        for (U32 u = 0; u < numRegisterValues; ++u)
-        {
-            if (sse::GetValue(matrixData[i], u) == ApproxZero<F32>(100))
-                sse::SetValue(matrixData[i], u, 0);
-        }
-    }
-    std::cout << MatrixType(matrixData) << std::endl;
+    //    // Temporary output, remove if finished implementation
+    //    for (U32 i = 0; i < matrixData.size(); ++i)
+    //    {
+    //        for (U32 u = 0; u < numRegisterValues; ++u)
+    //        {
+    //            if (sse::GetValue(matrixData[i], u) == ApproxZero<F32>(100))
+    //                sse::SetValue(matrixData[i], u, 0);
+    //        }
+    //    }
+    //    std::cout << MatrixType(matrixData) << std::endl;
+    //    std::cout << VectorType(vectorData) << std::endl;
 
     if constexpr (_regValueIdx + 1 < numRegisterValues)
-        GaussStepsRegister<_regValueIdx + 1>(colRegIdx, matrixData);
+        GaussStepsRegister<_regValueIdx + 1>(colRegIdx, matrixData, vectorData);
 }
 
 
@@ -211,7 +218,7 @@ inline void GaussDense<_registerType, _size>::GaussStepsRegister(U32 colRegIdx, 
 template <typename _registerType, I32 _size>
 template <U32 _regValueIdx>
 inline void GaussDense<_registerType, _size>::SwapRows(U32 pivotIdx, U32 stepCount, U32 colRegIdx,
-                                                       MatrixDataArray& matrixData)
+                                                       MatrixDataArray& matrixData, VectorDataArray& vectorData)
 {
     // Pivot element is already in place
     if (pivotIdx == stepCount)
@@ -221,9 +228,9 @@ inline void GaussDense<_registerType, _size>::SwapRows(U32 pivotIdx, U32 stepCou
 
     // Special case: if _stepCount == numRegistersPerCol
     if (colRegIdx == pivotColRegIdx)
-        SwapRowsSwitch<_regValueIdx, true>(pivotIdx, stepCount, pivotColRegIdx, colRegIdx, matrixData);
+        SwapRowsSwitch<_regValueIdx, true>(pivotIdx, stepCount, pivotColRegIdx, colRegIdx, matrixData, vectorData);
     else
-        SwapRowsSwitch<_regValueIdx, false>(pivotIdx, stepCount, pivotColRegIdx, colRegIdx, matrixData);
+        SwapRowsSwitch<_regValueIdx, false>(pivotIdx, stepCount, pivotColRegIdx, colRegIdx, matrixData, vectorData);
 }
 
 
@@ -233,7 +240,8 @@ inline void GaussDense<_registerType, _size>::SwapRows(U32 pivotIdx, U32 stepCou
 template <typename _registerType, I32 _size>
 template <U32 _regValueIdx, bool _swapSameReg>
 inline void GaussDense<_registerType, _size>::SwapRowsSwitch(U32 pivotIdx, U32 stepCount, U32 pivotColRegIdx,
-                                                             U32 colRegIdx, MatrixDataArray& matrixData)
+                                                             U32 colRegIdx, MatrixDataArray& matrixData,
+                                                             VectorDataArray& vectorData)
 {
     static_assert(numRegisterValues == 2 || numRegisterValues == 4 || numRegisterValues == 8,
                   "Only registers with 2,4 or 8 values are supported.");
@@ -242,10 +250,12 @@ inline void GaussDense<_registerType, _size>::SwapRowsSwitch(U32 pivotIdx, U32 s
         switch (pivotIdx % numRegisterValues)
         {
         case 0:
-            SwapRowsAllRegisters<_regValueIdx, 0, _swapSameReg>(stepCount, pivotColRegIdx, colRegIdx, matrixData);
+            SwapRowsAllRegisters<_regValueIdx, 0, _swapSameReg>(stepCount, pivotColRegIdx, colRegIdx, matrixData,
+                                                                vectorData);
             break;
         case 1:
-            SwapRowsAllRegisters<_regValueIdx, 1, _swapSameReg>(stepCount, pivotColRegIdx, colRegIdx, matrixData);
+            SwapRowsAllRegisters<_regValueIdx, 1, _swapSameReg>(stepCount, pivotColRegIdx, colRegIdx, matrixData,
+                                                                vectorData);
             break;
         }
 
@@ -253,16 +263,20 @@ inline void GaussDense<_registerType, _size>::SwapRowsSwitch(U32 pivotIdx, U32 s
         switch (pivotIdx % numRegisterValues)
         {
         case 0:
-            SwapRowsAllRegisters<_regValueIdx, 0, _swapSameReg>(stepCount, pivotColRegIdx, colRegIdx, matrixData);
+            SwapRowsAllRegisters<_regValueIdx, 0, _swapSameReg>(stepCount, pivotColRegIdx, colRegIdx, matrixData,
+                                                                vectorData);
             break;
         case 1:
-            SwapRowsAllRegisters<_regValueIdx, 1, _swapSameReg>(stepCount, pivotColRegIdx, colRegIdx, matrixData);
+            SwapRowsAllRegisters<_regValueIdx, 1, _swapSameReg>(stepCount, pivotColRegIdx, colRegIdx, matrixData,
+                                                                vectorData);
             break;
         case 2:
-            SwapRowsAllRegisters<_regValueIdx, 2, _swapSameReg>(stepCount, pivotColRegIdx, colRegIdx, matrixData);
+            SwapRowsAllRegisters<_regValueIdx, 2, _swapSameReg>(stepCount, pivotColRegIdx, colRegIdx, matrixData,
+                                                                vectorData);
             break;
         case 3:
-            SwapRowsAllRegisters<_regValueIdx, 3, _swapSameReg>(stepCount, pivotColRegIdx, colRegIdx, matrixData);
+            SwapRowsAllRegisters<_regValueIdx, 3, _swapSameReg>(stepCount, pivotColRegIdx, colRegIdx, matrixData,
+                                                                vectorData);
             break;
         }
 
@@ -270,28 +284,36 @@ inline void GaussDense<_registerType, _size>::SwapRowsSwitch(U32 pivotIdx, U32 s
         switch (pivotIdx % numRegisterValues)
         {
         case 0:
-            SwapRowsAllRegisters<_regValueIdx, 0, _swapSameReg>(stepCount, pivotColRegIdx, colRegIdx, matrixData);
+            SwapRowsAllRegisters<_regValueIdx, 0, _swapSameReg>(stepCount, pivotColRegIdx, colRegIdx, matrixData,
+                                                                vectorData);
             break;
         case 1:
-            SwapRowsAllRegisters<_regValueIdx, 1, _swapSameReg>(stepCount, pivotColRegIdx, colRegIdx, matrixData);
+            SwapRowsAllRegisters<_regValueIdx, 1, _swapSameReg>(stepCount, pivotColRegIdx, colRegIdx, matrixData,
+                                                                vectorData);
             break;
         case 2:
-            SwapRowsAllRegisters<_regValueIdx, 2, _swapSameReg>(stepCount, pivotColRegIdx, colRegIdx, matrixData);
+            SwapRowsAllRegisters<_regValueIdx, 2, _swapSameReg>(stepCount, pivotColRegIdx, colRegIdx, matrixData,
+                                                                vectorData);
             break;
         case 3:
-            SwapRowsAllRegisters<_regValueIdx, 3, _swapSameReg>(stepCount, pivotColRegIdx, colRegIdx, matrixData);
+            SwapRowsAllRegisters<_regValueIdx, 3, _swapSameReg>(stepCount, pivotColRegIdx, colRegIdx, matrixData,
+                                                                vectorData);
             break;
         case 4:
-            SwapRowsAllRegisters<_regValueIdx, 4, _swapSameReg>(stepCount, pivotColRegIdx, colRegIdx, matrixData);
+            SwapRowsAllRegisters<_regValueIdx, 4, _swapSameReg>(stepCount, pivotColRegIdx, colRegIdx, matrixData,
+                                                                vectorData);
             break;
         case 5:
-            SwapRowsAllRegisters<_regValueIdx, 5, _swapSameReg>(stepCount, pivotColRegIdx, colRegIdx, matrixData);
+            SwapRowsAllRegisters<_regValueIdx, 5, _swapSameReg>(stepCount, pivotColRegIdx, colRegIdx, matrixData,
+                                                                vectorData);
             break;
         case 6:
-            SwapRowsAllRegisters<_regValueIdx, 6, _swapSameReg>(stepCount, pivotColRegIdx, colRegIdx, matrixData);
+            SwapRowsAllRegisters<_regValueIdx, 6, _swapSameReg>(stepCount, pivotColRegIdx, colRegIdx, matrixData,
+                                                                vectorData);
             break;
         case 7:
-            SwapRowsAllRegisters<_regValueIdx, 7, _swapSameReg>(stepCount, pivotColRegIdx, colRegIdx, matrixData);
+            SwapRowsAllRegisters<_regValueIdx, 7, _swapSameReg>(stepCount, pivotColRegIdx, colRegIdx, matrixData,
+                                                                vectorData);
             break;
         }
 }
@@ -303,13 +325,17 @@ inline void GaussDense<_registerType, _size>::SwapRowsSwitch(U32 pivotIdx, U32 s
 template <typename _registerType, I32 _size>
 template <U32 _rowPiv, U32 _rowSwap, bool _swapSameReg>
 inline void GaussDense<_registerType, _size>::SwapRowsAllRegisters(U32 stepCount, U32 pivotColRegIdx, U32 colRegIdx,
-                                                                   MatrixDataArray& matrixData)
+                                                                   MatrixDataArray& matrixData,
+                                                                   VectorDataArray& vectorData)
 {
     if constexpr (_swapSameReg)
     {
         if constexpr (_rowPiv < _rowSwap)
+        {
             for (U32 i = stepCount * numColRegisters + colRegIdx; i < matrixData.size(); i += numColRegisters)
                 matrixData[i] = sse::Swap<_rowPiv, _rowSwap>(matrixData[i]);
+            vectorData[colRegIdx] = sse::Swap<_rowPiv, _rowSwap>(vectorData[colRegIdx]);
+        }
         else
             THROW("Internal index error");
     }
@@ -324,6 +350,7 @@ inline void GaussDense<_registerType, _size>::SwapRowsAllRegisters(U32 stepCount
 
         for (U32 i = stepCount * numColRegisters + colRegIdx; i < matrixData.size(); i += numColRegisters)
             sse::Exchange<_rowPiv, _rowSwap>(matrixData[i], matrixData[i + regDiff]);
+        sse::Exchange<_rowPiv, _rowSwap>(vectorData[colRegIdx], vectorData[colRegIdx + regDiff]);
     }
 }
 
