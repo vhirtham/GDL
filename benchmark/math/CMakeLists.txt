@@ -1,3 +1,5 @@
+add_subdirectory(solver)
+
 addBenchmark(Mat4)
 addBenchmark(Mat)
 addBenchmark(solver3)
