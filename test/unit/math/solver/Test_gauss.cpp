@@ -31,7 +31,7 @@ void TestGaussDense()
 
     VecSSE<_type, 8> expResult(1, 2, 3, 4, 5, 6, 7, 8);
 
-    BOOST_CHECK(CheckCloseArray(res.Data(), expResult.Data(), 50));
+    BOOST_CHECK(CheckCloseArray(res.Data(), expResult.Data(), 100));
 }
 
 
