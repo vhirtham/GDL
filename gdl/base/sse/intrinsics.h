@@ -181,6 +181,14 @@ inline auto _mmx_cmple_p(_registerType lhs, _registerType rhs);
 template <typename _registerType>
 inline auto _mmx_cmpgt_p(_registerType lhs, _registerType rhs);
 
+//! @brief Compares lhs > rhs for two registers
+//! @tparam _registerType: Register type
+//! @param lhs: Left hand side register
+//! @param rhs: Right hand side register
+//! @return Register which stores the results of the comparison
+template <typename _registerType>
+inline auto _mmx_cmplt_p(_registerType lhs, _registerType rhs);
+
 //! @brief Calculates the maximum values of two registers
 //! @tparam _registerType: Register type
 //! @param lhs: Left hand side register
@@ -231,6 +239,16 @@ inline auto _mmx_movemask_epi8(_registerType reg);
 //! @return Register with blended values
 template <I32 _blendMask, typename _registerType>
 inline auto _mmx_blend_p(_registerType src0, _registerType src1);
+
+//! @brief Creates a new register where each value is selected from the two source registers values at the same
+//! position.
+//! @tparam _registerType: Register type
+//! @param src0: First source register
+//! @param src1: second source register
+//! @param _blendMask: Register that determines which value is selected from which source register.
+//! @return Register with blended values
+template <typename _registerType>
+inline auto _mmx_blendv_p(_registerType src0, _registerType src1, _registerType _blendMask);
 
 //! @brief Returns a register with an arbitrary combination of values from the input register as long as the source
 //! values and the destination are in the same SIMD lane.

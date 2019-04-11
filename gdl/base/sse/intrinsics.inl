@@ -408,6 +408,26 @@ inline auto _mmx_cmpgt_p(_registerType lhs, _registerType rhs)
 
 
 template <typename _registerType>
+inline auto _mmx_cmplt_p(_registerType lhs, _registerType rhs)
+{
+    using namespace GDL::sse;
+    static_assert(IsRegisterType<_registerType>, "Function can only be used with compatible register types.");
+
+    if constexpr (Is__m128<_registerType>)
+        return _mm_cmplt_ps(lhs, rhs);
+    else if constexpr (Is__m128d<_registerType>)
+        return _mm_cmplt_pd(lhs, rhs);
+#ifdef __AVX2__
+    else if constexpr (Is__m256<_registerType>)
+        return _mm256_cmp_ps(lhs, rhs, _CMP_LT_OS);
+    else
+        return _mm256_cmp_pd(lhs, rhs, _CMP_LT_OS);
+#endif // __AVX2__
+}
+
+
+
+template <typename _registerType>
 inline _registerType _mmx_max_p(_registerType lhs, _registerType rhs)
 {
     using namespace GDL::sse;
@@ -539,6 +559,26 @@ inline auto _mmx_blend_p(_registerType src0, _registerType src1)
         return _mm256_blend_ps(src0, src1, _blendMask);
     else
         return _mm256_blend_pd(src0, src1, _blendMask);
+#endif // __AVX2__
+}
+
+
+
+template <typename _registerType>
+inline auto _mmx_blendv_p(_registerType src0, _registerType src1, _registerType _blendMask)
+{
+    using namespace GDL::sse;
+    static_assert(IsRegisterType<_registerType>, "Function can only be used with compatible register types.");
+
+    if constexpr (Is__m128<_registerType>)
+        return _mm_blendv_ps(src0, src1, _blendMask);
+    else if constexpr (Is__m128d<_registerType>)
+        return _mm_blendv_pd(src0, src1, _blendMask);
+#ifdef __AVX2__
+    else if constexpr (Is__m256<_registerType>)
+        return _mm256_blendv_ps(src0, src1, _blendMask);
+    else
+        return _mm256_blendv_pd(src0, src1, _blendMask);
 #endif // __AVX2__
 }
 

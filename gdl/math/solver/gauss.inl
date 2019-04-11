@@ -94,6 +94,50 @@ inline _registerType GaussDense<_registerType, _size>::BlendPivot(_registerType 
 // --------------------------------------------------------------------------------------------------------------------
 
 template <typename _registerType, I32 _size>
+template <U32 _idx>
+inline _registerType GaussDense<_registerType, _size>::BlendAboveIdx(_registerType reg0, _registerType reg1)
+{
+    using namespace GDL::sse;
+
+    static_assert(numRegisterValues == 2 || numRegisterValues == 4 || numRegisterValues == 8,
+                  "Only registers with 2, 4 or 8 values are supported.");
+
+    if constexpr (numRegisterValues == 2)
+    {
+        constexpr U32 b0 = (_idx > 0) ? 1 : 0;
+        constexpr U32 b1 = (_idx > 1) ? 1 : 0;
+
+        return Blend<b0, b1>(reg0, reg1);
+    }
+    if constexpr (numRegisterValues == 4)
+    {
+        constexpr U32 b0 = (_idx > 0) ? 1 : 0;
+        constexpr U32 b1 = (_idx > 1) ? 1 : 0;
+        constexpr U32 b2 = (_idx > 2) ? 1 : 0;
+        constexpr U32 b3 = (_idx > 3) ? 1 : 0;
+
+        return Blend<b0, b1, b2, b3>(reg0, reg1);
+    }
+    if constexpr (numRegisterValues == 8)
+    {
+        constexpr U32 b0 = (_idx > 0) ? 1 : 0;
+        constexpr U32 b1 = (_idx > 1) ? 1 : 0;
+        constexpr U32 b2 = (_idx > 2) ? 1 : 0;
+        constexpr U32 b3 = (_idx > 3) ? 1 : 0;
+        constexpr U32 b4 = (_idx > 4) ? 1 : 0;
+        constexpr U32 b5 = (_idx > 5) ? 1 : 0;
+        constexpr U32 b6 = (_idx > 6) ? 1 : 0;
+        constexpr U32 b7 = (_idx > 7) ? 1 : 0;
+
+        return Blend<b0, b1, b2, b3, b4, b5, b6, b7>(reg0, reg1);
+    }
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+template <typename _registerType, I32 _size>
 template <U32 _regValueIdx>
 inline void GaussDense<_registerType, _size>::EliminationStepRegister(U32 stepCount, U32 colRegIdx,
                                                                       MatrixDataArray& matrixData,
@@ -144,27 +188,55 @@ inline void GaussDense<_registerType, _size>::EliminationStepRegister(U32 stepCo
 // --------------------------------------------------------------------------------------------------------------------
 
 template <typename _registerType, I32 _size>
-inline U32 GaussDense<_registerType, _size>::FindPivot(U32 stepCount, const MatrixDataArray& matrixData)
+template <U32 _regValueIdx>
+inline U32 GaussDense<_registerType, _size>::FindPivot(U32 stepCount, U32 colRegIdx, const MatrixDataArray& matrixData)
 {
-    // Optimize: First compare all registers and apply result on value vector and index vector. Then store index
-    // vector and value vector results and compare elements. Index vector just stores register index. The element
-    // index can be calculated from register index and position in register.
+
+
     const U32 colIdx = stepCount * numColRegisters;
 
-    std::array<ValueType, _size> values;
-    std::memcpy(values.data(), &matrixData[colIdx], sizeof(ValueType) * _size);
+    //    std::array<ValueType, _size> values;
+    //    std::memcpy(values.data(), &matrixData[colIdx], sizeof(ValueType) * _size);
 
-    U32 pivotIdx = stepCount;
-    values[pivotIdx] = std::abs(values[pivotIdx]);
+    //    U32 pivotIdx = stepCount;
+    //    values[pivotIdx] = std::abs(values[pivotIdx]);
 
-    for (U32 j = stepCount + 1; j < _size; ++j)
+    //    for (U32 j = stepCount + 1; j < _size; ++j)
+    //    {
+    //        values[j] = std::abs(values[j]);
+    //        if (values[pivotIdx] < values[j])
+    //            pivotIdx = j;
+    //    }
+
+    _registerType zero = _mmx_setzero_p<_registerType>();
+    _registerType cmpAbs = sse::Abs(BlendAboveIdx<_regValueIdx>(matrixData[colIdx + colRegIdx], zero));
+    _registerType cmpIdx = _mmx_set1_p<_registerType>(colRegIdx);
+    for (U32 i = colRegIdx + 1; i < numColRegisters; ++i)
     {
-        values[j] = std::abs(values[j]);
-        if (values[pivotIdx] < values[j])
-            pivotIdx = j;
+        _registerType cmpAbs2 = sse::Abs(matrixData[colIdx + i]);
+        _registerType cmpRes = _mmx_cmplt_p(cmpAbs, cmpAbs2);
+        cmpAbs = _mmx_blendv_p(cmpAbs, cmpAbs2, cmpRes);
+        cmpIdx = _mmx_blendv_p(cmpIdx, _mmx_set1_p<_registerType>(i), cmpRes);
     }
 
-    return pivotIdx;
+    alignas(alignment) std::array<ValueType, numRegisterValues> values2;
+    _mmx_store_p(values2.data(), cmpAbs);
+    ValueType maxVal = values2[0];
+    U32 maxValIdx = 0;
+    for (U32 i = 1; i < numRegisterValues; ++i)
+        if (maxVal < values2[i])
+        {
+            maxVal = values2[i];
+            maxValIdx = i;
+        }
+
+    // U32 pivotIdx2 = sse::GetValue(cmpIdx, maxValIdx) * numRegisterValues + maxValIdx;
+
+    //    std::cout << VecSSE<ValueType, numRegisterValues>(std::array<_registerType, 1>{cmpIdx}) << std::endl;
+    // std::cout << pivotIdx << "/" << pivotIdx2 << std::endl;
+
+    // return pivotIdx;
+    return sse::GetValue(cmpIdx, maxValIdx) * numRegisterValues + maxValIdx;
 }
 
 
@@ -177,7 +249,7 @@ inline void GaussDense<_registerType, _size>::PivotingStepRegister(U32 stepCount
                                                                    MatrixDataArray& matrixData,
                                                                    VectorDataArray& vectorData)
 {
-    U32 pivotIdx = FindPivot(stepCount, matrixData);
+    U32 pivotIdx = FindPivot<_regValueIdx>(stepCount, colRegIdx, matrixData);
     SwapRows<_regValueIdx>(pivotIdx, stepCount, colRegIdx, matrixData, vectorData);
 }
 

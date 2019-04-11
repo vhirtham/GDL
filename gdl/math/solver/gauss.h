@@ -59,6 +59,9 @@ private:
     template <U32 _idx>
     inline static _registerType BlendPivot(_registerType reg0, _registerType reg1);
 
+    template <U32 _idx>
+    inline static _registerType BlendAboveIdx(_registerType reg0, _registerType reg1);
+
     template <U32 _regValueIdx>
     inline static void EliminationStepRegister(U32 stepCount, U32 colRegIdx, MatrixDataArray& matrixData,
                                                VectorDataArray& vectorData);
@@ -66,7 +69,8 @@ private:
     template <U32 _regValueIdx = 0>
     inline static void GaussStepsRegister(U32 colRegIdx, MatrixDataArray& matrixData, VectorDataArray& vectorData);
 
-    inline static U32 FindPivot(U32 stepCount, const MatrixDataArray& matrixData);
+    template <U32 _regValueIdx>
+    inline static U32 FindPivot(U32 stepCount, U32 colRegIdx, const MatrixDataArray& matrixData);
 
     template <U32 _regValueIdx>
     inline static void PivotingStepRegister(U32 stepCount, U32 colRegIdx, MatrixDataArray& matrixData,
