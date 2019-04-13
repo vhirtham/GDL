@@ -7,6 +7,8 @@
 #include "test/tools/ExceptionChecks.h"
 
 #include "test/tools/arrayValueComparison.h"
+#include "test/tools/ExceptionChecks.h"
+
 
 
 using namespace GDL;
@@ -100,7 +102,7 @@ void TestGaussDenseNoInvalidPivotIndexTestcase()
 
     std::array<_type, _size> expRes;
     std::array<_type, _size> vectorValues;
-    std::array<RegisterType, numColRegisters * _size> matrixValues;
+    std::array<RegisterType, numColRegisters * _size> matrixValues{0};
 
 
 
@@ -162,6 +164,39 @@ BOOST_AUTO_TEST_CASE(Test_Gauss_Dense_No_Invalid_Pivot_Index_F64)
     TestGaussDenseNoInvalidPivotIndex<F64>();
 }
 
+
+
+// Test for singular matrix -------------------------------------------------------------------------------------------
+
+#ifndef NDEVEXCEPTION
+
+template <typename _type>
+void TestGaussDenseSingularMatrix()
+{
+    // clang-format off
+    MatSSE<_type, 4, 4> A = MatSSE<_type, 4, 4>(0,  4, -5,  4,
+                                                0, -5,  2, -1,
+                                                0, -5,  2, -1,
+                                                0, -1,  9, -5).Transpose();
+    // clang-format on
+
+    VecSSE<_type, 4> b(4, -5, -4, 9);
+    BOOST_CHECK_THROW(Solver::GaussPartialPivot(A, b), Exception);
+}
+
+
+
+BOOST_AUTO_TEST_CASE(Test_Gauss_Dense_Singular_F32)
+{
+    TestGaussDenseSingularMatrix<F32>();
+}
+
+BOOST_AUTO_TEST_CASE(Test_Gauss_Dense_Singular_F64)
+{
+    TestGaussDenseSingularMatrix<F64>();
+}
+
+#endif
 
 // Test 2x2 -----------------------------------------------------------------------------------------------------------
 

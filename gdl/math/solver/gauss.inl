@@ -470,7 +470,7 @@ inline void GaussDense<_registerType, _size>::SwapRowsAllRegisters(U32 stepCount
             vectorData[colRegIdx] = sse::Swap<_rowPiv, _rowSwap>(vectorData[colRegIdx]);
         }
         else
-            THROW("Internal index error");
+            THROW("Internal index error - Probably singular matrix.");
     }
     else
     {
