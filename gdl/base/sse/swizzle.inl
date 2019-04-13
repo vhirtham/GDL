@@ -39,6 +39,137 @@ inline __m256 Blend(__m256 source0, __m256 source1)
 
 
 
+template <U32 _index, typename _registerType>
+inline _registerType BlendIndex(_registerType source0, _registerType source1)
+{
+    using namespace GDL::sse;
+
+    constexpr U32 numRegVals = numRegisterValues<_registerType>;
+
+    static_assert(_index < numRegVals, "Index must be lower than the number of register values.");
+    static_assert(numRegVals == 2 || numRegVals == 4 || numRegVals == 8,
+                  "Only registers with 2, 4 or 8 values are supported.");
+
+    if constexpr (numRegVals == 2)
+    {
+        constexpr U32 b0 = (_index == 0) ? 1 : 0;
+        constexpr U32 b1 = (_index == 1) ? 1 : 0;
+
+        return Blend<b0, b1>(source0, source1);
+    }
+    if constexpr (numRegVals == 4)
+    {
+        constexpr U32 b0 = (_index == 0) ? 1 : 0;
+        constexpr U32 b1 = (_index == 1) ? 1 : 0;
+        constexpr U32 b2 = (_index == 2) ? 1 : 0;
+        constexpr U32 b3 = (_index == 3) ? 1 : 0;
+
+        return Blend<b0, b1, b2, b3>(source0, source1);
+    }
+    if constexpr (numRegVals == 8)
+    {
+        constexpr U32 b0 = (_index == 0) ? 1 : 0;
+        constexpr U32 b1 = (_index == 1) ? 1 : 0;
+        constexpr U32 b2 = (_index == 2) ? 1 : 0;
+        constexpr U32 b3 = (_index == 3) ? 1 : 0;
+        constexpr U32 b4 = (_index == 4) ? 1 : 0;
+        constexpr U32 b5 = (_index == 5) ? 1 : 0;
+        constexpr U32 b6 = (_index == 6) ? 1 : 0;
+        constexpr U32 b7 = (_index == 7) ? 1 : 0;
+
+        return Blend<b0, b1, b2, b3, b4, b5, b6, b7>(source0, source1);
+    }
+}
+
+
+
+template <U32 _index, typename _registerType>
+inline _registerType BlendAboveIndex(_registerType source0, [[maybe_unused]] _registerType source1)
+{
+    constexpr U32 numRegVals = numRegisterValues<_registerType>;
+
+    static_assert(_index < numRegVals, "Index must be lower than the number of register values.");
+    static_assert(numRegVals == 2 || numRegVals == 4 || numRegVals == 8,
+                  "Only registers with 2, 4 or 8 values are supported.");
+
+    if constexpr (_index == 0)
+        return source0;
+    else if constexpr (numRegVals == 2)
+    {
+        constexpr U32 b0 = (_index > 0) ? 1 : 0;
+        constexpr U32 b1 = (_index > 1) ? 1 : 0;
+
+        return Blend<b0, b1>(source0, source1);
+    }
+    else if constexpr (numRegVals == 4)
+    {
+        constexpr U32 b0 = (_index > 0) ? 1 : 0;
+        constexpr U32 b1 = (_index > 1) ? 1 : 0;
+        constexpr U32 b2 = (_index > 2) ? 1 : 0;
+        constexpr U32 b3 = (_index > 3) ? 1 : 0;
+
+        return Blend<b0, b1, b2, b3>(source0, source1);
+    }
+    else if constexpr (numRegVals == 8)
+    {
+        constexpr U32 b0 = (_index > 0) ? 1 : 0;
+        constexpr U32 b1 = (_index > 1) ? 1 : 0;
+        constexpr U32 b2 = (_index > 2) ? 1 : 0;
+        constexpr U32 b3 = (_index > 3) ? 1 : 0;
+        constexpr U32 b4 = (_index > 4) ? 1 : 0;
+        constexpr U32 b5 = (_index > 5) ? 1 : 0;
+        constexpr U32 b6 = (_index > 6) ? 1 : 0;
+        constexpr U32 b7 = (_index > 7) ? 1 : 0;
+
+        return Blend<b0, b1, b2, b3, b4, b5, b6, b7>(source0, source1);
+    }
+}
+
+
+
+template <U32 _index, typename _registerType>
+inline _registerType BlendBelowIndex(_registerType source0, [[maybe_unused]] _registerType source1)
+{
+    constexpr U32 numRegVals = numRegisterValues<_registerType>;
+
+    static_assert(_index < numRegVals, "Index must be lower than the number of register values.");
+    static_assert(numRegVals == 2 || numRegVals == 4 || numRegVals == 8,
+                  "Only registers with 2, 4 or 8 values are supported.");
+
+    constexpr U32 b0 = 0;
+
+    if constexpr (_index >= numRegVals)
+        return source0;
+    else if constexpr (numRegVals == 2)
+    {
+        constexpr U32 b1 = (_index < 1) ? 1 : 0;
+
+        return Blend<b0, b1>(source0, source1);
+    }
+    else if constexpr (numRegVals == 4)
+    {
+        constexpr U32 b1 = (_index < 1) ? 1 : 0;
+        constexpr U32 b2 = (_index < 2) ? 1 : 0;
+        constexpr U32 b3 = (_index < 3) ? 1 : 0;
+
+        return Blend<b0, b1, b2, b3>(source0, source1);
+    }
+    else if constexpr (numRegVals == 8)
+    {
+        constexpr U32 b1 = (_index < 1) ? 1 : 0;
+        constexpr U32 b2 = (_index < 2) ? 1 : 0;
+        constexpr U32 b3 = (_index < 3) ? 1 : 0;
+        constexpr U32 b4 = (_index < 4) ? 1 : 0;
+        constexpr U32 b5 = (_index < 5) ? 1 : 0;
+        constexpr U32 b6 = (_index < 6) ? 1 : 0;
+        constexpr U32 b7 = (_index < 7) ? 1 : 0;
+
+        return Blend<b0, b1, b2, b3, b4, b5, b6, b7>(source0, source1);
+    }
+}
+
+
+
 template <U32 _src0, U32 _src1>
 constexpr U32 BlendMask()
 {

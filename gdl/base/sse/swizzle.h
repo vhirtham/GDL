@@ -33,6 +33,33 @@ inline _registerType Blend(_registerType source0, _registerType source1);
 template <U32 _src0, U32 _src1, U32 _src2, U32 _src3, U32 _src4, U32 _src5, U32 _src6, U32 _src7>
 inline __m256 Blend(__m256 source0, __m256 source1);
 
+//! @brief Blends a single value from source1 into source 0 and returns the result
+//! @tparam _index: Index of the value that should be blended
+//! @tparam _registerType: Register type
+//! @param source0: First source register
+//! @param source1: Second source register
+//! @return Register with blended values
+template <U32 _index, typename _registerType>
+inline _registerType BlendIndex(_registerType source0, _registerType source1);
+
+//! @brief Blends all values above the given index from source1 into source 0 and returns the result
+//! @tparam _index: Index
+//! @tparam _registerType: Register type
+//! @param source0: First source register
+//! @param source1: Second source register
+//! @return Register with blended values
+template <U32 _index, typename _registerType>
+inline _registerType BlendAboveIndex(_registerType source0, _registerType source1);
+
+//! @brief Blends all values below the given index from source1 into source 0 and returns the result
+//! @tparam _index: Index
+//! @tparam _registerType: Register type
+//! @param source0: First source register
+//! @param source1: Second source register
+//! @return Register with blended values
+template <U32 _index, typename _registerType>
+inline _registerType BlendBelowIndex(_registerType source0, _registerType source1);
+
 //! @brief Creates a mask for blend intrinsics
 //! @tparam _src0 - _src1: Index of the source register that should provide the corresponding value
 //! @return Mask

@@ -14,8 +14,6 @@
 using namespace GDL;
 
 
-//! Check throw if matrix is singular
-
 
 // Test pivoting ------------------------------------------------------------------------------------------------------
 

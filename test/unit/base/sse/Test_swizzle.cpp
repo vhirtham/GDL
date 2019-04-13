@@ -116,6 +116,109 @@ BOOST_AUTO_TEST_CASE(Blend2)
 }
 
 
+// Blend Index --------------------------------------------------------------------------------------------------------
+
+template <typename _registerType, U32 _index = 0>
+void TestBlendIndex()
+{
+    using Type = decltype(GetDataType<_registerType>());
+    constexpr U32 numRegVals = numRegisterValues<_registerType>;
+
+    _registerType a = _mmx_setzero_p<_registerType>();
+    _registerType b = _mmx_set1_p<_registerType>(1);
+
+    _registerType c = BlendIndex<_index>(a, b);
+    for (U32 i = 0; i < numRegVals; ++i)
+        if (i == _index)
+            BOOST_CHECK(GetValue(c, i) == Approx<Type>(1));
+        else
+            BOOST_CHECK(GetValue(c, i) == ApproxZero<Type>());
+
+    if constexpr (_index + 1 < numRegVals)
+        TestBlendIndex<_registerType, _index + 1>();
+}
+
+BOOST_AUTO_TEST_CASE(Test_Blend_Index)
+{
+    TestBlendIndex<__m128>();
+    TestBlendIndex<__m128d>();
+
+#ifdef __AVX2__
+    TestBlendIndex<__m256>();
+    TestBlendIndex<__m256d>();
+#endif // __AVX2__
+}
+
+
+
+// Blend Above Index --------------------------------------------------------------------------------------------------
+
+template <typename _registerType, U32 _index = 0>
+void TestBlendAboveIndex()
+{
+    using Type = decltype(GetDataType<_registerType>());
+    constexpr U32 numRegVals = numRegisterValues<_registerType>;
+
+    _registerType a = _mmx_setzero_p<_registerType>();
+    _registerType b = _mmx_set1_p<_registerType>(1);
+
+    _registerType c = BlendAboveIndex<_index>(a, b);
+    for (U32 i = 0; i < numRegVals; ++i)
+        if (i < _index)
+            BOOST_CHECK(GetValue(c, i) == Approx<Type>(1));
+        else
+            BOOST_CHECK(GetValue(c, i) == ApproxZero<Type>());
+
+    if constexpr (_index + 1 < numRegVals)
+        TestBlendAboveIndex<_registerType, _index + 1>();
+}
+
+BOOST_AUTO_TEST_CASE(Test_Blend_Above_Index)
+{
+    TestBlendAboveIndex<__m128>();
+    TestBlendAboveIndex<__m128d>();
+
+#ifdef __AVX2__
+    TestBlendAboveIndex<__m256>();
+    TestBlendAboveIndex<__m256d>();
+#endif // __AVX2__
+}
+
+
+
+// Blend Below Index --------------------------------------------------------------------------------------------------
+
+template <typename _registerType, U32 _index = 0>
+void TestBlendBelowIndex()
+{
+    using Type = decltype(GetDataType<_registerType>());
+    constexpr U32 numRegVals = numRegisterValues<_registerType>;
+
+    _registerType a = _mmx_setzero_p<_registerType>();
+    _registerType b = _mmx_set1_p<_registerType>(1);
+
+    _registerType c = BlendBelowIndex<_index>(a, b);
+    for (U32 i = 0; i < numRegVals; ++i)
+        if (i > _index)
+            BOOST_CHECK(GetValue(c, i) == Approx<Type>(1));
+        else
+            BOOST_CHECK(GetValue(c, i) == ApproxZero<Type>());
+
+    if constexpr (_index + 1 < numRegVals)
+        TestBlendAboveIndex<_registerType, _index + 1>();
+}
+
+BOOST_AUTO_TEST_CASE(Test_Blend_Below_Index)
+{
+    TestBlendBelowIndex<__m128>();
+    TestBlendBelowIndex<__m128d>();
+
+#ifdef __AVX2__
+    TestBlendBelowIndex<__m256>();
+    TestBlendBelowIndex<__m256d>();
+#endif // __AVX2__
+}
+
 
 // Broadcast -----------------------------------------------------------------------------------------------------------
 

@@ -35,7 +35,6 @@ VecSSE<_type, _size, true> GaussPartialPivot(const MatSSE<_type, _size, _size>& 
 template <typename _registerType, I32 _size>
 class GaussDense
 {
-    // using RegisterType = decltype(sse::GetFittingRegister<_type, sse::MaxRegisterSize()>());
     constexpr static U32 alignment = sse::alignmentBytes<_registerType>;
     static constexpr U32 numRegisterValues = sse::numRegisterValues<_registerType>;
     static constexpr U32 numColRegisters = sse::CalcMinNumArrayRegisters<_registerType>(_size);
@@ -56,15 +55,6 @@ public:
     inline static VectorType SolvePartialPivot(const MatrixType& A, const VectorType& b);
 
 private:
-    template <U32 _idx>
-    inline static _registerType BlendIndex(_registerType reg0, _registerType reg1);
-
-    template <U32 _idx>
-    inline static _registerType BlendAboveIndex(_registerType reg0, _registerType reg1);
-
-    template <U32 _idx>
-    inline static _registerType BlendBelowIndex(_registerType reg0, _registerType reg1);
-
     template <U32 _regValueIdx>
     inline static void EliminationStepRegister(U32 stepCount, U32 colRegIdx, MatrixDataArray& matrixData,
                                                VectorDataArray& vectorData);
