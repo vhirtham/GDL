@@ -33,13 +33,15 @@ void TestGaussDense_2x2()
 }
 
 
-BOOST_AUTO_TEST_CASE(Test_Gauss_Dense_2x2)
+BOOST_AUTO_TEST_CASE(Test_Gauss_Dense_2x2_F32)
 {
     TestGaussDense_2x2<F32>();
-    TestGaussDense_2x2<F64>();
 }
 
-
+BOOST_AUTO_TEST_CASE(Test_Gauss_Dense_2x2_F64)
+{
+    TestGaussDense_2x2<F64>();
+}
 
 // Test 3x3 -----------------------------------------------------------------------------------------------------------
 
@@ -62,12 +64,16 @@ void TestGaussDense_3x3()
 }
 
 
-BOOST_AUTO_TEST_CASE(Test_Gauss_Dense_3x3)
+BOOST_AUTO_TEST_CASE(Test_Gauss_Dense_3x3_F32)
 {
     TestGaussDense_3x3<F32>();
-    TestGaussDense_3x3<F64>();
 }
 
+
+BOOST_AUTO_TEST_CASE(Test_Gauss_Dense_3x3_F64)
+{
+    TestGaussDense_3x3<F64>();
+}
 
 
 // Test 4x4 -----------------------------------------------------------------------------------------------------------
@@ -92,9 +98,15 @@ void TestGaussDense_4x4()
 }
 
 
-BOOST_AUTO_TEST_CASE(Test_Gauss_Dense_4x4)
+BOOST_AUTO_TEST_CASE(Test_Gauss_Dense_4x4_F32)
 {
     TestGaussDense_4x4<F32>();
+}
+
+
+
+BOOST_AUTO_TEST_CASE(Test_Gauss_Dense_4x4_F64)
+{
     TestGaussDense_4x4<F64>();
 }
 
@@ -123,12 +135,17 @@ void TestGaussDense_5x5()
 }
 
 
-BOOST_AUTO_TEST_CASE(Test_Gauss_Dense_5x5)
+BOOST_AUTO_TEST_CASE(Test_Gauss_Dense_5x5_F32)
 {
     TestGaussDense_5x5<F32>();
-    TestGaussDense_5x5<F64>();
 }
 
+
+
+BOOST_AUTO_TEST_CASE(Test_Gauss_Dense_5x5_F64)
+{
+    TestGaussDense_5x5<F64>();
+}
 
 
 // Test 7x7 -----------------------------------------------------------------------------------------------------------
@@ -156,9 +173,15 @@ void TestGaussDense_7x7()
 }
 
 
-BOOST_AUTO_TEST_CASE(Test_Gauss_Dense_7x7)
+BOOST_AUTO_TEST_CASE(Test_Gauss_Dense_7x7_F32)
 {
     TestGaussDense_7x7<F32>();
+}
+
+
+
+BOOST_AUTO_TEST_CASE(Test_Gauss_Dense_7x7_F64)
+{
     TestGaussDense_7x7<F64>();
 }
 
@@ -190,12 +213,17 @@ void TestGaussDense_8x8()
 }
 
 
-BOOST_AUTO_TEST_CASE(Test_Gauss_Dense_8x8)
+BOOST_AUTO_TEST_CASE(Test_Gauss_Dense_8x8_F32)
 {
     TestGaussDense_8x8<F32>();
-    TestGaussDense_8x8<F64>();
 }
 
+
+
+BOOST_AUTO_TEST_CASE(Test_Gauss_Dense_8x8_F64)
+{
+    TestGaussDense_8x8<F64>();
+}
 
 
 // Test 9x9 -----------------------------------------------------------------------------------------------------------
@@ -225,8 +253,14 @@ void TestGaussDense_9x9()
 }
 
 
-BOOST_AUTO_TEST_CASE(Test_Gauss_Dense_9x9)
+BOOST_AUTO_TEST_CASE(Test_Gauss_Dense_9x9_F32)
 {
     TestGaussDense_9x9<F32>();
+}
+
+
+
+BOOST_AUTO_TEST_CASE(Test_Gauss_Dense_9x9_F64)
+{
     TestGaussDense_9x9<F64>();
 }
