@@ -33,12 +33,21 @@ GaussDense<_registerType, _size>::SolvePartialPivot(const MatrixType& A, const V
     alignas(alignment) MatrixDataArray matrixData = A.DataSSE();
     alignas(alignment) VectorDataArray vectorData = b.DataSSE();
 
-    constexpr U32 numFullCollReisters = _size / numRegisterValues;
+    constexpr U32 numFullColRegisters = _size / numRegisterValues;
+    constexpr U32 numNonFullRegValues = _size % numRegisterValues;
+
+    if constexpr (numNonFullRegValues != 0)
+        for (U32 i = numColRegisters - 1; i < _size * numFullColRegisters; i += numColRegisters)
+            BlendBelowIndex<numNonFullRegValues>(matrixData[i], _mmx_setzero_p<_registerType>());
+
+
 
     // Size is known! MAYBE recursive template call to eliminate loop and enable more optimizations!
-    for (U32 i = 0; i < numFullCollReisters; ++i)
+    for (U32 i = 0; i < numFullColRegisters; ++i)
         GaussStepsRegister(i, matrixData, vectorData);
 
+    if constexpr (numNonFullRegValues != 0)
+        GaussStepsRegister<0, numNonFullRegValues>(numColRegisters - 1, matrixData, vectorData);
 
     // Missing: Non full registers at the end of a column!
 
@@ -51,7 +60,7 @@ GaussDense<_registerType, _size>::SolvePartialPivot(const MatrixType& A, const V
 
 template <typename _registerType, I32 _size>
 template <U32 _idx>
-inline _registerType GaussDense<_registerType, _size>::BlendPivot(_registerType reg0, _registerType reg1)
+inline _registerType GaussDense<_registerType, _size>::BlendIndex(_registerType reg0, _registerType reg1)
 {
     using namespace GDL::sse;
 
@@ -95,21 +104,26 @@ inline _registerType GaussDense<_registerType, _size>::BlendPivot(_registerType 
 
 template <typename _registerType, I32 _size>
 template <U32 _idx>
-inline _registerType GaussDense<_registerType, _size>::BlendAboveIdx(_registerType reg0, _registerType reg1)
+inline _registerType GaussDense<_registerType, _size>::BlendAboveIndex([[maybe_unused]] _registerType reg0,
+                                                                       [[maybe_unused]] _registerType reg1)
 {
     using namespace GDL::sse;
 
     static_assert(numRegisterValues == 2 || numRegisterValues == 4 || numRegisterValues == 8,
                   "Only registers with 2, 4 or 8 values are supported.");
 
-    if constexpr (numRegisterValues == 2)
+    if constexpr (_idx == 0)
+        return reg0;
+    else if constexpr (_idx >= numRegisterValues)
+        return reg1;
+    else if constexpr (numRegisterValues == 2)
     {
         constexpr U32 b0 = (_idx > 0) ? 1 : 0;
         constexpr U32 b1 = (_idx > 1) ? 1 : 0;
 
         return Blend<b0, b1>(reg0, reg1);
     }
-    if constexpr (numRegisterValues == 4)
+    else if constexpr (numRegisterValues == 4)
     {
         constexpr U32 b0 = (_idx > 0) ? 1 : 0;
         constexpr U32 b1 = (_idx > 1) ? 1 : 0;
@@ -118,7 +132,7 @@ inline _registerType GaussDense<_registerType, _size>::BlendAboveIdx(_registerTy
 
         return Blend<b0, b1, b2, b3>(reg0, reg1);
     }
-    if constexpr (numRegisterValues == 8)
+    else if constexpr (numRegisterValues == 8)
     {
         constexpr U32 b0 = (_idx > 0) ? 1 : 0;
         constexpr U32 b1 = (_idx > 1) ? 1 : 0;
@@ -128,6 +142,52 @@ inline _registerType GaussDense<_registerType, _size>::BlendAboveIdx(_registerTy
         constexpr U32 b5 = (_idx > 5) ? 1 : 0;
         constexpr U32 b6 = (_idx > 6) ? 1 : 0;
         constexpr U32 b7 = (_idx > 7) ? 1 : 0;
+
+        return Blend<b0, b1, b2, b3, b4, b5, b6, b7>(reg0, reg1);
+    }
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+template <typename _registerType, I32 _size>
+template <U32 _idx>
+inline _registerType GaussDense<_registerType, _size>::BlendBelowIndex([[maybe_unused]] _registerType reg0,
+                                                                       [[maybe_unused]] _registerType reg1)
+{
+    using namespace GDL::sse;
+
+    static_assert(numRegisterValues == 2 || numRegisterValues == 4 || numRegisterValues == 8,
+                  "Only registers with 2, 4 or 8 values are supported.");
+
+    constexpr U32 b0 = 0;
+
+    if constexpr (_idx >= numRegisterValues)
+        return reg0;
+    else if constexpr (numRegisterValues == 2)
+    {
+        constexpr U32 b1 = (_idx < 1) ? 1 : 0;
+
+        return Blend<b0, b1>(reg0, reg1);
+    }
+    else if constexpr (numRegisterValues == 4)
+    {
+        constexpr U32 b1 = (_idx < 1) ? 1 : 0;
+        constexpr U32 b2 = (_idx < 2) ? 1 : 0;
+        constexpr U32 b3 = (_idx < 3) ? 1 : 0;
+
+        return Blend<b0, b1, b2, b3>(reg0, reg1);
+    }
+    else if constexpr (numRegisterValues == 8)
+    {
+        constexpr U32 b1 = (_idx < 1) ? 1 : 0;
+        constexpr U32 b2 = (_idx < 2) ? 1 : 0;
+        constexpr U32 b3 = (_idx < 3) ? 1 : 0;
+        constexpr U32 b4 = (_idx < 4) ? 1 : 0;
+        constexpr U32 b5 = (_idx < 5) ? 1 : 0;
+        constexpr U32 b6 = (_idx < 6) ? 1 : 0;
+        constexpr U32 b7 = (_idx < 7) ? 1 : 0;
 
         return Blend<b0, b1, b2, b3, b4, b5, b6, b7>(reg0, reg1);
     }
@@ -148,7 +208,7 @@ inline void GaussDense<_registerType, _size>::EliminationStepRegister(U32 stepCo
     const U32 colStartIdx = stepCount * numColRegisters;
     const U32 pivRegIdx = colStartIdx + colRegIdx;
 
-    DEV_EXCEPTION(GetValue<_regValueIdx>(matrixData[pivRegIdx]) == ApproxZero<F32>(10),
+    DEV_EXCEPTION(GetValue<_regValueIdx>(matrixData[pivRegIdx]) == ApproxZero<ValueType>(1, 10),
                   "Singular matrix - system not solveable");
 
 
@@ -162,7 +222,7 @@ inline void GaussDense<_registerType, _size>::EliminationStepRegister(U32 stepCo
         if (i == pivRegIdx % numColRegisters)
         {
             _registerType absPivM1 = _mmx_sub_p(matrixData[colStartIdx + i], one);
-            rowMult[i] = _mmx_mul_p(div, BlendPivot<_regValueIdx>(matrixData[colStartIdx + i], absPivM1));
+            rowMult[i] = _mmx_mul_p(div, BlendIndex<_regValueIdx>(matrixData[colStartIdx + i], absPivM1));
         }
         else
             rowMult[i] = _mmx_mul_p(div, matrixData[colStartIdx + i]);
@@ -209,7 +269,7 @@ inline U32 GaussDense<_registerType, _size>::FindPivot(U32 stepCount, U32 colReg
     //    }
 
     _registerType zero = _mmx_setzero_p<_registerType>();
-    _registerType cmpAbs = sse::Abs(BlendAboveIdx<_regValueIdx>(matrixData[colIdx + colRegIdx], zero));
+    _registerType cmpAbs = sse::Abs(BlendAboveIndex<_regValueIdx>(matrixData[colIdx + colRegIdx], zero));
     _registerType cmpIdx = _mmx_set1_p<_registerType>(colRegIdx);
     for (U32 i = colRegIdx + 1; i < numColRegisters; ++i)
     {
@@ -258,7 +318,7 @@ inline void GaussDense<_registerType, _size>::PivotingStepRegister(U32 stepCount
 // --------------------------------------------------------------------------------------------------------------------
 
 template <typename _registerType, I32 _size>
-template <U32 _regValueIdx>
+template <U32 _regValueIdx, U32 _maxSubsteps>
 inline void GaussDense<_registerType, _size>::GaussStepsRegister(U32 colRegIdx, MatrixDataArray& matrixData,
                                                                  VectorDataArray& vectorData)
 {
@@ -279,8 +339,8 @@ inline void GaussDense<_registerType, _size>::GaussStepsRegister(U32 colRegIdx, 
     //    std::cout << MatrixType(matrixData) << std::endl;
     //    std::cout << VectorType(vectorData) << std::endl;
 
-    if constexpr (_regValueIdx + 1 < numRegisterValues)
-        GaussStepsRegister<_regValueIdx + 1>(colRegIdx, matrixData, vectorData);
+    if constexpr (_regValueIdx + 1 < numRegisterValues && _regValueIdx + 1 < _maxSubsteps)
+        GaussStepsRegister<_regValueIdx + 1, _maxSubsteps>(colRegIdx, matrixData, vectorData);
 }
 
 

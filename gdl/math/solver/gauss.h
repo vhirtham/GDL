@@ -20,7 +20,7 @@ namespace Solver
 
 
 
-//! @brief Solves the linear system A * x = b by using Gaussian elimination with partial pivoting.
+//! @brief Solves the linear system A * x = b by using a Gauss-Jordan algorithm with partial pivoting.
 //! @param A: Matrix
 //! @param b: Vector
 //! @return Result vector x
@@ -29,7 +29,7 @@ VecSSE<_type, _size, true> GaussPartialPivot(const MatSSE<_type, _size, _size>& 
 
 
 
-//! @brief Gaussian elimination solver class for dense static systems
+//! @brief Gaussian-Jordan solver class for dense static systems
 //! @tparam _type: Basic data type. Can either be F32 or F64
 //! @tparam _size: Size of the linear system
 template <typename _registerType, I32 _size>
@@ -49,7 +49,7 @@ class GaussDense
 
 
 public:
-    //! @brief Solves the linear system A * x = b by using Gaussian elimination with partial pivoting.
+    //! @brief Solves the linear system A * x = b by using a Gauss-Jordan algorithm with partial pivoting.
     //! @param A: Matrix
     //! @param b: Vector
     //! @return Result vector x
@@ -57,16 +57,19 @@ public:
 
 private:
     template <U32 _idx>
-    inline static _registerType BlendPivot(_registerType reg0, _registerType reg1);
+    inline static _registerType BlendIndex(_registerType reg0, _registerType reg1);
 
     template <U32 _idx>
-    inline static _registerType BlendAboveIdx(_registerType reg0, _registerType reg1);
+    inline static _registerType BlendAboveIndex(_registerType reg0, _registerType reg1);
+
+    template <U32 _idx>
+    inline static _registerType BlendBelowIndex(_registerType reg0, _registerType reg1);
 
     template <U32 _regValueIdx>
     inline static void EliminationStepRegister(U32 stepCount, U32 colRegIdx, MatrixDataArray& matrixData,
                                                VectorDataArray& vectorData);
 
-    template <U32 _regValueIdx = 0>
+    template <U32 _regValueIdx = 0, U32 _maxSubsteps = numRegisterValues>
     inline static void GaussStepsRegister(U32 colRegIdx, MatrixDataArray& matrixData, VectorDataArray& vectorData);
 
     template <U32 _regValueIdx>
