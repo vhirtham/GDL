@@ -12,6 +12,83 @@
 using namespace GDL;
 
 
+//! Add testcase to check if register values behind the matrix size are set to zero.
+//! Check throw if matrix is singular
+
+
+// Test pivoting ------------------------------------------------------------------------------------------------------
+
+template <typename _type, U32 _size, bool _neg = false>
+void TestGaussDensePivotingTestcase(std::array<U32, _size> indices)
+{
+
+    for (U32 i = 0; i < _size; ++i)
+    {
+        if (indices[i] >= _size)
+            THROW("Testcase invalid. Index must be in the range [0, system size]");
+        for (U32 j = i + 1; j < _size; ++j)
+            if (indices[i] == indices[j])
+                THROW("Testcase invalid. Value found multiple times");
+    }
+
+    std::array<_type, _size> expRes;
+    std::array<_type, _size> vectorValues;
+    std::array<_type, _size * _size> matrixValues;
+
+    _type posNeg = (_neg) ? -1. : 1.;
+
+    for (U32 i = 0; i < _size; ++i)
+    {
+        expRes[i] = static_cast<_type>(i);
+        vectorValues[i] = static_cast<_type>(indices[i]) * posNeg;
+        for (U32 j = 0; j < _size; ++j)
+            if (indices[i] == j)
+                matrixValues[j * _size + i] = 1 * posNeg;
+            else
+                matrixValues[j * _size + i] = 0;
+    }
+
+    VecSSE<_type, _size> b(vectorValues);
+    MatSSE<_type, _size, _size> A(matrixValues);
+
+    // std::cout << A << std::endl;
+    // std::cout << b << std::endl;
+
+    VecSSE<_type, _size> res = Solver::GaussPartialPivot(A, b);
+    // std::cout << res << std::endl;
+
+    BOOST_CHECK(CheckCloseArray(res.Data(), expRes, 1));
+
+    if constexpr (!_neg)
+        TestGaussDensePivotingTestcase<_type, _size, true>(indices);
+}
+
+
+
+template <typename _type>
+void TestGaussDensePivoting()
+{
+    TestGaussDensePivotingTestcase<_type, 3>({{2, 0, 1}});
+    TestGaussDensePivotingTestcase<_type, 5>({{0, 4, 2, 1, 3}});
+    TestGaussDensePivotingTestcase<_type, 8>({{0, 1, 2, 3, 4, 5, 6, 7}});
+    TestGaussDensePivotingTestcase<_type, 8>({{1, 5, 4, 2, 0, 7, 6, 3}});
+    TestGaussDensePivotingTestcase<_type, 9>({{7, 2, 6, 4, 0, 8, 3, 5, 1}});
+    TestGaussDensePivotingTestcase<_type, 16>({{13, 5, 1, 11, 12, 7, 8, 0, 3, 14, 2, 6, 9, 15, 4, 10}});
+}
+
+
+
+BOOST_AUTO_TEST_CASE(Test_Gauss_Dense_Pivoting_F32)
+{
+    TestGaussDensePivoting<F32>();
+}
+
+BOOST_AUTO_TEST_CASE(Test_Gauss_Dense_Pivoting_F64)
+{
+    TestGaussDensePivoting<F64>();
+}
+
+
 
 // Test 2x2 -----------------------------------------------------------------------------------------------------------
 
