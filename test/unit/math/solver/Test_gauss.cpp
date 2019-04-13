@@ -12,7 +12,6 @@
 using namespace GDL;
 
 
-//! Add testcase to check if register values behind the matrix size are set to zero.
 //! Check throw if matrix is singular
 
 
@@ -51,11 +50,7 @@ void TestGaussDensePivotingTestcase(std::array<U32, _size> indices)
     VecSSE<_type, _size> b(vectorValues);
     MatSSE<_type, _size, _size> A(matrixValues);
 
-    // std::cout << A << std::endl;
-    // std::cout << b << std::endl;
-
     VecSSE<_type, _size> res = Solver::GaussPartialPivot(A, b);
-    // std::cout << res << std::endl;
 
     BOOST_CHECK(CheckCloseArray(res.Data(), expRes, 1));
 
@@ -88,6 +83,84 @@ BOOST_AUTO_TEST_CASE(Test_Gauss_Dense_Pivoting_F64)
     TestGaussDensePivoting<F64>();
 }
 
+
+
+// Test pivoting - no invalid pivot index -----------------------------------------------------------------------------
+
+
+//! @brief Matrices with a size that is not a multiple of the number of register values have a register at the end of
+//! each column which contains unused values. This test checks if high values in this unused memory locations are
+//! ignored as expected.
+template <typename _type, U32 _size>
+void TestGaussDenseNoInvalidPivotIndexTestcase()
+{
+    using RegisterType = typename MatSSE<_type, _size, _size>::RegisterType;
+    constexpr U32 numColRegisters = sse::CalcMinNumArrayRegisters<RegisterType>(_size);
+    constexpr U32 numRegisterValues = sse::numRegisterValues<RegisterType>;
+
+    std::array<_type, _size> expRes;
+    std::array<_type, _size> vectorValues;
+    std::array<RegisterType, numColRegisters * _size> matrixValues;
+
+
+
+    for (U32 i = 0; i < _size; ++i)
+    {
+        expRes[i] = static_cast<_type>(i);
+        vectorValues[i] = static_cast<_type>(i);
+        for (U32 j = 0; j < numColRegisters; ++j)
+            for (U32 k = 0; k < numRegisterValues; ++k)
+            {
+                U32 globalColIdx = j * numRegisterValues + k;
+                if (globalColIdx == i)
+                    sse::SetValue(matrixValues[i * numColRegisters + j], k, 1);
+                else if (globalColIdx < _size)
+                    sse::SetValue(matrixValues[i * numColRegisters + j], k, 0);
+                else
+                    sse::SetValue(matrixValues[i * numColRegisters + j], k, 500);
+            }
+    }
+
+
+    VecSSE<_type, _size> b(vectorValues);
+    MatSSE<_type, _size, _size> A(matrixValues);
+
+    for (U32 i = 0; i < _size; ++i)
+        for (U32 j = 0; j < numColRegisters; ++j)
+            for (U32 k = 0; k < numRegisterValues; ++k)
+                if (j * numRegisterValues + k >= _size)
+                    EXCEPTION(sse::GetValue(matrixValues[i * numColRegisters + j], k) != Approx<_type>(500),
+                              "Testcase invalid. Unused memory of matrix is not set as expected.");
+
+
+
+    VecSSE<_type, _size> res = Solver::GaussPartialPivot(A, b);
+
+    BOOST_CHECK(CheckCloseArray(res.Data(), expRes, 1));
+}
+
+
+
+template <typename _type>
+void TestGaussDenseNoInvalidPivotIndex()
+{
+    TestGaussDenseNoInvalidPivotIndexTestcase<_type, 3>();
+    TestGaussDenseNoInvalidPivotIndexTestcase<_type, 5>();
+    TestGaussDenseNoInvalidPivotIndexTestcase<_type, 7>();
+    TestGaussDenseNoInvalidPivotIndexTestcase<_type, 9>();
+}
+
+
+
+BOOST_AUTO_TEST_CASE(Test_Gauss_Dense_No_Invalid_Pivot_Index_F32)
+{
+    TestGaussDenseNoInvalidPivotIndex<F32>();
+}
+
+BOOST_AUTO_TEST_CASE(Test_Gauss_Dense_No_Invalid_Pivot_Index_F64)
+{
+    TestGaussDenseNoInvalidPivotIndex<F64>();
+}
 
 
 // Test 2x2 -----------------------------------------------------------------------------------------------------------
