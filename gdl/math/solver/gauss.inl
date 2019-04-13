@@ -37,19 +37,17 @@ GaussDense<_registerType, _size>::SolvePartialPivot(const MatrixType& A, const V
     constexpr U32 numNonFullRegValues = _size % numRegisterValues;
 
     if constexpr (numNonFullRegValues != 0)
-        for (U32 i = numColRegisters - 1; i < _size * numFullColRegisters; i += numColRegisters)
-            BlendBelowIndex<numNonFullRegValues>(matrixData[i], _mmx_setzero_p<_registerType>());
+        for (U32 i = numColRegisters - 1; i < _size * numColRegisters; i += numColRegisters)
+            matrixData[i] = BlendBelowIndex<numNonFullRegValues - 1>(matrixData[i], _mmx_set1_p<_registerType>(0));
 
 
 
-    // Size is known! MAYBE recursive template call to eliminate loop and enable more optimizations!
     for (U32 i = 0; i < numFullColRegisters; ++i)
         GaussStepsRegister(i, matrixData, vectorData);
 
     if constexpr (numNonFullRegValues != 0)
         GaussStepsRegister<0, numNonFullRegValues>(numColRegisters - 1, matrixData, vectorData);
 
-    // Missing: Non full registers at the end of a column!
 
     return VectorType(vectorData);
 }
@@ -310,6 +308,9 @@ inline void GaussDense<_registerType, _size>::PivotingStepRegister(U32 stepCount
                                                                    VectorDataArray& vectorData)
 {
     U32 pivotIdx = FindPivot<_regValueIdx>(stepCount, colRegIdx, matrixData);
+
+    DEV_EXCEPTION(pivotIdx >= _size, "Internal error. Pivot index bigger than matrix size.");
+
     SwapRows<_regValueIdx>(pivotIdx, stepCount, colRegIdx, matrixData, vectorData);
 }
 
