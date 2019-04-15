@@ -180,7 +180,8 @@ inline void GaussDense<_registerType, _size>::PivotingStepRegister(U32 iteration
 
     DEV_EXCEPTION(pivotRowIdx >= _size, "Internal error. Pivot index bigger than matrix size.");
 
-    SwapPivot<_regValueIdx>(pivotRowIdx, iteration, regRowIdx, matData, vecData);
+    if (pivotRowIdx != iteration)
+        SwapPivot<_regValueIdx>(pivotRowIdx, iteration, regRowIdx, matData, vecData);
 }
 
 
@@ -192,10 +193,6 @@ template <U32 _regValueIdx>
 inline void GaussDense<_registerType, _size>::SwapPivot(U32 pivotRowIdx, U32 iteration, U32 regRowIdx,
                                                         MatrixDataArray& matData, VectorDataArray& vecData)
 {
-    // Pivot element is already in place
-    if (pivotRowIdx == iteration)
-        return;
-
     const U32 pivotRegRowIdx = pivotRowIdx / numRegisterValues;
     if (regRowIdx == pivotRegRowIdx)
         SwapPivotSwitch<_regValueIdx, true>(pivotRowIdx, iteration, pivotRegRowIdx, regRowIdx, matData, vecData);
