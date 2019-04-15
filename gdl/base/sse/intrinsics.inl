@@ -270,7 +270,7 @@ inline _registerType _mmx_fnmsub_p(_registerType lhsM, _registerType rhsM, _regi
     static_assert(IsRegisterType<_registerType>, "Function can only be used with compatible register types.");
 
 #ifndef __FMA__
-    return _mmx_sub_p(_mmx_mul_p(_mmx_mul_p(lhsM, rhsM), _mmx_set1_p<_registerType>(-1)), sub);
+    return _mmx_sub_p(Negate(_mmx_mul_p(lhsM, rhsM)), sub);
 #else
     if constexpr (Is__m128<_registerType>)
         return _mm_fnmsub_ps(lhsM, rhsM, sub);

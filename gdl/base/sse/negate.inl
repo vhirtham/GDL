@@ -28,6 +28,26 @@ constexpr _type SignMask()
 
 
 
+template <typename _registerType>
+inline _registerType Negate(_registerType source)
+{
+    constexpr U32 numRegVals = numRegisterValues<_registerType>;
+
+    static_assert(numRegVals == 2 || numRegVals == 4 || numRegVals == 8,
+                  "Only registers with 2, 4 or 8 values are supported.");
+
+    if constexpr (numRegVals == 2)
+        return Negate<1, 1>(source);
+
+    if constexpr (numRegVals == 4)
+        return Negate<1, 1, 1, 1>(source);
+
+    if constexpr (numRegVals == 8)
+        return Negate<1, 1, 1, 1, 1, 1, 1, 1>(source);
+}
+
+
+
 template <U32 _n0, U32 _n1>
 inline __m128d Negate(const __m128d source)
 {

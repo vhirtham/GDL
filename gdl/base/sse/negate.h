@@ -14,6 +14,13 @@ namespace GDL::sse
 template <typename _type, U32 _negation>
 constexpr _type SignMask();
 
+//! @brief Returns a register with all values negated
+//! @tparam _registerType: Register type
+//! @param source: Source register
+//! @return Register with negated values
+template <typename _registerType>
+inline _registerType Negate(_registerType source);
+
 //! @brief Negates the specified values of a register
 //! @tparam _n0-_n1: Set to 1 if the value at the corresponding position should be negated
 //! @param source: Source register

@@ -101,3 +101,41 @@ BOOST_AUTO_TEST_CASE(Test_Negate)
     TestNegate256();
 #endif // __AVX2__
 }
+
+
+
+// Negate all ---------------------------------------------------------------------------------------------------------
+
+template <typename _registerType>
+void TestNegateAll()
+{
+    using Type = decltype(GetDataType<_registerType>());
+    constexpr U32 numRegVals = numRegisterValues<_registerType>;
+
+    _registerType a = _mmx_setzero_p<_registerType>();
+
+    for (U32 i = 0; i < numRegVals; ++i)
+        SetValue(a, i, static_cast<Type>(i));
+
+    _registerType b = Negate(a);
+    _registerType c = Negate(b);
+
+    for (I32 i = 0; i < static_cast<I32>(numRegVals); ++i)
+    {
+        BOOST_CHECK(b[i] == Approx(-a[i]));
+        BOOST_CHECK(c[i] == Approx(-b[i]));
+        BOOST_CHECK(c[i] == Approx(a[i]));
+    }
+}
+
+
+
+BOOST_AUTO_TEST_CASE(Test_Negate_All)
+{
+    TestNegateAll<__m128>();
+    TestNegateAll<__m128d>();
+#ifdef __AVX2__
+    TestNegateAll<__m256>();
+    TestNegateAll<__m256d>();
+#endif // __AVX2__
+}
