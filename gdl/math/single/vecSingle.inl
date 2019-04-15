@@ -2,6 +2,9 @@
 
 #include "gdl/math/single/vecSingle.h"
 
+#include "gdl/base/exception.h"
+
+
 
 namespace GDL
 {
@@ -28,6 +31,15 @@ template <typename _type, I32 _size, bool _isCol>
 VecSingle<_type, _size, _isCol>::VecSingle(const std::array<_type, _size>& data)
     : mData(data)
 {
+}
+
+
+
+template <typename _type, I32 _size, bool _isCol>
+[[nodiscard]] inline _type VecSingle<_type, _size, _isCol>::operator[](const U32 index) const
+{
+    DEV_EXCEPTION(index >= _size, "Invalid index");
+    return mData[index];
 }
 
 

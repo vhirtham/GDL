@@ -4,18 +4,18 @@
 #include "gdl/math/single/vecSingle.h"
 
 #include "test/tools/arrayValueComparison.h"
-
+#include "test/tools/ExceptionChecks.h"
 
 using namespace GDL;
 
 
 // Fixture definition -------------------------------------------------------------------------------------------------
 
-template <template <typename, I32, bool> class _vector, typename _type>
+template <template <typename, I32, bool> class _vector, typename _type, bool _isCol>
 struct Fixture
 {
-    _vector<_type, 16, true> A1 =
-            _vector<_type, 16, true>(0., 4., 8., 12., 1., 5., 9., 13., 2., 6., 10., 14., 3., 7., 11., 15.);
+    _vector<_type, 16, _isCol> a =
+            _vector<_type, 16, _isCol>(0., 4., 8., 12., 1., 5., 9., 13., 2., 6., 10., 14., 3., 7., 11., 15.);
 };
 
 
@@ -37,6 +37,31 @@ void CtorDataTest()
 }
 
 
+template <typename _type, bool _isCol>
+void SSECtorTest()
+{
+    constexpr U32 numVectorVals = 9;
+    using RegisterType = typename VecSSE<_type, numVectorVals>::RegisterType;
+
+
+    constexpr U32 numArrayReg = sse::CalcMinNumArrayRegisters<RegisterType>(numVectorVals);
+    constexpr U32 numRegVals = sse::numRegisterValues<RegisterType>;
+
+    std::array<RegisterType, numArrayReg> arr;
+    for (U32 i = 0; i < numArrayReg; ++i)
+        for (U32 j = 0; j < numRegVals; ++j)
+            sse::SetValue(arr[i], j, static_cast<_type>(i * numRegVals + j));
+
+    VecSSE<_type, numVectorVals, _isCol> a(arr);
+
+    std::array<_type, numVectorVals> expA;
+    for (U32 i = 0; i < numVectorVals; ++i)
+        expA[i] = static_cast<_type>(i);
+
+    BOOST_CHECK(CheckCloseArray(a.Data(), expA));
+}
+
+
 
 BOOST_AUTO_TEST_CASE(Construction_Single)
 {
@@ -47,10 +72,58 @@ BOOST_AUTO_TEST_CASE(Construction_Single)
 }
 
 
+
 BOOST_AUTO_TEST_CASE(Construction_SSE)
 {
     CtorDataTest<VecSSE, F32, true>();
     CtorDataTest<VecSSE, F32, false>();
     CtorDataTest<VecSSE, F64, true>();
     CtorDataTest<VecSSE, F64, false>();
+    SSECtorTest<F32, true>();
+    SSECtorTest<F32, false>();
+    SSECtorTest<F64, true>();
+    SSECtorTest<F64, false>();
+}
+
+
+
+// Operator[] test ----------------------------------------------------------------------------------------------------
+
+template <template <typename, I32, bool> class _vector, typename _type, I32 _size, bool _isCol>
+void DirectAccessOperatorVectorTest(const _vector<_type, _size, _isCol>& vector)
+{
+    std::array<_type, _size> data = vector.Data();
+
+    for (U32 i = 0; i < _size; ++i)
+        BOOST_CHECK(vector[i] == Approx(data[i]));
+
+    GDL_CHECK_THROW_DEV_DISABLE([[maybe_unused]] _type test = vector[_size + 1], Exception);
+}
+
+
+
+template <template <typename, I32, bool> class _vector, typename _type>
+void DirectAccessOperatorTest()
+{
+    Fixture<_vector, _type, true> fixtureC;
+    DirectAccessOperatorVectorTest<_vector>(fixtureC.a);
+
+    Fixture<_vector, _type, true> fixtureR;
+    DirectAccessOperatorVectorTest<_vector>(fixtureR.a);
+}
+
+
+
+BOOST_AUTO_TEST_CASE(Direct_Access_Single)
+{
+    DirectAccessOperatorTest<VecSingle, F32>();
+    DirectAccessOperatorTest<VecSingle, F64>();
+}
+
+
+
+BOOST_AUTO_TEST_CASE(Direct_Access_SSE)
+{
+    DirectAccessOperatorTest<VecSSE, F32>();
+    DirectAccessOperatorTest<VecSSE, F64>();
 }

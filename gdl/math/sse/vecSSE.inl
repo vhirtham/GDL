@@ -48,7 +48,7 @@ VecSSE<_type, _size, _isCol>::VecSSE(const DataArray& data)
 
 
 template <typename _type, I32 _size, bool _isCol>
-inline F32 VecSSE<_type, _size, _isCol>::operator[](const U32 index) const
+inline _type VecSSE<_type, _size, _isCol>::operator[](const U32 index) const
 {
     DEV_EXCEPTION(index >= _size, "Invalid index");
     return sse::GetValue(mData[index / mNumRegisterEntries], index % mNumRegisterEntries);

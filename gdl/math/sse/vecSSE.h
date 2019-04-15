@@ -19,11 +19,13 @@ class VecSSE
 
     static_assert(std::is_floating_point<_type>::value, "Matrix can only be created with floating point types");
 
+public:
     using RegisterType = decltype(sse::GetFittingRegister<_type, sse::MaxRegisterSize()>());
     constexpr static U32 mAlignment = sse::alignmentBytes<RegisterType>;
     constexpr static U32 mNumRegisterEntries = sse::numRegisterValues<RegisterType>;
     constexpr static U32 mNumRegisters = sse::CalcMinNumArrayRegisters<RegisterType>(_size);
 
+private:
     template <typename _type2, I32 _size2, bool _isCol2>
     friend class VecSSE;
 
@@ -57,7 +59,7 @@ public:
     //! @brief Direct access operator
     //! @param index: Index of the accessed value
     //! @return Accessed value
-    [[nodiscard]] inline F32 operator[](const U32 index) const;
+    [[nodiscard]] inline _type operator[](const U32 index) const;
 
     //! @brief Gets the data array
     //! @return Data

@@ -37,6 +37,11 @@ public:
     //! @param data: Array with values
     explicit VecSingle(const std::array<_type, _size>& data);
 
+    //! @brief Direct access operator
+    //! @param index: Index of the accessed value
+    //! @return Accessed value
+    [[nodiscard]] inline _type operator[](const U32 index) const;
+
     //! @brief Gets the data array
     //! @return Data
     [[nodiscard]] inline const std::array<_type, _size>& Data() const;
