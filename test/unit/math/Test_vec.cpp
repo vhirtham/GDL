@@ -1,7 +1,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include "gdl/math/sse/vecSSE.h"
-#include "gdl/math/single/vecSingle.h"
+#include "gdl/math/serial/vecSerial.h"
 
 #include "test/tools/arrayValueComparison.h"
 #include "test/tools/ExceptionChecks.h"
@@ -63,12 +63,12 @@ void SSECtorTest()
 
 
 
-BOOST_AUTO_TEST_CASE(Construction_Single)
+BOOST_AUTO_TEST_CASE(Construction_Serial)
 {
-    CtorDataTest<VecSingle, F32, true>();
-    CtorDataTest<VecSingle, F32, false>();
-    CtorDataTest<VecSingle, F64, true>();
-    CtorDataTest<VecSingle, F64, false>();
+    CtorDataTest<VecSerial, F32, true>();
+    CtorDataTest<VecSerial, F32, false>();
+    CtorDataTest<VecSerial, F64, true>();
+    CtorDataTest<VecSerial, F64, false>();
 }
 
 
@@ -114,10 +114,10 @@ void DirectAccessOperatorTest()
 
 
 
-BOOST_AUTO_TEST_CASE(Direct_Access_Single)
+BOOST_AUTO_TEST_CASE(Direct_Access_Serial)
 {
-    DirectAccessOperatorTest<VecSingle, F32>();
-    DirectAccessOperatorTest<VecSingle, F64>();
+    DirectAccessOperatorTest<VecSerial, F32>();
+    DirectAccessOperatorTest<VecSerial, F64>();
 }
 
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "gdl/math/single/quatSingle.h"
+#include "gdl/math/serial/quatSerial.h"
 
 #include "gdl/base/approx.h"
 #include "gdl/base/exception.h"
@@ -10,7 +10,7 @@ namespace GDL
 {
 
 template <typename _type>
-QuatSingle<_type>::QuatSingle()
+QuatSerial<_type>::QuatSerial()
     : mData{{0, 0, 0, 0}}
 {
 }
@@ -18,7 +18,7 @@ QuatSingle<_type>::QuatSingle()
 
 
 template <typename _type>
-QuatSingle<_type>::QuatSingle(std::array<_type, 4> data)
+QuatSerial<_type>::QuatSerial(std::array<_type, 4> data)
     : mData{data}
 {
 }
@@ -26,7 +26,7 @@ QuatSingle<_type>::QuatSingle(std::array<_type, 4> data)
 
 
 template <typename _type>
-QuatSingle<_type>::QuatSingle(_type x, _type y, _type z, _type w)
+QuatSerial<_type>::QuatSerial(_type x, _type y, _type z, _type w)
     : mData{{x, y, z, w}}
 {
 }
@@ -34,7 +34,7 @@ QuatSingle<_type>::QuatSingle(_type x, _type y, _type z, _type w)
 
 
 template <typename _type>
-_type QuatSingle<_type>::operator[](const U32 index) const
+_type QuatSerial<_type>::operator[](const U32 index) const
 {
     DEV_EXCEPTION(index > 3, "Invalid index value! [0..3]");
     return mData[index];
@@ -43,7 +43,7 @@ _type QuatSingle<_type>::operator[](const U32 index) const
 
 
 template <typename _type>
-bool QuatSingle<_type>::operator==(const QuatSingle& rhs) const
+bool QuatSerial<_type>::operator==(const QuatSerial& rhs) const
 {
     bool result = true;
     for (U32 i = 0; i < 4; ++i)
@@ -54,7 +54,7 @@ bool QuatSingle<_type>::operator==(const QuatSingle& rhs) const
 
 
 template <typename _type>
-bool QuatSingle<_type>::operator!=(const QuatSingle& rhs) const
+bool QuatSerial<_type>::operator!=(const QuatSerial& rhs) const
 {
     return !(operator==(rhs));
 }
@@ -62,7 +62,7 @@ bool QuatSingle<_type>::operator!=(const QuatSingle& rhs) const
 
 
 template <typename _type>
-const std::array<_type, 4> QuatSingle<_type>::Data() const
+const std::array<_type, 4> QuatSerial<_type>::Data() const
 {
     return mData;
 }
@@ -72,7 +72,7 @@ const std::array<_type, 4> QuatSingle<_type>::Data() const
 // LCOV_EXCL_START
 
 template <typename _type>
-std::ostream& operator<<(std::ostream& os, const QuatSingle<_type>& quat)
+std::ostream& operator<<(std::ostream& os, const QuatSerial<_type>& quat)
 {
     os << "| " << quat[0] << " |\n| " << quat[1] << " |\n| " << quat[2] << " |\n| " << quat[3] << " |" << std::endl;
     return os;

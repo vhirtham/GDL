@@ -4,8 +4,8 @@
 #include "gdl/base/fundamentalTypes.h"
 #include "gdl/math/sse/mat4fAVX.h"
 #include "gdl/math/sse/mat4fSSE.h"
-#include "gdl/math/single/mat4Single.h"
-#include "gdl/math/single/vec4Single.h"
+#include "gdl/math/serial/mat4Serial.h"
+#include "gdl/math/serial/vec4Serial.h"
 #include "gdl/math/sse/vec4fSSE.h"
 
 
@@ -45,9 +45,9 @@ void ConstructionTest()
 
 
 
-BOOST_AUTO_TEST_CASE(Construction_Single)
+BOOST_AUTO_TEST_CASE(Construction_Serial)
 {
-    ConstructionTest<Mat4Single<F32>>();
+    ConstructionTest<Mat4Serial<F32>>();
 }
 
 
@@ -109,7 +109,7 @@ void ComparisonTest(matrix& A, matrix& B)
 
 
 
-BOOST_FIXTURE_TEST_CASE(Comparison_Single, Fixture<Mat4Single<F32>>)
+BOOST_FIXTURE_TEST_CASE(Comparison_Serial, Fixture<Mat4Serial<F32>>)
 {
     ComparisonTest(A, B);
 }
@@ -157,7 +157,7 @@ void ParenthesesOperatorTest(_matrix A, _matrix B)
 
 
 
-BOOST_FIXTURE_TEST_CASE(Parentheses_Operator_Single, Fixture<Mat4Single<F32>>)
+BOOST_FIXTURE_TEST_CASE(Parentheses_Operator_Serial, Fixture<Mat4Serial<F32>>)
 {
     ParenthesesOperatorTest(A, B);
 }
@@ -197,7 +197,7 @@ void AdditionAssignmentTest(matrix& A, matrix& B)
 
 
 
-BOOST_FIXTURE_TEST_CASE(Addition_Assignment_Single, Fixture<Mat4Single<F32>>)
+BOOST_FIXTURE_TEST_CASE(Addition_Assignment_Serial, Fixture<Mat4Serial<F32>>)
 {
     AdditionAssignmentTest(A, B);
 }
@@ -232,7 +232,7 @@ void AdditionTest(matrix& A, matrix& B)
 
 
 
-BOOST_FIXTURE_TEST_CASE(Addition_Single, Fixture<Mat4Single<F32>>)
+BOOST_FIXTURE_TEST_CASE(Addition_Serial, Fixture<Mat4Serial<F32>>)
 {
     AdditionTest(A, B);
 }
@@ -271,9 +271,9 @@ void MultiplicationTest(const matrix& A, const matrix& B)
 
 
 
-BOOST_FIXTURE_TEST_CASE(Multiplication_Single, Fixture<Mat4Single<F32>>)
+BOOST_FIXTURE_TEST_CASE(Multiplication_Serial, Fixture<Mat4Serial<F32>>)
 {
-    MultiplicationTest<Mat4Single<F32>>(A, B);
+    MultiplicationTest<Mat4Serial<F32>>(A, B);
 }
 
 
@@ -313,9 +313,9 @@ void MatrixVectorMultiplicationTest(const _matrix& a, const _matrix& b)
 
 
 
-BOOST_FIXTURE_TEST_CASE(Matrix_Vector_Multiplication_Single, Fixture<Mat4Single<F32>>)
+BOOST_FIXTURE_TEST_CASE(Matrix_Vector_Multiplication_Serial, Fixture<Mat4Serial<F32>>)
 {
-    MatrixVectorMultiplicationTest<Mat4Single<F32>, Vec4fSingle<true>>(A, B);
+    MatrixVectorMultiplicationTest<Mat4Serial<F32>, Vec4fSerial<true>>(A, B);
 }
 
 
@@ -347,9 +347,9 @@ void Transpose(const matrix& A)
 
 
 
-BOOST_FIXTURE_TEST_CASE(Transpose_Single, Fixture<Mat4Single<F32>>)
+BOOST_FIXTURE_TEST_CASE(Transpose_Serial, Fixture<Mat4Serial<F32>>)
 {
-    Transpose<Mat4Single<F32>>(A);
+    Transpose<Mat4Serial<F32>>(A);
 }
 
 
@@ -382,9 +382,9 @@ void Determinant(const matrix& A, const matrix& B)
 
 
 
-BOOST_FIXTURE_TEST_CASE(Determinant_Single, Fixture<Mat4Single<F32>>)
+BOOST_FIXTURE_TEST_CASE(Determinant_Serial, Fixture<Mat4Serial<F32>>)
 {
-    Determinant<Mat4Single<F32>>(A, B);
+    Determinant<Mat4Serial<F32>>(A, B);
 }
 
 

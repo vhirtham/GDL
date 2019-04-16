@@ -1,6 +1,6 @@
 #pragma once
 
-#include "gdl/math/single/vec2Single.h"
+#include "gdl/math/serial/vec2Serial.h"
 
 #include "gdl/base/approx.h"
 #include "gdl/base/exception.h"
@@ -11,7 +11,7 @@ namespace GDL
 {
 
 template <typename _type, bool _isCol>
-Vec2Single<_type, _isCol>::Vec2Single()
+Vec2Serial<_type, _isCol>::Vec2Serial()
     : mData{{0, 0}}
 {
 }
@@ -19,7 +19,7 @@ Vec2Single<_type, _isCol>::Vec2Single()
 
 
 template <typename _type, bool _isCol>
-Vec2Single<_type, _isCol>::Vec2Single(std::array<_type, 2> data)
+Vec2Serial<_type, _isCol>::Vec2Serial(std::array<_type, 2> data)
     : mData{data}
 {
 }
@@ -27,7 +27,7 @@ Vec2Single<_type, _isCol>::Vec2Single(std::array<_type, 2> data)
 
 
 template <typename _type, bool _isCol>
-Vec2Single<_type, _isCol>::Vec2Single(_type v0, _type v1)
+Vec2Serial<_type, _isCol>::Vec2Serial(_type v0, _type v1)
     : mData{{v0, v1}}
 {
 }
@@ -35,7 +35,7 @@ Vec2Single<_type, _isCol>::Vec2Single(_type v0, _type v1)
 
 
 template <typename _type, bool _isCol>
-_type Vec2Single<_type, _isCol>::operator[](const U32 index) const
+_type Vec2Serial<_type, _isCol>::operator[](const U32 index) const
 {
     DEV_EXCEPTION(index > 1, "Invalid index value! [0..1]");
     return mData[index];
@@ -44,7 +44,7 @@ _type Vec2Single<_type, _isCol>::operator[](const U32 index) const
 
 
 template <typename _type, bool _isCol>
-bool Vec2Single<_type, _isCol>::operator==(const Vec2Single& rhs) const
+bool Vec2Serial<_type, _isCol>::operator==(const Vec2Serial& rhs) const
 {
     bool result = true;
     for (U32 i = 0; i < 2; ++i)
@@ -55,7 +55,7 @@ bool Vec2Single<_type, _isCol>::operator==(const Vec2Single& rhs) const
 
 
 template <typename _type, bool _isCol>
-bool Vec2Single<_type, _isCol>::operator!=(const Vec2Single& rhs) const
+bool Vec2Serial<_type, _isCol>::operator!=(const Vec2Serial& rhs) const
 {
     return !(operator==(rhs));
 }
@@ -63,7 +63,7 @@ bool Vec2Single<_type, _isCol>::operator!=(const Vec2Single& rhs) const
 
 
 template <typename _type, bool _isCol>
-Vec2Single<_type, _isCol>& Vec2Single<_type, _isCol>::operator+=(const Vec2Single& rhs)
+Vec2Serial<_type, _isCol>& Vec2Serial<_type, _isCol>::operator+=(const Vec2Serial& rhs)
 {
     mData[0] += rhs.mData[0];
     mData[1] += rhs.mData[1];
@@ -73,7 +73,7 @@ Vec2Single<_type, _isCol>& Vec2Single<_type, _isCol>::operator+=(const Vec2Singl
 
 
 template <typename _type, bool _isCol>
-Vec2Single<_type, _isCol>& Vec2Single<_type, _isCol>::operator-=(const Vec2Single& rhs)
+Vec2Serial<_type, _isCol>& Vec2Serial<_type, _isCol>::operator-=(const Vec2Serial& rhs)
 {
     mData[0] -= rhs.mData[0];
     mData[1] -= rhs.mData[1];
@@ -83,31 +83,31 @@ Vec2Single<_type, _isCol>& Vec2Single<_type, _isCol>::operator-=(const Vec2Singl
 
 
 template <typename _type, bool _isCol>
-Vec2Single<_type, _isCol> Vec2Single<_type, _isCol>::operator+(const Vec2Single& rhs) const
+Vec2Serial<_type, _isCol> Vec2Serial<_type, _isCol>::operator+(const Vec2Serial& rhs) const
 {
-    return Vec2Single<_type, _isCol>(mData[0] + rhs.mData[0], mData[1] + rhs.mData[1]);
+    return Vec2Serial<_type, _isCol>(mData[0] + rhs.mData[0], mData[1] + rhs.mData[1]);
 }
 
 
 
 template <typename _type, bool _isCol>
-Vec2Single<_type, _isCol> Vec2Single<_type, _isCol>::operator-(const Vec2Single& rhs) const
+Vec2Serial<_type, _isCol> Vec2Serial<_type, _isCol>::operator-(const Vec2Serial& rhs) const
 {
-    return Vec2Single<_type, _isCol>(mData[0] - rhs.mData[0], mData[1] - rhs.mData[1]);
+    return Vec2Serial<_type, _isCol>(mData[0] - rhs.mData[0], mData[1] - rhs.mData[1]);
 }
 
 
 
 template <typename _type, bool _isCol>
-Vec2Single<_type, _isCol> Vec2Single<_type, _isCol>::operator*(F32 rhs) const
+Vec2Serial<_type, _isCol> Vec2Serial<_type, _isCol>::operator*(F32 rhs) const
 {
-    return Vec2Single<_type, _isCol>(mData[0] * rhs, mData[1] * rhs);
+    return Vec2Serial<_type, _isCol>(mData[0] * rhs, mData[1] * rhs);
 }
 
 
 
 template <typename _type, bool _isCol>
-const std::array<_type, 2> Vec2Single<_type, _isCol>::Data() const
+const std::array<_type, 2> Vec2Serial<_type, _isCol>::Data() const
 {
     return mData;
 }
@@ -116,7 +116,7 @@ const std::array<_type, 2> Vec2Single<_type, _isCol>::Data() const
 
 template <typename _type, bool _isCol>
 template <bool _isColRhs>
-F32 Vec2Single<_type, _isCol>::Dot(Vec2Single<_type, _isColRhs> rhs) const
+F32 Vec2Serial<_type, _isCol>::Dot(Vec2Serial<_type, _isColRhs> rhs) const
 {
     return mData[0] * rhs.mData[0] + mData[1] * rhs.mData[1];
 }
@@ -124,7 +124,7 @@ F32 Vec2Single<_type, _isCol>::Dot(Vec2Single<_type, _isColRhs> rhs) const
 
 
 template <typename _type, bool _isCol>
-F32 Vec2Single<_type, _isCol>::Length() const
+F32 Vec2Serial<_type, _isCol>::Length() const
 {
     return std::sqrt(Dot(*this));
 }
@@ -132,7 +132,7 @@ F32 Vec2Single<_type, _isCol>::Length() const
 
 
 template <typename _type, bool _isCol>
-Vec2Single<_type, _isCol>& Vec2Single<_type, _isCol>::Normalize()
+Vec2Serial<_type, _isCol>& Vec2Serial<_type, _isCol>::Normalize()
 {
     const F32 length = Length();
     DEV_EXCEPTION(length == ApproxZero<F32>(), "Vector length is 0. Can't normalize the vector.");
@@ -145,7 +145,7 @@ Vec2Single<_type, _isCol>& Vec2Single<_type, _isCol>::Normalize()
 
 
 template <typename _type, bool _isCol>
-[[nodiscard]] inline Vec2Single<_type, _isCol> operator*(F32 lhs, Vec2Single<_type, _isCol> rhs)
+[[nodiscard]] inline Vec2Serial<_type, _isCol> operator*(F32 lhs, Vec2Serial<_type, _isCol> rhs)
 {
     return rhs * lhs;
 }
@@ -155,7 +155,7 @@ template <typename _type, bool _isCol>
 // LCOV_EXCL_START
 
 template <typename _type>
-std::ostream& operator<<(std::ostream& os, const Vec2Single<_type, true>& vec)
+std::ostream& operator<<(std::ostream& os, const Vec2Serial<_type, true>& vec)
 {
     os << "| " << vec[0] << " |\n| " << vec[1] << " |" << std::endl;
     return os;
@@ -164,7 +164,7 @@ std::ostream& operator<<(std::ostream& os, const Vec2Single<_type, true>& vec)
 
 
 template <typename _type>
-std::ostream& operator<<(std::ostream& os, const Vec2Single<_type, false>& vec)
+std::ostream& operator<<(std::ostream& os, const Vec2Serial<_type, false>& vec)
 {
     os << "| " << vec[0] << " " << vec[1] << " |" << std::endl;
     return os;

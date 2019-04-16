@@ -9,36 +9,43 @@
 namespace GDL
 {
 
+template <typename, bool>
+class Vec4Serial;
 
-//! @brief Vector class with 2 entries
+//! @brief Vector class with 3 entries
 //! @tparam _type: Data type of the vector
 //! @tparam _isCol: If true, the vector is treated as column vector, otherwise as row vector
 template <typename _type, bool _isCol = true>
-class Vec2Single
+class Vec3Serial
 {
     template <typename, bool>
-    friend class Vec2Single;
+    friend class Vec3Serial;
+    template <typename, bool>
+    friend class Vec4Serial;
     template <typename>
-    friend class Mat2Single;
+    friend class Mat3Serial;
 
-    std::array<_type, 2> mData;
+    std::array<_type, 3> mData;
 
 public:
-    inline Vec2Single();
-    inline Vec2Single(const Vec2Single& other) = default;
-    inline Vec2Single(Vec2Single&& other) = default;
-    inline Vec2Single& operator=(const Vec2Single& other) = default;
-    inline Vec2Single& operator=(Vec2Single&& other) = default;
-    inline ~Vec2Single() = default;
+    inline Vec3Serial();
+    inline Vec3Serial(const Vec3Serial& other) = default;
+    inline Vec3Serial(Vec3Serial&& other) = default;
+    inline Vec3Serial& operator=(const Vec3Serial& other) = default;
+    inline Vec3Serial& operator=(Vec3Serial&& other) = default;
+    inline ~Vec3Serial() = default;
 
     //! @brief Constructor which initializes the vector with the provided array
     //! @param data: Array containing the data
-    inline explicit Vec2Single(std::array<_type, 2> data);
+    inline explicit Vec3Serial(std::array<_type, 3> data);
 
     //! @brief Constructor that initializes the vector with specific values
     //! @param v0-v2: Vector values
-    inline Vec2Single(_type v0, _type v1);
+    inline Vec3Serial(_type v0, _type v1, _type v2);
 
+    //! @brief Constructor that initializes the vector with a Vec4. The last value of the vec 4 is dropped.
+    //! @param other: Other Vector
+    inline Vec3Serial(const Vec4Serial<_type, _isCol>& other);
 
 public:
     //! @brief Direct access operator
@@ -51,50 +58,56 @@ public:
     //! @return True / False
     //! @remark This function uses the Approx class internally. The default minimal base is used. This might be changed
     //! in the future. A global minimal base for linear algebra comparison might be introduced.
-    [[nodiscard]] inline bool operator==(const Vec2Single& rhs) const;
+    [[nodiscard]] inline bool operator==(const Vec3Serial& rhs) const;
 
     //! @brief Compares if two vectors are NOT equal
     //! @param rhs: Vector that should be compared
     //! @return True / False
     //! @remark This function uses the Approx class internally. The default minimal base is used. This might be changed
     //! in the future. A global minimal base for linear algebra comparison might be introduced.
-    [[nodiscard]] inline bool operator!=(const Vec2Single& rhs) const;
+    [[nodiscard]] inline bool operator!=(const Vec3Serial& rhs) const;
 
     //! @brief Vector - vector addition assignment
     //! @param rhs: Rhs vector
     //! @return Result of the addition (this)
-    inline Vec2Single& operator+=(const Vec2Single& rhs);
+    inline Vec3Serial& operator+=(const Vec3Serial& rhs);
 
     //! @brief Vector - vector substraction assignment
     //! @param rhs: Rhs vector
     //! @return Result of the substraction (this)
-    inline Vec2Single& operator-=(const Vec2Single& rhs);
+    inline Vec3Serial& operator-=(const Vec3Serial& rhs);
 
     //! @brief Vector - vector addition
     //! @param rhs: Rhs vector
     //! @return Result of the addition
-    [[nodiscard]] inline Vec2Single operator+(const Vec2Single& rhs) const;
+    [[nodiscard]] inline Vec3Serial operator+(const Vec3Serial& rhs) const;
 
     //! @brief Vector - vector substraction
     //! @param rhs: Rhs vector
     //! @return Result of the substraction
-    [[nodiscard]] inline Vec2Single operator-(const Vec2Single& rhs) const;
+    [[nodiscard]] inline Vec3Serial operator-(const Vec3Serial& rhs) const;
 
     //! @brief Vector - scalar multiplication
     //! @param rhs: Rhs scalar
     //! @return Result of the multiplication
-    [[nodiscard]] inline Vec2Single operator*(F32 rhs) const;
+    [[nodiscard]] inline Vec3Serial operator*(F32 rhs) const;
+
+    //! @brief Calculates the cross product of two vectors
+    //! @tparam _isColRhs: True if the rhs vector is a column vector, false otherwise
+    //! @param rhs: Right hand side vector
+    //! @return Cross product
+    [[nodiscard]] inline Vec3Serial Cross(Vec3Serial rhs) const;
 
     //! @brief Gets the data array
     //! @return Data
-    [[nodiscard]] inline const std::array<_type, 2> Data() const;
+    [[nodiscard]] inline const std::array<_type, 3> Data() const;
 
     //! @brief Calculates the dot product of two vectors
     //! @tparam _isColRhs: True if the rhs vector is a column vector, false otherwise
     //! @param rhs: Right hand side vector
     //! @return Dot product
     template <bool _isColRhs>
-    [[nodiscard]] inline F32 Dot(Vec2Single<_type, _isColRhs> rhs) const;
+    [[nodiscard]] inline F32 Dot(Vec3Serial<_type, _isColRhs> rhs) const;
 
     //! @brief Calculates the length of the vector
     //! @return Length of the vector
@@ -102,12 +115,12 @@ public:
 
     //! @brief Normalizes the vector
     //! @return Reference to this
-    Vec2Single& Normalize();
+    Vec3Serial& Normalize();
 };
 
 
 template <bool _isCol>
-using Vec2fSingle = Vec2Single<F32, _isCol>;
+using Vec3fSerial = Vec3Serial<F32, _isCol>;
 
 
 
@@ -118,7 +131,7 @@ using Vec2fSingle = Vec2Single<F32, _isCol>;
 //! @param rhs: Rhs vector
 //! @return Result of the multiplication
 template <typename _type, bool _isCol>
-[[nodiscard]] inline Vec2Single<_type, _isCol> operator*(F32 lhs, Vec2Single<_type, _isCol> rhs);
+[[nodiscard]] inline Vec3Serial<_type, _isCol> operator*(F32 lhs, Vec3Serial<_type, _isCol> rhs);
 
 //! @brief Offstream operator
 //! @tparam _type: Data type of the vector
@@ -126,7 +139,7 @@ template <typename _type, bool _isCol>
 //! @param vec: Vector
 //! @return Reference to offstream object
 template <typename _type>
-inline std::ostream& operator<<(std::ostream& os, const Vec2Single<_type, true>& vec);
+inline std::ostream& operator<<(std::ostream& os, const Vec3Serial<_type, true>& vec);
 
 //! @brief Offstream operator
 //! @tparam _type: Data type of the vector
@@ -134,8 +147,8 @@ inline std::ostream& operator<<(std::ostream& os, const Vec2Single<_type, true>&
 //! @param vec: Vector
 //! @return Reference to offstream object
 template <typename _type>
-inline std::ostream& operator<<(std::ostream& os, const Vec2Single<_type, false>& vec);
+inline std::ostream& operator<<(std::ostream& os, const Vec3Serial<_type, false>& vec);
 
 } // namespace GDL
 
-#include "gdl/math/single/vec2Single.inl"
+#include "gdl/math/serial/vec3Serial.inl"

@@ -1,5 +1,5 @@
 #include "gdl/math/sse/matSSE.h"
-#include "gdl/math/single/matSingle.h"
+#include "gdl/math/serial/matSerial.h"
 #include <benchmark/benchmark.h>
 
 #ifdef EIGEN3_FOUND
@@ -31,7 +31,7 @@ class SIMD : public benchmark::Fixture
 public:
     MatSSE<Type, N, N> A;
     MatSSE<Type, N, N> B;
-    MatSingle<Type, M, N> C;
+    MatSerial<Type, M, N> C;
     std::array<Type, N * N> valArray;
     std::array<Type, M * N> valArray2;
 
@@ -48,19 +48,19 @@ public:
 };
 
 
-class Single : public benchmark::Fixture
+class Serial : public benchmark::Fixture
 {
 public:
-    MatSingle<Type, N, N> A;
-    MatSingle<Type, N, N> B;
+    MatSerial<Type, N, N> A;
+    MatSerial<Type, N, N> B;
     std::array<Type, N * N> valArray;
 
-    Single()
+    Serial()
     {
         for (U32 i = 0; i < N * N; ++i)
             valArray[i] = 2 * i;
-        A = MatSingle<Type, N, N>(valArray);
-        B = MatSingle<Type, N, N>(valArray);
+        A = MatSerial<Type, N, N>(valArray);
+        B = MatSerial<Type, N, N>(valArray);
     }
 };
 
@@ -80,10 +80,10 @@ public:
 // Default Construction %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 #ifndef DISABLE_BENCHMARK_CTORS
 
-BENCHMARK_F(Single, Construction_Def)(benchmark::State& state)
+BENCHMARK_F(Serial, Construction_Def)(benchmark::State& state)
 {
     for (auto _ : state)
-        benchmark::DoNotOptimize(MatSingle<Type, N, N>());
+        benchmark::DoNotOptimize(MatSerial<Type, N, N>());
 }
 
 
@@ -95,10 +95,10 @@ BENCHMARK_F(SIMD, Construction_Def)(benchmark::State& state)
 
 // Value Construction %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-BENCHMARK_F(Single, Construction_Val)(benchmark::State& state)
+BENCHMARK_F(Serial, Construction_Val)(benchmark::State& state)
 {
     for (auto _ : state)
-        benchmark::DoNotOptimize(MatSingle<Type, N, N>(valArray));
+        benchmark::DoNotOptimize(MatSerial<Type, N, N>(valArray));
 }
 
 
@@ -117,10 +117,10 @@ BENCHMARK_F(SIMD, Construction_Val_non_full_registers)(benchmark::State& state)
         benchmark::DoNotOptimize(MatSSE<Type, M, N>(valArray2));
 }
 
-BENCHMARK_F(Single, Construction_Val_Variadic_12x12)(benchmark::State& state)
+BENCHMARK_F(Serial, Construction_Val_Variadic_12x12)(benchmark::State& state)
 {
     for (auto _ : state)
-        benchmark::DoNotOptimize(MatSingle<Type, 12, 12>(
+        benchmark::DoNotOptimize(MatSerial<Type, 12, 12>(
                 1., 2., 3., 4., 5., 6., 7., 8., 9., 10., 11., 12., 1., 2., 3., 4., 5., 6., 7., 8., 9., 10., 11., 12.,
                 1., 2., 3., 4., 5., 6., 7., 8., 9., 10., 11., 12., 1., 2., 3., 4., 5., 6., 7., 8., 9., 10., 11., 12.,
                 1., 2., 3., 4., 5., 6., 7., 8., 9., 10., 11., 12., 1., 2., 3., 4., 5., 6., 7., 8., 9., 10., 11., 12.,
@@ -148,7 +148,7 @@ BENCHMARK_F(SIMD, Construction_Val_Variadic_12x12)(benchmark::State& state)
 // Set Zero %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 #ifndef DISABLE_BENCHMARK_SETZERO
 
-BENCHMARK_F(Single, Set_Zero)(benchmark::State& state)
+BENCHMARK_F(Serial, Set_Zero)(benchmark::State& state)
 {
     for (auto _ : state)
         A.SetZero();
@@ -168,7 +168,7 @@ BENCHMARK_F(SIMD, Set_Zero)(benchmark::State& state)
 // Transpose %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 #ifndef DISABLE_BENCHMARK_TRANSPOSE
 
-BENCHMARK_F(Single, Assign_Transposed)(benchmark::State& state)
+BENCHMARK_F(Serial, Assign_Transposed)(benchmark::State& state)
 {
     for (auto _ : state)
         B = A.Transpose();
@@ -195,7 +195,7 @@ BENCHMARK_F(Eigen3, Assign_Transposed)(benchmark::State& state)
 
 // Data %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 #ifndef DISABLE_BENCHMARK_DATA
-BENCHMARK_F(Single, Data)(benchmark::State& state)
+BENCHMARK_F(Serial, Data)(benchmark::State& state)
 {
     for (auto _ : state)
         benchmark::DoNotOptimize(A.Data());
@@ -222,7 +222,7 @@ BENCHMARK_F(SIMD, Data_non_full_registers)(benchmark::State& state)
 // Compare Equal %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 #ifndef DISABLE_BENCHMARK_COMPARISON
 
-BENCHMARK_F(Single, Compare_Equal)(benchmark::State& state)
+BENCHMARK_F(Serial, Compare_Equal)(benchmark::State& state)
 {
     for (auto _ : state)
         benchmark::DoNotOptimize(A == A);
@@ -239,7 +239,7 @@ BENCHMARK_F(SIMD, Compare_Equal)(benchmark::State& state)
 
 // Compare NOT Equal %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-BENCHMARK_F(Single, Compare_Not_Equal)(benchmark::State& state)
+BENCHMARK_F(Serial, Compare_Not_Equal)(benchmark::State& state)
 {
     for (auto _ : state)
         benchmark::DoNotOptimize(A != A);
@@ -260,7 +260,7 @@ BENCHMARK_F(SIMD, Compare_Not_Equal)(benchmark::State& state)
 // Addition Assignment %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 #ifndef DISABLE_BENCHMARK_ADDITION
 
-BENCHMARK_F(Single, Addition_Assignment)(benchmark::State& state)
+BENCHMARK_F(Serial, Addition_Assignment)(benchmark::State& state)
 {
     for (auto _ : state)
         benchmark::DoNotOptimize(A += B);
@@ -287,7 +287,7 @@ BENCHMARK_F(Eigen3, Addition_Assignment)(benchmark::State& state)
 
 // Addition %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-BENCHMARK_F(Single, Addition)(benchmark::State& state)
+BENCHMARK_F(Serial, Addition)(benchmark::State& state)
 {
     decltype(A) C;
     for (auto _ : state)
@@ -318,7 +318,7 @@ BENCHMARK_F(Eigen3, Addition)(benchmark::State& state)
 
 // Multiplication %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 #ifndef DISABLE_BENCHMARK_MULTIPLICATION
-BENCHMARK_F(Single, Multiplication)(benchmark::State& state)
+BENCHMARK_F(Serial, Multiplication)(benchmark::State& state)
 {
     for (auto _ : state)
         benchmark::DoNotOptimize(A * B);
@@ -346,7 +346,7 @@ BENCHMARK_F(Eigen3, Multiplication)(benchmark::State& state)
 
 // Expression %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 #ifndef DISABLE_BENCHMARK_EXPRESSION
-BENCHMARK_F(Single, Expression)(benchmark::State& state)
+BENCHMARK_F(Serial, Expression)(benchmark::State& state)
 {
     for (auto _ : state)
         B = A.Transpose() * A + A * A;

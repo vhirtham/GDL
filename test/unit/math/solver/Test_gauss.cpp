@@ -179,7 +179,8 @@ void TestGaussDenseSingularMatrix()
     // clang-format on
 
     VecSSE<_type, 4> b(4, -5, -4, 9);
-    BOOST_CHECK_THROW(Solver::GaussPartialPivot(A, b), Exception);
+    VecSSE<_type, 4> res;
+    BOOST_CHECK_THROW(res = Solver::GaussPartialPivot(A, b), Exception);
 }
 
 

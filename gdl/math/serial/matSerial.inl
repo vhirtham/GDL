@@ -1,6 +1,6 @@
 #pragma once
 
-#include "gdl/math/single/matSingle.h"
+#include "gdl/math/serial/matSerial.h"
 
 #include <algorithm>
 #include <cassert>
@@ -14,7 +14,7 @@ namespace GDL
 
 
 template <typename _type, I32 _rows, I32 _cols>
-MatSingle<_type, _rows, _cols>::MatSingle()
+MatSerial<_type, _rows, _cols>::MatSerial()
     : mData{{0}}
 {
 }
@@ -23,7 +23,7 @@ MatSingle<_type, _rows, _cols>::MatSingle()
 
 template <typename _type, I32 _rows, I32 _cols>
 template <typename... _args>
-MatSingle<_type, _rows, _cols>::MatSingle(_args... args)
+MatSerial<_type, _rows, _cols>::MatSerial(_args... args)
     : mData{{static_cast<_type>(args)...}}
 {
     assert(mData.size() == sizeof...(args));
@@ -32,7 +32,7 @@ MatSingle<_type, _rows, _cols>::MatSingle(_args... args)
 
 
 template <typename _type, I32 _rows, I32 _cols>
-MatSingle<_type, _rows, _cols>::MatSingle(const std::array<_type, _rows * _cols>& data)
+MatSerial<_type, _rows, _cols>::MatSerial(const std::array<_type, _rows * _cols>& data)
     : mData(data)
 {
     assert(mData.size() == data.size());
@@ -41,7 +41,7 @@ MatSingle<_type, _rows, _cols>::MatSingle(const std::array<_type, _rows * _cols>
 
 
 template <typename _type, I32 _rows, I32 _cols>
-_type MatSingle<_type, _rows, _cols>::operator()(const U32 row, const U32 col) const
+_type MatSerial<_type, _rows, _cols>::operator()(const U32 row, const U32 col) const
 {
     return mData[row + col * _rows];
 }
@@ -49,7 +49,7 @@ _type MatSingle<_type, _rows, _cols>::operator()(const U32 row, const U32 col) c
 
 
 template <typename _type, I32 _rows, I32 _cols>
-bool MatSingle<_type, _rows, _cols>::operator==(const MatSingle& rhs) const
+bool MatSerial<_type, _rows, _cols>::operator==(const MatSerial& rhs) const
 {
     bool result = true;
     for (U32 i = 0; i < mData.size(); ++i)
@@ -60,7 +60,7 @@ bool MatSingle<_type, _rows, _cols>::operator==(const MatSingle& rhs) const
 
 
 template <typename _type, I32 _rows, I32 _cols>
-bool MatSingle<_type, _rows, _cols>::operator!=(const MatSingle& rhs) const
+bool MatSerial<_type, _rows, _cols>::operator!=(const MatSerial& rhs) const
 {
     return !operator==(rhs);
 }
@@ -68,7 +68,7 @@ bool MatSingle<_type, _rows, _cols>::operator!=(const MatSingle& rhs) const
 
 
 template <typename _type, I32 _rows, I32 _cols>
-MatSingle<_type, _rows, _cols>& MatSingle<_type, _rows, _cols>::operator+=(const MatSingle<_type, _rows, _cols>& rhs)
+MatSerial<_type, _rows, _cols>& MatSerial<_type, _rows, _cols>::operator+=(const MatSerial<_type, _rows, _cols>& rhs)
 {
     for (U32 i = 0; i < mData.size(); ++i)
         mData[i] += rhs.mData[i];
@@ -78,9 +78,9 @@ MatSingle<_type, _rows, _cols>& MatSingle<_type, _rows, _cols>::operator+=(const
 
 
 template <typename _type, I32 _rows, I32 _cols>
-MatSingle<_type, _rows, _cols> MatSingle<_type, _rows, _cols>::operator+(const MatSingle<_type, _rows, _cols>& rhs)
+MatSerial<_type, _rows, _cols> MatSerial<_type, _rows, _cols>::operator+(const MatSerial<_type, _rows, _cols>& rhs)
 {
-    MatSingle<_type, _rows, _cols> result;
+    MatSerial<_type, _rows, _cols> result;
     for (U32 i = 0; i < mData.size(); ++i)
         result.mData[i] = mData[i] + rhs.mData[i];
     return result;
@@ -89,9 +89,9 @@ MatSingle<_type, _rows, _cols> MatSingle<_type, _rows, _cols>::operator+(const M
 
 
 template <typename _type, I32 _rows, I32 _cols>
-MatSingle<_type, _cols, _rows> MatSingle<_type, _rows, _cols>::Transpose() const
+MatSerial<_type, _cols, _rows> MatSerial<_type, _rows, _cols>::Transpose() const
 {
-    MatSingle<_type, _cols, _rows> transposed;
+    MatSerial<_type, _cols, _rows> transposed;
     for (U32 i = 0; i < _rows; ++i)
         for (U32 j = 0; j < _cols; ++j)
             transposed.mData[j + i * _cols] = mData[i + j * _rows];
@@ -102,12 +102,12 @@ MatSingle<_type, _cols, _rows> MatSingle<_type, _rows, _cols>::Transpose() const
 
 template <typename _type, I32 _rows, I32 _cols>
 template <I32 _rowsRhs, I32 _colsRhs>
-MatSingle<_type, _rows, _colsRhs> MatSingle<_type, _rows, _cols>::
-operator*(const MatSingle<_type, _rowsRhs, _colsRhs>& rhs) const
+MatSerial<_type, _rows, _colsRhs> MatSerial<_type, _rows, _cols>::
+operator*(const MatSerial<_type, _rowsRhs, _colsRhs>& rhs) const
 {
     static_assert(_cols == _rowsRhs, "Lhs cols != Rhs rows");
 
-    MatSingle<_type, _rows, _colsRhs> result;
+    MatSerial<_type, _rows, _colsRhs> result;
     result.SetZero();
     // loop over RHS cols
     for (U32 i = 0; i < _colsRhs; ++i)
@@ -122,7 +122,7 @@ operator*(const MatSingle<_type, _rowsRhs, _colsRhs>& rhs) const
 
 
 template <typename _type, I32 _rows, I32 _cols>
-U32 MatSingle<_type, _rows, _cols>::Rows() const
+U32 MatSerial<_type, _rows, _cols>::Rows() const
 {
     return _rows;
 }
@@ -130,7 +130,7 @@ U32 MatSingle<_type, _rows, _cols>::Rows() const
 
 
 template <typename _type, I32 _rows, I32 _cols>
-U32 MatSingle<_type, _rows, _cols>::Cols() const
+U32 MatSerial<_type, _rows, _cols>::Cols() const
 {
     return _cols;
 }
@@ -138,7 +138,7 @@ U32 MatSingle<_type, _rows, _cols>::Cols() const
 
 
 template <typename _type, I32 _rows, I32 _cols>
-std::array<_type, _rows * _cols> MatSingle<_type, _rows, _cols>::Data() const
+std::array<_type, _rows * _cols> MatSerial<_type, _rows, _cols>::Data() const
 {
     return mData;
 }
@@ -146,7 +146,7 @@ std::array<_type, _rows * _cols> MatSingle<_type, _rows, _cols>::Data() const
 
 
 template <typename _type, I32 _rows, I32 _cols>
-void MatSingle<_type, _rows, _cols>::SetZero()
+void MatSerial<_type, _rows, _cols>::SetZero()
 {
     std::memset(&mData, 0, sizeof(mData));
 }
@@ -154,7 +154,7 @@ void MatSingle<_type, _rows, _cols>::SetZero()
 
 
 template <typename _type, I32 _rows, I32 _cols>
-std::ostream& operator<<(std::ostream& os, const MatSingle<_type, _rows, _cols>& mat)
+std::ostream& operator<<(std::ostream& os, const MatSerial<_type, _rows, _cols>& mat)
 {
     for (U32 i = 0; i < _rows; ++i)
     {

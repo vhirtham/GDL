@@ -25,7 +25,8 @@ namespace Solver
 //! @param b: Vector
 //! @return Result vector x
 template <typename _type, I32 _size>
-VecSSE<_type, _size, true> GaussPartialPivot(const MatSSE<_type, _size, _size>& A, const VecSSE<_type, _size, true>& b);
+[[nodiscard]] VecSSE<_type, _size, true> GaussPartialPivot(const MatSSE<_type, _size, _size>& A,
+                                                           const VecSSE<_type, _size, true>& b);
 
 
 
@@ -52,7 +53,7 @@ public:
     //! @param A: Matrix
     //! @param b: Vector
     //! @return Result vector x
-    inline static VectorType SolvePartialPivot(const MatrixType& A, const VectorType& b);
+    [[nodiscard]] inline static VectorType SolvePartialPivot(const MatrixType& A, const VectorType& b);
 
 private:
     //! @brief Performs the elimination step of the current iteration

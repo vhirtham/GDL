@@ -1,22 +1,14 @@
 add_subdirectory(solver)
 
-addBenchmark(Mat4)
-addBenchmark(Mat)
-addBenchmark(solver3)
-addBenchmark(solver4)
+addBenchmark(mat4)
+addBenchmark(mat)
+
 
 if(Eigen3_FOUND)
-    target_compile_definitions(Benchmark_Mat4
+    target_compile_definitions(Benchmark_mat4
         PRIVATE
             -DEIGEN3_FOUND)
-    target_compile_definitions(Benchmark_Mat
+    target_compile_definitions(Benchmark_mat
         PRIVATE
             -DEIGEN3_FOUND)
-    target_compile_definitions(Benchmark_solver3
-        PRIVATE
-            -DEIGEN3_FOUND)
-    target_compile_definitions(Benchmark_solver4
-        PRIVATE
-            -DEIGEN3_FOUND)
-
 endif()

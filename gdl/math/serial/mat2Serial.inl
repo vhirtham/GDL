@@ -1,16 +1,16 @@
 #pragma once
 
-#include "gdl/math/single/mat2Single.h"
+#include "gdl/math/serial/mat2Serial.h"
 
 #include "gdl/base/approx.h"
 #include "gdl/base/exception.h"
-#include "gdl/math/single/vec2Single.h"
+#include "gdl/math/serial/vec2Serial.h"
 
 namespace GDL
 {
 
 template <typename _type>
-inline Mat2Single<_type>::Mat2Single()
+inline Mat2Serial<_type>::Mat2Serial()
     : mD({{0.0, 0.0, 0.0, 0.0}})
 {
 }
@@ -18,7 +18,7 @@ inline Mat2Single<_type>::Mat2Single()
 
 
 template <typename _type>
-Mat2Single<_type>::Mat2Single(_type val)
+Mat2Serial<_type>::Mat2Serial(_type val)
     : mD({val, 0.0, 0.0, val})
 {
 }
@@ -26,7 +26,7 @@ Mat2Single<_type>::Mat2Single(_type val)
 
 
 template <typename _type>
-Mat2Single<_type>::Mat2Single(std::array<_type, 4> data)
+Mat2Serial<_type>::Mat2Serial(std::array<_type, 4> data)
     : mD{data}
 {
 }
@@ -34,7 +34,7 @@ Mat2Single<_type>::Mat2Single(std::array<_type, 4> data)
 
 
 template <typename _type>
-Mat2Single<_type>::Mat2Single(_type v0, _type v1, _type v2, _type v3)
+Mat2Serial<_type>::Mat2Serial(_type v0, _type v1, _type v2, _type v3)
     : mD({{v0, v1, v2, v3}})
 {
 }
@@ -42,7 +42,7 @@ Mat2Single<_type>::Mat2Single(_type v0, _type v1, _type v2, _type v3)
 
 
 template <typename _type>
-_type Mat2Single<_type>::operator()(const U32 row, const U32 col) const
+_type Mat2Serial<_type>::operator()(const U32 row, const U32 col) const
 {
     DEV_EXCEPTION(row > 1, "row - invalid value! [0..1]");
     DEV_EXCEPTION(col > 1, "col - invalid value! [0..1]");
@@ -53,7 +53,7 @@ _type Mat2Single<_type>::operator()(const U32 row, const U32 col) const
 
 
 template <typename _type>
-bool Mat2Single<_type>::operator==(const Mat2Single<_type>& rhs) const
+bool Mat2Serial<_type>::operator==(const Mat2Serial<_type>& rhs) const
 {
     bool result = true;
     for (U32 i = 0; i < 4; ++i)
@@ -64,7 +64,7 @@ bool Mat2Single<_type>::operator==(const Mat2Single<_type>& rhs) const
 
 
 template <typename _type>
-bool Mat2Single<_type>::operator!=(const Mat2Single<_type>& rhs) const
+bool Mat2Serial<_type>::operator!=(const Mat2Serial<_type>& rhs) const
 {
     return !(operator==(rhs));
 }
@@ -72,9 +72,9 @@ bool Mat2Single<_type>::operator!=(const Mat2Single<_type>& rhs) const
 
 
 template <typename _type>
-Mat2Single<_type> Mat2Single<_type>::operator+(const Mat2Single<_type>& rhs) const
+Mat2Serial<_type> Mat2Serial<_type>::operator+(const Mat2Serial<_type>& rhs) const
 {
-    Mat2Single<_type> result;
+    Mat2Serial<_type> result;
     for (U32 i = 0; i < 4; ++i)
         result.mD[i] = mD[i] + rhs.mD[i];
     return result;
@@ -83,7 +83,7 @@ Mat2Single<_type> Mat2Single<_type>::operator+(const Mat2Single<_type>& rhs) con
 
 
 template <typename _type>
-Mat2Single<_type>& Mat2Single<_type>::operator+=(const Mat2Single<_type>& rhs)
+Mat2Serial<_type>& Mat2Serial<_type>::operator+=(const Mat2Serial<_type>& rhs)
 {
     for (U32 i = 0; i < 4; ++i)
         mD[i] += rhs.mD[i];
@@ -93,25 +93,25 @@ Mat2Single<_type>& Mat2Single<_type>::operator+=(const Mat2Single<_type>& rhs)
 
 
 template <typename _type>
-Mat2Single<_type> Mat2Single<_type>::operator*(const Mat2Single<_type>& rhs) const
+Mat2Serial<_type> Mat2Serial<_type>::operator*(const Mat2Serial<_type>& rhs) const
 {
-    return Mat2Single<_type>(mD[0] * rhs.mD[0] + mD[2] * rhs.mD[1], mD[1] * rhs.mD[0] + mD[3] * rhs.mD[1],
+    return Mat2Serial<_type>(mD[0] * rhs.mD[0] + mD[2] * rhs.mD[1], mD[1] * rhs.mD[0] + mD[3] * rhs.mD[1],
                              mD[0] * rhs.mD[2] + mD[2] * rhs.mD[3], mD[1] * rhs.mD[2] + mD[3] * rhs.mD[3]);
 }
 
 
 
 template <typename _type>
-Vec2Single<_type, true> Mat2Single<_type>::operator*(const Vec2Single<_type, true>& rhs) const
+Vec2Serial<_type, true> Mat2Serial<_type>::operator*(const Vec2Serial<_type, true>& rhs) const
 {
-    return Vec2Single<_type, true>(mD[0] * rhs.mData[0] + mD[2] * rhs.mData[1],
+    return Vec2Serial<_type, true>(mD[0] * rhs.mData[0] + mD[2] * rhs.mData[1],
                                    mD[1] * rhs.mData[0] + mD[3] * rhs.mData[1]);
 }
 
 
 
 template <typename _type>
-const std::array<_type, 4> Mat2Single<_type>::Data() const
+const std::array<_type, 4> Mat2Serial<_type>::Data() const
 {
     return mD;
 }
@@ -119,7 +119,7 @@ const std::array<_type, 4> Mat2Single<_type>::Data() const
 
 
 template <typename _type>
-F32 Mat2Single<_type>::Det() const
+F32 Mat2Serial<_type>::Det() const
 {
     return mD[0] * mD[3] - mD[1] * mD[2];
 }
@@ -127,15 +127,15 @@ F32 Mat2Single<_type>::Det() const
 
 
 template <typename _type>
-Mat2Single<_type> Mat2Single<_type>::Transpose() const
+Mat2Serial<_type> Mat2Serial<_type>::Transpose() const
 {
-    return Mat2Single<_type>(mD[0], mD[2], mD[1], mD[3]);
+    return Mat2Serial<_type>(mD[0], mD[2], mD[1], mD[3]);
 }
 
 
 
 template <typename _type2>
-inline std::ostream& operator<<(std::ostream& os, const Mat2Single<_type2>& mat)
+inline std::ostream& operator<<(std::ostream& os, const Mat2Serial<_type2>& mat)
 {
     for (U32 i = 0; i < 2; ++i)
         os << "| " << mat(i, 0) << " " << mat(i, 1) << " |" << std::endl;

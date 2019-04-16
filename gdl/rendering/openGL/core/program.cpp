@@ -3,9 +3,9 @@
 #include "gdl/base/exception.h"
 #include "gdl/base/string.h"
 #include "gdl/base/container/vector.h"
-#include "gdl/math/single/mat4Single.h"
-#include "gdl/math/single/vec3Single.h"
-#include "gdl/math/single/vec4Single.h"
+#include "gdl/math/serial/mat4Serial.h"
+#include "gdl/math/serial/vec3Serial.h"
+#include "gdl/math/serial/vec4Serial.h"
 #include "gdl/math/sse/mat4fAVX.h"
 #include "gdl/math/sse/mat4fSSE.h"
 #include "gdl/math/sse/vec3fSSE.h"
@@ -166,14 +166,14 @@ void Program::SetUniform(GLint uniformLocation, const std::array<F32, 2>& values
 
 
 
-void Program::SetUniform(GLint uniformLocation, const Vec3Single<F32, true>& values)
+void Program::SetUniform(GLint uniformLocation, const Vec3Serial<F32, true>& values)
 {
     glProgramUniform3fv(mHandle, uniformLocation, 1, values.Data().data());
 }
 
 
 
-void Program::SetUniform(GLint uniformLocation, const Vec3Single<F32, false>& values)
+void Program::SetUniform(GLint uniformLocation, const Vec3Serial<F32, false>& values)
 {
     glProgramUniform3fv(mHandle, uniformLocation, 1, values.Data().data());
 }
@@ -194,14 +194,14 @@ void Program::SetUniform(GLint uniformLocation, const Vec3fSSE<false>& values)
 
 
 
-void Program::SetUniform(GLint uniformLocation, const Vec4Single<F32, true>& values)
+void Program::SetUniform(GLint uniformLocation, const Vec4Serial<F32, true>& values)
 {
     glProgramUniform4fv(mHandle, uniformLocation, 1, values.Data().data());
 }
 
 
 
-void Program::SetUniform(GLint uniformLocation, const Vec4Single<F32, false>& values)
+void Program::SetUniform(GLint uniformLocation, const Vec4Serial<F32, false>& values)
 {
     glProgramUniform4fv(mHandle, uniformLocation, 1, values.Data().data());
 }
@@ -240,7 +240,7 @@ void Program::SetUniform(GLint uniformLocation, const Mat4fAVX& values)
 
 
 
-void Program::SetUniform(GLint uniformLocation, const Mat4Single<F32>& values)
+void Program::SetUniform(GLint uniformLocation, const Mat4Serial<F32>& values)
 {
     glProgramUniformMatrix4fv(mHandle, uniformLocation, 1, GL_FALSE, values.Data().data());
 }

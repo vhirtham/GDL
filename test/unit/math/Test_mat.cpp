@@ -1,7 +1,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include "gdl/math/sse/matSSE.h"
-#include "gdl/math/single/matSingle.h"
+#include "gdl/math/serial/matSerial.h"
 
 #include "test/tools/arrayValueComparison.h"
 
@@ -55,10 +55,10 @@ void CtorDataTest()
 
 
 
-BOOST_AUTO_TEST_CASE(Construction_Single)
+BOOST_AUTO_TEST_CASE(Construction_Serial)
 {
-    CtorDataTest<MatSingle, F32>();
-    CtorDataTest<MatSingle, F64>();
+    CtorDataTest<MatSerial, F32>();
+    CtorDataTest<MatSerial, F64>();
 }
 
 
@@ -146,10 +146,10 @@ void ComparisonEqualTest()
 
 
 
-BOOST_AUTO_TEST_CASE(ComparisonEqual_Single)
+BOOST_AUTO_TEST_CASE(ComparisonEqual_Serial)
 {
-    ComparisonEqualTest<MatSingle, F32>();
-    ComparisonEqualTest<MatSingle, F64>();
+    ComparisonEqualTest<MatSerial, F32>();
+    ComparisonEqualTest<MatSerial, F64>();
 }
 
 
@@ -191,10 +191,10 @@ void ParenthesesOperatorTest()
 
 
 
-BOOST_AUTO_TEST_CASE(Parentheses_Operator_Single)
+BOOST_AUTO_TEST_CASE(Parentheses_Operator_Serial)
 {
-    ParenthesesOperatorTest<MatSingle, F32>();
-    ParenthesesOperatorTest<MatSingle, F64>();
+    ParenthesesOperatorTest<MatSerial, F32>();
+    ParenthesesOperatorTest<MatSerial, F64>();
 }
 
 
@@ -232,10 +232,10 @@ void AssignmentTest()
 
 
 
-BOOST_AUTO_TEST_CASE(Assignment_Single)
+BOOST_AUTO_TEST_CASE(Assignment_Serial)
 {
-    AssignmentTest<MatSingle, F32>();
-    AssignmentTest<MatSingle, F64>();
+    AssignmentTest<MatSerial, F32>();
+    AssignmentTest<MatSerial, F64>();
 }
 
 
@@ -269,10 +269,10 @@ void SetZeroTest()
 
 
 
-BOOST_AUTO_TEST_CASE(SetZero_Single)
+BOOST_AUTO_TEST_CASE(SetZero_Serial)
 {
-    SetZeroTest<MatSingle, F32>();
-    SetZeroTest<MatSingle, F64>();
+    SetZeroTest<MatSerial, F32>();
+    SetZeroTest<MatSerial, F64>();
 }
 
 
@@ -314,10 +314,10 @@ void AdditionAssignmentTest()
 
 
 
-BOOST_AUTO_TEST_CASE(Addition_Assignment_Single)
+BOOST_AUTO_TEST_CASE(Addition_Assignment_Serial)
 {
-    AdditionAssignmentTest<MatSingle, F32>();
-    AdditionAssignmentTest<MatSingle, F64>();
+    AdditionAssignmentTest<MatSerial, F32>();
+    AdditionAssignmentTest<MatSerial, F64>();
 }
 
 
@@ -355,10 +355,10 @@ void AdditionTest()
 
 
 
-BOOST_AUTO_TEST_CASE(Addition_Single)
+BOOST_AUTO_TEST_CASE(Addition_Serial)
 {
-    AdditionTest<MatSingle, F32>();
-    AdditionTest<MatSingle, F64>();
+    AdditionTest<MatSerial, F32>();
+    AdditionTest<MatSerial, F64>();
 }
 
 
@@ -412,10 +412,10 @@ void MultiplicationTest()
 
 
 
-BOOST_AUTO_TEST_CASE(Multiplication_Single)
+BOOST_AUTO_TEST_CASE(Multiplication_Serial)
 {
-    MultiplicationTest<MatSingle, F32>();
-    MultiplicationTest<MatSingle, F64>();
+    MultiplicationTest<MatSerial, F32>();
+    MultiplicationTest<MatSerial, F64>();
 }
 
 
@@ -472,10 +472,10 @@ void TransposeTest()
 
 
 
-BOOST_AUTO_TEST_CASE(Transpose_Single)
+BOOST_AUTO_TEST_CASE(Transpose_Serial)
 {
-    TransposeTest<MatSingle, F32>();
-    TransposeTest<MatSingle, F64>();
+    TransposeTest<MatSerial, F32>();
+    TransposeTest<MatSerial, F64>();
 }
 
 

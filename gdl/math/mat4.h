@@ -15,7 +15,7 @@ namespace GDL
 class Mat4fAVX;
 class Mat4fSSE;
 template <typename _type>
-class Mat4Single;
+class Mat4Serial;
 
 #ifndef __AVX2__
 using Mat4f = Mat4fSSE;
@@ -29,9 +29,9 @@ using Mat4f = Mat4fAVX;
 template <typename _type>
 constexpr const bool IsMat4 = false;
 template <>
-constexpr const bool IsMat4<Mat4Single<F32>> = true;
+constexpr const bool IsMat4<Mat4Serial<F32>> = true;
 template <>
-constexpr const bool IsMat4<Mat4Single<F64>> = true;
+constexpr const bool IsMat4<Mat4Serial<F64>> = true;
 template <>
 constexpr const bool IsMat4<Mat4fSSE> = true;
 template <>

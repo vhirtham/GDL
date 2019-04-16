@@ -12,13 +12,13 @@ namespace GDL
 class Mat4fAVX;
 class Mat4fSSE;
 template <typename>
-class Mat4Single;
+class Mat4Serial;
 template <typename, bool>
-class Vec3Single;
+class Vec3Serial;
 template <bool>
 class Vec3fSSE;
 template <typename, bool>
-class Vec4Single;
+class Vec4Serial;
 template <bool>
 class Vec4fSSE;
 
@@ -130,12 +130,12 @@ public:
     //! @brief Sets the value of a uniform vec3
     //! @param uniformLocation: Location of the uniform
     //! @param values: New value
-    void SetUniform(GLint uniformLocation, const Vec3Single<F32, true>& value);
+    void SetUniform(GLint uniformLocation, const Vec3Serial<F32, true>& value);
 
     //! @brief Sets the value of a uniform vec3
     //! @param uniformLocation: Location of the uniform
     //! @param values: New values
-    void SetUniform(GLint uniformLocation, const Vec3Single<F32, false>& value);
+    void SetUniform(GLint uniformLocation, const Vec3Serial<F32, false>& value);
 
     //! @brief Sets the value of a uniform vec3
     //! @param uniformLocation: Location of the uniform
@@ -150,12 +150,12 @@ public:
     //! @brief Sets the value of a uniform vec4
     //! @param uniformLocation: Location of the uniform
     //! @param values: New value
-    void SetUniform(GLint uniformLocation, const Vec4Single<F32, true>& value);
+    void SetUniform(GLint uniformLocation, const Vec4Serial<F32, true>& value);
 
     //! @brief Sets the value of a uniform vec4
     //! @param uniformLocation: Location of the uniform
     //! @param values: New values
-    void SetUniform(GLint uniformLocation, const Vec4Single<F32, false>& value);
+    void SetUniform(GLint uniformLocation, const Vec4Serial<F32, false>& value);
 
     //! @brief Sets the value of a uniform vec4
     //! @param uniformLocation: Location of the uniform
@@ -182,7 +182,7 @@ public:
     //! @brief Sets the value of a uniform mat4
     //! @param uniformLocation: Location of the uniform
     //! @param value: New value
-    void SetUniform(GLint uniformLocation, const Mat4Single<F32>& values);
+    void SetUniform(GLint uniformLocation, const Mat4Serial<F32>& values);
 
     //! @brief Sets the texture unit of a uniform sampler
     //! @param uniformName: Name of the uniform sampler

@@ -8,7 +8,7 @@ namespace GDL
 // forward declarations
 class Mat3fSSE;
 template <typename _type>
-class Mat3Single;
+class Mat3Serial;
 
 
 
@@ -20,9 +20,9 @@ using Mat3f = Mat3fSSE;
 template <typename _type>
 constexpr const bool IsMat3 = false;
 template <>
-constexpr const bool IsMat3<Mat3Single<F32>> = true;
+constexpr const bool IsMat3<Mat3Serial<F32>> = true;
 template <>
-constexpr const bool IsMat3<Mat3Single<F64>> = true;
+constexpr const bool IsMat3<Mat3Serial<F64>> = true;
 template <>
 constexpr const bool IsMat3<Mat3fSSE> = true;
 } // namespace GDL

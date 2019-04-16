@@ -12,30 +12,30 @@ namespace GDL
 //! @tparam _size: Number of rows
 //! @tparam _isCol: If true, the vector is treated as column vector, otherwise as row vector
 template <typename _type, I32 _size, bool _isCol = true>
-class VecSingle
+class VecSerial
 {
     template <typename _type2, I32 _size2, bool _isCol2>
-    friend class VecSingle;
+    friend class VecSerial;
 
     std::array<_type, _size> mData;
 
 public:
-    inline VecSingle();
-    inline VecSingle(const VecSingle& other) = default;
-    inline VecSingle(VecSingle&& other) = default;
-    inline VecSingle& operator=(const VecSingle& other) = default;
-    inline VecSingle& operator=(VecSingle&& other) = default;
-    inline ~VecSingle() = default;
+    inline VecSerial();
+    inline VecSerial(const VecSerial& other) = default;
+    inline VecSerial(VecSerial&& other) = default;
+    inline VecSerial& operator=(const VecSerial& other) = default;
+    inline VecSerial& operator=(VecSerial&& other) = default;
+    inline ~VecSerial() = default;
 
     //! @brief Constructor to set the whole vector
     //! @tparam _args: Variadic data type
     //! @param args: Values
     template <typename... _args>
-    explicit VecSingle(_args... args);
+    explicit VecSerial(_args... args);
 
     //! @brief Constructor to set the whole vector
     //! @param data: Array with values
-    explicit VecSingle(const std::array<_type, _size>& data);
+    explicit VecSerial(const std::array<_type, _size>& data);
 
     //! @brief Direct access operator
     //! @param index: Index of the accessed value
@@ -50,4 +50,4 @@ public:
 } // namespace GDL
 
 
-#include "gdl/math/single/vecSingle.inl"
+#include "gdl/math/serial/vecSerial.inl"

@@ -1,8 +1,8 @@
 #include "gdl/math/sse/mat4fAVX.h"
 #include "gdl/math/sse/mat4fSSE.h"
 #include "gdl/math/sse/vec4fSSE.h"
-#include "gdl/math/single/mat4Single.h"
-#include "gdl/math/single/vec4Single.h"
+#include "gdl/math/serial/mat4Serial.h"
+#include "gdl/math/serial/vec4Serial.h"
 #include <benchmark/benchmark.h>
 
 #ifdef EIGEN3_FOUND
@@ -62,14 +62,14 @@ public:
 };
 
 
-class Single : public benchmark::Fixture
+class Serial : public benchmark::Fixture
 {
 public:
-    Mat4Single<F32> A;
-    Mat4Single<F32> B;
-    Vec4fSingle<true> V;
+    Mat4Serial<F32> A;
+    Mat4Serial<F32> B;
+    Vec4fSerial<true> V;
 
-    Single()
+    Serial()
         : A{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15}
         , B{8, 5, 3, 6, 11, 4, 7, 8, 6, 9, 5, 2, 2, 3, 2, 6}
         , V{1, 2, 3, 4}
@@ -83,7 +83,7 @@ class Eigen3 : public benchmark::Fixture
 public:
     Eigen::Matrix4f A;
     Eigen::Matrix4f B;
-    // Vec4fSingle<true> V;
+    // Vec4fSerial<true> V;
 
     Eigen3()
     {
@@ -104,10 +104,10 @@ public:
 // Value Construction %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 #ifndef DISABLE_BENCHMARK_CTORS
 
-BENCHMARK_F(Single, Construction)(benchmark::State& state)
+BENCHMARK_F(Serial, Construction)(benchmark::State& state)
 {
     for (auto _ : state)
-        Mat4Single<F32> C(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15);
+        Mat4Serial<F32> C(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15);
 }
 
 
@@ -133,7 +133,7 @@ BENCHMARK_F(AVX, Construction)(benchmark::State& state)
 // Comparison %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 #ifndef DISABLE_BENCHMARK_COMPARISON
 
-BENCHMARK_F(Single, Comparison_Equal)(benchmark::State& state)
+BENCHMARK_F(Serial, Comparison_Equal)(benchmark::State& state)
 {
     for (auto _ : state)
         benchmark::DoNotOptimize(A == A);
@@ -156,7 +156,7 @@ BENCHMARK_F(AVX, Comparison_Equal)(benchmark::State& state)
 
 
 
-BENCHMARK_F(Single, Comparison_Not_Equal)(benchmark::State& state)
+BENCHMARK_F(Serial, Comparison_Not_Equal)(benchmark::State& state)
 {
     for (auto _ : state)
         benchmark::DoNotOptimize(A == B);
@@ -181,7 +181,7 @@ BENCHMARK_F(AVX, Comparison_Not_Equal)(benchmark::State& state)
 // Addition Assignment %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 #ifndef DISABLE_BENCHMARK_ADDITION
 
-BENCHMARK_F(Single, Addition_Assignment)(benchmark::State& state)
+BENCHMARK_F(Serial, Addition_Assignment)(benchmark::State& state)
 {
     for (auto _ : state)
         benchmark::DoNotOptimize(A += B);
@@ -205,7 +205,7 @@ BENCHMARK_F(AVX, Addition_Assignment)(benchmark::State& state)
 
 // Addition %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-BENCHMARK_F(Single, Addition)(benchmark::State& state)
+BENCHMARK_F(Serial, Addition)(benchmark::State& state)
 {
     for (auto _ : state)
         benchmark::DoNotOptimize(A + B);
@@ -233,7 +233,7 @@ BENCHMARK_F(AVX, Addition)(benchmark::State& state)
 #ifndef DISABLE_BENCHMARK_MULTIPLICATION
 
 
-BENCHMARK_F(Single, Multiplication)(benchmark::State& state)
+BENCHMARK_F(Serial, Multiplication)(benchmark::State& state)
 {
     for (auto _ : state)
         benchmark::DoNotOptimize(A * B);
@@ -271,7 +271,7 @@ BENCHMARK_F(Eigen3, Multiplication)(benchmark::State& state)
 // Multiplication Matrix-Vector %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 #ifndef DISABLE_BENCHMARK_MULTIPLICATION_WITH_VECTOR
 
-BENCHMARK_F(Single, Multiplication_Matrix_Vector)(benchmark::State& state)
+BENCHMARK_F(Serial, Multiplication_Matrix_Vector)(benchmark::State& state)
 {
     for (auto _ : state)
         benchmark::DoNotOptimize(A * V);
@@ -300,7 +300,7 @@ BENCHMARK_F(AVX, Multiplication_Matrix_Vector)(benchmark::State& state)
 // Determinant %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 #ifndef DISABLE_BENCHMARK_DETERMINANT
 
-BENCHMARK_F(Single, Determinant)(benchmark::State& state)
+BENCHMARK_F(Serial, Determinant)(benchmark::State& state)
 {
     for (auto _ : state)
         benchmark::DoNotOptimize(B.Det());
@@ -336,7 +336,7 @@ BENCHMARK_F(Eigen3, Determinant)(benchmark::State& state)
 // Transpose %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 #ifndef DISABLE_BENCHMARK_TRANSPOSE
 
-BENCHMARK_F(Single, Transpose)(benchmark::State& state)
+BENCHMARK_F(Serial, Transpose)(benchmark::State& state)
 {
     for (auto _ : state)
         benchmark::DoNotOptimize(A.Transpose());

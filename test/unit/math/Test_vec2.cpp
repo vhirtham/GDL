@@ -2,10 +2,9 @@
 
 
 #include "gdl/base/fundamentalTypes.h"
-#include "gdl/math/sse/vec3fSSE.h"
-#include "gdl/math/single/vec3Single.h"
-#include "gdl/math/sse/vec4fSSE.h"
-#include "gdl/math/single/vec4Single.h"
+#include "gdl/math/sse/vec2fSSE.h"
+#include "gdl/math/serial/vec2Serial.h"
+
 
 #include "test/tools/arrayValueComparison.h"
 #include "test/tools/ExceptionChecks.h"
@@ -19,29 +18,15 @@ using namespace GDL;
 template <template <bool> class _vector>
 struct Fixture
 {
-    _vector<true> cA{3., 7., 2.};
-    _vector<true> cB{8., 11., 6.};
-    _vector<false> rA{3., 7., 2.};
-    _vector<false> rB{8., 11., 6.};
+    _vector<true> cA{3., 7.};
+    _vector<true> cB{8., 11.};
+    _vector<false> rA{3., 7.};
+    _vector<false> rB{8., 11.};
 };
 
 
 
 // Construction -------------------------------------------------------------------------------------------------------
-
-template <typename _vector>
-constexpr auto GetVec4()
-{
-    if constexpr (std::is_same<_vector, Vec3fSSE<true>>::value)
-        return Vec4fSSE<true>();
-    if constexpr (std::is_same<_vector, Vec3fSSE<false>>::value)
-        return Vec4fSSE<false>();
-    if constexpr (std::is_same<_vector, Vec3fSingle<true>>::value)
-        return Vec4fSingle<true>();
-    if constexpr (std::is_same<_vector, Vec3fSingle<false>>::value)
-        return Vec4fSingle<false>();
-}
-
 
 
 template <typename _vector>
@@ -50,34 +35,28 @@ void ConstructionTest()
     _vector a;
     BOOST_CHECK(CheckArrayZero(a.Data()));
 
-    _vector b(0., 1., 2.);
-    std::array<F32, 3> expB{{0., 1., 2.}};
+    _vector b(0., 1.);
+    std::array<F32, 2> expB{{0., 1.}};
     BOOST_CHECK(CheckCloseArray(b.Data(), expB));
 
     _vector b1(expB);
     BOOST_CHECK(CheckCloseArray(b1.Data(), expB));
-
-    using _vector4 = decltype(GetVec4<_vector>());
-
-    _vector c(_vector4(3.f, 5.f, 1.f, 2.f));
-    std::array<F32, 3> expC{{3.f, 5.f, 1.f}};
-    BOOST_CHECK(CheckCloseArray(c.Data(), expC));
 }
 
 
 
-BOOST_AUTO_TEST_CASE(Construction_Single)
+BOOST_AUTO_TEST_CASE(Construction_Serial)
 {
-    ConstructionTest<Vec3Single<F32, true>>();
-    ConstructionTest<Vec3Single<F32, false>>();
+    ConstructionTest<Vec2Serial<F32, true>>();
+    ConstructionTest<Vec2Serial<F32, false>>();
 }
 
 
 
 BOOST_AUTO_TEST_CASE(Construction_SSE)
 {
-    ConstructionTest<Vec3fSSE<true>>();
-    ConstructionTest<Vec3fSSE<false>>();
+    ConstructionTest<Vec2fSSE<true>>();
+    ConstructionTest<Vec2fSSE<false>>();
 }
 
 
@@ -87,12 +66,12 @@ BOOST_AUTO_TEST_CASE(Construction_SSE)
 template <bool _isCol, template <bool> class _vector>
 void DirectAccessOperatorVectorTest(const _vector<_isCol>& vector)
 {
-    std::array<F32, 3> data = vector.Data();
+    std::array<F32, 2> data = vector.Data();
 
-    for (U32 i = 0; i < 3; ++i)
+    for (U32 i = 0; i < 2; ++i)
         BOOST_CHECK(vector[i] == Approx(data[i]));
 
-    GDL_CHECK_THROW_DEV_DISABLE([[maybe_unused]] F32 test = vector[3], Exception);
+    GDL_CHECK_THROW_DEV_DISABLE([[maybe_unused]] F32 test = vector[2], Exception);
 }
 
 
@@ -109,16 +88,16 @@ void DirectAccessOperatorTest()
 
 
 
-BOOST_AUTO_TEST_CASE(Parentheses_Operator_Single)
+BOOST_AUTO_TEST_CASE(Parentheses_Operator_Serial)
 {
-    DirectAccessOperatorTest<Vec3fSingle>();
+    DirectAccessOperatorTest<Vec2fSerial>();
 }
 
 
 
 BOOST_AUTO_TEST_CASE(Parentheses_Operator_SSE)
 {
-    DirectAccessOperatorTest<Vec3fSSE>();
+    DirectAccessOperatorTest<Vec2fSSE>();
 }
 
 
@@ -137,11 +116,11 @@ void ComparisonTest(_vector& A, _vector& B)
 
     // Check Tolerances
     constexpr F32 epsilon = std::numeric_limits<F32>::epsilon();
-    std::array<F32, 3> vecAData = A.Data();
-    std::array<F32, 3> vecEps1Data, vecEps2Data;
+    std::array<F32, 2> vecAData = A.Data();
+    std::array<F32, 2> vecEps1Data, vecEps2Data;
 
 
-    for (U32 i = 0; i < 3; ++i)
+    for (U32 i = 0; i < 2; ++i)
     {
         if (static_cast<I32>(vecAData[i]) == 0)
         {
@@ -166,7 +145,7 @@ void ComparisonTest(_vector& A, _vector& B)
 
 
     // Only a single value differs
-    for (U32 i = 0; i < 3; ++i)
+    for (U32 i = 0; i < 2; ++i)
     {
         vecEps1Data = A.Data();
         vecEps2Data = A.Data();
@@ -195,7 +174,7 @@ void ComparisonTest(_vector& A, _vector& B)
 
 
 
-BOOST_FIXTURE_TEST_CASE(Comparison_Single, Fixture<Vec3fSingle>)
+BOOST_FIXTURE_TEST_CASE(Comparison_Serial, Fixture<Vec2fSerial>)
 {
     ComparisonTest(cA, cB);
     ComparisonTest(rA, rB);
@@ -203,7 +182,7 @@ BOOST_FIXTURE_TEST_CASE(Comparison_Single, Fixture<Vec3fSingle>)
 
 
 
-BOOST_FIXTURE_TEST_CASE(Comparison_SSE, Fixture<Vec3fSSE>)
+BOOST_FIXTURE_TEST_CASE(Comparison_SSE, Fixture<Vec2fSSE>)
 {
     ComparisonTest(cA, cB);
     ComparisonTest(rA, rB);
@@ -216,11 +195,11 @@ BOOST_FIXTURE_TEST_CASE(Comparison_SSE, Fixture<Vec3fSSE>)
 template <typename _vector, typename _vector2>
 void DotProductTest(_vector& A, _vector2& B)
 {
-    std::array<F32, 3> vecAData = A.Data();
-    std::array<F32, 3> vecBData = B.Data();
+    std::array<F32, 2> vecAData = A.Data();
+    std::array<F32, 2> vecBData = B.Data();
 
     F32 expectedResult = 0;
-    for (U32 i = 0; i < 3; ++i)
+    for (U32 i = 0; i < 2; ++i)
         expectedResult += vecAData[i] * vecBData[i];
 
     BOOST_CHECK(A.Dot(B) == Approx(expectedResult));
@@ -228,7 +207,7 @@ void DotProductTest(_vector& A, _vector2& B)
 
 
 
-BOOST_FIXTURE_TEST_CASE(Dot_Product_Single, Fixture<Vec3fSingle>)
+BOOST_FIXTURE_TEST_CASE(Dot_Product_Serial, Fixture<Vec2fSerial>)
 {
     DotProductTest(cA, cB);
     DotProductTest(cA, rA);
@@ -238,7 +217,7 @@ BOOST_FIXTURE_TEST_CASE(Dot_Product_Single, Fixture<Vec3fSingle>)
 
 
 
-BOOST_FIXTURE_TEST_CASE(Dot_Product_SSE, Fixture<Vec3fSSE>)
+BOOST_FIXTURE_TEST_CASE(Dot_Product_SSE, Fixture<Vec2fSSE>)
 {
     DotProductTest(cA, cB);
     DotProductTest(cA, rA);
@@ -253,12 +232,12 @@ BOOST_FIXTURE_TEST_CASE(Dot_Product_SSE, Fixture<Vec3fSSE>)
 template <bool _isCol, template <bool> class _vector>
 void LengthTest()
 {
-    _vector<_isCol> vec1{3, 2, 6};
-    BOOST_CHECK(vec1.Length() == Approx(7.f));
+    _vector<_isCol> vec1{3.f, 4.f};
+    BOOST_CHECK(vec1.Length() == Approx(5.f));
 
-    for (U32 i = 0; i < 3; ++i)
+    for (U32 i = 0; i < 2; ++i)
     {
-        std::array<F32, 3> data{{0, 0, 0}};
+        std::array<F32, 2> data{{0, 0}};
         data[i] = 1.f;
         _vector<_isCol> vec2{data};
         BOOST_CHECK(vec2.Length() == Approx(1.f));
@@ -267,18 +246,18 @@ void LengthTest()
 
 
 
-BOOST_AUTO_TEST_CASE(Length_Test_Single)
+BOOST_AUTO_TEST_CASE(Length_Test_Serial)
 {
-    LengthTest<true, Vec3fSingle>();
-    LengthTest<false, Vec3fSingle>();
+    LengthTest<true, Vec2fSerial>();
+    LengthTest<false, Vec2fSerial>();
 }
 
 
 
 BOOST_AUTO_TEST_CASE(Length_Test_SSE)
 {
-    LengthTest<true, Vec3fSSE>();
-    LengthTest<false, Vec3fSSE>();
+    LengthTest<true, Vec2fSSE>();
+    LengthTest<false, Vec2fSSE>();
 }
 
 
@@ -294,7 +273,7 @@ void NormalizeTestVector(_vector& a)
     BOOST_CHECK(b.Length() == Approx(1.f));
 
     F32 lengthA = a.Length();
-    for (U32 i = 0; i < 3; ++i)
+    for (U32 i = 0; i < 2; ++i)
         BOOST_CHECK(b[i] * lengthA == Approx(a[i]));
 }
 
@@ -316,61 +295,16 @@ void NormalizeTest()
 
 
 
-BOOST_AUTO_TEST_CASE(Normalize_Single)
+BOOST_AUTO_TEST_CASE(Normalize_Serial)
 {
-    NormalizeTest<Vec3fSingle>();
+    NormalizeTest<Vec2fSerial>();
 }
 
 
 
 BOOST_AUTO_TEST_CASE(Normalize_SSE)
 {
-    NormalizeTest<Vec3fSSE>();
-}
-
-
-
-// Cross --------------------------------------------------------------------------------------------------------------
-
-template <typename _vector>
-void CrossProductTest()
-{
-    _vector a1{7, 1, 0};
-    _vector a2{2, 5, 0};
-
-    _vector aExpNorm{0, 0, 1};
-    _vector aCross = a1.Cross(a2);
-
-    BOOST_CHECK(aCross.Normalize() == aExpNorm);
-
-    _vector b1{2, 0, 2};
-    _vector b2{0, 2, 0};
-
-    _vector bExpNorm{_vector(-2, 0, 2).Normalize()};
-    _vector bCross = b1.Cross(b2);
-
-    BOOST_CHECK(bCross.Normalize() == bExpNorm);
-
-    _vector zeroVec;
-
-    GDL_CHECK_THROW_DEV_DISABLE([[maybe_unused]] _vector tmp = zeroVec.Cross(a1), Exception);
-    GDL_CHECK_THROW_DEV_DISABLE([[maybe_unused]] _vector tmp = a1.Cross(zeroVec), Exception);
-}
-
-
-
-BOOST_FIXTURE_TEST_CASE(Cross_Product_Single, Fixture<Vec3fSingle>)
-{
-    CrossProductTest<Vec3fSingle<true>>();
-    CrossProductTest<Vec3fSingle<false>>();
-}
-
-
-
-BOOST_FIXTURE_TEST_CASE(Cross_Product_SSE, Fixture<Vec3fSSE>)
-{
-    CrossProductTest<Vec3fSSE<true>>();
-    CrossProductTest<Vec3fSSE<false>>();
+    NormalizeTest<Vec2fSSE>();
 }
 
 
@@ -380,10 +314,10 @@ BOOST_FIXTURE_TEST_CASE(Cross_Product_SSE, Fixture<Vec3fSSE>)
 template <typename _vector>
 void AdditionAssignmentTestVector()
 {
-    _vector a(8, 3, 7);
-    _vector b(3, 2, 5);
+    _vector a(8, 3);
+    _vector b(3, 2);
 
-    _vector expResult(11, 5, 12);
+    _vector expResult(11, 5);
 
     b += a;
     BOOST_CHECK(b == expResult);
@@ -400,16 +334,16 @@ void AdditionAssignmentTest()
 
 
 
-BOOST_AUTO_TEST_CASE(Addition_Assignment_Single)
+BOOST_AUTO_TEST_CASE(Addition_Assignment_Serial)
 {
-    AdditionAssignmentTest<Vec3fSingle>();
+    AdditionAssignmentTest<Vec2fSerial>();
 }
 
 
 
 BOOST_AUTO_TEST_CASE(Addition_Assignment_SSE)
 {
-    AdditionAssignmentTest<Vec3fSSE>();
+    AdditionAssignmentTest<Vec2fSSE>();
 }
 
 
@@ -419,10 +353,10 @@ BOOST_AUTO_TEST_CASE(Addition_Assignment_SSE)
 template <typename _vector>
 void SubstractionAssignmentTestVector()
 {
-    _vector a(8, 3, 7);
-    _vector b(3, 2, 5);
+    _vector a(8, 3);
+    _vector b(3, 2);
 
-    _vector expResult(-5, -1, -2);
+    _vector expResult(-5, -1);
 
     b -= a;
     BOOST_CHECK(b == expResult);
@@ -439,16 +373,16 @@ void SubstractionAssignmentTest()
 
 
 
-BOOST_AUTO_TEST_CASE(Substraction_Assignment_Single)
+BOOST_AUTO_TEST_CASE(Substraction_Assignment_Serial)
 {
-    SubstractionAssignmentTest<Vec3fSingle>();
+    SubstractionAssignmentTest<Vec2fSerial>();
 }
 
 
 
 BOOST_AUTO_TEST_CASE(Substraction_Assignment_SSE)
 {
-    SubstractionAssignmentTest<Vec3fSSE>();
+    SubstractionAssignmentTest<Vec2fSSE>();
 }
 
 
@@ -458,9 +392,9 @@ BOOST_AUTO_TEST_CASE(Substraction_Assignment_SSE)
 template <typename _vector>
 void AdditionTestVector()
 {
-    _vector a(8, 3, 7);
-    _vector b(3, 2, 5);
-    _vector expResult(11, 5, 12);
+    _vector a(8, 3);
+    _vector b(3, 2);
+    _vector expResult(11, 5);
 
     BOOST_CHECK(a + b == expResult);
 }
@@ -476,16 +410,16 @@ void AdditionTest()
 
 
 
-BOOST_AUTO_TEST_CASE(Addition_Single)
+BOOST_AUTO_TEST_CASE(Addition_Serial)
 {
-    AdditionTest<Vec3fSingle>();
+    AdditionTest<Vec2fSerial>();
 }
 
 
 
 BOOST_AUTO_TEST_CASE(Addition_SSE)
 {
-    AdditionTest<Vec3fSSE>();
+    AdditionTest<Vec2fSSE>();
 }
 
 
@@ -495,10 +429,10 @@ BOOST_AUTO_TEST_CASE(Addition_SSE)
 template <typename _vector>
 void SubstractionTestVector()
 {
-    _vector a(8, 3, 7);
-    _vector b(3, 2, 5);
+    _vector a(8, 3);
+    _vector b(3, 2);
 
-    _vector expResult(-5, -1, -2);
+    _vector expResult(-5, -1);
 
     BOOST_CHECK(b - a == expResult);
 }
@@ -514,16 +448,16 @@ void SubstractionTest()
 
 
 
-BOOST_AUTO_TEST_CASE(Substraction_Single)
+BOOST_AUTO_TEST_CASE(Substraction_Serial)
 {
-    SubstractionTest<Vec3fSingle>();
+    SubstractionTest<Vec2fSerial>();
 }
 
 
 
 BOOST_AUTO_TEST_CASE(Substraction_SSE)
 {
-    SubstractionTest<Vec3fSSE>();
+    SubstractionTest<Vec2fSSE>();
 }
 
 
@@ -533,11 +467,11 @@ BOOST_AUTO_TEST_CASE(Substraction_SSE)
 template <typename _vector>
 void MultiplicationWithScalarTestVector()
 {
-    _vector a(8, -3, 7);
-    _vector b(-3, 2, 5);
+    _vector a(8, -3);
+    _vector b(-3, 2);
 
-    _vector expResultA(16, -6, 14);
-    _vector expResultB(-9, 6, 15);
+    _vector expResultA(16, -6);
+    _vector expResultB(-9, 6);
     BOOST_CHECK(a * 2 == expResultA);
     BOOST_CHECK(3 * b == expResultB);
 }
@@ -553,14 +487,14 @@ void MultiplicationWithScalarTest()
 
 
 
-BOOST_AUTO_TEST_CASE(Multiplication_With_Scalar_Single)
+BOOST_AUTO_TEST_CASE(Multiplication_With_Scalar_Serial)
 {
-    MultiplicationWithScalarTest<Vec3fSingle>();
+    MultiplicationWithScalarTest<Vec2fSerial>();
 }
 
 
 
 BOOST_AUTO_TEST_CASE(Multiplication_With_Scalar_SSE)
 {
-    MultiplicationWithScalarTest<Vec3fSSE>();
+    MultiplicationWithScalarTest<Vec2fSSE>();
 }

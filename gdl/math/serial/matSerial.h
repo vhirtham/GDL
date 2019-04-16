@@ -13,26 +13,26 @@ namespace GDL
 //! @tparam _rows: Number of rows
 //! @tparam _cols: Number of columns
 template <typename _type, I32 _rows, I32 _cols>
-class MatSingle
+class MatSerial
 {
     template <typename _type2, I32 _rows2, I32 _cols2>
-    friend class MatSingle;
+    friend class MatSerial;
 
     std::array<_type, _rows * _cols> mData;
 
 public:
     //! @brief Constructor
-    MatSingle();
+    MatSerial();
 
     //! @brief Constructor to set the whole matrix
     //! @tparam _args: Variadic data type
     //! @param args: Values (column major)
     template <typename... _args>
-    explicit MatSingle(_args... args);
+    explicit MatSerial(_args... args);
 
     //! @brief Constructor to set the whole matrix
     //! @param data: Array with values (column major)
-    explicit MatSingle(const std::array<_type, _rows * _cols>& data);
+    explicit MatSerial(const std::array<_type, _rows * _cols>& data);
 
     //! @brief Direct access operator
     //! @param row: Row of the accessed value
@@ -45,24 +45,24 @@ public:
     //! @return TRUE/FALSE
     //! @remark This function uses the Approx class internally. The default minimal base is used. This might be changed
     //! in the future. A global minimal base for linear algebra comparison might be introduced.
-    [[nodiscard]] inline bool operator==(const MatSingle& rhs) const;
+    [[nodiscard]] inline bool operator==(const MatSerial& rhs) const;
 
     //! @brief Compares if two matrices are NOT equal
     //! @param rhs: Matrix that should be compared
     //! @return TRUE/FALSE
     //! @remark This function uses the Approx class internally. The default minimal base is used. This might be changed
     //! in the future. A global minimal base for linear algebra comparison might be introduced.
-    [[nodiscard]] inline bool operator!=(const MatSingle& rhs) const;
+    [[nodiscard]] inline bool operator!=(const MatSerial& rhs) const;
 
     //! @brief Matrix - matrix addition assignment
     //! @param rhs: Rhs matrix
     //! @return Result of the addition
-    inline MatSingle& operator+=(const MatSingle& rhs);
+    inline MatSerial& operator+=(const MatSerial& rhs);
 
     //! @brief Matrix - matrix addition assignment
     //! @param rhs: Rhs matrix
     //! @return Result of the addition
-    [[nodiscard]] inline MatSingle operator+(const MatSingle& rhs);
+    [[nodiscard]] inline MatSerial operator+(const MatSerial& rhs);
 
     //! @brief Matrix - matrix multiplication
     //! @tparam _rowsRhs: Rhs matrix number of rows
@@ -70,12 +70,12 @@ public:
     //! @param rhs: Rhs matrix
     //! @return Result of the multiplication
     template <I32 _rowsRhs, I32 _colsRhs>
-    [[nodiscard]] inline MatSingle<_type, _rows, _colsRhs>
-    operator*(const MatSingle<_type, _rowsRhs, _colsRhs>& rhs) const;
+    [[nodiscard]] inline MatSerial<_type, _rows, _colsRhs>
+    operator*(const MatSerial<_type, _rowsRhs, _colsRhs>& rhs) const;
 
     //! @brief Returns the transposed matrix
     //! @return Transposed matrix
-    [[nodiscard]] inline MatSingle<_type, _cols, _rows> Transpose() const;
+    [[nodiscard]] inline MatSerial<_type, _cols, _rows> Transpose() const;
 
     //! @brief Gets the number of rows
     //! @return Number of rows
@@ -103,7 +103,7 @@ public:
 //! @param mat: Matrix
 //! @return Reference to offstream object
 template <typename _type, I32 _rows, I32 _cols>
-std::ostream& operator<<(std::ostream& os, const MatSingle<_type, _rows, _cols>& mat);
+std::ostream& operator<<(std::ostream& os, const MatSerial<_type, _rows, _cols>& mat);
 
 
 
@@ -111,4 +111,4 @@ std::ostream& operator<<(std::ostream& os, const MatSingle<_type, _rows, _cols>&
 
 
 
-#include "gdl/math/single/matSingle.inl"
+#include "gdl/math/serial/matSerial.inl"

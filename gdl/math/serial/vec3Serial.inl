@@ -1,6 +1,6 @@
 #pragma once
 
-#include "gdl/math/single/vec3Single.h"
+#include "gdl/math/serial/vec3Serial.h"
 
 #include "gdl/base/approx.h"
 #include "gdl/base/exception.h"
@@ -10,7 +10,7 @@ namespace GDL
 {
 
 template <typename _type, bool _isCol>
-Vec3Single<_type, _isCol>::Vec3Single()
+Vec3Serial<_type, _isCol>::Vec3Serial()
     : mData{{0, 0, 0}}
 {
 }
@@ -18,7 +18,7 @@ Vec3Single<_type, _isCol>::Vec3Single()
 
 
 template <typename _type, bool _isCol>
-Vec3Single<_type, _isCol>::Vec3Single(std::array<_type, 3> data)
+Vec3Serial<_type, _isCol>::Vec3Serial(std::array<_type, 3> data)
     : mData{data}
 {
 }
@@ -26,7 +26,7 @@ Vec3Single<_type, _isCol>::Vec3Single(std::array<_type, 3> data)
 
 
 template <typename _type, bool _isCol>
-Vec3Single<_type, _isCol>::Vec3Single(_type v0, _type v1, _type v2)
+Vec3Serial<_type, _isCol>::Vec3Serial(_type v0, _type v1, _type v2)
     : mData{{v0, v1, v2}}
 {
 }
@@ -34,7 +34,7 @@ Vec3Single<_type, _isCol>::Vec3Single(_type v0, _type v1, _type v2)
 
 
 template <typename _type, bool _isCol>
-Vec3Single<_type, _isCol>::Vec3Single(const Vec4Single<_type, _isCol>& other)
+Vec3Serial<_type, _isCol>::Vec3Serial(const Vec4Serial<_type, _isCol>& other)
     : mData{{other.mData[0], other.mData[1], other.mData[2]}}
 {
 }
@@ -42,7 +42,7 @@ Vec3Single<_type, _isCol>::Vec3Single(const Vec4Single<_type, _isCol>& other)
 
 
 template <typename _type, bool _isCol>
-_type Vec3Single<_type, _isCol>::operator[](const U32 index) const
+_type Vec3Serial<_type, _isCol>::operator[](const U32 index) const
 {
     DEV_EXCEPTION(index > 2, "Invalid index value! [0..2]");
     return mData[index];
@@ -51,7 +51,7 @@ _type Vec3Single<_type, _isCol>::operator[](const U32 index) const
 
 
 template <typename _type, bool _isCol>
-bool Vec3Single<_type, _isCol>::operator==(const Vec3Single& rhs) const
+bool Vec3Serial<_type, _isCol>::operator==(const Vec3Serial& rhs) const
 {
     bool result = true;
     for (U32 i = 0; i < 3; ++i)
@@ -62,7 +62,7 @@ bool Vec3Single<_type, _isCol>::operator==(const Vec3Single& rhs) const
 
 
 template <typename _type, bool _isCol>
-bool Vec3Single<_type, _isCol>::operator!=(const Vec3Single& rhs) const
+bool Vec3Serial<_type, _isCol>::operator!=(const Vec3Serial& rhs) const
 {
     return !(operator==(rhs));
 }
@@ -70,7 +70,7 @@ bool Vec3Single<_type, _isCol>::operator!=(const Vec3Single& rhs) const
 
 
 template <typename _type, bool _isCol>
-Vec3Single<_type, _isCol>& Vec3Single<_type, _isCol>::operator+=(const Vec3Single& rhs)
+Vec3Serial<_type, _isCol>& Vec3Serial<_type, _isCol>::operator+=(const Vec3Serial& rhs)
 {
     mData[0] += rhs.mData[0];
     mData[1] += rhs.mData[1];
@@ -81,7 +81,7 @@ Vec3Single<_type, _isCol>& Vec3Single<_type, _isCol>::operator+=(const Vec3Singl
 
 
 template <typename _type, bool _isCol>
-Vec3Single<_type, _isCol>& Vec3Single<_type, _isCol>::operator-=(const Vec3Single& rhs)
+Vec3Serial<_type, _isCol>& Vec3Serial<_type, _isCol>::operator-=(const Vec3Serial& rhs)
 {
     mData[0] -= rhs.mData[0];
     mData[1] -= rhs.mData[1];
@@ -92,36 +92,36 @@ Vec3Single<_type, _isCol>& Vec3Single<_type, _isCol>::operator-=(const Vec3Singl
 
 
 template <typename _type, bool _isCol>
-Vec3Single<_type, _isCol> Vec3Single<_type, _isCol>::operator+(const Vec3Single& rhs) const
+Vec3Serial<_type, _isCol> Vec3Serial<_type, _isCol>::operator+(const Vec3Serial& rhs) const
 {
-    return Vec3Single<_type, _isCol>(mData[0] + rhs.mData[0], mData[1] + rhs.mData[1], mData[2] + rhs.mData[2]);
+    return Vec3Serial<_type, _isCol>(mData[0] + rhs.mData[0], mData[1] + rhs.mData[1], mData[2] + rhs.mData[2]);
 }
 
 
 
 template <typename _type, bool _isCol>
-Vec3Single<_type, _isCol> Vec3Single<_type, _isCol>::operator-(const Vec3Single& rhs) const
+Vec3Serial<_type, _isCol> Vec3Serial<_type, _isCol>::operator-(const Vec3Serial& rhs) const
 {
-    return Vec3Single<_type, _isCol>(mData[0] - rhs.mData[0], mData[1] - rhs.mData[1], mData[2] - rhs.mData[2]);
+    return Vec3Serial<_type, _isCol>(mData[0] - rhs.mData[0], mData[1] - rhs.mData[1], mData[2] - rhs.mData[2]);
 }
 
 
 
 template <typename _type, bool _isCol>
-Vec3Single<_type, _isCol> Vec3Single<_type, _isCol>::operator*(F32 rhs) const
+Vec3Serial<_type, _isCol> Vec3Serial<_type, _isCol>::operator*(F32 rhs) const
 {
-    return Vec3Single<_type, _isCol>(mData[0] * rhs, mData[1] * rhs, mData[2] * rhs);
+    return Vec3Serial<_type, _isCol>(mData[0] * rhs, mData[1] * rhs, mData[2] * rhs);
 }
 
 
 
 template <typename _type, bool _isCol>
-Vec3Single<_type, _isCol> Vec3Single<_type, _isCol>::Cross(Vec3Single rhs) const
+Vec3Serial<_type, _isCol> Vec3Serial<_type, _isCol>::Cross(Vec3Serial rhs) const
 {
-    DEV_EXCEPTION(*this == Vec3Single(), "Length of this vector is 0. Can't calculate the cross product.");
-    DEV_EXCEPTION(rhs == Vec3Single(), "Length of rhs vector is 0. Can't calculate the cross product.");
+    DEV_EXCEPTION(*this == Vec3Serial(), "Length of this vector is 0. Can't calculate the cross product.");
+    DEV_EXCEPTION(rhs == Vec3Serial(), "Length of rhs vector is 0. Can't calculate the cross product.");
 
-    return Vec3Single<_type, _isCol>{mData[1] * rhs.mData[2] - mData[2] * rhs.mData[1],
+    return Vec3Serial<_type, _isCol>{mData[1] * rhs.mData[2] - mData[2] * rhs.mData[1],
                                      mData[2] * rhs.mData[0] - mData[0] * rhs.mData[2],
                                      mData[0] * rhs.mData[1] - mData[1] * rhs.mData[0]};
 }
@@ -129,7 +129,7 @@ Vec3Single<_type, _isCol> Vec3Single<_type, _isCol>::Cross(Vec3Single rhs) const
 
 
 template <typename _type, bool _isCol>
-const std::array<_type, 3> Vec3Single<_type, _isCol>::Data() const
+const std::array<_type, 3> Vec3Serial<_type, _isCol>::Data() const
 {
     return mData;
 }
@@ -138,7 +138,7 @@ const std::array<_type, 3> Vec3Single<_type, _isCol>::Data() const
 
 template <typename _type, bool _isCol>
 template <bool _isColRhs>
-F32 Vec3Single<_type, _isCol>::Dot(Vec3Single<_type, _isColRhs> rhs) const
+F32 Vec3Serial<_type, _isCol>::Dot(Vec3Serial<_type, _isColRhs> rhs) const
 {
     return mData[0] * rhs.mData[0] + mData[1] * rhs.mData[1] + mData[2] * rhs.mData[2];
 }
@@ -146,7 +146,7 @@ F32 Vec3Single<_type, _isCol>::Dot(Vec3Single<_type, _isColRhs> rhs) const
 
 
 template <typename _type, bool _isCol>
-F32 Vec3Single<_type, _isCol>::Length() const
+F32 Vec3Serial<_type, _isCol>::Length() const
 {
     return std::sqrt(Dot(*this));
 }
@@ -154,7 +154,7 @@ F32 Vec3Single<_type, _isCol>::Length() const
 
 
 template <typename _type, bool _isCol>
-Vec3Single<_type, _isCol>& Vec3Single<_type, _isCol>::Normalize()
+Vec3Serial<_type, _isCol>& Vec3Serial<_type, _isCol>::Normalize()
 {
     const F32 length = Length();
     DEV_EXCEPTION(length == ApproxZero<F32>(), "Vector length is 0. Can't normalize the vector.");
@@ -167,7 +167,7 @@ Vec3Single<_type, _isCol>& Vec3Single<_type, _isCol>::Normalize()
 
 
 template <typename _type, bool _isCol>
-[[nodiscard]] inline Vec3Single<_type, _isCol> operator*(F32 lhs, Vec3Single<_type, _isCol> rhs)
+[[nodiscard]] inline Vec3Serial<_type, _isCol> operator*(F32 lhs, Vec3Serial<_type, _isCol> rhs)
 {
     return rhs * lhs;
 }
@@ -177,7 +177,7 @@ template <typename _type, bool _isCol>
 // LCOV_EXCL_START
 
 template <typename _type>
-std::ostream& operator<<(std::ostream& os, const Vec3Single<_type, true>& vec)
+std::ostream& operator<<(std::ostream& os, const Vec3Serial<_type, true>& vec)
 {
     os << "| " << vec[0] << " |\n| " << vec[1] << " |\n| " << vec[2] << " |" << std::endl;
     return os;
@@ -186,7 +186,7 @@ std::ostream& operator<<(std::ostream& os, const Vec3Single<_type, true>& vec)
 
 
 template <typename _type>
-std::ostream& operator<<(std::ostream& os, const Vec3Single<_type, false>& vec)
+std::ostream& operator<<(std::ostream& os, const Vec3Serial<_type, false>& vec)
 {
     os << "| " << vec[0] << " " << vec[1] << " " << vec[2] << " |" << std::endl;
     return os;

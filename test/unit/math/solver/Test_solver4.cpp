@@ -1,8 +1,8 @@
 #include <boost/test/unit_test.hpp>
 
 
-#include "gdl/math/single/mat4Single.h"
-#include "gdl/math/single/vec4Single.h"
+#include "gdl/math/serial/mat4Serial.h"
+#include "gdl/math/serial/vec4Serial.h"
 #include "gdl/math/solver/solver4.h"
 #include "test/tools/ExceptionChecks.h"
 
@@ -29,8 +29,8 @@ void TestSolverTestcase(_solver solver, const Matrix& A, const Vector& b, const 
 template <bool IsSSE, typename _solver>
 void TestSolver(_solver solver, bool pivot = true)
 {
-    using Matrix = typename std::conditional<IsSSE, Mat4fSSE, Mat4fSingle>::type;
-    using Vector = typename std::conditional<IsSSE, Vec4fSSE<true>, Vec4fSingle<true>>::type;
+    using Matrix = typename std::conditional<IsSSE, Mat4fSSE, Mat4fSerial>::type;
+    using Vector = typename std::conditional<IsSSE, Vec4fSSE<true>, Vec4fSerial<true>>::type;
 
     TestSolverTestcase(solver, Matrix(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1), Vector(1, 2, 3, 4),
                        Vector(1, 2, 3, 4));

@@ -2,7 +2,7 @@
 
 #include "gdl/base/fundamentalTypes.h"
 #include "gdl/math/sse/quatfSSE.h"
-#include "gdl/math/single/quatSingle.h"
+#include "gdl/math/serial/quatSerial.h"
 
 #include "test/tools/arrayValueComparison.h"
 #include "test/tools/ExceptionChecks.h"
@@ -40,9 +40,9 @@ void ConstructionTest()
 
 
 
-BOOST_AUTO_TEST_CASE(Construction_Single)
+BOOST_AUTO_TEST_CASE(Construction_Serial)
 {
-    ConstructionTest<QuatfSingle>();
+    ConstructionTest<QuatfSerial>();
 }
 
 
@@ -77,9 +77,9 @@ void DirectAccessOperatorTest()
 
 
 
-BOOST_AUTO_TEST_CASE(Parentheses_Operator_Single)
+BOOST_AUTO_TEST_CASE(Parentheses_Operator_Serial)
 {
-    DirectAccessOperatorTest<QuatfSingle>();
+    DirectAccessOperatorTest<QuatfSerial>();
 }
 
 
@@ -164,7 +164,7 @@ void ComparisonTest(_quaternion& A, _quaternion& B)
 
 
 
-BOOST_FIXTURE_TEST_CASE(Comparison_Single, Fixture<QuatfSingle>)
+BOOST_FIXTURE_TEST_CASE(Comparison_Serial, Fixture<QuatfSerial>)
 {
     ComparisonTest(A, B);
 }
