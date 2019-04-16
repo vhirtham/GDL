@@ -4,6 +4,7 @@
 
 #include "gdl/base/approx.h"
 #include "gdl/base/functions/alignment.h"
+#include "gdl/base/sse/crossProduct.h"
 #include "gdl/base/sse/directAccess.h"
 #include "gdl/base/sse/dotProduct.h"
 #include "gdl/base/sse/swizzle.h"
@@ -142,13 +143,7 @@ Vec3fSSE<_isCol> Vec3fSSE<_isCol>::Cross(Vec3fSSE rhs) const
     DEV_EXCEPTION(*this == Vec3fSSE(), "Length of this vector is 0. Can't calculate the cross product.");
     DEV_EXCEPTION(rhs == Vec3fSSE(), "Length of rhs vector is 0. Can't calculate the cross product.");
 
-    // source: http://threadlocalmutex.com/?p=8
-    __m128 lhs_yzx = sse::Shuffle<1, 2, 0, 3>(mData, mData);
-    __m128 rhs_yzx = sse::Shuffle<1, 2, 0, 3>(rhs.mData, rhs.mData);
-
-    __m128 tmp = _mmx_sub_p(_mmx_mul_p(mData, rhs_yzx), _mmx_mul_p(lhs_yzx, rhs.mData));
-
-    return Vec3fSSE<_isCol>(sse::Shuffle<1, 2, 0, 3>(tmp, tmp));
+    return sse::CrossProduct(mData, rhs.mData);
 }
 
 

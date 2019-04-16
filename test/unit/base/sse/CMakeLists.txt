@@ -1,4 +1,5 @@
 addTest(abs)
+addTest(crossProduct)
 addTest(compareAll)
 addTest(determinant)
 addTest(directAccess)

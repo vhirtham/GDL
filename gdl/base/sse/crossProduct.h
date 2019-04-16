@@ -7,6 +7,7 @@
 
 namespace GDL::sse
 {
+
 //! @brief Calculates the cross product of first 3 values of 2 registers
 //! @param lhs: Left hand side register
 //! @param rhs: Right hand side register
@@ -15,6 +16,7 @@ namespace GDL::sse
 //! and should not be used. If both input registers contain a 0 in the fourth element, the fourth value of the result
 //! register will also be 0.
 [[nodiscard]] inline __m128 CrossProduct(__m128 lhs, __m128 rhs);
+
 } // namespace GDL::sse
 
 #include "gdl/base/sse/crossProduct.inl"
