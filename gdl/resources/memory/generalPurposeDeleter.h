@@ -1,5 +1,6 @@
 #pragma once
 
+#include <type_traits>
 
 namespace GDL
 {
@@ -9,6 +10,8 @@ namespace GDL
 template <typename _type>
 class GeneralPurposeDeleter
 {
+    static_assert(!std::is_array<_type>::value,
+                  "General purpose deleter can't be used with arrays. Use a GDL::Vector instead of a GDL::UniquePtr.");
 
 public:
     GeneralPurposeDeleter() = default;
@@ -28,6 +31,8 @@ public:
     //! @param pointer: Pointer to object that should be destroyed
     void operator()(_type* pointer);
 };
+
+
 
 } // namespace GDL
 

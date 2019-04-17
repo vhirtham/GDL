@@ -100,7 +100,7 @@ void TestGaussDenseNoInvalidPivotIndexTestcase()
 
     std::array<_type, _size> expRes;
     std::array<_type, _size> vectorValues;
-    std::array<RegisterType, numColRegisters * _size> matrixValues{0};
+    std::array<RegisterType, numColRegisters * _size> matrixValues{{0}};
 
 
 

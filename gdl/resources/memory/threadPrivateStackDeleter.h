@@ -3,6 +3,8 @@
 #include "gdl/resources/memory/memoryInterface.h"
 #include "gdl/resources/memory/threadPrivateStackAllocator.h"
 
+#include <type_traits>
+
 namespace GDL
 {
 
@@ -11,6 +13,10 @@ namespace GDL
 template <typename _type>
 class ThreadPrivateStackDeleter
 {
+    static_assert(
+            !std::is_array<_type>::value,
+            "Thread private stack deleter can't be used with arrays. Use a GDL::Vector instead of a GDL::UniquePtr.");
+
     MemoryInterface& mMemoryAllocationPattern;
 
 public:

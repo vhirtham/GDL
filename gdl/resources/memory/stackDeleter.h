@@ -1,5 +1,6 @@
 #pragma once
 
+#include <type_traits>
 
 namespace GDL
 {
@@ -9,6 +10,9 @@ namespace GDL
 template <typename _type>
 class StackDeleter
 {
+
+    static_assert(!std::is_array<_type>::value,
+                  "Stack deleter can't be used with arrays. Use a GDL::Vector instead of a GDL::UniquePtr.");
 
 public:
     StackDeleter() = default;
