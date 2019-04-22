@@ -10,17 +10,30 @@
 namespace GDL
 {
 
-template <typename _type, I32 _size, bool _isCol>
-class VecSSE;
-template <typename _type, I32 _rows, I32 _cols>
+template <typename _type, I32, I32>
+class MatSerial;
+template <typename _type, I32, I32>
 class MatSSE;
+template <typename _type, I32, bool>
+class VecSerial;
+template <typename _type, I32, bool>
+class VecSSE;
 
 namespace Solver
 {
 
 
 
-//! @brief Solves the linear system A * x = b by using a Gauss-Jordan algorithm with partial pivoting.
+//! @brief ...
+//! @param A: Matrix
+//! @param b: Vector
+//! @return Result vector x
+template <typename _type, I32 _size>
+[[nodiscard]] VecSerial<_type, _size, true> GaussPartialPivot(const MatSerial<_type, _size, _size>& A,
+                                                              const VecSerial<_type, _size, true>& b);
+
+
+//! @brief Solves the linear system A * x = b by using a vectorized Gauss-Jordan algorithm with partial pivoting.
 //! @param A: Matrix
 //! @param b: Vector
 //! @return Result vector x
@@ -30,11 +43,41 @@ template <typename _type, I32 _size>
 
 
 
+//! @brief ...
+//! @tparam _registerType: SSE register type
+//! @tparam _size: Size of the linear system
+template <typename _type, I32 _size>
+class GaussDenseSerial
+{
+    using MatrixDataArray = std::array<_type, _size * _size>;
+    using VectorDataArray = std::array<_type, _size>;
+    using VectorType = VecSerial<_type, _size, true>;
+    using MatrixType = MatSerial<_type, _size, _size>;
+
+public:
+    //! @brief ...
+    //! @param A: Matrix
+    //! @param b: Vector
+    //! @return Result vector x
+    [[nodiscard]] inline static VectorType SolvePartialPivot(const MatrixType& A, const VectorType& b);
+
+private:
+    inline static void EliminationStep(U32 iteration, MatrixDataArray& matData, VectorDataArray& vecData);
+
+    inline static U32 FindPivot(U32 iteration, const MatrixDataArray& matData);
+
+    inline static void PivotingStep(U32 iteration, MatrixDataArray& matData, VectorDataArray& vecData);
+
+    inline static void SwapRows(U32 pivotRowIdx, U32 iteration, MatrixDataArray& matData, VectorDataArray& vecData);
+};
+
+
+
 //! @brief SSE based Gauss-Jordan solver class for dense static systems
 //! @tparam _registerType: SSE register type
 //! @tparam _size: Size of the linear system
 template <typename _registerType, I32 _size>
-class GaussDense
+class GaussDenseSSE
 {
     constexpr static U32 alignment = sse::alignmentBytes<_registerType>;
     static constexpr U32 numRegisterValues = sse::numRegisterValues<_registerType>;

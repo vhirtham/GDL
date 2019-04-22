@@ -92,9 +92,18 @@ bool VecSSE<_type, _size, _isCol>::IsInternalDataValid() const
 template <typename _type, I32 _size, bool _isCol>
 inline std::ostream& operator<<(std::ostream& os, const VecSSE<_type, _size, _isCol>& vec)
 {
-    for (U32 i = 0; i < _size; ++i)
-        os << "| " << vec[i] << "|" << std::endl;
-
+    if constexpr (_isCol)
+    {
+        for (U32 i = 0; i < _size; ++i)
+            os << "| " << vec[i] << " |" << std::endl;
+    }
+    else
+    {
+        os << "| ";
+        for (U32 i = 0; i < _size; ++i)
+            os << vec[i] << " ";
+        os << "|" << std::endl;
+    }
     return os;
 }
 

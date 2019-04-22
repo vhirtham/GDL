@@ -2,11 +2,13 @@
 
 #include "gdl/math/solver/gauss.h"
 
+#include "gdl/math/serial/matSerial.h"
+#include "gdl/math/serial/vecSerial.h"
 #include "gdl/base/sse/swizzle.h"
 #include "gdl/math/sse/matSSE.h"
 #include "gdl/math/sse/vecSSE.h"
 
-
+#include <cmath>
 
 namespace GDL::Solver
 {
@@ -16,10 +18,139 @@ namespace GDL::Solver
 // --------------------------------------------------------------------------------------------------------------------
 
 template <typename _type, I32 _size>
+VecSerial<_type, _size, true> GaussPartialPivot(const MatSerial<_type, _size, _size>& A,
+                                                const VecSerial<_type, _size, true>& b)
+{
+    return GaussDenseSerial<_type, _size>::SolvePartialPivot(A, b);
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+template <typename _type, I32 _size>
 VecSSE<_type, _size, true> GaussPartialPivot(const MatSSE<_type, _size, _size>& A, const VecSSE<_type, _size, true>& b)
 {
     using RegisterType = typename MatSSE<_type, _size, _size>::RegisterType;
-    return GaussDense<RegisterType, _size>::SolvePartialPivot(A, b);
+    return GaussDenseSSE<RegisterType, _size>::SolvePartialPivot(A, b);
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+template <typename _type, I32 _size>
+inline typename GaussDenseSerial<_type, _size>::VectorType
+GaussDenseSerial<_type, _size>::SolvePartialPivot(const MatrixType& A, const VectorType& b)
+{
+
+    MatrixDataArray matData = A.Data();
+    VectorDataArray vecData = b.Data();
+
+    for (U32 i = 0; i < _size; ++i)
+    {
+        PivotingStep(i, matData, vecData);
+        EliminationStep(i, matData, vecData);
+    }
+
+    return VectorType(vecData);
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+template <typename _type, I32 _size>
+inline void GaussDenseSerial<_type, _size>::EliminationStep(U32 iteration, MatrixDataArray& matData,
+                                                            VectorDataArray& vecData)
+{
+    const U32 colStartIdx = iteration * _size;
+    const U32 pivotIdx = colStartIdx + iteration;
+
+    DEV_EXCEPTION(matData[pivotIdx] == ApproxZero<_type>(1, 10), "Singular matrix - system not solveable");
+
+    std::array<_type, _size> rowMult;
+
+    // Calculate row multipliers
+    _type div = 1 / matData[pivotIdx];
+    for (U32 i = 0; i < _size; ++i)
+        if (i == iteration)
+        {
+            _type absPivM1 = matData[colStartIdx + i] - 1;
+            rowMult[i] = div * absPivM1;
+        }
+        else
+            rowMult[i] = div * matData[colStartIdx + i];
+
+    // Perform elimination for all relevant columns
+    for (U32 i = colStartIdx + _size; i < matData.size(); i += _size)
+    {
+        _type pivValue = matData[iteration + i];
+        for (U32 j = 0; j < _size; ++j)
+        {
+            const U32 idx = i + j;
+            matData[idx] = matData[idx] - rowMult[j] * pivValue;
+        }
+    }
+
+    _type pivValue = vecData[iteration];
+    for (U32 i = 0; i < _size; ++i)
+        vecData[i] = vecData[i] - rowMult[i] * pivValue;
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+template <typename _type, I32 _size>
+inline U32 GaussDenseSerial<_type, _size>::FindPivot(U32 iteration, const MatrixDataArray& matData)
+{
+    const U32 colStartIdx = iteration * _size;
+    F32 maxAbs = std::abs(matData[colStartIdx + iteration]);
+    U32 maxValIdx = iteration;
+    for (U32 i = iteration + 1; i < _size; ++i)
+    {
+        F32 cmpAbs = std::abs(matData[i + colStartIdx]);
+        if (maxAbs < cmpAbs)
+        {
+            maxAbs = cmpAbs;
+            maxValIdx = i;
+        }
+    }
+
+    return maxValIdx;
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+template <typename _type, I32 _size>
+inline void GaussDenseSerial<_type, _size>::PivotingStep(U32 iteration, MatrixDataArray& matData,
+                                                         VectorDataArray& vecData)
+{
+    U32 pivotRowIdx = FindPivot(iteration, matData);
+
+    if (pivotRowIdx != iteration)
+        SwapRows(pivotRowIdx, iteration, matData, vecData);
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+template <typename _type, I32 _size>
+inline void GaussDenseSerial<_type, _size>::SwapRows(U32 pivotRowIdx, U32 iteration, MatrixDataArray& matData,
+                                                     VectorDataArray& vecData)
+{
+    DEV_EXCEPTION(pivotRowIdx < iteration,
+                  "Internal error. Row of the pivot element must be higher or equal to the current iteration number");
+
+    const U32 rowDiff = pivotRowIdx - iteration;
+    for (U32 i = iteration * _size + iteration; i < matData.size(); i += _size)
+        std::swap(matData[i], matData[i + rowDiff]);
+
+    std::swap(vecData[iteration], vecData[pivotRowIdx]);
 }
 
 
@@ -27,8 +158,8 @@ VecSSE<_type, _size, true> GaussPartialPivot(const MatSSE<_type, _size, _size>& 
 // --------------------------------------------------------------------------------------------------------------------
 
 template <typename _registerType, I32 _size>
-inline typename GaussDense<_registerType, _size>::VectorType
-GaussDense<_registerType, _size>::SolvePartialPivot(const MatrixType& A, const VectorType& b)
+inline typename GaussDenseSSE<_registerType, _size>::VectorType
+GaussDenseSSE<_registerType, _size>::SolvePartialPivot(const MatrixType& A, const VectorType& b)
 {
     using namespace GDL::sse;
 
@@ -61,9 +192,9 @@ GaussDense<_registerType, _size>::SolvePartialPivot(const MatrixType& A, const V
 
 template <typename _registerType, I32 _size>
 template <U32 _regValueIdx>
-inline void GaussDense<_registerType, _size>::EliminationStepRegister(U32 iteration, U32 regRowIdx,
-                                                                      MatrixDataArray& matData,
-                                                                      VectorDataArray& vecData)
+inline void GaussDenseSSE<_registerType, _size>::EliminationStepRegister(U32 iteration, U32 regRowIdx,
+                                                                         MatrixDataArray& matData,
+                                                                         VectorDataArray& vecData)
 {
     using namespace GDL::sse;
 
@@ -112,7 +243,7 @@ inline void GaussDense<_registerType, _size>::EliminationStepRegister(U32 iterat
 
 template <typename _registerType, I32 _size>
 template <U32 _regValueIdx>
-inline U32 GaussDense<_registerType, _size>::FindPivot(U32 iteration, U32 regRowIdx, const MatrixDataArray& matData)
+inline U32 GaussDenseSSE<_registerType, _size>::FindPivot(U32 iteration, U32 regRowIdx, const MatrixDataArray& matData)
 {
     using namespace GDL::sse;
 
@@ -153,8 +284,8 @@ inline U32 GaussDense<_registerType, _size>::FindPivot(U32 iteration, U32 regRow
 
 template <typename _registerType, I32 _size>
 template <U32 _regValueIdx, U32 _maxRecursionDepth>
-inline void GaussDense<_registerType, _size>::GaussStepsRegister(U32 regRowIdx, MatrixDataArray& matData,
-                                                                 VectorDataArray& vecData)
+inline void GaussDenseSSE<_registerType, _size>::GaussStepsRegister(U32 regRowIdx, MatrixDataArray& matData,
+                                                                    VectorDataArray& vecData)
 {
     static_assert(_maxRecursionDepth <= numRegisterValues,
                   "_maxRecursionDepth must be equal or smaller than the number of register values.");
@@ -173,8 +304,9 @@ inline void GaussDense<_registerType, _size>::GaussStepsRegister(U32 regRowIdx, 
 
 template <typename _registerType, I32 _size>
 template <U32 _regValueIdx>
-inline void GaussDense<_registerType, _size>::PivotingStepRegister(U32 iteration, U32 regRowIdx,
-                                                                   MatrixDataArray& matData, VectorDataArray& vecData)
+inline void GaussDenseSSE<_registerType, _size>::PivotingStepRegister(U32 iteration, U32 regRowIdx,
+                                                                      MatrixDataArray& matData,
+                                                                      VectorDataArray& vecData)
 {
     U32 pivotRowIdx = FindPivot<_regValueIdx>(iteration, regRowIdx, matData);
 
@@ -190,8 +322,8 @@ inline void GaussDense<_registerType, _size>::PivotingStepRegister(U32 iteration
 
 template <typename _registerType, I32 _size>
 template <U32 _regValueIdx>
-inline void GaussDense<_registerType, _size>::SwapPivot(U32 pivotRowIdx, U32 iteration, U32 regRowIdx,
-                                                        MatrixDataArray& matData, VectorDataArray& vecData)
+inline void GaussDenseSSE<_registerType, _size>::SwapPivot(U32 pivotRowIdx, U32 iteration, U32 regRowIdx,
+                                                           MatrixDataArray& matData, VectorDataArray& vecData)
 {
     const U32 pivotRegRowIdx = pivotRowIdx / numRegisterValues;
     if (regRowIdx == pivotRegRowIdx)
@@ -206,8 +338,8 @@ inline void GaussDense<_registerType, _size>::SwapPivot(U32 pivotRowIdx, U32 ite
 
 template <typename _registerType, I32 _size>
 template <U32 _regIdxDst, U32 _regIdxPiv, bool _sameReg>
-inline void GaussDense<_registerType, _size>::SwapPivotAllColumns(U32 iteration, U32 pivotRegRowIdx, U32 regRowIdx,
-                                                                  MatrixDataArray& matData, VectorDataArray& vecData)
+inline void GaussDenseSSE<_registerType, _size>::SwapPivotAllColumns(U32 iteration, U32 pivotRegRowIdx, U32 regRowIdx,
+                                                                     MatrixDataArray& matData, VectorDataArray& vecData)
 {
     using namespace GDL::sse;
 
@@ -243,9 +375,9 @@ inline void GaussDense<_registerType, _size>::SwapPivotAllColumns(U32 iteration,
 
 template <typename _registerType, I32 _size>
 template <U32 _regValueIdx, bool _sameReg>
-inline void GaussDense<_registerType, _size>::SwapPivotSwitch(U32 pivotRowIdx, U32 iteration, U32 pivotRegRowIdx,
-                                                              U32 regRowIdx, MatrixDataArray& matData,
-                                                              VectorDataArray& vecData)
+inline void GaussDenseSSE<_registerType, _size>::SwapPivotSwitch(U32 pivotRowIdx, U32 iteration, U32 pivotRegRowIdx,
+                                                                 U32 regRowIdx, MatrixDataArray& matData,
+                                                                 VectorDataArray& vecData)
 {
     static_assert(numRegisterValues == 2 || numRegisterValues == 4 || numRegisterValues == 8,
                   "Only registers with 2,4 or 8 values are supported.");

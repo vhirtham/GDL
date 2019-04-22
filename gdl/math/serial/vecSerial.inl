@@ -4,7 +4,7 @@
 
 #include "gdl/base/exception.h"
 
-
+#include <iostream>
 
 namespace GDL
 {
@@ -49,6 +49,27 @@ const std::array<_type, _size>& VecSerial<_type, _size, _isCol>::Data() const
 {
     return mData;
 }
+
+
+
+template <typename _type, I32 _size, bool _isCol>
+inline std::ostream& operator<<(std::ostream& os, const VecSerial<_type, _size, _isCol>& vec)
+{
+    if constexpr (_isCol)
+    {
+        for (U32 i = 0; i < _size; ++i)
+            os << "| " << vec[i] << " |" << std::endl;
+    }
+    else
+    {
+        os << "| ";
+        for (U32 i = 0; i < _size; ++i)
+            os << vec[i] << " ";
+        os << "|" << std::endl;
+    }
+    return os;
+}
+
 
 
 } // namespace GDL
