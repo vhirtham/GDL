@@ -1,5 +1,7 @@
 #include <benchmark/benchmark.h>
 
+#define EIGEN_STACK_ALLOCATION_LIMIT 0
+
 #include "gdl/math/solver/gauss.h"
 #include "eigen3/Eigen/Dense"
 
@@ -213,6 +215,8 @@ public:
 
 
 #ifdef EIGEN3_FOUND
+
+
 
 class Eigen3 : public benchmark::Fixture
 {

@@ -73,29 +73,22 @@ inline void GaussDenseSerial<_type, _size>::EliminationStep(U32 iteration, Matri
 
     // Calculate row multipliers
     _type div = 1 / matData[pivotIdx];
+
+    matData[colStartIdx + iteration] -= 1;
     for (U32 i = 0; i < _size; ++i)
-        if (i == iteration)
-        {
-            _type absPivM1 = matData[colStartIdx + i] - 1;
-            rowMult[i] = div * absPivM1;
-        }
-        else
-            rowMult[i] = div * matData[colStartIdx + i];
+        rowMult[i] = div * matData[colStartIdx + i];
 
     // Perform elimination for all relevant columns
     for (U32 i = colStartIdx + _size; i < matData.size(); i += _size)
     {
         _type pivValue = matData[iteration + i];
         for (U32 j = 0; j < _size; ++j)
-        {
-            const U32 idx = i + j;
-            matData[idx] = matData[idx] - rowMult[j] * pivValue;
-        }
+            matData[i + j] -= rowMult[j] * pivValue;
     }
 
     _type pivValue = vecData[iteration];
     for (U32 i = 0; i < _size; ++i)
-        vecData[i] = vecData[i] - rowMult[i] * pivValue;
+        vecData[i] -= rowMult[i] * pivValue;
 }
 
 
@@ -205,36 +198,28 @@ inline void GaussDenseSSE<_registerType, _size>::EliminationStepRegister(U32 ite
                   "Singular matrix - system not solveable");
 
 
-
     // Calculate row multipliers
     alignas(alignmentBytes<_registerType>) std::array<_registerType, numColRegisters> rowMult;
+    const _registerType zero = _mmx_setzero_p<_registerType>();
     const _registerType one = _mmx_set1_p<_registerType>(1);
     const _registerType div = _mmx_div_p(one, BroadcastAcrossLanes<_regValueIdx>(matData[actRowRegIdx]));
 
+    matData[actRowRegIdx] = _mmx_sub_p(matData[actRowRegIdx], BlendIndex<_regValueIdx>(zero, one));
     for (U32 i = 0; i < numColRegisters; ++i)
-        if (i == actRowRegIdx % numColRegisters)
-        {
-            _registerType absPivM1 = _mmx_sub_p(matData[colStartIdx + i], one);
-            rowMult[i] = _mmx_mul_p(div, BlendIndex<_regValueIdx>(matData[colStartIdx + i], absPivM1));
-        }
-        else
-            rowMult[i] = _mmx_mul_p(div, matData[colStartIdx + i]);
-
+        rowMult[i] = _mmx_mul_p(div, matData[colStartIdx + i]);
 
 
     // Perform elimination for all relevant columns
     for (U32 i = colStartIdx + numColRegisters; i < _size * numColRegisters; i += numColRegisters)
     {
-        _registerType bc = BroadcastAcrossLanes<_regValueIdx>(matData[regRowIdx + i]);
+        _registerType pivValue = BroadcastAcrossLanes<_regValueIdx>(matData[regRowIdx + i]);
         for (U32 j = 0; j < numColRegisters; ++j)
-        {
-            const U32 regIdx = i + j;
-            matData[regIdx] = _mmx_fnmadd_p(rowMult[j], bc, matData[regIdx]);
-        }
+            matData[i + j] = _mmx_fnmadd_p(rowMult[j], pivValue, matData[i + j]);
     }
-    _registerType bc = BroadcastAcrossLanes<_regValueIdx>(vecData[regRowIdx]);
+
+    _registerType pivValue = BroadcastAcrossLanes<_regValueIdx>(vecData[regRowIdx]);
     for (U32 i = 0; i < numColRegisters; ++i)
-        vecData[i] = _mmx_fnmadd_p(rowMult[i], bc, vecData[i]);
+        vecData[i] = _mmx_fnmadd_p(rowMult[i], pivValue, vecData[i]);
 }
 
 
