@@ -1,9 +1,18 @@
+set(MemoryManagerSources
+    resources/memory/generalPurposeMemory.cpp
+    resources/memory/heapMemory.cpp
+    resources/memory/memoryManager.cpp
+    resources/memory/memoryPool.cpp
+    resources/memory/memoryStack.cpp)
+
 add_subdirectory(solver)
 addTest(mat)
 addTest(mat2)
 addTest(mat3)
 addTest(mat4)
 addTest(quat)
+addTest(sparseMatCLL
+    ${MemoryManagerSources})
 addTest(vec)
 addTest(vec2)
 addTest(vec3)
