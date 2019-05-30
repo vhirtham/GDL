@@ -24,7 +24,7 @@ namespace Solver
 
 
 
-//! @brief ...
+//! @brief Solves the linear system A * x = b by using a Gauss-Jordan algorithm with partial pivoting.
 //! @param A: Matrix
 //! @param b: Vector
 //! @return Result vector x
@@ -43,8 +43,8 @@ template <typename _type, I32 _size>
 
 
 
-//! @brief ...
-//! @tparam _registerType: SSE register type
+//! @brief Gauss-Jordan solver class for dense static systems
+//! @tparam _type: Data type
 //! @tparam _size: Size of the linear system
 template <typename _type, I32 _size>
 class GaussDenseSerial
@@ -55,20 +55,38 @@ class GaussDenseSerial
     using MatrixType = MatSerial<_type, _size, _size>;
 
 public:
-    //! @brief ...
+    //! @brief Solves the linear system A * x = b by using a Gauss-Jordan algorithm with partial pivoting.
     //! @param A: Matrix
     //! @param b: Vector
     //! @return Result vector x
     [[nodiscard]] inline static VectorType SolvePartialPivot(const MatrixType& A, const VectorType& b);
 
 private:
+    //! @brief Performs the elimination step of the current iteration
+    //! @param iteration: Number of the current iteration
+    //! @param matData: Matrix data array (column major ordering)
+    //! @param vecData: Vector data array
     inline static void EliminationStep(U32 iteration, MatrixDataArray& matData, VectorDataArray& vecData);
 
+    //! @brief Finds the pivot element (maximum absolute value) inside of a column and returns the row where it is
+    //! currently located.
+    //! @param iteration: Number of the current iteration
+    //! @param matData: Matrix data array (column major ordering)
+    //! @return Row index of the pivot element
     inline static U32 FindPivot(U32 iteration, const MatrixDataArray& matData);
 
+    //! @brief Performs the pivoting step for the given iteration
+    //! @param iteration: Number of the current iteration
+    //! @param matData: Matrix data array (column major ordering)
+    //! @param vecData: Vector data array
     inline static void PivotingStep(U32 iteration, MatrixDataArray& matData, VectorDataArray& vecData);
 
-    inline static void SwapRows(U32 pivotRowIdx, U32 iteration, MatrixDataArray& matData, VectorDataArray& vecData);
+    //! @brief Moves the row that contains the pivot element into the correct position.
+    //! @param pivotRowIdx: Index of the row that contains the pivot element
+    //! @param iteration: Number of the current iteration
+    //! @param matData: Matrix data array (column major ordering)
+    //! @param vecData: Vector data array
+    inline static void SwapPivot(U32 pivotRowIdx, U32 iteration, MatrixDataArray& matData, VectorDataArray& vecData);
 };
 
 

@@ -125,7 +125,7 @@ inline void GaussDenseSerial<_type, _size>::PivotingStep(U32 iteration, MatrixDa
     U32 pivotRowIdx = FindPivot(iteration, matData);
 
     if (pivotRowIdx != iteration)
-        SwapRows(pivotRowIdx, iteration, matData, vecData);
+        SwapPivot(pivotRowIdx, iteration, matData, vecData);
 }
 
 
@@ -133,8 +133,8 @@ inline void GaussDenseSerial<_type, _size>::PivotingStep(U32 iteration, MatrixDa
 // --------------------------------------------------------------------------------------------------------------------
 
 template <typename _type, I32 _size>
-inline void GaussDenseSerial<_type, _size>::SwapRows(U32 pivotRowIdx, U32 iteration, MatrixDataArray& matData,
-                                                     VectorDataArray& vecData)
+inline void GaussDenseSerial<_type, _size>::SwapPivot(U32 pivotRowIdx, U32 iteration, MatrixDataArray& matData,
+                                                      VectorDataArray& vecData)
 {
     DEV_EXCEPTION(pivotRowIdx < iteration,
                   "Internal error. Row of the pivot element must be higher or equal to the current iteration number");
