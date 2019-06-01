@@ -32,7 +32,6 @@ template <typename _type, I32 _size>
 [[nodiscard]] VecSerial<_type, _size, true> GaussPartialPivot(const MatSerial<_type, _size, _size>& A,
                                                               const VecSerial<_type, _size, true>& b);
 
-
 //! @brief Solves the linear system A * x = b by using a vectorized Gauss-Jordan algorithm with partial pivoting.
 //! @param A: Matrix
 //! @param b: Vector
@@ -42,6 +41,8 @@ template <typename _type, I32 _size>
                                                            const VecSSE<_type, _size, true>& b);
 
 
+
+// Support classes ----------------------------------------------------------------------------------------------------
 
 //! @brief Gauss-Jordan solver class for dense static systems
 //! @tparam _type: Data type

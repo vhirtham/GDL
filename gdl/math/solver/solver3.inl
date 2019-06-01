@@ -2,17 +2,22 @@
 
 #include "gdl/math/solver/solver3.h"
 
+#include "gdl/base/approx.h"
 #include "gdl/base/sse/abs.h"
 #include "gdl/base/sse/crossProduct.h"
 #include "gdl/base/sse/determinant.h"
 #include "gdl/base/sse/dotProduct.h"
 #include "gdl/base/sse/swizzle.h"
+#include "gdl/math/serial/mat3Serial.h"
+#include "gdl/math/serial/vec3Serial.h"
 #include "gdl/math/sse/mat3fSSE.h"
-#include "gdl/math/sse/vec3fSSE.h"
 
 
 namespace GDL::Solver
 {
+
+
+// --------------------------------------------------------------------------------------------------------------------
 
 Vec3fSSE<true> Cramer(const Mat3fSSE& A, const Vec3fSSE<true>& b)
 {
@@ -33,46 +38,57 @@ Vec3fSSE<true> Cramer(const Mat3fSSE& A, const Vec3fSSE<true>& b)
 }
 
 
-class GaussInternals3
+
+// --------------------------------------------------------------------------------------------------------------------
+
+template <typename _type>
+Vec3Serial<_type, true> GaussPartialPivot(const Mat3Serial<_type>& A, const Vec3Serial<_type, true>& b)
 {
-    friend Vec3fSSE<true> GaussPartialPivot(const Mat3fSSE&, const Vec3fSSE<true>&);
+    std::array<_type, 9> matrixData = A.Data();
+    std::array<_type, 3> vectorData = b.Data();
 
-    //! @brief Performs the gauss elimination step starting with the specified matrix element on the main diagonal. Rows
-    //! above and to the right of the specified element are not modified, since the elemination process is expected to
-    //! work from left to right and top to bottom.
-    //! @tparam _idx: Index of the element on the main diagonal of the matrix from which the elimination process is
-    //! started
-    //! @param data: Data of the linear system (matrix columns with appended rhs vector)
-    //! @remark Since the current column is not needed in subsequent elimination steps, it will not be modified to
-    //! maximize performance. Therefore the matrix is not equal to the identity matrix when all elimination steps are
-    //! done.
-    template <U32 _idx>
-    static inline void EliminationStep(const std::array<__m128* const, 4>& data)
+    U32 idx = 0;
+
+    // Find first pivot
+    for (U32 i = 1; i < 3; ++i)
+        if (std::abs(matrixData[idx]) < std::abs(matrixData[i]))
+            idx = i;
+
+    // First pivoting step
+    if (idx != 0)
     {
-        using namespace GDL::sse;
-
-        DEV_EXCEPTION(GetValue<_idx>(*data[_idx]) == ApproxZero<F32>(10), "Singular matrix - system not solveable");
-
-        constexpr U32 b0 = (_idx == 0) ? 1 : 0;
-        constexpr U32 b1 = (_idx == 1) ? 1 : 0;
-        constexpr U32 b2 = (_idx == 2) ? 1 : 0;
-
-        const __m128 m1 = _mmx_set1_p<__m128>(-1);
-        const __m128 zero = _mmx_setzero_p<__m128>();
-
-        __m128 bc = Broadcast<_idx>(*data[_idx]);
-        __m128 mult0 = Blend<b0, b1, b2, 0>(*data[_idx], m1);
-        __m128 mult1 = _mmx_div_p(mult0, bc);
-
-        for (U32 i = _idx + 1; i < 4; ++i)
-        {
-            bc = Broadcast<_idx>(*data[i]);
-            *data[i] = _mmx_fnmadd_p(mult1, bc, Blend<b0, b1, b2, 1>(*data[i], zero));
-        }
+        for (U32 i = 0; i < 9; i += 3)
+            std::swap(matrixData[i], matrixData[i + idx]);
+        std::swap(vectorData[0], vectorData[idx]);
     }
-};
 
 
+    // First elimination step
+    Gauss3Serial<_type>::template EliminationStep<0>(matrixData, vectorData);
+
+
+    // Second pivoting step
+    if (std::abs(matrixData[4]) < std::abs(matrixData[5]))
+    {
+        std::swap(matrixData[4], matrixData[5]);
+        std::swap(matrixData[7], matrixData[8]);
+        std::swap(vectorData[1], vectorData[2]);
+    }
+
+
+    // Second elimination step
+    Gauss3Serial<_type>::template EliminationStep<1>(matrixData, vectorData);
+
+    // Last elimination step
+    Gauss3Serial<_type>::template EliminationStep<2>(matrixData, vectorData);
+
+
+    return Vec3Serial<_type, true>(vectorData);
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
 
 Vec3fSSE<true> GaussPartialPivot(const Mat3fSSE& A, const Vec3fSSE<true>& b)
 {
@@ -109,7 +125,7 @@ Vec3fSSE<true> GaussPartialPivot(const Mat3fSSE& A, const Vec3fSSE<true>& b)
 
 
     // First elimination
-    GaussInternals3::EliminationStep<0>(data);
+    Gauss3SSE::EliminationStep<0>(data);
 
 
     // Second pivoting step
@@ -120,15 +136,80 @@ Vec3fSSE<true> GaussPartialPivot(const Mat3fSSE& A, const Vec3fSSE<true>& b)
 
 
     // Second elimination
-    GaussInternals3::EliminationStep<1>(data);
+    Gauss3SSE::EliminationStep<1>(data);
 
 
     // Final elimination
-    GaussInternals3::EliminationStep<2>(data);
+    Gauss3SSE::EliminationStep<2>(data);
+
 
     return Vec3fSSE<true>(rhs);
 }
 
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+template <typename _type>
+template <U32 _idx>
+inline void Gauss3Serial<_type>::EliminationStep(std::array<_type, 9>& matrixData, std::array<_type, 3>& vectorData)
+{
+    constexpr U32 colStartIdx = _idx * 3;
+    constexpr U32 pivotIdx = colStartIdx + _idx;
+
+    DEV_EXCEPTION(matrixData[pivotIdx] == ApproxZero<_type>(1, 10), "Singular matrix - system not solveable");
+
+    std::array<_type, 3> rowMult;
+
+    // Calculate row multipliers
+    _type div = 1 / matrixData[pivotIdx];
+
+    matrixData[colStartIdx + _idx] -= 1;
+    for (U32 i = 0; i < 3; ++i)
+        rowMult[i] = div * matrixData[colStartIdx + i];
+
+    // Perform elimination for all relevant columns
+    for (U32 i = colStartIdx + 3; i < matrixData.size(); i += 3)
+    {
+        _type pivValue = matrixData[_idx + i];
+        for (U32 j = 0; j < 3; ++j)
+            matrixData[i + j] -= rowMult[j] * pivValue;
+    }
+
+    _type pivValue = vectorData[_idx];
+    for (U32 i = 0; i < 3; ++i)
+        vectorData[i] -= rowMult[i] * pivValue;
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+
+template <U32 _idx>
+inline void Gauss3SSE::EliminationStep(const std::array<__m128* const, 4>& data)
+{
+    using namespace GDL::sse;
+
+    DEV_EXCEPTION(GetValue<_idx>(*data[_idx]) == ApproxZero<F32>(10), "Singular matrix - system not solveable");
+
+    constexpr U32 b0 = (_idx == 0) ? 1 : 0;
+    constexpr U32 b1 = (_idx == 1) ? 1 : 0;
+    constexpr U32 b2 = (_idx == 2) ? 1 : 0;
+
+    const __m128 m1 = _mmx_set1_p<__m128>(-1);
+    const __m128 zero = _mmx_setzero_p<__m128>();
+
+    __m128 bc = Broadcast<_idx>(*data[_idx]);
+    __m128 mult0 = Blend<b0, b1, b2, 0>(*data[_idx], m1);
+    __m128 mult1 = _mmx_div_p(mult0, bc);
+
+    for (U32 i = _idx + 1; i < 4; ++i)
+    {
+        bc = Broadcast<_idx>(*data[i]);
+        *data[i] = _mmx_fnmadd_p(mult1, bc, Blend<b0, b1, b2, 1>(*data[i], zero));
+    }
+}
 
 
 // std::cout << Vec3f(row) << std::endl;

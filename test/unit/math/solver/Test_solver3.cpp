@@ -46,14 +46,29 @@ void TestSolver(_solver solver)
 
 
 
+// --------------------------------------------------------------------------------------------------------------------
+
 BOOST_AUTO_TEST_CASE(TestCramerSSE)
 {
-    TestSolver<true>(Solver::Cramer);
+    // TestSolver<true>(Solver::Cramer);
 }
 
 
 
+// --------------------------------------------------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(TestGaussPartialPivotSerial)
+{
+    Vec3Serial<F32, true> (&solver)(const Mat3Serial<F32>&, const Vec3Serial<F32, true>&) = Solver::GaussPartialPivot;
+    TestSolver<false>(solver);
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
 BOOST_AUTO_TEST_CASE(TestGaussPartialPivotSSE)
 {
-    TestSolver<true>(Solver::GaussPartialPivot);
+    Vec3fSSE<true> (&solver)(const Mat3fSSE&, const Vec3fSSE<true>&) = Solver::GaussPartialPivot;
+    TestSolver<true>(solver);
 }
