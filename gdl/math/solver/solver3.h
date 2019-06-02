@@ -24,10 +24,18 @@ namespace Solver
 {
 
 //! @brief Solves the linear system A * x = b by using Cramers rule.
+//! @tparam: Data type
 //! @param A: Matrix
 //! @param b: Vector
 //! @return Result vector x
-Vec3fSSE<true> Cramer(const Mat3fSSE& A, const Vec3fSSE<true>& b);
+template <typename _type>
+[[nodiscard]] inline Vec3Serial<_type, true> Cramer(const Mat3Serial<_type>& A, const Vec3Serial<_type, true>& b);
+
+//! @brief Solves the linear system A * x = b by using Cramers rule.
+//! @param A: Matrix
+//! @param b: Vector
+//! @return Result vector x
+[[nodiscard]] inline Vec3fSSE<true> Cramer(const Mat3fSSE& A, const Vec3fSSE<true>& b);
 
 //! @brief Solves the linear system A * x = b by using Gaussian elimination with partial pivoting.
 //! @tparam: Data type
@@ -35,13 +43,14 @@ Vec3fSSE<true> Cramer(const Mat3fSSE& A, const Vec3fSSE<true>& b);
 //! @param b: Vector
 //! @return Result vector x
 template <typename _type>
-Vec3Serial<_type, true> GaussPartialPivot(const Mat3Serial<_type>& A, const Vec3Serial<_type, true>& b);
+[[nodiscard]] inline Vec3Serial<_type, true> GaussPartialPivot(const Mat3Serial<_type>& A,
+                                                               const Vec3Serial<_type, true>& b);
 
 //! @brief Solves the linear system A * x = b by using Gaussian elimination with partial pivoting.
 //! @param A: Matrix
 //! @param b: Vector
 //! @return Result vector x
-Vec3fSSE<true> GaussPartialPivot(const Mat3fSSE& A, const Vec3fSSE<true>& b);
+[[nodiscard]] inline Vec3fSSE<true> GaussPartialPivot(const Mat3fSSE& A, const Vec3fSSE<true>& b);
 
 
 

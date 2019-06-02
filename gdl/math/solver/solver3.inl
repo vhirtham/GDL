@@ -16,10 +16,43 @@
 namespace GDL::Solver
 {
 
+// --------------------------------------------------------------------------------------------------------------------
+
+template <typename _type>
+inline Vec3Serial<_type, true> Cramer(const Mat3Serial<_type>& A, const Vec3Serial<_type, true>& b)
+{
+    std::array<_type, 9> matrixData = A.Data();
+    std::array<_type, 3> vectorData = b.Data();
+
+    std::array<_type, 3> cross12 = {{matrixData[4] * matrixData[8] - matrixData[5] * matrixData[7],
+                                     matrixData[5] * matrixData[6] - matrixData[3] * matrixData[8],
+                                     matrixData[3] * matrixData[7] - matrixData[4] * matrixData[6]}};
+
+    std::array<_type, 3> crossV2 = {{vectorData[1] * matrixData[8] - vectorData[2] * matrixData[7],
+                                     vectorData[2] * matrixData[6] - vectorData[0] * matrixData[8],
+                                     vectorData[0] * matrixData[7] - vectorData[1] * matrixData[6]}};
+
+    std::array<_type, 3> cross1V = {{matrixData[4] * vectorData[2] - matrixData[5] * vectorData[1],
+                                     matrixData[5] * vectorData[0] - matrixData[3] * vectorData[2],
+                                     matrixData[3] * vectorData[1] - matrixData[4] * vectorData[0]}};
+
+    _type detA = matrixData[0] * cross12[0] + matrixData[1] * cross12[1] + matrixData[2] * cross12[2];
+
+    DEV_EXCEPTION(detA == ApproxZero<F32>(10), "Singular matrix - system not solveable");
+
+    std::array<_type, 3> result = {
+            {(vectorData[0] * cross12[0] + vectorData[1] * cross12[1] + vectorData[2] * cross12[2]) / detA,
+             (matrixData[0] * crossV2[0] + matrixData[1] * crossV2[1] + matrixData[2] * crossV2[2]) / detA,
+             (matrixData[0] * cross1V[0] + matrixData[1] * cross1V[1] + matrixData[2] * cross1V[2]) / detA}};
+
+    return Vec3Serial<_type, true>(result);
+}
+
+
 
 // --------------------------------------------------------------------------------------------------------------------
 
-Vec3fSSE<true> Cramer(const Mat3fSSE& A, const Vec3fSSE<true>& b)
+inline Vec3fSSE<true> Cramer(const Mat3fSSE& A, const Vec3fSSE<true>& b)
 {
     using namespace GDL::sse;
 
@@ -42,7 +75,7 @@ Vec3fSSE<true> Cramer(const Mat3fSSE& A, const Vec3fSSE<true>& b)
 // --------------------------------------------------------------------------------------------------------------------
 
 template <typename _type>
-Vec3Serial<_type, true> GaussPartialPivot(const Mat3Serial<_type>& A, const Vec3Serial<_type, true>& b)
+inline Vec3Serial<_type, true> GaussPartialPivot(const Mat3Serial<_type>& A, const Vec3Serial<_type, true>& b)
 {
     std::array<_type, 9> matrixData = A.Data();
     std::array<_type, 3> vectorData = b.Data();
@@ -90,7 +123,7 @@ Vec3Serial<_type, true> GaussPartialPivot(const Mat3Serial<_type>& A, const Vec3
 
 // --------------------------------------------------------------------------------------------------------------------
 
-Vec3fSSE<true> GaussPartialPivot(const Mat3fSSE& A, const Vec3fSSE<true>& b)
+inline Vec3fSSE<true> GaussPartialPivot(const Mat3fSSE& A, const Vec3fSSE<true>& b)
 {
     using namespace GDL::sse;
 

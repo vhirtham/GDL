@@ -8,8 +8,8 @@
 
 using namespace GDL;
 
-template <typename _solver>
-bool SolverIsSSE = false;
+
+// --------------------------------------------------------------------------------------------------------------------
 
 template <typename _solver, typename Matrix, typename Vector>
 void TestSolverTestcase(_solver solver, const Matrix& A, const Vector& b, const Vector& exp)
@@ -25,11 +25,13 @@ void TestSolverTestcase(_solver solver, const Matrix& A, const Vector& b, const 
 
 
 
-template <bool IsSSE, typename _solver>
+// --------------------------------------------------------------------------------------------------------------------
+
+template <typename _solver>
 void TestSolver(_solver solver)
 {
-    using Matrix = typename std::conditional<IsSSE, Mat3fSSE, Mat3fSerial>::type;
-    using Vector = typename std::conditional<IsSSE, Vec3fSSE<true>, Vec3fSerial<true>>::type;
+    using Vector = decltype(solver({}, {}));
+    using Matrix = typename std::conditional<std::is_same<Vector, Vec3fSSE<true>>::value, Mat3fSSE, Mat3fSerial>::type;
 
     TestSolverTestcase(solver, Matrix(1, 0, 0, 0, 1, 0, 0, 0, 1), Vector(1, 2, 3), Vector(1, 2, 3));
     TestSolverTestcase(solver, Matrix(-2, -1, -3, -4, -1, -4, -8, -1, -5), Vector(-2, -1, -2), Vector(3, -3, 1));
@@ -45,12 +47,29 @@ void TestSolver(_solver solver)
 }
 
 
+// --------------------------------------------------------------------------------------------------------------------
+
+using SerialSolverPtr = Vec3Serial<F32, true> (*)(const Mat3Serial<F32>&, const Vec3Serial<F32, true>&);
+using SSESolverPtr = Vec3fSSE<true> (*)(const Mat3fSSE&, const Vec3fSSE<true>&);
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(TestCramerSerial)
+{
+    SerialSolverPtr solver = Solver::Cramer;
+    TestSolver(solver);
+}
+
+
 
 // --------------------------------------------------------------------------------------------------------------------
 
 BOOST_AUTO_TEST_CASE(TestCramerSSE)
 {
-    TestSolver<true>(Solver::Cramer);
+    SSESolverPtr solver = Solver::Cramer;
+    TestSolver(solver);
 }
 
 
@@ -59,8 +78,8 @@ BOOST_AUTO_TEST_CASE(TestCramerSSE)
 
 BOOST_AUTO_TEST_CASE(TestGaussPartialPivotSerial)
 {
-    Vec3Serial<F32, true> (&solver)(const Mat3Serial<F32>&, const Vec3Serial<F32, true>&) = Solver::GaussPartialPivot;
-    TestSolver<false>(solver);
+    SerialSolverPtr solver = Solver::GaussPartialPivot;
+    TestSolver(solver);
 }
 
 
@@ -69,6 +88,6 @@ BOOST_AUTO_TEST_CASE(TestGaussPartialPivotSerial)
 
 BOOST_AUTO_TEST_CASE(TestGaussPartialPivotSSE)
 {
-    Vec3fSSE<true> (&solver)(const Mat3fSSE&, const Vec3fSSE<true>&) = Solver::GaussPartialPivot;
-    TestSolver<true>(solver);
+    SSESolverPtr solver = Solver::GaussPartialPivot;
+    TestSolver(solver);
 }
