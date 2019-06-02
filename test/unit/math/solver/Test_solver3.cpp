@@ -50,7 +50,7 @@ void TestSolver(_solver solver)
 
 BOOST_AUTO_TEST_CASE(TestCramerSSE)
 {
-    // TestSolver<true>(Solver::Cramer);
+    TestSolver<true>(Solver::Cramer);
 }
 
 

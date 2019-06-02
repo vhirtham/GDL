@@ -193,28 +193,20 @@ inline void Gauss3SSE::EliminationStep(const std::array<__m128* const, 4>& data)
 
     DEV_EXCEPTION(GetValue<_idx>(*data[_idx]) == ApproxZero<F32>(10), "Singular matrix - system not solveable");
 
-    constexpr U32 b0 = (_idx == 0) ? 1 : 0;
-    constexpr U32 b1 = (_idx == 1) ? 1 : 0;
-    constexpr U32 b2 = (_idx == 2) ? 1 : 0;
 
-    const __m128 m1 = _mmx_set1_p<__m128>(-1);
     const __m128 zero = _mmx_setzero_p<__m128>();
+    const __m128 one = _mmx_set1_p<__m128>(1);
+    const __m128 div = _mmx_div_p(one, Broadcast<_idx>(*data[_idx]));
 
-    __m128 bc = Broadcast<_idx>(*data[_idx]);
-    __m128 mult0 = Blend<b0, b1, b2, 0>(*data[_idx], m1);
-    __m128 mult1 = _mmx_div_p(mult0, bc);
+    *data[_idx] = _mmx_sub_p(*data[_idx], BlendIndex<_idx>(zero, one));
+    __m128 rowMult = _mmx_mul_p(div, *data[_idx]);
 
     for (U32 i = _idx + 1; i < 4; ++i)
     {
-        bc = Broadcast<_idx>(*data[i]);
-        *data[i] = _mmx_fnmadd_p(mult1, bc, Blend<b0, b1, b2, 1>(*data[i], zero));
+        __m128 pivValue = Broadcast<_idx>(*data[i]);
+        *data[i] = _mmx_fnmadd_p(rowMult, pivValue, *data[i]);
     }
 }
 
-
-// std::cout << Vec3f(row) << std::endl;
-// std::cout << rowValues[mapping[1]] << " < " << rowValues[mapping[2]] << std::endl;
-// std::cout << mapping[1] << std::endl;
-// std::cout << Mat3fSSE(*data[0], *data[1], *data[2]) << std::endl;
 
 } // namespace GDL::Solver
