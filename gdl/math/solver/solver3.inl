@@ -232,7 +232,7 @@ inline void Gauss3SSE::EliminationStep(const std::array<__m128* const, 4>& data)
     const __m128 div = _mmx_div_p(one, Broadcast<_idx>(*data[_idx]));
 
     *data[_idx] = _mmx_sub_p(*data[_idx], BlendIndex<_idx>(zero, one));
-    __m128 rowMult = _mmx_mul_p(div, *data[_idx]);
+    const __m128 rowMult = _mmx_mul_p(div, *data[_idx]);
 
     for (U32 i = _idx + 1; i < 4; ++i)
     {

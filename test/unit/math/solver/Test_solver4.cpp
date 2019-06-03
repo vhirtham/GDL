@@ -9,8 +9,8 @@
 
 using namespace GDL;
 
-template <typename _solver>
-bool SolverIsSSE = false;
+
+// --------------------------------------------------------------------------------------------------------------------
 
 template <typename _solver, typename Matrix, typename Vector>
 void TestSolverTestcase(_solver solver, const Matrix& A, const Vector& b, const Vector& exp)
@@ -26,11 +26,13 @@ void TestSolverTestcase(_solver solver, const Matrix& A, const Vector& b, const 
 
 
 
-template <bool IsSSE, typename _solver>
+// --------------------------------------------------------------------------------------------------------------------
+
+template <typename _solver>
 void TestSolver(_solver solver, bool pivot = true)
 {
-    using Matrix = typename std::conditional<IsSSE, Mat4fSSE, Mat4fSerial>::type;
-    using Vector = typename std::conditional<IsSSE, Vec4fSSE<true>, Vec4fSerial<true>>::type;
+    using Vector = decltype(solver({}, {}));
+    using Matrix = typename std::conditional<std::is_same<Vector, Vec4fSSE<true>>::value, Mat4fSSE, Mat4fSerial>::type;
 
     TestSolverTestcase(solver, Matrix(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1), Vector(1, 2, 3, 4),
                        Vector(1, 2, 3, 4));
@@ -71,21 +73,37 @@ void TestSolver(_solver solver, bool pivot = true)
 
 
 
+// --------------------------------------------------------------------------------------------------------------------
+
+using SerialSolverPtr = Vec4Serial<F32, true> (*)(const Mat4Serial<F32>&, const Vec4Serial<F32, true>&);
+using SSESolverPtr = Vec4fSSE<true> (*)(const Mat4fSSE&, const Vec4fSSE<true>&);
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
 BOOST_AUTO_TEST_CASE(TestCramerSSE)
 {
-    TestSolver<true>(Solver::Cramer);
+    SSESolverPtr solver = Solver::Cramer;
+    TestSolver(solver);
 }
 
 
+
+// --------------------------------------------------------------------------------------------------------------------
 
 BOOST_AUTO_TEST_CASE(TestGaussNoPivotSSE)
 {
-    TestSolver<true>(Solver::GaussNoPivot, false);
+    SSESolverPtr solver = Solver::GaussNoPivot;
+    TestSolver(solver, false);
 }
 
 
 
+// --------------------------------------------------------------------------------------------------------------------
+
 BOOST_AUTO_TEST_CASE(TestGaussPartialPivotSSE)
 {
-    TestSolver<true>(Solver::GaussPartialPivot);
+    SSESolverPtr solver = Solver::GaussPartialPivot;
+    TestSolver(solver);
 }

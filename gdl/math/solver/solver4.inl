@@ -14,6 +14,8 @@
 namespace GDL::Solver
 {
 
+// --------------------------------------------------------------------------------------------------------------------
+
 Vec4fSSE<true> Cramer(const Mat4fSSE& A, const Vec4fSSE<true>& b)
 {
     using namespace GDL::sse;
@@ -36,48 +38,7 @@ Vec4fSSE<true> Cramer(const Mat4fSSE& A, const Vec4fSSE<true>& b)
 
 
 
-class GaussInternals4
-{
-    friend Vec4fSSE<true> GaussPartialPivot(const Mat4fSSE&, const Vec4fSSE<true>&);
-    friend Vec4fSSE<true> GaussNoPivot(const Mat4fSSE&, const Vec4fSSE<true>&);
-
-    //! @brief Performs the gauss elimination step starting with the specified matrix element on the main diagonal. Rows
-    //! above and to the right of the specified element are not modified, since the elemination process is expected to
-    //! work from left to right and top to bottom.
-    //! @tparam _idx: Index of the element on the main diagonal of the matrix from which the elimination process is
-    //! started
-    //! @param data: Data of the linear system (matrix columns with appended rhs vector)
-    //! @remark Since the current column is not needed in subsequent elimination steps, it will not be modified to
-    //! maximize performance. Therefore the matrix is not equal to the identity matrix when all elimination steps are
-    //! done.
-    template <U32 _idx>
-    static inline void EliminationStep(const std::array<__m128* const, 5>& data)
-    {
-        using namespace GDL::sse;
-
-        DEV_EXCEPTION(GetValue<_idx>(*data[_idx]) == ApproxZero<F32>(10), "Singular matrix - system not solveable");
-
-        constexpr U32 b0 = (_idx == 0) ? 1 : 0;
-        constexpr U32 b1 = (_idx == 1) ? 1 : 0;
-        constexpr U32 b2 = (_idx == 2) ? 1 : 0;
-        constexpr U32 b3 = (_idx == 3) ? 1 : 0;
-
-        const __m128 m1 = _mmx_set1_p<__m128>(-1);
-        const __m128 zero = _mmx_setzero_p<__m128>();
-
-        __m128 bc = Broadcast<_idx>(*data[_idx]);
-        __m128 mult0 = Blend<b0, b1, b2, b3>(*data[_idx], m1);
-        __m128 mult1 = _mmx_div_p(mult0, bc);
-
-        for (U32 i = _idx + 1; i < 5; ++i)
-        {
-            bc = Broadcast<_idx>(*data[i]);
-            *data[i] = _mmx_fnmadd_p(mult1, bc, Blend<b0, b1, b2, b3>(*data[i], zero));
-        }
-    }
-};
-
-
+// --------------------------------------------------------------------------------------------------------------------
 
 Vec4fSSE<true> GaussPartialPivot(const Mat4fSSE& A, const Vec4fSSE<true>& b)
 {
@@ -119,7 +80,7 @@ Vec4fSSE<true> GaussPartialPivot(const Mat4fSSE& A, const Vec4fSSE<true>& b)
 
 
     // First elimination
-    GaussInternals4::EliminationStep<0>(data);
+    Gauss4SSE::EliminationStep<0>(data);
 
 
 
@@ -148,7 +109,7 @@ Vec4fSSE<true> GaussPartialPivot(const Mat4fSSE& A, const Vec4fSSE<true>& b)
 
 
     // Second elimination
-    GaussInternals4::EliminationStep<1>(data);
+    Gauss4SSE::EliminationStep<1>(data);
 
 
 
@@ -160,16 +121,18 @@ Vec4fSSE<true> GaussPartialPivot(const Mat4fSSE& A, const Vec4fSSE<true>& b)
 
 
     // Third elimination
-    GaussInternals4::EliminationStep<2>(data);
+    Gauss4SSE::EliminationStep<2>(data);
 
 
     // Final elimination
-    GaussInternals4::EliminationStep<3>(data);
+    Gauss4SSE::EliminationStep<3>(data);
 
     return Vec4fSSE<true>(rhs);
 }
 
 
+
+// --------------------------------------------------------------------------------------------------------------------
 
 Vec4fSSE<true> GaussNoPivot(const Mat4fSSE& A, const Vec4fSSE<true>& b)
 {
@@ -181,18 +144,45 @@ Vec4fSSE<true> GaussNoPivot(const Mat4fSSE& A, const Vec4fSSE<true>& b)
 
 
     // First elimination
-    GaussInternals4::EliminationStep<0>(data);
+    Gauss4SSE::EliminationStep<0>(data);
 
     // Second elimination
-    GaussInternals4::EliminationStep<1>(data);
+    Gauss4SSE::EliminationStep<1>(data);
 
     // Third elimination
-    GaussInternals4::EliminationStep<2>(data);
+    Gauss4SSE::EliminationStep<2>(data);
 
     // Final elimination
-    GaussInternals4::EliminationStep<3>(data);
+    Gauss4SSE::EliminationStep<3>(data);
 
     return Vec4fSSE<true>(rhs);
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+template <U32 _idx>
+inline void Gauss4SSE::EliminationStep(const std::array<__m128* const, 5>& data)
+{
+    // INFO: This version is slightly faster than the one with the "-1". Reason: The "-1" version needs more
+    // "expensive" operations in front of the for loop. For small systems the additional blends in the loop are cheaper
+    // than those extra operations.
+    using namespace GDL::sse;
+
+    DEV_EXCEPTION(GetValue<_idx>(*data[_idx]) == ApproxZero<F32>(10), "Singular matrix - system not solveable");
+
+    const __m128 m1 = _mmx_set1_p<__m128>(-1);
+    const __m128 zero = _mmx_setzero_p<__m128>();
+
+    __m128 bc = Broadcast<_idx>(*data[_idx]);
+    const __m128 rowMult = _mmx_div_p(BlendIndex<_idx>(*data[_idx], m1), bc);
+
+    for (U32 i = _idx + 1; i < 5; ++i)
+    {
+        bc = Broadcast<_idx>(*data[i]);
+        *data[i] = _mmx_fnmadd_p(rowMult, bc, BlendIndex<_idx>(*data[i], zero));
+    }
 }
 
 } // namespace GDL::Solver
