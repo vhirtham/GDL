@@ -19,8 +19,8 @@ void TestSolverTestcase(_solver solver, const Matrix& A, const Vector& b, const 
     Vector b2 = A * res;
     for (U32 i = 0; i < 4; ++i)
     {
-        BOOST_CHECK(res[i] == Approx(exp[i], 20));
-        BOOST_CHECK(b2[i] == Approx(b[i], 20));
+        BOOST_CHECK(res[i] == Approx(exp[i], 50));
+        BOOST_CHECK(b2[i] == Approx(b[i], 50));
     }
 }
 
