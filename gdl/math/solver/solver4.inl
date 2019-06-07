@@ -7,6 +7,8 @@
 #include "gdl/base/sse/determinant.h"
 #include "gdl/base/sse/dotProduct.h"
 #include "gdl/base/sse/swizzle.h"
+#include "gdl/math/serial/mat4Serial.h"
+#include "gdl/math/serial/vec4Serial.h"
 #include "gdl/math/sse/mat4fSSE.h"
 #include "gdl/math/sse/vec4fSSE.h"
 
@@ -16,7 +18,7 @@ namespace GDL::Solver
 
 // --------------------------------------------------------------------------------------------------------------------
 
-Vec4fSSE<true> Cramer(const Mat4fSSE& A, const Vec4fSSE<true>& b)
+inline Vec4fSSE<true> Cramer(const Mat4fSSE& A, const Vec4fSSE<true>& b)
 {
     using namespace GDL::sse;
 
@@ -40,12 +42,132 @@ Vec4fSSE<true> Cramer(const Mat4fSSE& A, const Vec4fSSE<true>& b)
 
 // --------------------------------------------------------------------------------------------------------------------
 
-Vec4fSSE<true> GaussPartialPivot(const Mat4fSSE& A, const Vec4fSSE<true>& b)
+template <typename _type>
+inline Vec4Serial<_type, true> GaussNoPivot(const Mat4Serial<_type>& A, const Vec4Serial<_type, true>& b)
+{
+    std::array<_type, 16> matrixData = A.Data();
+    std::array<_type, 4> vectorData = b.Data();
+
+    // First elimination step
+    Gauss4Serial<_type>::template EliminationStep<0>(matrixData, vectorData);
+
+    // Second elimination step
+    Gauss4Serial<_type>::template EliminationStep<1>(matrixData, vectorData);
+
+    // Third elimination step
+    Gauss4Serial<_type>::template EliminationStep<2>(matrixData, vectorData);
+
+    // Last elimination step
+    Gauss4Serial<_type>::template EliminationStep<3>(matrixData, vectorData);
+
+    return Vec4Serial<_type, true>(vectorData);
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+inline Vec4fSSE<true> GaussNoPivot(const Mat4fSSE& A, const Vec4fSSE<true>& b)
 {
     using namespace GDL::sse;
 
-    __m128 rhs = b.DataSSE();
     alignas(alignmentBytes<__m128>) std::array<__m128, 4> matrixData = A.DataSSE();
+    __m128 rhs = b.DataSSE();
+    const std::array<__m128* const, 5> data = {{&matrixData[0], &matrixData[1], &matrixData[2], &matrixData[3], &rhs}};
+
+
+    // First elimination
+    Gauss4SSE::EliminationStep<0>(data);
+
+    // Second elimination
+    Gauss4SSE::EliminationStep<1>(data);
+
+    // Third elimination
+    Gauss4SSE::EliminationStep<2>(data);
+
+    // Final elimination
+    Gauss4SSE::EliminationStep<3>(data);
+
+    return Vec4fSSE<true>(rhs);
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+template <typename _type>
+inline Vec4Serial<_type, true> GaussPartialPivot(const Mat4Serial<_type>& A, const Vec4Serial<_type, true>& b)
+{
+    std::array<_type, 16> matrixData = A.Data();
+    std::array<_type, 4> vectorData = b.Data();
+
+
+    // Find first pivot
+    U32 idx = 0;
+    for (U32 i = 1; i < 4; ++i)
+        if (std::abs(matrixData[idx]) < std::abs(matrixData[i]))
+            idx = i;
+
+    // First pivoting step
+    if (idx != 0)
+    {
+        for (U32 i = 0; i < 16; i += 4)
+            std::swap(matrixData[i], matrixData[i + idx]);
+        std::swap(vectorData[0], vectorData[idx]);
+    }
+
+    // First elimination step
+    Gauss4Serial<_type>::template EliminationStep<0>(matrixData, vectorData);
+
+
+
+    // Find second pivot
+    idx = 5;
+    for (U32 i = 5; i < 7; ++i)
+        if (std::abs(matrixData[idx]) < std::abs(matrixData[i]))
+            idx = i;
+
+    // Second pivoting step
+    idx -= 5;
+    if (idx != 0)
+    {
+        for (U32 i = 5; i < 16; i += 4)
+            std::swap(matrixData[i], matrixData[i + idx]);
+        std::swap(vectorData[1], vectorData[idx + 1]);
+    }
+
+    // Second elimination step
+    Gauss4Serial<_type>::template EliminationStep<1>(matrixData, vectorData);
+
+
+    // Third pivoting step
+    if (std::abs(matrixData[10]) < std::abs(matrixData[11]))
+    {
+        std::swap(matrixData[10], matrixData[11]);
+        std::swap(matrixData[14], matrixData[15]);
+        std::swap(vectorData[2], vectorData[3]);
+    }
+
+
+    // Third elimination step
+    Gauss4Serial<_type>::template EliminationStep<2>(matrixData, vectorData);
+
+    // Last elimination step
+    Gauss4Serial<_type>::template EliminationStep<3>(matrixData, vectorData);
+
+    return Vec4Serial<_type, true>(vectorData);
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+inline Vec4fSSE<true> GaussPartialPivot(const Mat4fSSE& A, const Vec4fSSE<true>& b)
+{
+    using namespace GDL::sse;
+
+    alignas(alignmentBytes<__m128>) std::array<__m128, 4> matrixData = A.DataSSE();
+    __m128 rhs = b.DataSSE();
     const std::array<__m128* const, 5> data = {{&matrixData[0], &matrixData[1], &matrixData[2], &matrixData[3], &rhs}};
 
 
@@ -92,7 +214,7 @@ Vec4fSSE<true> GaussPartialPivot(const Mat4fSSE& A, const Vec4fSSE<true>& b)
         if (colValues[idx] < colValues[i])
             idx = i;
 
-    // First pivoting step
+    // Second pivoting step
     switch (idx)
     {
     case 1:
@@ -134,28 +256,35 @@ Vec4fSSE<true> GaussPartialPivot(const Mat4fSSE& A, const Vec4fSSE<true>& b)
 
 // --------------------------------------------------------------------------------------------------------------------
 
-Vec4fSSE<true> GaussNoPivot(const Mat4fSSE& A, const Vec4fSSE<true>& b)
+template <typename _type>
+template <U32 _idx>
+inline void Gauss4Serial<_type>::EliminationStep(std::array<_type, 16>& matrixData, std::array<_type, 4>& vectorData)
 {
-    using namespace GDL::sse;
+    constexpr U32 colStartIdx = _idx * 4;
+    constexpr U32 pivotIdx = colStartIdx + _idx;
 
-    __m128 rhs = b.DataSSE();
-    alignas(alignmentBytes<__m128>) std::array<__m128, 4> matrixData = A.DataSSE();
-    const std::array<__m128* const, 5> data = {{&matrixData[0], &matrixData[1], &matrixData[2], &matrixData[3], &rhs}};
+    DEV_EXCEPTION(matrixData[pivotIdx] == ApproxZero<_type>(1, 10), "Singular matrix - system not solveable");
 
+    std::array<_type, 4> rowMult;
 
-    // First elimination
-    Gauss4SSE::EliminationStep<0>(data);
+    // Calculate row multipliers
+    _type div = 1 / matrixData[pivotIdx];
 
-    // Second elimination
-    Gauss4SSE::EliminationStep<1>(data);
+    matrixData[colStartIdx + _idx] -= 1;
+    for (U32 i = 0; i < 4; ++i)
+        rowMult[i] = div * matrixData[colStartIdx + i];
 
-    // Third elimination
-    Gauss4SSE::EliminationStep<2>(data);
+    // Perform elimination for all relevant columns
+    for (U32 i = colStartIdx + 4; i < matrixData.size(); i += 4)
+    {
+        _type pivValue = matrixData[_idx + i];
+        for (U32 j = 0; j < 4; ++j)
+            matrixData[i + j] -= rowMult[j] * pivValue;
+    }
 
-    // Final elimination
-    Gauss4SSE::EliminationStep<3>(data);
-
-    return Vec4fSSE<true>(rhs);
+    _type pivValue = vectorData[_idx];
+    for (U32 i = 0; i < 4; ++i)
+        vectorData[i] -= rowMult[i] * pivValue;
 }
 
 

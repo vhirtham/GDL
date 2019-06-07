@@ -127,8 +127,8 @@ inline Vec3fSSE<true> GaussPartialPivot(const Mat3fSSE& A, const Vec3fSSE<true>&
 {
     using namespace GDL::sse;
 
-    __m128 rhs = b.DataSSE();
     alignas(alignmentBytes<__m128>) std::array<__m128, 3> matrixData = A.DataSSE();
+    __m128 rhs = b.DataSSE();
     const std::array<__m128* const, 4> data = {{&matrixData[0], &matrixData[1], &matrixData[2], &rhs}};
 
 

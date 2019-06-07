@@ -9,6 +9,22 @@ using namespace GDL;
 
 // Fixture declaration ------------------------------------------------------------------------------------------------
 
+
+class Serial : public benchmark::Fixture
+{
+public:
+    Mat4Serial<F32> A;
+    Vec4Serial<F32, true> b;
+
+    Serial()
+        : A{2, 0, 4, 6, 2, 2, -3, 1, 3, 0, 0, -6, 2, 1, 1, -5}
+        , b{-6, 0, -21, 18}
+    {
+    }
+};
+
+
+
 class SIMD : public benchmark::Fixture
 {
 public:
@@ -56,10 +72,26 @@ BENCHMARK_F(SIMD, Cramer)(benchmark::State& state)
 // Gauss --------------------------------------------------------------------------------------------------------------
 
 
+BENCHMARK_F(Serial, GaussNoPivot)(benchmark::State& state)
+{
+    for (auto _ : state)
+        benchmark::DoNotOptimize(Solver::GaussNoPivot(A, b));
+}
+
+
+
 BENCHMARK_F(SIMD, GaussNoPivot)(benchmark::State& state)
 {
     for (auto _ : state)
         benchmark::DoNotOptimize(Solver::GaussNoPivot(A, b));
+}
+
+
+
+BENCHMARK_F(Serial, GaussPartialPivot)(benchmark::State& state)
+{
+    for (auto _ : state)
+        benchmark::DoNotOptimize(Solver::GaussPartialPivot(A, b));
 }
 
 

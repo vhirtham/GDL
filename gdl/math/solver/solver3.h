@@ -12,13 +12,13 @@
 namespace GDL
 {
 
-template <typename, bool>
-class Vec3Serial;
 template <typename>
 class Mat3Serial;
+class Mat3fSSE;
+template <typename, bool>
+class Vec3Serial;
 template <bool>
 class Vec3fSSE;
-class Mat3fSSE;
 
 namespace Solver
 {

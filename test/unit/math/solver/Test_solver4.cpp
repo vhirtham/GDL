@@ -19,8 +19,8 @@ void TestSolverTestcase(_solver solver, const Matrix& A, const Vector& b, const 
     Vector b2 = A * res;
     for (U32 i = 0; i < 4; ++i)
     {
-        BOOST_CHECK(res[i] == Approx(exp[i], 10));
-        BOOST_CHECK(b2[i] == Approx(b[i], 10));
+        BOOST_CHECK(res[i] == Approx(exp[i], 20));
+        BOOST_CHECK(b2[i] == Approx(b[i], 20));
     }
 }
 
@@ -96,6 +96,26 @@ BOOST_AUTO_TEST_CASE(TestGaussNoPivotSSE)
 {
     SSESolverPtr solver = Solver::GaussNoPivot;
     TestSolver(solver, false);
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(TestGaussNoPivotSerial)
+{
+    SerialSolverPtr solver = Solver::GaussNoPivot;
+    TestSolver(solver, false);
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(TestGaussPartialPivotSerial)
+{
+    SerialSolverPtr solver = Solver::GaussPartialPivot;
+    TestSolver(solver);
 }
 
 
