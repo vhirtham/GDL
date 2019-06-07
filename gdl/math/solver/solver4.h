@@ -21,8 +21,29 @@ class Vec4Serial;
 template <bool>
 class Vec4fSSE;
 
+
+// Missing solver types:
+// LL/Cholesky
+// LDL
+// LU
+
+
+// Missing solver variants:
+// - CramerAVX
+// - GaussAVX
+
+
 namespace Solver
 {
+
+//! @brief Solves the linear system A * x = b by using Cramers rule.
+//! @tparam _type: Data type
+//! @param A: Matrix
+//! @param b: Vector
+//! @return Result vector x
+template <typename _type>
+[[nodiscard]] inline Vec4Serial<_type, true> Cramer(const Mat4Serial<_type>& A, const Vec4Serial<_type, true>& b);
+
 //! @brief Solves the linear system A * x = b by using Cramers rule.
 //! @param A: Matrix
 //! @param b: Vector
@@ -30,7 +51,7 @@ namespace Solver
 [[nodiscard]] inline Vec4fSSE<true> Cramer(const Mat4fSSE& A, const Vec4fSSE<true>& b);
 
 //! @brief Solves the linear system A * x = b by using Gaussian elimination without pivoting.
-//! @tparam: Data type
+//! @tparam _type: Data type
 //! @param A: Matrix
 //! @param b: Vector
 //! @return Result vector x
@@ -44,7 +65,7 @@ template <typename _type>
 [[nodiscard]] inline Vec4fSSE<true> GaussNoPivot(const Mat4fSSE& A, const Vec4fSSE<true>& b);
 
 //! @brief Solves the linear system A * x = b by using Gaussian elimination with partial pivoting.
-//! @tparam: Data type
+//! @tparam _type: Data type
 //! @param A: Matrix
 //! @param b: Vector
 //! @return Result vector x

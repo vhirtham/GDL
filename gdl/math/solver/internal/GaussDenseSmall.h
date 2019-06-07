@@ -61,6 +61,8 @@ class GaussDenseSmallSerial
                                        std::array<_type, _size>& vectorData);
 };
 
+
+
 //! @brief Support class for Gauss solver.
 //! @tparam _size: Size of the linear system
 template <U32 _size>

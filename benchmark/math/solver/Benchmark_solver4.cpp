@@ -61,6 +61,14 @@ public:
 
 
 
+BENCHMARK_F(Serial, Cramer)(benchmark::State& state)
+{
+    for (auto _ : state)
+        benchmark::DoNotOptimize(Solver::Cramer(A, b));
+}
+
+
+
 BENCHMARK_F(SIMD, Cramer)(benchmark::State& state)
 {
     for (auto _ : state)

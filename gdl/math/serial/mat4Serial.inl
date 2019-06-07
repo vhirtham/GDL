@@ -161,6 +161,25 @@ Mat4Serial<_type> Mat4Serial<_type>::Transpose() const
 
 
 
+template <typename _type>
+F32 Mat4Serial<_type>::Det(const std::array<_type, 16>& data)
+{
+    F32 cd12 = data[8] * data[13] - data[9] * data[12];
+    F32 cd13 = data[8] * data[14] - data[10] * data[12];
+    F32 cd14 = data[8] * data[15] - data[11] * data[12];
+    F32 cd23 = data[9] * data[14] - data[10] * data[13];
+    F32 cd24 = data[9] * data[15] - data[11] * data[13];
+    F32 cd34 = data[10] * data[15] - data[11] * data[14];
+
+
+    return data[0] * (data[5] * cd34 - data[6] * cd24 + data[7] * cd23) +
+           data[1] * (-data[4] * cd34 + data[6] * cd14 - data[7] * cd13) +
+           data[2] * (data[4] * cd24 - data[5] * cd14 + data[7] * cd12) +
+           data[3] * (-data[4] * cd23 + data[5] * cd13 - data[6] * cd12);
+}
+
+
+
 template <typename _type2>
 inline std::ostream& operator<<(std::ostream& os, const Mat4Serial<_type2>& mat)
 {

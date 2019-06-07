@@ -82,6 +82,16 @@ using SSESolverPtr = Vec4fSSE<true> (*)(const Mat4fSSE&, const Vec4fSSE<true>&);
 
 // --------------------------------------------------------------------------------------------------------------------
 
+BOOST_AUTO_TEST_CASE(TestCramerSerial)
+{
+    SerialSolverPtr solver = Solver::Cramer;
+    TestSolver(solver);
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
 BOOST_AUTO_TEST_CASE(TestCramerSSE)
 {
     SSESolverPtr solver = Solver::Cramer;
