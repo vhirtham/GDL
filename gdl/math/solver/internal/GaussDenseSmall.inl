@@ -1,5 +1,8 @@
 #pragma once
 
+#include "gdl/base/approx.h"
+#include "gdl/base/exception.h"
+#include "gdl/base/sse/directAccess.h"
 #include "gdl/math/solver/internal/GaussDenseSmall.h"
 #include "gdl/base/sse/swizzle.h"
 
