@@ -7,6 +7,7 @@
 #include "gdl/base/sse/determinant.h"
 #include "gdl/base/sse/dotProduct.h"
 #include "gdl/base/sse/swizzle.h"
+#include "gdl/math/solver/internal/GaussDenseSmall.h"
 #include "gdl/math/serial/mat4Serial.h"
 #include "gdl/math/serial/vec4Serial.h"
 #include "gdl/math/sse/mat4fSSE.h"
@@ -49,16 +50,16 @@ inline Vec4Serial<_type, true> GaussNoPivot(const Mat4Serial<_type>& A, const Ve
     std::array<_type, 4> vectorData = b.Data();
 
     // First elimination step
-    Gauss4Serial<_type>::template EliminationStep<0>(matrixData, vectorData);
+    GaussDenseSmallSerial<_type, 4>::template EliminationStep<0>(matrixData, vectorData);
 
     // Second elimination step
-    Gauss4Serial<_type>::template EliminationStep<1>(matrixData, vectorData);
+    GaussDenseSmallSerial<_type, 4>::template EliminationStep<1>(matrixData, vectorData);
 
     // Third elimination step
-    Gauss4Serial<_type>::template EliminationStep<2>(matrixData, vectorData);
+    GaussDenseSmallSerial<_type, 4>::template EliminationStep<2>(matrixData, vectorData);
 
     // Last elimination step
-    Gauss4Serial<_type>::template EliminationStep<3>(matrixData, vectorData);
+    GaussDenseSmallSerial<_type, 4>::template EliminationStep<3>(matrixData, vectorData);
 
     return Vec4Serial<_type, true>(vectorData);
 }
@@ -77,16 +78,16 @@ inline Vec4fSSE<true> GaussNoPivot(const Mat4fSSE& A, const Vec4fSSE<true>& b)
 
 
     // First elimination
-    Gauss4SSE::EliminationStep<0>(data);
+    GaussDenseSmallSSE<4>::EliminationStep<0>(data);
 
     // Second elimination
-    Gauss4SSE::EliminationStep<1>(data);
+    GaussDenseSmallSSE<4>::EliminationStep<1>(data);
 
     // Third elimination
-    Gauss4SSE::EliminationStep<2>(data);
+    GaussDenseSmallSSE<4>::EliminationStep<2>(data);
 
     // Final elimination
-    Gauss4SSE::EliminationStep<3>(data);
+    GaussDenseSmallSSE<4>::EliminationStep<3>(data);
 
     return Vec4fSSE<true>(rhs);
 }
@@ -117,7 +118,7 @@ inline Vec4Serial<_type, true> GaussPartialPivot(const Mat4Serial<_type>& A, con
     }
 
     // First elimination step
-    Gauss4Serial<_type>::template EliminationStep<0>(matrixData, vectorData);
+    GaussDenseSmallSerial<_type, 4>::template EliminationStep<0>(matrixData, vectorData);
 
 
 
@@ -137,7 +138,7 @@ inline Vec4Serial<_type, true> GaussPartialPivot(const Mat4Serial<_type>& A, con
     }
 
     // Second elimination step
-    Gauss4Serial<_type>::template EliminationStep<1>(matrixData, vectorData);
+    GaussDenseSmallSerial<_type, 4>::template EliminationStep<1>(matrixData, vectorData);
 
 
     // Third pivoting step
@@ -150,10 +151,10 @@ inline Vec4Serial<_type, true> GaussPartialPivot(const Mat4Serial<_type>& A, con
 
 
     // Third elimination step
-    Gauss4Serial<_type>::template EliminationStep<2>(matrixData, vectorData);
+    GaussDenseSmallSerial<_type, 4>::template EliminationStep<2>(matrixData, vectorData);
 
     // Last elimination step
-    Gauss4Serial<_type>::template EliminationStep<3>(matrixData, vectorData);
+    GaussDenseSmallSerial<_type, 4>::template EliminationStep<3>(matrixData, vectorData);
 
     return Vec4Serial<_type, true>(vectorData);
 }
@@ -202,7 +203,7 @@ inline Vec4fSSE<true> GaussPartialPivot(const Mat4fSSE& A, const Vec4fSSE<true>&
 
 
     // First elimination
-    Gauss4SSE::EliminationStep<0>(data);
+    GaussDenseSmallSSE<4>::EliminationStep<0>(data);
 
 
 
@@ -231,7 +232,7 @@ inline Vec4fSSE<true> GaussPartialPivot(const Mat4fSSE& A, const Vec4fSSE<true>&
 
 
     // Second elimination
-    Gauss4SSE::EliminationStep<1>(data);
+    GaussDenseSmallSSE<4>::EliminationStep<1>(data);
 
 
 
@@ -243,75 +244,14 @@ inline Vec4fSSE<true> GaussPartialPivot(const Mat4fSSE& A, const Vec4fSSE<true>&
 
 
     // Third elimination
-    Gauss4SSE::EliminationStep<2>(data);
+    GaussDenseSmallSSE<4>::EliminationStep<2>(data);
 
 
     // Final elimination
-    Gauss4SSE::EliminationStep<3>(data);
+    GaussDenseSmallSSE<4>::EliminationStep<3>(data);
 
     return Vec4fSSE<true>(rhs);
 }
 
-
-
-// --------------------------------------------------------------------------------------------------------------------
-
-template <typename _type>
-template <U32 _idx>
-inline void Gauss4Serial<_type>::EliminationStep(std::array<_type, 16>& matrixData, std::array<_type, 4>& vectorData)
-{
-    constexpr U32 colStartIdx = _idx * 4;
-    constexpr U32 pivotIdx = colStartIdx + _idx;
-
-    DEV_EXCEPTION(matrixData[pivotIdx] == ApproxZero<_type>(1, 10), "Singular matrix - system not solveable");
-
-    std::array<_type, 4> rowMult;
-
-    // Calculate row multipliers
-    _type div = 1 / matrixData[pivotIdx];
-
-    matrixData[colStartIdx + _idx] -= 1;
-    for (U32 i = 0; i < 4; ++i)
-        rowMult[i] = div * matrixData[colStartIdx + i];
-
-    // Perform elimination for all relevant columns
-    for (U32 i = colStartIdx + 4; i < matrixData.size(); i += 4)
-    {
-        _type pivValue = matrixData[_idx + i];
-        for (U32 j = 0; j < 4; ++j)
-            matrixData[i + j] -= rowMult[j] * pivValue;
-    }
-
-    _type pivValue = vectorData[_idx];
-    for (U32 i = 0; i < 4; ++i)
-        vectorData[i] -= rowMult[i] * pivValue;
-}
-
-
-
-// --------------------------------------------------------------------------------------------------------------------
-
-template <U32 _idx>
-inline void Gauss4SSE::EliminationStep(const std::array<__m128* const, 5>& data)
-{
-    // INFO: This version is slightly faster than the one with the "-1". Reason: The "-1" version needs more
-    // "expensive" operations in front of the for loop. For small systems the additional blends in the loop are cheaper
-    // than those extra operations.
-    using namespace GDL::sse;
-
-    DEV_EXCEPTION(GetValue<_idx>(*data[_idx]) == ApproxZero<F32>(10), "Singular matrix - system not solveable");
-
-    const __m128 m1 = _mmx_set1_p<__m128>(-1);
-    const __m128 zero = _mmx_setzero_p<__m128>();
-
-    __m128 bc = Broadcast<_idx>(*data[_idx]);
-    const __m128 rowMult = _mmx_div_p(BlendIndex<_idx>(*data[_idx], m1), bc);
-
-    for (U32 i = _idx + 1; i < 5; ++i)
-    {
-        bc = Broadcast<_idx>(*data[i]);
-        *data[i] = _mmx_fnmadd_p(rowMult, bc, BlendIndex<_idx>(*data[i], zero));
-    }
-}
 
 } // namespace GDL::Solver

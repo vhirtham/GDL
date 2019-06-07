@@ -1,0 +1,73 @@
+#pragma once
+
+#include "gdl/math/solver/internal/GaussDenseSmall.h"
+#include "gdl/base/sse/swizzle.h"
+
+
+namespace GDL::Solver
+{
+
+// --------------------------------------------------------------------------------------------------------------------
+
+template <typename _type, U32 _size>
+template <U32 _idx>
+inline void GaussDenseSmallSerial<_type, _size>::EliminationStep(std::array<_type, _size * _size>& matrixData,
+                                                                 std::array<_type, _size>& vectorData)
+{
+    constexpr U32 colStartIdx = _idx * _size;
+    constexpr U32 pivotIdx = colStartIdx + _idx;
+
+    DEV_EXCEPTION(matrixData[pivotIdx] == ApproxZero<_type>(1, 10), "Singular matrix - system not solveable");
+
+    std::array<_type, _size> rowMult;
+
+    // Calculate row multipliers
+    _type div = 1 / matrixData[pivotIdx];
+
+    matrixData[colStartIdx + _idx] -= 1;
+    for (U32 i = 0; i < _size; ++i)
+        rowMult[i] = div * matrixData[colStartIdx + i];
+
+    // Perform elimination for all relevant columns
+    for (U32 i = colStartIdx + _size; i < matrixData.size(); i += _size)
+    {
+        _type pivValue = matrixData[_idx + i];
+        for (U32 j = 0; j < _size; ++j)
+            matrixData[i + j] -= rowMult[j] * pivValue;
+    }
+
+    _type pivValue = vectorData[_idx];
+    for (U32 i = 0; i < _size; ++i)
+        vectorData[i] -= rowMult[i] * pivValue;
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+
+template < U32 _size>
+template <U32 _idx>
+inline void GaussDenseSmallSSE<_size>::EliminationStep(const std::array<__m128* const, _size +1>& data)
+{
+    // INFO: This version is slightly faster than the one with the "-1". Reason: The "-1" version needs more
+    // "expensive" operations in front of the for-loop. For small systems the additional blends in the loop are cheaper
+    // than those extra operations.
+    using namespace GDL::sse;
+
+    DEV_EXCEPTION(GetValue<_idx>(*data[_idx]) == ApproxZero<F32>(10), "Singular matrix - system not solveable");
+
+    const __m128 m1 = _mmx_set1_p<__m128>(-1);
+    const __m128 zero = _mmx_setzero_p<__m128>();
+
+    __m128 bc = Broadcast<_idx>(*data[_idx]);
+    const __m128 rowMult = _mmx_div_p(BlendIndex<_idx>(*data[_idx], m1), bc);
+
+    for (U32 i = _idx + 1; i < _size +1; ++i)
+    {
+        bc = Broadcast<_idx>(*data[i]);
+        *data[i] = _mmx_fnmadd_p(rowMult, bc, BlendIndex<_idx>(*data[i], zero));
+    }
+}
+
+} // namespace GDL::Solver
