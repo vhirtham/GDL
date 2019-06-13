@@ -160,6 +160,13 @@ const std::array<F32, 16> Mat4fAVX::Data() const
 
 
 
+const std::array<__m256, 2>& Mat4fAVX::DataAVX() const
+{
+    return mData;
+}
+
+
+
 F32 Mat4fAVX::Det() const
 {
     return sse::Determinant4x4(mData[0], mData[1]);

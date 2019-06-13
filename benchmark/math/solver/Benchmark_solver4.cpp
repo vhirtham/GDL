@@ -39,6 +39,25 @@ public:
 };
 
 
+#ifdef __AVX2__
+
+class AVX : public benchmark::Fixture
+{
+public:
+    Mat4fAVX A;
+    Vec4f b;
+
+    AVX()
+        : A{2, 0, 4, 6, 2, 2, -3, 1, 3, 0, 0, -6, 2, 1, 1, -5}
+        , b{-6, 0, -21, 18}
+    {
+    }
+};
+
+#endif // __AVX2__
+
+
+
 #ifdef EIGEN3_FOUND
 
 class Eigen3 : public benchmark::Fixture
@@ -74,6 +93,18 @@ BENCHMARK_F(SIMD, Cramer)(benchmark::State& state)
     for (auto _ : state)
         benchmark::DoNotOptimize(Solver::Cramer(A, b));
 }
+
+
+
+#ifdef __AVX2__
+
+BENCHMARK_F(AVX, Cramer)(benchmark::State& state)
+{
+    for (auto _ : state)
+        benchmark::DoNotOptimize(Solver::Cramer(A, b));
+}
+
+#endif // __AVX2__
 
 
 

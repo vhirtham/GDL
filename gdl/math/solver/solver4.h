@@ -13,6 +13,7 @@
 
 namespace GDL
 {
+class Mat4fAVX;
 template <typename>
 class Mat4Serial;
 class Mat4fSSE;
@@ -29,9 +30,10 @@ class Vec4fSSE;
 
 
 // Missing solver variants:
-// - CramerAVX
 // - GaussAVX
 
+// Misc
+// - Optimize Cramer SSE the same way as AVX variant
 
 namespace Solver
 {
@@ -49,6 +51,16 @@ template <typename _type>
 //! @param b: Vector
 //! @return Result vector x
 [[nodiscard]] inline Vec4fSSE<true> Cramer(const Mat4fSSE& A, const Vec4fSSE<true>& b);
+
+#ifdef __AVX2__
+
+//! @brief Solves the linear system A * x = b by using Cramers rule.
+//! @param A: Matrix
+//! @param b: Vector
+//! @return Result vector x
+[[nodiscard]] inline Vec4fSSE<true> Cramer(const Mat4fAVX& A, const Vec4fSSE<true>& b);
+
+#endif // __AVX2__
 
 //! @brief Solves the linear system A * x = b by using Gaussian elimination without pivoting.
 //! @tparam _type: Data type

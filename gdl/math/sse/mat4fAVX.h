@@ -89,6 +89,10 @@ public:
     //! @return Data
     [[nodiscard]] inline const std::array<F32, 16> Data() const;
 
+    //! @brief Gets the underlying array of AVX registers
+    //! @return Data array
+    inline const std::array<__m256, 2>& DataAVX() const;
+
     //! @brief Calculates the determinant of the matrix
     //! @return Determinant of the matrix
     [[nodiscard]] inline F32 Det() const;

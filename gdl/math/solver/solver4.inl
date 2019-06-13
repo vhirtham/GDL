@@ -2,6 +2,7 @@
 
 #include "gdl/math/solver/solver4.h"
 
+
 #include "gdl/base/sse/abs.h"
 #include "gdl/base/sse/crossProduct.h"
 #include "gdl/base/sse/determinant.h"
@@ -10,6 +11,7 @@
 #include "gdl/math/solver/internal/GaussDenseSmall.h"
 #include "gdl/math/serial/mat4Serial.h"
 #include "gdl/math/serial/vec4Serial.h"
+#include "gdl/math/sse/mat4fAVX.h"
 #include "gdl/math/sse/mat4fSSE.h"
 #include "gdl/math/sse/vec4fSSE.h"
 
@@ -83,7 +85,7 @@ inline Vec4fSSE<true> Cramer(const Mat4fSSE& A, const Vec4fSSE<true>& b)
     F32 detA = A.Det();
     DEV_EXCEPTION(detA == ApproxZero<F32>(10), "Singular matrix - system not solveable");
 
-    const std::array<__m128, 4>& dataA = A.DataSSE();
+    alignas(alignmentBytes<__m128>) const std::array<__m128, 4>& dataA = A.DataSSE();
     const __m128 dataB = b.DataSSE();
 
     alignas(alignmentBytes<__m128>) std::array<F32, 4> detTmp;
@@ -95,6 +97,94 @@ inline Vec4fSSE<true> Cramer(const Mat4fSSE& A, const Vec4fSSE<true>& b)
 
     return Vec4fSSE<true>(_mmx_div_p(_mmx_load_p<__m128>(detTmp.data()), _mmx_set1_p<__m128>(detA)));
 }
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+#ifdef __AVX2__
+
+inline Vec4fSSE<true> Cramer(const Mat4fAVX& A, const Vec4fSSE<true>& b)
+{
+    using namespace GDL::sse;
+
+    // Calculate determinant of A
+
+    const std::array<__m256, 2>& dataA = A.DataAVX();
+    const __m256& col01 = dataA[0];
+    const __m256& col23 = dataA[1];
+
+    __m256 col01P1230 = Permute<1, 2, 3, 0>(col01);
+    __m256 col23P1230 = Permute<1, 2, 3, 0>(col23);
+    __m256 tmp0 = _mmx_fmsub_p(col01, col23P1230, _mmx_mul_p(col23, col01P1230));
+    tmp0 = Negate<0, 0, 0, 0, 1, 0, 1, 0>(tmp0);
+
+    __m256 col01P2323 = Permute<2, 3, 2, 3>(col01);
+    __m256 col23P2323 = Permute<2, 3, 2, 3>(col23);
+    __m256 tmp1 = _mmx_fmsub_p(col01, col23P2323, _mmx_mul_p(col23, col01P2323));
+
+    __m256 tmp2 = Blend<0, 0, 0, 0, 1, 1, 1, 1>(tmp0, tmp1);
+    __m256 tmp3 = Permute2F128<0, 1, 1, 0>(tmp0, tmp1);
+    tmp3 = Permute<2, 3, 0, 1, 1, 0, 2, 3>(tmp3);
+
+    __m256 tmp4 = DotProduct(tmp2, tmp3);
+
+    __m256 detA = _mmx_add_p(tmp4, Permute2F128<1, 0>(tmp4));
+
+    DEV_EXCEPTION(_mm256_cvtss_f32(detA) == ApproxZero<F32>(10), "Singular matrix - system not solveable");
+
+
+    const __m256 v = _mm256_insertf128_ps(_mm256_castps128_ps256(b.DataSSE()), b.DataSSE(), 1);
+    __m256 vP1230 = Permute<1, 2, 3, 0>(v);
+
+
+    // Calculate first 4 products of all modified matrix determinants
+
+    __m256 tmp0V01 = _mmx_fmsub_p(v, col23P1230, _mmx_mul_p(vP1230, col23));
+    tmp0V01 = Negate<0, 0, 0, 0, 1, 0, 1, 0>(tmp0V01);
+    __m256 tmp0V23 = _mmx_fmsub_p(col01, vP1230, _mmx_mul_p(v, col01P1230));
+    tmp0V23 = Negate<0, 0, 0, 0, 1, 0, 1, 0>(tmp0V23);
+
+    __m256 tmp0SL = Permute2F128<1, 0>(tmp0);
+    __m256 tmp0SLP2301 = Permute<2, 3, 0, 1>(tmp0SL);
+
+    __m256 prod03V01 = _mmx_mul_p(tmp0V01, tmp0SLP2301);
+    __m256 prod03V23 = _mmx_mul_p(tmp0V23, tmp0SLP2301);
+    __m256 prod03B0 = Blend<0, 0, 1, 1, 0, 0, 1, 1>(prod03V01, prod03V23);
+    __m256 prod03B1 = Blend<1, 1, 0, 0, 1, 1, 0, 0>(prod03V01, prod03V23);
+    __m256 prod03B1P2301 = Permute<2, 3, 0, 1>(prod03B1);
+
+    __m256 prodSum03 = _mmx_add_p(prod03B0, prod03B1P2301);
+
+
+
+    // Calculate last 2 products of all modified matrix determinants
+
+
+    __m256 blend1 = Blend<1, 1, 0, 0, 1, 1, 0, 0>(col01, col23);
+    __m256 blend0 = Blend<0, 0, 1, 1, 0, 0, 1, 1>(col01, col23);
+    __m256 blend0P2301 = Permute<2, 3, 0, 1>(blend0);
+
+    __m256 vP2301 = Permute<2, 3, 0, 1>(v);
+
+    __m256 tmp1V = _mmx_fmsub_p(blend0P2301, v, _mmx_mul_p(vP2301, blend1));
+    __m256 tmp1SL = Permute2F128<1, 0>(tmp1);
+    __m256 tmp1SLP1010 = Permute<1, 0, 1, 0>(tmp1SL);
+
+    __m256 prod45V = _mmx_mul_p(tmp1V, tmp1SLP1010);
+
+    // Calculate result
+
+    __m256 prodSum05 = _mmx_add_p(prodSum03, prod45V);
+    __m256 determinants = _mmx_add_p(prodSum05, Permute<1, 0, 3, 2>(prodSum05));
+    __m256 determinantsSL = Permute2F128<1, 0>(determinants);
+    __m256 determinants0123 = Blend<0, 1, 0, 1, 1, 0, 1, 0>(determinants, determinantsSL);
+    __m256 result = _mmx_div_p(determinants0123, detA);
+
+    return Vec4fSSE<true>(_mm256_castps256_ps128(result));
+}
+
+#endif // __AVX2__
 
 
 

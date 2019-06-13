@@ -12,6 +12,14 @@ using namespace GDL;
 
 // --------------------------------------------------------------------------------------------------------------------
 
+using SerialSolverPtr = Vec4Serial<F32, true> (*)(const Mat4Serial<F32>&, const Vec4Serial<F32, true>&);
+using SSESolverPtr = Vec4fSSE<true> (*)(const Mat4fSSE&, const Vec4fSSE<true>&);
+using AVXSolverPtr = Vec4fSSE<true> (*)(const Mat4fAVX&, const Vec4fSSE<true>&);
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
 template <typename _solver, typename Matrix, typename Vector>
 void TestSolverTestcase(_solver solver, const Matrix& A, const Vector& b, const Vector& exp)
 {
@@ -31,8 +39,11 @@ void TestSolverTestcase(_solver solver, const Matrix& A, const Vector& b, const 
 template <typename _solver>
 void TestSolver(_solver solver, bool pivot = true)
 {
+
     using Vector = decltype(solver({}, {}));
-    using Matrix = typename std::conditional<std::is_same<Vector, Vec4fSSE<true>>::value, Mat4fSSE, Mat4fSerial>::type;
+    using Matrix = typename std::conditional<
+            std::is_same<_solver, SSESolverPtr>::value, Mat4fSSE,
+            typename std::conditional<std::is_same<_solver, AVXSolverPtr>::value, Mat4fAVX, Mat4fSerial>::type>::type;
 
     TestSolverTestcase(solver, Matrix(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1), Vector(1, 2, 3, 4),
                        Vector(1, 2, 3, 4));
@@ -75,13 +86,6 @@ void TestSolver(_solver solver, bool pivot = true)
 
 // --------------------------------------------------------------------------------------------------------------------
 
-using SerialSolverPtr = Vec4Serial<F32, true> (*)(const Mat4Serial<F32>&, const Vec4Serial<F32, true>&);
-using SSESolverPtr = Vec4fSSE<true> (*)(const Mat4fSSE&, const Vec4fSSE<true>&);
-
-
-
-// --------------------------------------------------------------------------------------------------------------------
-
 BOOST_AUTO_TEST_CASE(TestCramerSerial)
 {
     SerialSolverPtr solver = Solver::Cramer;
@@ -95,6 +99,16 @@ BOOST_AUTO_TEST_CASE(TestCramerSerial)
 BOOST_AUTO_TEST_CASE(TestCramerSSE)
 {
     SSESolverPtr solver = Solver::Cramer;
+    TestSolver(solver);
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(TestCramerAVX)
+{
+    AVXSolverPtr solver = Solver::Cramer;
     TestSolver(solver);
 }
 
