@@ -7,6 +7,7 @@
 #include "gdl/base/sse/negate.h"
 #include "gdl/base/sse/swizzle.h"
 
+
 namespace GDL::sse
 {
 
@@ -39,21 +40,53 @@ inline F32 Determinant3x3(__m128 col0, __m128 col1, __m128 col2)
 
 inline F32 Determinant4x4(__m128 col0, __m128 col1, __m128 col2, __m128 col3)
 {
-    __m128 d1032 = Permute<1, 0, 3, 2>(col3);
-    __m128 c1032 = Permute<1, 0, 3, 2>(col2);
+    __m128 col0P1230 = Permute<1, 2, 3, 0>(col0);
+    __m128 col1P1230 = Permute<1, 2, 3, 0>(col1);
+    __m128 col2P1230 = Permute<1, 2, 3, 0>(col2);
+    __m128 col3P1230 = Permute<1, 2, 3, 0>(col3);
 
-    __m128 tmp1 = Permute<2, 3, 0, 1>(_mmx_fmsub_p(col2, d1032, _mmx_mul_p(col3, c1032)));
-    __m128 tmp2 = _mmx_fmsub_p(Permute<3, 2, 0, 1>(col2), d1032, _mmx_mul_p(Permute<3, 2, 0, 1>(col3), c1032));
+    __m128 tmp0 = _mmx_fmsub_p(col0, col1P1230, _mm_mul_ps(col0P1230, col1));
+    __m128 tmp1 = _mmx_fmsub_p(col2, col3P1230, _mm_mul_ps(col2P1230, col3));
 
-    __m128 tmp3 = Negate<1, 1, 0, 0>(tmp2);
+    __m128 tmp1P2301 = Permute<2, 3, 0, 1>(tmp1);
+    __m128 tmp1P2301N = Negate<0, 1, 0, 1>(tmp1P2301);
 
-    __m128 b1032 = Permute<1, 0, 3, 2>(col1);
-    __m128 b2310 = Permute<2, 3, 1, 0>(col1);
-    __m128 tmp4 = Permute<3, 2, 0, 1>(_mmx_mul_p((col1), tmp3));
+    __m128 prodSum03 = DotProduct(tmp0, tmp1P2301N);
 
-    __m128 tmp5 = _mmx_fmsub_p(b1032, tmp1, _mmx_fmsub_p(b2310, tmp3, tmp4));
 
-    return DotProductF32(col0, tmp5);
+    __m128 b0 = Blend<0, 0, 1, 1>(col0, col2);
+    __m128 b1 = Blend<1, 1, 0, 0>(col0, col2);
+    __m128 b2 = Blend<0, 0, 1, 1>(col1, col3);
+    __m128 b3 = Blend<1, 1, 0, 0>(col1, col3);
+
+    __m128 b1P2301 = Permute<2, 3, 0, 1>(b1);
+    __m128 b3P2301 = Permute<2, 3, 0, 1>(b3);
+
+    __m128 tmp4 = _mmx_fmsub_p(b0, b3P2301, _mm_mul_ps(b1P2301, b2));
+    __m128 tmp4P3210 = Permute<3, 2, 1, 0>(tmp4);
+
+    __m128 tmp5 = _mm_mul_ps(tmp4, tmp4P3210);
+    __m128 prodSum45 = _mm_add_ps(tmp5, Permute<1, 0, 3, 2>(tmp5));
+
+    return _mm_cvtss_f32(prodSum03) + _mm_cvtss_f32(prodSum45);
+
+    // Alternative version
+
+    //    __m128 d1032 = Permute<1, 0, 3, 2>(col3);
+    //    __m128 c1032 = Permute<1, 0, 3, 2>(col2);
+
+    //    __m128 tmp1 = Permute<2, 3, 0, 1>(_mmx_fmsub_p(col2, d1032, _mmx_mul_p(col3, c1032)));
+    //    __m128 tmp2 = _mmx_fmsub_p(Permute<3, 2, 0, 1>(col2), d1032, _mmx_mul_p(Permute<3, 2, 0, 1>(col3), c1032));
+
+    //    __m128 tmp3 = Negate<1, 1, 0, 0>(tmp2);
+
+    //    __m128 b1032 = Permute<1, 0, 3, 2>(col1);
+    //    __m128 b2310 = Permute<2, 3, 1, 0>(col1);
+    //    __m128 tmp4 = Permute<3, 2, 0, 1>(_mmx_mul_p((col1), tmp3));
+
+    //    __m128 tmp5 = _mmx_fmsub_p(b1032, tmp1, _mmx_fmsub_p(b2310, tmp3, tmp4));
+
+    //    return DotProductF32(col0, tmp5);
 }
 
 

@@ -95,8 +95,781 @@ a_0b_1c_2d_3
 
 \subsection{Implementation}
 
+\subsubsection{4x4 Determinant - SSE}
+\label{sec:determinant4x4SSE}
+
+\begin{align*}
+  a_0b_1 \pth{c_2d_3 - c_3d_2} 
++ a_0b_2 \pth{c_3d_1 - c_1d_3}
++ a_0b_3 \pth{c_1d_2 - c_2d_1}\\
++ a_1b_0 \pth{c_3d_2 - c_2d_3}
++ a_1b_2 \pth{c_0d_3 - c_3d_0}
++ a_1b_3 \pth{c_2d_0 - c_0d_2}\\
++ a_2b_0 \pth{c_1d_3 - c_3d_1}
++ a_2b_1 \pth{c_3d_0 - c_0d_3}
++ a_2b_3 \pth{c_0d_1 - c_1d_0}\\
++ a_3b_0 \pth{c_2d_1 - c_1d_2}
++ a_3b_1 \pth{c_0d_2 - c_2d_0}
++ a_3b_2 \pth{c_1d_0 - c_0d_1}
+\end{align*}
+
+
+\begin{align*}
+  \pth{a_0b_1 - a_1b_0} \pth{c_2d_3 - c_3d_2}\\
++ \pth{a_0b_2 - a_2b_0} \pth{c_3d_1 - c_1d_3}\\
++ \pth{a_0b_3 - a_3b_0} \pth{c_1d_2 - c_2d_1}\\
++ \pth{a_1b_2 - a_2b_1} \pth{c_0d_3 - c_3d_0}\\
++ \pth{a_1b_3 - a_3b_1} \pth{c_2d_0 - c_0d_2}\\
++ \pth{a_2b_3 - a_3b_2} \pth{c_0d_1 - c_1d_0}\\
+\end{align*}
+
+\begin{align*}
+  \pth{a_0b_1 - a_1b_0} \pth{c_2d_3 - c_3d_2}\\
++ \pth{a_1b_2 - a_2b_1} \pth{c_0d_3 - c_3d_0}\\
++ \pth{a_2b_3 - a_3b_2} \pth{c_0d_1 - c_1d_0}\\
++ \pth{a_3b_0 - a_0b_3} \pth{c_2d_1 - c_1d_2}\\
++ \pth{a_0b_2 - a_2b_0} \pth{c_3d_1 - c_1d_3}\\
++ \pth{a_1b_3 - a_3b_1} \pth{c_2d_0 - c_0d_2}\\
+\end{align*}
+
+Matrix as 4 \mintinline{cpp}{__m128} registers:
+
+\begin{align*}
+\mathrm{col0} 
+=
+\begin{bmatrix}
+a_0\\
+a_1\\
+a_2\\
+a_3\\
+\end{bmatrix}
+&&
+\mathrm{col1} 
+&=
+\begin{bmatrix}
+b_0\\
+b_1\\
+b_2\\
+b_3\\
+\end{bmatrix}
+&
+\mathrm{col2} 
+=
+\begin{bmatrix}
+c_0\\
+c_1\\
+c_2\\
+c_3\\
+\end{bmatrix}
+&&
+\mathrm{col3} 
+&=
+\begin{bmatrix}
+d_0\\
+d_1\\
+d_2\\
+d_3\\
+\end{bmatrix}
+\end{align*}
+
+
+
+\vspace{1cm}
+\textbf{Calculation of the first 4 products}
+\vspace{1cm}
+
+\begin{minted}{cpp}
+__m128 col0P1230 = Permute<1, 2, 3, 0>(col0);
+__m128 col1P1230 = Permute<1, 2, 3, 0>(col1);
+__m128 col2P1230 = Permute<1, 2, 3, 0>(col2);
+__m128 col3P1230 = Permute<1, 2, 3, 0>(col3);
+
+\end{minted}
+
+\begin{align*}
+\mathrm{col0} 
+=
+\begin{bmatrix}
+a_1\\
+a_2\\
+a_3\\
+a_0\\
+\end{bmatrix}
+&&
+\mathrm{col1} 
+&=
+\begin{bmatrix}
+b_1\\
+b_2\\
+b_3\\
+b_0\\
+\end{bmatrix}
+&
+\mathrm{col2} 
+=
+\begin{bmatrix}
+c_1\\
+c_2\\
+c_3\\
+c_0\\
+\end{bmatrix}
+&&
+\mathrm{col3} 
+&=
+\begin{bmatrix}
+d_1\\
+d_2\\
+d_3\\
+d_0\\
+\end{bmatrix}
+\end{align*}
+
+\begin{minted}{cpp}
+__m128 tmp0 = _mmx_fmsub_p(col0, col1P1230, _mm_mul_ps(col0P1230, col1));
+__m128 tmp1 = _mmx_fmsub_p(col2, col3P1230, _mm_mul_ps(col2P1230, col3));
+\end{minted}
+
+
+\begin{align*}
+\mathrm{tmp0} 
+=
+\begin{bmatrix}
+a_0b_1 - a_1b_0\\
+a_1b_2 - a_2b_1\\
+a_2b_3 - a_3b_2\\
+a_3b_0 - a_0b_3\\
+\end{bmatrix}
+&&
+\mathrm{tmp1} 
+&=
+\begin{bmatrix}
+c_0d_1 - c_1d_0\\
+c_1d_2 - c_2d_1\\
+c_2d_3 - c_3d_2\\
+c_3d_0 - c_0d_3\\
+\end{bmatrix}
+\end{align*}
+
+\begin{minted}{cpp}
+__m128 tmp1P2301 = Permute<2, 3, 0, 1>(tmp1);
+\end{minted}
+
+\begin{align*}
+\mathrm{tmp1P2301} 
+=
+\begin{bmatrix}
+c_2d_3 - c_3d_2\\
+c_3d_0 - c_0d_3\\
+c_0d_1 - c_1d_0\\
+c_1d_2 - c_2d_1\\
+\end{bmatrix}
+\end{align*}
+
+\begin{minted}{cpp}
+ __m128 tmp1P2301N = Negate<0, 1, 0, 1>(tmp1P2301);
+\end{minted}
+
+\begin{align*}
+\mathrm{tmp1P2301N} 
+=
+\begin{bmatrix}
+c_2d_3 - c_3d_2\\
+c_0d_3 - c_3d_0\\
+c_0d_1 - c_1d_0\\
+c_2d_1 - c_1d_2\\
+\end{bmatrix}
+\end{align*}
+
+\begin{minted}{cpp}
+__m128 prodSum03 = DotProduct(tmp0, tmp1P2301N);
+\end{minted}
+
+\begin{align*}
+\mathrm{prodSum03} 
+&=
+\begin{bmatrix}
+\mathrm{dot03}\\
+\mathrm{dot03}\\
+\mathrm{dot03}\\
+\mathrm{dot03}\\
+\end{bmatrix}\\
+\\
+\mathrm{dot03}
+&= \pth{a_0b_1 - a_1b_0} \pth{c_2d_3 - c_3d_2}\\
+&+ \pth{a_1b_2 - a_2b_1} \pth{c_0d_3 - c_3d_0}\\
+&+ \pth{a_2b_3 - a_3b_2} \pth{c_0d_1 - c_1d_0}\\
+&+ \pth{a_3b_0 - a_0b_3} \pth{c_2d_1 - c_1d_2}\\
+\end{align*}
+
+
+\vspace{1cm}
+\textbf{Calculation of the last 2 products}
+\vspace{1cm}
+
+\begin{minted}{cpp}
+__m128 b0 = Blend<0, 0, 1, 1>(col0, col2);
+__m128 b1 = Blend<1, 1, 0, 0>(col0, col2);
+__m128 b2 = Blend<0, 0, 1, 1>(col1, col3);
+__m128 b3 = Blend<1, 1, 0, 0>(col1, col3);
+\end{minted}
+
+\begin{align*}
+\mathrm{b0} 
+=
+\begin{bmatrix}
+a_0\\
+a_1\\
+c_2\\
+c_3\\
+\end{bmatrix}
+&&
+\mathrm{b1} 
+&=
+\begin{bmatrix}
+c_0\\
+c_1\\
+a_2\\
+a_3\\
+\end{bmatrix}
+&
+\mathrm{b2} 
+=
+\begin{bmatrix}
+b_0\\
+b_1\\
+d_2\\
+d_3\\
+\end{bmatrix}
+&&
+\mathrm{b3} 
+&=
+\begin{bmatrix}
+d_0\\
+d_1\\
+b_2\\
+b_3\\
+\end{bmatrix}
+\end{align*}
+
+\begin{minted}{cpp}
+__m128 b1P2301 = Permute<2, 3, 0, 1>(b1);
+__m128 b3P2301 = Permute<2, 3, 0, 1>(b3);
+\end{minted}
+
+\begin{align*}
+\mathrm{b1P2301} 
+=
+\begin{bmatrix}
+a_2\\
+a_3\\
+c_0\\
+c_1\\
+\end{bmatrix}
+&&
+\mathrm{b3P2301} 
+&=
+\begin{bmatrix}
+b_2\\
+b_3\\
+d_0\\
+d_1\\
+\end{bmatrix}
+\end{align*}
+
+
+\begin{minted}{cpp}
+__m128 tmp4 = _mmx_fmsub_p(b0, b3P2301, _mm_mul_ps(b1P2301, b2));
+\end{minted}
+
+\begin{align*}
+\mathrm{tmp4} 
+=
+\begin{bmatrix}
+a_0b_2 - a_2b_0\\
+a_1b_3 - a_3b_1\\
+c_2d_0 - c_0d_2\\
+c_3d_1 - c_1d_3\\
+\end{bmatrix}
+\end{align*}
+
+\begin{minted}{cpp}
+__m128 tmp4P3210 = Permute<3, 2, 1, 0>(tmp4);
+\end{minted}
+
+\begin{align*}
+\mathrm{tmp4P3210} 
+=
+\begin{bmatrix}
+c_3d_1 - c_1d_3\\
+c_2d_0 - c_0d_2\\
+a_1b_3 - a_3b_1\\
+a_0b_2 - a_2b_0\\
+\end{bmatrix}
+\end{align*}
+
+\begin{minted}{cpp}
+    __m128 tmp5 = _mm_mul_ps(tmp4, tmp4P3210);
+\end{minted}
+
+\begin{align*}
+\mathrm{tmp5} 
+=
+\begin{bmatrix}
+\pth{a_0b_2 - a_2b_0}\pth{c_3d_1 - c_1d_3}\\
+\pth{a_1b_3 - a_3b_1}\pth{c_2d_0 - c_0d_2}\\
+\pth{a_1b_3 - a_3b_1}\pth{c_2d_0 - c_0d_2}\\
+\pth{a_0b_2 - a_2b_0}\pth{c_3d_1 - c_1d_3}\\
+\end{bmatrix}
+\end{align*}
+
+
+\begin{minted}{cpp}
+__m128 prodSum45 = _mm_add_ps(tmp5, Permute<1, 0, 3, 2>(tmp5));
+\end{minted}
+
+
+
+\begin{align*}
+\mathrm{prodSum45} 
+=
+\begin{bmatrix}
+  \pth{a_0b_2 - a_2b_0}\pth{c_3d_1 - c_1d_3}
++ \pth{a_1b_3 - a_3b_1}\pth{c_2d_0 - c_0d_2}\\
+  \pth{a_0b_2 - a_2b_0}\pth{c_3d_1 - c_1d_3}
++ \pth{a_1b_3 - a_3b_1}\pth{c_2d_0 - c_0d_2}\\
+  \pth{a_0b_2 - a_2b_0}\pth{c_3d_1 - c_1d_3}
++ \pth{a_1b_3 - a_3b_1}\pth{c_2d_0 - c_0d_2}\\
+  \pth{a_0b_2 - a_2b_0}\pth{c_3d_1 - c_1d_3}
++ \pth{a_1b_3 - a_3b_1}\pth{c_2d_0 - c_0d_2}\\
+\end{bmatrix}
+\end{align*}
+
+\begin{minted}{cpp}
+return _mm_cvtss_f32(prodSum03) + _mm_cvtss_f32(prodSum45);
+\end{minted}
+
+
+\subsubsection{4x4 Solver - SSE}
+
+The first part of the solver implementation is identical to the calculation of the determinant as described in \cref{sec:determinant4x4SSE}. The return statement is replaced by a check if the system is solvable.
+
+\begin{minted}{cpp}
+DEV_EXCEPTION(_mm_cvtss_f32(prodSum03) + _mm_cvtss_f32(prodSum45) 
+               == ApproxZero<F32>(10), "Singular matrix - system not solveable");
+\end{minted} 
+
+The values of the right-hand side vector are stored in a single \mintinline{cpp}{__m128} register with name \mintinline{cpp}{v}. Additionally, a permutation of \mintinline{cpp}{v} is created as follows:
+
+\begin{minted}{cpp}
+__m128 vP1230 = Permute<1, 2, 3, 0>(v);
+\end{minted}
+
+
+\begin{align*}
+\mathrm{v} 
+=
+\begin{bmatrix}
+v_0\\
+v_1\\
+v_2\\
+v_3\\
+\end{bmatrix}
+&&
+\mathrm{vP1230} 
+&=
+\begin{bmatrix}
+v_1\\
+v_2\\
+v_3\\
+v_0\\
+\end{bmatrix}
+\end{align*}
+
+
+\begin{minted}{cpp}
+__m128 tmp0V0 = _mmx_fmsub_p(v, col1P1230, _mm_mul_ps(vP1230, col1));
+__m128 tmp0V1 = _mmx_fmsub_p(col0, vP1230, _mm_mul_ps(col0P1230, v));
+__m128 tmp1V2 = _mmx_fmsub_p(v, col3P1230, _mm_mul_ps(vP1230, col3));
+__m128 tmp1V3 = _mmx_fmsub_p(col2, vP1230, _mm_mul_ps(col2P1230, v));
+\end{minted}
+
+\begin{align*}
+\mathrm{tmp0V0} 
+=
+\begin{bmatrix}
+v_0b_1 - v_1b_0\\
+v_1b_2 - v_2b_1\\
+v_2b_3 - v_3b_2\\
+v_3b_0 - v_0b_3\\
+\end{bmatrix}
+&&
+\mathrm{tmp0V1} 
+&=
+\begin{bmatrix}
+a_0v_1 - a_1v_0\\
+a_1v_2 - a_2v_1\\
+a_2v_3 - a_3v_2\\
+a_3v_0 - a_0v_3\\
+\end{bmatrix}
+&
+\mathrm{tmp1V2} 
+=
+\begin{bmatrix}
+v_0d_1 - v_1d_0\\
+v_1d_2 - v_2d_1\\
+v_2d_3 - v_3d_2\\
+v_3d_0 - v_0d_3\\
+\end{bmatrix}
+&&
+\mathrm{tmp1V3} 
+&=
+\begin{bmatrix}
+c_0v_1 - c_1v_0\\
+c_1v_2 - c_2v_1\\
+c_2v_3 - c_3v_2\\
+c_3v_0 - c_0v_3\\
+\end{bmatrix}
+\end{align*}
+
+\begin{minted}{cpp}
+__m128 tmp1V2P2301 = Permute<2, 3, 0, 1>(tmp1V2);
+__m128 tmp1V3P2301 = Permute<2, 3, 0, 1>(tmp1V3);
+\end{minted}
+
+\begin{align*}
+\mathrm{tmp1V2P2301} 
+=
+\begin{bmatrix}
+v_2d_3 - v_3d_2\\
+v_3d_0 - v_0d_3\\
+v_0d_1 - v_1d_0\\
+v_1d_2 - v_2d_1\\
+\end{bmatrix}
+&&
+\mathrm{tmp1V3P2301} 
+&=
+\begin{bmatrix}
+c_2v_3 - c_3v_2\\
+c_3v_0 - c_0v_3\\
+c_0v_1 - c_1v_0\\
+c_1v_2 - c_2v_1\\
+\end{bmatrix}
+\end{align*}
+
+\begin{minted}{cpp}
+__m128 tmp1V2P2301N = Negate<0, 1, 0, 1>(tmp1V2P2301);
+__m128 tmp1V3P2301N = Negate<0, 1, 0, 1>(tmp1V3P2301);
+\end{minted}
+
+\begin{align*}
+\mathrm{tmp1V2P2301N} 
+=
+\begin{bmatrix}
+v_2d_3 - v_3d_2\\
+v_0d_3 - v_3d_0\\
+v_0d_1 - v_1d_0\\
+v_2d_1 - v_1d_2\\
+\end{bmatrix}
+&&
+\mathrm{tmp1V3P2301N} 
+&=
+\begin{bmatrix}
+c_2v_3 - c_3v_2\\
+c_0v_3 - c_3v_0\\
+c_0v_1 - c_1v_0\\
+c_2v_1 - c_1v_2\\
+\end{bmatrix}
+\end{align*}
+
+\begin{minted}{cpp}
+__m128 prod03V0 = _mmx_mul_p(tmp0V0, tmp1P2301N);
+__m128 prod03V1 = _mmx_mul_p(tmp0V1, tmp1P2301N);
+__m128 prod03V2 = _mmx_mul_p(tmp0, tmp1V2P2301N);
+__m128 prod03V3 = _mmx_mul_p(tmp0, tmp1V3P2301N);
+\end{minted}
+
+\begin{align*}
+\mathrm{prod03V0} 
+=
+\begin{bmatrix}
+\pth{v_0b_1 - v_1b_0}\pth{c_2d_3 - c_3d_2}\\
+\pth{v_1b_2 - v_2b_1}\pth{c_3d_0 - c_0d_3}\\
+\pth{v_2b_3 - v_3b_2}\pth{c_0d_1 - c_1d_0}\\
+\pth{v_3b_0 - v_0b_3}\pth{c_1d_2 - c_2d_1}\\
+\end{bmatrix}
+&&
+\mathrm{prod03V1} 
+&=
+\begin{bmatrix}
+\pth{a_0v_1 - a_1v_0}\pth{c_2d_3 - c_3d_2}\\
+\pth{a_1v_2 - a_2v_1}\pth{c_3d_0 - c_0d_3}\\
+\pth{a_2v_3 - a_3v_2}\pth{c_0d_1 - c_1d_0}\\
+\pth{a_3v_0 - a_0v_3}\pth{c_1d_2 - c_2d_1}\\
+\end{bmatrix}
+\\
+\mathrm{prod03V2} 
+=
+\begin{bmatrix}
+\pth{a_0b_1 - a_1b_0}\pth{v_2d_3 - v_3d_2}\\
+\pth{a_1b_2 - a_2b_1}\pth{v_0d_3 - v_3d_0}\\
+\pth{a_2b_3 - a_3b_2}\pth{v_0d_1 - v_1d_0}\\
+\pth{a_3b_0 - a_0b_3}\pth{v_2d_1 - v_1d_2}\\
+\end{bmatrix}
+&&
+\mathrm{prod03V3} 
+&=
+\begin{bmatrix}
+\pth{a_0b_1 - a_1b_0}\pth{c_2v_3 - c_3v_2}\\
+\pth{a_1b_2 - a_2b_1}\pth{c_0v_3 - c_3v_0}\\
+\pth{a_2b_3 - a_3b_2}\pth{c_0v_1 - c_1v_0}\\
+\pth{a_3b_0 - a_0b_3}\pth{c_2v_1 - c_1v_2}\\
+\end{bmatrix}
+\end{align*}
+
+
+\begin{minted}{cpp}
+__m128 vP2301 = Permute<2, 3, 0, 1>(v);
+\end{minted}
+
+\begin{align*}
+\mathrm{vP2301} 
+=
+\begin{bmatrix}
+v_2\\
+v_3\\
+v_0\\
+v_1\\
+\end{bmatrix}
+\end{align*}
+
+\begin{minted}{cpp}
+__m128 tmp4V02 = _mmx_fmsub_p(v, b3P2301, _mm_mul_ps(vP2301, b2));
+__m128 tmp4V13 = _mmx_fmsub_p(b0, vP2301, _mm_mul_ps(b1P2301, v));
+\end{minted}
+
+\begin{align*}
+\mathrm{tmp4V02} 
+=
+\begin{bmatrix}
+v_0b_2- v_2b_0\\
+v_1b_3- v_3b_1\\
+v_2d_0- v_0d_2\\
+v_3d_1- v_1d_3\\
+\end{bmatrix}
+&&
+\mathrm{tmp4V13} 
+&=
+\begin{bmatrix}
+a_0v_2 - a_2v_0\\
+a_1v_3 - a_3v_1\\
+c_2v_0 - c_0v_2\\
+c_3v_1 - c_1v_3\\
+\end{bmatrix}
+\end{align*}
+
+\begin{minted}{cpp}
+__m128 prod03V02b0 = Blend<0, 0, 1, 1>(prod03V0, prod03V2);
+__m128 prod03V02b1 = Blend<1, 1, 0, 0>(prod03V0, prod03V2);
+__m128 prod03V13b0 = Blend<0, 0, 1, 1>(prod03V1, prod03V3);
+__m128 prod03V13b1 = Blend<1, 1, 0, 0>(prod03V1, prod03V3);
+\end{minted}
+
+\begin{align*}
+\mathrm{prod03V02b0} 
+=
+\begin{bmatrix}
+\pth{v_0b_1 - v_1b_0}\pth{c_2d_3 - c_3d_2}\\
+\pth{v_1b_2 - v_2b_1}\pth{c_3d_0 - c_0d_3}\\
+\pth{a_2b_3 - a_3b_2}\pth{v_0d_1 - v_1d_0}\\
+\pth{a_3b_0 - a_0b_3}\pth{v_2d_1 - v_1d_2}\\
+\end{bmatrix}
+&&
+\mathrm{prod03V02b1} 
+&=
+\begin{bmatrix}
+\pth{a_0b_1 - a_1b_0}\pth{v_2d_3 - v_3d_2}\\
+\pth{a_1b_2 - a_2b_1}\pth{v_0d_3 - v_3d_0}\\
+\pth{v_2b_3 - v_3b_2}\pth{c_0d_1 - c_1d_0}\\
+\pth{v_3b_0 - v_0b_3}\pth{c_1d_2 - c_2d_1}\\
+\end{bmatrix}
+\\
+\mathrm{prod03V13b0} 
+=
+\begin{bmatrix}
+\pth{a_0v_1 - a_1v_0}\pth{c_2d_3 - c_3d_2}\\
+\pth{a_1v_2 - a_2v_1}\pth{c_3d_0 - c_0d_3}\\
+\pth{a_2b_3 - a_3b_2}\pth{c_0v_1 - c_1v_0}\\
+\pth{a_3b_0 - a_0b_3}\pth{c_2v_1 - c_1v_2}\\
+\end{bmatrix}
+&&
+\mathrm{prod03V13b1} 
+&=
+\begin{bmatrix}
+\pth{a_0b_1 - a_1b_0}\pth{c_2v_3 - c_3v_2}\\
+\pth{a_1b_2 - a_2b_1}\pth{c_0v_3 - c_3v_0}\\
+\pth{a_2v_3 - a_3v_2}\pth{c_0d_1 - c_1d_0}\\
+\pth{a_3v_0 - a_0v_3}\pth{c_1d_2 - c_2d_1}\\
+\end{bmatrix}
+\end{align*}
+
+
+\begin{minted}{cpp}
+__m128 prod03V02b1P2301 = Permute<2, 3, 0, 1>(prod03V02b1);
+__m128 prod03V13b1P2301 = Permute<2, 3, 0, 1>(prod03V13b1);
+\end{minted}
+
+\begin{align*}
+\mathrm{prod03V02b1P2301} 
+=
+\begin{bmatrix}
+\pth{v_2b_3 - v_3b_2}\pth{c_0d_1 - c_1d_0}\\
+\pth{v_3b_0 - v_0b_3}\pth{c_1d_2 - c_2d_1}\\
+\pth{a_0b_1 - a_1b_0}\pth{v_2d_3 - v_3d_2}\\
+\pth{a_1b_2 - a_2b_1}\pth{v_0d_3 - v_3d_0}\\
+\end{bmatrix}
+\\
+\mathrm{prod03V13b1P2301} 
+=
+\begin{bmatrix}
+\pth{a_2v_3 - a_3v_2}\pth{c_0d_1 - c_1d_0}\\
+\pth{a_3v_0 - a_0v_3}\pth{c_1d_2 - c_2d_1}\\
+\pth{a_0b_1 - a_1b_0}\pth{c_2v_3 - c_3v_2}\\
+\pth{a_1b_2 - a_2b_1}\pth{c_0v_3 - c_3v_0}\\
+\end{bmatrix}
+\end{align*}
+
+\begin{minted}{cpp}
+__m128 prodSumV02 = 
+    _mmx_fmadd_p(tmp4V02,tmp4P3210,_mmx_add_p(prod03V02b0,prod03V02b1P2301));
+__m128 prodSumV13 =   
+    _mmx_fmadd_p(tmp4V13,tmp4P3210,_mmx_add_p(prod03V13b0,prod03V13b1P2301));    
+\end{minted}
+
+\begin{align*}
+\mathrm{prodSumV02} 
+=
+\begin{bmatrix}
+  \pth{v_0b_2 - v_2b_0}\pth{c_3d_1 - c_1d_3}
++ \pth{v_0b_1 - v_1b_0}\pth{c_2d_3 - c_3d_2}
++ \pth{v_2b_3 - v_3b_2}\pth{c_0d_1 - c_1d_0}\\
+  \pth{v_1b_3 - v_3b_1}\pth{c_2d_0 - c_0d_2}
++ \pth{v_1b_2 - v_2b_1}\pth{c_3d_0 - c_0d_3}
++ \pth{v_3b_0 - v_0b_3}\pth{c_1d_2 - c_2d_1}\\
+  \pth{a_1b_3 - a_3b_1}\pth{v_2d_0 - v_0d_2}
++ \pth{a_2b_3 - a_3b_2}\pth{v_0d_1 - v_1d_0}
++ \pth{a_0b_1 - a_1b_0}\pth{v_2d_3 - v_3d_2}\\
+  \pth{a_0b_2 - a_2b_0}\pth{v_3d_1 - v_1d_3}
++ \pth{a_3b_0 - a_0b_3}\pth{v_2d_1 - v_1d_2}
++ \pth{a_1b_2 - a_2b_1}\pth{v_0d_3 - v_3d_0}\\
+\end{bmatrix}
+\\
+\mathrm{prodSumV13} 
+=
+\begin{bmatrix}
+  \pth{a_0v_2 - a_2v_0}\pth{c_3d_1 - c_1d_3}
++ \pth{a_0v_1 - a_1v_0}\pth{c_2d_3 - c_3d_2}
++ \pth{a_2v_3 - a_3v_2}\pth{c_0d_1 - c_1d_0}\\
+  \pth{a_1v_3 - a_3v_1}\pth{c_2d_0 - c_0d_2}
++ \pth{a_1v_2 - a_2v_1}\pth{c_3d_0 - c_0d_3}
++ \pth{a_3v_0 - a_0v_3}\pth{c_1d_2 - c_2d_1}\\
+  \pth{a_1b_3 - a_3b_1}\pth{c_2v_0 - c_0v_2}
++ \pth{a_2b_3 - a_3b_2}\pth{c_0v_1 - c_1v_0}
++ \pth{a_0b_1 - a_1b_0}\pth{c_2v_3 - c_3v_2}\\
+  \pth{a_0b_2 - a_2b_0}\pth{c_3v_1 - c_1v_3}
++ \pth{a_3b_0 - a_0b_3}\pth{c_2v_1 - c_1v_2}
++ \pth{a_1b_2 - a_2b_1}\pth{c_0v_3 - c_3v_0}\\
+\end{bmatrix}
+\end{align*}
+
+\begin{minted}{cpp}
+__m128 prodSumB0 = Blend<0,1,0,1>(prodSumV02,prodSumV13);
+__m128 prodSumB1 = Blend<1,0,1,0>(prodSumV02,prodSumV13);
+\end{minted}
+
+\begin{align*}
+\mathrm{prodSumB0} 
+=
+\begin{bmatrix}
+  \pth{v_0b_2 - v_2b_0}\pth{c_3d_1 - c_1d_3}
++ \pth{v_0b_1 - v_1b_0}\pth{c_2d_3 - c_3d_2}
++ \pth{v_2b_3 - v_3b_2}\pth{c_0d_1 - c_1d_0}\\
+  \pth{a_1v_3 - a_3v_1}\pth{c_2d_0 - c_0d_2}
++ \pth{a_1v_2 - a_2v_1}\pth{c_3d_0 - c_0d_3}
++ \pth{a_3v_0 - a_0v_3}\pth{c_1d_2 - c_2d_1}\\
+  \pth{a_1b_3 - a_3b_1}\pth{v_2d_0 - v_0d_2}
++ \pth{a_2b_3 - a_3b_2}\pth{v_0d_1 - v_1d_0}
++ \pth{a_0b_1 - a_1b_0}\pth{v_2d_3 - v_3d_2}\\
+  \pth{a_0b_2 - a_2b_0}\pth{c_3v_1 - c_1v_3}
++ \pth{a_3b_0 - a_0b_3}\pth{c_2v_1 - c_1v_2}
++ \pth{a_1b_2 - a_2b_1}\pth{c_0v_3 - c_3v_0}\\
+\end{bmatrix}
+\\
+\mathrm{prodSumB1} 
+=
+\begin{bmatrix}
+  \pth{a_0v_2 - a_2v_0}\pth{c_3d_1 - c_1d_3}
++ \pth{a_0v_1 - a_1v_0}\pth{c_2d_3 - c_3d_2}
++ \pth{a_2v_3 - a_3v_2}\pth{c_0d_1 - c_1d_0}\\
+  \pth{v_1b_3 - v_3b_1}\pth{c_2d_0 - c_0d_2}
++ \pth{v_1b_2 - v_2b_1}\pth{c_3d_0 - c_0d_3}
++ \pth{v_3b_0 - v_0b_3}\pth{c_1d_2 - c_2d_1}\\
+  \pth{a_1b_3 - a_3b_1}\pth{c_2v_0 - c_0v_2}
++ \pth{a_2b_3 - a_3b_2}\pth{c_0v_1 - c_1v_0}
++ \pth{a_0b_1 - a_1b_0}\pth{c_2v_3 - c_3v_2}\\
+  \pth{a_0b_2 - a_2b_0}\pth{v_3d_1 - v_1d_3}
++ \pth{a_3b_0 - a_0b_3}\pth{v_2d_1 - v_1d_2}
++ \pth{a_1b_2 - a_2b_1}\pth{v_0d_3 - v_3d_0}\\
+\end{bmatrix}
+\end{align*}
+
+
+\begin{minted}{cpp}
+__m128 prodSumB1P1032 = Permute<1,0,3,2>(prodSumB1);
+\end{minted}
+
+\begin{align*}
+\mathrm{prodSumB1P1032} 
+=
+\begin{bmatrix}
+  \pth{v_1b_3 - v_3b_1}\pth{c_2d_0 - c_0d_2}
++ \pth{v_1b_2 - v_2b_1}\pth{c_3d_0 - c_0d_3}
++ \pth{v_3b_0 - v_0b_3}\pth{c_1d_2 - c_2d_1}\\
+  \pth{a_0v_2 - a_2v_0}\pth{c_3d_1 - c_1d_3}
++ \pth{a_0v_1 - a_1v_0}\pth{c_2d_3 - c_3d_2}
++ \pth{a_2v_3 - a_3v_2}\pth{c_0d_1 - c_1d_0}\\
+  \pth{a_0b_2 - a_2b_0}\pth{v_3d_1 - v_1d_3}
++ \pth{a_3b_0 - a_0b_3}\pth{v_2d_1 - v_1d_2}
++ \pth{a_1b_2 - a_2b_1}\pth{v_0d_3 - v_3d_0}\\
+  \pth{a_1b_3 - a_3b_1}\pth{c_2v_0 - c_0v_2}
++ \pth{a_2b_3 - a_3b_2}\pth{c_0v_1 - c_1v_0}
++ \pth{a_0b_1 - a_1b_0}\pth{c_2v_3 - c_3v_2}\\
+\end{bmatrix}
+\end{align*}
+
+\begin{minted}{cpp}
+__m128 determinants = _mmx_add_p(prodSumB0, prodSumB1P1032);
+\end{minted}
+
+
+\begin{align*}
+\mathrm{determinants} 
+=
+\begin{bmatrix}
+\mathrm{detV0}\\
+\mathrm{detV1}\\
+\mathrm{detV2}\\
+\mathrm{detV3}\\
+\end{bmatrix}
+\end{align*}
+
+\begin{minted}{cpp}
+__m128 result = _mmx_div_p(determinants, detA);
+\end{minted}
+
+% AVX --------------------------------------------------------------------------
+
 \subsubsection{4x4 Determinant - AVX}
-\label{sec:determinant4x4}
+\label{sec:determinant4x4AVX}
 
 \begin{align*}
   a_0c_1 \pth{b_3d_2 - b_2d_3}
@@ -410,7 +1183,7 @@ inline F32 Determinant4x4(__m256 col01, __m256 col23)
 
 \subsubsection{4x4 Solver - AVX}
 
-The first implementation part of the 4x4 solver is identical to the calculation of an 4x4 determinant as described in \cref{sec:determinant4x4}. The return statement, is replaced by a check if the determinant is 0:
+The first implementation part of the 4x4 solver is identical to the calculation of an 4x4 determinant as described in \cref{sec:determinant4x4AVX}. The return statement, is replaced by a check if the determinant is 0:
 \begin{minted}{cpp}
 DEV_EXCEPTION(_mm256_cvtss_f32(detA) == ApproxZero<F32>(10), 
               "Singular matrix - system not solveable");
@@ -855,6 +1628,90 @@ b_1v_3 - b_3v_1\\
 \mathrm{detV3}\\
 \end{bmatrix}
 \end{align*}
+
+
+The whole function looks like this:
+
+\begin{minted}{cpp}
+inline Vec4fSSE<true> Cramer(const Mat4fAVX& A, const Vec4fSSE<true>& b)
+{
+    using namespace GDL::sse;
+
+    // Calculate determinant of A
+
+    const std::array<__m256, 2>& dataA = A.DataAVX();
+    const __m256& col01 = dataA[0];
+    const __m256& col23 = dataA[1];
+
+    __m256 col01P1230 = Permute<1, 2, 3, 0>(col01);
+    __m256 col23P1230 = Permute<1, 2, 3, 0>(col23);
+    __m256 tmp0 = _mmx_fmsub_p(col01, col23P1230, _mmx_mul_p(col23, col01P1230));
+    tmp0 = Negate<0, 0, 0, 0, 1, 0, 1, 0>(tmp0);
+
+    __m256 col01P2323 = Permute<2, 3, 2, 3>(col01);
+    __m256 col23P2323 = Permute<2, 3, 2, 3>(col23);
+    __m256 tmp1 = _mmx_fmsub_p(col01, col23P2323, _mmx_mul_p(col23, col01P2323));
+
+    __m256 tmp2 = Blend<0, 0, 0, 0, 1, 1, 1, 1>(tmp0, tmp1);
+    __m256 tmp3 = Permute2F128<0, 1, 1, 0>(tmp0, tmp1);
+    tmp3 = Permute<2, 3, 0, 1, 1, 0, 2, 3>(tmp3);
+
+    __m256 tmp4 = DotProduct(tmp2, tmp3);
+
+    __m256 detA = _mmx_add_p(tmp4, Permute2F128<1, 0>(tmp4));
+
+    DEV_EXCEPTION(_mm256_cvtss_f32(detA) == ApproxZero<F32>(10), "Singular matrix - system not solveable");
+
+    const __m256 v = _mm256_insertf128_ps(_mm256_castps128_ps256(b.DataSSE()), b.DataSSE(), 1);
+    __m256 vP1230 = Permute<1, 2, 3, 0>(v);
+
+
+    // Calculate first 4 products of all modified matrix determinants
+
+    __m256 tmp0V01 = _mmx_fmsub_p(v, col23P1230, _mmx_mul_p(vP1230, col23));
+    tmp0V01 = Negate<0, 0, 0, 0, 1, 0, 1, 0>(tmp0V01);
+    __m256 tmp0V23 = _mmx_fmsub_p(col01, vP1230, _mmx_mul_p(v, col01P1230));
+    tmp0V23 = Negate<0, 0, 0, 0, 1, 0, 1, 0>(tmp0V23);
+
+    __m256 tmp0SL = Permute2F128<1, 0>(tmp0);
+    __m256 tmp0SLP2301 = Permute<2, 3, 0, 1>(tmp0SL);
+
+    __m256 prod03V01 = _mmx_mul_p(tmp0V01, tmp0SLP2301);
+    __m256 prod03V23 = _mmx_mul_p(tmp0V23, tmp0SLP2301);
+    __m256 prod03B0 = Blend<0, 0, 1, 1, 0, 0, 1, 1>(prod03V01, prod03V23);
+    __m256 prod03B1 = Blend<1, 1, 0, 0, 1, 1, 0, 0>(prod03V01, prod03V23);
+    __m256 prod03B1P2301 = Permute<2, 3, 0, 1>(prod03B1);
+
+    __m256 prodSum03 = _mmx_add_p(prod03B0, prod03B1P2301);
+
+
+    // Calculate last 2 products of all modified matrix determinants
+
+    __m256 blend1 = Blend<1, 1, 0, 0, 1, 1, 0, 0>(col01, col23);
+    __m256 blend0 = Blend<0, 0, 1, 1, 0, 0, 1, 1>(col01, col23);
+    __m256 blend0P2301 = Permute<2, 3, 0, 1>(blend0);
+
+    __m256 vP2301 = Permute<2, 3, 0, 1>(v);
+
+    __m256 tmp1V = _mmx_fmsub_p(blend0P2301, v, _mmx_mul_p(vP2301, blend1));
+    __m256 tmp1SL = Permute2F128<1, 0>(tmp1);
+    __m256 tmp1SLP1010 = Permute<1, 0, 1, 0>(tmp1SL);
+
+    __m256 prod45V = _mmx_mul_p(tmp1V, tmp1SLP1010);
+
+
+    // Calculate result
+
+    __m256 prodSum05 = _mmx_add_p(prodSum03, prod45V);
+    __m256 determinants = _mmx_add_p(prodSum05, Permute<1, 0, 3, 2>(prodSum05));
+    __m256 determinantsSL = Permute2F128<1, 0>(determinants);
+    __m256 determinants0123 = Blend<0, 1, 0, 1, 1, 0, 1, 0>(determinants, determinantsSL);
+    __m256 result = _mmx_div_p(determinants0123, detA);
+
+    return Vec4fSSE<true>(_mm256_castps256_ps128(result));
+}
+\end{minted}
+
 % ------------------------------------------------------------------------------
 
 \section{Dense Gaussian elimination}

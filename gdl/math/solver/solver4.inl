@@ -82,20 +82,87 @@ inline Vec4fSSE<true> Cramer(const Mat4fSSE& A, const Vec4fSSE<true>& b)
 {
     using namespace GDL::sse;
 
-    F32 detA = A.Det();
-    DEV_EXCEPTION(detA == ApproxZero<F32>(10), "Singular matrix - system not solveable");
+    const std::array<__m128, 4>& matrixData = A.DataSSE();
+    const __m128& col0 = matrixData[0];
+    const __m128& col1 = matrixData[1];
+    const __m128& col2 = matrixData[2];
+    const __m128& col3 = matrixData[3];
 
-    alignas(alignmentBytes<__m128>) const std::array<__m128, 4>& dataA = A.DataSSE();
-    const __m128 dataB = b.DataSSE();
+    __m128 col0P1230 = Permute<1, 2, 3, 0>(col0);
+    __m128 col1P1230 = Permute<1, 2, 3, 0>(col1);
+    __m128 col2P1230 = Permute<1, 2, 3, 0>(col2);
+    __m128 col3P1230 = Permute<1, 2, 3, 0>(col3);
 
-    alignas(alignmentBytes<__m128>) std::array<F32, 4> detTmp;
+    __m128 tmp0 = _mmx_fmsub_p(col0, col1P1230, _mm_mul_ps(col0P1230, col1));
+    __m128 tmp1 = _mmx_fmsub_p(col2, col3P1230, _mm_mul_ps(col2P1230, col3));
 
-    detTmp[0] = Determinant4x4(dataB, dataA[1], dataA[2], dataA[3]);
-    detTmp[1] = Determinant4x4(dataA[0], dataB, dataA[2], dataA[3]);
-    detTmp[2] = Determinant4x4(dataA[0], dataA[1], dataB, dataA[3]);
-    detTmp[3] = Determinant4x4(dataA[0], dataA[1], dataA[2], dataB);
+    __m128 tmp1P2301 = Permute<2, 3, 0, 1>(tmp1);
+    __m128 tmp1P2301N = Negate<0, 1, 0, 1>(tmp1P2301);
 
-    return Vec4fSSE<true>(_mmx_div_p(_mmx_load_p<__m128>(detTmp.data()), _mmx_set1_p<__m128>(detA)));
+    __m128 prodSum03 = DotProduct(tmp0, tmp1P2301N);
+
+
+    __m128 b0 = Blend<0, 0, 1, 1>(col0, col2);
+    __m128 b1 = Blend<1, 1, 0, 0>(col0, col2);
+    __m128 b2 = Blend<0, 0, 1, 1>(col1, col3);
+    __m128 b3 = Blend<1, 1, 0, 0>(col1, col3);
+
+    __m128 b1P2301 = Permute<2, 3, 0, 1>(b1);
+    __m128 b3P2301 = Permute<2, 3, 0, 1>(b3);
+
+    __m128 tmp4 = _mmx_fmsub_p(b0, b3P2301, _mm_mul_ps(b1P2301, b2));
+    __m128 tmp4P3210 = Permute<3, 2, 1, 0>(tmp4);
+
+    __m128 tmp5 = _mm_mul_ps(tmp4, tmp4P3210);
+    __m128 prodSum45 = _mm_add_ps(tmp5, Permute<1, 0, 3, 2>(tmp5));
+
+    __m128 detA = _mmx_add_p(prodSum03, prodSum45);
+
+    DEV_EXCEPTION(_mm_cvtss_f32(detA) == ApproxZero<F32>(10), "Singular matrix - system not solveable");
+
+    const __m128& v = b.DataSSE();
+    __m128 vP1230 = Permute<1, 2, 3, 0>(v);
+
+    __m128 tmp0V0 = _mmx_fmsub_p(v, col1P1230, _mm_mul_ps(vP1230, col1));
+    __m128 tmp0V1 = _mmx_fmsub_p(col0, vP1230, _mm_mul_ps(col0P1230, v));
+    __m128 tmp1V2 = _mmx_fmsub_p(v, col3P1230, _mm_mul_ps(vP1230, col3));
+    __m128 tmp1V3 = _mmx_fmsub_p(col2, vP1230, _mm_mul_ps(col2P1230, v));
+
+    __m128 tmp1V2P2301 = Permute<2, 3, 0, 1>(tmp1V2);
+    __m128 tmp1V3P2301 = Permute<2, 3, 0, 1>(tmp1V3);
+
+    __m128 tmp1V2P2301N = Negate<0, 1, 0, 1>(tmp1V2P2301);
+    __m128 tmp1V3P2301N = Negate<0, 1, 0, 1>(tmp1V3P2301);
+
+    __m128 prod03V0 = _mmx_mul_p(tmp0V0, tmp1P2301N);
+    __m128 prod03V1 = _mmx_mul_p(tmp0V1, tmp1P2301N);
+    __m128 prod03V2 = _mmx_mul_p(tmp0, tmp1V2P2301N);
+    __m128 prod03V3 = _mmx_mul_p(tmp0, tmp1V3P2301N);
+
+    __m128 vP2301 = Permute<2, 3, 0, 1>(v);
+
+    __m128 tmp4V02 = _mmx_fmsub_p(v, b3P2301, _mm_mul_ps(vP2301, b2));
+    __m128 tmp4V13 = _mmx_fmsub_p(b0, vP2301, _mm_mul_ps(b1P2301, v));
+
+    __m128 prod03V02b0 = Blend<0, 0, 1, 1>(prod03V0, prod03V2);
+    __m128 prod03V02b1 = Blend<1, 1, 0, 0>(prod03V0, prod03V2);
+    __m128 prod03V13b0 = Blend<0, 0, 1, 1>(prod03V1, prod03V3);
+    __m128 prod03V13b1 = Blend<1, 1, 0, 0>(prod03V1, prod03V3);
+
+    __m128 prod03V02b1P2301 = Permute<2, 3, 0, 1>(prod03V02b1);
+    __m128 prod03V13b1P2301 = Permute<2, 3, 0, 1>(prod03V13b1);
+
+    __m128 prodSumV02 = _mmx_fmadd_p(tmp4V02, tmp4P3210, _mmx_add_p(prod03V02b0, prod03V02b1P2301));
+    __m128 prodSumV13 = _mmx_fmadd_p(tmp4V13, tmp4P3210, _mmx_add_p(prod03V13b0, prod03V13b1P2301));
+
+    __m128 prodSumB0 = Blend<0, 1, 0, 1>(prodSumV02, prodSumV13);
+    __m128 prodSumB1 = Blend<1, 0, 1, 0>(prodSumV02, prodSumV13);
+
+    __m128 prodSumB1P1032 = Permute<1, 0, 3, 2>(prodSumB1);
+
+    __m128 determinants = _mmx_add_p(prodSumB0, prodSumB1P1032);
+    __m128 result = _mmx_div_p(determinants, detA);
+    return Vec4fSSE<true>(result);
 }
 
 
@@ -133,7 +200,6 @@ inline Vec4fSSE<true> Cramer(const Mat4fAVX& A, const Vec4fSSE<true>& b)
 
     DEV_EXCEPTION(_mm256_cvtss_f32(detA) == ApproxZero<F32>(10), "Singular matrix - system not solveable");
 
-
     const __m256 v = _mm256_insertf128_ps(_mm256_castps128_ps256(b.DataSSE()), b.DataSSE(), 1);
     __m256 vP1230 = Permute<1, 2, 3, 0>(v);
 
@@ -157,9 +223,7 @@ inline Vec4fSSE<true> Cramer(const Mat4fAVX& A, const Vec4fSSE<true>& b)
     __m256 prodSum03 = _mmx_add_p(prod03B0, prod03B1P2301);
 
 
-
     // Calculate last 2 products of all modified matrix determinants
-
 
     __m256 blend1 = Blend<1, 1, 0, 0, 1, 1, 0, 0>(col01, col23);
     __m256 blend0 = Blend<0, 0, 1, 1, 0, 0, 1, 1>(col01, col23);
@@ -172,6 +236,7 @@ inline Vec4fSSE<true> Cramer(const Mat4fAVX& A, const Vec4fSSE<true>& b)
     __m256 tmp1SLP1010 = Permute<1, 0, 1, 0>(tmp1SL);
 
     __m256 prod45V = _mmx_mul_p(tmp1V, tmp1SLP1010);
+
 
     // Calculate result
 
