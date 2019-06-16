@@ -6,6 +6,7 @@
 #include "gdl/base/sse/abs.h"
 #include "gdl/base/sse/crossProduct.h"
 #include "gdl/base/sse/determinant.h"
+#include "gdl/base/sse/directAccess.h"
 #include "gdl/base/sse/dotProduct.h"
 #include "gdl/base/sse/swizzle.h"
 #include "gdl/math/solver/internal/GaussDenseSmall.h"
@@ -58,17 +59,27 @@ inline Vec3fSSE<true> Cramer(const Mat3fSSE& A, const Vec3fSSE<true>& b)
     using namespace GDL::sse;
 
     const std::array<__m128, 3>& dataA = A.DataSSE();
+    const __m128& col0 = dataA[0];
+    const __m128& col1 = dataA[1];
+    const __m128& col2 = dataA[2];
 
-    __m128 cross12 = CrossProduct(dataA[1], dataA[2]);
-    __m128 detA = DotProduct<1, 1, 1, 0>(dataA[0], cross12);
+    const __m128& v = b.DataSSE();
+
+    __m128 cross12 = CrossProduct(col1, col2);
+    __m128 detA = DotProduct<1, 1, 1, 0>(col0, cross12);
 
     DEV_EXCEPTION(_mm_cvtss_f32(detA) == ApproxZero<F32>(10), "Singular matrix - system not solveable");
 
-    __m128 x = DotProduct<1, 1, 1, 0>(b.DataSSE(), cross12);
-    x = Blend<0, 1, 0, 0>(x, DotProduct<1, 1, 1, 0>(dataA[0], CrossProduct(b.DataSSE(), dataA[2])));
-    x = Blend<0, 0, 1, 0>(x, DotProduct<1, 1, 1, 0>(dataA[0], CrossProduct(dataA[1], b.DataSSE())));
+    __m128 crossv2 = CrossProduct(v, col2);
+    __m128 cross1v = CrossProduct(col1, v);
 
-    return Vec3fSSE<true>(_mmx_div_p(x, detA));
+    __m128 determinants = DotProduct<1, 1, 1, 0>(v, cross12);
+    determinants = Blend<0, 1, 0, 0>(determinants, DotProduct<1, 1, 1, 0>(col0, crossv2));
+    determinants = Blend<0, 0, 1, 0>(determinants, DotProduct<1, 1, 1, 0>(col0, cross1v));
+
+    __m128 result = _mmx_div_p(determinants, detA);
+
+    return Vec3fSSE<true>(result);
 }
 
 

@@ -106,11 +106,15 @@ BOOST_AUTO_TEST_CASE(TestCramerSSE)
 
 // --------------------------------------------------------------------------------------------------------------------
 
+#ifdef __AVX2__
+
 BOOST_AUTO_TEST_CASE(TestCramerAVX)
 {
     AVXSolverPtr solver = Solver::Cramer;
     TestSolver(solver);
 }
+
+#endif // __AVX2__
 
 
 

@@ -88,6 +88,9 @@ inline Vec4fSSE<true> Cramer(const Mat4fSSE& A, const Vec4fSSE<true>& b)
     const __m128& col2 = matrixData[2];
     const __m128& col3 = matrixData[3];
 
+
+    // Calculate first 4 terms of det(A)
+
     __m128 col0P1230 = Permute<1, 2, 3, 0>(col0);
     __m128 col1P1230 = Permute<1, 2, 3, 0>(col1);
     __m128 col2P1230 = Permute<1, 2, 3, 0>(col2);
@@ -101,6 +104,8 @@ inline Vec4fSSE<true> Cramer(const Mat4fSSE& A, const Vec4fSSE<true>& b)
 
     __m128 prodSum03 = DotProduct(tmp0, tmp1P2301N);
 
+
+    // Calculate last 2 terms of det(A)
 
     __m128 b0 = Blend<0, 0, 1, 1>(col0, col2);
     __m128 b1 = Blend<1, 1, 0, 0>(col0, col2);
@@ -116,9 +121,15 @@ inline Vec4fSSE<true> Cramer(const Mat4fSSE& A, const Vec4fSSE<true>& b)
     __m128 tmp5 = _mm_mul_ps(tmp4, tmp4P3210);
     __m128 prodSum45 = _mm_add_ps(tmp5, Permute<1, 0, 3, 2>(tmp5));
 
+
+    // Calculate det(A)
+
     __m128 detA = _mmx_add_p(prodSum03, prodSum45);
 
     DEV_EXCEPTION(_mm_cvtss_f32(detA) == ApproxZero<F32>(10), "Singular matrix - system not solveable");
+
+
+    // Calculate first 4 terms of modified determinants
 
     const __m128& v = b.DataSSE();
     __m128 vP1230 = Permute<1, 2, 3, 0>(v);
@@ -134,6 +145,9 @@ inline Vec4fSSE<true> Cramer(const Mat4fSSE& A, const Vec4fSSE<true>& b)
     __m128 tmp1V2P2301N = Negate<0, 1, 0, 1>(tmp1V2P2301);
     __m128 tmp1V3P2301N = Negate<0, 1, 0, 1>(tmp1V3P2301);
 
+
+    // Calculate last 2 terms of modified determinants
+
     __m128 prod03V0 = _mmx_mul_p(tmp0V0, tmp1P2301N);
     __m128 prod03V1 = _mmx_mul_p(tmp0V1, tmp1P2301N);
     __m128 prod03V2 = _mmx_mul_p(tmp0, tmp1V2P2301N);
@@ -143,6 +157,9 @@ inline Vec4fSSE<true> Cramer(const Mat4fSSE& A, const Vec4fSSE<true>& b)
 
     __m128 tmp4V02 = _mmx_fmsub_p(v, b3P2301, _mm_mul_ps(vP2301, b2));
     __m128 tmp4V13 = _mmx_fmsub_p(b0, vP2301, _mm_mul_ps(b1P2301, v));
+
+
+    // Calculate modified determinants
 
     __m128 prod03V02b0 = Blend<0, 0, 1, 1>(prod03V0, prod03V2);
     __m128 prod03V02b1 = Blend<1, 1, 0, 0>(prod03V0, prod03V2);
@@ -161,6 +178,10 @@ inline Vec4fSSE<true> Cramer(const Mat4fSSE& A, const Vec4fSSE<true>& b)
     __m128 prodSumB1P1032 = Permute<1, 0, 3, 2>(prodSumB1);
 
     __m128 determinants = _mmx_add_p(prodSumB0, prodSumB1P1032);
+
+
+    // Calculate result
+
     __m128 result = _mmx_div_p(determinants, detA);
     return Vec4fSSE<true>(result);
 }
