@@ -1,0 +1,307 @@
+\section{Dense Gaussian elimination}
+\label{sec:gaussianElimination}
+\subsection{Theory}
+
+\subsubsection{Standard algorithm (no pivoting)}
+The standard Gaussian elimination algorithm brings the matrix representation of the system that should be solved into upper triangle form:
+
+
+\begin{align}
+\label{eq:gauss3x3upperTriangle}
+\begin{bmatrix}
+a_{00}&a_{01}&a_{02}\\
+0&a_{11}&a_{12}\\
+0&0&a_{22}\\
+\end{bmatrix}
+\cdot
+\begin{bmatrix}
+x_0\\
+x_1\\
+x_2\\
+\end{bmatrix}
+=
+\begin{bmatrix}
+b_0\\
+b_1\\
+b_2\\
+\end{bmatrix}
+\end{align}
+
+In this form, simple backward substitution can be used to determine all unknown values $x_0$, $x_1$ and $x_2$.
+The procedure to determine the upper triangular form will be illustrated on a short example.
+Consider the following system:
+
+\begin{align}
+\label{eq:gauss3x3unmodified}
+\begin{bmatrix}
+	2&4&8\\
+	1&1&1\\
+	3&4&5\\
+\end{bmatrix}
+\cdot
+\begin{bmatrix}
+x_0\\
+x_1\\
+x_2\\
+\end{bmatrix}
+=
+\begin{bmatrix}
+2\\
+1\\
+2\\
+\end{bmatrix}
+\end{align}
+
+Its solution is:
+
+\begin{align*}
+\begin{bmatrix}
+	x_0\\
+	x_1\\
+	x_2\\
+\end{bmatrix}
+=
+\begin{bmatrix}
+	3\\
+	-3\\
+	1\\
+\end{bmatrix}
+\end{align*}
+
+
+Multiplying individual rows with a scalar and subtracting a multiple of a row from another one does not affect the system's solution.
+Note, that not only the matrix must be modified by the chosen operation, but also the right hand side vector.
+
+
+This can be used to modify the matrix in a way, that all values of the first column, except the first one, become zero.
+In the system of \cref{eq:gauss3x3unmodified}, this can be achieved by multiplying the first row with $\frac{1}{2}$ and subtracting the result from the second one.
+The same thing is done for the third row but with a factor of $\frac{3}{2}$.
+Notice that the factors are calculated by dividing the first value of a row by the first element of the first row, which is also the first value of the main diagonal.
+This yields:
+
+\begin{align*}
+\begin{bmatrix}
+	 \textcolor{red}{2}
+	&\textcolor{red}{4}
+	&\textcolor{red}{8}\\
+	 \left(1 - \textcolor{blue}{\frac{1}{2}} \cdot \textcolor{red}{2}\right)
+	&\left(1 - \textcolor{blue}{\frac{1}{2}} \cdot \textcolor{red}{4}\right)
+	&\left(1 - \textcolor{blue}{\frac{1}{2}} \cdot \textcolor{red}{8}\right)\\
+	 \left(3 - \textcolor{blue}{\frac{3}{2}} \cdot \textcolor{red}{2}\right)
+	&\left(4 - \textcolor{blue}{\frac{3}{2}} \cdot \textcolor{red}{4}\right)
+	&\left(5 - \textcolor{blue}{\frac{3}{2}} \cdot \textcolor{red}{8}\right)\\
+\end{bmatrix}
+&\cdot
+\begin{bmatrix}
+x_0\\
+x_1\\
+x_2\\
+\end{bmatrix}
+=
+\begin{bmatrix}
+\textcolor{red}{2}\\
+\left(1 - \textcolor{blue}{\frac{1}{2}} \cdot \textcolor{red}{2}\right)\\
+\left(2 - \textcolor{blue}{\frac{3}{2}} \cdot \textcolor{red}{2}\right)\\
+\end{bmatrix}
+\\
+\begin{bmatrix}
+2&4&8\\
+0&-1&-3\\
+0&-2&-7\\
+\end{bmatrix}
+&\cdot
+\begin{bmatrix}
+x_0\\
+x_1\\
+x_2\\
+\end{bmatrix}
+=
+\begin{bmatrix}
+2\\
+0\\
+-1\\
+\end{bmatrix}
+\end{align*}
+
+The upper diagonal form can now be obtained by repeating this procedure for the subsystem that remains if the rows and columns above and to the left of the second value of the main diagonal are ignored.
+
+\begin{align*}
+\begin{bmatrix}
+	2&
+	4&
+	8\\
+	0&
+	-1&
+	-3\\
+	\left(0 - \textcolor{blue}{\frac{-2}{-1}} \cdot \textcolor{red}{0} \right)&
+	\left(-2 - \textcolor{blue}{\frac{-2}{-1}} \cdot \textcolor{red}{-1} \right)&
+	\left(-7 - \textcolor{blue}{\frac{-2}{-1}} \cdot \textcolor{red}{-3} \right)\\
+\end{bmatrix}
+&\cdot
+\begin{bmatrix}
+	x_0\\
+	x_1\\
+	x_2\\
+\end{bmatrix}
+=
+\begin{bmatrix}
+	2\\
+	0\\
+	\left(-1 - \textcolor{blue}{\frac{-2}{-1}} \cdot \textcolor{red}{0} \right)\\
+\end{bmatrix}
+\\
+\begin{bmatrix}
+2&4&8\\
+0&-1&-3\\
+0&0&-1\\
+\end{bmatrix}
+&\cdot
+\begin{bmatrix}
+x_0\\
+x_1\\
+x_2\\
+\end{bmatrix}
+=
+\begin{bmatrix}
+2\\
+0\\
+-1\\
+\end{bmatrix}
+\end{align*}
+
+If the matrix is larger than in the example, the algorithm would continue with the subsystem that remains after removing the columns and rows  above and to the left of the third main diagonal value and so on until the upper triangular form is achieved.
+
+Now the unknown values can be determined by backward substitution.
+The value of $x_2$ follows from the last row: 
+
+
+\begin{align*}
+ x_2 = 1
+\end{align*}
+
+The second row yields:
+
+\begin{align*}
+-1x_1 - 3x_2 &= 0\\
+x_1 &= -3x_2\\
+x_1 &= -3
+\end{align*}
+
+The first row gives:
+\begin{align*}
+2x_0 + 4x_1 + 8x_2 &= 2\\
+2x_0  &= 2 -  4x_1 - 8x_2\\
+x_0  &= 1 -  2x_1 - 4x_2 \\
+x_0  &= 1 -  \left(2\cdot-3\right) - \left(4\cdot 1\right) \\
+x_0  &= 3
+\end{align*}
+
+\subsubsection{Gauss-Jordan algorithm}
+
+The Gauss-Jordan algorithm works quite similar to the standard algorithm shown in the previous section.
+The major difference is, that instead of an upper triangular matrix, it produces a diagonal matrix.
+This makes the backward substitution step obsolete.
+The first step is identical in both algorithms, but in the second step, the first row is not ignored:
+
+\begin{align*}
+\begin{bmatrix}
+\left(2 - \textcolor{blue}{\frac{4}{-1}} \cdot \textcolor{red}{0} \right)&
+\left(4 - \textcolor{blue}{\frac{4}{-1}} \cdot \textcolor{red}{-1} \right)&
+\left(8 - \textcolor{blue}{\frac{4}{-1}} \cdot \textcolor{red}{-3} \right)\\
+0&
+-1&
+-3\\
+\left(0 - \textcolor{blue}{\frac{-2}{-1}} \cdot \textcolor{red}{0} \right)&
+\left(-2 - \textcolor{blue}{\frac{-2}{-1}} \cdot \textcolor{red}{-1} \right)&
+\left(-7 - \textcolor{blue}{\frac{-2}{-1}} \cdot \textcolor{red}{-3} \right)\\
+\end{bmatrix}
+&\cdot
+\begin{bmatrix}
+x_0\\
+x_1\\
+x_2\\
+\end{bmatrix}
+=
+\begin{bmatrix}
+\left(2 - \textcolor{blue}{\frac{4}{-1}} \cdot \textcolor{red}{0} \right)\\
+0\\
+\left(-1 - \textcolor{blue}{\frac{-2}{-1}} \cdot \textcolor{red}{0} \right)\\
+\end{bmatrix}
+\\
+\begin{bmatrix}
+2&0&-4\\
+0&-1&-3\\
+0&0&-1\\
+\end{bmatrix}
+&\cdot
+\begin{bmatrix}
+x_0\\
+x_1\\
+x_2\\
+\end{bmatrix}
+=
+\begin{bmatrix}
+2\\
+0\\
+-1\\
+\end{bmatrix}
+\end{align*}
+
+In contrast to the general algorithm, an extra step at the end is needed to get the diagonal form.
+The procedure remains the same with the only difference to previous steps being the fact that there is no more row below the pivot element:
+
+\begin{align*}
+\begin{bmatrix}
+\left(2 - \textcolor{blue}{\frac{-4}{-1}} \cdot \textcolor{red}{0} \right)&
+\left(0 - \textcolor{blue}{\frac{-4}{-1}} \cdot \textcolor{red}{0} \right)&
+\left(-4 - \textcolor{blue}{\frac{-4}{-1}} \cdot \textcolor{red}{-1} \right)\\
+\left(0 - \textcolor{blue}{\frac{-3}{-1}} \cdot \textcolor{red}{0} \right)&
+\left(-1 - \textcolor{blue}{\frac{-3}{-1}} \cdot \textcolor{red}{0} \right)&
+\left(-3 - \textcolor{blue}{\frac{-3}{-1}} \cdot \textcolor{red}{-1} \right)\\
+0&
+0&
+-1\\
+\end{bmatrix}
+&\cdot
+\begin{bmatrix}
+x_0\\
+x_1\\
+x_2\\
+\end{bmatrix}
+=
+\begin{bmatrix}
+\left(2 - \textcolor{blue}{\frac{-4}{-1}} \cdot \textcolor{red}{-1} \right)\\
+\left(0 - \textcolor{blue}{\frac{-3}{-1}} \cdot \textcolor{red}{-1} \right)\\
+-1\\
+\end{bmatrix}
+\\
+\begin{bmatrix}
+2&0&0\\
+0&-1&0\\
+0&0&-1\\
+\end{bmatrix}
+&\cdot
+\begin{bmatrix}
+x_0\\
+x_1\\
+x_2\\
+\end{bmatrix}
+=
+\begin{bmatrix}
+6\\
+3\\
+-1\\
+\end{bmatrix}
+\end{align*}
+
+If the right hand side values are divided by the corresponding matrix main diagonal value, the same result as in the previous section is obtained.
+
+
+\subsubsection{Pivoting}
+
+
+\subsection{Optimizations}
+
+\subsection{Implementation}
+\subsubsection{Serial version}
+\subsubsection{Vectorized version}

@@ -21,31 +21,24 @@ namespace GDL::Solver
 // --------------------------------------------------------------------------------------------------------------------
 
 template <typename _type>
-inline Vec3Serial<_type, true> Cramer(const Mat3Serial<_type>& A, const Vec3Serial<_type, true>& b)
+inline Vec3Serial<_type, true> Cramer(const Mat3Serial<_type>& matA, const Vec3Serial<_type, true>& vecRhs)
 {
-    std::array<_type, 9> matrixData = A.Data();
-    std::array<_type, 3> vectorData = b.Data();
+    std::array<_type, 9> a = matA.Data();
+    std::array<_type, 3> r = vecRhs.Data();
 
-    std::array<_type, 3> cross12 = {{matrixData[4] * matrixData[8] - matrixData[5] * matrixData[7],
-                                     matrixData[5] * matrixData[6] - matrixData[3] * matrixData[8],
-                                     matrixData[3] * matrixData[7] - matrixData[4] * matrixData[6]}};
+    std::array<_type, 3> crossbc = {{a[4] * a[8] - a[5] * a[7], a[5] * a[6] - a[3] * a[8], a[3] * a[7] - a[4] * a[6]}};
 
-    std::array<_type, 3> crossV2 = {{vectorData[1] * matrixData[8] - vectorData[2] * matrixData[7],
-                                     vectorData[2] * matrixData[6] - vectorData[0] * matrixData[8],
-                                     vectorData[0] * matrixData[7] - vectorData[1] * matrixData[6]}};
+    std::array<_type, 3> crossrc = {{r[1] * a[8] - r[2] * a[7], r[2] * a[6] - r[0] * a[8], r[0] * a[7] - r[1] * a[6]}};
 
-    std::array<_type, 3> cross1V = {{matrixData[4] * vectorData[2] - matrixData[5] * vectorData[1],
-                                     matrixData[5] * vectorData[0] - matrixData[3] * vectorData[2],
-                                     matrixData[3] * vectorData[1] - matrixData[4] * vectorData[0]}};
+    std::array<_type, 3> crossbr = {{a[4] * r[2] - a[5] * r[1], a[5] * r[0] - a[3] * r[2], a[3] * r[1] - a[4] * r[0]}};
 
-    _type detA = matrixData[0] * cross12[0] + matrixData[1] * cross12[1] + matrixData[2] * cross12[2];
+    _type detA = a[0] * crossbc[0] + a[1] * crossbc[1] + a[2] * crossbc[2];
 
     DEV_EXCEPTION(detA == ApproxZero<F32>(10), "Singular matrix - system not solveable");
 
-    std::array<_type, 3> result = {
-            {(vectorData[0] * cross12[0] + vectorData[1] * cross12[1] + vectorData[2] * cross12[2]) / detA,
-             (matrixData[0] * crossV2[0] + matrixData[1] * crossV2[1] + matrixData[2] * crossV2[2]) / detA,
-             (matrixData[0] * cross1V[0] + matrixData[1] * cross1V[1] + matrixData[2] * cross1V[2]) / detA}};
+    std::array<_type, 3> result = {{(r[0] * crossbc[0] + r[1] * crossbc[1] + r[2] * crossbc[2]) / detA,
+                                    (a[0] * crossrc[0] + a[1] * crossrc[1] + a[2] * crossrc[2]) / detA,
+                                    (a[0] * crossbr[0] + a[1] * crossbr[1] + a[2] * crossbr[2]) / detA}};
 
     return Vec3Serial<_type, true>(result);
 }
@@ -54,28 +47,28 @@ inline Vec3Serial<_type, true> Cramer(const Mat3Serial<_type>& A, const Vec3Seri
 
 // --------------------------------------------------------------------------------------------------------------------
 
-inline Vec3fSSE<true> Cramer(const Mat3fSSE& A, const Vec3fSSE<true>& b)
+inline Vec3fSSE<true> Cramer(const Mat3fSSE& matA, const Vec3fSSE<true>& vecRhs)
 {
     using namespace GDL::sse;
 
-    const std::array<__m128, 3>& dataA = A.DataSSE();
-    const __m128& col0 = dataA[0];
-    const __m128& col1 = dataA[1];
-    const __m128& col2 = dataA[2];
+    const std::array<__m128, 3>& dataA = matA.DataSSE();
+    const __m128& a = dataA[0];
+    const __m128& b = dataA[1];
+    const __m128& c = dataA[2];
 
-    const __m128& v = b.DataSSE();
+    const __m128& r = vecRhs.DataSSE();
 
-    __m128 cross12 = CrossProduct(col1, col2);
-    __m128 detA = DotProduct<1, 1, 1, 0>(col0, cross12);
+    __m128 crossbc = CrossProduct(b, c);
+    __m128 detA = DotProduct<1, 1, 1, 0>(a, crossbc);
 
     DEV_EXCEPTION(_mm_cvtss_f32(detA) == ApproxZero<F32>(10), "Singular matrix - system not solveable");
 
-    __m128 crossv2 = CrossProduct(v, col2);
-    __m128 cross1v = CrossProduct(col1, v);
+    __m128 crossrc = CrossProduct(r, c);
+    __m128 crossbr = CrossProduct(b, r);
 
-    __m128 determinants = DotProduct<1, 1, 1, 0>(v, cross12);
-    determinants = Blend<0, 1, 0, 0>(determinants, DotProduct<1, 1, 1, 0>(col0, crossv2));
-    determinants = Blend<0, 0, 1, 0>(determinants, DotProduct<1, 1, 1, 0>(col0, cross1v));
+    __m128 determinants = DotProduct<1, 1, 1, 0>(r, crossbc);
+    determinants = Blend<0, 1, 0, 0>(determinants, DotProduct<1, 1, 1, 0>(a, crossrc));
+    determinants = Blend<0, 0, 1, 0>(determinants, DotProduct<1, 1, 1, 0>(a, crossbr));
 
     __m128 result = _mmx_div_p(determinants, detA);
 

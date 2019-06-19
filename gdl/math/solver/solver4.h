@@ -33,32 +33,32 @@ class Vec4fSSE;
 // - GaussAVX
 
 // Misc
-// - Optimize Cramer SSE the same way as AVX variant
+// - Optimize Cramer Serial the same way as AVX variant
 
 namespace Solver
 {
 
 //! @brief Solves the linear system A * x = b by using Cramers rule.
 //! @tparam _type: Data type
-//! @param A: Matrix
-//! @param b: Vector
+//! @param matA: Matrix
+//! @param vecRhs: Right-hand side vector
 //! @return Result vector x
 template <typename _type>
 [[nodiscard]] inline Vec4Serial<_type, true> Cramer(const Mat4Serial<_type>& A, const Vec4Serial<_type, true>& b);
 
 //! @brief Solves the linear system A * x = b by using Cramers rule.
-//! @param A: Matrix
-//! @param b: Vector
+//! @param matA: Matrix
+//! @param vecRhs: Right-hand side vector
 //! @return Result vector x
-[[nodiscard]] inline Vec4fSSE<true> Cramer(const Mat4fSSE& A, const Vec4fSSE<true>& b);
+[[nodiscard]] inline Vec4fSSE<true> Cramer(const Mat4fSSE& matA, const Vec4fSSE<true>& vecRhs);
 
 #ifdef __AVX2__
 
 //! @brief Solves the linear system A * x = b by using Cramers rule.
-//! @param A: Matrix
-//! @param b: Vector
+//! @param matA: Matrix
+//! @param vecRhs: Right-hand side vector
 //! @return Result vector x
-[[nodiscard]] inline Vec4fSSE<true> Cramer(const Mat4fAVX& A, const Vec4fSSE<true>& b);
+[[nodiscard]] inline Vec4fSSE<true> Cramer(const Mat4fAVX& matA, const Vec4fSSE<true>& vecRhs);
 
 #endif // __AVX2__
 

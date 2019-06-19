@@ -20,92 +20,103 @@ inline F32 Determinant2x2(__m128 data)
 
 
 
-inline F32 Determinant2x2(__m128 col0, __m128 col1)
+inline F32 Determinant2x2(__m128 a, __m128 b)
 {
-    return Determinant2x2(Shuffle<0, 1, 0, 1>(col0, col1));
+    return Determinant2x2(Shuffle<0, 1, 0, 1>(a, b));
 }
 
 
 
-inline F32 Determinant3x3(__m128 col0, __m128 col1, __m128 col2)
+inline F32 Determinant3x3(__m128 a, __m128 b, __m128 c)
 {
-    return DotProductF32<1, 1, 1, 0>(col0, CrossProduct(col1, col2));
+    return DotProductF32<1, 1, 1, 0>(a, CrossProduct(b, c));
 }
 
 
 
-inline F32 Determinant4x4(__m128 col0, __m128 col1, __m128 col2, __m128 col3)
+inline F32 Determinant4x4(__m128 a, __m128 b, __m128 c, __m128 d)
 {
-    __m128 col0P1230 = Permute<1, 2, 3, 0>(col0);
-    __m128 col1P1230 = Permute<1, 2, 3, 0>(col1);
-    __m128 col2P1230 = Permute<1, 2, 3, 0>(col2);
-    __m128 col3P1230 = Permute<1, 2, 3, 0>(col3);
+    // Calculate sum of first 4 terms
+    __m128 aP1230 = Permute<1, 2, 3, 0>(a);
+    __m128 bP1230 = Permute<1, 2, 3, 0>(b);
+    __m128 cP1230 = Permute<1, 2, 3, 0>(c);
+    __m128 dP1230 = Permute<1, 2, 3, 0>(d);
 
-    __m128 tmp0 = _mmx_fmsub_p(col0, col1P1230, _mm_mul_ps(col0P1230, col1));
-    __m128 tmp1 = _mmx_fmsub_p(col2, col3P1230, _mm_mul_ps(col2P1230, col3));
+    __m128 ab03 = _mmx_fmsub_p(a, bP1230, _mm_mul_ps(aP1230, b));
+    __m128 cd03 = _mmx_fmsub_p(c, dP1230, _mm_mul_ps(cP1230, d));
 
-    __m128 tmp1P2301 = Permute<2, 3, 0, 1>(tmp1);
-    __m128 tmp1P2301N = Negate<0, 1, 0, 1>(tmp1P2301);
+    __m128 cd03P2301 = Permute<2, 3, 0, 1>(cd03);
+    __m128 cd03P2301N = Negate<0, 1, 0, 1>(cd03P2301);
 
-    __m128 prodSum03 = DotProduct(tmp0, tmp1P2301N);
+    __m128 sum03 = DotProduct(ab03, cd03P2301N);
 
 
-    __m128 b0 = Blend<0, 0, 1, 1>(col0, col2);
-    __m128 b1 = Blend<1, 1, 0, 0>(col0, col2);
-    __m128 b2 = Blend<0, 0, 1, 1>(col1, col3);
-    __m128 b3 = Blend<1, 1, 0, 0>(col1, col3);
+    // Calculate sum of last 2 terms
+    __m128 acB0011 = Blend<0, 0, 1, 1>(a, c);
+    __m128 acB1100 = Blend<1, 1, 0, 0>(a, c);
+    __m128 bdB0011 = Blend<0, 0, 1, 1>(b, d);
+    __m128 bdB1100 = Blend<1, 1, 0, 0>(b, d);
 
-    __m128 b1P2301 = Permute<2, 3, 0, 1>(b1);
-    __m128 b3P2301 = Permute<2, 3, 0, 1>(b3);
+    __m128 acB1100P2301 = Permute<2, 3, 0, 1>(acB1100);
+    __m128 bdB1100P2301 = Permute<2, 3, 0, 1>(bdB1100);
 
-    __m128 tmp4 = _mmx_fmsub_p(b0, b3P2301, _mm_mul_ps(b1P2301, b2));
-    __m128 tmp4P3210 = Permute<3, 2, 1, 0>(tmp4);
+    __m128 abcd45 = _mmx_fmsub_p(acB0011, bdB1100P2301, _mm_mul_ps(acB1100P2301, bdB0011));
+    __m128 abcd45P3210 = Permute<3, 2, 1, 0>(abcd45);
 
-    __m128 tmp5 = _mm_mul_ps(tmp4, tmp4P3210);
-    __m128 prodSum45 = _mm_add_ps(tmp5, Permute<1, 0, 3, 2>(tmp5));
+    __m128 products45 = _mm_mul_ps(abcd45, abcd45P3210);
+    __m128 sum45 = _mm_add_ps(products45, Permute<1, 0, 3, 2>(products45));
 
-    return _mm_cvtss_f32(prodSum03) + _mm_cvtss_f32(prodSum45);
+
+    // Calculate and return determinant
+    return _mm_cvtss_f32(sum03) + _mm_cvtss_f32(sum45);
 
     // Alternative version
 
-    //    __m128 d1032 = Permute<1, 0, 3, 2>(col3);
-    //    __m128 c1032 = Permute<1, 0, 3, 2>(col2);
+    //    __m128 d1032 = Permute<1, 0, 3, 2>(d);
+    //    __m128 c1032 = Permute<1, 0, 3, 2>(c);
 
-    //    __m128 tmp1 = Permute<2, 3, 0, 1>(_mmx_fmsub_p(col2, d1032, _mmx_mul_p(col3, c1032)));
-    //    __m128 tmp2 = _mmx_fmsub_p(Permute<3, 2, 0, 1>(col2), d1032, _mmx_mul_p(Permute<3, 2, 0, 1>(col3), c1032));
+    //    __m128 tmp1 = Permute<2, 3, 0, 1>(_mmx_fmsub_p(c, d1032, _mmx_mul_p(d, c1032)));
+    //    __m128 tmp2 = _mmx_fmsub_p(Permute<3, 2, 0, 1>(c), d1032, _mmx_mul_p(Permute<3, 2, 0, 1>(d), c1032));
 
     //    __m128 tmp3 = Negate<1, 1, 0, 0>(tmp2);
 
-    //    __m128 b1032 = Permute<1, 0, 3, 2>(col1);
-    //    __m128 b2310 = Permute<2, 3, 1, 0>(col1);
-    //    __m128 tmp4 = Permute<3, 2, 0, 1>(_mmx_mul_p((col1), tmp3));
+    //    __m128 b1032 = Permute<1, 0, 3, 2>(b);
+    //    __m128 b2310 = Permute<2, 3, 1, 0>(b);
+    //    __m128 tmp4 = Permute<3, 2, 0, 1>(_mmx_mul_p((b), tmp3));
 
     //    __m128 tmp5 = _mmx_fmsub_p(b1032, tmp1, _mmx_fmsub_p(b2310, tmp3, tmp4));
 
-    //    return DotProductF32(col0, tmp5);
+    //    return DotProductF32(a, tmp5);
 }
 
 
 #ifdef __AVX2__
-inline F32 Determinant4x4(__m256 col01, __m256 col23)
+inline F32 Determinant4x4(__m256 ab, __m256 cd)
 {
-    __m256 col01P1230 = Permute<1, 2, 3, 0>(col01);
-    __m256 col23P1230 = Permute<1, 2, 3, 0>(col23);
-    __m256 tmp0 = _mmx_fmsub_p(col01, col23P1230, _mmx_mul_p(col23, col01P1230));
-    tmp0 = Negate<0, 0, 0, 0, 1, 0, 1, 0>(tmp0);
+    // Calculate the components of the first 4 terms
+    __m256 abP1230 = Permute<1, 2, 3, 0>(ab);
+    __m256 cdP1230 = Permute<1, 2, 3, 0>(cd);
 
-    __m256 col01P2323 = Permute<2, 3, 2, 3>(col01);
-    __m256 col23P2323 = Permute<2, 3, 2, 3>(col23);
-    __m256 tmp1 = _mmx_fmsub_p(col01, col23P2323, _mmx_mul_p(col23, col01P2323));
+    __m256 acbd03 = _mmx_fmsub_p(ab, cdP1230, _mmx_mul_p(cd, abP1230));
+    __m256 acbd03N = Negate<0, 0, 0, 0, 1, 0, 1, 0>(acbd03);
 
-    __m256 tmp2 = Blend<0, 0, 0, 0, 1, 1, 1, 1>(tmp0, tmp1);
-    __m256 tmp3 = Permute2F128<0, 1, 1, 0>(tmp0, tmp1);
-    tmp3 = Permute<2, 3, 0, 1, 1, 0, 2, 3>(tmp3);
 
-    __m256 tmp4 = DotProduct(tmp2, tmp3);
+    // Calculate the components of the last 2 terms
+    __m256 abP2323 = Permute<2, 3, 2, 3>(ab);
+    __m256 cdP2323 = Permute<2, 3, 2, 3>(cd);
+    __m256 acbd45 = _mmx_fmsub_p(ab, cdP2323, _mmx_mul_p(cd, abP2323));
 
-    __m256 result = _mmx_add_p(tmp4, Permute2F128<1, 0>(tmp4));
-    return _mm256_cvtss_f32(result);
+
+    // Calculate determinant
+    __m256 ac03bd45 = Blend<0, 0, 0, 0, 1, 1, 1, 1>(acbd03N, acbd45);
+    __m256 bd03ac45 = Permute2F128<0, 1, 1, 0>(acbd03N, acbd45);
+    __m256 bd03ac45P = Permute<2, 3, 0, 1, 1, 0, 2, 3>(bd03ac45);
+
+    __m256 sums = DotProduct(ac03bd45, bd03ac45P);
+
+    __m256 determinant = _mmx_add_p(sums, Permute2F128<1, 0>(sums));
+
+    return _mm256_cvtss_f32(determinant);
 }
 #endif // __AVX2__
 
