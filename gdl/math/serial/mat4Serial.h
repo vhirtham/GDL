@@ -91,11 +91,6 @@ public:
     //! @brief Returns the transposed matrix
     //! @return Transposed matrix
     [[nodiscard]] inline Mat4Serial Transpose() const;
-
-    //! @brief Calculates the determinant of a matrix
-    //! @param data: Matrix values in column major ordering
-    //! @return Determinant of the matrix
-    [[nodiscard]] static inline F32 Det(const std::array<_type, 16>& data);
 };
 
 

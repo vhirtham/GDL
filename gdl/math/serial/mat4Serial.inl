@@ -137,17 +137,25 @@ const std::array<_type, 16> Mat4Serial<_type>::Data() const
 template <typename _type>
 F32 Mat4Serial<_type>::Det() const
 {
-    F32 cd12 = mD[8] * mD[13] - mD[9] * mD[12];
-    F32 cd13 = mD[8] * mD[14] - mD[10] * mD[12];
-    F32 cd14 = mD[8] * mD[15] - mD[11] * mD[12];
-    F32 cd23 = mD[9] * mD[14] - mD[10] * mD[13];
-    F32 cd24 = mD[9] * mD[15] - mD[11] * mD[13];
-    F32 cd34 = mD[10] * mD[15] - mD[11] * mD[14];
+    F32 ab01 = mD[0] * mD[5] - mD[1] * mD[4];
+    F32 cd23 = mD[10] * mD[15] - mD[11] * mD[14];
 
+    F32 ab12 = mD[1] * mD[6] - mD[2] * mD[5];
+    F32 cd03 = mD[8] * mD[15] - mD[11] * mD[12];
 
-    return mD[0] * (mD[5] * cd34 - mD[6] * cd24 + mD[7] * cd23) +
-           mD[1] * (-mD[4] * cd34 + mD[6] * cd14 - mD[7] * cd13) +
-           mD[2] * (mD[4] * cd24 - mD[5] * cd14 + mD[7] * cd12) + mD[3] * (-mD[4] * cd23 + mD[5] * cd13 - mD[6] * cd12);
+    F32 ab23 = mD[2] * mD[7] - mD[3] * mD[6];
+    F32 cd01 = mD[8] * mD[13] - mD[9] * mD[12];
+
+    F32 ab30 = mD[3] * mD[4] - mD[0] * mD[7];
+    F32 cd21 = mD[10] * mD[13] - mD[9] * mD[14];
+
+    F32 ab02 = mD[0] * mD[6] - mD[2] * mD[4];
+    F32 cd31 = mD[11] * mD[13] - mD[9] * mD[15];
+
+    F32 ab13 = mD[1] * mD[7] - mD[3] * mD[5];
+    F32 cd20 = mD[10] * mD[12] - mD[8] * mD[14];
+
+    return ab01 * cd23 + ab12 * cd03 + ab23 * cd01 + ab30 * cd21 + ab02 * cd31 + ab13 * cd20;
 }
 
 
@@ -157,25 +165,6 @@ Mat4Serial<_type> Mat4Serial<_type>::Transpose() const
 {
     return Mat4Serial<_type>(mD[0], mD[4], mD[8], mD[12], mD[1], mD[5], mD[9], mD[13], mD[2], mD[6], mD[10], mD[14],
                              mD[3], mD[7], mD[11], mD[15]);
-}
-
-
-
-template <typename _type>
-F32 Mat4Serial<_type>::Det(const std::array<_type, 16>& data)
-{
-    F32 cd12 = data[8] * data[13] - data[9] * data[12];
-    F32 cd13 = data[8] * data[14] - data[10] * data[12];
-    F32 cd14 = data[8] * data[15] - data[11] * data[12];
-    F32 cd23 = data[9] * data[14] - data[10] * data[13];
-    F32 cd24 = data[9] * data[15] - data[11] * data[13];
-    F32 cd34 = data[10] * data[15] - data[11] * data[14];
-
-
-    return data[0] * (data[5] * cd34 - data[6] * cd24 + data[7] * cd23) +
-           data[1] * (-data[4] * cd34 + data[6] * cd14 - data[7] * cd13) +
-           data[2] * (data[4] * cd24 - data[5] * cd14 + data[7] * cd12) +
-           data[3] * (-data[4] * cd23 + data[5] * cd13 - data[6] * cd12);
 }
 
 

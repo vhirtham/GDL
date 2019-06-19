@@ -44,7 +44,8 @@ namespace Solver
 //! @param vecRhs: Right-hand side vector
 //! @return Result vector x
 template <typename _type>
-[[nodiscard]] inline Vec4Serial<_type, true> Cramer(const Mat4Serial<_type>& A, const Vec4Serial<_type, true>& b);
+[[nodiscard]] inline Vec4Serial<_type, true> Cramer(const Mat4Serial<_type>& matA,
+                                                    const Vec4Serial<_type, true>& vecRhs);
 
 //! @brief Solves the linear system A * x = b by using Cramers rule.
 //! @param matA: Matrix

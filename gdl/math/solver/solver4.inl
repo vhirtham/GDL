@@ -22,56 +22,80 @@ namespace GDL::Solver
 
 
 template <typename _type>
-inline Vec4Serial<_type, true> Cramer(const Mat4Serial<_type>& A, const Vec4Serial<_type, true>& b)
+inline Vec4Serial<_type, true> Cramer(const Mat4Serial<_type>& matA, const Vec4Serial<_type, true>& vecRhs)
 {
+    const std::array<_type, 16>& A = matA.Data();
 
-    _type detA = A.Det();
+
+    // Calculate detrminant of A
+    F32 ab01 = A[0] * A[5] - A[1] * A[4];
+    F32 cd23 = A[10] * A[15] - A[11] * A[14];
+
+    F32 ab12 = A[1] * A[6] - A[2] * A[5];
+    F32 cd03 = A[8] * A[15] - A[11] * A[12];
+
+    F32 ab23 = A[2] * A[7] - A[3] * A[6];
+    F32 cd01 = A[8] * A[13] - A[9] * A[12];
+
+    F32 ab30 = A[3] * A[4] - A[0] * A[7];
+    F32 cd21 = A[10] * A[13] - A[9] * A[14];
+
+    F32 ab02 = A[0] * A[6] - A[2] * A[4];
+    F32 cd31 = A[11] * A[13] - A[9] * A[15];
+
+    F32 ab13 = A[1] * A[7] - A[3] * A[5];
+    F32 cd20 = A[10] * A[12] - A[8] * A[14];
+
+    _type detA = ab01 * cd23 + ab12 * cd03 + ab23 * cd01 + ab30 * cd21 + ab02 * cd31 + ab13 * cd20;
+
     DEV_EXCEPTION(detA == ApproxZero<F32>(10), "Singular matrix - system not solveable");
 
-    std::array<_type, 4> detTmp;
-    std::array<_type, 16> matrixData = A.Data();
-    matrixData[0] = b[0];
-    matrixData[1] = b[1];
-    matrixData[2] = b[2];
-    matrixData[3] = b[3];
-    detTmp[0] = Mat4Serial<_type>::Det(matrixData);
+    const std::array<_type, 4>& r = vecRhs.Data();
 
-    matrixData[0] = A(0, 0);
-    matrixData[1] = A(1, 0);
-    matrixData[2] = A(2, 0);
-    matrixData[3] = A(3, 0);
-    matrixData[4] = b[0];
-    matrixData[5] = b[1];
-    matrixData[6] = b[2];
-    matrixData[7] = b[3];
-    detTmp[1] = Mat4Serial<_type>::Det(matrixData);
 
-    matrixData[4] = A(0, 1);
-    matrixData[5] = A(1, 1);
-    matrixData[6] = A(2, 1);
-    matrixData[7] = A(3, 1);
-    matrixData[8] = b[0];
-    matrixData[9] = b[1];
-    matrixData[10] = b[2];
-    matrixData[11] = b[3];
-    detTmp[2] = Mat4Serial<_type>::Det(matrixData);
+    // Calculate solution with modified determinants
+    F32 rb01 = r[0] * A[5] - r[1] * A[4];
+    F32 rb12 = r[1] * A[6] - r[2] * A[5];
+    F32 rb23 = r[2] * A[7] - r[3] * A[6];
+    F32 rb30 = r[3] * A[4] - r[0] * A[7];
+    F32 rb02 = r[0] * A[6] - r[2] * A[4];
+    F32 rb13 = r[1] * A[7] - r[3] * A[5];
 
-    matrixData[8] = A(0, 2);
-    matrixData[9] = A(1, 2);
-    matrixData[10] = A(2, 2);
-    matrixData[11] = A(3, 2);
-    matrixData[12] = b[0];
-    matrixData[13] = b[1];
-    matrixData[14] = b[2];
-    matrixData[15] = b[3];
-    detTmp[3] = Mat4Serial<_type>::Det(matrixData);
+    std::array<_type, 4> solution;
+    solution[0] = (rb01 * cd23 + rb12 * cd03 + rb23 * cd01 + rb30 * cd21 + rb02 * cd31 + rb13 * cd20) / detA;
 
-    detTmp[0] /= detA;
-    detTmp[1] /= detA;
-    detTmp[2] /= detA;
-    detTmp[3] /= detA;
 
-    return Vec4Serial<_type, true>(detTmp);
+    F32 ar01 = A[0] * r[1] - A[1] * r[0];
+    F32 ar12 = A[1] * r[2] - A[2] * r[1];
+    F32 ar23 = A[2] * r[3] - A[3] * r[2];
+    F32 ar30 = A[3] * r[0] - A[0] * r[3];
+    F32 ar02 = A[0] * r[2] - A[2] * r[0];
+    F32 ar13 = A[1] * r[3] - A[3] * r[1];
+
+    solution[1] = (ar01 * cd23 + ar12 * cd03 + ar23 * cd01 + ar30 * cd21 + ar02 * cd31 + ar13 * cd20) / detA;
+
+
+    F32 rd23 = r[2] * A[15] - r[3] * A[14];
+    F32 rd03 = r[0] * A[15] - r[3] * A[12];
+    F32 rd01 = r[0] * A[13] - r[1] * A[12];
+    F32 rd21 = r[2] * A[13] - r[1] * A[14];
+    F32 rd31 = r[3] * A[13] - r[1] * A[15];
+    F32 rd20 = r[2] * A[12] - r[0] * A[14];
+
+    solution[2] = (ab01 * rd23 + ab12 * rd03 + ab23 * rd01 + ab30 * rd21 + ab02 * rd31 + ab13 * rd20) / detA;
+
+
+    F32 cr23 = A[10] * r[3] - A[11] * r[2];
+    F32 cr03 = A[8] * r[3] - A[11] * r[0];
+    F32 cr01 = A[8] * r[1] - A[9] * r[0];
+    F32 cr21 = A[10] * r[1] - A[9] * r[2];
+    F32 cr31 = A[11] * r[1] - A[9] * r[3];
+    F32 cr20 = A[10] * r[0] - A[8] * r[2];
+
+    solution[3] = (ab01 * cr23 + ab12 * cr03 + ab23 * cr01 + ab30 * cr21 + ab02 * cr31 + ab13 * cr20) / detA;
+
+
+    return Vec4Serial<_type, true>(solution);
 }
 
 

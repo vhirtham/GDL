@@ -92,10 +92,25 @@ Since the efficiency of Cramers rule drops significantly for larger systems, oth
 
 
 
-\subsubsection{2x2 Determinant}
+\subsubsection{2x2 determinant}
 \label{sec:determinant2x2}
 
-\subsubsection{3x3 Determinant}
+\begin{align*}
+\mathbf{A}
+=
+\begin{bmatrix}
+a_0&b_0\\
+a_1&b_1\\
+\end{bmatrix}
+\end{align*}
+
+\begin{align*}
+\mathrm{det}\pth{\mathbf{A}}
+&
+= a_0b_1 - a_1b_0
+\end{align*}
+
+\subsubsection{3x3 determinant}
 \label{sec:determinant3x3}
 \begin{align*}
 \mathbf{A}
@@ -138,7 +153,7 @@ If all three columns of $\mathbf{A}$ are treated as individual vectors $\mathbf{
 
 The determinant of  $\mathbf{A}$ is the dot product of the first column and the cross product of second and third column.
 
-\subsubsection{4x4 Determinant}
+\subsubsection{4x4 determinant}
 \label{sec:determinant4x4}
 \begin{align*}
 \mathbf{A}
@@ -311,8 +326,77 @@ a_0c_1 \pth{b_3d_2 - b_2d_3}
 \end{align}
 
 
+
+
+% ------------------------------------------------------------------------------
 \newpage
-\subsection{Implementation 3x3 Determinant - SSE}
+\subsection{Implementation}
+\subsubsection{3x3 determinant - serial}
+\label{sec:determinant3x3Serial}
+
+Since the serial calculation of a 3x3 determinant is just turning \cref{eq:determinant3x3} into C++ code, the function is not further discussed.
+The code for a matrix with column major ordering is as follows:
+
+\begin{minted}{cpp}
+template <typename _type>
+F32 Mat3Serial<_type>::Det() const
+{
+    return mD[0] * (mD[4] * mD[8] - mD[5] * mD[7]) + 
+           mD[3] * (mD[7] * mD[2] - mD[8] * mD[1]) +
+           mD[6] * (mD[1] * mD[5] - mD[2] * mD[4]);
+}
+\end{minted}
+
+
+
+
+% ------------------------------------------------------------------------------
+\newpage
+\subsubsection{3x3 solver - serial}
+\label{sec:cramerSolver3x3Serial}
+
+The serial implementation of Cramers rule just calculates four determinants as presented in \cref{sec:determinant3x3Serial} with one cross product being reused.
+Because of its simplicity, the code is presented without any further explanation.
+
+
+\begin{minted}{cpp}
+template <typename _type>
+inline Vec3Serial<_type, true> Cramer(const Mat3Serial<_type>& matA, 
+                                      const Vec3Serial<_type, true>& vecRhs)
+{
+    std::array<_type, 9> a = matA.Data();
+    std::array<_type, 3> r = vecRhs.Data();
+
+    std::array<_type, 3> crossbc = {{a[4] * a[8] - a[5] * a[7], 
+                                     a[5] * a[6] - a[3] * a[8], 
+                                     a[3] * a[7] - a[4] * a[6]}};
+
+    std::array<_type, 3> crossrc = {{r[1] * a[8] - r[2] * a[7], 
+                                     r[2] * a[6] - r[0] * a[8], 
+                                     r[0] * a[7] - r[1] * a[6]}};
+
+    std::array<_type, 3> crossbr = {{a[4] * r[2] - a[5] * r[1], 
+                                     a[5] * r[0] - a[3] * r[2], 
+                                     a[3] * r[1] - a[4] * r[0]}};
+
+    _type detA = a[0] * crossbc[0] + a[1] * crossbc[1] + a[2] * crossbc[2];
+
+    DEV_EXCEPTION(detA == ApproxZero<F32>(10), 
+                          "Singular matrix - system not solveable");
+
+    std::array<_type, 3> solution = 
+        {{(r[0] * crossbc[0] + r[1] * crossbc[1] + r[2] * crossbc[2]) / detA,
+          (a[0] * crossrc[0] + a[1] * crossrc[1] + a[2] * crossrc[2]) / detA,
+          (a[0] * crossbr[0] + a[1] * crossbr[1] + a[2] * crossbr[2]) / detA}};
+
+    return Vec3Serial<_type, true>(solution);
+}
+\end{minted}
+
+
+% ------------------------------------------------------------------------------
+\newpage
+\subsubsection{3x3 determinant - SSE}
 \label{sec:determinant3x3SSE}
 
 The matrix
@@ -388,8 +472,8 @@ Because this is a rather simple function, it won't be explained any further.
 
 % ------------------------------------------------------------------------------
 \newpage
-\subsection{Implementation 3x3 Solver - SSE}
-\label{sec:solver3x3SSE}
+\subsubsection{3x3 solver - SSE}
+\label{sec:cramerSolver3x3SSE}
 
 First, the determinant of the unmodified matrix is calculated. Since the cross product of the second and third column can be reused later, it is stored in an extra variable.
 
@@ -422,9 +506,9 @@ determinants = Blend<0, 0, 1, 0>(determinants, DotProduct<1, 1, 1, 0>(a, crossbr
 Finally, the modified determinants are divided by the determinant of the unmodified matrix to get the system's solution:
 
 \begin{minted}{cpp}
-__m128 result = _mmx_div_p(determinants, detA);
+__m128 solution = _mmx_div_p(determinants, detA);
 
-return Vec3fSSE<true>(result);
+return Vec3fSSE<true>(solution);
 \end{minted}
 
 
@@ -458,17 +542,155 @@ inline Vec3fSSE<true> Cramer(const Mat3fSSE& matA, const Vec3fSSE<true>& vecRhs)
     determinants = 
         Blend<0, 0, 1, 0>(determinants, DotProduct<1, 1, 1, 0>(a, crossbr));
 
-    __m128 result = _mmx_div_p(determinants, detA);
+    __m128 solution = _mmx_div_p(determinants, detA);
 
-    return Vec3fSSE<true>(result);
+    return Vec3fSSE<true>(solution);
 }
 \end{minted}
 
 
 
+
 % ------------------------------------------------------------------------------
 \newpage
-\subsection{Implementation 4x4 Determinant - SSE}
+\subsubsection{4x4 determinant - serial}
+\label{sec:determinant4x4Serial}
+
+Since the serial calculation of a 4x4 determinant is just turning \cref{eq:determinant4x4SSE} into C++ code, the function is not further discussed.
+The code for a matrix with column major ordering is as follows:
+
+\begin{minted}{cpp}
+F32 Mat4Serial<_type>::Det() const
+{
+    F32 ab01 = mD[0]  * mD[5]  - mD[1]  * mD[4];
+    F32 cd23 = mD[10] * mD[15] - mD[11] * mD[14];
+
+    F32 ab12 = mD[1]  * mD[6]  - mD[2]  * mD[5];
+    F32 cd03 = mD[8]  * mD[15] - mD[11] * mD[12];
+
+    F32 ab23 = mD[2]  * mD[7]  - mD[3]  * mD[6];
+    F32 cd01 = mD[8]  * mD[13] - mD[9]  * mD[12];
+
+    F32 ab30 = mD[3]  * mD[4]  - mD[0]  * mD[7];
+    F32 cd21 = mD[10] * mD[13] - mD[9]  * mD[14];
+
+    F32 ab02 = mD[0]  * mD[6]  - mD[2]  * mD[4];
+    F32 cd31 = mD[11] * mD[13] - mD[9]  * mD[15];
+
+    F32 ab13 = mD[1]  * mD[7]  - mD[3]  * mD[5];
+    F32 cd20 = mD[10] * mD[12] - mD[8]  * mD[14];
+
+    return ab01 * cd23 + ab12 * cd03 + ab23 * cd01 + 
+           ab30 * cd21 + ab02 * cd31 + ab13 * cd20;
+}
+\end{minted}
+
+
+
+
+
+% ------------------------------------------------------------------------------
+\newpage
+\subsubsection{4x4 solver - serial}
+\label{sec:cramerSolver4x4Serial}
+
+The serial implementation of Cramers rule just calculates five determinants as presented in \cref{sec:determinant4x4Serial} with some intermediate results being reused.
+Because of its simplicity, the code is presented without any further explanation.
+
+\begin{minted}{cpp}
+template <typename _type>
+inline Vec4Serial<_type, true> Cramer(const Mat4Serial<_type>& matA, 
+                                      const Vec4Serial<_type, true>& vecRhs)
+{
+    const std::array<_type, 16>& A = matA.Data();
+
+
+    // Calculate detrminant of A
+    F32 ab01 = A[0]  * A[5]  - A[1]  * A[4];
+    F32 cd23 = A[10] * A[15] - A[11] * A[14];
+
+    F32 ab12 = A[1]  * A[6]  - A[2]  * A[5];
+    F32 cd03 = A[8]  * A[15] - A[11] * A[12];
+
+    F32 ab23 = A[2]  * A[7]  - A[3]  * A[6];
+    F32 cd01 = A[8]  * A[13] - A[9]  * A[12];
+
+    F32 ab30 = A[3]  * A[4]  - A[0]  * A[7];
+    F32 cd21 = A[10] * A[13] - A[9]  * A[14];
+
+    F32 ab02 = A[0]  * A[6]  - A[2]  * A[4];
+    F32 cd31 = A[11] * A[13] - A[9]  * A[15];
+
+    F32 ab13 = A[1]  * A[7]  - A[3]  * A[5];
+    F32 cd20 = A[10] * A[12] - A[8]  * A[14];
+
+    _type detA = ab01 * cd23 + ab12 * cd03 + ab23 * cd01 + 
+                 ab30 * cd21 + ab02 * cd31 + ab13 * cd20;
+
+
+    DEV_EXCEPTION(detA == ApproxZero<F32>(10), 
+                  "Singular matrix - system not solveable");
+
+
+    const std::array<_type, 4>& r = vecRhs.Data();
+
+
+    // Calculate solution with modified determinants
+    F32 rb01 = r[0] * A[5] - r[1] * A[4];
+    F32 rb12 = r[1] * A[6] - r[2] * A[5];
+    F32 rb23 = r[2] * A[7] - r[3] * A[6];
+    F32 rb30 = r[3] * A[4] - r[0] * A[7];
+    F32 rb02 = r[0] * A[6] - r[2] * A[4];
+    F32 rb13 = r[1] * A[7] - r[3] * A[5];
+
+    std::array<_type, 4> solution;
+    solution[0] = (rb01 * cd23 + rb12 * cd03 + rb23 * cd01 + 
+                   rb30 * cd21 + rb02 * cd31 + rb13 * cd20) / detA;
+
+
+    F32 ar01 = A[0] * r[1] - A[1] * r[0];
+    F32 ar12 = A[1] * r[2] - A[2] * r[1];
+    F32 ar23 = A[2] * r[3] - A[3] * r[2];
+    F32 ar30 = A[3] * r[0] - A[0] * r[3];
+    F32 ar02 = A[0] * r[2] - A[2] * r[0];
+    F32 ar13 = A[1] * r[3] - A[3] * r[1];
+
+    solution[1] = (ar01 * cd23 + ar12 * cd03 + ar23 * cd01 + 
+                   ar30 * cd21 + ar02 * cd31 + ar13 * cd20) / detA;
+
+
+    F32 rd23 = r[2] * A[15] - r[3] * A[14];
+    F32 rd03 = r[0] * A[15] - r[3] * A[12];
+    F32 rd01 = r[0] * A[13] - r[1] * A[12];
+    F32 rd21 = r[2] * A[13] - r[1] * A[14];
+    F32 rd31 = r[3] * A[13] - r[1] * A[15];
+    F32 rd20 = r[2] * A[12] - r[0] * A[14];
+
+    solution[2] = (ab01 * rd23 + ab12 * rd03 + ab23 * rd01 + 
+                   ab30 * rd21 + ab02 * rd31 + ab13 * rd20) / detA;
+
+
+    F32 cr23 = A[10] * r[3] - A[11] * r[2];
+    F32 cr03 = A[8]  * r[3] - A[11] * r[0];
+    F32 cr01 = A[8]  * r[1] - A[9]  * r[0];
+    F32 cr21 = A[10] * r[1] - A[9]  * r[2];
+    F32 cr31 = A[11] * r[1] - A[9]  * r[3];
+    F32 cr20 = A[10] * r[0] - A[8]  * r[2];
+
+    solution[3] = (ab01 * cr23 + ab12 * cr03 + ab23 * cr01 + 
+                   ab30 * cr21 + ab02 * cr31 + ab13 * cr20) / detA;
+
+
+    return Vec4Serial<_type, true>(solution);
+}
+\end{minted}
+
+
+
+
+% ------------------------------------------------------------------------------
+\newpage
+\subsubsection{4x4 determinant - SSE}
 \label{sec:determinant4x4SSE}
 
 Each column of the matrix
@@ -854,7 +1076,7 @@ inline F32 Determinant4x4(__m128 a, __m128 b, __m128 c, __m128 d)
 
 % ------------------------------------------------------------------------------
 \newpage
-\subsection{Implementation 4x4 Solver - SSE}
+\subsubsection{4x4 solver - SSE}
 
 First the determinant of $\mathbf{A}$ is calculated.
 Because some intermediate results can be reused, the previously introduced determinant function of \cref{sec:determinant4x4SSE} is not employed here. 
@@ -1418,7 +1640,7 @@ inline Vec4fSSE<true> Cramer(const Mat4fSSE& matA, const Vec4fSSE<true>& vecRhs)
 
 % ------------------------------------------------------------------------------
 \newpage
-\subsection{Implementation 4x4 Determinant - AVX}
+\subsubsection{4x4 determinant - AVX}
 \label{sec:determinant4x4AVX}
 
 The matrix 
@@ -1738,7 +1960,7 @@ inline F32 Determinant4x4(__m256 ab, __m256 cd)
 
 % ------------------------------------------------------------------------------
 \newpage
-\subsection{Implementation 4x4 Solver - AVX}
+\subsubsection{4x4 solver - AVX}
 
 First the determinant of $\mathbf{A}$ is calculated.
 Because some intermediate results can be reused, the previously introduced determinant function of \cref{sec:determinant4x4AVX} is not employed here. 
