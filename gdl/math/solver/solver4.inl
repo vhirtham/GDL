@@ -307,10 +307,10 @@ inline Vec4fSSE<true> Cramer(const Mat4fAVX& matA, const Vec4fSSE<true>& vecRhs)
 // --------------------------------------------------------------------------------------------------------------------
 
 template <typename _type>
-inline Vec4Serial<_type, true> GaussNoPivot(const Mat4Serial<_type>& A, const Vec4Serial<_type, true>& b)
+inline Vec4Serial<_type, true> GaussNoPivot(const Mat4Serial<_type>& matA, const Vec4Serial<_type, true>& vecRhs)
 {
-    std::array<_type, 16> matrixData = A.Data();
-    std::array<_type, 4> vectorData = b.Data();
+    std::array<_type, 16> matrixData = matA.Data();
+    std::array<_type, 4> vectorData = vecRhs.Data();
 
     // First elimination step
     GaussDenseSmallSerial<_type, 4>::template EliminationStep<0>(matrixData, vectorData);
@@ -331,12 +331,12 @@ inline Vec4Serial<_type, true> GaussNoPivot(const Mat4Serial<_type>& A, const Ve
 
 // --------------------------------------------------------------------------------------------------------------------
 
-inline Vec4fSSE<true> GaussNoPivot(const Mat4fSSE& A, const Vec4fSSE<true>& b)
+inline Vec4fSSE<true> GaussNoPivot(const Mat4fSSE& matA, const Vec4fSSE<true>& vecRhs)
 {
     using namespace GDL::sse;
 
-    alignas(alignmentBytes<__m128>) std::array<__m128, 4> matrixData = A.DataSSE();
-    __m128 rhs = b.DataSSE();
+    alignas(alignmentBytes<__m128>) std::array<__m128, 4> matrixData = matA.DataSSE();
+    __m128 rhs = vecRhs.DataSSE();
     const std::array<__m128* const, 5> data = {{&matrixData[0], &matrixData[1], &matrixData[2], &matrixData[3], &rhs}};
 
 
@@ -378,10 +378,10 @@ inline Vec4fSSE<true> GaussNoPivot(const Mat4fSSE& A, const Vec4fSSE<true>& b)
 // --------------------------------------------------------------------------------------------------------------------
 
 template <typename _type>
-inline Vec4Serial<_type, true> GaussPartialPivot(const Mat4Serial<_type>& A, const Vec4Serial<_type, true>& b)
+inline Vec4Serial<_type, true> GaussPartialPivot(const Mat4Serial<_type>& matA, const Vec4Serial<_type, true>& vecRhs)
 {
-    std::array<_type, 16> matrixData = A.Data();
-    std::array<_type, 4> vectorData = b.Data();
+    std::array<_type, 16> matrixData = matA.Data();
+    std::array<_type, 4> vectorData = vecRhs.Data();
 
 
     // Find first pivot
@@ -444,12 +444,12 @@ inline Vec4Serial<_type, true> GaussPartialPivot(const Mat4Serial<_type>& A, con
 
 // --------------------------------------------------------------------------------------------------------------------
 
-inline Vec4fSSE<true> GaussPartialPivot(const Mat4fSSE& A, const Vec4fSSE<true>& b)
+inline Vec4fSSE<true> GaussPartialPivot(const Mat4fSSE& matA, const Vec4fSSE<true>& vecRhs)
 {
     using namespace GDL::sse;
 
-    alignas(alignmentBytes<__m128>) std::array<__m128, 4> matrixData = A.DataSSE();
-    __m128 rhs = b.DataSSE();
+    alignas(alignmentBytes<__m128>) std::array<__m128, 4> matrixData = matA.DataSSE();
+    __m128 rhs = vecRhs.DataSSE();
     const std::array<__m128* const, 5> data = {{&matrixData[0], &matrixData[1], &matrixData[2], &matrixData[3], &rhs}};
 
 
@@ -540,18 +540,72 @@ inline Vec4fSSE<true> GaussPartialPivot(const Mat4fSSE& A, const Vec4fSSE<true>&
 
 #ifdef __AVX2__
 
-[[nodiscard]] inline Vec4fSSE<true> GaussPartialPivot(const Mat4fAVX& A, const Vec4fSSE<true>& b)
+[[nodiscard]] inline Vec4fSSE<true> GaussPartialPivot(const Mat4fAVX& matA, const Vec4fSSE<true>& vecRhs)
 {
     // INFO: There is no specialized AVX version of this function. During the elimination step, the row multipliers must
     // be transferred across lane boundaries which results in a performance penalty when compared to the SSE version.
     // Therefore, the AVX matrix uses the same function as the SSE matrix.
 
     static_assert(sizeof(Mat4fAVX) == sizeof(Mat4fSSE), "Internal error - Matrix types have different sizes");
-    return GaussPartialPivot(*reinterpret_cast<const Mat4fSSE*>(&A), b);
+    return GaussPartialPivot(*reinterpret_cast<const Mat4fSSE*>(&matA), vecRhs);
 }
 
 #endif // __AVX2__
 
 
+
+// --------------------------------------------------------------------------------------------------------------------
+
+template <typename _type>
+[[nodiscard]] inline Vec4Serial<_type, true> LUNoPivot(const Mat4Serial<_type>& matA,
+                                                       const Vec4Serial<_type, true>& vecRhs)
+{
+    // Factorize
+    std::array<_type, 16> LU = matA.Data();
+
+
+    DEV_EXCEPTION(LU[0] == ApproxZero<_type>(1, 10), "Singular matrix - system not solveable");
+
+    for (U32 i = 1; i < 4; ++i)
+    {
+        LU[i] /= LU[0];
+        LU[i + 4] -= LU[i] * LU[4];
+        LU[i + 8] -= LU[i] * LU[8];
+        LU[i + 12] -= LU[i] * LU[12];
+    }
+
+
+    DEV_EXCEPTION(LU[5] == ApproxZero<_type>(1, 10), "Singular matrix - system not solveable");
+
+    for (U32 i = 6; i < 8; ++i)
+    {
+        LU[i] /= LU[5];
+        LU[i + 4] -= LU[i] * LU[9];
+        LU[i + 8] -= LU[i] * LU[13];
+    }
+
+    DEV_EXCEPTION(LU[10] == ApproxZero<_type>(1, 10), "Singular matrix - system not solveable");
+
+    LU[11] /= LU[10];
+    LU[15] -= LU[11] * LU[14];
+
+
+    // Solve
+    std::array<_type, 4> r = vecRhs.Data();
+
+    // Ly=r
+    r[1] -= LU[1] * r[0];
+    r[2] -= LU[2] * r[0] + LU[6] * r[1];
+    r[3] -= LU[3] * r[0] + LU[7] * r[1] + LU[11] * r[2];
+
+    // Ux=y
+
+    r[3] /= LU[15];
+    r[2] = (r[2] - r[3] * LU[14]) / LU[10];
+    r[1] = (r[1] - r[3] * LU[13] - r[2] * LU[9]) / LU[5];
+    r[0] = (r[0] - r[3] * LU[12] - r[2] * LU[8] - r[1] * LU[4]) / LU[0];
+
+    return Vec4Serial<_type>(r);
+}
 
 } // namespace GDL::Solver

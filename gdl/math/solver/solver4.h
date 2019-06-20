@@ -60,17 +60,18 @@ template <typename _type>
 
 //! @brief Solves the linear system A * x = b by using Gaussian elimination without pivoting.
 //! @tparam _type: Data type
-//! @param A: Matrix
-//! @param b: Vector
+//! @param matA: Matrix
+//! @param vecRhs: Right-hand side vector
 //! @return Result vector x
 template <typename _type>
-[[nodiscard]] inline Vec4Serial<_type, true> GaussNoPivot(const Mat4Serial<_type>& A, const Vec4Serial<_type, true>& b);
+[[nodiscard]] inline Vec4Serial<_type, true> GaussNoPivot(const Mat4Serial<_type>& matA,
+                                                          const Vec4Serial<_type, true>& vecRhs);
 
 //! @brief Solves the linear system A * x = b by using Gaussian elimination without pivoting.
-//! @param A: Matrix
-//! @param b: Vector
+//! @param matA: Matrix
+//! @param vecRhs: Right-hand side vector
 //! @return Result vector x
-[[nodiscard]] inline Vec4fSSE<true> GaussNoPivot(const Mat4fSSE& A, const Vec4fSSE<true>& b);
+[[nodiscard]] inline Vec4fSSE<true> GaussNoPivot(const Mat4fSSE& matA, const Vec4fSSE<true>& vecRhs);
 
 #ifdef __AVX2__
 
@@ -85,24 +86,33 @@ template <typename _type>
 
 //! @brief Solves the linear system A * x = b by using Gaussian elimination with partial pivoting.
 //! @tparam _type: Data type
-//! @param A: Matrix
-//! @param b: Vector
+//! @param matA: Matrix
+//! @param vecRhs: Right-hand side vector
 //! @return Result vector x
 template <typename _type>
-[[nodiscard]] inline Vec4Serial<_type, true> GaussPartialPivot(const Mat4Serial<_type>& A,
-                                                               const Vec4Serial<_type, true>& b);
+[[nodiscard]] inline Vec4Serial<_type, true> GaussPartialPivot(const Mat4Serial<_type>& matA,
+                                                               const Vec4Serial<_type, true>& vecRhs);
 
 //! @brief Solves the linear system A * x = b by using Gaussian elimination with partial pivoting.
-//! @param A: Matrix
-//! @param b: Vector
+//! @param matA: Matrix
+//! @param vecRhs: Right-hand side vector
 //! @return Result vector x
-[[nodiscard]] inline Vec4fSSE<true> GaussPartialPivot(const Mat4fSSE& A, const Vec4fSSE<true>& b);
+[[nodiscard]] inline Vec4fSSE<true> GaussPartialPivot(const Mat4fSSE& matA, const Vec4fSSE<true>& vecRhs);
 
 //! @brief Solves the linear system A * x = b by using Gaussian elimination with partial pivoting.
-//! @param A: Matrix
-//! @param b: Vector
+//! @param matA: Matrix
+//! @param vecRhs: Right-hand side vector
 //! @return Result vector x
-[[nodiscard]] inline Vec4fSSE<true> GaussPartialPivot(const Mat4fAVX& A, const Vec4fSSE<true>& b);
+[[nodiscard]] inline Vec4fSSE<true> GaussPartialPivot(const Mat4fAVX& matA, const Vec4fSSE<true>& vecRhs);
+
+//! @brief Solves the linear system A * x = b by using LU decomposition without pivoting.
+//! @tparam _type: Data type
+//! @param matA: Matrix
+//! @param vecRhs: Right-hand side vector
+//! @return Result vector x
+template <typename _type>
+[[nodiscard]] inline Vec4Serial<_type, true> LUNoPivot(const Mat4Serial<_type>& matA,
+                                                       const Vec4Serial<_type, true>& vecRhs);
 
 } // namespace Solver
 

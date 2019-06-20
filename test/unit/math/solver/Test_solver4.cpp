@@ -183,3 +183,13 @@ BOOST_AUTO_TEST_CASE(TestGaussPartialPivotAVX)
 }
 
 #endif // __AVX2__
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(TestLUNoPivot)
+{
+    SerialSolverPtr solver = Solver::LUNoPivot;
+    TestSolver(solver, false);
+}
