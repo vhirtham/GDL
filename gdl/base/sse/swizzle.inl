@@ -8,6 +8,9 @@ namespace GDL::sse
 {
 
 
+
+// --------------------------------------------------------------------------------------------------------------------
+
 template <U32 _src0, U32 _src1>
 inline __m128d Blend(__m128d source0, __m128d source1)
 {
@@ -15,6 +18,8 @@ inline __m128d Blend(__m128d source0, __m128d source1)
 }
 
 
+
+// --------------------------------------------------------------------------------------------------------------------
 
 template <U32 _src0, U32 _src1, U32 _src2, U32 _src3, typename _registerType>
 inline _registerType Blend(_registerType source0, _registerType source1)
@@ -27,6 +32,8 @@ inline _registerType Blend(_registerType source0, _registerType source1)
 
 
 
+// --------------------------------------------------------------------------------------------------------------------
+
 #ifdef __AVX2__
 
 template <U32 _src0, U32 _src1, U32 _src2, U32 _src3, U32 _src4, U32 _src5, U32 _src6, U32 _src7>
@@ -38,6 +45,8 @@ inline __m256 Blend(__m256 source0, __m256 source1)
 #endif // __AVX2__
 
 
+
+// --------------------------------------------------------------------------------------------------------------------
 
 template <U32 _index, typename _registerType>
 inline _registerType BlendIndex(_registerType source0, _registerType source1)
@@ -83,6 +92,8 @@ inline _registerType BlendIndex(_registerType source0, _registerType source1)
 
 
 
+// --------------------------------------------------------------------------------------------------------------------
+
 template <U32 _index, typename _registerType>
 inline _registerType BlendAboveIndex(_registerType source0, [[maybe_unused]] _registerType source1)
 {
@@ -127,6 +138,8 @@ inline _registerType BlendAboveIndex(_registerType source0, [[maybe_unused]] _re
 
 
 
+// --------------------------------------------------------------------------------------------------------------------
+
 template <U32 _index, typename _registerType>
 inline _registerType BlendBelowIndex(_registerType source0, [[maybe_unused]] _registerType source1)
 {
@@ -170,6 +183,8 @@ inline _registerType BlendBelowIndex(_registerType source0, [[maybe_unused]] _re
 
 
 
+// --------------------------------------------------------------------------------------------------------------------
+
 template <U32 _src0, U32 _src1>
 constexpr U32 BlendMask()
 {
@@ -179,6 +194,8 @@ constexpr U32 BlendMask()
 }
 
 
+
+// --------------------------------------------------------------------------------------------------------------------
 
 template <U32 _src0, U32 _src1, U32 _src2, U32 _src3>
 constexpr U32 BlendMask()
@@ -191,6 +208,8 @@ constexpr U32 BlendMask()
 
 
 
+// --------------------------------------------------------------------------------------------------------------------
+
 template <U32 _src0, U32 _src1, U32 _src2, U32 _src3, U32 _src4, U32 _src5, U32 _src6, U32 _src7>
 constexpr U32 BlendMask()
 {
@@ -202,6 +221,8 @@ constexpr U32 BlendMask()
 }
 
 
+
+// --------------------------------------------------------------------------------------------------------------------
 
 template <U32 _index, typename _registerType>
 inline _registerType Broadcast(_registerType reg)
@@ -219,6 +240,8 @@ inline _registerType Broadcast(_registerType reg)
 
 
 
+// --------------------------------------------------------------------------------------------------------------------
+
 template <U32 _idx0, U32 _idx1, typename _registerType>
 inline _registerType Broadcast(_registerType reg)
 {
@@ -235,6 +258,8 @@ inline _registerType Broadcast(_registerType reg)
 }
 
 
+
+// --------------------------------------------------------------------------------------------------------------------
 
 template <U32 _index, typename _registerType>
 inline _registerType BroadcastAcrossLanes(_registerType reg)
@@ -258,6 +283,8 @@ inline _registerType BroadcastAcrossLanes(_registerType reg)
 }
 
 
+
+// --------------------------------------------------------------------------------------------------------------------
 
 template <U32 _idx0, U32 _idx1>
 inline void Exchange(__m128& reg0, __m128& reg1)
@@ -291,6 +318,9 @@ inline void Exchange(__m128& reg0, __m128& reg1)
 }
 
 
+
+// --------------------------------------------------------------------------------------------------------------------
+
 template <U32 _idx0, U32 _idx1>
 inline void Exchange(__m128d& reg0, __m128d& reg1)
 {
@@ -320,6 +350,8 @@ inline void Exchange(__m128d& reg0, __m128d& reg1)
 }
 
 
+
+// --------------------------------------------------------------------------------------------------------------------
 
 #ifdef __AVX2__
 
@@ -391,6 +423,9 @@ inline void Exchange(__m256& reg0, __m256& reg1)
 }
 
 
+
+// --------------------------------------------------------------------------------------------------------------------
+
 template <U32 _idx0, U32 _idx1>
 inline void Exchange(__m256d& reg0, __m256d& reg1)
 {
@@ -450,10 +485,11 @@ inline void Exchange(__m256d& reg0, __m256d& reg1)
     }
 }
 
-
-
 #endif // __AVX2__
 
+
+
+// --------------------------------------------------------------------------------------------------------------------
 
 template <U32 _src0, U32 _src1>
 inline __m128d Permute(__m128d source)
@@ -463,6 +499,8 @@ inline __m128d Permute(__m128d source)
 
 
 
+// --------------------------------------------------------------------------------------------------------------------
+
 template <U32 _src0, U32 _src1, U32 _src2, U32 _src3>
 inline __m128 Permute(__m128 source)
 {
@@ -470,6 +508,8 @@ inline __m128 Permute(__m128 source)
 }
 
 
+
+// --------------------------------------------------------------------------------------------------------------------
 
 #ifdef __AVX2__
 
@@ -481,6 +521,8 @@ inline __m256 Permute(__m256 source)
 
 
 
+// --------------------------------------------------------------------------------------------------------------------
+
 template <U32 _src0, U32 _src1, U32 _src2, U32 _src3>
 inline __m256d Permute(__m256d source)
 {
@@ -488,6 +530,8 @@ inline __m256d Permute(__m256d source)
 }
 
 
+
+// --------------------------------------------------------------------------------------------------------------------
 
 template <U32 _src0, U32 _src1, U32 _src2, U32 _src3, U32 _src4, U32 _src5, U32 _src6, U32 _src7>
 inline __m256 Permute(__m256 source)
@@ -502,6 +546,8 @@ inline __m256 Permute(__m256 source)
 
 
 
+// --------------------------------------------------------------------------------------------------------------------
+
 template <U32 _src0, U32 _src1>
 constexpr U32 PermuteMask()
 {
@@ -511,6 +557,8 @@ constexpr U32 PermuteMask()
 }
 
 
+
+// --------------------------------------------------------------------------------------------------------------------
 
 template <U32 _src0, U32 _src1, U32 _src2, U32 _src3>
 constexpr U32 PermuteMask()
@@ -523,6 +571,8 @@ constexpr U32 PermuteMask()
 
 
 
+// --------------------------------------------------------------------------------------------------------------------
+
 template <U32 _src0, U32 _src1, U32 _src2, U32 _src3>
 constexpr U32 Permute256dMask()
 {
@@ -534,6 +584,8 @@ constexpr U32 Permute256dMask()
 
 
 
+// --------------------------------------------------------------------------------------------------------------------
+
 #ifdef __AVX2__
 
 template <U32 _lane0SrcLane, U32 _lane1SrcLane, typename _registerType>
@@ -543,6 +595,8 @@ inline _registerType Permute2F128(_registerType source)
 }
 
 
+
+// --------------------------------------------------------------------------------------------------------------------
 
 template <U32 _lane0SrcReg, U32 _lane0SrcLane, U32 _lane1SrcReg, U32 _lane1SrcLane, typename _registerType>
 inline _registerType Permute2F128(_registerType source0, _registerType source1)
@@ -556,6 +610,8 @@ inline _registerType Permute2F128(_registerType source0, _registerType source1)
 
 
 
+// --------------------------------------------------------------------------------------------------------------------
+
 template <U32 _lane0SrcReg, U32 _lane0SrcLane, U32 _lane1SrcReg, U32 _lane1SrcLane>
 constexpr U32 Permute2F128Mask()
 {
@@ -565,11 +621,11 @@ constexpr U32 Permute2F128Mask()
     return (((_lane1SrcReg) << 5) | ((_lane1SrcLane) << 4) | ((_lane0SrcReg) << 1) | (_lane0SrcLane));
 }
 
-
-
 #endif // __AVX2__
 
 
+
+// --------------------------------------------------------------------------------------------------------------------
 
 template <U32 _src0, U32 _src1, typename _registerType>
 inline _registerType Shuffle(_registerType source0, _registerType source1)
@@ -587,6 +643,8 @@ inline _registerType Shuffle(_registerType source0, _registerType source1)
 
 
 
+// --------------------------------------------------------------------------------------------------------------------
+
 template <U32 _src0, U32 _src1, U32 _src2, U32 _src3>
 inline __m256d Shuffle(__m256d source0, __m256d source1)
 {
@@ -594,6 +652,8 @@ inline __m256d Shuffle(__m256d source0, __m256d source1)
 }
 
 
+
+// --------------------------------------------------------------------------------------------------------------------
 
 template <U32 _src0, U32 _src1, U32 _src2, U32 _src3, typename _registerType>
 inline _registerType Shuffle(_registerType source0, _registerType source1)
@@ -606,6 +666,8 @@ inline _registerType Shuffle(_registerType source0, _registerType source1)
 
 
 
+// --------------------------------------------------------------------------------------------------------------------
+
 template <U32 _src0, U32 _src1>
 constexpr U32 ShuffleMask()
 {
@@ -615,6 +677,8 @@ constexpr U32 ShuffleMask()
 }
 
 
+
+// --------------------------------------------------------------------------------------------------------------------
 
 template <U32 _src0, U32 _src1, U32 _src2, U32 _src3>
 constexpr U32 ShuffleMask()
@@ -627,6 +691,8 @@ constexpr U32 ShuffleMask()
 
 
 
+// --------------------------------------------------------------------------------------------------------------------
+
 template <U32 _src0, U32 _src1, U32 _src2, U32 _src3>
 constexpr U32 ShuffleMask256d()
 {
@@ -636,6 +702,8 @@ constexpr U32 ShuffleMask256d()
 }
 
 
+
+// --------------------------------------------------------------------------------------------------------------------
 
 template <U32 _idx0, U32 _idx1>
 inline __m128 Swap(__m128 source)
@@ -655,6 +723,8 @@ inline __m128 Swap(__m128 source)
 
 
 
+// --------------------------------------------------------------------------------------------------------------------
+
 template <U32 _idx0, U32 _idx1>
 inline __m128d Swap(__m128d source)
 {
@@ -666,6 +736,9 @@ inline __m128d Swap(__m128d source)
     return Permute<1, 0>(source);
 }
 
+
+
+// --------------------------------------------------------------------------------------------------------------------
 
 #ifdef __AVX2__
 
@@ -720,6 +793,8 @@ inline __m256 Swap(__m256 source)
 }
 
 
+
+// --------------------------------------------------------------------------------------------------------------------
 
 template <U32 _idx0, U32 _idx1>
 inline __m256d Swap(__m256d source)

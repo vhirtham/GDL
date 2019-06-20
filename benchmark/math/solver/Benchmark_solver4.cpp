@@ -25,13 +25,13 @@ public:
 
 
 
-class SIMD : public benchmark::Fixture
+class SSE : public benchmark::Fixture
 {
 public:
     Mat4fSSE A;
     Vec4f b;
 
-    SIMD()
+    SSE()
         : A{2, 0, 4, 6, 2, 2, -3, 1, 3, 0, 0, -6, 2, 1, 1, -5}
         , b{-6, 0, -21, 18}
     {
@@ -88,7 +88,7 @@ BENCHMARK_F(Serial, Cramer)(benchmark::State& state)
 
 
 
-BENCHMARK_F(SIMD, Cramer)(benchmark::State& state)
+BENCHMARK_F(SSE, Cramer)(benchmark::State& state)
 {
     for (auto _ : state)
         benchmark::DoNotOptimize(Solver::Cramer(A, b));
@@ -119,11 +119,23 @@ BENCHMARK_F(Serial, GaussNoPivot)(benchmark::State& state)
 
 
 
-BENCHMARK_F(SIMD, GaussNoPivot)(benchmark::State& state)
+BENCHMARK_F(SSE, GaussNoPivot)(benchmark::State& state)
 {
     for (auto _ : state)
         benchmark::DoNotOptimize(Solver::GaussNoPivot(A, b));
 }
+
+
+
+#ifdef __AVX2__
+
+BENCHMARK_F(AVX, GaussNoPivot)(benchmark::State& state)
+{
+    for (auto _ : state)
+        benchmark::DoNotOptimize(Solver::GaussNoPivot(A, b));
+}
+
+#endif // __AVX2__
 
 
 
@@ -135,12 +147,23 @@ BENCHMARK_F(Serial, GaussPartialPivot)(benchmark::State& state)
 
 
 
-BENCHMARK_F(SIMD, GaussPartialPivot)(benchmark::State& state)
+BENCHMARK_F(SSE, GaussPartialPivot)(benchmark::State& state)
 {
     for (auto _ : state)
         benchmark::DoNotOptimize(Solver::GaussPartialPivot(A, b));
 }
 
+
+
+#ifdef __AVX2__
+
+BENCHMARK_F(AVX, GaussPartialPivot)(benchmark::State& state)
+{
+    for (auto _ : state)
+        benchmark::DoNotOptimize(Solver::GaussPartialPivot(A, b));
+}
+
+#endif // __AVX2__
 
 
 // Eigen --------------------------------------------------------------------------------------------------------------

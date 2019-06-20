@@ -38,13 +38,11 @@ public:
     inline Mat4fAVX(F32 v0, F32 v1, F32 v2, F32 v3, F32 v4, F32 v5, F32 v6, F32 v7, F32 v8, F32 v9, F32 v10, F32 v11,
                     F32 v12, F32 v13, F32 v14, F32 v15);
 
-private:
     //! @brief Constructor that initializes the full matrix with two registers
     //! @param col01: first 2 columns
     //! @param col23: second 2 columns
     inline Mat4fAVX(__m256 col01, __m256 col23);
 
-public:
     //! @brief Direct access operator
     //! @param row: Row of the accessed value
     //! @param col: Column of the accessed value

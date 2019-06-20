@@ -29,8 +29,6 @@ constexpr auto SSECalculateComparisonValueAllTrue()
 
 
 
-
-
 template <typename _registerType, U32 _numComparedValues, typename _compFunction>
 inline bool CompareAllTrue(_registerType lhs, _registerType rhs, _compFunction compFunction)
 {
@@ -52,15 +50,12 @@ inline bool CompareAllTrue(_registerType lhs, _registerType rhs, _compFunction c
 
 
 
-
 template <typename _registerType, U32 _numComparedValues>
 inline bool CompareAllEqual(_registerType lhs, _registerType rhs)
 {
     return CompareAllTrue<_registerType, _numComparedValues, decltype(_mmx_cmpeq_p<_registerType>)>(
             lhs, rhs, &_mmx_cmpeq_p<_registerType>);
 }
-
-
 
 
 
@@ -72,6 +67,13 @@ inline bool CompareAllLessEqual(_registerType lhs, _registerType rhs)
 }
 
 
+
+template <typename _registerType, U32 _numComparedValues>
+inline bool CompareAllLessThan(_registerType lhs, _registerType rhs)
+{
+    return CompareAllTrue<_registerType, _numComparedValues, decltype(_mmx_cmplt_p<_registerType>)>(
+            lhs, rhs, &_mmx_cmplt_p<_registerType>);
+}
 
 
 

@@ -11,6 +11,10 @@
 namespace GDL
 {
 
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
 template <typename _type, typename _registerType>
 inline void _mmx_store_p(_type* ptr, _registerType reg)
 {
@@ -30,6 +34,8 @@ inline void _mmx_store_p(_type* ptr, _registerType reg)
 }
 
 
+
+// --------------------------------------------------------------------------------------------------------------------
 
 template <typename _registerType, typename _type>
 inline _registerType _mmx_load_p(_type* ptr)
@@ -51,6 +57,8 @@ inline _registerType _mmx_load_p(_type* ptr)
 
 
 
+// --------------------------------------------------------------------------------------------------------------------
+
 template <typename _registerType>
 inline _registerType _mmx_setzero_p()
 {
@@ -70,6 +78,8 @@ inline _registerType _mmx_setzero_p()
 }
 
 
+
+// --------------------------------------------------------------------------------------------------------------------
 
 template <typename _registerType, typename _type>
 inline _registerType _mmx_set1_p(_type value)
@@ -91,6 +101,8 @@ inline _registerType _mmx_set1_p(_type value)
 
 
 
+// --------------------------------------------------------------------------------------------------------------------
+
 template <typename _registerType, typename... _args>
 inline _registerType _mmx_setr_p(_args... args)
 {
@@ -110,6 +122,8 @@ inline _registerType _mmx_setr_p(_args... args)
 }
 
 
+
+// --------------------------------------------------------------------------------------------------------------------
 
 template <typename _registerType>
 inline _registerType _mmx_add_p(_registerType lhs, _registerType rhs)
@@ -131,6 +145,8 @@ inline _registerType _mmx_add_p(_registerType lhs, _registerType rhs)
 
 
 
+// --------------------------------------------------------------------------------------------------------------------
+
 template <typename _registerType>
 inline _registerType _mmx_sub_p(_registerType lhs, _registerType rhs)
 {
@@ -150,6 +166,8 @@ inline _registerType _mmx_sub_p(_registerType lhs, _registerType rhs)
 }
 
 
+
+// --------------------------------------------------------------------------------------------------------------------
 
 template <typename _registerType>
 inline _registerType _mmx_mul_p(_registerType lhs, _registerType rhs)
@@ -171,6 +189,8 @@ inline _registerType _mmx_mul_p(_registerType lhs, _registerType rhs)
 
 
 
+// --------------------------------------------------------------------------------------------------------------------
+
 template <typename _registerType>
 _registerType _mmx_div_p(_registerType lhs, _registerType rhs)
 {
@@ -190,6 +210,8 @@ _registerType _mmx_div_p(_registerType lhs, _registerType rhs)
 }
 
 
+
+// --------------------------------------------------------------------------------------------------------------------
 
 template <typename _registerType>
 inline _registerType _mmx_fmadd_p(_registerType lhsM, _registerType rhsM, _registerType add)
@@ -215,6 +237,8 @@ inline _registerType _mmx_fmadd_p(_registerType lhsM, _registerType rhsM, _regis
 
 
 
+// --------------------------------------------------------------------------------------------------------------------
+
 template <typename _registerType>
 inline _registerType _mmx_fnmadd_p(_registerType lhsM, _registerType rhsM, _registerType add)
 {
@@ -238,6 +262,8 @@ inline _registerType _mmx_fnmadd_p(_registerType lhsM, _registerType rhsM, _regi
 }
 
 
+
+// --------------------------------------------------------------------------------------------------------------------
 
 template <typename _registerType>
 inline _registerType _mmx_fmsub_p(_registerType lhsM, _registerType rhsM, _registerType sub)
@@ -263,6 +289,8 @@ inline _registerType _mmx_fmsub_p(_registerType lhsM, _registerType rhsM, _regis
 
 
 
+// --------------------------------------------------------------------------------------------------------------------
+
 template <typename _registerType>
 inline _registerType _mmx_fnmsub_p(_registerType lhsM, _registerType rhsM, _registerType sub)
 {
@@ -287,6 +315,8 @@ inline _registerType _mmx_fnmsub_p(_registerType lhsM, _registerType rhsM, _regi
 
 
 
+// --------------------------------------------------------------------------------------------------------------------
+
 template <U32 _mask, typename _registerType>
 _registerType _mmx_dp_p(_registerType lhs, _registerType rhs)
 {
@@ -306,6 +336,8 @@ _registerType _mmx_dp_p(_registerType lhs, _registerType rhs)
 }
 
 
+
+// --------------------------------------------------------------------------------------------------------------------
 
 template <typename _registerType>
 _registerType _mmx_sqrt_p(_registerType reg)
@@ -327,6 +359,8 @@ _registerType _mmx_sqrt_p(_registerType reg)
 
 
 
+// --------------------------------------------------------------------------------------------------------------------
+
 template <typename _registerType>
 _registerType _mmx_rsqrt_p(_registerType reg)
 {
@@ -346,6 +380,8 @@ _registerType _mmx_rsqrt_p(_registerType reg)
 }
 
 
+
+// --------------------------------------------------------------------------------------------------------------------
 
 template <typename _registerType>
 inline auto _mmx_cmpeq_p(_registerType lhs, _registerType rhs)
@@ -367,6 +403,8 @@ inline auto _mmx_cmpeq_p(_registerType lhs, _registerType rhs)
 
 
 
+// --------------------------------------------------------------------------------------------------------------------
+
 template <typename _registerType>
 inline auto _mmx_cmple_p(_registerType lhs, _registerType rhs)
 {
@@ -386,6 +424,8 @@ inline auto _mmx_cmple_p(_registerType lhs, _registerType rhs)
 }
 
 
+
+// --------------------------------------------------------------------------------------------------------------------
 
 template <typename _registerType>
 inline auto _mmx_cmpgt_p(_registerType lhs, _registerType rhs)
@@ -407,6 +447,8 @@ inline auto _mmx_cmpgt_p(_registerType lhs, _registerType rhs)
 
 
 
+// --------------------------------------------------------------------------------------------------------------------
+
 template <typename _registerType>
 inline auto _mmx_cmplt_p(_registerType lhs, _registerType rhs)
 {
@@ -426,6 +468,8 @@ inline auto _mmx_cmplt_p(_registerType lhs, _registerType rhs)
 }
 
 
+
+// --------------------------------------------------------------------------------------------------------------------
 
 template <typename _registerType>
 inline _registerType _mmx_max_p(_registerType lhs, _registerType rhs)
@@ -447,6 +491,8 @@ inline _registerType _mmx_max_p(_registerType lhs, _registerType rhs)
 
 
 
+// --------------------------------------------------------------------------------------------------------------------
+
 template <typename _registerType>
 inline _registerType _mmx_min_p(_registerType lhs, _registerType rhs)
 {
@@ -466,6 +512,8 @@ inline _registerType _mmx_min_p(_registerType lhs, _registerType rhs)
 }
 
 
+
+// --------------------------------------------------------------------------------------------------------------------
 
 template <typename _registerType>
 inline _registerType _mmx_andnot_p(_registerType lhs, _registerType rhs)
@@ -487,6 +535,8 @@ inline _registerType _mmx_andnot_p(_registerType lhs, _registerType rhs)
 
 
 
+// --------------------------------------------------------------------------------------------------------------------
+
 template <typename _registerType>
 inline _registerType _mmx_xor_p(_registerType lhs, _registerType rhs)
 {
@@ -507,6 +557,8 @@ inline _registerType _mmx_xor_p(_registerType lhs, _registerType rhs)
 
 
 
+// --------------------------------------------------------------------------------------------------------------------
+
 template <typename _registerType>
 inline auto _mmx_movemask_epi8(_registerType reg)
 {
@@ -523,6 +575,8 @@ inline auto _mmx_movemask_epi8(_registerType reg)
 }
 
 
+
+// --------------------------------------------------------------------------------------------------------------------
 
 template <typename _registerType>
 inline auto _mmx_cvtsx_fx(_registerType reg)
@@ -544,6 +598,8 @@ inline auto _mmx_cvtsx_fx(_registerType reg)
 
 
 
+// --------------------------------------------------------------------------------------------------------------------
+
 template <I32 _blendMask, typename _registerType>
 inline auto _mmx_blend_p(_registerType src0, _registerType src1)
 {
@@ -564,6 +620,8 @@ inline auto _mmx_blend_p(_registerType src0, _registerType src1)
 
 
 
+// --------------------------------------------------------------------------------------------------------------------
+
 template <typename _registerType>
 inline auto _mmx_blendv_p(_registerType src0, _registerType src1, _registerType _blendMask)
 {
@@ -583,6 +641,8 @@ inline auto _mmx_blendv_p(_registerType src0, _registerType src1, _registerType 
 }
 
 
+
+// --------------------------------------------------------------------------------------------------------------------
 
 template <I32 _permuteMask, typename _registerType>
 inline auto _mmx_permute_p(_registerType reg)
@@ -609,6 +669,8 @@ inline auto _mmx_permute_p(_registerType reg)
 
 
 
+// --------------------------------------------------------------------------------------------------------------------
+
 #ifdef __AVX2__
 
 template <I32 _permuteMask, typename _registerType>
@@ -627,6 +689,8 @@ inline auto _mmx_permute2f128_p(_registerType src0, _registerType src1)
 #endif // __AVX2__
 
 
+
+// --------------------------------------------------------------------------------------------------------------------
 
 template <I32 _shuffleMask, typename _registerType>
 inline auto _mmx_shuffle_p(_registerType src0, _registerType src1)

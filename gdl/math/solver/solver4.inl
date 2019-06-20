@@ -5,6 +5,7 @@
 
 #include "gdl/base/sse/abs.h"
 #include "gdl/base/sse/crossProduct.h"
+#include "gdl/base/sse/compareAll.h"
 #include "gdl/base/sse/determinant.h"
 #include "gdl/base/sse/dotProduct.h"
 #include "gdl/base/sse/swizzle.h"
@@ -20,6 +21,8 @@ namespace GDL::Solver
 {
 
 
+
+// --------------------------------------------------------------------------------------------------------------------
 
 template <typename _type>
 inline Vec4Serial<_type, true> Cramer(const Mat4Serial<_type>& matA, const Vec4Serial<_type, true>& vecRhs)
@@ -48,7 +51,9 @@ inline Vec4Serial<_type, true> Cramer(const Mat4Serial<_type>& matA, const Vec4S
 
     _type detA = ab01 * cd23 + ab12 * cd03 + ab23 * cd01 + ab30 * cd21 + ab02 * cd31 + ab13 * cd20;
 
+
     DEV_EXCEPTION(detA == ApproxZero<F32>(10), "Singular matrix - system not solveable");
+
 
     const std::array<_type, 4>& r = vecRhs.Data();
 
@@ -354,6 +359,24 @@ inline Vec4fSSE<true> GaussNoPivot(const Mat4fSSE& A, const Vec4fSSE<true>& b)
 
 // --------------------------------------------------------------------------------------------------------------------
 
+#ifdef __AVX2__
+
+[[nodiscard]] inline Vec4fSSE<true> GaussNoPivot(const Mat4fAVX& A, const Vec4fSSE<true>& b)
+{
+    // INFO: There is no specialized AVX version of this function. During the elimination step, the row multipliers must
+    // be transferred across lane boundaries which results in a performance penalty when compared to the SSE version.
+    // Therefore, the AVX matrix uses the same function as the SSE matrix.
+
+    static_assert(sizeof(Mat4fAVX) == sizeof(Mat4fSSE), "Internal error - Matrix types have different sizes");
+    return GaussNoPivot(*reinterpret_cast<const Mat4fSSE*>(&A), b);
+}
+
+#endif // __AVX2__
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
 template <typename _type>
 inline Vec4Serial<_type, true> GaussPartialPivot(const Mat4Serial<_type>& A, const Vec4Serial<_type, true>& b)
 {
@@ -510,6 +533,25 @@ inline Vec4fSSE<true> GaussPartialPivot(const Mat4fSSE& A, const Vec4fSSE<true>&
 
     return Vec4fSSE<true>(rhs);
 }
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+#ifdef __AVX2__
+
+[[nodiscard]] inline Vec4fSSE<true> GaussPartialPivot(const Mat4fAVX& A, const Vec4fSSE<true>& b)
+{
+    // INFO: There is no specialized AVX version of this function. During the elimination step, the row multipliers must
+    // be transferred across lane boundaries which results in a performance penalty when compared to the SSE version.
+    // Therefore, the AVX matrix uses the same function as the SSE matrix.
+
+    static_assert(sizeof(Mat4fAVX) == sizeof(Mat4fSSE), "Internal error - Matrix types have different sizes");
+    return GaussPartialPivot(*reinterpret_cast<const Mat4fSSE*>(&A), b);
+}
+
+#endif // __AVX2__
+
 
 
 } // namespace GDL::Solver

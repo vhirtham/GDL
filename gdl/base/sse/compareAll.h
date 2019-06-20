@@ -54,6 +54,17 @@ inline bool CompareAllEqual(_registerType lhs, _registerType rhs);
 template <typename _registerType, U32 _numComparedValues = numRegisterValues<_registerType>>
 inline bool CompareAllLessEqual(_registerType lhs, _registerType rhs);
 
+//! @brief Compares lhs < rhs for two register. This function returns true if all lhs values are less than the
+//! corresponding rhs values
+//! @tparam _registerType: Register type
+//! @tparam _numComparedValues: Number of register values that should be compared. If the value is smaller than the
+//! number of register values, only the first elements of the register are compared.
+//! @param lhs: Left hand side register
+//! @param rhs: Right hand side register
+//! @return TRUE / FALSE
+template <typename _registerType, U32 _numComparedValues = numRegisterValues<_registerType>>
+inline bool CompareAllLessThan(_registerType lhs, _registerType rhs);
+
 //! @brief Compares lhs > rhs for two register. This function returns true if all lhs values are greater than the rhs
 //! values. False if not.
 //! @tparam _registerType: Register type

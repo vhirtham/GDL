@@ -316,3 +316,103 @@ BOOST_AUTO_TEST_CASE(All_Greater_Than)
     TestCompareAllGreaterThan<__m256d>();
 #endif // __AVX2__
 }
+
+
+
+// Test CompareAllLessThan -----------------------------------------------------------------------------------------
+
+//! @brief Tests the sse::CompareAllLessEqual function with varying number of compared values.
+template <typename _registerType, U32 _count = 1>
+void TestCompareAllLessThan()
+{
+    using DataType = decltype(sse::GetDataType<_registerType>());
+    constexpr U32 numRegisterEntries = sse::numRegisterValues<_registerType>;
+
+    auto compLT = [](_registerType lhs, _registerType rhs) {
+        return sse::CompareAllLessThan<_registerType, _count>(lhs, rhs);
+    };
+
+
+    alignas(sse::alignmentBytes<_registerType>) _registerType lhs = _mmx_setzero_p<_registerType>();
+    for (U32 i = 0; i < numRegisterEntries; ++i)
+        sse::SetValue(lhs, i, static_cast<DataType>(i + 1));
+    alignas(sse::alignmentBytes<_registerType>) _registerType rhs;
+
+
+    // all values return false
+    BOOST_CHECK(!compLT(lhs, lhs));
+
+    // all values return true
+    BOOST_CHECK(compLT(lhs, _mmx_set1_p<_registerType>(100)));
+
+
+    // Maximal 1 used value returns false
+    for (U32 i = 0; i < _count; ++i)
+    {
+        for (U32 j = _count; j < numRegisterEntries; ++j)
+        {
+            // all unused values return true
+            rhs = _mmx_add_p(lhs, _mmx_set1_p<_registerType>(1));
+            BOOST_CHECK(compLT(lhs, rhs));
+            sse::SetValue(rhs, i, sse::GetValue(lhs, i) - 1);
+            BOOST_CHECK(!compLT(lhs, rhs));
+            sse::SetValue(rhs, i, sse::GetValue(lhs, i) - 10);
+            BOOST_CHECK(!compLT(lhs, rhs));
+
+            // one unused value returns false
+            rhs = _mmx_add_p(lhs, _mmx_set1_p<_registerType>(1));
+            sse::SetValue(rhs, j, sse::GetValue(lhs, i) - 10);
+            BOOST_CHECK(compLT(lhs, rhs));
+            sse::SetValue(rhs, i, sse::GetValue(lhs, i) - 1);
+            BOOST_CHECK(!compLT(lhs, rhs));
+            sse::SetValue(rhs, i, sse::GetValue(lhs, i) - 10);
+            BOOST_CHECK(!compLT(lhs, rhs));
+        }
+
+        // Up to all unused values return false
+        rhs = _mmx_add_p(lhs, _mmx_set1_p<_registerType>(1));
+        for (U32 j = _count; j < numRegisterEntries; ++j)
+        {
+            sse::SetValue(rhs, j, sse::GetValue(lhs, i) - 10);
+
+            sse::SetValue(rhs, i, sse::GetValue(lhs, i) - 1);
+            BOOST_CHECK(!compLT(lhs, rhs));
+            sse::SetValue(rhs, i, sse::GetValue(lhs, i) - 10);
+            BOOST_CHECK(!compLT(lhs, rhs));
+            sse::SetValue(rhs, i, sse::GetValue(lhs, i) + 1);
+            BOOST_CHECK(compLT(lhs, rhs));
+        }
+    }
+
+    // maximal all used values return false
+    for (U32 j = _count; j < numRegisterEntries; ++j)
+    {
+        rhs = _mmx_add_p(lhs, _mmx_set1_p<_registerType>(1));
+        for (U32 i = 0; i < _count; ++i)
+        {
+            // all unused values return true
+            sse::SetValue(rhs, i, sse::GetValue(lhs, i) - 10);
+            BOOST_CHECK(!compLT(lhs, rhs));
+
+            // one unused value returns false
+            sse::SetValue(rhs, j, sse::GetValue(lhs, i) - 10);
+            BOOST_CHECK(!compLT(lhs, rhs));
+        }
+    }
+
+
+    if constexpr (_count < numRegisterEntries)
+        TestCompareAllLessThan<_registerType, _count + 1>();
+}
+
+
+
+BOOST_AUTO_TEST_CASE(All_Less_Than)
+{
+    TestCompareAllLessThan<__m128>();
+    TestCompareAllLessThan<__m128d>();
+#ifdef __AVX2__
+    TestCompareAllLessThan<__m256>();
+    TestCompareAllLessThan<__m256d>();
+#endif // __AVX2__
+}

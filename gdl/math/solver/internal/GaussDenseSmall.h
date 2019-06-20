@@ -13,6 +13,7 @@
 
 namespace GDL
 {
+class Mat4fAVX;
 template <typename>
 class Mat3Serial;
 template <typename>
@@ -86,6 +87,36 @@ class GaussDenseSmallSSE
     template <U32 _idx>
     static inline void EliminationStep(const std::array<__m128* const, _size + 1>& data);
 };
+
+
+
+//#ifdef __AVX2__
+
+////! @brief Support class for Gauss solver.
+////! @tparam _size: Size of the linear system
+// class GaussDenseSmallAVX
+//{
+
+//    friend Vec4fSSE<true> GaussNoPivot(const Mat4fAVX&, const Vec4fSSE<true>&);
+//    friend Vec4fSSE<true> GaussPartialPivot(const Mat4fAVX&, const Vec4fSSE<true>&);
+
+//    //! @brief Performs the gauss elimination step starting with the specified matrix element on the main diagonal.
+//    Rows
+//    //! above and to the right of the specified element are not modified, since the elemination process is expected to
+//    //! work from left to right and top to bottom.
+//    //! @tparam _idx: Index of the element on the main diagonal of the matrix from which the elimination process is
+//    //! started
+//    //! @param data: Data of the linear system (matrix columns with appended rhs vector)
+//    //! @remark Since the current column is not needed in subsequent elimination steps, it will not be modified to
+//    //! maximize performance. Therefore the matrix is not equal to the identity matrix when all elimination steps are
+//    //! done.
+//    template <U32 _idx>
+//    static inline void EliminationStep(const std::array<__m256* const, 3>& data);
+//};
+
+//#endif // __AVX2__
+
+
 
 } // namespace Solver
 

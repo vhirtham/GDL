@@ -140,6 +140,20 @@ BOOST_AUTO_TEST_CASE(TestGaussNoPivotSerial)
 
 // --------------------------------------------------------------------------------------------------------------------
 
+#ifdef __AVX2__
+
+BOOST_AUTO_TEST_CASE(TestGaussNoPivotAVX)
+{
+    AVXSolverPtr solver = Solver::GaussNoPivot;
+    TestSolver(solver, false);
+}
+
+#endif // __AVX2__
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
 BOOST_AUTO_TEST_CASE(TestGaussPartialPivotSerial)
 {
     SerialSolverPtr solver = Solver::GaussPartialPivot;
@@ -155,3 +169,17 @@ BOOST_AUTO_TEST_CASE(TestGaussPartialPivotSSE)
     SSESolverPtr solver = Solver::GaussPartialPivot;
     TestSolver(solver);
 }
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+#ifdef __AVX2__
+
+BOOST_AUTO_TEST_CASE(TestGaussPartialPivotAVX)
+{
+    AVXSolverPtr solver = Solver::GaussPartialPivot;
+    TestSolver(solver);
+}
+
+#endif // __AVX2__

@@ -36,11 +36,11 @@ inline Vec3Serial<_type, true> Cramer(const Mat3Serial<_type>& matA, const Vec3S
 
     DEV_EXCEPTION(detA == ApproxZero<F32>(10), "Singular matrix - system not solveable");
 
-    std::array<_type, 3> result = {{(r[0] * crossbc[0] + r[1] * crossbc[1] + r[2] * crossbc[2]) / detA,
-                                    (a[0] * crossrc[0] + a[1] * crossrc[1] + a[2] * crossrc[2]) / detA,
-                                    (a[0] * crossbr[0] + a[1] * crossbr[1] + a[2] * crossbr[2]) / detA}};
+    std::array<_type, 3> solution = {{(r[0] * crossbc[0] + r[1] * crossbc[1] + r[2] * crossbc[2]) / detA,
+                                      (a[0] * crossrc[0] + a[1] * crossrc[1] + a[2] * crossrc[2]) / detA,
+                                      (a[0] * crossbr[0] + a[1] * crossbr[1] + a[2] * crossbr[2]) / detA}};
 
-    return Vec3Serial<_type, true>(result);
+    return Vec3Serial<_type, true>(solution);
 }
 
 
@@ -70,9 +70,9 @@ inline Vec3fSSE<true> Cramer(const Mat3fSSE& matA, const Vec3fSSE<true>& vecRhs)
     determinants = Blend<0, 1, 0, 0>(determinants, DotProduct<1, 1, 1, 0>(a, crossrc));
     determinants = Blend<0, 0, 1, 0>(determinants, DotProduct<1, 1, 1, 0>(a, crossbr));
 
-    __m128 result = _mmx_div_p(determinants, detA);
+    __m128 solution = _mmx_div_p(determinants, detA);
 
-    return Vec3fSSE<true>(result);
+    return Vec3fSSE<true>(solution);
 }
 
 
