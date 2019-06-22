@@ -20,14 +20,14 @@ template <U32 _idx>
 inline void LUDenseSmallSerial<_type, _size>::BackwardSubstitution(const std::array<_type, _size * _size>& lu,
                                                                    std::array<_type, _size>& r)
 {
-    constexpr U32 diagIdx = (_size + 1) * _idx;
+    constexpr U32 pivIdx = (_size + 1) * _idx;
 
-    r[_idx] /= lu[diagIdx];
+    r[_idx] /= lu[pivIdx];
 
     for (U32 i = 0; i < _idx; ++i)
         r[i] -= r[_idx] * lu[i + _idx * _size];
 
-    if constexpr (_idx != 0)
+    if constexpr (_idx > 0)
         BackwardSubstitution<_idx - 1>(lu, r);
 
     //    4x4 system:
@@ -35,6 +35,20 @@ inline void LUDenseSmallSerial<_type, _size>::BackwardSubstitution(const std::ar
     //    r[2] = (r[2] - r[3] * LU[14]) / LU[10];
     //    r[1] = (r[1] - r[3] * LU[13] - r[2] * LU[9]) / LU[5];
     //    r[0] = (r[0] - r[3] * LU[12] - r[2] * LU[8] - r[1] * LU[4]) / LU[0];
+
+
+    // Alternative version:
+
+    //    for (U32 i = 0; i < _idx; ++i)
+    //        r[i] -= r[_idx] * lu[i + _idx * _size];
+
+    //    if constexpr (_idx > 1)
+    //        BackwardSubstitution<_idx - 1>(lu, r);
+
+    //    //    4x4 system:
+    //    //    r[2] = (r[2] - r[3] * LU[14]);
+    //    //    r[1] = (r[1] - r[3] * LU[13] - r[2] * LU[9]);
+    //    //    r[0] = (r[0] - r[3] * LU[12] - r[2] * LU[8] - r[1] * LU[4]);
 }
 
 
@@ -49,8 +63,16 @@ LUDenseSmallSerial<_type, _size>::Factorize(const std::array<_type, _size * _siz
     FactorizationStep<0>(lu);
     FactorizationStep<1>(lu);
     FactorizationStep<2>(lu);
+    FactorizationStep<3>(lu);
 
-    DEV_EXCEPTION(lu[_size * _size - 1] == ApproxZero<_type>(1, 10), "Singular matrix - system not solveable");
+    //DEV_EXCEPTION(lu[_size * _size - 1] == ApproxZero<_type>(1, 10), "Singular matrix - system not solveable");
+
+
+    //    std::array<_type, _size* _size> lu = matrixData;
+    //    FactorizationStep<0>(lu);
+    //    FactorizationStep<1>(lu);
+    //    FactorizationStep<2>(lu);
+    //    FactorizationStep<3>(lu);
 
     return lu;
 }
@@ -73,6 +95,23 @@ inline void LUDenseSmallSerial<_type, _size>::FactorizationStep(std::array<_type
         for (U32 j = _size; j < (_size - _idx) * _size; j += _size)
             lu[i + j] -= lu[i] * lu[pivIdx + j];
     }
+
+
+    // Alternative version:
+
+    //    constexpr U32 pivIdx = _idx * _size + _idx;
+    //    DEV_EXCEPTION(lu[pivIdx] == ApproxZero<_type>(1, 10), "Singular matrix - system not solveable");
+
+
+    //    lu[pivIdx] = 1 / lu[pivIdx];
+
+
+    //    for (U32 i = pivIdx + _size; i < _size * _size; i += _size)
+    //        lu[i] *= lu[pivIdx];
+
+    //    for (U32 i = pivIdx + 1; i < _size * (_idx + 1); ++i)
+    //        for (U32 j = _size; j < (_size - _idx) * _size; j += _size)
+    //            lu[i + j] -= lu[i] * lu[pivIdx + j];
 }
 
 
@@ -94,6 +133,25 @@ inline void LUDenseSmallSerial<_type, _size>::ForwardSubstitution(const std::arr
     //    r[1] -= LU[1] * r[0];
     //    r[2] -= LU[2] * r[0] + LU[6] * r[1];
     //    r[3] -= LU[3] * r[0] + LU[7] * r[1] + LU[11] * r[2];
+
+
+
+    // Alternative version:
+
+    //    constexpr U32 pivIdx = (_size + 1) * _idx;
+
+    //    r[_idx] *= lu[pivIdx];
+    //    for (U32 i = _idx + 1; i < _size; ++i)
+    //        r[i] -= lu[i + _idx * _size] * r[_idx];
+
+    //    if constexpr (_idx + 1 < _size)
+    //        ForwardSubstitution<_idx + 1>(lu, r);
+
+    //    //    4x4 system:
+    //    //    r[0] = LU[0] * r[0];
+    //    //    r[1] = (r[1] - LU[1] * r[0]) * LU[5];
+    //    //    r[2] = (r[2] - LU[2] * r[0] - LU[6] * r[1]) * LU[10];
+    //    //    r[3] = (r[3] - LU[3] * r[0] - LU[7] * r[1] - LU[11] * r[2]) * LU[15];
 }
 
 
