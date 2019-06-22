@@ -114,6 +114,13 @@ template <typename _type>
 [[nodiscard]] inline Vec4Serial<_type, true> LUNoPivot(const Mat4Serial<_type>& matA,
                                                        const Vec4Serial<_type, true>& vecRhs);
 
+//! @brief Solves the linear system A * x = b by using LU decomposition without pivoting.
+//! @tparam _type: Data type
+//! @param matA: Matrix
+//! @param vecRhs: Right-hand side vector
+//! @return Result vector x
+[[nodiscard]] inline Vec4fSSE<true> LUNoPivot(const Mat4fSSE& matA, const Vec4fSSE<true>& vecRhs);
+
 } // namespace Solver
 
 } // namespace GDL

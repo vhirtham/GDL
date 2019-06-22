@@ -169,8 +169,15 @@ BENCHMARK_F(AVX, GaussPartialPivot)(benchmark::State& state)
 
 // LU -----------------------------------------------------------------------------------------------------------------
 
-
 BENCHMARK_F(Serial, LUNoPivot)(benchmark::State& state)
+{
+    for (auto _ : state)
+        benchmark::DoNotOptimize(Solver::LUNoPivot(A, b));
+}
+
+
+
+BENCHMARK_F(SSE, LUNoPivot)(benchmark::State& state)
 {
     for (auto _ : state)
         benchmark::DoNotOptimize(Solver::LUNoPivot(A, b));
