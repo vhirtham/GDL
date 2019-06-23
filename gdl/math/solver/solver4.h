@@ -7,6 +7,7 @@
 
 #include "gdl/base/fundamentalTypes.h"
 #include "gdl/math/solver/pivot.h"
+#include "gdl/math/solver/internal/luDenseSmall.h"
 
 #include <array>
 #include <xmmintrin.h>
@@ -114,6 +115,27 @@ template <typename _type>
 //! @return Result vector x
 template <Pivot _pivot = Pivot::PARTIAL, typename _type>
 [[nodiscard]] inline Vec4Serial<_type, true> LU(const Mat4Serial<_type>& matA, const Vec4Serial<_type, true>& vecRhs);
+
+//! @brief Solves the linear system A * x = b by using LU decomposition without pivoting.
+//! @tparam _pivot: Enum to select pivoting strategy
+//! @tparam _type: Data type
+//! @param matA: Matrix
+//! @param vecRhs: Right-hand side vector
+//! @return Result vector x
+template <Pivot _pivot = Pivot::PARTIAL, typename _type>
+[[nodiscard]] inline Vec4Serial<_type, true>
+LU(const typename LUDenseSmallSerial<_type, 4, _pivot>::Factorization& factorization,
+   const Vec4Serial<_type, true>& vecRhs);
+
+//! @brief Solves the linear system A * x = b by using LU decomposition without pivoting.
+//! @tparam _pivot: Enum to select pivoting strategy
+//! @tparam _type: Data type
+//! @param matA: Matrix
+//! @param vecRhs: Right-hand side vector
+//! @return Result vector x
+template <Pivot _pivot = Pivot::PARTIAL, typename _type>
+[[nodiscard]] inline typename LUDenseSmallSerial<_type, 4, _pivot>::Factorization
+LUFactorization(const Mat4Serial<_type>& matA);
 
 //! @brief Solves the linear system A * x = b by using LU decomposition without pivoting.
 //! @tparam _type: Data type

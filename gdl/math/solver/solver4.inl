@@ -10,7 +10,6 @@
 #include "gdl/base/sse/dotProduct.h"
 #include "gdl/base/sse/swizzle.h"
 #include "gdl/math/solver/internal/GaussDenseSmall.h"
-#include "gdl/math/solver/internal/luDenseSmall.h"
 #include "gdl/math/serial/mat4Serial.h"
 #include "gdl/math/serial/vec4Serial.h"
 #include "gdl/math/sse/mat4fAVX.h"
@@ -562,9 +561,35 @@ template <Pivot _pivot, typename _type>
 {
     using LUSolver = LUDenseSmallSerial<_type, 4, _pivot>;
 
-    typename LUSolver::Factorization lu = LUSolver::Factorize(matA.Data());
+    typename LUSolver::Factorization factorization = LUFactorization<_pivot>(matA);
 
-    return Vec4Serial<_type>(LUSolver::Solve(lu, vecRhs.Data()));
+    return LU<_pivot>(factorization, vecRhs);
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+template <Pivot _pivot, typename _type>
+[[nodiscard]] typename LUDenseSmallSerial<_type, 4, _pivot>::Factorization
+LUFactorization(const Mat4Serial<_type>& matA)
+{
+    using LUSolver = LUDenseSmallSerial<_type, 4, _pivot>;
+
+    return LUSolver::Factorize(matA.Data());
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+template <Pivot _pivot, typename _type>
+[[nodiscard]] inline Vec4Serial<_type, true>
+LU(const typename LUDenseSmallSerial<_type, 4, _pivot>::Factorization& factorization,
+   const Vec4Serial<_type, true>& vecRhs)
+{
+    using LUSolver = LUDenseSmallSerial<_type, 4, _pivot>;
+
+    return Vec4Serial<_type>(LUSolver::Solve(factorization, vecRhs.Data()));
 }
 
 

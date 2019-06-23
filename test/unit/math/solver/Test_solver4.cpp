@@ -63,8 +63,6 @@ class Mat4TestData
                 AP[i + j * 4] = A[permutation[i] + j * 4];
         }
         mTests.emplace_back(AP, bP, x);
-        //        std::cout << Mat4Serial<F32>(AP) << std::endl;
-        //        std::cout << Vec4Serial<F32, true>(bP) << std::endl;
     }
 
 public:
