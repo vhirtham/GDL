@@ -557,13 +557,14 @@ inline Vec4fSSE<true> GaussPartialPivot(const Mat4fSSE& matA, const Vec4fSSE<tru
 
 // --------------------------------------------------------------------------------------------------------------------
 
-template <typename _type>
-[[nodiscard]] inline Vec4Serial<_type, true> LUNoPivot(const Mat4Serial<_type>& matA,
-                                                       const Vec4Serial<_type, true>& vecRhs)
+template <Pivot _pivot, typename _type>
+[[nodiscard]] inline Vec4Serial<_type, true> LU(const Mat4Serial<_type>& matA, const Vec4Serial<_type, true>& vecRhs)
 {
-    std::array<_type, 16> lu = LUDenseSmallSerial<_type, 4>::Factorize(matA.Data());
+    using LUSolver = LUDenseSmallSerial<_type, 4, _pivot>;
 
-    return Vec4Serial<_type>(LUDenseSmallSerial<_type, 4>::Solve(lu, vecRhs.Data()));
+    typename LUSolver::Factorization lu = LUSolver::Factorize(matA.Data());
+
+    return Vec4Serial<_type>(LUSolver::Solve(lu, vecRhs.Data()));
 }
 
 

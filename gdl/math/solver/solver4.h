@@ -6,6 +6,7 @@
 #endif
 
 #include "gdl/base/fundamentalTypes.h"
+#include "gdl/math/solver/pivot.h"
 
 #include <array>
 #include <xmmintrin.h>
@@ -110,9 +111,8 @@ template <typename _type>
 //! @param matA: Matrix
 //! @param vecRhs: Right-hand side vector
 //! @return Result vector x
-template <typename _type>
-[[nodiscard]] inline Vec4Serial<_type, true> LUNoPivot(const Mat4Serial<_type>& matA,
-                                                       const Vec4Serial<_type, true>& vecRhs);
+template <Pivot _pivot = Pivot::PARTIAL, typename _type>
+[[nodiscard]] inline Vec4Serial<_type, true> LU(const Mat4Serial<_type>& matA, const Vec4Serial<_type, true>& vecRhs);
 
 //! @brief Solves the linear system A * x = b by using LU decomposition without pivoting.
 //! @tparam _type: Data type

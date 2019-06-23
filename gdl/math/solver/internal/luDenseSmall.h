@@ -7,7 +7,10 @@
 
 #include "gdl/base/fundamentalTypes.h"
 
+#include "gdl/math/solver/pivot.h"
+
 #include <array>
+#include <type_traits>
 #include <xmmintrin.h>
 
 
@@ -33,35 +36,44 @@ class Vec4fSSE;
 namespace Solver
 {
 
+
 //! @brief Support class for LU solver.
 //! @tparam _type: Data type
 //! @tparam _size: Size of the linear system
-template <typename _type, U32 _size>
+template <typename _type, U32 _size, Pivot _pivot = Pivot::PARTIAL>
 class LUDenseSmallSerial
 {
     static_assert(_size == 3 || _size == 4, "Unsupported system size.");
 
-    template <typename _type2>
-    friend Vec4Serial<_type2, true> LUNoPivot(const Mat4Serial<_type2>& A, const Vec4Serial<_type2, true>& b);
-    template <typename _type2>
-    friend Vec3Serial<_type2, true> LUPartialPivot(const Mat3Serial<_type2>& A, const Vec3Serial<_type2, true>& b);
-    template <typename _type2>
-    friend Vec4Serial<_type2, true> LUPartialPivot(const Mat4Serial<_type2>& A, const Vec4Serial<_type2, true>& b);
+public:
+    class Factorization
+    {
+        friend class LUDenseSmallSerial;
 
+        std::array<_type, _size * _size> mLU;
+        std::array<_type, _size> mPermutation;
 
-    template <U32 _idx = _size-1>
+        Factorization(const std::array<_type, _size * _size>& lu);
+
+        inline std::array<_type, _size> InitializePermutation();
+    };
+
+    static inline std::array<_type, _size> Solve(const Factorization& factorization, std::array<_type, _size> r);
+
+    static inline Factorization Factorize(const std::array<_type, _size * _size>& matrixData);
+
+private:
+    template <U32 _idx = _size - 1>
     static inline void BackwardSubstitution(const std::array<_type, _size * _size>& lu, std::array<_type, _size>& r);
 
-    static inline std::array<_type, _size * _size> Factorize(const std::array<_type, _size * _size>& matrixData);
+    template <U32 _idx = 0>
+    static inline void FactorizeLU(Factorization& factorization);
 
     template <U32 _idx>
-    static inline void FactorizationStep(std::array<_type, _size * _size>& matrixData);
+    static inline void FactorizationStep(Factorization& factorization);
 
     template <U32 _idx = 0>
     static inline void ForwardSubstitution(const std::array<_type, _size * _size>& lu, std::array<_type, _size>& r);
-
-    static inline std::array<_type, _size> Solve(const std::array<_type, _size * _size>& lu,
-                                                 std::array<_type, _size> r);
 };
 
 

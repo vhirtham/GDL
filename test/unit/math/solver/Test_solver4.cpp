@@ -190,7 +190,7 @@ BOOST_AUTO_TEST_CASE(TestGaussPartialPivotAVX)
 
 BOOST_AUTO_TEST_CASE(TestLUNoPivotSerial)
 {
-    SerialSolverPtr solver = Solver::LUNoPivot;
+    SerialSolverPtr solver = Solver::LU<Solver::Pivot::NONE>;
     TestSolver(solver, false);
 }
 

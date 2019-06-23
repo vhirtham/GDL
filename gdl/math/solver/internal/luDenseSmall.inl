@@ -12,13 +12,36 @@
 namespace GDL::Solver
 {
 
+template <typename _type, U32 _size, Pivot _pivot>
+inline LUDenseSmallSerial<_type, _size, _pivot>::Factorization::Factorization(
+        const std::array<_type, _size * _size>& lu)
+    : mLU{lu}
+    , mPermutation{InitializePermutation()}
+{
+}
+
+
 
 // --------------------------------------------------------------------------------------------------------------------
 
-template <typename _type, U32 _size>
+template <typename _type, U32 _size, Pivot _pivot>
+inline std::array<_type, _size> LUDenseSmallSerial<_type, _size, _pivot>::Factorization::InitializePermutation()
+{
+    static_assert(_size == 3 || _size == 4, "System size not supported");
+    if constexpr (_size == 3)
+        return {{0, 1, 2}};
+    if constexpr (_size == 4)
+        return {{0, 1, 2, 3}};
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+template <typename _type, U32 _size, Pivot _pivot>
 template <U32 _idx>
-inline void LUDenseSmallSerial<_type, _size>::BackwardSubstitution(const std::array<_type, _size * _size>& lu,
-                                                                   std::array<_type, _size>& r)
+inline void LUDenseSmallSerial<_type, _size, _pivot>::BackwardSubstitution(const std::array<_type, _size * _size>& lu,
+                                                                           std::array<_type, _size>& r)
 {
     constexpr U32 pivIdx = (_size + 1) * _idx;
 
@@ -55,45 +78,47 @@ inline void LUDenseSmallSerial<_type, _size>::BackwardSubstitution(const std::ar
 
 // --------------------------------------------------------------------------------------------------------------------
 
-template <typename _type, U32 _size>
-inline std::array<_type, _size * _size>
-LUDenseSmallSerial<_type, _size>::Factorize(const std::array<_type, _size * _size>& matrixData)
+template <typename _type, U32 _size, Pivot _pivot>
+inline typename LUDenseSmallSerial<_type, _size, _pivot>::Factorization
+LUDenseSmallSerial<_type, _size, _pivot>::Factorize(const std::array<_type, _size * _size>& matrixData)
 {
-    std::array<_type, _size* _size> lu = matrixData;
-    FactorizationStep<0>(lu);
-    FactorizationStep<1>(lu);
-    FactorizationStep<2>(lu);
-    FactorizationStep<3>(lu);
+    Factorization fac(matrixData);
+    FactorizeLU(fac);
 
-    //DEV_EXCEPTION(lu[_size * _size - 1] == ApproxZero<_type>(1, 10), "Singular matrix - system not solveable");
-
-
-    //    std::array<_type, _size* _size> lu = matrixData;
-    //    FactorizationStep<0>(lu);
-    //    FactorizationStep<1>(lu);
-    //    FactorizationStep<2>(lu);
-    //    FactorizationStep<3>(lu);
-
-    return lu;
+    return fac;
 }
 
 
 
 // --------------------------------------------------------------------------------------------------------------------
 
-template <typename _type, U32 _size>
+template <typename _type, U32 _size, Pivot _pivot>
 template <U32 _idx>
-inline void LUDenseSmallSerial<_type, _size>::FactorizationStep(std::array<_type, _size * _size>& lu)
+inline void LUDenseSmallSerial<_type, _size, _pivot>::FactorizeLU(Factorization& factorization)
+{
+    FactorizationStep<_idx>(factorization);
+
+    if constexpr (_idx + 1 < _size)
+        FactorizeLU<_idx + 1>(factorization);
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+template <typename _type, U32 _size, Pivot _pivot>
+template <U32 _idx>
+inline void LUDenseSmallSerial<_type, _size, _pivot>::FactorizationStep(Factorization& factorization)
 {
     constexpr U32 pivIdx = _idx * _size + _idx;
-    DEV_EXCEPTION(lu[pivIdx] == ApproxZero<_type>(1, 10), "Singular matrix - system not solveable");
+    DEV_EXCEPTION(factorization.mLU[pivIdx] == ApproxZero<_type>(1, 10), "Singular matrix - system not solveable");
 
 
     for (U32 i = pivIdx + 1; i < _size * (_idx + 1); ++i)
     {
-        lu[i] /= lu[pivIdx];
+        factorization.mLU[i] /= factorization.mLU[pivIdx];
         for (U32 j = _size; j < (_size - _idx) * _size; j += _size)
-            lu[i + j] -= lu[i] * lu[pivIdx + j];
+            factorization.mLU[i + j] -= factorization.mLU[i] * factorization.mLU[pivIdx + j];
     }
 
 
@@ -118,10 +143,10 @@ inline void LUDenseSmallSerial<_type, _size>::FactorizationStep(std::array<_type
 
 // --------------------------------------------------------------------------------------------------------------------
 
-template <typename _type, U32 _size>
+template <typename _type, U32 _size, Pivot _pivot>
 template <U32 _idx>
-inline void LUDenseSmallSerial<_type, _size>::ForwardSubstitution(const std::array<_type, _size * _size>& lu,
-                                                                  std::array<_type, _size>& r)
+inline void LUDenseSmallSerial<_type, _size, _pivot>::ForwardSubstitution(const std::array<_type, _size * _size>& lu,
+                                                                          std::array<_type, _size>& r)
 {
     for (U32 i = _idx + 1; i < _size; ++i)
         r[i] -= lu[i + _idx * _size] * r[_idx];
@@ -158,12 +183,12 @@ inline void LUDenseSmallSerial<_type, _size>::ForwardSubstitution(const std::arr
 
 // --------------------------------------------------------------------------------------------------------------------
 
-template <typename _type, U32 _size>
-inline std::array<_type, _size> LUDenseSmallSerial<_type, _size>::Solve(const std::array<_type, _size * _size>& lu,
-                                                                        std::array<_type, _size> r)
+template <typename _type, U32 _size, Pivot _pivot>
+inline std::array<_type, _size> LUDenseSmallSerial<_type, _size, _pivot>::Solve(const Factorization& factorization,
+                                                                                std::array<_type, _size> r)
 {
-    ForwardSubstitution(lu, r);
-    BackwardSubstitution(lu, r);
+    ForwardSubstitution(factorization.mLU, r);
+    BackwardSubstitution(factorization.mLU, r);
     return r;
 }
 
