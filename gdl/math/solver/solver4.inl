@@ -406,7 +406,7 @@ inline Vec4Serial<_type, true> GaussPartialPivot(const Mat4Serial<_type>& matA, 
 
     // Find second pivot
     idx = 5;
-    for (U32 i = 5; i < 7; ++i)
+    for (U32 i = 6; i < 8; ++i)
         if (std::abs(matrixData[idx]) < std::abs(matrixData[i]))
             idx = i;
 

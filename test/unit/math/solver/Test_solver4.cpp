@@ -9,6 +9,73 @@
 
 using namespace GDL;
 
+struct LinearSystem4x4
+{
+    std::array<F32, 16> A;
+    std::array<F32, 4> b;
+    std::array<F32, 4> x;
+
+    LinearSystem4x4(std::array<F32, 16> pA, std::array<F32, 4> pb, std::array<F32, 4> px)
+        : A{pA}
+        , b{pb}
+        , x{px}
+    {
+    }
+};
+
+
+class Mat4TestData
+{
+    std::vector<LinearSystem4x4> mTests;
+
+    Mat4TestData()
+    {
+        std::array<F32, 16> A0 = {{1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1}};
+        std::array<F32, 4> b0 = {{1, 2, 3, 4}};
+        std::array<F32, 4> x0 = {{1, 2, 3, 4}};
+        CreatePermutations(A0, b0, x0);
+
+        std::array<F32, 16> A1 = {{2, 0, 4, 6, 2, 2, -3, 1, 3, 0, 0, -6, 2, 1, 1, -5}};
+        std::array<F32, 4> b1 = {{-6, 0, -21, 18}};
+        std::array<F32, 4> x1 = {{-1.5, 3, 1, -6}};
+        CreatePermutations(A1, b1, x1);
+    }
+
+    void CreatePermutations(const std::array<F32, 16>& A, const std::array<F32, 4>& b, const std::array<F32, 4>& x)
+    {
+        for (U32 i = 0; i < 4; ++i)
+            for (U32 j = 0; j < 4; ++j)
+                for (U32 k = 0; k < 4; ++k)
+                    for (U32 l = 0; l < 4; ++l)
+                        if (i != j && i != k && i != l && j != k && j != l && k != l)
+                            AddPermutation(A, b, x, {{i, j, k, l}});
+    }
+
+    void AddPermutation(const std::array<F32, 16>& A, const std::array<F32, 4>& b, const std::array<F32, 4>& x,
+                        const std::array<U32, 4>& permutation)
+    {
+        std::array<F32, 16> AP;
+        std::array<F32, 4> bP;
+        for (U32 i = 0; i < 4; ++i)
+        {
+            bP[i] = b[permutation[i]];
+            for (U32 j = 0; j < 4; ++j)
+                AP[i + j * 4] = A[permutation[i] + j * 4];
+        }
+        mTests.emplace_back(AP, bP, x);
+        //        std::cout << Mat4Serial<F32>(AP) << std::endl;
+        //        std::cout << Vec4Serial<F32, true>(bP) << std::endl;
+    }
+
+public:
+    static const std::vector<LinearSystem4x4>& GetTestData()
+    {
+        static Mat4TestData testData;
+        return testData.mTests;
+    }
+};
+
+
 
 // --------------------------------------------------------------------------------------------------------------------
 
@@ -45,36 +112,18 @@ void TestSolver(_solver solver, bool pivot = true)
             std::is_same<_solver, SSESolverPtr>::value, Mat4fSSE,
             typename std::conditional<std::is_same<_solver, AVXSolverPtr>::value, Mat4fAVX, Mat4fSerial>::type>::type;
 
-    TestSolverTestcase(solver, Matrix(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1), Vector(1, 2, 3, 4),
-                       Vector(1, 2, 3, 4));
-    TestSolverTestcase(solver, Matrix(2, 0, 4, 6, 2, 2, -3, 1, 3, 0, 0, -6, 2, 1, 1, -5), Vector(-6, 0, -21, 18),
-                       Vector(-1.5, 3, 1, -6));
 
     if (pivot)
     {
-        // 1234
-        TestSolverTestcase(solver, Matrix(0, 2, 4, 6, 2, 2, -3, 1, 0, 3, 0, -6, 1, 2, 1, -5), Vector(0, -6, -21, 18),
-                           Vector(-1.5, 3, 1, -6));
-        // 1243
-        TestSolverTestcase(solver, Matrix(0, 2, 6, 4, 2, 2, 1, -3, 0, 3, -6, 0, 1, 2, -5, 1), Vector(0, -6, 18, -21),
-                           Vector(-1.5, 3, 1, -6));
-        // 1324
-        TestSolverTestcase(solver, Matrix(0, 4, 2, 6, 2, -3, 2, 1, 0, 0, 3, -6, 1, 1, 2, -5), Vector(0, -21, -6, 18),
-                           Vector(-1.5, 3, 1, -6));
-        // 1342
-        TestSolverTestcase(solver, Matrix(0, 4, 6, 2, 2, -3, 1, 2, 0, 0, -6, 3, 1, 1, -5, 2), Vector(0, -21, 18, -6),
-                           Vector(-1.5, 3, 1, -6));
-        // 1423
-        TestSolverTestcase(solver, Matrix(0, 6, 2, 4, 2, 1, 2, -3, 0, -6, 3, 0, 1, -5, 2, 1), Vector(0, 18, -6, -21),
-                           Vector(-1.5, 3, 1, -6));
-        // 1432
-        TestSolverTestcase(solver, Matrix(0, 6, 4, 2, 2, 1, -3, 2, 0, -6, 0, 3, 1, -5, 1, 2), Vector(0, 18, -21, -6),
-                           Vector(-1.5, 3, 1, -6));
-        // 2134
+        const auto& testcases = Mat4TestData::GetTestData();
+        for (U32 i = 0; i < testcases.size(); ++i)
+            TestSolverTestcase(solver, Matrix(testcases[i].A), Vector(testcases[i].b), Vector(testcases[i].x));
+    }
+    else
+    {
+        TestSolverTestcase(solver, Matrix(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1), Vector(1, 2, 3, 4),
+                           Vector(1, 2, 3, 4));
         TestSolverTestcase(solver, Matrix(2, 0, 4, 6, 2, 2, -3, 1, 3, 0, 0, -6, 2, 1, 1, -5), Vector(-6, 0, -21, 18),
-                           Vector(-1.5, 3, 1, -6));
-        // 2143
-        TestSolverTestcase(solver, Matrix(2, 0, 6, 4, 2, 2, 1, -3, 3, 0, -6, 0, 2, 1, -5, 1), Vector(-6, 0, 18, -21),
                            Vector(-1.5, 3, 1, -6));
     }
 
