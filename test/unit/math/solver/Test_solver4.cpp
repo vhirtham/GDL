@@ -203,3 +203,13 @@ BOOST_AUTO_TEST_CASE(TestLUNoPivotSSE)
     SSESolverPtr solver = Solver::LUNoPivot;
     TestSolver(solver, false);
 }
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(TestLUPartialPivotSerial)
+{
+    SerialSolverPtr solver = Solver::LU<Solver::Pivot::PARTIAL>;
+    TestSolver(solver);
+}

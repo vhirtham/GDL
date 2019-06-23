@@ -184,6 +184,13 @@ BENCHMARK_F(SSE, LUNoPivot)(benchmark::State& state)
 }
 
 
+BENCHMARK_F(Serial, LUPartialPivot)(benchmark::State& state)
+{
+    for (auto _ : state)
+        benchmark::DoNotOptimize(Solver::LU<Solver::Pivot::PARTIAL>(A, b));
+}
+
+
 
 // Eigen --------------------------------------------------------------------------------------------------------------
 

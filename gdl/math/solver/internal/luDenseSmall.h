@@ -74,6 +74,12 @@ private:
 
     template <U32 _idx = 0>
     static inline void ForwardSubstitution(const std::array<_type, _size * _size>& lu, std::array<_type, _size>& r);
+
+    template <U32 _idx>
+    static inline void PartialPivot(Factorization& factorization);
+
+    static inline std::array<_type, _size> RhsPermutation(const std::array<_type, _size>& r,
+                                                          const std::array<_type, _size>& permutation);
 };
 
 
