@@ -197,9 +197,25 @@ BENCHMARK_F(Serial, LUNoPivotSolve)(benchmark::State& state)
 BENCHMARK_F(SSE, LUNoPivot)(benchmark::State& state)
 {
     for (auto _ : state)
-        benchmark::DoNotOptimize(Solver::LUNoPivot(A, b));
+        benchmark::DoNotOptimize(Solver::LU<Solver::Pivot::NONE>(A, b));
 }
 
+
+
+BENCHMARK_F(SSE, LUNoPivotFactorize)(benchmark::State& state)
+{
+    for (auto _ : state)
+        benchmark::DoNotOptimize(Solver::LUFactorization<Solver::Pivot::NONE>(A));
+}
+
+
+
+BENCHMARK_F(SSE, LUNoPivotSolve)(benchmark::State& state)
+{
+    auto factorization = Solver::LUFactorization<Solver::Pivot::NONE>(A);
+    for (auto _ : state)
+        benchmark::DoNotOptimize(Solver::LU<Solver::Pivot::NONE>(factorization, b));
+}
 
 
 BENCHMARK_F(Serial, LUPartialPivot)(benchmark::State& state)
@@ -226,7 +242,31 @@ BENCHMARK_F(Serial, LUPartialPivotSolve)(benchmark::State& state)
 }
 
 
-// Eigen --------------------------------------------------------------------------------------------------------------
+
+BENCHMARK_F(SSE, LUPartialPivot)(benchmark::State& state)
+{
+    for (auto _ : state)
+        benchmark::DoNotOptimize(Solver::LU<Solver::Pivot::PARTIAL>(A, b));
+}
+
+BENCHMARK_F(SSE, LUPartialPivotFactorize)(benchmark::State& state)
+{
+    for (auto _ : state)
+        benchmark::DoNotOptimize(Solver::LUFactorization<Solver::Pivot::PARTIAL>(A));
+}
+
+
+
+BENCHMARK_F(SSE, LUPartialPivotSolve)(benchmark::State& state)
+{
+    auto factorization = Solver::LUFactorization<Solver::Pivot::PARTIAL>(A);
+    for (auto _ : state)
+        benchmark::DoNotOptimize(Solver::LU<Solver::Pivot::PARTIAL>(factorization, b));
+}
+
+
+// Eigen
+// --------------------------------------------------------------------------------------------------------------
 
 #ifdef EIGEN3_FOUND
 
@@ -273,6 +313,7 @@ BENCHMARK_F(Eigen3, PartialPivLU)(benchmark::State& state)
 #endif // EIGEN3_FOUND
 
 
-// Main ---------------------------------------------------------------------------------------------------------------
+// Main
+// ---------------------------------------------------------------------------------------------------------------
 
 BENCHMARK_MAIN();

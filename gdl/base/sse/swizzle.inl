@@ -710,8 +710,10 @@ inline __m128 Swap(__m128 source)
 {
     constexpr U32 numRegVals = numRegisterValues<decltype(source)>;
 
-    static_assert(_idx0 != _idx1, "Indices must differ");
     static_assert(_idx0 < numRegVals && _idx1 < numRegVals, "Indices must be in the range [0, 3]");
+
+    if constexpr (_idx0 == _idx1)
+        return source;
 
     constexpr U32 s0 = (_idx0 == 0) ? _idx1 : (_idx1 == 0) ? _idx0 : 0;
     constexpr U32 s1 = (_idx0 == 1) ? _idx1 : (_idx1 == 1) ? _idx0 : 1;

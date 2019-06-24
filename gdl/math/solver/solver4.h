@@ -142,7 +142,26 @@ LUFactorization(const Mat4Serial<_type>& matA);
 //! @param matA: Matrix
 //! @param vecRhs: Right-hand side vector
 //! @return Result vector x
-[[nodiscard]] inline Vec4fSSE<true> LUNoPivot(const Mat4fSSE& matA, const Vec4fSSE<true>& vecRhs);
+template <Pivot _pivot = Pivot::PARTIAL>
+[[nodiscard]] inline Vec4fSSE<true> LU(const Mat4fSSE& matA, const Vec4fSSE<true>& vecRhs);
+
+
+//! @brief Solves the linear system A * x = b by using LU decomposition without pivoting.
+//! @tparam _type: Data type
+//! @param matA: Matrix
+//! @param vecRhs: Right-hand side vector
+//! @return Result vector x
+template <Pivot _pivot = Pivot::PARTIAL>
+[[nodiscard]] inline Vec4fSSE<true> LU(const typename LUDenseSmallSSE<4, _pivot>::Factorization& factorization,
+                                       const Vec4fSSE<true>& vecRhs);
+
+//! @brief Solves the linear system A * x = b by using LU decomposition without pivoting.
+//! @tparam _type: Data type
+//! @param matA: Matrix
+//! @param vecRhs: Right-hand side vector
+//! @return Result vector x
+template <Pivot _pivot = Pivot::PARTIAL>
+[[nodiscard]] inline typename LUDenseSmallSSE<4, _pivot>::Factorization LUFactorization(const Mat4fSSE& matA);
 
 } // namespace Solver
 

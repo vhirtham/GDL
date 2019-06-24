@@ -569,19 +569,6 @@ template <Pivot _pivot, typename _type>
 
 
 // --------------------------------------------------------------------------------------------------------------------
-
-template <Pivot _pivot, typename _type>
-[[nodiscard]] typename LUDenseSmallSerial<_type, 4, _pivot>::Factorization
-LUFactorization(const Mat4Serial<_type>& matA)
-{
-    using LUSolver = LUDenseSmallSerial<_type, 4, _pivot>;
-
-    return LUSolver::Factorize(matA.Data());
-}
-
-
-
-// --------------------------------------------------------------------------------------------------------------------
 template <Pivot _pivot, typename _type>
 [[nodiscard]] inline Vec4Serial<_type, true>
 LU(const typename LUDenseSmallSerial<_type, 4, _pivot>::Factorization& factorization,
@@ -596,164 +583,54 @@ LU(const typename LUDenseSmallSerial<_type, 4, _pivot>::Factorization& factoriza
 
 // --------------------------------------------------------------------------------------------------------------------
 
-[[nodiscard]] inline Vec4fSSE<true> LUNoPivot(const Mat4fSSE& matA, const Vec4fSSE<true>& vecRhs)
+template <Pivot _pivot, typename _type>
+[[nodiscard]] typename LUDenseSmallSerial<_type, 4, _pivot>::Factorization
+LUFactorization(const Mat4Serial<_type>& matA)
 {
-    using namespace GDL::sse;
+    using LUSolver = LUDenseSmallSerial<_type, 4, _pivot>;
 
-    // Factorize
-    alignas(alignmentBytes<__m128>) std::array<__m128, 4> LU = matA.DataSSE();
-
-
-    DEV_EXCEPTION(GetValue<0>(LU[0]) == ApproxZero<F32>(1, 10), "Singular matrix - system not solveable");
-
-
-    const __m128 zero = _mmx_setzero_p<__m128>();
-
-    __m128 rowMult = BlendIndex<0>(_mmx_div_p(LU[0], Broadcast<0>(LU[0])), zero);
-    LU[0] = BlendIndex<0>(rowMult, LU[0]);
-    for (U32 i = 1; i < 4; ++i)
-    {
-        __m128 bc = Broadcast<0>(LU[i]);
-        LU[i] = _mmx_fnmadd_p(rowMult, bc, LU[i]);
-    }
-
-    //    std::cout << "SSE" << std::endl;
-    //    std::cout << Mat4fSSE(LU[0], LU[1], LU[2], LU[3]) << std::endl;
-
-    DEV_EXCEPTION(GetValue<1>(LU[1]) == ApproxZero<F32>(1, 10), "Singular matrix - system not solveable");
-
-    __m128 rowMult1 = BlendAboveIndex<2>(_mmx_div_p(LU[1], Broadcast<1>(LU[1])), zero);
-    LU[1] = BlendAboveIndex<2>(rowMult1, LU[1]);
-    for (U32 i = 2; i < 4; ++i)
-    {
-        __m128 bc = Broadcast<1>(LU[i]);
-        LU[i] = _mmx_fnmadd_p(rowMult1, bc, LU[i]);
-    }
-
-    DEV_EXCEPTION(GetValue<2>(LU[2]) == ApproxZero<F32>(1, 10), "Singular matrix - system not solveable");
-
-    __m128 rowMult2 = BlendAboveIndex<3>(_mmx_div_p(LU[2], Broadcast<2>(LU[2])), zero);
-    LU[2] = BlendAboveIndex<3>(rowMult2, LU[2]);
-    for (U32 i = 3; i < 4; ++i)
-    {
-        __m128 bc = Broadcast<2>(LU[i]);
-        LU[i] = _mmx_fnmadd_p(rowMult2, bc, LU[i]);
-    }
-
-
-    DEV_EXCEPTION(GetValue<3>(LU[3]) == ApproxZero<F32>(1, 10), "Singular matrix - system not solveable");
-
-
-
-    // Solve
-    __m128 r = vecRhs.DataSSE();
-
-    // Ly=r
-    r = _mmx_fnmadd_p(BlendBelowIndex<0>(zero, LU[0]), Broadcast<0>(r), r);
-    r = _mmx_fnmadd_p(BlendBelowIndex<1>(zero, LU[1]), Broadcast<1>(r), r);
-    r = _mmx_fnmadd_p(BlendBelowIndex<2>(zero, LU[2]), Broadcast<2>(r), r);
-
-
-    // Ux=y
-    r = BlendIndex<3>(r, _mmx_div_p(r, LU[3]));
-    r = _mmx_fnmadd_p(BlendAboveIndex<3>(zero, LU[3]), Broadcast<3>(r), r);
-    r = BlendIndex<2>(r, _mmx_div_p(r, LU[2]));
-    r = _mmx_fnmadd_p(BlendAboveIndex<2>(zero, LU[2]), Broadcast<2>(r), r);
-    r = BlendIndex<1>(r, _mmx_div_p(r, LU[1]));
-    r = _mmx_fnmadd_p(BlendAboveIndex<1>(zero, LU[1]), Broadcast<1>(r), r);
-    r = BlendIndex<0>(r, _mmx_div_p(r, LU[0]));
-
-
-    return Vec4fSSE<true>(r);
-
-
-
-    //    using namespace GDL::sse;
-
-    //    // Factorize
-    //    alignas(alignmentBytes<__m128>) std::array<__m128, 4> LU = matA.DataSSE();
-
-
-    //    DEV_EXCEPTION(GetValue<0>(LU[0]) == ApproxZero<F32>(1, 10), "Singular matrix - system not solveable");
-
-
-    //    const __m128 one = _mmx_set1_p<__m128>(1);
-    //    const __m128 m1 = _mmx_set1_p<__m128>(-1);
-    //    const __m128 zero = _mmx_setzero_p<__m128>();
-
-
-    //    __m128 bc = Broadcast<0>(LU[0]);
-    //    const __m128 rowMult = _mmx_div_p(BlendIndex<0>(LU[0], m1), bc);
-    //    LU[0] = BlendIndex<0>(LU[0], Negate(rowMult));
-
-    //    for (U32 i = 1; i < 4; ++i)
-    //    {
-    //        bc = Broadcast<0>(LU[i]);
-    //        LU[i] = _mmx_fnmadd_p(rowMult, bc, BlendIndex<0>(LU[i], zero));
-    //    }
-
-    //    DEV_EXCEPTION(GetValue<1>(LU[1]) == ApproxZero<F32>(1, 10), "Singular matrix - system not solveable");
-
-    //    __m128 bc1 = Broadcast<1>(LU[1]);
-    //    const __m128 rowMult1 = _mmx_div_p(BlendBelowIndex<1>(_mmx_setr_p<__m128>(0, -1, 0, 0), LU[1]), bc1);
-    //    LU[1] = BlendIndex<1>(LU[1], Negate(rowMult1));
-
-    //    for (U32 i = 2; i < 4; ++i)
-    //    {
-    //        bc1 = Broadcast<1>(LU[i]);
-    //        LU[i] = _mmx_fnmadd_p(rowMult1, bc1, BlendIndex<1>(LU[i], zero));
-    //    }
-
-    //    DEV_EXCEPTION(GetValue<2>(LU[2]) == ApproxZero<F32>(1, 10), "Singular matrix - system not solveable");
-
-    //    __m128 bc2 = Broadcast<2>(LU[2]);
-    //    const __m128 rowMult2 = _mmx_div_p(BlendBelowIndex<2>(_mmx_setr_p<__m128>(0, 0, -1, 0), LU[2]), bc2);
-    //    LU[2] = BlendIndex<2>(LU[2], Negate(rowMult2));
-
-    //    for (U32 i = 3; i < 4; ++i)
-    //    {
-    //        bc2 = Broadcast<2>(LU[i]);
-    //        LU[i] = _mmx_fnmadd_p(rowMult2, bc2, BlendIndex<2>(LU[i], zero));
-    //    }
-
-    //    DEV_EXCEPTION(GetValue<3>(LU[3]) == ApproxZero<F32>(1, 10), "Singular matrix - system not solveable");
-
-    //    LU[3] = BlendIndex<3>(LU[3], _mmx_div_p(one, LU[3]));
-
-
-
-    //    __m128 r = vecRhs.DataSSE();
-
-    //    // Ly=r
-    //    //    r[0] =    0  --LU[0] * LU[0] *r[0];
-    //    //    r[1] = (r[1] - LU[1] * LU[0] *r[0]) * LU[5];
-    //    //    r[2] = (r[2] - LU[2] * LU[0] *r[0] - LU[6] * r[1]) * LU[10];
-    //    //    r[3] = (r[3] - LU[3] * LU[0] *r[0] - LU[7] * r[1] - LU[11] * r[2]) * LU[15];
-
-    //    r = BlendIndex<0>(r, _mmx_mul_p(LU[0], r));
-    //    r = BlendBelowIndex<0>(r, _mmx_fnmadd_p(LU[0], Broadcast<0>(r), r));
-
-    //    r = BlendIndex<1>(r, _mmx_mul_p(LU[1], r));
-    //    r = BlendBelowIndex<1>(r, _mmx_fnmadd_p(LU[1], Broadcast<1>(r), r));
-
-    //    r = BlendIndex<2>(r, _mmx_mul_p(LU[2], r));
-    //    r = BlendBelowIndex<2>(r, _mmx_fnmadd_p(LU[2], Broadcast<2>(r), r));
-
-    //    r = BlendIndex<3>(r, _mmx_mul_p(LU[3], r));
-
-
-
-    //    // Ux=y
-    //    //    r[2] = (r[2] - r[3] * LU[14]);
-    //    //    r[1] = (r[1] - r[3] * LU[13] - r[2] * LU[9]);
-    //    //    r[0] = (r[0] - r[3] * LU[12] - r[2] * LU[8] - r[1] * LU[4]);
-
-    //    r = BlendAboveIndex<3>(r, _mmx_fnmadd_p(LU[3], Broadcast<3>(r), r));
-    //    r = BlendAboveIndex<2>(r, _mmx_fnmadd_p(LU[2], Broadcast<2>(r), r));
-    //    r = BlendAboveIndex<1>(r, _mmx_fnmadd_p(LU[1], Broadcast<1>(r), r));
-
-    //    return Vec4fSSE<true>(r);
+    return LUSolver::Factorize(matA.Data());
 }
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+template <Pivot _pivot>
+[[nodiscard]] inline Vec4fSSE<true> LU(const Mat4fSSE& matA, const Vec4fSSE<true>& vecRhs)
+{
+    using LUSolver = LUDenseSmallSSE<4, _pivot>;
+
+    typename LUSolver::Factorization factorization = LUFactorization<_pivot>(matA);
+
+    return LU<_pivot>(factorization, vecRhs);
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+template <Pivot _pivot>
+[[nodiscard]] inline Vec4fSSE<true> LU(const typename LUDenseSmallSSE<4, _pivot>::Factorization& factorization,
+                                       const Vec4fSSE<true>& vecRhs)
+{
+    using LUSolver = LUDenseSmallSSE<4, _pivot>;
+
+    return Vec4fSSE<true>(LUSolver::Solve(factorization, vecRhs.DataSSE()));
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+template <Pivot _pivot>
+[[nodiscard]] inline typename LUDenseSmallSSE<4, _pivot>::Factorization LUFactorization(const Mat4fSSE& matA)
+{
+    using LUSolver = LUDenseSmallSSE<4, _pivot>;
+
+    return LUSolver::Factorize(matA.DataSSE());
+}
+
 
 
 } // namespace GDL::Solver
