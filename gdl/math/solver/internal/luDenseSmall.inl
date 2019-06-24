@@ -465,13 +465,6 @@ inline void LUDenseSmallSSE<_size, _pivot>::PartialPivot(Factorization& factoriz
         case 0:
             if constexpr (_idx == 0)
                 break;
-            else
-            {
-                for (U32 i = 0; i < _size; ++i)
-                    factorization.mLU[i] = Swap<_idx, 0>(factorization.mLU[i]);
-                permutation = Swap<_idx, 0>(permutation);
-                break;
-            }
         case 1:
             if constexpr (_idx == 1)
                 break;
@@ -577,8 +570,10 @@ inline __m128 LUDenseSmallSSE<_size, _pivot>::RhsPermutation(const __m128& r, U3
         return Permute<3, 0, 2, 1>(r);
     case (((3) << 6) | (0) << 4) | ((1) << 2) | (2):
         return Permute<3, 0, 1, 2>(r);
+        // LCOV_EXCL_START
     default:
         THROW("Invalid permutation value");
+        // LCOV_EXCL_STOP
     }
 }
 
