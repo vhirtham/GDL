@@ -212,7 +212,7 @@ inline void LUDenseSmallSerial<_type, _size, _pivot>::PartialPivot(Factorization
         U32 rowDiff = rowIdx - _idx * pivIdx;
         if (rowDiff > 0)
         {
-            for (U32 i = _idx; i < 16; i += 4)
+            for (U32 i = _idx; i < _size * _size; i += _size)
                 std::swap(factorization.mLU[i], factorization.mLU[i + rowDiff]);
             std::swap(factorization.mPermutation[_idx], factorization.mPermutation[_idx + rowDiff]);
         }
@@ -221,7 +221,7 @@ inline void LUDenseSmallSerial<_type, _size, _pivot>::PartialPivot(Factorization
     {
         if (std::abs(factorization.mLU[pivIdx]) < std::abs(factorization.mLU[pivIdx + 1]))
         {
-            for (U32 i = _idx; i < 16; i += 4)
+            for (U32 i = _idx; i < _size * _size; i += _size)
                 std::swap(factorization.mLU[i], factorization.mLU[i + 1]);
             std::swap(factorization.mPermutation[_idx], factorization.mPermutation[_idx + 1]);
         }
@@ -235,7 +235,7 @@ inline void LUDenseSmallSerial<_type, _size, _pivot>::PartialPivot(Factorization
 template <typename _type, U32 _size, Pivot _pivot>
 inline std::array<_type, _size>
 LUDenseSmallSerial<_type, _size, _pivot>::RhsPermutation(const std::array<_type, _size>& r,
-                                                         const std::array<_type, _size>& permutation)
+                                                         const std::array<_type, 4>& permutation)
 {
     std::array<_type, _size> rPermute;
     for (U32 i = 0; i < _size; ++i)

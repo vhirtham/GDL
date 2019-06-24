@@ -186,4 +186,84 @@ inline Vec3fSSE<true> GaussPartialPivot(const Mat3fSSE& A, const Vec3fSSE<true>&
 
 
 
+// --------------------------------------------------------------------------------------------------------------------
+
+template <Pivot _pivot, typename _type>
+[[nodiscard]] inline Vec3Serial<_type, true> LU(const Mat3Serial<_type>& matA, const Vec3Serial<_type, true>& vecRhs)
+{
+    using LUSolver = LUDenseSmallSerial<_type, 3, _pivot>;
+
+    typename LUSolver::Factorization factorization = LUFactorization<_pivot>(matA);
+
+    return LU<_pivot>(factorization, vecRhs);
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+template <Pivot _pivot, typename _type>
+[[nodiscard]] inline Vec3Serial<_type, true>
+LU(const typename LUDenseSmallSerial<_type, 3, _pivot>::Factorization& factorization,
+   const Vec3Serial<_type, true>& vecRhs)
+{
+    using LUSolver = LUDenseSmallSerial<_type, 3, _pivot>;
+
+    return Vec3Serial<_type>(LUSolver::Solve(factorization, vecRhs.Data()));
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+template <Pivot _pivot, typename _type>
+[[nodiscard]] typename LUDenseSmallSerial<_type, 3, _pivot>::Factorization
+LUFactorization(const Mat3Serial<_type>& matA)
+{
+    using LUSolver = LUDenseSmallSerial<_type, 3, _pivot>;
+
+    return LUSolver::Factorize(matA.Data());
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+template <Pivot _pivot>
+[[nodiscard]] inline Vec3fSSE<true> LU(const Mat3fSSE& matA, const Vec3fSSE<true>& vecRhs)
+{
+    using LUSolver = LUDenseSmallSSE<3, _pivot>;
+
+    typename LUSolver::Factorization factorization = LUFactorization<_pivot>(matA);
+
+    return LU<_pivot>(factorization, vecRhs);
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+template <Pivot _pivot>
+[[nodiscard]] inline Vec3fSSE<true> LU(const typename LUDenseSmallSSE<3, _pivot>::Factorization& factorization,
+                                       const Vec3fSSE<true>& vecRhs)
+{
+    using LUSolver = LUDenseSmallSSE<3, _pivot>;
+
+    return Vec3fSSE<true>(LUSolver::Solve(factorization, vecRhs.DataSSE()));
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+template <Pivot _pivot>
+[[nodiscard]] inline typename LUDenseSmallSSE<3, _pivot>::Factorization LUFactorization(const Mat3fSSE& matA)
+{
+    using LUSolver = LUDenseSmallSSE<3, _pivot>;
+
+    return LUSolver::Factorize(matA.DataSSE());
+}
+
+
+
 } // namespace GDL::Solver

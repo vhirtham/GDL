@@ -113,7 +113,7 @@ private:
     //! @param permutation: Permutation data
     //! @return Permuted right-hand side vector
     static inline std::array<_type, _size> RhsPermutation(const std::array<_type, _size>& r,
-                                                          const std::array<_type, _size>& permutation);
+                                                          const std::array<_type, 4>& permutation);
 };
 
 

@@ -5,6 +5,8 @@
 #endif
 
 #include "gdl/base/fundamentalTypes.h"
+#include "gdl/math/solver/pivot.h"
+#include "gdl/math/solver/internal/luDenseSmall.h"
 
 #include <array>
 #include <xmmintrin.h>
@@ -52,6 +54,60 @@ template <typename _type>
 //! @param b: Vector
 //! @return Result vector x
 [[nodiscard]] inline Vec3fSSE<true> GaussPartialPivot(const Mat3fSSE& A, const Vec3fSSE<true>& b);
+
+//! @brief Solves the linear system A * x = r by using LU decomposition.
+//! @tparam _pivot: Enum to select pivoting strategy
+//! @tparam _type: Data type
+//! @param matA: Matrix
+//! @param vecRhs: Right-hand side vector
+//! @return Result vector x
+template <Pivot _pivot = Pivot::PARTIAL, typename _type>
+[[nodiscard]] inline Vec3Serial<_type, true> LU(const Mat3Serial<_type>& matA, const Vec3Serial<_type, true>& vecRhs);
+
+//! @brief Solves the linear system A * x = r by using LU decomposition.
+//! @tparam _pivot: Enum to select pivoting strategy
+//! @tparam _type: Data type
+//! @param factorization: Factorization of A
+//! @param vecRhs: Right-hand side vector
+//! @return Result vector x
+template <Pivot _pivot = Pivot::PARTIAL, typename _type>
+[[nodiscard]] inline Vec3Serial<_type, true>
+LU(const typename LUDenseSmallSerial<_type, 3, _pivot>::Factorization& factorization,
+   const Vec3Serial<_type, true>& vecRhs);
+
+//! @brief Calculates the LU decomposition of a matrix.
+//! @tparam _pivot: Enum to select pivoting strategy
+//! @tparam _type: Data type
+//! @param matA: Matrix
+//! @return LU factorization of the matrix
+template <Pivot _pivot = Pivot::PARTIAL, typename _type>
+[[nodiscard]] inline typename LUDenseSmallSerial<_type, 3, _pivot>::Factorization
+LUFactorization(const Mat3Serial<_type>& matA);
+
+//! @brief Solves the linear system A * x = r by using LU decomposition.
+//! @tparam _pivot: Enum to select pivoting strategy
+//! @param matA: Matrix
+//! @param vecRhs: Right-hand side vector
+//! @return Result vector x
+template <Pivot _pivot = Pivot::PARTIAL>
+[[nodiscard]] inline Vec3fSSE<true> LU(const Mat3fSSE& matA, const Vec3fSSE<true>& vecRhs);
+
+
+//! @brief Solves the linear system A * x = r by using LU decomposition.
+//! @tparam _pivot: Enum to select pivoting strategy
+//! @param factorization: Factorization of A
+//! @param vecRhs: Right-hand side vector
+//! @return Result vector x
+template <Pivot _pivot = Pivot::PARTIAL>
+[[nodiscard]] inline Vec3fSSE<true> LU(const typename LUDenseSmallSSE<3, _pivot>::Factorization& factorization,
+                                       const Vec3fSSE<true>& vecRhs);
+
+//! @brief Calculates the LU decomposition of a matrix.
+//! @tparam _pivot: Enum to select pivoting strategy
+//! @param matA: Matrix
+//! @return LU factorization of the matrix
+template <Pivot _pivot = Pivot::PARTIAL>
+[[nodiscard]] inline typename LUDenseSmallSSE<3, _pivot>::Factorization LUFactorization(const Mat3fSSE& matA);
 
 
 

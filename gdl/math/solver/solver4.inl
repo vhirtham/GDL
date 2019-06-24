@@ -569,6 +569,7 @@ template <Pivot _pivot, typename _type>
 
 
 // --------------------------------------------------------------------------------------------------------------------
+
 template <Pivot _pivot, typename _type>
 [[nodiscard]] inline Vec4Serial<_type, true>
 LU(const typename LUDenseSmallSerial<_type, 4, _pivot>::Factorization& factorization,

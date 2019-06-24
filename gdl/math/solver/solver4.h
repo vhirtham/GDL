@@ -28,14 +28,14 @@ class Vec4fSSE;
 // Missing solver types:
 // LL/Cholesky
 // LDL
-// LU
+// LU - AVX
 
 
 
 namespace Solver
 {
 
-//! @brief Solves the linear system A * x = b by using Cramers rule.
+//! @brief Solves the linear system A * x = r by using Cramers rule.
 //! @tparam _type: Data type
 //! @param matA: Matrix
 //! @param vecRhs: Right-hand side vector
@@ -44,7 +44,7 @@ template <typename _type>
 [[nodiscard]] inline Vec4Serial<_type, true> Cramer(const Mat4Serial<_type>& matA,
                                                     const Vec4Serial<_type, true>& vecRhs);
 
-//! @brief Solves the linear system A * x = b by using Cramers rule.
+//! @brief Solves the linear system A * x = r by using Cramers rule.
 //! @param matA: Matrix
 //! @param vecRhs: Right-hand side vector
 //! @return Result vector x
@@ -52,7 +52,7 @@ template <typename _type>
 
 #ifdef __AVX2__
 
-//! @brief Solves the linear system A * x = b by using Cramers rule.
+//! @brief Solves the linear system A * x = r by using Cramers rule.
 //! @param matA: Matrix
 //! @param vecRhs: Right-hand side vector
 //! @return Result vector x
@@ -107,7 +107,7 @@ template <typename _type>
 //! @return Result vector x
 [[nodiscard]] inline Vec4fSSE<true> GaussPartialPivot(const Mat4fAVX& matA, const Vec4fSSE<true>& vecRhs);
 
-//! @brief Solves the linear system A * x = b by using LU decomposition without pivoting.
+//! @brief Solves the linear system A * x = r by using LU decomposition.
 //! @tparam _pivot: Enum to select pivoting strategy
 //! @tparam _type: Data type
 //! @param matA: Matrix
@@ -116,10 +116,10 @@ template <typename _type>
 template <Pivot _pivot = Pivot::PARTIAL, typename _type>
 [[nodiscard]] inline Vec4Serial<_type, true> LU(const Mat4Serial<_type>& matA, const Vec4Serial<_type, true>& vecRhs);
 
-//! @brief Solves the linear system A * x = b by using LU decomposition without pivoting.
+//! @brief Solves the linear system A * x = r by using LU decomposition.
 //! @tparam _pivot: Enum to select pivoting strategy
 //! @tparam _type: Data type
-//! @param matA: Matrix
+//! @param factorization: Factorization of A
 //! @param vecRhs: Right-hand side vector
 //! @return Result vector x
 template <Pivot _pivot = Pivot::PARTIAL, typename _type>
@@ -127,18 +127,17 @@ template <Pivot _pivot = Pivot::PARTIAL, typename _type>
 LU(const typename LUDenseSmallSerial<_type, 4, _pivot>::Factorization& factorization,
    const Vec4Serial<_type, true>& vecRhs);
 
-//! @brief Solves the linear system A * x = b by using LU decomposition without pivoting.
+//! @brief Calculates the LU decomposition of a matrix.
 //! @tparam _pivot: Enum to select pivoting strategy
 //! @tparam _type: Data type
 //! @param matA: Matrix
-//! @param vecRhs: Right-hand side vector
-//! @return Result vector x
+//! @return LU factorization of the matrix
 template <Pivot _pivot = Pivot::PARTIAL, typename _type>
 [[nodiscard]] inline typename LUDenseSmallSerial<_type, 4, _pivot>::Factorization
 LUFactorization(const Mat4Serial<_type>& matA);
 
-//! @brief Solves the linear system A * x = b by using LU decomposition without pivoting.
-//! @tparam _type: Data type
+//! @brief Solves the linear system A * x = r by using LU decomposition.
+//! @tparam _pivot: Enum to select pivoting strategy
 //! @param matA: Matrix
 //! @param vecRhs: Right-hand side vector
 //! @return Result vector x
@@ -146,20 +145,19 @@ template <Pivot _pivot = Pivot::PARTIAL>
 [[nodiscard]] inline Vec4fSSE<true> LU(const Mat4fSSE& matA, const Vec4fSSE<true>& vecRhs);
 
 
-//! @brief Solves the linear system A * x = b by using LU decomposition without pivoting.
-//! @tparam _type: Data type
-//! @param matA: Matrix
+//! @brief Solves the linear system A * x = r by using LU decomposition.
+//! @tparam _pivot: Enum to select pivoting strategy
+//! @param factorization: Factorization of A
 //! @param vecRhs: Right-hand side vector
 //! @return Result vector x
 template <Pivot _pivot = Pivot::PARTIAL>
 [[nodiscard]] inline Vec4fSSE<true> LU(const typename LUDenseSmallSSE<4, _pivot>::Factorization& factorization,
                                        const Vec4fSSE<true>& vecRhs);
 
-//! @brief Solves the linear system A * x = b by using LU decomposition without pivoting.
-//! @tparam _type: Data type
+//! @brief Calculates the LU decomposition of a matrix.
+//! @tparam _pivot: Enum to select pivoting strategy
 //! @param matA: Matrix
-//! @param vecRhs: Right-hand side vector
-//! @return Result vector x
+//! @return LU factorization of the matrix
 template <Pivot _pivot = Pivot::PARTIAL>
 [[nodiscard]] inline typename LUDenseSmallSSE<4, _pivot>::Factorization LUFactorization(const Mat4fSSE& matA);
 
