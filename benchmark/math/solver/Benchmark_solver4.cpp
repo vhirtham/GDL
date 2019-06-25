@@ -6,9 +6,33 @@
 using namespace GDL;
 
 
+// OPTIONS ------------------------------------------------------------------------------------------------------------
+
+// solver types
+#define BENCHMARK_CRAMER
+#define BENCHMARK_GAUSS
+#define BENCHMARK_LU
+
+// pivoting
+#define BENCHMARK_NOPIVOT
+#define BENCHMARK_PARTIALPIVOT
+
+// factorization
+#define BENCHMARK_FACTORIZATION
+
+// vectorization
+#define BENCHMARK_SERIAL
+#define BENCHMARK_SSE
+#define BENCHMARK_AVX
+
+// Eigen
+#define BENCHMARK_EIGEN
+
+
 
 // Fixture declaration ------------------------------------------------------------------------------------------------
 
+#ifdef BENCHMARK_SERIAL
 
 class Serial : public benchmark::Fixture
 {
@@ -23,7 +47,11 @@ public:
     }
 };
 
+#endif // BENCHMARK_SERIAL
 
+
+
+#ifdef BENCHMARK_SSE
 
 class SSE : public benchmark::Fixture
 {
@@ -38,8 +66,12 @@ public:
     }
 };
 
+#endif // BENCHMARK_SSE
+
+
 
 #ifdef __AVX2__
+#ifdef BENCHMARK_AVX
 
 class AVX : public benchmark::Fixture
 {
@@ -54,11 +86,13 @@ public:
     }
 };
 
+#endif // BENCHMARK_AVX
 #endif // __AVX2__
 
 
 
 #ifdef EIGEN3_FOUND
+#ifdef BENCHMARK_EIGEN
 
 class Eigen3 : public benchmark::Fixture
 {
@@ -73,12 +107,14 @@ public:
     }
 };
 
+#endif // BENCHMARK_EIGEN
 #endif // EIGEN3_FOUND
 
 
 // Cramer -------------------------------------------------------------------------------------------------------------
 
-
+#ifdef BENCHMARK_CRAMER
+#ifdef BENCHMARK_SERIAL
 
 BENCHMARK_F(Serial, Cramer)(benchmark::State& state)
 {
@@ -86,7 +122,11 @@ BENCHMARK_F(Serial, Cramer)(benchmark::State& state)
         benchmark::DoNotOptimize(Solver::Cramer(A, b));
 }
 
+#endif // BENCHMARK_SERIAL
 
+
+
+#ifdef BENCHMARK_SSE
 
 BENCHMARK_F(SSE, Cramer)(benchmark::State& state)
 {
@@ -94,9 +134,12 @@ BENCHMARK_F(SSE, Cramer)(benchmark::State& state)
         benchmark::DoNotOptimize(Solver::Cramer(A, b));
 }
 
+#endif // BENCHMARK_SSE
+
 
 
 #ifdef __AVX2__
+#ifdef BENCHMARK_AVX
 
 BENCHMARK_F(AVX, Cramer)(benchmark::State& state)
 {
@@ -104,12 +147,17 @@ BENCHMARK_F(AVX, Cramer)(benchmark::State& state)
         benchmark::DoNotOptimize(Solver::Cramer(A, b));
 }
 
+#endif // BENCHMARK_AVX
 #endif // __AVX2__
+#endif // BENCHMARK_CRAMER
 
 
 
-// Gauss --------------------------------------------------------------------------------------------------------------
+// Gauss - no pivot ---------------------------------------------------------------------------------------------------
 
+#ifdef BENCHMARK_GAUSS
+#ifdef BENCHMARK_NOPIVOT
+#ifdef BENCHMARK_SERIAL
 
 BENCHMARK_F(Serial, GaussNoPivot)(benchmark::State& state)
 {
@@ -117,7 +165,11 @@ BENCHMARK_F(Serial, GaussNoPivot)(benchmark::State& state)
         benchmark::DoNotOptimize(Solver::GaussNoPivot(A, b));
 }
 
+#endif // BENCHMARK_SERIAL
 
+
+
+#ifdef BENCHMARK_SSE
 
 BENCHMARK_F(SSE, GaussNoPivot)(benchmark::State& state)
 {
@@ -125,19 +177,28 @@ BENCHMARK_F(SSE, GaussNoPivot)(benchmark::State& state)
         benchmark::DoNotOptimize(Solver::GaussNoPivot(A, b));
 }
 
+#endif // BENCHMARK_SSE
+
 
 
 #ifdef __AVX2__
-
+#ifdef BENCHMARK_AVX
 BENCHMARK_F(AVX, GaussNoPivot)(benchmark::State& state)
 {
     for (auto _ : state)
         benchmark::DoNotOptimize(Solver::GaussNoPivot(A, b));
 }
 
+#endif // BENCHMARK_AVX
 #endif // __AVX2__
+#endif // BENCHMARK_NOPIVOT
 
 
+
+// Gauss - partial pivot ----------------------------------------------------------------------------------------------
+
+#ifdef BENCHMARK_PARTIALPIVOT
+#ifdef BENCHMARK_SERIAL
 
 BENCHMARK_F(Serial, GaussPartialPivot)(benchmark::State& state)
 {
@@ -145,7 +206,11 @@ BENCHMARK_F(Serial, GaussPartialPivot)(benchmark::State& state)
         benchmark::DoNotOptimize(Solver::GaussPartialPivot(A, b));
 }
 
+#endif // BENCHMARK_SERIAL
 
+
+
+#ifdef BENCHMARK_SSE
 
 BENCHMARK_F(SSE, GaussPartialPivot)(benchmark::State& state)
 {
@@ -153,21 +218,29 @@ BENCHMARK_F(SSE, GaussPartialPivot)(benchmark::State& state)
         benchmark::DoNotOptimize(Solver::GaussPartialPivot(A, b));
 }
 
+#endif // BENCHMARK_SSE
+
 
 
 #ifdef __AVX2__
-
+#ifdef BENCHMARK_AVX
 BENCHMARK_F(AVX, GaussPartialPivot)(benchmark::State& state)
 {
     for (auto _ : state)
         benchmark::DoNotOptimize(Solver::GaussPartialPivot(A, b));
 }
-
+#endif // BENCHMARK_AVX
 #endif // __AVX2__
+#endif // BENCHMARK_PARTIALPIVOT
+#endif // BENCHMARK_GAUSS
 
 
 
-// LU -----------------------------------------------------------------------------------------------------------------
+// LU - no pivot ------------------------------------------------------------------------------------------------------
+
+#ifdef BENCHMARK_LU
+#ifdef BENCHMARK_NOPIVOT
+#ifdef BENCHMARK_SERIAL
 
 BENCHMARK_F(Serial, LUNoPivot)(benchmark::State& state)
 {
@@ -176,6 +249,7 @@ BENCHMARK_F(Serial, LUNoPivot)(benchmark::State& state)
 }
 
 
+#ifdef BENCHMARK_FACTORIZATION
 
 BENCHMARK_F(Serial, LUNoPivotFactorize)(benchmark::State& state)
 {
@@ -192,7 +266,12 @@ BENCHMARK_F(Serial, LUNoPivotSolve)(benchmark::State& state)
         benchmark::DoNotOptimize(Solver::LU<Solver::Pivot::NONE>(factorization, b));
 }
 
+#endif // BENCHMARK_FACTORIZATION
+#endif // BENCHMARK_SERIAL
 
+
+
+#ifdef BENCHMARK_SSE
 
 BENCHMARK_F(SSE, LUNoPivot)(benchmark::State& state)
 {
@@ -201,6 +280,7 @@ BENCHMARK_F(SSE, LUNoPivot)(benchmark::State& state)
 }
 
 
+#ifdef BENCHMARK_FACTORIZATION
 
 BENCHMARK_F(SSE, LUNoPivotFactorize)(benchmark::State& state)
 {
@@ -217,6 +297,16 @@ BENCHMARK_F(SSE, LUNoPivotSolve)(benchmark::State& state)
         benchmark::DoNotOptimize(Solver::LU<Solver::Pivot::NONE>(factorization, b));
 }
 
+#endif // BENCHMARK_FACTORIZATION
+#endif // BENCHMARK_SSE
+#endif // BENCHMARK_NOPIVOT
+
+
+
+// LU - partial pivot -------------------------------------------------------------------------------------------------
+
+#ifdef BENCHMARK_PARTIALPIVOT
+#ifdef BENCHMARK_SERIAL
 
 BENCHMARK_F(Serial, LUPartialPivot)(benchmark::State& state)
 {
@@ -225,6 +315,8 @@ BENCHMARK_F(Serial, LUPartialPivot)(benchmark::State& state)
 }
 
 
+
+#ifdef BENCHMARK_FACTORIZATION
 
 BENCHMARK_F(Serial, LUPartialPivotFactorize)(benchmark::State& state)
 {
@@ -241,13 +333,22 @@ BENCHMARK_F(Serial, LUPartialPivotSolve)(benchmark::State& state)
         benchmark::DoNotOptimize(Solver::LU<Solver::Pivot::PARTIAL>(factorization, b));
 }
 
+#endif // BENCHMARK_FACTORIZATION
+#endif // BENCHMARK_SERIAL
 
+
+
+#ifdef BENCHMARK_SSE
 
 BENCHMARK_F(SSE, LUPartialPivot)(benchmark::State& state)
 {
     for (auto _ : state)
         benchmark::DoNotOptimize(Solver::LU<Solver::Pivot::PARTIAL>(A, b));
 }
+
+
+
+#ifdef BENCHMARK_FACTORIZATION
 
 BENCHMARK_F(SSE, LUPartialPivotFactorize)(benchmark::State& state)
 {
@@ -264,11 +365,17 @@ BENCHMARK_F(SSE, LUPartialPivotSolve)(benchmark::State& state)
         benchmark::DoNotOptimize(Solver::LU<Solver::Pivot::PARTIAL>(factorization, b));
 }
 
+#endif // BENCHMARK_FACTORIZATION
+#endif // BENCHMARK_SSE
+#endif // BENCHMARK_PARTIALPIVOT
+#endif // BENCHMARK_LU
 
-// Eigen
-// --------------------------------------------------------------------------------------------------------------
+
+
+// Eigen --------------------------------------------------------------------------------------------------------------
 
 #ifdef EIGEN3_FOUND
+#ifdef BENCHMARK_EIGEN
 
 // https://eigen.tuxfamily.org/dox/group__TutorialLinearAlgebra.html
 // https://eigen.tuxfamily.org/dox/group__DenseDecompositionBenchmark.html
@@ -310,6 +417,7 @@ BENCHMARK_F(Eigen3, PartialPivLU)(benchmark::State& state)
         benchmark::DoNotOptimize(A.partialPivLu().solve(b));
 }
 
+#endif // BENCHMARK_EIGEN
 #endif // EIGEN3_FOUND
 
 
