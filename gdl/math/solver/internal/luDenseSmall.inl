@@ -1,24 +1,40 @@
 #pragma once
 
+#include "gdl/math/solver/internal/luDenseSmall.h"
+
 #include "gdl/base/approx.h"
 #include "gdl/base/exception.h"
 #include "gdl/base/sse/directAccess.h"
 #include "gdl/base/sse/swizzle.h"
-#include "gdl/math/solver/internal/luDenseSmall.h"
+#include "gdl/math/solver/internal/pivotDenseSmall.h"
 
-
-#include <iostream>
-#include "gdl/math/sse/mat4fSSE.h"
 
 namespace GDL::Solver
 {
+
+// --------------------------------------------------------------------------------------------------------------------
 
 template <typename _type, U32 _size, Pivot _pivot>
 inline LUDenseSmallSerial<_type, _size, _pivot>::Factorization::Factorization(
         const std::array<_type, _size * _size>& matrixData)
     : mLU{matrixData}
-    , mPermutation{{0, 1, 2, 3}}
+    , mPermutation{InitializePermutation()}
 {
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+template <typename _type, U32 _size, Pivot _pivot>
+inline constexpr std::array<_type, _size>
+LUDenseSmallSerial<_type, _size, _pivot>::Factorization::InitializePermutation() const
+{
+    static_assert(_size == 3 || _size == 4, "Unsupported array size");
+    if constexpr (_size == 3)
+        return {{0, 1, 2}};
+    if constexpr (_size == 4)
+        return {{0, 1, 2, 3}};
 }
 
 
@@ -44,7 +60,7 @@ template <typename _type, U32 _size, Pivot _pivot>
 LUDenseSmallSerial<_type, _size, _pivot>::Solve(const Factorization& factorization, std::array<_type, _size> r)
 {
     if constexpr (_pivot != Pivot::NONE)
-        r = RhsPermutation(r, factorization.mPermutation);
+        r = PivotDenseSmallSerial<_type, _size>::PermuteVector(r, factorization.mPermutation);
 
     ForwardSubstitution(factorization.mLU, r);
     BackwardSubstitution(factorization.mLU, r);
@@ -101,7 +117,7 @@ template <U32 _idx>
 inline void LUDenseSmallSerial<_type, _size, _pivot>::FactorizeLU(Factorization& factorization)
 {
     if constexpr (_pivot == Pivot::PARTIAL && _idx + 1 < _size)
-        PartialPivot<_idx>(factorization);
+        PivotDenseSmallSerial<_type, _size>::template Partial<_idx>(factorization.mLU, factorization.mPermutation);
 
     FactorizationStep<_idx>(factorization);
 
@@ -184,64 +200,6 @@ inline void LUDenseSmallSerial<_type, _size, _pivot>::ForwardSubstitution(const 
     //    //    r[1] = (r[1] - LU[1] * r[0]) * LU[5];
     //    //    r[2] = (r[2] - LU[2] * r[0] - LU[6] * r[1]) * LU[10];
     //    //    r[3] = (r[3] - LU[3] * r[0] - LU[7] * r[1] - LU[11] * r[2]) * LU[15];
-}
-
-
-
-// --------------------------------------------------------------------------------------------------------------------
-
-template <typename _type, U32 _size, Pivot _pivot>
-template <U32 _idx>
-inline void LUDenseSmallSerial<_type, _size, _pivot>::PartialPivot(Factorization& factorization)
-{
-    static_assert(_idx + 1 < _size, "Unnecessary function call.");
-
-    constexpr U32 pivIdx = _idx * (1 + _size);
-
-    if constexpr (_idx + 2 < _size)
-    {
-        // Find pivot
-        U32 rowIdx = pivIdx;
-
-        for (U32 i = pivIdx + 1; i < _size * (_idx + 1); ++i)
-            if (std::abs(factorization.mLU[rowIdx]) < std::abs(factorization.mLU[i]))
-                rowIdx = i;
-
-
-        // Pivoting step
-        U32 rowDiff = rowIdx - _idx * pivIdx;
-        if (rowDiff > 0)
-        {
-            for (U32 i = _idx; i < _size * _size; i += _size)
-                std::swap(factorization.mLU[i], factorization.mLU[i + rowDiff]);
-            std::swap(factorization.mPermutation[_idx], factorization.mPermutation[_idx + rowDiff]);
-        }
-    }
-    else
-    {
-        if (std::abs(factorization.mLU[pivIdx]) < std::abs(factorization.mLU[pivIdx + 1]))
-        {
-            for (U32 i = _idx; i < _size * _size; i += _size)
-                std::swap(factorization.mLU[i], factorization.mLU[i + 1]);
-            std::swap(factorization.mPermutation[_idx], factorization.mPermutation[_idx + 1]);
-        }
-    }
-}
-
-
-
-// --------------------------------------------------------------------------------------------------------------------
-
-template <typename _type, U32 _size, Pivot _pivot>
-inline std::array<_type, _size>
-LUDenseSmallSerial<_type, _size, _pivot>::RhsPermutation(const std::array<_type, _size>& r,
-                                                         const std::array<_type, 4>& permutation)
-{
-    std::array<_type, _size> rPermute;
-    for (U32 i = 0; i < _size; ++i)
-        rPermute[i] = r[permutation[i]];
-
-    return rPermute;
 }
 
 

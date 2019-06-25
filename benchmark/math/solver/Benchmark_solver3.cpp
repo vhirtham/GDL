@@ -78,10 +78,19 @@ BENCHMARK_F(SSE, Cramer)(benchmark::State& state)
 // Gauss --------------------------------------------------------------------------------------------------------------
 
 
+
+BENCHMARK_F(Serial, GaussNoPivot)(benchmark::State& state)
+{
+    for (auto _ : state)
+        benchmark::DoNotOptimize(Solver::Gauss<Solver::Pivot::NONE>(A, b));
+}
+
+
+
 BENCHMARK_F(Serial, GaussPartialPivot)(benchmark::State& state)
 {
     for (auto _ : state)
-        benchmark::DoNotOptimize(Solver::GaussPartialPivot(A, b));
+        benchmark::DoNotOptimize(Solver::Gauss<Solver::Pivot::PARTIAL>(A, b));
 }
 
 

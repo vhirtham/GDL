@@ -60,14 +60,6 @@ template <typename _type>
 
 #endif // __AVX2__
 
-//! @brief Solves the linear system A * x = b by using Gaussian elimination without pivoting.
-//! @tparam _type: Data type
-//! @param matA: Matrix
-//! @param vecRhs: Right-hand side vector
-//! @return Result vector x
-template <typename _type>
-[[nodiscard]] inline Vec4Serial<_type, true> GaussNoPivot(const Mat4Serial<_type>& matA,
-                                                          const Vec4Serial<_type, true>& vecRhs);
 
 //! @brief Solves the linear system A * x = b by using Gaussian elimination without pivoting.
 //! @param matA: Matrix
@@ -86,14 +78,14 @@ template <typename _type>
 #endif // __AVX2__
 
 
-//! @brief Solves the linear system A * x = b by using Gaussian elimination with partial pivoting.
+//! @brief Solves the linear system A * x = r by using Gaussian elimination with partial pivoting.
 //! @tparam _type: Data type
 //! @param matA: Matrix
 //! @param vecRhs: Right-hand side vector
 //! @return Result vector x
-template <typename _type>
-[[nodiscard]] inline Vec4Serial<_type, true> GaussPartialPivot(const Mat4Serial<_type>& matA,
-                                                               const Vec4Serial<_type, true>& vecRhs);
+template <Pivot _pivot = Pivot::PARTIAL, typename _type>
+[[nodiscard]] inline Vec4Serial<_type, true> Gauss(const Mat4Serial<_type>& matA,
+                                                   const Vec4Serial<_type, true>& vecRhs);
 
 //! @brief Solves the linear system A * x = b by using Gaussian elimination with partial pivoting.
 //! @param matA: Matrix

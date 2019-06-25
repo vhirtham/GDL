@@ -1,16 +1,33 @@
 #pragma once
 
+#include "gdl/math/solver/internal/GaussDenseSmall.h"
+
 #include "gdl/base/approx.h"
 #include "gdl/base/exception.h"
 #include "gdl/base/sse/directAccess.h"
-#include "gdl/math/solver/internal/GaussDenseSmall.h"
 #include "gdl/base/sse/swizzle.h"
+#include "gdl/math/solver/internal/pivotDenseSmall.h"
 
 
 #include <iostream>
 
 namespace GDL::Solver
 {
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+template <typename _type, U32 _size>
+template <U32 _idx, Pivot _pivot>
+inline void GaussDenseSmallSerial<_type, _size>::GaussStep(std::array<_type, _size * _size>& matrixData,
+                                                           std::array<_type, _size>& vectorData)
+{
+    if constexpr (_pivot == Pivot::PARTIAL && _idx + 1 < _size)
+        PivotDenseSmallSerial<_type, _size>::template Partial<_idx, _idx>(matrixData, vectorData);
+    GaussDenseSmallSerial<_type, _size>::template EliminationStep<_idx>(matrixData, vectorData);
+}
+
+
 
 // --------------------------------------------------------------------------------------------------------------------
 

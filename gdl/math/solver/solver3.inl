@@ -79,47 +79,18 @@ inline Vec3fSSE<true> Cramer(const Mat3fSSE& matA, const Vec3fSSE<true>& vecRhs)
 
 // --------------------------------------------------------------------------------------------------------------------
 
-template <typename _type>
-inline Vec3Serial<_type, true> GaussPartialPivot(const Mat3Serial<_type>& A, const Vec3Serial<_type, true>& b)
+template <Pivot _pivot, typename _type>
+inline Vec3Serial<_type, true> Gauss(const Mat3Serial<_type>& matA, const Vec3Serial<_type, true>& vecRhs)
 {
-    std::array<_type, 9> matrixData = A.Data();
-    std::array<_type, 3> vectorData = b.Data();
+    std::array<_type, 9> matrixData = matA.Data();
+    std::array<_type, 3> vectorData = vecRhs.Data();
 
-    U32 idx = 0;
+    // INFO: Tried using template recursion here, but it seems to prevent clang from doing some optimizations ---> runs
+    // slower
 
-    // Find first pivot
-    for (U32 i = 1; i < 3; ++i)
-        if (std::abs(matrixData[idx]) < std::abs(matrixData[i]))
-            idx = i;
-
-    // First pivoting step
-    if (idx != 0)
-    {
-        for (U32 i = 0; i < 9; i += 3)
-            std::swap(matrixData[i], matrixData[i + idx]);
-        std::swap(vectorData[0], vectorData[idx]);
-    }
-
-
-    // First elimination step
-    GaussDenseSmallSerial<_type, 3>::template EliminationStep<0>(matrixData, vectorData);
-
-
-    // Second pivoting step
-    if (std::abs(matrixData[4]) < std::abs(matrixData[5]))
-    {
-        std::swap(matrixData[4], matrixData[5]);
-        std::swap(matrixData[7], matrixData[8]);
-        std::swap(vectorData[1], vectorData[2]);
-    }
-
-
-    // Second elimination step
-    GaussDenseSmallSerial<_type, 3>::template EliminationStep<1>(matrixData, vectorData);
-
-    // Last elimination step
-    GaussDenseSmallSerial<_type, 3>::template EliminationStep<2>(matrixData, vectorData);
-
+    GaussDenseSmallSerial<_type, 3>::template GaussStep<0, _pivot>(matrixData, vectorData);
+    GaussDenseSmallSerial<_type, 3>::template GaussStep<1, _pivot>(matrixData, vectorData);
+    GaussDenseSmallSerial<_type, 3>::template GaussStep<2, _pivot>(matrixData, vectorData);
 
     return Vec3Serial<_type, true>(vectorData);
 }

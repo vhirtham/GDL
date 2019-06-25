@@ -126,6 +126,9 @@ void TestSolver(_solver solver, bool pivot = true)
                            Vector(1, 2, 3, 4));
         TestSolverTestcase(solver, Matrix(2, 0, 4, 6, 2, 2, -3, 1, 3, 0, 0, -6, 2, 1, 1, -5), Vector(-6, 0, -21, 18),
                            Vector(-1.5, 3, 1, -6));
+
+        Matrix ANeedPivot(0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
+        GDL_CHECK_THROW_DEV(solver(ANeedPivot, Vector()), Exception);
     }
 
     Matrix AThrow(2, 1, 3, 4, 2, 1, 3, 4, 2, 1, 3, 4, 2, 1, 3, 4);
@@ -182,7 +185,7 @@ BOOST_AUTO_TEST_CASE(TestGaussNoPivotSSE)
 
 BOOST_AUTO_TEST_CASE(TestGaussNoPivotSerial)
 {
-    SerialSolverPtr solver = Solver::GaussNoPivot;
+    SerialSolverPtr solver = Solver::Gauss<Solver::Pivot::NONE>;
     TestSolver(solver, false);
 }
 
@@ -206,7 +209,7 @@ BOOST_AUTO_TEST_CASE(TestGaussNoPivotAVX)
 
 BOOST_AUTO_TEST_CASE(TestGaussPartialPivotSerial)
 {
-    SerialSolverPtr solver = Solver::GaussPartialPivot;
+    SerialSolverPtr solver = Solver::Gauss<Solver::Pivot::PARTIAL>;
     TestSolver(solver);
 }
 

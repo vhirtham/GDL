@@ -2,6 +2,9 @@
 
 
 #include "gdl/math/serial/mat3Serial.h"
+#include "gdl/math/serial/vec3Serial.h"
+#include "gdl/math/sse/mat3fSSE.h"
+#include "gdl/math/sse/vec3fSSE.h"
 #include "gdl/math/solver/solver3.h"
 #include "test/tools/ExceptionChecks.h"
 
@@ -117,6 +120,9 @@ void TestSolver(_solver solver, bool pivot = true)
         TestSolverTestcase(solver, Matrix(1, 0, 0, 0, 1, 0, 0, 0, 1), Vector(1, 2, 3), Vector(1, 2, 3));
         TestSolverTestcase(solver, Matrix(-2, -1, -3, -4, -1, -4, -8, -1, -5), Vector(-2, -1, -2), Vector(3, -3, 1));
         TestSolverTestcase(solver, Matrix(2, 1, 3, 4, 1, 4, 8, 1, 5), Vector(2, 1, 2), Vector(3, -3, 1));
+
+        Matrix ANeedPivot(0, 1, 0, 1, 0, 0, 0, 0, 1);
+        GDL_CHECK_THROW_DEV(solver(ANeedPivot, Vector()), Exception);
     }
     Matrix AThrow(2, 1, 3, 2, 1, 3, 2, 1, 3);
     GDL_CHECK_THROW_DEV(solver(AThrow, Vector()), Exception);
@@ -152,9 +158,19 @@ BOOST_AUTO_TEST_CASE(TestCramerSSE)
 
 // --------------------------------------------------------------------------------------------------------------------
 
+BOOST_AUTO_TEST_CASE(TestGaussNoPivotSerial)
+{
+    SerialSolverPtr solver = Solver::Gauss<Solver::Pivot::NONE>;
+    TestSolver(solver, false);
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
 BOOST_AUTO_TEST_CASE(TestGaussPartialPivotSerial)
 {
-    SerialSolverPtr solver = Solver::GaussPartialPivot;
+    SerialSolverPtr solver = Solver::Gauss<Solver::Pivot::PARTIAL>;
     TestSolver(solver);
 }
 

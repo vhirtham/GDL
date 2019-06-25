@@ -9,9 +9,9 @@ using namespace GDL;
 // OPTIONS ------------------------------------------------------------------------------------------------------------
 
 // solver types
-#define BENCHMARK_CRAMER
+//#define BENCHMARK_CRAMER
 #define BENCHMARK_GAUSS
-#define BENCHMARK_LU
+//#define BENCHMARK_LU
 
 // pivoting
 #define BENCHMARK_NOPIVOT
@@ -22,11 +22,11 @@ using namespace GDL;
 
 // vectorization
 #define BENCHMARK_SERIAL
-#define BENCHMARK_SSE
-#define BENCHMARK_AVX
+//#define BENCHMARK_SSE
+//#define BENCHMARK_AVX
 
 // Eigen
-#define BENCHMARK_EIGEN
+//#define BENCHMARK_EIGEN
 
 
 
@@ -162,7 +162,7 @@ BENCHMARK_F(AVX, Cramer)(benchmark::State& state)
 BENCHMARK_F(Serial, GaussNoPivot)(benchmark::State& state)
 {
     for (auto _ : state)
-        benchmark::DoNotOptimize(Solver::GaussNoPivot(A, b));
+        benchmark::DoNotOptimize(Solver::Gauss<Solver::Pivot::NONE>(A, b));
 }
 
 #endif // BENCHMARK_SERIAL
@@ -203,7 +203,7 @@ BENCHMARK_F(AVX, GaussNoPivot)(benchmark::State& state)
 BENCHMARK_F(Serial, GaussPartialPivot)(benchmark::State& state)
 {
     for (auto _ : state)
-        benchmark::DoNotOptimize(Solver::GaussPartialPivot(A, b));
+        benchmark::DoNotOptimize(Solver::Gauss<Solver::Pivot::PARTIAL>(A, b));
 }
 
 #endif // BENCHMARK_SERIAL

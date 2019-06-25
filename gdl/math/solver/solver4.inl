@@ -306,31 +306,6 @@ inline Vec4fSSE<true> Cramer(const Mat4fAVX& matA, const Vec4fSSE<true>& vecRhs)
 
 // --------------------------------------------------------------------------------------------------------------------
 
-template <typename _type>
-inline Vec4Serial<_type, true> GaussNoPivot(const Mat4Serial<_type>& matA, const Vec4Serial<_type, true>& vecRhs)
-{
-    std::array<_type, 16> matrixData = matA.Data();
-    std::array<_type, 4> vectorData = vecRhs.Data();
-
-    // First elimination step
-    GaussDenseSmallSerial<_type, 4>::template EliminationStep<0>(matrixData, vectorData);
-
-    // Second elimination step
-    GaussDenseSmallSerial<_type, 4>::template EliminationStep<1>(matrixData, vectorData);
-
-    // Third elimination step
-    GaussDenseSmallSerial<_type, 4>::template EliminationStep<2>(matrixData, vectorData);
-
-    // Last elimination step
-    GaussDenseSmallSerial<_type, 4>::template EliminationStep<3>(matrixData, vectorData);
-
-    return Vec4Serial<_type, true>(vectorData);
-}
-
-
-
-// --------------------------------------------------------------------------------------------------------------------
-
 inline Vec4fSSE<true> GaussNoPivot(const Mat4fSSE& matA, const Vec4fSSE<true>& vecRhs)
 {
     using namespace GDL::sse;
@@ -377,65 +352,19 @@ inline Vec4fSSE<true> GaussNoPivot(const Mat4fSSE& matA, const Vec4fSSE<true>& v
 
 // --------------------------------------------------------------------------------------------------------------------
 
-template <typename _type>
-inline Vec4Serial<_type, true> GaussPartialPivot(const Mat4Serial<_type>& matA, const Vec4Serial<_type, true>& vecRhs)
+template <Pivot _pivot, typename _type>
+inline Vec4Serial<_type, true> Gauss(const Mat4Serial<_type>& matA, const Vec4Serial<_type, true>& vecRhs)
 {
     std::array<_type, 16> matrixData = matA.Data();
     std::array<_type, 4> vectorData = vecRhs.Data();
 
+    // INFO: Tried using template recursion here, but it seems to prevent clang from doing some optimizations ---> runs
+    // slower
 
-    // Find first pivot
-    U32 idx = 0;
-    for (U32 i = 1; i < 4; ++i)
-        if (std::abs(matrixData[idx]) < std::abs(matrixData[i]))
-            idx = i;
-
-    // First pivoting step
-    if (idx != 0)
-    {
-        for (U32 i = 0; i < 16; i += 4)
-            std::swap(matrixData[i], matrixData[i + idx]);
-        std::swap(vectorData[0], vectorData[idx]);
-    }
-
-    // First elimination step
-    GaussDenseSmallSerial<_type, 4>::template EliminationStep<0>(matrixData, vectorData);
-
-
-
-    // Find second pivot
-    idx = 5;
-    for (U32 i = 6; i < 8; ++i)
-        if (std::abs(matrixData[idx]) < std::abs(matrixData[i]))
-            idx = i;
-
-    // Second pivoting step
-    idx -= 5;
-    if (idx != 0)
-    {
-        for (U32 i = 5; i < 16; i += 4)
-            std::swap(matrixData[i], matrixData[i + idx]);
-        std::swap(vectorData[1], vectorData[idx + 1]);
-    }
-
-    // Second elimination step
-    GaussDenseSmallSerial<_type, 4>::template EliminationStep<1>(matrixData, vectorData);
-
-
-    // Third pivoting step
-    if (std::abs(matrixData[10]) < std::abs(matrixData[11]))
-    {
-        std::swap(matrixData[10], matrixData[11]);
-        std::swap(matrixData[14], matrixData[15]);
-        std::swap(vectorData[2], vectorData[3]);
-    }
-
-
-    // Third elimination step
-    GaussDenseSmallSerial<_type, 4>::template EliminationStep<2>(matrixData, vectorData);
-
-    // Last elimination step
-    GaussDenseSmallSerial<_type, 4>::template EliminationStep<3>(matrixData, vectorData);
+    GaussDenseSmallSerial<_type, 4>::template GaussStep<0, _pivot>(matrixData, vectorData);
+    GaussDenseSmallSerial<_type, 4>::template GaussStep<1, _pivot>(matrixData, vectorData);
+    GaussDenseSmallSerial<_type, 4>::template GaussStep<2, _pivot>(matrixData, vectorData);
+    GaussDenseSmallSerial<_type, 4>::template GaussStep<3, _pivot>(matrixData, vectorData);
 
     return Vec4Serial<_type, true>(vectorData);
 }

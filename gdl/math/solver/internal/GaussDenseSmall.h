@@ -6,6 +6,7 @@
 #endif
 
 #include "gdl/base/fundamentalTypes.h"
+#include "gdl/math/solver/pivot.h"
 
 #include <array>
 #include <xmmintrin.h>
@@ -41,12 +42,14 @@ class GaussDenseSmallSerial
 {
     static_assert(_size == 3 || _size == 4, "Unsupported system size.");
 
-    template <typename _type2>
-    friend Vec4Serial<_type2, true> GaussNoPivot(const Mat4Serial<_type2>& A, const Vec4Serial<_type2, true>& b);
-    template <typename _type2>
-    friend Vec3Serial<_type2, true> GaussPartialPivot(const Mat3Serial<_type2>& A, const Vec3Serial<_type2, true>& b);
-    template <typename _type2>
-    friend Vec4Serial<_type2, true> GaussPartialPivot(const Mat4Serial<_type2>& A, const Vec4Serial<_type2, true>& b);
+    template <Pivot, typename _type2>
+    friend Vec3Serial<_type2, true> Gauss(const Mat3Serial<_type2>& A, const Vec3Serial<_type2, true>& b);
+    template <Pivot, typename _type2>
+    friend Vec4Serial<_type2, true> Gauss(const Mat4Serial<_type2>& A, const Vec4Serial<_type2, true>& b);
+
+
+    template <U32 _idx, Pivot _pivot = Pivot::PARTIAL>
+    static inline void GaussStep(std::array<_type, _size * _size>& matrixData, std::array<_type, _size>& vectorData);
 
     //! @brief Performs the gauss elimination step starting with the specified matrix element on the main diagonal. Rows
     //! above and to the right of the specified element are not modified, since the elemination process is expected to

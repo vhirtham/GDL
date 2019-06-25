@@ -16,21 +16,7 @@
 
 namespace GDL
 {
-class Mat4fAVX;
-template <typename>
-class Mat3Serial;
-template <typename>
-class Mat4Serial;
-class Mat3fSSE;
-class Mat4fSSE;
-template <typename, bool>
-class Vec3Serial;
-template <typename, bool>
-class Vec4Serial;
-template <bool>
-class Vec3fSSE;
-template <bool>
-class Vec4fSSE;
+
 
 
 namespace Solver
@@ -53,11 +39,15 @@ public:
         friend class LUDenseSmallSerial;
 
         std::array<_type, _size * _size> mLU;
-        std::array<_type, 4> mPermutation;
+        std::array<_type, _size> mPermutation;
 
         //! @brief ctor
         //! @param matrixData: Data of the matrix that should be factorized
         Factorization(const std::array<_type, _size * _size>& matrixData);
+
+        //! @brief Provides the initialization of the permutation array
+        //! @return Permutation array
+        inline constexpr std::array<_type, _size> InitializePermutation() const;
     };
 
 
@@ -101,19 +91,6 @@ private:
     //! @param r: Data of the right-hand side vector
     template <U32 _idx = 0>
     static inline void ForwardSubstitution(const std::array<_type, _size * _size>& lu, std::array<_type, _size>& r);
-
-    //! @brief Performs partial pivoting if necessary
-    //! @tparam _idx: Index of the active row
-    //! @param factorization: Factorization data
-    template <U32 _idx>
-    static inline void PartialPivot(Factorization& factorization);
-
-    //! @brief Applies the necessary row interchanges of the factorization to the right hand side vector and returns it
-    //! @param r: Original right-hand side vector
-    //! @param permutation: Permutation data
-    //! @return Permuted right-hand side vector
-    static inline std::array<_type, _size> RhsPermutation(const std::array<_type, _size>& r,
-                                                          const std::array<_type, 4>& permutation);
 };
 
 
