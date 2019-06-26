@@ -10,19 +10,19 @@ using namespace GDL;
 
 // solver types
 //#define BENCHMARK_CRAMER
-#define BENCHMARK_GAUSS
-//#define BENCHMARK_LU
+//#define BENCHMARK_GAUSS
+#define BENCHMARK_LU
 
 // pivoting
-#define BENCHMARK_NOPIVOT
+//#define BENCHMARK_NOPIVOT
 #define BENCHMARK_PARTIALPIVOT
 
 // factorization
 #define BENCHMARK_FACTORIZATION
 
 // vectorization
-#define BENCHMARK_SERIAL
-//#define BENCHMARK_SSE
+//#define BENCHMARK_SERIAL
+#define BENCHMARK_SSE
 //#define BENCHMARK_AVX
 
 // Eigen

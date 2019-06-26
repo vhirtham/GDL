@@ -158,21 +158,6 @@ private:
     //! @param r: Data of the right-hand side vector
     template <U32 _idx = 0>
     static inline void ForwardSubstitution(const std::array<__m128, _size>& lu, __m128& r);
-
-    //! @brief Performs partial pivoting if necessary
-    //! @tparam _idx: Index of the active row
-    //! @param factorization: Factorization data
-    //! @param permutation: Register that keeps track of the permutations.
-    //! @note The content of the permutation register is turned into a single integer at the end of the factorization
-    //! process. This value is then stored in the factorization class
-    template <U32 _idx>
-    static inline void PartialPivot(Factorization& factorization, __m128& permutation);
-
-    //! @brief Applies the necessary row interchanges of the factorization to the right hand side vector and returns it
-    //! @param r: Original right-hand side vector
-    //! @param permutation: Permutation data
-    //! @return Permuted right-hand side vector
-    static inline __m128 RhsPermutation(const __m128& r, U32 permutation);
 };
 
 

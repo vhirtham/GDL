@@ -46,6 +46,34 @@ class PivotDenseSmallSerial
 
 
 
+//! @brief Helper class for pivoting strategies that are shared amongst multiple solvers
+template <U32 _size>
+class PivotDenseSmallSSE
+{
+    template <U32, Pivot>
+    friend class LUDenseSmallSSE;
+    template <U32>
+    friend class GaussDenseSmallSSE;
+
+    //! @brief Creates the permutation hash for the given permutation
+    //! @param permutation: Register that contains an arbitrary permutation of 0,1,2,3
+    //! @return Permutation hash
+    static inline U32 CreatePermutationHash(__m128 permutation);
+
+    //! @brief Performs partial pivoting on a matrix if necessary
+    //! @tparam _idx: Index of the active row
+    //! @param matrixData: Data of the matrix (column major)
+    //! @param vectorData: Vector wich is permuted the same way as the matrix
+    template <U32 _idx, U32 _idxColStart = 0>
+    static inline void Partial(std::array<__m128, _size>& matrixData, __m128& vectorData);
+
+    //! @brief Applies a permutation to a vector
+    //! @param vec: Original vector
+    //! @param permutationHash: Hash that specifies the permutation
+    //! @return Permuted vector
+    static inline __m128 PermuteVector(const __m128& vec, U32 permutationHash);
+};
+
 } // namespace Solver
 
 } // namespace GDL

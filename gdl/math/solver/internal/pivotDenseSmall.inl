@@ -70,4 +70,159 @@ PivotDenseSmallSerial<_type, _size>::PermuteVector(const std::array<_type, _size
 }
 
 
+
+// --------------------------------------------------------------------------------------------------------------------
+
+template <U32 _size>
+inline U32 PivotDenseSmallSSE<_size>::CreatePermutationHash(__m128 permutation)
+{
+    alignas(sse::alignmentBytes<__m128>) F32 P[4];
+
+    _mmx_store_p(P, permutation);
+
+    return (((static_cast<U32>(P[0])) << 6) | ((static_cast<U32>(P[1])) << 4) | ((static_cast<U32>(P[2])) << 2) |
+            (static_cast<U32>(P[3])));
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+template <U32 _size>
+template <U32 _idx, U32 _idxColStart>
+inline void PivotDenseSmallSSE<_size>::Partial(std::array<__m128, _size>& matrixData, __m128& vectorData)
+{
+    using namespace GDL::sse;
+
+    static_assert(_idx + 1 < _size, "Unnecessary function call.");
+
+    if constexpr (_idx + 2 < _size)
+    {
+        U32 idx = _idx;
+        alignas(alignmentBytes<__m128>) F32 colValues[4];
+
+        _mmx_store_p(colValues, Abs(matrixData[_idx]));
+        for (U32 i = _idx + 1; i < _size; ++i)
+            if (colValues[idx] < colValues[i])
+                idx = i;
+
+
+        switch (idx)
+        {
+        case 0:
+            if constexpr (_idx == 0)
+                break;
+        case 1:
+            if constexpr (_idx == 1)
+                break;
+            else
+            {
+                for (U32 i = _idxColStart; i < _size; ++i)
+                    matrixData[i] = Swap<_idx, 1>(matrixData[i]);
+                vectorData = Swap<_idx, 1>(vectorData);
+                break;
+            }
+        case 2:
+            if constexpr (_idx == 2)
+                break;
+            else
+            {
+                for (U32 i = _idxColStart; i < _size; ++i)
+                    matrixData[i] = Swap<_idx, 2>(matrixData[i]);
+                vectorData = Swap<_idx, 2>(vectorData);
+                break;
+            }
+        case 3:
+            if constexpr (_idx == 3)
+                break;
+            else
+            {
+                for (U32 i = _idxColStart; i < _size; ++i)
+                    matrixData[i] = Swap<_idx, 3>(matrixData[i]);
+                vectorData = Swap<_idx, 3>(vectorData);
+            }
+        }
+    }
+    else
+    {
+        __m128 absCol = Abs(matrixData[_idx]);
+        if (_mm_comilt_ss(Broadcast<_idx>(absCol), Broadcast<_idx + 1>(absCol)))
+        {
+            for (U32 i = _idxColStart; i < _size; ++i)
+                matrixData[i] = Swap<_idx, _idx + 1>(matrixData[i]);
+            vectorData = Swap<_idx, _idx + 1>(vectorData);
+        }
+    }
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+template <U32 _size>
+inline __m128 PivotDenseSmallSSE<_size>::PermuteVector(const __m128& vec, U32 permutationHash)
+{
+    using namespace GDL::sse;
+
+    switch (permutationHash)
+    {
+    case (((0) << 6) | (1) << 4) | ((2) << 2) | (3):
+        return vec;
+    case (((0) << 6) | (1) << 4) | ((3) << 2) | (2):
+        return Permute<0, 1, 3, 2>(vec);
+    case (((0) << 6) | (2) << 4) | ((1) << 2) | (3):
+        return Permute<0, 2, 1, 3>(vec);
+    case (((0) << 6) | (2) << 4) | ((3) << 2) | (1):
+        return Permute<0, 2, 3, 1>(vec);
+    case (((0) << 6) | (3) << 4) | ((2) << 2) | (1):
+        return Permute<0, 3, 2, 1>(vec);
+    case (((0) << 6) | (3) << 4) | ((1) << 2) | (2):
+        return Permute<0, 3, 1, 2>(vec);
+
+    case (((1) << 6) | (0) << 4) | ((2) << 2) | (3):
+        return Permute<1, 0, 2, 3>(vec);
+    case (((1) << 6) | (0) << 4) | ((3) << 2) | (2):
+        return Permute<1, 0, 3, 2>(vec);
+    case (((1) << 6) | (2) << 4) | ((0) << 2) | (3):
+        return Permute<1, 2, 0, 3>(vec);
+    case (((1) << 6) | (2) << 4) | ((3) << 2) | (0):
+        return Permute<1, 2, 3, 0>(vec);
+    case (((1) << 6) | (3) << 4) | ((2) << 2) | (0):
+        return Permute<1, 3, 2, 0>(vec);
+    case (((1) << 6) | (3) << 4) | ((0) << 2) | (2):
+        return Permute<1, 3, 0, 2>(vec);
+
+    case (((2) << 6) | (1) << 4) | ((0) << 2) | (3):
+        return Permute<2, 1, 0, 3>(vec);
+    case (((2) << 6) | (1) << 4) | ((3) << 2) | (0):
+        return Permute<2, 1, 3, 0>(vec);
+    case (((2) << 6) | (0) << 4) | ((1) << 2) | (3):
+        return Permute<2, 0, 1, 3>(vec);
+    case (((2) << 6) | (0) << 4) | ((3) << 2) | (1):
+        return Permute<2, 0, 3, 1>(vec);
+    case (((2) << 6) | (3) << 4) | ((0) << 2) | (1):
+        return Permute<2, 3, 0, 1>(vec);
+    case (((2) << 6) | (3) << 4) | ((1) << 2) | (0):
+        return Permute<2, 3, 1, 0>(vec);
+
+    case (((3) << 6) | (1) << 4) | ((2) << 2) | (0):
+        return Permute<3, 1, 2, 0>(vec);
+    case (((3) << 6) | (1) << 4) | ((0) << 2) | (2):
+        return Permute<3, 1, 0, 2>(vec);
+    case (((3) << 6) | (2) << 4) | ((1) << 2) | (0):
+        return Permute<3, 2, 1, 0>(vec);
+    case (((3) << 6) | (2) << 4) | ((0) << 2) | (1):
+        return Permute<3, 2, 0, 1>(vec);
+    case (((3) << 6) | (0) << 4) | ((2) << 2) | (1):
+        return Permute<3, 0, 2, 1>(vec);
+    case (((3) << 6) | (0) << 4) | ((1) << 2) | (2):
+        return Permute<3, 0, 1, 2>(vec);
+        // LCOV_EXCL_START
+    default:
+        THROW("Invalid permutation hash");
+        // LCOV_EXCL_STOP
+    }
+}
+
+
 } // namespace GDL::Solver

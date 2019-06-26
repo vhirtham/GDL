@@ -230,18 +230,12 @@ LUDenseSmallSSE<_size, _pivot>::Factorize(const std::array<__m128, _size>& matri
 {
 
     __m128 permutation = _mmx_setr_p<__m128>(0, 1, 2, 3);
+
     Factorization factorization(matrixData);
     FactorizeLU(factorization, permutation);
 
-    // Convert permutation register to single U32 value
     if constexpr (_pivot != Pivot::NONE)
-    {
-        alignas(sse::alignmentBytes<__m128>) F32 P[4];
-        _mmx_store_p(P, permutation);
-        factorization.mPermutation = (((static_cast<U32>(P[0])) << 6) | ((static_cast<U32>(P[1])) << 4) |
-                                      ((static_cast<U32>(P[2])) << 2) | (static_cast<U32>(P[3])));
-    }
-
+        factorization.mPermutation = PivotDenseSmallSSE<_size>::CreatePermutationHash(permutation);
 
     return factorization;
 } // namespace GDL::Solver
@@ -254,7 +248,7 @@ template <U32 _size, Pivot _pivot>
 [[nodiscard]] inline __m128 LUDenseSmallSSE<_size, _pivot>::Solve(const Factorization& factorization, __m128 r)
 {
     if constexpr (_pivot != Pivot::NONE)
-        r = RhsPermutation(r, factorization.mPermutation);
+        r = PivotDenseSmallSSE<_size>::PermuteVector(r, factorization.mPermutation);
 
     ForwardSubstitution(factorization.mLU, r);
     BackwardSubstitution(factorization.mLU, r);
@@ -357,7 +351,7 @@ template <U32 _idx>
 inline void LUDenseSmallSSE<_size, _pivot>::FactorizeLU(Factorization& factorization, __m128& permutation)
 {
     if constexpr (_pivot == Pivot::PARTIAL && _idx + 1 < _size)
-        PartialPivot<_idx>(factorization, permutation);
+        PivotDenseSmallSSE<_size>::template Partial<_idx>(factorization.mLU, permutation);
 
     FactorizationStep<_idx>(factorization);
 
@@ -395,145 +389,6 @@ inline void LUDenseSmallSSE<_size, _pivot>::ForwardSubstitution(const std::array
     //        ForwardSubstitution<_idx + 1>(lu, r);
 }
 
-
-
-// --------------------------------------------------------------------------------------------------------------------
-
-template <U32 _size, Pivot _pivot>
-template <U32 _idx>
-inline void LUDenseSmallSSE<_size, _pivot>::PartialPivot(Factorization& factorization, __m128& permutation)
-{
-    using namespace GDL::sse;
-
-    static_assert(_idx + 1 < _size, "Unnecessary function call.");
-
-    if constexpr (_idx + 2 < _size)
-    {
-        U32 idx = _idx;
-        alignas(alignmentBytes<__m128>) F32 colValues[4];
-
-        _mmx_store_p(colValues, Abs(factorization.mLU[_idx]));
-        for (U32 i = _idx + 1; i < _size; ++i)
-            if (colValues[idx] < colValues[i])
-                idx = i;
-
-
-        switch (idx)
-        {
-        case 0:
-            if constexpr (_idx == 0)
-                break;
-        case 1:
-            if constexpr (_idx == 1)
-                break;
-            else
-            {
-                for (U32 i = 0; i < _size; ++i)
-                    factorization.mLU[i] = Swap<_idx, 1>(factorization.mLU[i]);
-                permutation = Swap<_idx, 1>(permutation);
-                break;
-            }
-        case 2:
-            if constexpr (_idx == 2)
-                break;
-            else
-            {
-                for (U32 i = 0; i < _size; ++i)
-                    factorization.mLU[i] = Swap<_idx, 2>(factorization.mLU[i]);
-                permutation = Swap<_idx, 2>(permutation);
-                break;
-            }
-        case 3:
-            if constexpr (_idx == 3)
-                break;
-            else
-            {
-                for (U32 i = 0; i < _size; ++i)
-                    factorization.mLU[i] = Swap<_idx, 3>(factorization.mLU[i]);
-                permutation = Swap<_idx, 3>(permutation);
-            }
-        }
-    }
-    else
-    {
-        __m128 absCol = Abs(factorization.mLU[_idx]);
-        if (_mm_comilt_ss(Broadcast<_idx>(absCol), Broadcast<_idx + 1>(absCol)))
-        {
-            for (U32 i = 0; i < _size; ++i)
-                factorization.mLU[i] = Swap<_idx, _idx + 1>(factorization.mLU[i]);
-            permutation = Swap<_idx, _idx + 1>(permutation);
-        }
-    }
-}
-
-
-
-// --------------------------------------------------------------------------------------------------------------------
-
-template <U32 _size, Pivot _pivot>
-inline __m128 LUDenseSmallSSE<_size, _pivot>::RhsPermutation(const __m128& r, U32 permutation)
-{
-    using namespace GDL::sse;
-
-    switch (permutation)
-    {
-    case (((0) << 6) | (1) << 4) | ((2) << 2) | (3):
-        return r;
-    case (((0) << 6) | (1) << 4) | ((3) << 2) | (2):
-        return Permute<0, 1, 3, 2>(r);
-    case (((0) << 6) | (2) << 4) | ((1) << 2) | (3):
-        return Permute<0, 2, 1, 3>(r);
-    case (((0) << 6) | (2) << 4) | ((3) << 2) | (1):
-        return Permute<0, 2, 3, 1>(r);
-    case (((0) << 6) | (3) << 4) | ((2) << 2) | (1):
-        return Permute<0, 3, 2, 1>(r);
-    case (((0) << 6) | (3) << 4) | ((1) << 2) | (2):
-        return Permute<0, 3, 1, 2>(r);
-
-    case (((1) << 6) | (0) << 4) | ((2) << 2) | (3):
-        return Permute<1, 0, 2, 3>(r);
-    case (((1) << 6) | (0) << 4) | ((3) << 2) | (2):
-        return Permute<1, 0, 3, 2>(r);
-    case (((1) << 6) | (2) << 4) | ((0) << 2) | (3):
-        return Permute<1, 2, 0, 3>(r);
-    case (((1) << 6) | (2) << 4) | ((3) << 2) | (0):
-        return Permute<1, 2, 3, 0>(r);
-    case (((1) << 6) | (3) << 4) | ((2) << 2) | (0):
-        return Permute<1, 3, 2, 0>(r);
-    case (((1) << 6) | (3) << 4) | ((0) << 2) | (2):
-        return Permute<1, 3, 0, 2>(r);
-
-    case (((2) << 6) | (1) << 4) | ((0) << 2) | (3):
-        return Permute<2, 1, 0, 3>(r);
-    case (((2) << 6) | (1) << 4) | ((3) << 2) | (0):
-        return Permute<2, 1, 3, 0>(r);
-    case (((2) << 6) | (0) << 4) | ((1) << 2) | (3):
-        return Permute<2, 0, 1, 3>(r);
-    case (((2) << 6) | (0) << 4) | ((3) << 2) | (1):
-        return Permute<2, 0, 3, 1>(r);
-    case (((2) << 6) | (3) << 4) | ((0) << 2) | (1):
-        return Permute<2, 3, 0, 1>(r);
-    case (((2) << 6) | (3) << 4) | ((1) << 2) | (0):
-        return Permute<2, 3, 1, 0>(r);
-
-    case (((3) << 6) | (1) << 4) | ((2) << 2) | (0):
-        return Permute<3, 1, 2, 0>(r);
-    case (((3) << 6) | (1) << 4) | ((0) << 2) | (2):
-        return Permute<3, 1, 0, 2>(r);
-    case (((3) << 6) | (2) << 4) | ((1) << 2) | (0):
-        return Permute<3, 2, 1, 0>(r);
-    case (((3) << 6) | (2) << 4) | ((0) << 2) | (1):
-        return Permute<3, 2, 0, 1>(r);
-    case (((3) << 6) | (0) << 4) | ((2) << 2) | (1):
-        return Permute<3, 0, 2, 1>(r);
-    case (((3) << 6) | (0) << 4) | ((1) << 2) | (2):
-        return Permute<3, 0, 1, 2>(r);
-        // LCOV_EXCL_START
-    default:
-        THROW("Invalid permutation value");
-        // LCOV_EXCL_STOP
-    }
-}
 
 
 } // namespace GDL::Solver
