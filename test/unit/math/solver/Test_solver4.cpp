@@ -175,7 +175,7 @@ BOOST_AUTO_TEST_CASE(TestCramerAVX)
 
 BOOST_AUTO_TEST_CASE(TestGaussNoPivotSSE)
 {
-    SSESolverPtr solver = Solver::GaussNoPivot;
+    SSESolverPtr solver = Solver::Gauss<Solver::Pivot::NONE>;
     TestSolver(solver, false);
 }
 
@@ -197,7 +197,7 @@ BOOST_AUTO_TEST_CASE(TestGaussNoPivotSerial)
 
 BOOST_AUTO_TEST_CASE(TestGaussNoPivotAVX)
 {
-    AVXSolverPtr solver = Solver::GaussNoPivot;
+    AVXSolverPtr solver = Solver::Gauss<Solver::Pivot::NONE>;
     TestSolver(solver, false);
 }
 
@@ -219,7 +219,7 @@ BOOST_AUTO_TEST_CASE(TestGaussPartialPivotSerial)
 
 BOOST_AUTO_TEST_CASE(TestGaussPartialPivotSSE)
 {
-    SSESolverPtr solver = Solver::GaussPartialPivot;
+    SSESolverPtr solver = Solver::Gauss<Solver::Pivot::PARTIAL>;
     TestSolver(solver);
 }
 
@@ -231,7 +231,7 @@ BOOST_AUTO_TEST_CASE(TestGaussPartialPivotSSE)
 
 BOOST_AUTO_TEST_CASE(TestGaussPartialPivotAVX)
 {
-    AVXSolverPtr solver = Solver::GaussPartialPivot;
+    AVXSolverPtr solver = Solver::Gauss<Solver::Pivot::PARTIAL>;
     TestSolver(solver);
 }
 

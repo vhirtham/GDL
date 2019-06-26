@@ -111,7 +111,7 @@ public:
         friend class LUDenseSmallSSE;
 
         std::array<__m128, _size> mLU;
-        U32 mPermutation;
+        U32 mPermutationHash;
 
         //! @brief ctor
         //! @param matrixData: Data of the matrix that should be factorized

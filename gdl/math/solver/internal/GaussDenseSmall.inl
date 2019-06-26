@@ -17,24 +17,10 @@ namespace GDL::Solver
 
 // --------------------------------------------------------------------------------------------------------------------
 
-template <typename _type, U32 _size>
-template <U32 _idx, Pivot _pivot>
-inline void GaussDenseSmallSerial<_type, _size>::GaussStep(std::array<_type, _size * _size>& matrixData,
-                                                           std::array<_type, _size>& vectorData)
-{
-    if constexpr (_pivot == Pivot::PARTIAL && _idx + 1 < _size)
-        PivotDenseSmallSerial<_type, _size>::template Partial<_idx, _idx>(matrixData, vectorData);
-    GaussDenseSmallSerial<_type, _size>::template EliminationStep<_idx>(matrixData, vectorData);
-}
-
-
-
-// --------------------------------------------------------------------------------------------------------------------
-
-template <typename _type, U32 _size>
+template <typename _type, U32 _size, Pivot _pivot>
 template <U32 _idx>
-inline void GaussDenseSmallSerial<_type, _size>::EliminationStep(std::array<_type, _size * _size>& matrixData,
-                                                                 std::array<_type, _size>& vectorData)
+inline void GaussDenseSmallSerial<_type, _size, _pivot>::EliminationStep(std::array<_type, _size * _size>& matrixData,
+                                                                         std::array<_type, _size>& vectorData)
 {
     constexpr U32 colStartIdx = _idx * _size;
     constexpr U32 pivotIdx = colStartIdx + _idx;
@@ -67,29 +53,60 @@ inline void GaussDenseSmallSerial<_type, _size>::EliminationStep(std::array<_typ
 
 // --------------------------------------------------------------------------------------------------------------------
 
-
-template <U32 _size>
+template <typename _type, U32 _size, Pivot _pivot>
 template <U32 _idx>
-inline void GaussDenseSmallSSE<_size>::EliminationStep(const std::array<__m128* const, _size + 1>& data)
+inline void GaussDenseSmallSerial<_type, _size, _pivot>::GaussStep(std::array<_type, _size * _size>& matrixData,
+                                                                   std::array<_type, _size>& vectorData)
+{
+    if constexpr (_pivot != Pivot::NONE && _idx + 1 < _size)
+        PivotDenseSmallSerial<_type, _size>::template PivotStep<_pivot, _idx, _idx>(matrixData, vectorData);
+
+    GaussDenseSmallSerial<_type, _size, _pivot>::template EliminationStep<_idx>(matrixData, vectorData);
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+template <U32 _size, Pivot _pivot>
+template <U32 _idx>
+inline void GaussDenseSmallSSE<_size, _pivot>::EliminationStep(std::array<__m128, _size>& matrixData,
+                                                               __m128& vectorData)
 {
     // INFO: This version is slightly faster than the one with the "-1". Reason: The "-1" version needs more
     // "expensive" operations in front of the for-loop. For small systems the additional blends in the loop are cheaper
     // than those extra operations.
     using namespace GDL::sse;
 
-    DEV_EXCEPTION(GetValue<_idx>(*data[_idx]) == ApproxZero<F32>(10), "Singular matrix - system not solveable");
+    DEV_EXCEPTION(GetValue<_idx>(matrixData[_idx]) == ApproxZero<F32>(10), "Singular matrix - system not solveable");
 
     const __m128 m1 = _mmx_set1_p<__m128>(-1);
     const __m128 zero = _mmx_setzero_p<__m128>();
 
-    __m128 bc = Broadcast<_idx>(*data[_idx]);
-    const __m128 rowMult = _mmx_div_p(BlendIndex<_idx>(*data[_idx], m1), bc);
+    __m128 bc = Broadcast<_idx>(matrixData[_idx]);
+    const __m128 rowMult = _mmx_div_p(BlendIndex<_idx>(matrixData[_idx], m1), bc);
 
-    for (U32 i = _idx + 1; i < _size + 1; ++i)
+    for (U32 i = _idx + 1; i < _size; ++i)
     {
-        bc = Broadcast<_idx>(*data[i]);
-        *data[i] = _mmx_fnmadd_p(rowMult, bc, BlendIndex<_idx>(*data[i], zero));
+        bc = Broadcast<_idx>(matrixData[i]);
+        matrixData[i] = _mmx_fnmadd_p(rowMult, bc, BlendIndex<_idx>(matrixData[i], zero));
     }
+    bc = Broadcast<_idx>(vectorData);
+    vectorData = _mmx_fnmadd_p(rowMult, bc, BlendIndex<_idx>(vectorData, zero));
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+template <U32 _size, Pivot _pivot>
+template <U32 _idx>
+inline void GaussDenseSmallSSE<_size, _pivot>::GaussStep(std::array<__m128, _size>& matrixData, __m128& vectorData)
+{
+    if constexpr (_pivot != Pivot::NONE && _idx + 1 < _size)
+        PivotDenseSmallSSE<_size>::template PivotStep<_pivot, _idx, _idx>(matrixData, vectorData);
+
+    EliminationStep<_idx>(matrixData, vectorData);
 }
 
 

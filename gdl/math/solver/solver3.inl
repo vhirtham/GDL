@@ -88,9 +88,9 @@ inline Vec3Serial<_type, true> Gauss(const Mat3Serial<_type>& matA, const Vec3Se
     // INFO: Tried using template recursion here, but it seems to prevent clang from doing some optimizations ---> runs
     // slower
 
-    GaussDenseSmallSerial<_type, 3>::template GaussStep<0, _pivot>(matrixData, vectorData);
-    GaussDenseSmallSerial<_type, 3>::template GaussStep<1, _pivot>(matrixData, vectorData);
-    GaussDenseSmallSerial<_type, 3>::template GaussStep<2, _pivot>(matrixData, vectorData);
+    GaussDenseSmallSerial<_type, 3, _pivot>::template GaussStep<0>(matrixData, vectorData);
+    GaussDenseSmallSerial<_type, 3, _pivot>::template GaussStep<1>(matrixData, vectorData);
+    GaussDenseSmallSerial<_type, 3, _pivot>::template GaussStep<2>(matrixData, vectorData);
 
     return Vec3Serial<_type, true>(vectorData);
 }
@@ -99,60 +99,20 @@ inline Vec3Serial<_type, true> Gauss(const Mat3Serial<_type>& matA, const Vec3Se
 
 // --------------------------------------------------------------------------------------------------------------------
 
-inline Vec3fSSE<true> GaussPartialPivot(const Mat3fSSE& A, const Vec3fSSE<true>& b)
+
+template <Pivot _pivot>
+inline Vec3fSSE<true> Gauss(const Mat3fSSE& matA, const Vec3fSSE<true>& vecRhs)
 {
     using namespace GDL::sse;
 
-    alignas(alignmentBytes<__m128>) std::array<__m128, 3> matrixData = A.DataSSE();
-    __m128 rhs = b.DataSSE();
-    const std::array<__m128* const, 4> data = {{&matrixData[0], &matrixData[1], &matrixData[2], &rhs}};
+    alignas(alignmentBytes<__m128>) std::array<__m128, 3> matrixData = matA.DataSSE();
+    __m128 vectorData = vecRhs.DataSSE();
 
+    GaussDenseSmallSSE<3, _pivot>::template GaussStep<0>(matrixData, vectorData);
+    GaussDenseSmallSSE<3, _pivot>::template GaussStep<1>(matrixData, vectorData);
+    GaussDenseSmallSSE<3, _pivot>::template GaussStep<2>(matrixData, vectorData);
 
-    // Find first pivot
-    U32 idx = 0;
-
-    alignas(alignmentBytes<__m128>) F32 colValues[4];
-    _mmx_store_p(colValues, Abs(*data[0]));
-    for (U32 i = 1; i < 3; ++i)
-        if (colValues[idx] < colValues[i])
-            idx = i;
-
-    // First pivoting step
-    switch (idx)
-    {
-    case 0:
-        break;
-    case 1:
-        for (U32 i = 0; i < 4; ++i)
-            *data[i] = Permute<1, 0, 2, 3>(*data[i]);
-        break;
-    case 2:
-        for (U32 i = 0; i < 4; ++i)
-            *data[i] = Permute<2, 1, 0, 3>(*data[i]);
-        break;
-    }
-
-
-    // First elimination
-    GaussDenseSmallSSE<3>::EliminationStep<0>(data);
-
-
-    // Second pivoting step
-    __m128 absCol = Abs(*data[1]);
-    if (_mm_comilt_ss(Broadcast<1>(absCol), Broadcast<2>(absCol)))
-        for (U32 i = 1; i < 4; ++i)
-            *data[i] = Permute<0, 2, 1, 3>(*data[i]);
-
-
-    // Second elimination
-    GaussDenseSmallSSE<3>::EliminationStep<1>(data);
-
-
-    // Final elimination
-    GaussDenseSmallSSE<3>::EliminationStep<2>(data);
-
-
-    return Vec3fSSE<true>(rhs);
+    return Vec3fSSE<true>(vectorData);
 }
 
 

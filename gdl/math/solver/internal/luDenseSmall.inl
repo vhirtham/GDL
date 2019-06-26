@@ -116,8 +116,9 @@ template <typename _type, U32 _size, Pivot _pivot>
 template <U32 _idx>
 inline void LUDenseSmallSerial<_type, _size, _pivot>::FactorizeLU(Factorization& factorization)
 {
-    if constexpr (_pivot == Pivot::PARTIAL && _idx + 1 < _size)
-        PivotDenseSmallSerial<_type, _size>::template Partial<_idx>(factorization.mLU, factorization.mPermutation);
+    if constexpr (_pivot != Pivot::NONE && _idx + 1 < _size)
+        PivotDenseSmallSerial<_type, _size>::template PivotStep<_pivot, _idx, _idx>(factorization.mLU,
+                                                                                    factorization.mPermutation);
 
     FactorizationStep<_idx>(factorization);
 
@@ -235,7 +236,7 @@ LUDenseSmallSSE<_size, _pivot>::Factorize(const std::array<__m128, _size>& matri
     FactorizeLU(factorization, permutation);
 
     if constexpr (_pivot != Pivot::NONE)
-        factorization.mPermutation = PivotDenseSmallSSE<_size>::CreatePermutationHash(permutation);
+        factorization.mPermutationHash = PivotDenseSmallSSE<_size>::CreatePermutationHash(permutation);
 
     return factorization;
 } // namespace GDL::Solver
@@ -248,7 +249,7 @@ template <U32 _size, Pivot _pivot>
 [[nodiscard]] inline __m128 LUDenseSmallSSE<_size, _pivot>::Solve(const Factorization& factorization, __m128 r)
 {
     if constexpr (_pivot != Pivot::NONE)
-        r = PivotDenseSmallSSE<_size>::PermuteVector(r, factorization.mPermutation);
+        r = PivotDenseSmallSSE<_size>::PermuteVector(r, factorization.mPermutationHash);
 
     ForwardSubstitution(factorization.mLU, r);
     BackwardSubstitution(factorization.mLU, r);
@@ -350,8 +351,8 @@ template <U32 _size, Pivot _pivot>
 template <U32 _idx>
 inline void LUDenseSmallSSE<_size, _pivot>::FactorizeLU(Factorization& factorization, __m128& permutation)
 {
-    if constexpr (_pivot == Pivot::PARTIAL && _idx + 1 < _size)
-        PivotDenseSmallSSE<_size>::template Partial<_idx>(factorization.mLU, permutation);
+    if constexpr (_pivot != Pivot::NONE && _idx + 1 < _size)
+        PivotDenseSmallSSE<_size>::template PivotStep<_pivot, _idx, _idx>(factorization.mLU, permutation);
 
     FactorizationStep<_idx>(factorization);
 

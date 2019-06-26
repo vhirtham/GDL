@@ -14,16 +14,16 @@ using namespace GDL;
 #define BENCHMARK_LU
 
 // pivoting
-//#define BENCHMARK_NOPIVOT
+#define BENCHMARK_NOPIVOT
 #define BENCHMARK_PARTIALPIVOT
 
 // factorization
 #define BENCHMARK_FACTORIZATION
 
 // vectorization
-//#define BENCHMARK_SERIAL
+#define BENCHMARK_SERIAL
 #define BENCHMARK_SSE
-//#define BENCHMARK_AVX
+#define BENCHMARK_AVX
 
 // Eigen
 //#define BENCHMARK_EIGEN
@@ -174,7 +174,7 @@ BENCHMARK_F(Serial, GaussNoPivot)(benchmark::State& state)
 BENCHMARK_F(SSE, GaussNoPivot)(benchmark::State& state)
 {
     for (auto _ : state)
-        benchmark::DoNotOptimize(Solver::GaussNoPivot(A, b));
+        benchmark::DoNotOptimize(Solver::Gauss<Solver::Pivot::NONE>(A, b));
 }
 
 #endif // BENCHMARK_SSE
@@ -186,7 +186,7 @@ BENCHMARK_F(SSE, GaussNoPivot)(benchmark::State& state)
 BENCHMARK_F(AVX, GaussNoPivot)(benchmark::State& state)
 {
     for (auto _ : state)
-        benchmark::DoNotOptimize(Solver::GaussNoPivot(A, b));
+        benchmark::DoNotOptimize(Solver::Gauss<Solver::Pivot::NONE>(A, b));
 }
 
 #endif // BENCHMARK_AVX
@@ -215,7 +215,7 @@ BENCHMARK_F(Serial, GaussPartialPivot)(benchmark::State& state)
 BENCHMARK_F(SSE, GaussPartialPivot)(benchmark::State& state)
 {
     for (auto _ : state)
-        benchmark::DoNotOptimize(Solver::GaussPartialPivot(A, b));
+        benchmark::DoNotOptimize(Solver::Gauss<Solver::Pivot::PARTIAL>(A, b));
 }
 
 #endif // BENCHMARK_SSE
@@ -224,11 +224,13 @@ BENCHMARK_F(SSE, GaussPartialPivot)(benchmark::State& state)
 
 #ifdef __AVX2__
 #ifdef BENCHMARK_AVX
+
 BENCHMARK_F(AVX, GaussPartialPivot)(benchmark::State& state)
 {
     for (auto _ : state)
-        benchmark::DoNotOptimize(Solver::GaussPartialPivot(A, b));
+        benchmark::DoNotOptimize(Solver::Gauss<Solver::Pivot::PARTIAL>(A, b));
 }
+
 #endif // BENCHMARK_AVX
 #endif // __AVX2__
 #endif // BENCHMARK_PARTIALPIVOT

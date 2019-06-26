@@ -72,6 +72,22 @@ PivotDenseSmallSerial<_type, _size>::PermuteVector(const std::array<_type, _size
 
 
 // --------------------------------------------------------------------------------------------------------------------
+template <typename _type, U32 _size>
+template <Pivot _pivot, U32 _idx, U32 _idxColStart>
+inline void PivotDenseSmallSerial<_type, _size>::PivotStep(std::array<_type, _size * _size>& matrixData,
+                                                           std::array<_type, _size>& vectorData)
+{
+    static_assert(_pivot != Pivot::NONE, "Unneccessary function call");
+
+    static_assert(_pivot == Pivot::PARTIAL, "Unsupported pivoting strategy");
+
+    if constexpr (_pivot == Pivot::PARTIAL)
+        Partial<_idx, _idxColStart>(matrixData, vectorData);
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
 
 template <U32 _size>
 inline U32 PivotDenseSmallSSE<_size>::CreatePermutationHash(__m128 permutation)
@@ -222,6 +238,22 @@ inline __m128 PivotDenseSmallSSE<_size>::PermuteVector(const __m128& vec, U32 pe
         THROW("Invalid permutation hash");
         // LCOV_EXCL_STOP
     }
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+template <U32 _size>
+template <Pivot _pivot, U32 _idx, U32 _idxColStart>
+inline void PivotDenseSmallSSE<_size>::PivotStep(std::array<__m128, _size>& matrixData, __m128& vectorData)
+{
+    static_assert(_pivot != Pivot::NONE, "Unneccessary function call");
+
+    static_assert(_pivot == Pivot::PARTIAL, "Unsupported pivoting strategy");
+
+    if constexpr (_pivot == Pivot::PARTIAL)
+        Partial<_idx, _idxColStart>(matrixData, vectorData);
 }
 
 

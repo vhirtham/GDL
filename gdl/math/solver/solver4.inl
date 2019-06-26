@@ -25,7 +25,8 @@ namespace GDL::Solver
 // --------------------------------------------------------------------------------------------------------------------
 
 template <typename _type>
-inline Vec4Serial<_type, true> Cramer(const Mat4Serial<_type>& matA, const Vec4Serial<_type, true>& vecRhs)
+[[nodiscard]] inline Vec4Serial<_type, true> Cramer(const Mat4Serial<_type>& matA,
+                                                    const Vec4Serial<_type, true>& vecRhs)
 {
     const std::array<_type, 16>& A = matA.Data();
 
@@ -107,7 +108,7 @@ inline Vec4Serial<_type, true> Cramer(const Mat4Serial<_type>& matA, const Vec4S
 
 // --------------------------------------------------------------------------------------------------------------------
 
-inline Vec4fSSE<true> Cramer(const Mat4fSSE& matA, const Vec4fSSE<true>& vecRhs)
+[[nodiscard]] inline Vec4fSSE<true> Cramer(const Mat4fSSE& matA, const Vec4fSSE<true>& vecRhs)
 {
     using namespace GDL::sse;
 
@@ -216,7 +217,7 @@ inline Vec4fSSE<true> Cramer(const Mat4fSSE& matA, const Vec4fSSE<true>& vecRhs)
 
 #ifdef __AVX2__
 
-inline Vec4fSSE<true> Cramer(const Mat4fAVX& matA, const Vec4fSSE<true>& vecRhs)
+[[nodiscard]] inline Vec4fSSE<true> Cramer(const Mat4fAVX& matA, const Vec4fSSE<true>& vecRhs)
 {
     using namespace GDL::sse;
 
@@ -306,54 +307,8 @@ inline Vec4fSSE<true> Cramer(const Mat4fAVX& matA, const Vec4fSSE<true>& vecRhs)
 
 // --------------------------------------------------------------------------------------------------------------------
 
-inline Vec4fSSE<true> GaussNoPivot(const Mat4fSSE& matA, const Vec4fSSE<true>& vecRhs)
-{
-    using namespace GDL::sse;
-
-    alignas(alignmentBytes<__m128>) std::array<__m128, 4> matrixData = matA.DataSSE();
-    __m128 rhs = vecRhs.DataSSE();
-    const std::array<__m128* const, 5> data = {{&matrixData[0], &matrixData[1], &matrixData[2], &matrixData[3], &rhs}};
-
-
-    // First elimination
-    GaussDenseSmallSSE<4>::EliminationStep<0>(data);
-
-    // Second elimination
-    GaussDenseSmallSSE<4>::EliminationStep<1>(data);
-
-    // Third elimination
-    GaussDenseSmallSSE<4>::EliminationStep<2>(data);
-
-    // Final elimination
-    GaussDenseSmallSSE<4>::EliminationStep<3>(data);
-
-    return Vec4fSSE<true>(rhs);
-}
-
-
-
-// --------------------------------------------------------------------------------------------------------------------
-
-#ifdef __AVX2__
-
-[[nodiscard]] inline Vec4fSSE<true> GaussNoPivot(const Mat4fAVX& A, const Vec4fSSE<true>& b)
-{
-    // INFO: There is no specialized AVX version of this function. During the elimination step, the row multipliers must
-    // be transferred across lane boundaries which results in a performance penalty when compared to the SSE version.
-    // Therefore, the AVX matrix uses the same function as the SSE matrix.
-
-    static_assert(sizeof(Mat4fAVX) == sizeof(Mat4fSSE), "Internal error - Matrix types have different sizes");
-    return GaussNoPivot(*reinterpret_cast<const Mat4fSSE*>(&A), b);
-}
-
-#endif // __AVX2__
-
-
-
-// --------------------------------------------------------------------------------------------------------------------
-
 template <Pivot _pivot, typename _type>
-inline Vec4Serial<_type, true> Gauss(const Mat4Serial<_type>& matA, const Vec4Serial<_type, true>& vecRhs)
+[[nodiscard]] inline Vec4Serial<_type, true> Gauss(const Mat4Serial<_type>& matA, const Vec4Serial<_type, true>& vecRhs)
 {
     std::array<_type, 16> matrixData = matA.Data();
     std::array<_type, 4> vectorData = vecRhs.Data();
@@ -361,10 +316,10 @@ inline Vec4Serial<_type, true> Gauss(const Mat4Serial<_type>& matA, const Vec4Se
     // INFO: Tried using template recursion here, but it seems to prevent clang from doing some optimizations ---> runs
     // slower
 
-    GaussDenseSmallSerial<_type, 4>::template GaussStep<0, _pivot>(matrixData, vectorData);
-    GaussDenseSmallSerial<_type, 4>::template GaussStep<1, _pivot>(matrixData, vectorData);
-    GaussDenseSmallSerial<_type, 4>::template GaussStep<2, _pivot>(matrixData, vectorData);
-    GaussDenseSmallSerial<_type, 4>::template GaussStep<3, _pivot>(matrixData, vectorData);
+    GaussDenseSmallSerial<_type, 4, _pivot>::template GaussStep<0>(matrixData, vectorData);
+    GaussDenseSmallSerial<_type, 4, _pivot>::template GaussStep<1>(matrixData, vectorData);
+    GaussDenseSmallSerial<_type, 4, _pivot>::template GaussStep<2>(matrixData, vectorData);
+    GaussDenseSmallSerial<_type, 4, _pivot>::template GaussStep<3>(matrixData, vectorData);
 
     return Vec4Serial<_type, true>(vectorData);
 }
@@ -373,94 +328,20 @@ inline Vec4Serial<_type, true> Gauss(const Mat4Serial<_type>& matA, const Vec4Se
 
 // --------------------------------------------------------------------------------------------------------------------
 
-inline Vec4fSSE<true> GaussPartialPivot(const Mat4fSSE& matA, const Vec4fSSE<true>& vecRhs)
+template <Pivot _pivot>
+[[nodiscard]] inline Vec4fSSE<true> Gauss(const Mat4fSSE& matA, const Vec4fSSE<true>& vecRhs)
 {
     using namespace GDL::sse;
 
     alignas(alignmentBytes<__m128>) std::array<__m128, 4> matrixData = matA.DataSSE();
-    __m128 rhs = vecRhs.DataSSE();
-    const std::array<__m128* const, 5> data = {{&matrixData[0], &matrixData[1], &matrixData[2], &matrixData[3], &rhs}};
+    __m128 vectorData = vecRhs.DataSSE();
 
+    GaussDenseSmallSSE<4, _pivot>::template GaussStep<0>(matrixData, vectorData);
+    GaussDenseSmallSSE<4, _pivot>::template GaussStep<1>(matrixData, vectorData);
+    GaussDenseSmallSSE<4, _pivot>::template GaussStep<2>(matrixData, vectorData);
+    GaussDenseSmallSSE<4, _pivot>::template GaussStep<3>(matrixData, vectorData);
 
-    // Find first pivot
-    U32 idx = 0;
-    alignas(alignmentBytes<__m128>) F32 colValues[4];
-
-    _mmx_store_p(colValues, Abs(*data[0]));
-    for (U32 i = 1; i < 4; ++i)
-        if (colValues[idx] < colValues[i])
-            idx = i;
-
-
-    // First pivoting step
-    switch (idx)
-    {
-    case 0:
-        break;
-    case 1:
-        for (U32 i = 0; i < 5; ++i)
-            *data[i] = Permute<1, 0, 2, 3>(*data[i]);
-        break;
-    case 2:
-        for (U32 i = 0; i < 5; ++i)
-            *data[i] = Permute<2, 1, 0, 3>(*data[i]);
-        break;
-    case 3:
-        for (U32 i = 0; i < 5; ++i)
-            *data[i] = Permute<3, 1, 2, 0>(*data[i]);
-        break;
-    }
-
-
-    // First elimination
-    GaussDenseSmallSSE<4>::EliminationStep<0>(data);
-
-
-
-    // Find second pivot
-    idx = 1;
-
-    _mmx_store_p(colValues, Abs(*data[1]));
-    for (U32 i = 2; i < 4; ++i)
-        if (colValues[idx] < colValues[i])
-            idx = i;
-
-    // Second pivoting step
-    switch (idx)
-    {
-    case 1:
-        break;
-    case 2:
-        for (U32 i = 1; i < 5; ++i)
-            *data[i] = Permute<0, 2, 1, 3>(*data[i]);
-        break;
-    case 3:
-        for (U32 i = 1; i < 5; ++i)
-            *data[i] = Permute<0, 3, 2, 1>(*data[i]);
-        break;
-    }
-
-
-    // Second elimination
-    GaussDenseSmallSSE<4>::EliminationStep<1>(data);
-
-
-
-    // Third pivoting step
-    __m128 absCol = Abs(*data[2]);
-    if (_mm_comilt_ss(Broadcast<2>(absCol), Broadcast<3>(absCol)))
-        for (U32 i = 2; i < 5; ++i)
-            *data[i] = Permute<0, 1, 3, 2>(*data[i]);
-
-
-    // Third elimination
-    GaussDenseSmallSSE<4>::EliminationStep<2>(data);
-
-
-    // Final elimination
-    GaussDenseSmallSSE<4>::EliminationStep<3>(data);
-
-    return Vec4fSSE<true>(rhs);
+    return Vec4fSSE<true>(vectorData);
 }
 
 
@@ -469,14 +350,15 @@ inline Vec4fSSE<true> GaussPartialPivot(const Mat4fSSE& matA, const Vec4fSSE<tru
 
 #ifdef __AVX2__
 
-[[nodiscard]] inline Vec4fSSE<true> GaussPartialPivot(const Mat4fAVX& matA, const Vec4fSSE<true>& vecRhs)
+template <Pivot _pivot>
+[[nodiscard]] inline Vec4fSSE<true> Gauss(const Mat4fAVX& matA, const Vec4fSSE<true>& vecRhs)
 {
     // INFO: There is no specialized AVX version of this function. During the elimination step, the row multipliers must
     // be transferred across lane boundaries which results in a performance penalty when compared to the SSE version.
     // Therefore, the AVX matrix uses the same function as the SSE matrix.
 
     static_assert(sizeof(Mat4fAVX) == sizeof(Mat4fSSE), "Internal error - Matrix types have different sizes");
-    return GaussPartialPivot(*reinterpret_cast<const Mat4fSSE*>(&matA), vecRhs);
+    return Gauss<_pivot>(*reinterpret_cast<const Mat4fSSE*>(&matA), vecRhs);
 }
 
 #endif // __AVX2__

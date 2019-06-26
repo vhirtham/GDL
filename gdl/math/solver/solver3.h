@@ -41,6 +41,7 @@ template <typename _type>
 [[nodiscard]] inline Vec3fSSE<true> Cramer(const Mat3fSSE& matA, const Vec3fSSE<true>& vecRhs);
 
 //! @brief Solves the linear system A * x = r by using Gaussian elimination with partial pivoting.
+//! @tparam _pivot: Enum to select pivoting strategy
 //! @tparam: Data type
 //! @param matA: Matrix
 //! @param vecRhs: Right-hand side vector
@@ -49,11 +50,14 @@ template <Pivot _pivot = Pivot::PARTIAL, typename _type>
 [[nodiscard]] inline Vec3Serial<_type, true> Gauss(const Mat3Serial<_type>& matA,
                                                    const Vec3Serial<_type, true>& vecRhs);
 
-//! @brief Solves the linear system A * x = b by using Gaussian elimination with partial pivoting.
-//! @param A: Matrix
-//! @param b: Vector
+//! @brief Solves the linear system A * x = r by using Gaussian elimination with partial pivoting.
+//! @tparam _pivot: Enum to select pivoting strategy
+//! @tparam: Data type
+//! @param matA: Matrix
+//! @param vecRhs: Right-hand side vector
 //! @return Result vector x
-[[nodiscard]] inline Vec3fSSE<true> GaussPartialPivot(const Mat3fSSE& A, const Vec3fSSE<true>& b);
+template <Pivot _pivot = Pivot::PARTIAL>
+[[nodiscard]] inline Vec3fSSE<true> Gauss(const Mat3fSSE& matA, const Vec3fSSE<true>& vecRhs);
 
 //! @brief Solves the linear system A * x = r by using LU decomposition.
 //! @tparam _pivot: Enum to select pivoting strategy

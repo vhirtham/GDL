@@ -165,6 +165,14 @@ BOOST_AUTO_TEST_CASE(TestGaussNoPivotSerial)
 }
 
 
+// --------------------------------------------------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(TestGaussNoPivotSSE)
+{
+    SSESolverPtr solver = Solver::Gauss<Solver::Pivot::NONE>;
+    TestSolver(solver, false);
+}
+
 
 // --------------------------------------------------------------------------------------------------------------------
 
@@ -180,7 +188,7 @@ BOOST_AUTO_TEST_CASE(TestGaussPartialPivotSerial)
 
 BOOST_AUTO_TEST_CASE(TestGaussPartialPivotSSE)
 {
-    SSESolverPtr solver = Solver::GaussPartialPivot;
+    SSESolverPtr solver = Solver::Gauss<Solver::Pivot::PARTIAL>;
     TestSolver(solver);
 }
 

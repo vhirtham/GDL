@@ -60,25 +60,8 @@ template <typename _type>
 
 #endif // __AVX2__
 
-
-//! @brief Solves the linear system A * x = b by using Gaussian elimination without pivoting.
-//! @param matA: Matrix
-//! @param vecRhs: Right-hand side vector
-//! @return Result vector x
-[[nodiscard]] inline Vec4fSSE<true> GaussNoPivot(const Mat4fSSE& matA, const Vec4fSSE<true>& vecRhs);
-
-#ifdef __AVX2__
-
-//! @brief Solves the linear system A * x = b by using Cramers rule.
-//! @param matA: Matrix
-//! @param vecRhs: Right-hand side vector
-//! @return Result vector x
-[[nodiscard]] inline Vec4fSSE<true> GaussNoPivot(const Mat4fAVX& matA, const Vec4fSSE<true>& vecRhs);
-
-#endif // __AVX2__
-
-
 //! @brief Solves the linear system A * x = r by using Gaussian elimination with partial pivoting.
+//! @tparam _pivot: Enum to select pivoting strategy
 //! @tparam _type: Data type
 //! @param matA: Matrix
 //! @param vecRhs: Right-hand side vector
@@ -87,17 +70,26 @@ template <Pivot _pivot = Pivot::PARTIAL, typename _type>
 [[nodiscard]] inline Vec4Serial<_type, true> Gauss(const Mat4Serial<_type>& matA,
                                                    const Vec4Serial<_type, true>& vecRhs);
 
-//! @brief Solves the linear system A * x = b by using Gaussian elimination with partial pivoting.
+//! @brief Solves the linear system A * x = r by using Gaussian elimination with partial pivoting.
+//! @tparam _pivot: Enum to select pivoting strategy
 //! @param matA: Matrix
 //! @param vecRhs: Right-hand side vector
 //! @return Result vector x
-[[nodiscard]] inline Vec4fSSE<true> GaussPartialPivot(const Mat4fSSE& matA, const Vec4fSSE<true>& vecRhs);
+template <Pivot _pivot = Pivot::PARTIAL>
+[[nodiscard]] inline Vec4fSSE<true> Gauss(const Mat4fSSE& matA, const Vec4fSSE<true>& vecRhs);
 
-//! @brief Solves the linear system A * x = b by using Gaussian elimination with partial pivoting.
+#ifdef __AVX2__
+
+//! @brief Solves the linear system A * x = r by using Gaussian elimination with partial pivoting.
+//! @tparam _pivot: Enum to select pivoting strategy
 //! @param matA: Matrix
 //! @param vecRhs: Right-hand side vector
 //! @return Result vector x
-[[nodiscard]] inline Vec4fSSE<true> GaussPartialPivot(const Mat4fAVX& matA, const Vec4fSSE<true>& vecRhs);
+template <Pivot _pivot = Pivot::PARTIAL>
+[[nodiscard]] inline Vec4fSSE<true> Gauss(const Mat4fAVX& matA, const Vec4fSSE<true>& vecRhs);
+
+
+#endif // __AVX2__
 
 //! @brief Solves the linear system A * x = r by using LU decomposition.
 //! @tparam _pivot: Enum to select pivoting strategy
