@@ -101,16 +101,16 @@ void TestApproxSSE()
             ElementType valueBase = Pow(static_cast<ElementType>(10.), static_cast<I32>(i - 10));
             ElementType epsilonBase = std::numeric_limits<ElementType>::epsilon(); // Epsilon of the current value
 
-            _registerType values = _mmx_setzero_p<_registerType>();
+            _registerType values = _mm_setzero<_registerType>();
             _registerType cmp = values;
 
 
             for (U32 k = 0; k < numRegisterEntries; ++k)
                 simd::SetValue(values, k, valueBase * static_cast<ElementType>(k));
 
-            _registerType negValues = _mmx_mul_p(values, _mmx_set1_p<_registerType>(-1));
+            _registerType negValues = _mm_mul(values, _mm_set1<_registerType>(-1));
 
-            _registerType scaledEps = _mmx_mul_p(values, _mmx_set1_p<_registerType>(epsilonBase));
+            _registerType scaledEps = _mm_mul(values, _mm_set1<_registerType>(epsilonBase));
 
 
 
@@ -120,13 +120,13 @@ void TestApproxSSE()
             Approx<_registerType> approx = Approx<_registerType>(values, factor, valueBase);
 
             // All comparisons true or false
-            cmp = _mmx_add_p(values, _mmx_mul_p(scaledEps, _mmx_set1_p<_registerType>(factor - 1)));
+            cmp = _mm_add(values, _mm_mul(scaledEps, _mm_set1<_registerType>(factor - 1)));
             BOOST_CHECK(cmp == approx);
             BOOST_CHECK(approx == cmp);
             BOOST_CHECK(!(cmp != approx));
             BOOST_CHECK(!(approx != cmp));
 
-            cmp = _mmx_add_p(values, _mmx_mul_p(scaledEps, _mmx_set1_p<_registerType>(factor + 1)));
+            cmp = _mm_add(values, _mm_mul(scaledEps, _mm_set1<_registerType>(factor + 1)));
             BOOST_CHECK(cmp != approx);
             BOOST_CHECK(approx != cmp);
             BOOST_CHECK(!(cmp == approx));
@@ -134,11 +134,11 @@ void TestApproxSSE()
 
 
             approx = Approx<_registerType>(negValues, factor, valueBase);
-            cmp = _mmx_add_p(negValues, _mmx_mul_p(scaledEps, _mmx_set1_p<_registerType>(factor - 1)));
+            cmp = _mm_add(negValues, _mm_mul(scaledEps, _mm_set1<_registerType>(factor - 1)));
             BOOST_CHECK(cmp == approx);
             BOOST_CHECK(approx == cmp);
 
-            cmp = _mmx_add_p(negValues, _mmx_mul_p(scaledEps, _mmx_set1_p<_registerType>(factor + 1)));
+            cmp = _mm_add(negValues, _mm_mul(scaledEps, _mm_set1<_registerType>(factor + 1)));
             BOOST_CHECK(cmp != approx);
             BOOST_CHECK(approx != cmp);
 
@@ -206,7 +206,7 @@ void TestApproxSSE()
         }
     }
 
-    _registerType allEntriesOne = _mmx_set1_p<_registerType>(1.);
+    _registerType allEntriesOne = _mm_set1<_registerType>(1.);
     GDL_CHECK_THROW_DEV(Approx<_registerType>(allEntriesOne, 0), Exception);
     GDL_CHECK_THROW_DEV(Approx<_registerType>(allEntriesOne, -1), Exception);
 }
@@ -238,28 +238,28 @@ void TestApproxZeroSSE()
         {
             ElementType base = Pow(static_cast<ElementType>(10.), static_cast<I32>(i - 10));
 
-            _registerType scaledEps = _mmx_set1_p<_registerType>(std::numeric_limits<ElementType>::epsilon() *
+            _registerType scaledEps = _mm_set1<_registerType>(std::numeric_limits<ElementType>::epsilon() *
                                                                  base); // Epsilon of the current value
 
             I32 factor = static_cast<I32>(j); // Scales the tolerance (1 = epsilon of value)
 
-            _registerType zeroReg = _mmx_setzero_p<_registerType>();
-            _registerType cmp = _mmx_mul_p(scaledEps, _mmx_set1_p<_registerType>(factor - 1));
+            _registerType zeroReg = _mm_setzero<_registerType>();
+            _registerType cmp = _mm_mul(scaledEps, _mm_set1<_registerType>(factor - 1));
 
             // Compare values that are one epsilon above and below the adjusted tolerance
             BOOST_CHECK(cmp == Approx<_registerType>(zeroReg, factor, base));
             BOOST_CHECK(cmp == ApproxZero<_registerType>(base, factor));
             BOOST_CHECK(cmp == ApproxZero<_registerType>(-base, factor));
 
-            cmp = _mmx_mul_p(scaledEps, _mmx_set1_p<_registerType>(factor + 1));
+            cmp = _mm_mul(scaledEps, _mm_set1<_registerType>(factor + 1));
             BOOST_CHECK(cmp != Approx<_registerType>(zeroReg, factor, base));
             BOOST_CHECK(cmp != ApproxZero<_registerType>(base, factor));
             BOOST_CHECK(cmp != ApproxZero<_registerType>(-base, factor));
 
 
-            BOOST_CHECK(zeroReg == Approx<_registerType>(_mmx_mul_p(scaledEps, _mmx_set1_p<_registerType>(factor - 1)),
+            BOOST_CHECK(zeroReg == Approx<_registerType>(_mm_mul(scaledEps, _mm_set1<_registerType>(factor - 1)),
                                                          factor, base));
-            BOOST_CHECK(zeroReg != Approx<_registerType>(_mmx_mul_p(scaledEps, _mmx_set1_p<_registerType>(factor + 1)),
+            BOOST_CHECK(zeroReg != Approx<_registerType>(_mm_mul(scaledEps, _mm_set1<_registerType>(factor + 1)),
                                                          factor, base));
 
 

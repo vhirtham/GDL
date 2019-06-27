@@ -14,7 +14,7 @@ namespace GDL::simd
 template <U32 _src0, U32 _src1>
 inline __m128d Blend(__m128d source0, __m128d source1)
 {
-    return _mmx_blend_p<BlendMask<_src0, _src1>()>(source0, source1);
+    return _mm_blend<BlendMask<_src0, _src1>()>(source0, source1);
 }
 
 
@@ -27,7 +27,7 @@ inline _registerType Blend(_registerType source0, _registerType source1)
     static_assert(Is__m128<_registerType> || Is__m256d<_registerType>,
                   "Function overload only compatble with __m128 and __m256d registers.");
 
-    return _mmx_blend_p<BlendMask<_src0, _src1, _src2, _src3>()>(source0, source1);
+    return _mm_blend<BlendMask<_src0, _src1, _src2, _src3>()>(source0, source1);
 }
 
 
@@ -39,7 +39,7 @@ inline _registerType Blend(_registerType source0, _registerType source1)
 template <U32 _src0, U32 _src1, U32 _src2, U32 _src3, U32 _src4, U32 _src5, U32 _src6, U32 _src7>
 inline __m256 Blend(__m256 source0, __m256 source1)
 {
-    return _mmx_blend_p<BlendMask<_src0, _src1, _src2, _src3, _src4, _src5, _src6, _src7>()>(source0, source1);
+    return _mm_blend<BlendMask<_src0, _src1, _src2, _src3, _src4, _src5, _src6, _src7>()>(source0, source1);
 }
 
 #endif // __AVX2__
@@ -494,7 +494,7 @@ inline void Exchange(__m256d& reg0, __m256d& reg1)
 template <U32 _src0, U32 _src1>
 inline __m128d Permute(__m128d source)
 {
-    return _mmx_permute_p<PermuteMask<_src0, _src1>()>(source);
+    return _mm_permute<PermuteMask<_src0, _src1>()>(source);
 }
 
 
@@ -504,7 +504,7 @@ inline __m128d Permute(__m128d source)
 template <U32 _src0, U32 _src1, U32 _src2, U32 _src3>
 inline __m128 Permute(__m128 source)
 {
-    return _mmx_permute_p<PermuteMask<_src0, _src1, _src2, _src3>()>(source);
+    return _mm_permute<PermuteMask<_src0, _src1, _src2, _src3>()>(source);
 }
 
 
@@ -516,7 +516,7 @@ inline __m128 Permute(__m128 source)
 template <U32 _src0, U32 _src1, U32 _src2, U32 _src3>
 inline __m256 Permute(__m256 source)
 {
-    return _mmx_permute_p<PermuteMask<_src0, _src1, _src2, _src3>()>(source);
+    return _mm_permute<PermuteMask<_src0, _src1, _src2, _src3>()>(source);
 }
 
 
@@ -526,7 +526,7 @@ inline __m256 Permute(__m256 source)
 template <U32 _src0, U32 _src1, U32 _src2, U32 _src3>
 inline __m256d Permute(__m256d source)
 {
-    return _mmx_permute_p<Permute256dMask<_src0, _src1, _src2, _src3>()>(source);
+    return _mm_permute<Permute256dMask<_src0, _src1, _src2, _src3>()>(source);
 }
 
 
@@ -604,7 +604,7 @@ inline _registerType Permute2F128(_registerType source0, _registerType source1)
     static_assert(Is__m256<_registerType> || Is__m256d<_registerType>,
                   "Function only compatible with __m256 and __m256d registers.");
 
-    return _mmx_permute2f128_p<Permute2F128Mask<_lane0SrcReg, _lane0SrcLane, _lane1SrcReg, _lane1SrcLane>()>(source0,
+    return _mm_permute2f128<Permute2F128Mask<_lane0SrcReg, _lane0SrcLane, _lane1SrcReg, _lane1SrcLane>()>(source0,
                                                                                                              source1);
 }
 
@@ -634,10 +634,10 @@ inline _registerType Shuffle(_registerType source0, _registerType source1)
                   "Function only compatible with __m128d and __m256d registers.");
 
     if constexpr (Is__m128d<_registerType>)
-        return _mmx_shuffle_p<ShuffleMask<_src0, _src1>()>(source0, source1);
+        return _mm_shuffle<ShuffleMask<_src0, _src1>()>(source0, source1);
 #ifdef __AVX2__
     else
-        return _mmx_shuffle_p<ShuffleMask256d<_src0, _src1, _src0, _src1>()>(source0, source1);
+        return _mm_shuffle<ShuffleMask256d<_src0, _src1, _src0, _src1>()>(source0, source1);
 #endif // __AVX2__
 }
 
@@ -648,7 +648,7 @@ inline _registerType Shuffle(_registerType source0, _registerType source1)
 template <U32 _src0, U32 _src1, U32 _src2, U32 _src3>
 inline __m256d Shuffle(__m256d source0, __m256d source1)
 {
-    return _mmx_shuffle_p<ShuffleMask256d<_src0, _src1, _src2, _src3>()>(source0, source1);
+    return _mm_shuffle<ShuffleMask256d<_src0, _src1, _src2, _src3>()>(source0, source1);
 }
 
 
@@ -661,7 +661,7 @@ inline _registerType Shuffle(_registerType source0, _registerType source1)
     static_assert(Is__m128<_registerType> || Is__m256<_registerType>,
                   "Function only compatible with __m128 and __m256 float registers.");
 
-    return _mmx_shuffle_p<ShuffleMask<_src0, _src1, _src2, _src3>()>(source0, source1);
+    return _mm_shuffle<ShuffleMask<_src0, _src1, _src2, _src3>()>(source0, source1);
 }
 
 

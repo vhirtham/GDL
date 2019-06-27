@@ -21,7 +21,7 @@ void TestCompareAllEqual()
     };
 
 
-    alignas(simd::alignmentBytes<_registerType>) _registerType lhs = _mmx_setzero_p<_registerType>();
+    alignas(simd::alignmentBytes<_registerType>) _registerType lhs = _mm_setzero<_registerType>();
     for (U32 i = 0; i < numRegisterEntries; ++i)
         simd::SetValue(lhs, i, static_cast<DataType>(i + 1));
     alignas(simd::alignmentBytes<_registerType>) _registerType rhs;
@@ -31,7 +31,7 @@ void TestCompareAllEqual()
     BOOST_CHECK(compEQ(lhs, lhs));
 
     // all values return false
-    BOOST_CHECK(!compEQ(lhs, _mmx_setzero_p<_registerType>()));
+    BOOST_CHECK(!compEQ(lhs, _mm_setzero<_registerType>()));
 
 
     // Maximal 1 used value returns false
@@ -127,7 +127,7 @@ void TestCompareAllLessEqual()
     };
 
 
-    alignas(simd::alignmentBytes<_registerType>) _registerType lhs = _mmx_setzero_p<_registerType>();
+    alignas(simd::alignmentBytes<_registerType>) _registerType lhs = _mm_setzero<_registerType>();
     for (U32 i = 0; i < numRegisterEntries; ++i)
         simd::SetValue(lhs, i, static_cast<DataType>(i + 1));
     alignas(simd::alignmentBytes<_registerType>) _registerType rhs;
@@ -137,7 +137,7 @@ void TestCompareAllLessEqual()
     BOOST_CHECK(compLE(lhs, lhs));
 
     // all values return false
-    BOOST_CHECK(!compLE(lhs, _mmx_setzero_p<_registerType>()));
+    BOOST_CHECK(!compLE(lhs, _mm_setzero<_registerType>()));
 
 
     // Maximal 1 used value returns false
@@ -233,7 +233,7 @@ void TestCompareAllGreaterThan()
     };
 
 
-    alignas(simd::alignmentBytes<_registerType>) _registerType lhs = _mmx_setzero_p<_registerType>();
+    alignas(simd::alignmentBytes<_registerType>) _registerType lhs = _mm_setzero<_registerType>();
     for (U32 i = 0; i < numRegisterEntries; ++i)
         simd::SetValue(lhs, i, static_cast<DataType>(i + 1));
     alignas(simd::alignmentBytes<_registerType>) _registerType rhs;
@@ -243,7 +243,7 @@ void TestCompareAllGreaterThan()
     BOOST_CHECK(!compGT(lhs, lhs));
 
     // all values return false
-    BOOST_CHECK(compGT(lhs, _mmx_set1_p<_registerType>(-100)));
+    BOOST_CHECK(compGT(lhs, _mm_set1<_registerType>(-100)));
 
 
     // Maximal 1 used value returns false
@@ -252,7 +252,7 @@ void TestCompareAllGreaterThan()
         for (U32 j = _count; j < numRegisterEntries; ++j)
         {
             // all unused values return true
-            rhs = _mmx_sub_p(lhs, _mmx_set1_p<_registerType>(1));
+            rhs = _mm_sub(lhs, _mm_set1<_registerType>(1));
             BOOST_CHECK(compGT(lhs, rhs));
             simd::SetValue(rhs, i, simd::GetValue(lhs, i) + 1);
             BOOST_CHECK(!compGT(lhs, rhs));
@@ -260,7 +260,7 @@ void TestCompareAllGreaterThan()
             BOOST_CHECK(!compGT(lhs, rhs));
 
             // one unused value returns false
-            rhs = _mmx_sub_p(lhs, _mmx_set1_p<_registerType>(1));
+            rhs = _mm_sub(lhs, _mm_set1<_registerType>(1));
             simd::SetValue(rhs, j, simd::GetValue(lhs, i) + 10);
             BOOST_CHECK(compGT(lhs, rhs));
             simd::SetValue(rhs, i, simd::GetValue(lhs, i) + 1);
@@ -270,7 +270,7 @@ void TestCompareAllGreaterThan()
         }
 
         // Up to all unused values return false
-        rhs = _mmx_sub_p(lhs, _mmx_set1_p<_registerType>(1));
+        rhs = _mm_sub(lhs, _mm_set1<_registerType>(1));
         for (U32 j = _count; j < numRegisterEntries; ++j)
         {
             simd::SetValue(rhs, j, simd::GetValue(lhs, i) + 10);
@@ -287,7 +287,7 @@ void TestCompareAllGreaterThan()
     // maximal all used values return false
     for (U32 j = _count; j < numRegisterEntries; ++j)
     {
-        rhs = _mmx_sub_p(lhs, _mmx_set1_p<_registerType>(1));
+        rhs = _mm_sub(lhs, _mm_set1<_registerType>(1));
         for (U32 i = 0; i < _count; ++i)
         {
             // all unused values return true
@@ -333,7 +333,7 @@ void TestCompareAllLessThan()
     };
 
 
-    alignas(simd::alignmentBytes<_registerType>) _registerType lhs = _mmx_setzero_p<_registerType>();
+    alignas(simd::alignmentBytes<_registerType>) _registerType lhs = _mm_setzero<_registerType>();
     for (U32 i = 0; i < numRegisterEntries; ++i)
         simd::SetValue(lhs, i, static_cast<DataType>(i + 1));
     alignas(simd::alignmentBytes<_registerType>) _registerType rhs;
@@ -343,7 +343,7 @@ void TestCompareAllLessThan()
     BOOST_CHECK(!compLT(lhs, lhs));
 
     // all values return true
-    BOOST_CHECK(compLT(lhs, _mmx_set1_p<_registerType>(100)));
+    BOOST_CHECK(compLT(lhs, _mm_set1<_registerType>(100)));
 
 
     // Maximal 1 used value returns false
@@ -352,7 +352,7 @@ void TestCompareAllLessThan()
         for (U32 j = _count; j < numRegisterEntries; ++j)
         {
             // all unused values return true
-            rhs = _mmx_add_p(lhs, _mmx_set1_p<_registerType>(1));
+            rhs = _mm_add(lhs, _mm_set1<_registerType>(1));
             BOOST_CHECK(compLT(lhs, rhs));
             simd::SetValue(rhs, i, simd::GetValue(lhs, i) - 1);
             BOOST_CHECK(!compLT(lhs, rhs));
@@ -360,7 +360,7 @@ void TestCompareAllLessThan()
             BOOST_CHECK(!compLT(lhs, rhs));
 
             // one unused value returns false
-            rhs = _mmx_add_p(lhs, _mmx_set1_p<_registerType>(1));
+            rhs = _mm_add(lhs, _mm_set1<_registerType>(1));
             simd::SetValue(rhs, j, simd::GetValue(lhs, i) - 10);
             BOOST_CHECK(compLT(lhs, rhs));
             simd::SetValue(rhs, i, simd::GetValue(lhs, i) - 1);
@@ -370,7 +370,7 @@ void TestCompareAllLessThan()
         }
 
         // Up to all unused values return false
-        rhs = _mmx_add_p(lhs, _mmx_set1_p<_registerType>(1));
+        rhs = _mm_add(lhs, _mm_set1<_registerType>(1));
         for (U32 j = _count; j < numRegisterEntries; ++j)
         {
             simd::SetValue(rhs, j, simd::GetValue(lhs, i) - 10);
@@ -387,7 +387,7 @@ void TestCompareAllLessThan()
     // maximal all used values return false
     for (U32 j = _count; j < numRegisterEntries; ++j)
     {
-        rhs = _mmx_add_p(lhs, _mmx_set1_p<_registerType>(1));
+        rhs = _mm_add(lhs, _mm_set1<_registerType>(1));
         for (U32 i = 0; i < _count; ++i)
         {
             // all unused values return true

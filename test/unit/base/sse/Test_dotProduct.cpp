@@ -66,8 +66,8 @@ void TestDotProduct128()
     std::array<F32, 8> testValues0 = {{1, 2, 3, 4}};
     std::array<F32, 8> testValues1 = {{4, 11, 5, 1}};
 
-    __m128 reg0 = _mmx_setzero_p<__m128>();
-    __m128 reg1 = _mmx_setzero_p<__m128>();
+    __m128 reg0 = _mm_setzero<__m128>();
+    __m128 reg1 = _mm_setzero<__m128>();
 
     for (U32 i = 0; i < simd::numRegisterValues<__m128>; ++i)
     {
@@ -182,8 +182,8 @@ void TestDotProduct256()
     std::array<F32, 8> testValues0 = {{1, 2, 3, 4, 5, 6, 7, 8}};
     std::array<F32, 8> testValues1 = {{4, 11, 5, 1, 8, 6, 9, 2}};
 
-    __m256 reg0 = _mmx_setzero_p<__m256>();
-    __m256 reg1 = _mmx_setzero_p<__m256>();
+    __m256 reg0 = _mm_setzero<__m256>();
+    __m256 reg1 = _mm_setzero<__m256>();
 
     for (U32 i = 0; i < simd::numRegisterValues<__m256>; ++i)
     {

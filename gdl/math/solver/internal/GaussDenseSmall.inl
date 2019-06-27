@@ -80,19 +80,19 @@ inline void GaussDenseSmallSSE<_size, _pivot>::EliminationStep(std::array<__m128
 
     DEV_EXCEPTION(GetValue<_idx>(matrixData[_idx]) == ApproxZero<F32>(10), "Singular matrix - system not solveable");
 
-    const __m128 m1 = _mmx_set1_p<__m128>(-1);
-    const __m128 zero = _mmx_setzero_p<__m128>();
+    const __m128 m1 = _mm_set1<__m128>(-1);
+    const __m128 zero = _mm_setzero<__m128>();
 
     __m128 bc = Broadcast<_idx>(matrixData[_idx]);
-    const __m128 rowMult = _mmx_div_p(BlendIndex<_idx>(matrixData[_idx], m1), bc);
+    const __m128 rowMult = _mm_div(BlendIndex<_idx>(matrixData[_idx], m1), bc);
 
     for (U32 i = _idx + 1; i < _size; ++i)
     {
         bc = Broadcast<_idx>(matrixData[i]);
-        matrixData[i] = _mmx_fnmadd_p(rowMult, bc, BlendIndex<_idx>(matrixData[i], zero));
+        matrixData[i] = _mm_fnmadd(rowMult, bc, BlendIndex<_idx>(matrixData[i], zero));
     }
     bc = Broadcast<_idx>(vectorData);
-    vectorData = _mmx_fnmadd_p(rowMult, bc, BlendIndex<_idx>(vectorData, zero));
+    vectorData = _mm_fnmadd(rowMult, bc, BlendIndex<_idx>(vectorData, zero));
 }
 
 
@@ -130,11 +130,11 @@ inline void GaussDenseSmallSSE<_size, _pivot>::GaussStep(std::array<__m128, _siz
 
 //    DEV_EXCEPTION(GetValue<valueIdx>(*data[regIdx]) == ApproxZero<F32>(10), "Singular matrix - system not solveable");
 
-//    const __m256 m1 = _mmx_set1_p<__m256>(-1);
-//    const __m256 zero = _mmx_setzero_p<__m256>();
+//    const __m256 m1 = _mm_set1<__m256>(-1);
+//    const __m256 zero = _mm_setzero<__m256>();
 
 //    __m256 bc = Broadcast<_idx>(*data[regIdx]);
-//    const __m256 rowMult = Permute2F128<laneIdx, laneIdx>(_mmx_div_p(BlendIndex<valueIdx>(*data[regIdx], m1), bc));
+//    const __m256 rowMult = Permute2F128<laneIdx, laneIdx>(_mm_div(BlendIndex<valueIdx>(*data[regIdx], m1), bc));
 
 
 
@@ -148,7 +148,7 @@ inline void GaussDenseSmallSSE<_size, _pivot>::GaussStep(std::array<__m128, _siz
 //    for (U32 i = regIdx + 1; i < 3; ++i)
 //    {
 //        bc = Broadcast<_idx>(*data[i]);
-//        *data[i] = _mmx_fnmadd_p(rowMult, bc, Blend<b0, b1, b2, b3, b0, b1, b2, b3>(*data[i], zero));
+//        *data[i] = _mm_fnmadd(rowMult, bc, Blend<b0, b1, b2, b3, b0, b1, b2, b3>(*data[i], zero));
 //    }
 //    if constexpr (laneIdx == 0)
 //        *data[regIdx] = *data[2];

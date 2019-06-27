@@ -15,13 +15,13 @@ namespace GDL
 //! @param ptr: Pointer to a piece of memory where the data should be stored
 //! @param reg: Register that provides the data
 template <typename _type, typename _registerType>
-inline void _mmx_store_p(_type* ptr, _registerType reg);
+inline void _mm_store(_type* ptr, _registerType reg);
 
 //! @brief Template to create a register with all entries set to zero
 //! @tparam _registerType: Register type
 //! @return Register with all entries set to zero
 template <typename _registerType>
-inline _registerType _mmx_setzero_p();
+inline _registerType _mm_setzero();
 
 //! @brief Template to create a register with all entries set to the same value
 //! @tparam _registerType: Register type
@@ -29,7 +29,7 @@ inline _registerType _mmx_setzero_p();
 //! @param value: Value that should be set
 //! @return Register with all entries set to the same value
 template <typename _registerType, typename _type>
-inline _registerType _mmx_set1_p(_type value);
+inline _registerType _mm_set1(_type value);
 
 //! @brief Template to create a register with given values in reverse order
 //! @tparam _registerType: Register type
@@ -40,7 +40,7 @@ inline _registerType _mmx_set1_p(_type value);
 //! @param v3: Fourth value
 //! @return Register with given values in reverse order
 template <typename _registerType, typename... _args>
-inline _registerType _mmx_setr_p(_args... args);
+inline _registerType _mm_setr(_args... args);
 
 
 //! @brief Extracts the lowest element of a register. In case of 256 bit registers, the lowest element of the first
@@ -49,7 +49,7 @@ inline _registerType _mmx_setr_p(_args... args);
 //! @param reg: Source register
 //! @return Lowest element of a register
 template <typename _registerType>
-inline auto _mmx_cvtsx_fx(_registerType reg);
+inline auto _mm_cvtsF(_registerType reg);
 
 //! @brief Template for register addition
 //! @tparam _registerType: Register type
@@ -57,7 +57,7 @@ inline auto _mmx_cvtsx_fx(_registerType reg);
 //! @param rhs: Right hand side value
 //! @return Result of the addition
 template <typename _registerType>
-inline _registerType _mmx_add_p(_registerType lhs, _registerType rhs);
+inline _registerType _mm_add(_registerType lhs, _registerType rhs);
 
 //! @brief Template for register substraction
 //! @tparam _registerType: Register type
@@ -65,7 +65,7 @@ inline _registerType _mmx_add_p(_registerType lhs, _registerType rhs);
 //! @param rhs: Right hand side value
 //! @return Result of the substraction
 template <typename _registerType>
-inline _registerType _mmx_sub_p(_registerType lhs, _registerType rhs);
+inline _registerType _mm_sub(_registerType lhs, _registerType rhs);
 
 //! @brief Template for register multiplication
 //! @tparam _registerType: Register type
@@ -73,7 +73,7 @@ inline _registerType _mmx_sub_p(_registerType lhs, _registerType rhs);
 //! @param rhs: Right hand side value
 //! @return Result of the multiplication
 template <typename _registerType>
-inline _registerType _mmx_mul_p(_registerType lhs, _registerType rhs);
+inline _registerType _mm_mul(_registerType lhs, _registerType rhs);
 
 //! @brief Template for register division
 //! @tparam _registerType: Register type
@@ -81,7 +81,7 @@ inline _registerType _mmx_mul_p(_registerType lhs, _registerType rhs);
 //! @param rhs: Right hand side value
 //! @return Result of the division
 template <typename _registerType>
-inline _registerType _mmx_div_p(_registerType lhs, _registerType rhs);
+inline _registerType _mm_div(_registerType lhs, _registerType rhs);
 
 //! @brief Template for multiplication of two registers with subsequent addition of a third register (fused multiply
 //! add)
@@ -93,7 +93,7 @@ inline _registerType _mmx_div_p(_registerType lhs, _registerType rhs);
 //! @remark If fmadd intrinsics are not available the function still works. It performs the necessary operations
 //! seperately.
 template <typename _registerType>
-inline _registerType _mmx_fmadd_p(_registerType lhsM, _registerType rhsM, _registerType add);
+inline _registerType _mm_fmadd(_registerType lhsM, _registerType rhsM, _registerType add);
 
 //! @brief Template for multiplication of two registers with subsequent negation of the result and addition of a third
 //! register (fused negate multiply add)
@@ -105,7 +105,7 @@ inline _registerType _mmx_fmadd_p(_registerType lhsM, _registerType rhsM, _regis
 //! @remark If fmadd intrinsics are not available the function still works. It performs the necessary operations
 //! seperately.
 template <typename _registerType>
-inline _registerType _mmx_fnmadd_p(_registerType lhsM, _registerType rhsM, _registerType add);
+inline _registerType _mm_fnmadd(_registerType lhsM, _registerType rhsM, _registerType add);
 
 //! @brief Template for multiplication of two registers with subsequent substraction of a third register (fused multiply
 //! sub)
@@ -117,7 +117,7 @@ inline _registerType _mmx_fnmadd_p(_registerType lhsM, _registerType rhsM, _regi
 //! @remark If fmsub intrinsics are not available the function still works. It performs the necessary operations
 //! seperately.
 template <typename _registerType>
-inline _registerType _mmx_fmsub_p(_registerType lhsM, _registerType rhsM, _registerType sub);
+inline _registerType _mm_fmsub(_registerType lhsM, _registerType rhsM, _registerType sub);
 
 //! @brief Template for multiplication of two registers with subsequent negation of the result and substraction of a
 //! third register (fused negate multiply sub)
@@ -129,7 +129,7 @@ inline _registerType _mmx_fmsub_p(_registerType lhsM, _registerType rhsM, _regis
 //! @remark If fnmsub intrinsics are not available the function still works. It performs the necessary operations
 //! seperately.
 template <typename _registerType>
-inline _registerType _mmx_fnmsub_p(_registerType lhsM, _registerType rhsM, _registerType sub);
+inline _registerType _mm_fnmsub(_registerType lhsM, _registerType rhsM, _registerType sub);
 
 //! @brief Template for register dot product
 //! @tparam _mask: Mask for the calculation of the dot product
@@ -138,21 +138,21 @@ inline _registerType _mmx_fnmsub_p(_registerType lhsM, _registerType rhsM, _regi
 //! @param rhs: Right hand side value
 //! @return Dot product
 template <U32 _mask, typename _registerType>
-inline _registerType _mmx_dp_p(_registerType lhs, _registerType rhs);
+inline _registerType _mm_dp(_registerType lhs, _registerType rhs);
 
 //! @brief Calculates the square root of a register
 //! @tparam _registerType: Register type
 //! @param reg: Source register
 //! @return Result register
 template <typename _registerType>
-inline _registerType _mmx_sqrt_p(_registerType reg);
+inline _registerType _mm_sqrt(_registerType reg);
 
 //! @brief Calculates the reciprocal square root of a register
 //! @tparam _registerType: Register type
 //! @param reg: Source register
 //! @return Result register
 template <typename _registerType>
-inline _registerType _mmx_rsqrt_p(_registerType reg);
+inline _registerType _mm_rsqrt(_registerType reg);
 
 //! @brief Compares two registers for equality
 //! @tparam _registerType: Register type
@@ -160,7 +160,7 @@ inline _registerType _mmx_rsqrt_p(_registerType reg);
 //! @param rhs: Right hand side register
 //! @return Register which stores the results of the comparison
 template <typename _registerType>
-inline auto _mmx_cmpeq_p(_registerType lhs, _registerType rhs);
+inline auto _mm_cmpeq(_registerType lhs, _registerType rhs);
 
 //! @brief Compares lhs <= rhs for two registers
 //! @tparam _registerType: Register type
@@ -168,7 +168,7 @@ inline auto _mmx_cmpeq_p(_registerType lhs, _registerType rhs);
 //! @param rhs: Right hand side register
 //! @return Register which stores the results of the comparison
 template <typename _registerType>
-inline auto _mmx_cmple_p(_registerType lhs, _registerType rhs);
+inline auto _mm_cmple(_registerType lhs, _registerType rhs);
 
 //! @brief Compares lhs > rhs for two registers
 //! @tparam _registerType: Register type
@@ -176,7 +176,7 @@ inline auto _mmx_cmple_p(_registerType lhs, _registerType rhs);
 //! @param rhs: Right hand side register
 //! @return Register which stores the results of the comparison
 template <typename _registerType>
-inline auto _mmx_cmpgt_p(_registerType lhs, _registerType rhs);
+inline auto _mm_cmpgt(_registerType lhs, _registerType rhs);
 
 //! @brief Compares lhs > rhs for two registers
 //! @tparam _registerType: Register type
@@ -184,7 +184,7 @@ inline auto _mmx_cmpgt_p(_registerType lhs, _registerType rhs);
 //! @param rhs: Right hand side register
 //! @return Register which stores the results of the comparison
 template <typename _registerType>
-inline auto _mmx_cmplt_p(_registerType lhs, _registerType rhs);
+inline auto _mm_cmplt(_registerType lhs, _registerType rhs);
 
 //! @brief Calculates the maximum values of two registers
 //! @tparam _registerType: Register type
@@ -192,7 +192,7 @@ inline auto _mmx_cmplt_p(_registerType lhs, _registerType rhs);
 //! @param rhs: Right hand side register
 //! @return Register which stores the maximum values
 template <typename _registerType>
-inline _registerType _mmx_max_p(_registerType lhs, _registerType rhs);
+inline _registerType _mm_max(_registerType lhs, _registerType rhs);
 
 //! @brief Calculates the minimum values of two registers
 //! @tparam _registerType: Register type
@@ -200,7 +200,7 @@ inline _registerType _mmx_max_p(_registerType lhs, _registerType rhs);
 //! @param rhs: Right hand side register
 //! @return Register which stores the minimum values
 template <typename _registerType>
-inline _registerType _mmx_min_p(_registerType lhs, _registerType rhs);
+inline _registerType _mm_min(_registerType lhs, _registerType rhs);
 
 //! @brief Performs a and-not operation on the passed registers
 //! @tparam _registerType: Register type
@@ -208,7 +208,7 @@ inline _registerType _mmx_min_p(_registerType lhs, _registerType rhs);
 //! @param rhs: Right hand side register
 //! @return Result of the and-not operation
 template <typename _registerType>
-inline _registerType _mmx_andnot_p(_registerType lhs, _registerType rhs);
+inline _registerType _mm_andnot(_registerType lhs, _registerType rhs);
 
 //! @brief Performs a xor operation on the passed registers
 //! @tparam _registerType: Register type
@@ -216,14 +216,14 @@ inline _registerType _mmx_andnot_p(_registerType lhs, _registerType rhs);
 //! @param rhs: Right hand side register
 //! @return Result of the xor operation
 template <typename _registerType>
-inline _registerType _mmx_xor_p(_registerType lhs, _registerType rhs);
+inline _registerType _mm_xor(_registerType lhs, _registerType rhs);
 
 //! @brief Create mask from the most significant bit of each 8-bit element in a register and returns it
 //! @tparam _registerType: Register type
 //! @param reg: Register which serves as source for the mask
 //! @return Mask from the most significant bit of each 8-bit element of the source register
 template <typename _registerType>
-inline auto _mmx_movemask_epi8(_registerType reg);
+inline auto _mm_movemaskEpi8(_registerType reg);
 
 
 //! @brief Creates a new register where each value is selected from the two source registers values at the same
@@ -235,7 +235,7 @@ inline auto _mmx_movemask_epi8(_registerType reg);
 //! @param src1: second source register
 //! @return Register with blended values
 template <I32 _blendMask, typename _registerType>
-inline auto _mmx_blend_p(_registerType src0, _registerType src1);
+inline auto _mm_blend(_registerType src0, _registerType src1);
 
 //! @brief Creates a new register where each value is selected from the two source registers values at the same
 //! position.
@@ -245,7 +245,7 @@ inline auto _mmx_blend_p(_registerType src0, _registerType src1);
 //! @param _blendMask: Register that determines which value is selected from which source register.
 //! @return Register with blended values
 template <typename _registerType>
-inline auto _mmx_blendv_p(_registerType src0, _registerType src1, _registerType _blendMask);
+inline auto _mm_blendv(_registerType src0, _registerType src1, _registerType _blendMask);
 
 //! @brief Returns a register with an arbitrary combination of values from the input register as long as the source
 //! values and the destination are in the same SIMD lane.
@@ -255,7 +255,7 @@ inline auto _mmx_blendv_p(_registerType src0, _registerType src1, _registerType 
 //! @param reg: Register which serves as source
 //! @return Register with an arbitrary combination of values from the input register.
 template <I32 _permuteMask, typename _registerType>
-inline auto _mmx_permute_p(_registerType reg);
+inline auto _mm_permute(_registerType reg);
 
 #ifdef __AVX2__
 
@@ -267,7 +267,7 @@ inline auto _mmx_permute_p(_registerType reg);
 //! @param src1: Second register which serves as source
 //! @return AVX register with an arbitrary combination of the two source registers lanes
 template <I32 _permuteMask, typename _registerType>
-inline auto _mmx_permute2f128_p(_registerType src0, _registerType src1);
+inline auto _mm_permute2f128(_registerType src0, _registerType src1);
 
 #endif // __AVX2__
 
@@ -280,7 +280,7 @@ inline auto _mmx_permute2f128_p(_registerType src0, _registerType src1);
 //! @param src1: second source register
 //! @return Register with shuffled values
 template <I32 _shuffleMask, typename _registerType>
-inline auto _mmx_shuffle_p(_registerType src0, _registerType src1);
+inline auto _mm_shuffle(_registerType src0, _registerType src1);
 
 } // namespace GDL
 

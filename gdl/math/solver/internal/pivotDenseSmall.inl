@@ -94,7 +94,7 @@ inline U32 PivotDenseSmallSSE<_size>::CreatePermutationHash(__m128 permutation)
 {
     alignas(simd::alignmentBytes<__m128>) F32 P[4];
 
-    _mmx_store_p(P, permutation);
+    _mm_store(P, permutation);
 
     return (((static_cast<U32>(P[0])) << 6) | ((static_cast<U32>(P[1])) << 4) | ((static_cast<U32>(P[2])) << 2) |
             (static_cast<U32>(P[3])));
@@ -117,7 +117,7 @@ inline void PivotDenseSmallSSE<_size>::Partial(std::array<__m128, _size>& matrix
         U32 idx = _idx;
         alignas(alignmentBytes<__m128>) F32 colValues[4];
 
-        _mmx_store_p(colValues, Abs(matrixData[_idx]));
+        _mm_store(colValues, Abs(matrixData[_idx]));
         for (U32 i = _idx + 1; i < _size; ++i)
             if (colValues[idx] < colValues[i])
                 idx = i;

@@ -17,9 +17,9 @@ template <typename _registerType, U32 _numComparedValuesSSE>
 Approx<_registerType, _numComparedValuesSSE>::Approx(const _registerType values, const I32 factor,
                                                      const ElementType minimalBase)
     : mValues{values}
-    , mFactor{_mmx_set1_p<_registerType>(
+    , mFactor{_mm_set1<_registerType>(
               static_cast<ElementType>(factor * std::numeric_limits<ElementType>::epsilon()))}
-    , mBaseZero{_mmx_set1_p<_registerType>(std::abs(minimalBase))}
+    , mBaseZero{_mm_set1<_registerType>(std::abs(minimalBase))}
 {
     DEV_EXCEPTION(factor <= 0, "Scaling factor must be bigger than 0.");
     DEV_EXCEPTION(mBaseZero[0] <= static_cast<ElementType>(0), "Minimal base can't be 0.");
@@ -31,9 +31,9 @@ template <typename _registerType, U32 _numComparedValuesSSE>
 bool Approx<_registerType, _numComparedValuesSSE>::operator==(const _registerType rhs) const
 {
     const _registerType tolerance =
-            _mmx_mul_p(mFactor, _mmx_max_p(_mmx_max_p(simd::Abs(rhs), simd::Abs(mValues)), mBaseZero));
+            _mm_mul(mFactor, _mm_max(_mm_max(simd::Abs(rhs), simd::Abs(mValues)), mBaseZero));
 
-    return simd::CompareAllLessEqual<_registerType, _numComparedValuesSSE>(simd::Abs(_mmx_sub_p(rhs, mValues)),
+    return simd::CompareAllLessEqual<_registerType, _numComparedValuesSSE>(simd::Abs(_mm_sub(rhs, mValues)),
                                                                           tolerance);
 }
 
@@ -101,7 +101,7 @@ template <typename _classType, U32 _numComparedValuesSSE, typename _baseType>
 constexpr auto ApproxZero(_baseType base, I32 factor)
 {
     if constexpr (simd::IsRegisterType<_classType>)
-        return Approx<_classType, _numComparedValuesSSE>(_mmx_setzero_p<_classType>(), factor, base);
+        return Approx<_classType, _numComparedValuesSSE>(_mm_setzero<_classType>(), factor, base);
     else
         return Approx<_classType>(static_cast<_baseType>(0), factor, static_cast<_baseType>(base));
 }

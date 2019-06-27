@@ -165,7 +165,7 @@ GaussDenseSSE<_registerType, _size>::SolvePartialPivot(const MatrixType& A, cons
     // Set memory of unused register values to zero -> Important for pivoting step
     if constexpr (numNonFullRegValues != 0)
         for (U32 i = numColRegisters - 1; i < _size * numColRegisters; i += numColRegisters)
-            matData[i] = BlendBelowIndex<numNonFullRegValues - 1>(matData[i], _mmx_set1_p<_registerType>(0));
+            matData[i] = BlendBelowIndex<numNonFullRegValues - 1>(matData[i], _mm_set1<_registerType>(0));
 
     // Perform Gauss steps for all registers that do not contain unused values
     for (U32 i = 0; i < numRowsFullRegisters; ++i)
@@ -200,13 +200,13 @@ inline void GaussDenseSSE<_registerType, _size>::EliminationStepRegister(U32 ite
 
     // Calculate row multipliers
     alignas(alignmentBytes<_registerType>) std::array<_registerType, numColRegisters> rowMult;
-    const _registerType zero = _mmx_setzero_p<_registerType>();
-    const _registerType one = _mmx_set1_p<_registerType>(1);
-    const _registerType div = _mmx_div_p(one, BroadcastAcrossLanes<_regValueIdx>(matData[actRowRegIdx]));
+    const _registerType zero = _mm_setzero<_registerType>();
+    const _registerType one = _mm_set1<_registerType>(1);
+    const _registerType div = _mm_div(one, BroadcastAcrossLanes<_regValueIdx>(matData[actRowRegIdx]));
 
-    matData[actRowRegIdx] = _mmx_sub_p(matData[actRowRegIdx], BlendIndex<_regValueIdx>(zero, one));
+    matData[actRowRegIdx] = _mm_sub(matData[actRowRegIdx], BlendIndex<_regValueIdx>(zero, one));
     for (U32 i = 0; i < numColRegisters; ++i)
-        rowMult[i] = _mmx_mul_p(div, matData[colStartIdx + i]);
+        rowMult[i] = _mm_mul(div, matData[colStartIdx + i]);
 
 
     // Perform elimination for all relevant columns
@@ -214,12 +214,12 @@ inline void GaussDenseSSE<_registerType, _size>::EliminationStepRegister(U32 ite
     {
         _registerType pivValue = BroadcastAcrossLanes<_regValueIdx>(matData[regRowIdx + i]);
         for (U32 j = 0; j < numColRegisters; ++j)
-            matData[i + j] = _mmx_fnmadd_p(rowMult[j], pivValue, matData[i + j]);
+            matData[i + j] = _mm_fnmadd(rowMult[j], pivValue, matData[i + j]);
     }
 
     _registerType pivValue = BroadcastAcrossLanes<_regValueIdx>(vecData[regRowIdx]);
     for (U32 i = 0; i < numColRegisters; ++i)
-        vecData[i] = _mmx_fnmadd_p(rowMult[i], pivValue, vecData[i]);
+        vecData[i] = _mm_fnmadd(rowMult[i], pivValue, vecData[i]);
 }
 
 
@@ -236,20 +236,20 @@ inline U32 GaussDenseSSE<_registerType, _size>::FindPivot(U32 iteration, U32 reg
 
 
     // Vectorized comparisons
-    _registerType zero = _mmx_setzero_p<_registerType>();
+    _registerType zero = _mm_setzero<_registerType>();
     _registerType cmpAbs = Abs(BlendAboveIndex<_regValueIdx>(matData[colStartIdx + regRowIdx], zero));
-    _registerType cmpIdx = _mmx_set1_p<_registerType>(regRowIdx);
+    _registerType cmpIdx = _mm_set1<_registerType>(regRowIdx);
     for (U32 i = regRowIdx + 1; i < numColRegisters; ++i)
     {
         _registerType cmpAbs2 = Abs(matData[colStartIdx + i]);
-        _registerType cmpRes = _mmx_cmplt_p(cmpAbs, cmpAbs2);
-        cmpAbs = _mmx_blendv_p(cmpAbs, cmpAbs2, cmpRes);
-        cmpIdx = _mmx_blendv_p(cmpIdx, _mmx_set1_p<_registerType>(i), cmpRes);
+        _registerType cmpRes = _mm_cmplt(cmpAbs, cmpAbs2);
+        cmpAbs = _mm_blendv(cmpAbs, cmpAbs2, cmpRes);
+        cmpIdx = _mm_blendv(cmpIdx, _mm_set1<_registerType>(i), cmpRes);
     }
 
     // Find pivot in result register
     alignas(alignment) std::array<ValueType, numRegisterValues> values2;
-    _mmx_store_p(values2.data(), cmpAbs);
+    _mm_store(values2.data(), cmpAbs);
     ValueType maxVal = values2[0];
     U32 maxValIdx = 0;
     for (U32 i = 1; i < numRegisterValues; ++i)

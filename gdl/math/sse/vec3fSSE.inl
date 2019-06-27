@@ -18,7 +18,7 @@ namespace GDL
 
 template <bool _isCol>
 Vec3fSSE<_isCol>::Vec3fSSE()
-    : mData{_mmx_setzero_p<__m128>()}
+    : mData{_mm_setzero<__m128>()}
 {
     DEV_EXCEPTION(!IsDataAligned(), "Register of Vec3fSSE is not aligned");
 }
@@ -36,7 +36,7 @@ Vec3fSSE<_isCol>::Vec3fSSE(const Vec3fSSE& other)
 
 template <bool _isCol>
 Vec3fSSE<_isCol>::Vec3fSSE(std::array<F32, 3> data)
-    : mData{_mmx_setr_p<__m128>(data[0], data[1], data[2], 0)}
+    : mData{_mm_setr<__m128>(data[0], data[1], data[2], 0)}
 {
     DEV_EXCEPTION(!IsDataAligned(), "Register of Vec3fSSE is not aligned");
 }
@@ -45,7 +45,7 @@ Vec3fSSE<_isCol>::Vec3fSSE(std::array<F32, 3> data)
 
 template <bool _isCol>
 Vec3fSSE<_isCol>::Vec3fSSE(F32 v0, F32 v1, F32 v2)
-    : mData{_mmx_setr_p<__m128>(v0, v1, v2, 0)}
+    : mData{_mm_setr<__m128>(v0, v1, v2, 0)}
 {
     DEV_EXCEPTION(!IsDataAligned(), "Register of Vec3fSSE is not aligned");
 }
@@ -54,7 +54,7 @@ Vec3fSSE<_isCol>::Vec3fSSE(F32 v0, F32 v1, F32 v2)
 
 template <bool _isCol>
 Vec3fSSE<_isCol>::Vec3fSSE(const Vec4fSSE<_isCol>& other)
-    : mData{simd::Blend<0, 0, 0, 1>(other.mData, _mmx_setzero_p<__m128>())}
+    : mData{simd::Blend<0, 0, 0, 1>(other.mData, _mm_setzero<__m128>())}
 {
 }
 
@@ -98,7 +98,7 @@ bool Vec3fSSE<_isCol>::operator!=(const Vec3fSSE& rhs) const
 template <bool _isCol>
 Vec3fSSE<_isCol>& Vec3fSSE<_isCol>::operator+=(const Vec3fSSE& rhs)
 {
-    mData = _mmx_add_p(mData, rhs.mData);
+    mData = _mm_add(mData, rhs.mData);
     return *this;
 }
 
@@ -107,7 +107,7 @@ Vec3fSSE<_isCol>& Vec3fSSE<_isCol>::operator+=(const Vec3fSSE& rhs)
 template <bool _isCol>
 Vec3fSSE<_isCol>& Vec3fSSE<_isCol>::operator-=(const Vec3fSSE& rhs)
 {
-    mData = _mmx_sub_p(mData, rhs.mData);
+    mData = _mm_sub(mData, rhs.mData);
     return *this;
 }
 
@@ -116,7 +116,7 @@ Vec3fSSE<_isCol>& Vec3fSSE<_isCol>::operator-=(const Vec3fSSE& rhs)
 template <bool _isCol>
 Vec3fSSE<_isCol> Vec3fSSE<_isCol>::operator+(const Vec3fSSE& rhs) const
 {
-    return _mmx_add_p(mData, rhs.mData);
+    return _mm_add(mData, rhs.mData);
 }
 
 
@@ -124,7 +124,7 @@ Vec3fSSE<_isCol> Vec3fSSE<_isCol>::operator+(const Vec3fSSE& rhs) const
 template <bool _isCol>
 Vec3fSSE<_isCol> Vec3fSSE<_isCol>::operator-(const Vec3fSSE& rhs) const
 {
-    return _mmx_sub_p(mData, rhs.mData);
+    return _mm_sub(mData, rhs.mData);
 }
 
 
@@ -132,7 +132,7 @@ Vec3fSSE<_isCol> Vec3fSSE<_isCol>::operator-(const Vec3fSSE& rhs) const
 template <bool _isCol>
 Vec3fSSE<_isCol> Vec3fSSE<_isCol>::operator*(F32 rhs) const
 {
-    return _mmx_mul_p(mData, _mmx_setr_p<__m128>(rhs, rhs, rhs, 0.f));
+    return _mm_mul(mData, _mm_setr<__m128>(rhs, rhs, rhs, 0.f));
 }
 
 
@@ -180,7 +180,7 @@ F32 Vec3fSSE<_isCol>::Dot(Vec3fSSE<_isColRhs> rhs) const
 template <bool _isCol>
 F32 Vec3fSSE<_isCol>::Length() const
 {
-    return _mmx_cvtsx_fx(_mmx_sqrt_p(simd::DotProduct<1, 1, 1, 0>(mData, mData)));
+    return _mm_cvtsF(_mm_sqrt(simd::DotProduct<1, 1, 1, 0>(mData, mData)));
 }
 
 
@@ -189,7 +189,7 @@ template <bool _isCol>
 Vec3fSSE<_isCol>& Vec3fSSE<_isCol>::Normalize()
 {
     DEV_EXCEPTION(*this == Vec3fSSE(), "Vector length is 0. Can't normalize the vector.");
-    mData = _mmx_div_p(mData, _mmx_sqrt_p(simd::DotProduct<1, 1, 1, 0>(mData, mData)));
+    mData = _mm_div(mData, _mm_sqrt(simd::DotProduct<1, 1, 1, 0>(mData, mData)));
 
     return *this;
 }

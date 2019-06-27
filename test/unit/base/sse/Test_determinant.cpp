@@ -11,9 +11,9 @@ using namespace GDL::simd;
 
 void TestDeterminant2x2(const std::array<F32, 4>& mat, F32 expectedResult)
 {
-    BOOST_CHECK(Determinant2x2(_mmx_setr_p<__m128>(mat[0], mat[1], mat[2], mat[3])) == Approx(expectedResult));
+    BOOST_CHECK(Determinant2x2(_mm_setr<__m128>(mat[0], mat[1], mat[2], mat[3])) == Approx(expectedResult));
 
-    BOOST_CHECK(Determinant2x2(_mmx_setr_p<__m128>(mat[0], mat[1], 0, 0), _mmx_setr_p<__m128>(mat[2], mat[3], 0, 0)) ==
+    BOOST_CHECK(Determinant2x2(_mm_setr<__m128>(mat[0], mat[1], 0, 0), _mm_setr<__m128>(mat[2], mat[3], 0, 0)) ==
                 Approx(expectedResult));
 }
 
@@ -30,9 +30,9 @@ BOOST_AUTO_TEST_CASE(Test_Determinant2x2)
 
 void TestDeterminant3x3(const std::array<F32, 9>& mat, F32 expectedResult)
 {
-    __m128 col0 = _mmx_setr_p<__m128>(mat[0], mat[1], mat[2], 0);
-    __m128 col1 = _mmx_setr_p<__m128>(mat[3], mat[4], mat[5], 0);
-    __m128 col2 = _mmx_setr_p<__m128>(mat[6], mat[7], mat[8], 0);
+    __m128 col0 = _mm_setr<__m128>(mat[0], mat[1], mat[2], 0);
+    __m128 col1 = _mm_setr<__m128>(mat[3], mat[4], mat[5], 0);
+    __m128 col2 = _mm_setr<__m128>(mat[6], mat[7], mat[8], 0);
 
     BOOST_CHECK(Determinant3x3(col0, col1, col2) == Approx(expectedResult));
 }
@@ -50,16 +50,16 @@ BOOST_AUTO_TEST_CASE(Test_Determinant3x3)
 
 void TestDeterminant4x4(const std::array<F32, 16>& mat, F32 expectedResult)
 {
-    __m128 col0 = _mmx_setr_p<__m128>(mat[0], mat[1], mat[2], mat[3]);
-    __m128 col1 = _mmx_setr_p<__m128>(mat[4], mat[5], mat[6], mat[7]);
-    __m128 col2 = _mmx_setr_p<__m128>(mat[8], mat[9], mat[10], mat[11]);
-    __m128 col3 = _mmx_setr_p<__m128>(mat[12], mat[13], mat[14], mat[15]);
+    __m128 col0 = _mm_setr<__m128>(mat[0], mat[1], mat[2], mat[3]);
+    __m128 col1 = _mm_setr<__m128>(mat[4], mat[5], mat[6], mat[7]);
+    __m128 col2 = _mm_setr<__m128>(mat[8], mat[9], mat[10], mat[11]);
+    __m128 col3 = _mm_setr<__m128>(mat[12], mat[13], mat[14], mat[15]);
 
     BOOST_CHECK(Determinant4x4(col0, col1, col2, col3) == Approx(expectedResult));
 
 #ifdef __AVX2__
-    __m256 col01 = _mmx_setr_p<__m256>(mat[0], mat[1], mat[2], mat[3], mat[4], mat[5], mat[6], mat[7]);
-    __m256 col23 = _mmx_setr_p<__m256>(mat[8], mat[9], mat[10], mat[11], mat[12], mat[13], mat[14], mat[15]);
+    __m256 col01 = _mm_setr<__m256>(mat[0], mat[1], mat[2], mat[3], mat[4], mat[5], mat[6], mat[7]);
+    __m256 col23 = _mm_setr<__m256>(mat[8], mat[9], mat[10], mat[11], mat[12], mat[13], mat[14], mat[15]);
 
     BOOST_CHECK(Determinant4x4(col01, col23) == Approx(expectedResult));
 #endif // __AVX2__

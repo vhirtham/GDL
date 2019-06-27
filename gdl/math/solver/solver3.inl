@@ -70,7 +70,7 @@ inline Vec3fSSE<true> Cramer(const Mat3fSSE& matA, const Vec3fSSE<true>& vecRhs)
     determinants = Blend<0, 1, 0, 0>(determinants, DotProduct<1, 1, 1, 0>(a, crossrc));
     determinants = Blend<0, 0, 1, 0>(determinants, DotProduct<1, 1, 1, 0>(a, crossbr));
 
-    __m128 solution = _mmx_div_p(determinants, detA);
+    __m128 solution = _mm_div(determinants, detA);
 
     return Vec3fSSE<true>(solution);
 }

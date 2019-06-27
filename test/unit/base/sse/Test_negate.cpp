@@ -31,7 +31,7 @@ void TestNegate128d()
 template <typename _registerType, U32 _i = 0, U32 _j = 0, U32 _k = 0, U32 _l = 0>
 void TestNegate4()
 {
-    const _registerType a = _mmx_setr_p<_registerType>(1.f, 2.f, 3.f, 4.f);
+    const _registerType a = _mm_setr<_registerType>(1.f, 2.f, 3.f, 4.f);
 
     const _registerType b = Negate<_i, _j, _k, _l>(a);
 
@@ -112,7 +112,7 @@ void TestNegateAll()
     using Type = decltype(GetDataType<_registerType>());
     constexpr U32 numRegVals = numRegisterValues<_registerType>;
 
-    _registerType a = _mmx_setzero_p<_registerType>();
+    _registerType a = _mm_setzero<_registerType>();
 
     for (U32 i = 0; i < numRegVals; ++i)
         SetValue(a, i, static_cast<Type>(i));

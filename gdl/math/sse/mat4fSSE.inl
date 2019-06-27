@@ -24,20 +24,20 @@ namespace GDL
 
 
 Mat4fSSE::Mat4fSSE()
-    : mData({{{_mmx_setzero_p<__m128>()},
-              {_mmx_setzero_p<__m128>()},
-              {_mmx_setzero_p<__m128>()},
-              {_mmx_setzero_p<__m128>()}}})
+    : mData({{{_mm_setzero<__m128>()},
+              {_mm_setzero<__m128>()},
+              {_mm_setzero<__m128>()},
+              {_mm_setzero<__m128>()}}})
 {
     DEV_EXCEPTION(!IsDataAligned(), "One or more registers of Mat4fSSE are not 16 byte aligned");
 }
 
 
 Mat4fSSE::Mat4fSSE(std::array<F32, 16> data)
-    : mData({{{_mmx_setr_p<__m128>(data[0], data[1], data[2], data[3])},
-              {_mmx_setr_p<__m128>(data[4], data[5], data[6], data[7])},
-              {_mmx_setr_p<__m128>(data[8], data[9], data[10], data[11])},
-              {_mmx_setr_p<__m128>(data[12], data[13], data[14], data[15])}}})
+    : mData({{{_mm_setr<__m128>(data[0], data[1], data[2], data[3])},
+              {_mm_setr<__m128>(data[4], data[5], data[6], data[7])},
+              {_mm_setr<__m128>(data[8], data[9], data[10], data[11])},
+              {_mm_setr<__m128>(data[12], data[13], data[14], data[15])}}})
 {
     DEV_EXCEPTION(!IsDataAligned(), "One or more registers of Mat4fSSE are not 16 byte aligned");
 }
@@ -46,10 +46,10 @@ Mat4fSSE::Mat4fSSE(std::array<F32, 16> data)
 
 Mat4fSSE::Mat4fSSE(F32 v0, F32 v1, F32 v2, F32 v3, F32 v4, F32 v5, F32 v6, F32 v7, F32 v8, F32 v9, F32 v10, F32 v11,
                    F32 v12, F32 v13, F32 v14, F32 v15)
-    : mData({{{_mmx_setr_p<__m128>(v0, v1, v2, v3)},
-              {_mmx_setr_p<__m128>(v4, v5, v6, v7)},
-              {_mmx_setr_p<__m128>(v8, v9, v10, v11)},
-              {_mmx_setr_p<__m128>(v12, v13, v14, v15)}}})
+    : mData({{{_mm_setr<__m128>(v0, v1, v2, v3)},
+              {_mm_setr<__m128>(v4, v5, v6, v7)},
+              {_mm_setr<__m128>(v8, v9, v10, v11)},
+              {_mm_setr<__m128>(v12, v13, v14, v15)}}})
 {
     DEV_EXCEPTION(!IsDataAligned(), "One or more registers of Mat4fSSE are not 16 byte aligned");
 }
@@ -100,10 +100,10 @@ bool Mat4fSSE::operator!=(const Mat4fSSE& rhs) const
 Mat4fSSE& Mat4fSSE::operator+=(const Mat4fSSE& other)
 
 {
-    mData[0] = _mmx_add_p(mData[0], other.mData[0]);
-    mData[1] = _mmx_add_p(mData[1], other.mData[1]);
-    mData[2] = _mmx_add_p(mData[2], other.mData[2]);
-    mData[3] = _mmx_add_p(mData[3], other.mData[3]);
+    mData[0] = _mm_add(mData[0], other.mData[0]);
+    mData[1] = _mm_add(mData[1], other.mData[1]);
+    mData[2] = _mm_add(mData[2], other.mData[2]);
+    mData[3] = _mm_add(mData[3], other.mData[3]);
     return *this;
 }
 
@@ -112,8 +112,8 @@ Mat4fSSE& Mat4fSSE::operator+=(const Mat4fSSE& other)
 Mat4fSSE Mat4fSSE::operator+(const Mat4fSSE& other)
 
 {
-    return Mat4fSSE(_mmx_add_p(mData[0], other.mData[0]), _mmx_add_p(mData[1], other.mData[1]),
-                    _mmx_add_p(mData[2], other.mData[2]), _mmx_add_p(mData[3], other.mData[3]));
+    return Mat4fSSE(_mm_add(mData[0], other.mData[0]), _mm_add(mData[1], other.mData[1]),
+                    _mm_add(mData[2], other.mData[2]), _mm_add(mData[3], other.mData[3]));
 }
 
 
@@ -121,31 +121,31 @@ Mat4fSSE Mat4fSSE::operator+(const Mat4fSSE& other)
 Mat4fSSE Mat4fSSE::operator*(const Mat4fSSE& rhs) const
 {
     using namespace GDL::simd;
-    return Mat4fSSE(_mmx_fmadd_p(simd::Broadcast<0>(rhs.mData[0]), mData[0],
-                                 _mmx_fmadd_p(Broadcast<1>(rhs.mData[0]), mData[1],
-                                              _mmx_fmadd_p(Broadcast<2>(rhs.mData[0]), mData[2],
-                                                           _mmx_mul_p(Broadcast<3>(rhs.mData[0]), mData[3])))),
-                    _mmx_fmadd_p(Broadcast<0>(rhs.mData[1]), mData[0],
-                                 _mmx_fmadd_p(Broadcast<1>(rhs.mData[1]), mData[1],
-                                              _mmx_fmadd_p(Broadcast<2>(rhs.mData[1]), mData[2],
-                                                           _mmx_mul_p(Broadcast<3>(rhs.mData[1]), mData[3])))),
-                    _mmx_fmadd_p(Broadcast<0>(rhs.mData[2]), mData[0],
-                                 _mmx_fmadd_p(Broadcast<1>(rhs.mData[2]), mData[1],
-                                              _mmx_fmadd_p(Broadcast<2>(rhs.mData[2]), mData[2],
-                                                           _mmx_mul_p(Broadcast<3>(rhs.mData[2]), mData[3])))),
-                    _mmx_fmadd_p(Broadcast<0>(rhs.mData[3]), mData[0],
-                                 _mmx_fmadd_p(Broadcast<1>(rhs.mData[3]), mData[1],
-                                              _mmx_fmadd_p(Broadcast<2>(rhs.mData[3]), mData[2],
-                                                           _mmx_mul_p(Broadcast<3>(rhs.mData[3]), mData[3])))));
+    return Mat4fSSE(_mm_fmadd(simd::Broadcast<0>(rhs.mData[0]), mData[0],
+                                 _mm_fmadd(Broadcast<1>(rhs.mData[0]), mData[1],
+                                              _mm_fmadd(Broadcast<2>(rhs.mData[0]), mData[2],
+                                                           _mm_mul(Broadcast<3>(rhs.mData[0]), mData[3])))),
+                    _mm_fmadd(Broadcast<0>(rhs.mData[1]), mData[0],
+                                 _mm_fmadd(Broadcast<1>(rhs.mData[1]), mData[1],
+                                              _mm_fmadd(Broadcast<2>(rhs.mData[1]), mData[2],
+                                                           _mm_mul(Broadcast<3>(rhs.mData[1]), mData[3])))),
+                    _mm_fmadd(Broadcast<0>(rhs.mData[2]), mData[0],
+                                 _mm_fmadd(Broadcast<1>(rhs.mData[2]), mData[1],
+                                              _mm_fmadd(Broadcast<2>(rhs.mData[2]), mData[2],
+                                                           _mm_mul(Broadcast<3>(rhs.mData[2]), mData[3])))),
+                    _mm_fmadd(Broadcast<0>(rhs.mData[3]), mData[0],
+                                 _mm_fmadd(Broadcast<1>(rhs.mData[3]), mData[1],
+                                              _mm_fmadd(Broadcast<2>(rhs.mData[3]), mData[2],
+                                                           _mm_mul(Broadcast<3>(rhs.mData[3]), mData[3])))));
 }
 
 Vec4fSSE<true> Mat4fSSE::operator*(const Vec4fSSE<true>& rhs) const
 {
     using namespace GDL::simd;
-    return Vec4fSSE<true>(_mmx_fmadd_p(Broadcast<0>(rhs.mData), mData[0],
-                                       _mmx_fmadd_p(Broadcast<1>(rhs.mData), mData[1],
-                                                    _mmx_fmadd_p(Broadcast<2>(rhs.mData), mData[2],
-                                                                 _mmx_mul_p(Broadcast<3>(rhs.mData), mData[3])))));
+    return Vec4fSSE<true>(_mm_fmadd(Broadcast<0>(rhs.mData), mData[0],
+                                       _mm_fmadd(Broadcast<1>(rhs.mData), mData[1],
+                                                    _mm_fmadd(Broadcast<2>(rhs.mData), mData[2],
+                                                                 _mm_mul(Broadcast<3>(rhs.mData), mData[3])))));
 }
 
 

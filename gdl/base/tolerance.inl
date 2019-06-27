@@ -15,7 +15,7 @@ Tolerance<_registerType, _numComparedValuesSSE>::Tolerance(_registerType value, 
     : mValue{value}
     , mTolerance{tolerance}
 {
-    DEV_EXCEPTION(!simd::CompareAllGreaterThan(tolerance, _mmx_setzero_p<_registerType>()),
+    DEV_EXCEPTION(!simd::CompareAllGreaterThan(tolerance, _mm_setzero<_registerType>()),
                   "Tolerance values must be greater than 0.");
 }
 
@@ -25,7 +25,7 @@ template <typename _registerType, U32 _numComparedValuesSSE>
 template <typename _type>
 Tolerance<_registerType, _numComparedValuesSSE>::Tolerance(_registerType value, _type tolerance)
     : mValue{value}
-    , mTolerance{_mmx_set1_p<_registerType>(tolerance)}
+    , mTolerance{_mm_set1<_registerType>(tolerance)}
 {
     static_assert(std::is_integral<_type>::value || std::is_floating_point<_type>::value,
                   "Tolerance must be an integer or floating point type.");
@@ -37,7 +37,7 @@ Tolerance<_registerType, _numComparedValuesSSE>::Tolerance(_registerType value, 
 template <typename _registerType, U32 _numComparedValuesSSE>
 bool Tolerance<_registerType, _numComparedValuesSSE>::operator==(_registerType rhs) const
 {
-    return simd::CompareAllLessEqual<_registerType, _numComparedValuesSSE>(simd::Abs(_mmx_sub_p(rhs, mValue)),
+    return simd::CompareAllLessEqual<_registerType, _numComparedValuesSSE>(simd::Abs(_mm_sub(rhs, mValue)),
                                                                           mTolerance);
 }
 

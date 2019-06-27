@@ -24,7 +24,7 @@ constexpr inline U32 GetDotProductMask4()
 template <U32 _src0, U32 _src1, U32 _src2, U32 _src3, U32 _dst0, U32 _dst1, U32 _dst2, U32 _dst3>
 inline __m128 DotProduct(const __m128& lhs, const __m128& rhs)
 {
-    return _mmx_dp_p<GetDotProductMask4<_src0, _src1, _src2, _src3, _dst0, _dst1, _dst2, _dst3>()>(lhs, rhs);
+    return _mm_dp<GetDotProductMask4<_src0, _src1, _src2, _src3, _dst0, _dst1, _dst2, _dst3>()>(lhs, rhs);
 }
 
 
@@ -32,7 +32,7 @@ inline __m128 DotProduct(const __m128& lhs, const __m128& rhs)
 template <U32 _src0, U32 _src1, U32 _src2, U32 _src3>
 inline F32 DotProductF32(const __m128& lhs, const __m128& rhs)
 {
-    return _mmx_cvtsx_fx(DotProduct<_src0, _src1, _src2, _src3>(lhs, rhs));
+    return _mm_cvtsF(DotProduct<_src0, _src1, _src2, _src3>(lhs, rhs));
 }
 
 
@@ -40,7 +40,7 @@ inline F32 DotProductF32(const __m128& lhs, const __m128& rhs)
 template <U32 _src0, U32 _src1, U32 _src2, U32 _src3, U32 _dst0, U32 _dst1, U32 _dst2, U32 _dst3>
 inline __m256 DotProduct(const __m256& lhs, const __m256& rhs)
 {
-    return _mmx_dp_p<GetDotProductMask4<_src0, _src1, _src2, _src3, _dst0, _dst1, _dst2, _dst3>()>(lhs, rhs);
+    return _mm_dp<GetDotProductMask4<_src0, _src1, _src2, _src3, _dst0, _dst1, _dst2, _dst3>()>(lhs, rhs);
 }
 
 } // namespace GDL::simd

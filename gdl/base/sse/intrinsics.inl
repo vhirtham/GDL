@@ -16,7 +16,7 @@ namespace GDL
 // --------------------------------------------------------------------------------------------------------------------
 
 template <typename _type, typename _registerType>
-inline void _mmx_store_p(_type* ptr, _registerType reg)
+inline void _mm_store(_type* ptr, _registerType reg)
 {
     using namespace GDL::simd;
     static_assert(IsRegisterType<_registerType>, "Function can only be used with compatible register types.");
@@ -60,7 +60,7 @@ inline _registerType _mmx_load_p(_type* ptr)
 // --------------------------------------------------------------------------------------------------------------------
 
 template <typename _registerType>
-inline _registerType _mmx_setzero_p()
+inline _registerType _mm_setzero()
 {
     using namespace GDL::simd;
     static_assert(IsRegisterType<_registerType>, "Function can only be used with compatible register types.");
@@ -82,7 +82,7 @@ inline _registerType _mmx_setzero_p()
 // --------------------------------------------------------------------------------------------------------------------
 
 template <typename _registerType, typename _type>
-inline _registerType _mmx_set1_p(_type value)
+inline _registerType _mm_set1(_type value)
 {
     using namespace GDL::simd;
     static_assert(IsRegisterType<_registerType>, "Function can only be used with compatible register types.");
@@ -104,7 +104,7 @@ inline _registerType _mmx_set1_p(_type value)
 // --------------------------------------------------------------------------------------------------------------------
 
 template <typename _registerType, typename... _args>
-inline _registerType _mmx_setr_p(_args... args)
+inline _registerType _mm_setr(_args... args)
 {
     using namespace GDL::simd;
     static_assert(IsRegisterType<_registerType>, "Function can only be used with compatible register types.");
@@ -126,7 +126,7 @@ inline _registerType _mmx_setr_p(_args... args)
 // --------------------------------------------------------------------------------------------------------------------
 
 template <typename _registerType>
-inline _registerType _mmx_add_p(_registerType lhs, _registerType rhs)
+inline _registerType _mm_add(_registerType lhs, _registerType rhs)
 {
     using namespace GDL::simd;
     static_assert(IsRegisterType<_registerType>, "Function can only be used with compatible register types.");
@@ -148,7 +148,7 @@ inline _registerType _mmx_add_p(_registerType lhs, _registerType rhs)
 // --------------------------------------------------------------------------------------------------------------------
 
 template <typename _registerType>
-inline _registerType _mmx_sub_p(_registerType lhs, _registerType rhs)
+inline _registerType _mm_sub(_registerType lhs, _registerType rhs)
 {
     using namespace GDL::simd;
     static_assert(IsRegisterType<_registerType>, "Function can only be used with compatible register types.");
@@ -170,7 +170,7 @@ inline _registerType _mmx_sub_p(_registerType lhs, _registerType rhs)
 // --------------------------------------------------------------------------------------------------------------------
 
 template <typename _registerType>
-inline _registerType _mmx_mul_p(_registerType lhs, _registerType rhs)
+inline _registerType _mm_mul(_registerType lhs, _registerType rhs)
 {
     using namespace GDL::simd;
     static_assert(IsRegisterType<_registerType>, "Function can only be used with compatible register types.");
@@ -192,7 +192,7 @@ inline _registerType _mmx_mul_p(_registerType lhs, _registerType rhs)
 // --------------------------------------------------------------------------------------------------------------------
 
 template <typename _registerType>
-_registerType _mmx_div_p(_registerType lhs, _registerType rhs)
+_registerType _mm_div(_registerType lhs, _registerType rhs)
 {
     using namespace GDL::simd;
     static_assert(IsRegisterType<_registerType>, "Function can only be used with compatible register types.");
@@ -214,13 +214,13 @@ _registerType _mmx_div_p(_registerType lhs, _registerType rhs)
 // --------------------------------------------------------------------------------------------------------------------
 
 template <typename _registerType>
-inline _registerType _mmx_fmadd_p(_registerType lhsM, _registerType rhsM, _registerType add)
+inline _registerType _mm_fmadd(_registerType lhsM, _registerType rhsM, _registerType add)
 {
     using namespace GDL::simd;
     static_assert(IsRegisterType<_registerType>, "Function can only be used with compatible register types.");
 
 #ifndef __FMA__
-    return _mmx_add_p(_mmx_mul_p(lhsM, rhsM), add);
+    return _mm_add(_mm_mul(lhsM, rhsM), add);
 #else
     if constexpr (Is__m128<_registerType>)
         return _mm_fmadd_ps(lhsM, rhsM, add);
@@ -240,13 +240,13 @@ inline _registerType _mmx_fmadd_p(_registerType lhsM, _registerType rhsM, _regis
 // --------------------------------------------------------------------------------------------------------------------
 
 template <typename _registerType>
-inline _registerType _mmx_fnmadd_p(_registerType lhsM, _registerType rhsM, _registerType add)
+inline _registerType _mm_fnmadd(_registerType lhsM, _registerType rhsM, _registerType add)
 {
     using namespace GDL::simd;
     static_assert(IsRegisterType<_registerType>, "Function can only be used with compatible register types.");
 
 #ifndef __FMA__
-    return _mmx_sub_p(add, _mmx_mul_p(lhsM, rhsM));
+    return _mm_sub(add, _mm_mul(lhsM, rhsM));
 #else
     if constexpr (Is__m128<_registerType>)
         return _mm_fnmadd_ps(lhsM, rhsM, add);
@@ -266,13 +266,13 @@ inline _registerType _mmx_fnmadd_p(_registerType lhsM, _registerType rhsM, _regi
 // --------------------------------------------------------------------------------------------------------------------
 
 template <typename _registerType>
-inline _registerType _mmx_fmsub_p(_registerType lhsM, _registerType rhsM, _registerType sub)
+inline _registerType _mm_fmsub(_registerType lhsM, _registerType rhsM, _registerType sub)
 {
     using namespace GDL::simd;
     static_assert(IsRegisterType<_registerType>, "Function can only be used with compatible register types.");
 
 #ifndef __FMA__
-    return _mmx_sub_p(_mmx_mul_p(lhsM, rhsM), sub);
+    return _mm_sub(_mm_mul(lhsM, rhsM), sub);
 #else
     if constexpr (Is__m128<_registerType>)
         return _mm_fmsub_ps(lhsM, rhsM, sub);
@@ -292,13 +292,13 @@ inline _registerType _mmx_fmsub_p(_registerType lhsM, _registerType rhsM, _regis
 // --------------------------------------------------------------------------------------------------------------------
 
 template <typename _registerType>
-inline _registerType _mmx_fnmsub_p(_registerType lhsM, _registerType rhsM, _registerType sub)
+inline _registerType _mm_fnmsub(_registerType lhsM, _registerType rhsM, _registerType sub)
 {
     using namespace GDL::simd;
     static_assert(IsRegisterType<_registerType>, "Function can only be used with compatible register types.");
 
 #ifndef __FMA__
-    return _mmx_sub_p(Negate(_mmx_mul_p(lhsM, rhsM)), sub);
+    return _mm_sub(Negate(_mm_mul(lhsM, rhsM)), sub);
 #else
     if constexpr (Is__m128<_registerType>)
         return _mm_fnmsub_ps(lhsM, rhsM, sub);
@@ -318,7 +318,7 @@ inline _registerType _mmx_fnmsub_p(_registerType lhsM, _registerType rhsM, _regi
 // --------------------------------------------------------------------------------------------------------------------
 
 template <U32 _mask, typename _registerType>
-_registerType _mmx_dp_p(_registerType lhs, _registerType rhs)
+_registerType _mm_dp(_registerType lhs, _registerType rhs)
 {
     using namespace GDL::simd;
     static_assert(Is__m128<_registerType> || Is__m128d<_registerType> || Is__m256<_registerType>,
@@ -340,7 +340,7 @@ _registerType _mmx_dp_p(_registerType lhs, _registerType rhs)
 // --------------------------------------------------------------------------------------------------------------------
 
 template <typename _registerType>
-_registerType _mmx_sqrt_p(_registerType reg)
+_registerType _mm_sqrt(_registerType reg)
 {
     using namespace GDL::simd;
     static_assert(IsRegisterType<_registerType>, "Function can only be used with compatible register types.");
@@ -362,7 +362,7 @@ _registerType _mmx_sqrt_p(_registerType reg)
 // --------------------------------------------------------------------------------------------------------------------
 
 template <typename _registerType>
-_registerType _mmx_rsqrt_p(_registerType reg)
+_registerType _mm_rsqrt(_registerType reg)
 {
     using namespace GDL::simd;
     static_assert(IsRegisterType<_registerType>, "Function can only be used with compatible register types.");
@@ -384,7 +384,7 @@ _registerType _mmx_rsqrt_p(_registerType reg)
 // --------------------------------------------------------------------------------------------------------------------
 
 template <typename _registerType>
-inline auto _mmx_cmpeq_p(_registerType lhs, _registerType rhs)
+inline auto _mm_cmpeq(_registerType lhs, _registerType rhs)
 {
     using namespace GDL::simd;
     static_assert(IsRegisterType<_registerType>, "Function can only be used with compatible register types.");
@@ -406,7 +406,7 @@ inline auto _mmx_cmpeq_p(_registerType lhs, _registerType rhs)
 // --------------------------------------------------------------------------------------------------------------------
 
 template <typename _registerType>
-inline auto _mmx_cmple_p(_registerType lhs, _registerType rhs)
+inline auto _mm_cmple(_registerType lhs, _registerType rhs)
 {
     using namespace GDL::simd;
     static_assert(IsRegisterType<_registerType>, "Function can only be used with compatible register types.");
@@ -428,7 +428,7 @@ inline auto _mmx_cmple_p(_registerType lhs, _registerType rhs)
 // --------------------------------------------------------------------------------------------------------------------
 
 template <typename _registerType>
-inline auto _mmx_cmpgt_p(_registerType lhs, _registerType rhs)
+inline auto _mm_cmpgt(_registerType lhs, _registerType rhs)
 {
     using namespace GDL::simd;
     static_assert(IsRegisterType<_registerType>, "Function can only be used with compatible register types.");
@@ -450,7 +450,7 @@ inline auto _mmx_cmpgt_p(_registerType lhs, _registerType rhs)
 // --------------------------------------------------------------------------------------------------------------------
 
 template <typename _registerType>
-inline auto _mmx_cmplt_p(_registerType lhs, _registerType rhs)
+inline auto _mm_cmplt(_registerType lhs, _registerType rhs)
 {
     using namespace GDL::simd;
     static_assert(IsRegisterType<_registerType>, "Function can only be used with compatible register types.");
@@ -472,7 +472,7 @@ inline auto _mmx_cmplt_p(_registerType lhs, _registerType rhs)
 // --------------------------------------------------------------------------------------------------------------------
 
 template <typename _registerType>
-inline _registerType _mmx_max_p(_registerType lhs, _registerType rhs)
+inline _registerType _mm_max(_registerType lhs, _registerType rhs)
 {
     using namespace GDL::simd;
     static_assert(IsRegisterType<_registerType>, "Function can only be used with compatible register types.");
@@ -494,7 +494,7 @@ inline _registerType _mmx_max_p(_registerType lhs, _registerType rhs)
 // --------------------------------------------------------------------------------------------------------------------
 
 template <typename _registerType>
-inline _registerType _mmx_min_p(_registerType lhs, _registerType rhs)
+inline _registerType _mm_min(_registerType lhs, _registerType rhs)
 {
     using namespace GDL::simd;
     static_assert(IsRegisterType<_registerType>, "Function can only be used with compatible register types.");
@@ -516,7 +516,7 @@ inline _registerType _mmx_min_p(_registerType lhs, _registerType rhs)
 // --------------------------------------------------------------------------------------------------------------------
 
 template <typename _registerType>
-inline _registerType _mmx_andnot_p(_registerType lhs, _registerType rhs)
+inline _registerType _mm_andnot(_registerType lhs, _registerType rhs)
 {
     using namespace GDL::simd;
     static_assert(IsRegisterType<_registerType>, "Function can only be used with compatible register types.");
@@ -538,7 +538,7 @@ inline _registerType _mmx_andnot_p(_registerType lhs, _registerType rhs)
 // --------------------------------------------------------------------------------------------------------------------
 
 template <typename _registerType>
-inline _registerType _mmx_xor_p(_registerType lhs, _registerType rhs)
+inline _registerType _mm_xor(_registerType lhs, _registerType rhs)
 {
     using namespace GDL::simd;
     static_assert(IsRegisterType<_registerType>, "Function can only be used with compatible register types.");
@@ -560,7 +560,7 @@ inline _registerType _mmx_xor_p(_registerType lhs, _registerType rhs)
 // --------------------------------------------------------------------------------------------------------------------
 
 template <typename _registerType>
-inline auto _mmx_movemask_epi8(_registerType reg)
+inline auto _mm_movemaskEpi8(_registerType reg)
 {
     using namespace GDL::simd;
     static_assert(Is__m128i<_registerType> || Is__m256i<_registerType>,
@@ -579,7 +579,7 @@ inline auto _mmx_movemask_epi8(_registerType reg)
 // --------------------------------------------------------------------------------------------------------------------
 
 template <typename _registerType>
-inline auto _mmx_cvtsx_fx(_registerType reg)
+inline auto _mm_cvtsF(_registerType reg)
 {
     using namespace GDL::simd;
     static_assert(IsRegisterType<_registerType>, "Function can only be used with compatible register types.");
@@ -601,7 +601,7 @@ inline auto _mmx_cvtsx_fx(_registerType reg)
 // --------------------------------------------------------------------------------------------------------------------
 
 template <I32 _blendMask, typename _registerType>
-inline auto _mmx_blend_p(_registerType src0, _registerType src1)
+inline auto _mm_blend(_registerType src0, _registerType src1)
 {
     using namespace GDL::simd;
     static_assert(IsRegisterType<_registerType>, "Function can only be used with compatible register types.");
@@ -623,7 +623,7 @@ inline auto _mmx_blend_p(_registerType src0, _registerType src1)
 // --------------------------------------------------------------------------------------------------------------------
 
 template <typename _registerType>
-inline auto _mmx_blendv_p(_registerType src0, _registerType src1, _registerType _blendMask)
+inline auto _mm_blendv(_registerType src0, _registerType src1, _registerType _blendMask)
 {
     using namespace GDL::simd;
     static_assert(IsRegisterType<_registerType>, "Function can only be used with compatible register types.");
@@ -645,7 +645,7 @@ inline auto _mmx_blendv_p(_registerType src0, _registerType src1, _registerType 
 // --------------------------------------------------------------------------------------------------------------------
 
 template <I32 _permuteMask, typename _registerType>
-inline auto _mmx_permute_p(_registerType reg)
+inline auto _mm_permute(_registerType reg)
 {
     using namespace GDL::simd;
     static_assert(IsRegisterType<_registerType>, "Function can only be used with compatible register types.");
@@ -674,7 +674,7 @@ inline auto _mmx_permute_p(_registerType reg)
 #ifdef __AVX2__
 
 template <I32 _permuteMask, typename _registerType>
-inline auto _mmx_permute2f128_p(_registerType src0, _registerType src1)
+inline auto _mm_permute2f128(_registerType src0, _registerType src1)
 {
     using namespace GDL::simd;
     static_assert(Is__m256<_registerType> || Is__m256d<_registerType>,
@@ -693,7 +693,7 @@ inline auto _mmx_permute2f128_p(_registerType src0, _registerType src1)
 // --------------------------------------------------------------------------------------------------------------------
 
 template <I32 _shuffleMask, typename _registerType>
-inline auto _mmx_shuffle_p(_registerType src0, _registerType src1)
+inline auto _mm_shuffle(_registerType src0, _registerType src1)
 {
     using namespace GDL::simd;
     static_assert(IsRegisterType<_registerType>, "Function can only be used with compatible register types.");

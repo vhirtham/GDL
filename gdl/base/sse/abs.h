@@ -14,8 +14,8 @@ namespace GDL::simd
 template <typename _registerType>
 inline _registerType Abs(_registerType reg)
 {
-    const _registerType mask = _mmx_set1_p<_registerType>(-0.0);
-    return _mmx_andnot_p(mask, reg);
+    const _registerType mask = _mm_set1<_registerType>(-0.0);
+    return _mm_andnot(mask, reg);
 }
 
 } // namespace GDL::simd

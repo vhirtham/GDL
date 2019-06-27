@@ -18,7 +18,7 @@ inline auto GetValue(const _registerType reg)
     static_assert(_index < simd::numRegisterValues<_registerType>, "Index >= numRegisterValues");
 
     alignas(simd::alignmentBytes<_registerType>) ValueType array[simd::numRegisterValues<_registerType>];
-    _mmx_store_p(array, reg);
+    _mm_store(array, reg);
     return array[_index];
 }
 
@@ -32,7 +32,7 @@ inline auto GetValue(const _registerType reg, const U32 index)
     DEV_EXCEPTION(index >= simd::numRegisterValues<_registerType>, "Index >= numRegisterValues");
 
     alignas(simd::alignmentBytes<_registerType>) ValueType array[simd::numRegisterValues<_registerType>];
-    _mmx_store_p(array, reg);
+    _mm_store(array, reg);
     return array[index];
 }
 
@@ -48,7 +48,7 @@ inline auto SetValue(_registerType& reg, const _type value)
                   "The values type can't be converted to the registers value type");
 
     alignas(simd::alignmentBytes<_registerType>) ValueType array[simd::numRegisterValues<_registerType>];
-    _mmx_store_p(array, reg);
+    _mm_store(array, reg);
     array[_index] = static_cast<ValueType>(value);
     reg = _mmx_load_p<_registerType>(array);
 }
@@ -65,7 +65,7 @@ inline auto SetValue(_registerType& reg, const U32 index, const _type value)
                   "The values type can't be converted to the registers value type");
 
     alignas(simd::alignmentBytes<_registerType>) ValueType array[simd::numRegisterValues<_registerType>];
-    _mmx_store_p(array, reg);
+    _mm_store(array, reg);
     array[index] = static_cast<ValueType>(value);
     reg = _mmx_load_p<_registerType>(array);
 }

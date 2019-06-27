@@ -34,11 +34,11 @@ F32 PointInsideSphere(const Vec3fSSE<_isCol>& point, const Vec3fSSE<_isCol>& c0,
     __m128 cy = Shuffle<2, 3, 2, 3>(c01xy, c23xy);
     __m128 cz = Shuffle<0, 1, 0, 1>(c01z0, c23z0);
 
-    __m128 tmp0 = _mmx_sub_p(cx, px);
-    __m128 tmp1 = _mmx_sub_p(cy, py);
-    __m128 tmp2 = _mmx_sub_p(cz, pz);
+    __m128 tmp0 = _mm_sub(cx, px);
+    __m128 tmp1 = _mm_sub(cy, py);
+    __m128 tmp2 = _mm_sub(cz, pz);
 
-    __m128 tmp3 = _mmx_fmadd_p(tmp0, tmp0, _mmx_fmadd_p(tmp1, tmp1, _mmx_mul_p(tmp2, tmp2)));
+    __m128 tmp3 = _mm_fmadd(tmp0, tmp0, _mm_fmadd(tmp1, tmp1, _mm_mul(tmp2, tmp2)));
 
     return Determinant4x4(tmp0, tmp1, tmp2, tmp3);
 }

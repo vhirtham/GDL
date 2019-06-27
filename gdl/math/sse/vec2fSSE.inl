@@ -17,7 +17,7 @@ namespace GDL
 
 template <bool _isCol>
 Vec2fSSE<_isCol>::Vec2fSSE()
-    : mData{_mmx_setzero_p<__m128>()}
+    : mData{_mm_setzero<__m128>()}
 {
     DEV_EXCEPTION(!IsDataAligned(), "Register of Vec2fSSE is not aligned");
 }
@@ -35,7 +35,7 @@ Vec2fSSE<_isCol>::Vec2fSSE(const Vec2fSSE& other)
 
 template <bool _isCol>
 Vec2fSSE<_isCol>::Vec2fSSE(std::array<F32, 2> data)
-    : mData{_mmx_setr_p<__m128>(data[0], data[1], 0, 0)}
+    : mData{_mm_setr<__m128>(data[0], data[1], 0, 0)}
 {
     DEV_EXCEPTION(!IsDataAligned(), "Register of Vec2fSSE is not aligned");
 }
@@ -44,7 +44,7 @@ Vec2fSSE<_isCol>::Vec2fSSE(std::array<F32, 2> data)
 
 template <bool _isCol>
 Vec2fSSE<_isCol>::Vec2fSSE(F32 v0, F32 v1)
-    : mData{_mmx_setr_p<__m128>(v0, v1, 0, 0)}
+    : mData{_mm_setr<__m128>(v0, v1, 0, 0)}
 {
     DEV_EXCEPTION(!IsDataAligned(), "Register of Vec2fSSE is not aligned");
 }
@@ -89,7 +89,7 @@ bool Vec2fSSE<_isCol>::operator!=(const Vec2fSSE& rhs) const
 template <bool _isCol>
 Vec2fSSE<_isCol>& Vec2fSSE<_isCol>::operator+=(const Vec2fSSE& rhs)
 {
-    mData = _mmx_add_p(mData, rhs.mData);
+    mData = _mm_add(mData, rhs.mData);
     return *this;
 }
 
@@ -98,7 +98,7 @@ Vec2fSSE<_isCol>& Vec2fSSE<_isCol>::operator+=(const Vec2fSSE& rhs)
 template <bool _isCol>
 Vec2fSSE<_isCol>& Vec2fSSE<_isCol>::operator-=(const Vec2fSSE& rhs)
 {
-    mData = _mmx_sub_p(mData, rhs.mData);
+    mData = _mm_sub(mData, rhs.mData);
     return *this;
 }
 
@@ -107,7 +107,7 @@ Vec2fSSE<_isCol>& Vec2fSSE<_isCol>::operator-=(const Vec2fSSE& rhs)
 template <bool _isCol>
 Vec2fSSE<_isCol> Vec2fSSE<_isCol>::operator+(const Vec2fSSE& rhs) const
 {
-    return _mmx_add_p(mData, rhs.mData);
+    return _mm_add(mData, rhs.mData);
 }
 
 
@@ -115,7 +115,7 @@ Vec2fSSE<_isCol> Vec2fSSE<_isCol>::operator+(const Vec2fSSE& rhs) const
 template <bool _isCol>
 Vec2fSSE<_isCol> Vec2fSSE<_isCol>::operator-(const Vec2fSSE& rhs) const
 {
-    return _mmx_sub_p(mData, rhs.mData);
+    return _mm_sub(mData, rhs.mData);
 }
 
 
@@ -123,7 +123,7 @@ Vec2fSSE<_isCol> Vec2fSSE<_isCol>::operator-(const Vec2fSSE& rhs) const
 template <bool _isCol>
 Vec2fSSE<_isCol> Vec2fSSE<_isCol>::operator*(F32 rhs) const
 {
-    return _mmx_mul_p(mData, _mmx_setr_p<__m128>(rhs, rhs, 0.f, 0.f));
+    return _mm_mul(mData, _mm_setr<__m128>(rhs, rhs, 0.f, 0.f));
 }
 
 
@@ -160,7 +160,7 @@ F32 Vec2fSSE<_isCol>::Dot(Vec2fSSE<_isColRhs> rhs) const
 template <bool _isCol>
 F32 Vec2fSSE<_isCol>::Length() const
 {
-    return _mmx_cvtsx_fx(_mmx_sqrt_p(simd::DotProduct<1, 1, 0, 0>(mData, mData)));
+    return _mm_cvtsF(_mm_sqrt(simd::DotProduct<1, 1, 0, 0>(mData, mData)));
 }
 
 
@@ -169,7 +169,7 @@ template <bool _isCol>
 Vec2fSSE<_isCol>& Vec2fSSE<_isCol>::Normalize()
 {
     DEV_EXCEPTION(*this == Vec2fSSE(), "Vector length is 0. Can't normalize the vector.");
-    mData = _mmx_div_p(mData, _mmx_sqrt_p(simd::DotProduct<1, 1, 0, 0>(mData, mData)));
+    mData = _mm_div(mData, _mm_sqrt(simd::DotProduct<1, 1, 0, 0>(mData, mData)));
 
     return *this;
 }

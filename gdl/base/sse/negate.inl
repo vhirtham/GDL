@@ -51,7 +51,7 @@ inline _registerType Negate(_registerType source)
 template <U32 _n0, U32 _n1>
 inline __m128d Negate(const __m128d source)
 {
-    return _mmx_xor_p(source, NegationMask<_n0, _n1>());
+    return _mm_xor(source, NegationMask<_n0, _n1>());
 }
 
 
@@ -59,7 +59,7 @@ inline __m128d Negate(const __m128d source)
 template <U32 _n0, U32 _n1, U32 _n2, U32 _n3, typename _registerType>
 inline _registerType Negate(const _registerType source)
 {
-    return _mmx_xor_p(source, NegationMask<_registerType, _n0, _n1, _n2, _n3>());
+    return _mm_xor(source, NegationMask<_registerType, _n0, _n1, _n2, _n3>());
 }
 
 
@@ -69,7 +69,7 @@ inline _registerType Negate(const _registerType source)
 template <U32 _n0, U32 _n1, U32 _n2, U32 _n3, U32 _n4, U32 _n5, U32 _n6, U32 _n7>
 inline __m256 Negate(const __m256 source)
 {
-    return _mmx_xor_p(source, NegationMask<_n0, _n1, _n2, _n3, _n4, _n5, _n6, _n7>());
+    return _mm_xor(source, NegationMask<_n0, _n1, _n2, _n3, _n4, _n5, _n6, _n7>());
 }
 
 #endif // __AVX2__
@@ -79,7 +79,7 @@ inline __m256 Negate(const __m256 source)
 template <U32 _n0, U32 _n1>
 inline __m128d NegationMask()
 {
-    return _mmx_setr_p<__m128d>(SignMask<F64, _n0>(), SignMask<F64, _n1>());
+    return _mm_setr<__m128d>(SignMask<F64, _n0>(), SignMask<F64, _n1>());
 }
 
 
@@ -91,7 +91,7 @@ inline _registerType NegationMask()
                   "Function overload only compatble with __m128 and __m256d registers.");
 
     using ValueType = decltype(GetDataType<_registerType>());
-    return _mmx_setr_p<_registerType>(SignMask<ValueType, _n0>(), SignMask<ValueType, _n1>(),
+    return _mm_setr<_registerType>(SignMask<ValueType, _n0>(), SignMask<ValueType, _n1>(),
                                       SignMask<ValueType, _n2>(), SignMask<ValueType, _n3>());
 }
 
@@ -101,7 +101,7 @@ inline _registerType NegationMask()
 template <U32 _n0, U32 _n1, U32 _n2, U32 _n3, U32 _n4, U32 _n5, U32 _n6, U32 _n7>
 inline __m256 NegationMask()
 {
-    return _mmx_setr_p<__m256>(SignMask<F32, _n0>(), SignMask<F32, _n1>(), SignMask<F32, _n2>(), SignMask<F32, _n3>(),
+    return _mm_setr<__m256>(SignMask<F32, _n0>(), SignMask<F32, _n1>(), SignMask<F32, _n2>(), SignMask<F32, _n3>(),
                                SignMask<F32, _n4>(), SignMask<F32, _n5>(), SignMask<F32, _n6>(), SignMask<F32, _n7>());
 }
 

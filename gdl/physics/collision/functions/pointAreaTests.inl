@@ -28,10 +28,10 @@ F32 PointInsideCircle(const Vec2fSSE<_isCol>& point, const Vec2fSSE<_isCol>& c0,
     __m128 cx = Shuffle<0, 1, 0, 3>(c01, c2.DataSSE());
     __m128 cy = Shuffle<2, 3, 1, 3>(c01, c2.DataSSE());
 
-    __m128 tmp0 = _mmx_sub_p(cx, px);
-    __m128 tmp1 = _mmx_sub_p(cy, py);
+    __m128 tmp0 = _mm_sub(cx, px);
+    __m128 tmp1 = _mm_sub(cy, py);
 
-    __m128 tmp2 = _mmx_fmadd_p(tmp0, tmp0, _mmx_mul_p(tmp1, tmp1));
+    __m128 tmp2 = _mm_fmadd(tmp0, tmp0, _mm_mul(tmp1, tmp1));
 
     return Determinant3x3(tmp0, tmp1, tmp2);
 }

@@ -67,7 +67,7 @@ void TestSetValue()
 {
     using _valueType = decltype(simd::GetDataType<_registerType>());
 
-    _registerType reg1 = _mmx_setzero_p<_registerType>();
+    _registerType reg1 = _mm_setzero<_registerType>();
     BOOST_CHECK(reg1 == ApproxZero<_registerType>());
 
     simd::SetValue<0>(reg1, 1);
@@ -88,13 +88,13 @@ void TestSetValue()
     BOOST_CHECK(reg1 != ApproxZero<_registerType>());
 
     alignas(simd::alignmentBytes<_registerType>) std::array<_valueType, simd::numRegisterValues<_registerType>> values;
-    _mmx_store_p(values.data(), reg1);
+    _mm_store(values.data(), reg1);
     for (U32 i = 0; i < values.size(); ++i)
         BOOST_CHECK(values[i] == Approx(static_cast<_valueType>(i + 1)));
 
 
 
-    _registerType reg2 = _mmx_setzero_p<_registerType>();
+    _registerType reg2 = _mm_setzero<_registerType>();
     BOOST_CHECK(reg2 == ApproxZero<_registerType>());
     for (U32 i = 0; i < values.size(); ++i)
         simd::SetValue(reg2, i, i + 1);
@@ -103,7 +103,7 @@ void TestSetValue()
     BOOST_CHECK(reg2 != ApproxZero<_registerType>());
 
     alignas(simd::alignmentBytes<_registerType>) std::array<_valueType, simd::numRegisterValues<_registerType>> values2;
-    _mmx_store_p(values2.data(), reg2);
+    _mm_store(values2.data(), reg2);
     for (U32 i = 0; i < values2.size(); ++i)
         BOOST_CHECK(values2[i] == Approx(static_cast<_valueType>(i + 1)));
 }

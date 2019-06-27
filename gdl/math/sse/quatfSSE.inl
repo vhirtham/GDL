@@ -15,7 +15,7 @@ namespace GDL
 
 
 QuatfSSE::QuatfSSE()
-    : mData{_mmx_setzero_p<__m128>()}
+    : mData{_mm_setzero<__m128>()}
 {
     DEV_EXCEPTION(!IsDataAligned(), "Register of QuatfSSE is not aligned");
 }
@@ -31,7 +31,7 @@ QuatfSSE::QuatfSSE(const QuatfSSE& other)
 
 
 QuatfSSE::QuatfSSE(std::array<F32, 4> data)
-    : mData{_mmx_setr_p<__m128>(data[0], data[1], data[2], data[3])}
+    : mData{_mm_setr<__m128>(data[0], data[1], data[2], data[3])}
 {
     DEV_EXCEPTION(!IsDataAligned(), "Register of QuatfSSE is not aligned");
 }
@@ -39,7 +39,7 @@ QuatfSSE::QuatfSSE(std::array<F32, 4> data)
 
 
 QuatfSSE::QuatfSSE(F32 x, F32 y, F32 z, F32 w)
-    : mData{_mmx_setr_p<__m128>(x, y, z, w)}
+    : mData{_mm_setr<__m128>(x, y, z, w)}
 {
     DEV_EXCEPTION(!IsDataAligned(), "Register of QuatfSSE is not aligned");
 }

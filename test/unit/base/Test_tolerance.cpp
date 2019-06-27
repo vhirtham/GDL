@@ -56,9 +56,9 @@ void TestToleranceSSE()
     using ToleranceType = Tolerance<_registerType, _count>;
 
     F32 toleranceValue = 1.5;
-    alignas(simd::alignmentBytes<_registerType>) _registerType ref = _mmx_setzero_p<_registerType>();
+    alignas(simd::alignmentBytes<_registerType>) _registerType ref = _mm_setzero<_registerType>();
     alignas(simd::alignmentBytes<_registerType>) _registerType toleranceValueSSE =
-            _mmx_set1_p<_registerType>(toleranceValue);
+            _mm_set1<_registerType>(toleranceValue);
 
     for (U32 i = 0; i < numRegisterEntries; ++i)
         simd::SetValue(ref, i, i);
@@ -77,8 +77,8 @@ void TestToleranceSSE()
 
         BOOST_CHECK(tolerance == ref);
         BOOST_CHECK(ref == tolerance);
-        BOOST_CHECK(tolerance != _mmx_set1_p<_registerType>(-10));
-        BOOST_CHECK(_mmx_set1_p<_registerType>(-10) != tolerance);
+        BOOST_CHECK(tolerance != _mm_set1<_registerType>(-10));
+        BOOST_CHECK(_mm_set1<_registerType>(-10) != tolerance);
 
         alignas(simd::alignmentBytes<_registerType>) _registerType cmpAll;
         alignas(simd::alignmentBytes<_registerType>) _registerType cmpSingle;
@@ -87,7 +87,7 @@ void TestToleranceSSE()
         {
             // All values modified
             // -------------------
-            cmpAll = _mmx_add_p(ref, _mmx_set1_p<_registerType>(i));
+            cmpAll = _mm_add(ref, _mm_set1<_registerType>(i));
 
             // Not compared values are equal to ref
             for (U32 j = _count; j < numRegisterEntries; ++j)
@@ -154,12 +154,12 @@ void TestToleranceSSE()
 
     GDL_CHECK_THROW_DEV(ToleranceType(ref, 0), Exception);
     GDL_CHECK_THROW_DEV(ToleranceType(ref, -1), Exception);
-    GDL_CHECK_THROW_DEV(ToleranceType(ref, _mmx_setzero_p<_registerType>()), Exception);
-    GDL_CHECK_THROW_DEV(ToleranceType(ref, _mmx_set1_p<_registerType>(-1)), Exception);
+    GDL_CHECK_THROW_DEV(ToleranceType(ref, _mm_setzero<_registerType>()), Exception);
+    GDL_CHECK_THROW_DEV(ToleranceType(ref, _mm_set1<_registerType>(-1)), Exception);
     // Only one invalid tolerance
     for (U32 i = 0; i < numRegisterEntries; ++i)
     {
-        toleranceValueSSE = _mmx_set1_p<_registerType>(toleranceValue);
+        toleranceValueSSE = _mm_set1<_registerType>(toleranceValue);
         simd::SetValue(toleranceValueSSE, i, -1);
         GDL_CHECK_THROW_DEV(ToleranceType(ref, toleranceValueSSE), Exception);
     }

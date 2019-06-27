@@ -124,7 +124,7 @@ template <typename _type, I32 _rows, I32 _cols>
 MatSSE<_type, _rows, _cols>& MatSSE<_type, _rows, _cols>::operator+=(const MatSSE<_type, _rows, _cols>& rhs)
 {
     for (U32 i = 0; i < mData.size(); ++i)
-        mData[i] = _mmx_add_p(rhs.mData[i], mData[i]);
+        mData[i] = _mm_add(rhs.mData[i], mData[i]);
     return *this;
 }
 
@@ -135,7 +135,7 @@ MatSSE<_type, _rows, _cols> MatSSE<_type, _rows, _cols>::operator+(const MatSSE<
 {
     MatSSE<_type, _rows, _cols> result{true};
     for (U32 i = 0; i < mNumRegisters; ++i)
-        result.mData[i] = _mmx_add_p(rhs.mData[i], mData[i]);
+        result.mData[i] = _mm_add(rhs.mData[i], mData[i]);
     return result;
 }
 
@@ -211,7 +211,7 @@ void MatSSE<_type, _rows, _cols>::TransposeSparseBlocks(MatSSE<_type, _cols, _ro
     {
         if constexpr (_hasSparseCols && _count >= _cols % mNumRegisterEntries)
         {
-            alignas(mAlignment) RegisterType tmp = _mmx_setzero_p<RegisterType>();
+            alignas(mAlignment) RegisterType tmp = _mm_setzero<RegisterType>();
             TransposeSparseBlocks<_hasSparseRows, _hasSparseCols, _count + 1>(result, indexBlock, args..., tmp);
         }
         else
@@ -225,7 +225,7 @@ void MatSSE<_type, _rows, _cols>::TransposeSparseBlocks(MatSSE<_type, _cols, _ro
     {
         if constexpr (_hasSparseRows && _count >= _rows % mNumRegisterEntries + mNumRegisterEntries)
         {
-            alignas(mAlignment) RegisterType tmp = _mmx_setzero_p<RegisterType>();
+            alignas(mAlignment) RegisterType tmp = _mm_setzero<RegisterType>();
             TransposeSparseBlocks<_hasSparseRows, _hasSparseCols, _count + 1>(result, indexBlock, args..., tmp);
         }
         else
@@ -389,10 +389,10 @@ MatSSE<_type, _rows, _cols>::MultiplyAddRegisters(const RegisterType rhsValues, 
 
 
     if constexpr (_count + 1 == _numOperations)
-        return _mmx_fmadd_p(mData[currentBlockIndex + _count * mNumRegistersPerCol],
+        return _mm_fmadd(mData[currentBlockIndex + _count * mNumRegistersPerCol],
                             simd::BroadcastAcrossLanes<_count>(rhsValues), currentValue);
     else
-        return _mmx_fmadd_p(
+        return _mm_fmadd(
                 mData[currentBlockIndex + _count * mNumRegistersPerCol], simd::BroadcastAcrossLanes<_count>(rhsValues),
                 MultiplyAddRegisters<_numOperations, _count + 1>(rhsValues, currentValue, currentBlockIndex));
 }

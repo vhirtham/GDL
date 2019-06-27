@@ -22,7 +22,7 @@ namespace GDL
 
 
 Mat2fSSE::Mat2fSSE()
-    : mData{_mmx_setzero_p<__m128>()}
+    : mData{_mm_setzero<__m128>()}
 {
     DEV_EXCEPTION(!IsDataAligned(), "Register of Mat2fSSE is not 16 byte aligned");
 }
@@ -30,7 +30,7 @@ Mat2fSSE::Mat2fSSE()
 
 
 Mat2fSSE::Mat2fSSE(std::array<F32, 4> data)
-    : mData{_mmx_setr_p<__m128>(data[0], data[1], data[2], data[3])}
+    : mData{_mm_setr<__m128>(data[0], data[1], data[2], data[3])}
 {
     DEV_EXCEPTION(!IsDataAligned(), "Register of Mat2fSSE is not 16 byte aligned");
 }
@@ -38,7 +38,7 @@ Mat2fSSE::Mat2fSSE(std::array<F32, 4> data)
 
 
 Mat2fSSE::Mat2fSSE(F32 v0, F32 v1, F32 v2, F32 v3)
-    : mData{_mmx_setr_p<__m128>(v0, v1, v2, v3)}
+    : mData{_mm_setr<__m128>(v0, v1, v2, v3)}
 {
     DEV_EXCEPTION(!IsDataAligned(), "Register of Mat2fSSE is not 16 byte aligned");
 }
@@ -87,7 +87,7 @@ bool Mat2fSSE::operator!=(const Mat2fSSE& rhs) const
 
 Mat2fSSE& Mat2fSSE::operator+=(const Mat2fSSE& other)
 {
-    mData = _mmx_add_p(mData, other.mData);
+    mData = _mm_add(mData, other.mData);
     return *this;
 }
 
@@ -96,7 +96,7 @@ Mat2fSSE& Mat2fSSE::operator+=(const Mat2fSSE& other)
 Mat2fSSE Mat2fSSE::operator+(const Mat2fSSE& other)
 
 {
-    return Mat2fSSE(_mmx_add_p(mData, other.mData));
+    return Mat2fSSE(_mm_add(mData, other.mData));
 }
 
 
@@ -104,8 +104,8 @@ Mat2fSSE Mat2fSSE::operator+(const Mat2fSSE& other)
 Mat2fSSE Mat2fSSE::operator*(const Mat2fSSE& rhs) const
 {
     using namespace GDL::simd;
-    return Mat2fSSE(_mmx_fmadd_p(mData, Permute<0, 0, 3, 3>(rhs.mData),
-                                 _mmx_mul_p(Permute<2, 3, 0, 1>(mData), Permute<1, 1, 2, 2>(rhs.mData))));
+    return Mat2fSSE(_mm_fmadd(mData, Permute<0, 0, 3, 3>(rhs.mData),
+                                 _mm_mul(Permute<2, 3, 0, 1>(mData), Permute<1, 1, 2, 2>(rhs.mData))));
 }
 
 
@@ -113,8 +113,8 @@ Mat2fSSE Mat2fSSE::operator*(const Mat2fSSE& rhs) const
 Vec2fSSE<true> Mat2fSSE::operator*(const Vec2fSSE<true>& rhs) const
 {
     using namespace GDL::simd;
-    return Vec2fSSE<true>(_mmx_fmadd_p(mData, Permute<0, 0, 3, 3>(rhs.mData),
-                                       _mmx_mul_p(Permute<2, 3, 0, 1>(mData), Permute<1, 1, 2, 2>(rhs.mData))));
+    return Vec2fSSE<true>(_mm_fmadd(mData, Permute<0, 0, 3, 3>(rhs.mData),
+                                       _mm_mul(Permute<2, 3, 0, 1>(mData), Permute<1, 1, 2, 2>(rhs.mData))));
 }
 
 
@@ -124,7 +124,7 @@ const std::array<F32, 4> Mat2fSSE::Data() const
     alignas(simd::alignmentBytes<__m128>) std::array<F32, 4> data;
     assert(sizeof(mData) == sizeof(data));
 
-    _mmx_store_p(&data[0], mData);
+    _mm_store(&data[0], mData);
     return data;
 }
 

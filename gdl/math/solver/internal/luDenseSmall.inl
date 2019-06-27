@@ -230,7 +230,7 @@ template <U32 _size, Pivot _pivot>
 LUDenseSmallSSE<_size, _pivot>::Factorize(const std::array<__m128, _size>& matrixData)
 {
 
-    __m128 permutation = _mmx_setr_p<__m128>(0, 1, 2, 3);
+    __m128 permutation = _mm_setr<__m128>(0, 1, 2, 3);
 
     Factorization factorization(matrixData);
     FactorizeLU(factorization, permutation);
@@ -267,10 +267,10 @@ inline void LUDenseSmallSSE<_size, _pivot>::BackwardSubstitution(const std::arra
 {
     using namespace GDL::simd;
 
-    const __m128 zero = _mmx_setzero_p<__m128>();
+    const __m128 zero = _mm_setzero<__m128>();
 
-    r = BlendIndex<_idx>(r, _mmx_div_p(r, lu[_idx]));
-    r = _mmx_fnmadd_p(BlendAboveIndex<_idx>(zero, lu[_idx]), Broadcast<_idx>(r), r);
+    r = BlendIndex<_idx>(r, _mm_div(r, lu[_idx]));
+    r = _mm_fnmadd(BlendAboveIndex<_idx>(zero, lu[_idx]), Broadcast<_idx>(r), r);
 
     if constexpr (_idx > 0)
         BackwardSubstitution<_idx - 1>(lu, r);
@@ -281,7 +281,7 @@ inline void LUDenseSmallSSE<_size, _pivot>::BackwardSubstitution(const std::arra
 
     //    using namespace GDL::simd;
 
-    //    r = BlendAboveIndex<_idx>(r, _mmx_fnmadd_p(lu[_idx], Broadcast<_idx>(r), r));
+    //    r = BlendAboveIndex<_idx>(r, _mm_fnmadd(lu[_idx], Broadcast<_idx>(r), r));
 
     //    if constexpr (_idx > 1)
     //        BackwardSubstitution<_idx - 1>(lu, r);
@@ -302,15 +302,15 @@ inline void LUDenseSmallSSE<_size, _pivot>::FactorizationStep(Factorization& fac
 
     if constexpr (_idx + 1 < _size)
     {
-        const __m128 zero = _mmx_setzero_p<__m128>();
+        const __m128 zero = _mm_setzero<__m128>();
 
         __m128 rowMult = BlendBelowIndex<_idx>(
-                zero, _mmx_div_p(factorization.mLU[_idx], Broadcast<_idx>(factorization.mLU[_idx])));
+                zero, _mm_div(factorization.mLU[_idx], Broadcast<_idx>(factorization.mLU[_idx])));
         factorization.mLU[_idx] = BlendBelowIndex<_idx>(factorization.mLU[_idx], rowMult);
         for (U32 i = _idx + 1; i < _size; ++i)
         {
             __m128 bc = Broadcast<_idx>(factorization.mLU[i]);
-            factorization.mLU[i] = _mmx_fnmadd_p(rowMult, bc, factorization.mLU[i]);
+            factorization.mLU[i] = _mm_fnmadd(rowMult, bc, factorization.mLU[i]);
         }
     }
 
@@ -329,17 +329,17 @@ inline void LUDenseSmallSSE<_size, _pivot>::FactorizationStep(Factorization& fac
     //    constexpr F32 m12 = (_idx == 2) ? -1 : 0;
     //    constexpr F32 m13 = (_idx == 3) ? -1 : 0;
 
-    //    const __m128 m1 = _mmx_setr_p<__m128>(m10, m11, m12, m13);
-    //    const __m128 zero = _mmx_setzero_p<__m128>();
+    //    const __m128 m1 = _mm_setr<__m128>(m10, m11, m12, m13);
+    //    const __m128 zero = _mm_setzero<__m128>();
 
     //    __m128 bc = Broadcast<_idx>(factorization.mLU[_idx]);
-    //    const __m128 rowMult = _mmx_div_p(BlendBelowIndex<_idx>(m1, factorization.mLU[_idx]), bc);
+    //    const __m128 rowMult = _mm_div(BlendBelowIndex<_idx>(m1, factorization.mLU[_idx]), bc);
     //    factorization.mLU[_idx] = BlendIndex<_idx>(factorization.mLU[_idx], Negate(rowMult));
 
     //    for (U32 i = _idx + 1; i < _size; ++i)
     //    {
     //        bc = Broadcast<_idx>(factorization.mLU[i]);
-    //        factorization.mLU[i] = _mmx_fnmadd_p(rowMult, bc, BlendIndex<_idx>(factorization.mLU[i], zero));
+    //        factorization.mLU[i] = _mm_fnmadd(rowMult, bc, BlendIndex<_idx>(factorization.mLU[i], zero));
     //    }
 }
 
@@ -370,9 +370,9 @@ inline void LUDenseSmallSSE<_size, _pivot>::ForwardSubstitution(const std::array
 {
     using namespace GDL::simd;
 
-    const __m128 zero = _mmx_setzero_p<__m128>();
+    const __m128 zero = _mm_setzero<__m128>();
 
-    r = _mmx_fnmadd_p(BlendBelowIndex<_idx>(zero, lu[_idx]), Broadcast<_idx>(r), r);
+    r = _mm_fnmadd(BlendBelowIndex<_idx>(zero, lu[_idx]), Broadcast<_idx>(r), r);
 
     if constexpr (_idx + 2 < _size)
         ForwardSubstitution<_idx + 1>(lu, r);
@@ -383,8 +383,8 @@ inline void LUDenseSmallSSE<_size, _pivot>::ForwardSubstitution(const std::array
 
     //    using namespace GDL::simd;
 
-    //    r = BlendIndex<_idx>(r, _mmx_mul_p(lu[_idx], r));
-    //    r = BlendBelowIndex<_idx>(r, _mmx_fnmadd_p(lu[_idx], Broadcast<_idx>(r), r));
+    //    r = BlendIndex<_idx>(r, _mm_mul(lu[_idx], r));
+    //    r = BlendBelowIndex<_idx>(r, _mm_fnmadd(lu[_idx], Broadcast<_idx>(r), r));
 
     //    if constexpr (_idx + 1 < _size)
     //        ForwardSubstitution<_idx + 1>(lu, r);

@@ -77,7 +77,7 @@ template <U32 _index>
 ValueType GetterStaticStore(RegisterType reg)
 {
     alignas(simd::alignmentBytes<RegisterType>) ValueType array[simd::numRegisterValues<RegisterType>];
-    _mmx_store_p(array, reg);
+    _mm_store(array, reg);
     return array[_index];
 }
 
@@ -205,7 +205,7 @@ ValueType GetterDynamicUnion(RegisterType reg, U32 index)
 ValueType GetterDynamicStore(RegisterType reg, U32 index)
 {
     alignas(simd::alignmentBytes<RegisterType>) ValueType array[simd::numRegisterValues<RegisterType>];
-    _mmx_store_p(array, reg);
+    _mm_store(array, reg);
     return array[index];
 }
 
@@ -322,7 +322,7 @@ template <U32 _index>
 void SetterStaticStoreModifyLoad(RegisterType& reg, ValueType value)
 {
     alignas(simd::alignmentBytes<RegisterType>) ValueType array[simd::numRegisterValues<RegisterType>];
-    _mmx_store_p(array, reg);
+    _mm_store(array, reg);
     array[_index] = value;
     reg = _mmx_load_p<RegisterType>(array);
 }
@@ -397,7 +397,7 @@ void SetterDynamicDirectAccessOperator(RegisterType& reg, ValueType value, U32 i
 void SetterDynamicStoreModifyLoad(RegisterType& reg, ValueType value, U32 index)
 {
     alignas(simd::alignmentBytes<RegisterType>) ValueType array[simd::numRegisterValues<RegisterType>];
-    _mmx_store_p(array, reg);
+    _mm_store(array, reg);
     array[index] = value;
     reg = _mmx_load_p<RegisterType>(array);
 }

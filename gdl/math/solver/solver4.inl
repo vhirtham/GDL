@@ -125,8 +125,8 @@ template <typename _type>
     __m128 cP1230 = Permute<1, 2, 3, 0>(c);
     __m128 dP1230 = Permute<1, 2, 3, 0>(d);
 
-    __m128 ab03 = _mmx_fmsub_p(a, bP1230, _mm_mul_ps(aP1230, b));
-    __m128 cd03 = _mmx_fmsub_p(c, dP1230, _mm_mul_ps(cP1230, d));
+    __m128 ab03 = _mm_fmsub(a, bP1230, _mm_mul_ps(aP1230, b));
+    __m128 cd03 = _mm_fmsub(c, dP1230, _mm_mul_ps(cP1230, d));
 
     __m128 cd03P2301 = Permute<2, 3, 0, 1>(cd03);
     __m128 cd03P2301N = Negate<0, 1, 0, 1>(cd03P2301);
@@ -143,7 +143,7 @@ template <typename _type>
     __m128 acB1100P2301 = Permute<2, 3, 0, 1>(acB1100);
     __m128 bdB1100P2301 = Permute<2, 3, 0, 1>(bdB1100);
 
-    __m128 abcd45 = _mmx_fmsub_p(acB0011, bdB1100P2301, _mm_mul_ps(acB1100P2301, bdB0011));
+    __m128 abcd45 = _mm_fmsub(acB0011, bdB1100P2301, _mm_mul_ps(acB1100P2301, bdB0011));
     __m128 abcd45P3210 = Permute<3, 2, 1, 0>(abcd45);
 
     __m128 products45 = _mm_mul_ps(abcd45, abcd45P3210);
@@ -151,7 +151,7 @@ template <typename _type>
 
 
     // Calculate det(A)
-    __m128 detA = _mmx_add_p(sum03, sum45);
+    __m128 detA = _mm_add(sum03, sum45);
 
 
     DEV_EXCEPTION(_mm_cvtss_f32(detA) == ApproxZero<F32>(10), "Singular matrix - system not solveable");
@@ -161,10 +161,10 @@ template <typename _type>
     const __m128& r = vecRhs.DataSSE();
     __m128 rP1230 = Permute<1, 2, 3, 0>(r);
 
-    __m128 rb03 = _mmx_fmsub_p(r, bP1230, _mm_mul_ps(rP1230, b));
-    __m128 ar03 = _mmx_fmsub_p(a, rP1230, _mm_mul_ps(aP1230, r));
-    __m128 rd03 = _mmx_fmsub_p(r, dP1230, _mm_mul_ps(rP1230, d));
-    __m128 cr03 = _mmx_fmsub_p(c, rP1230, _mm_mul_ps(cP1230, r));
+    __m128 rb03 = _mm_fmsub(r, bP1230, _mm_mul_ps(rP1230, b));
+    __m128 ar03 = _mm_fmsub(a, rP1230, _mm_mul_ps(aP1230, r));
+    __m128 rd03 = _mm_fmsub(r, dP1230, _mm_mul_ps(rP1230, d));
+    __m128 cr03 = _mm_fmsub(c, rP1230, _mm_mul_ps(cP1230, r));
 
     __m128 rd03P2301 = Permute<2, 3, 0, 1>(rd03);
     __m128 cr03P2301 = Permute<2, 3, 0, 1>(cr03);
@@ -172,17 +172,17 @@ template <typename _type>
     __m128 rd03P2301N = Negate<0, 1, 0, 1>(rd03P2301);
     __m128 cr03P2301N = Negate<0, 1, 0, 1>(cr03P2301);
 
-    __m128 products03M0 = _mmx_mul_p(rb03, cd03P2301N);
-    __m128 products03M1 = _mmx_mul_p(ar03, cd03P2301N);
-    __m128 products03M2 = _mmx_mul_p(ab03, rd03P2301N);
-    __m128 products03M3 = _mmx_mul_p(ab03, cr03P2301N);
+    __m128 products03M0 = _mm_mul(rb03, cd03P2301N);
+    __m128 products03M1 = _mm_mul(ar03, cd03P2301N);
+    __m128 products03M2 = _mm_mul(ab03, rd03P2301N);
+    __m128 products03M3 = _mm_mul(ab03, cr03P2301N);
 
 
     // Calculate last 2 terms of the modified determinants
     __m128 rP2301 = Permute<2, 3, 0, 1>(r);
 
-    __m128 rbrd45 = _mmx_fmsub_p(r, bdB1100P2301, _mm_mul_ps(rP2301, bdB0011));
-    __m128 arcr45 = _mmx_fmsub_p(acB0011, rP2301, _mm_mul_ps(acB1100P2301, r));
+    __m128 rbrd45 = _mm_fmsub(r, bdB1100P2301, _mm_mul_ps(rP2301, bdB0011));
+    __m128 arcr45 = _mm_fmsub(acB0011, rP2301, _mm_mul_ps(acB1100P2301, r));
 
 
     // Calculate modified determinants
@@ -194,19 +194,19 @@ template <typename _type>
     __m128 products03M0M2B1100P2301 = Permute<2, 3, 0, 1>(products03M0M2B1100);
     __m128 products03M1M3B1100P2301 = Permute<2, 3, 0, 1>(products03M1M3B1100);
 
-    __m128 sumsM0M2 = _mmx_fmadd_p(rbrd45, abcd45P3210, _mmx_add_p(products03M0M2B0011, products03M0M2B1100P2301));
-    __m128 sumsM1M3 = _mmx_fmadd_p(arcr45, abcd45P3210, _mmx_add_p(products03M1M3B0011, products03M1M3B1100P2301));
+    __m128 sumsM0M2 = _mm_fmadd(rbrd45, abcd45P3210, _mm_add(products03M0M2B0011, products03M0M2B1100P2301));
+    __m128 sumsM1M3 = _mm_fmadd(arcr45, abcd45P3210, _mm_add(products03M1M3B0011, products03M1M3B1100P2301));
 
     __m128 sumsB0101 = Blend<0, 1, 0, 1>(sumsM0M2, sumsM1M3);
     __m128 sumsB1010 = Blend<1, 0, 1, 0>(sumsM0M2, sumsM1M3);
 
     __m128 sumsB1010P1032 = Permute<1, 0, 3, 2>(sumsB1010);
 
-    __m128 determinants = _mmx_add_p(sumsB0101, sumsB1010P1032);
+    __m128 determinants = _mm_add(sumsB0101, sumsB1010P1032);
 
 
     // Calculate and return solution
-    __m128 solution = _mmx_div_p(determinants, detA);
+    __m128 solution = _mm_div(determinants, detA);
 
     return Vec4fSSE<true>(solution);
 }
@@ -230,14 +230,14 @@ template <typename _type>
     __m256 abP1230 = Permute<1, 2, 3, 0>(ab);
     __m256 cdP1230 = Permute<1, 2, 3, 0>(cd);
 
-    __m256 acbd03 = _mmx_fmsub_p(ab, cdP1230, _mmx_mul_p(cd, abP1230));
+    __m256 acbd03 = _mm_fmsub(ab, cdP1230, _mm_mul(cd, abP1230));
     __m256 acbd03N = Negate<0, 0, 0, 0, 1, 0, 1, 0>(acbd03);
 
 
     // Calculate the components of the last 2 terms of det(a)
     __m256 abP2323 = Permute<2, 3, 2, 3>(ab);
     __m256 cdP2323 = Permute<2, 3, 2, 3>(cd);
-    __m256 acbd45 = _mmx_fmsub_p(ab, cdP2323, _mmx_mul_p(cd, abP2323));
+    __m256 acbd45 = _mm_fmsub(ab, cdP2323, _mm_mul(cd, abP2323));
 
 
     // Calculate determinant of A
@@ -247,7 +247,7 @@ template <typename _type>
 
     __m256 sums = DotProduct(ac03bd45, bd03ac45P);
 
-    __m256 detA = _mmx_add_p(sums, Permute2F128<1, 0>(sums));
+    __m256 detA = _mm_add(sums, Permute2F128<1, 0>(sums));
 
 
     DEV_EXCEPTION(_mm256_cvtss_f32(detA) == ApproxZero<F32>(10), "Singular matrix - system not solveable");
@@ -258,8 +258,8 @@ template <typename _type>
     // Calculate first 4 products of all modified matrix determinants
     __m256 rP1230 = Permute<1, 2, 3, 0>(r);
 
-    __m256 rcrd03 = _mmx_fmsub_p(r, cdP1230, _mmx_mul_p(rP1230, cd));
-    __m256 arbr03 = _mmx_fmsub_p(ab, rP1230, _mmx_mul_p(r, abP1230));
+    __m256 rcrd03 = _mm_fmsub(r, cdP1230, _mm_mul(rP1230, cd));
+    __m256 arbr03 = _mm_fmsub(ab, rP1230, _mm_mul(r, abP1230));
 
     __m256 rcrd03N = Negate<0, 0, 0, 0, 1, 0, 1, 0>(rcrd03);
     __m256 arbr03N = Negate<0, 0, 0, 0, 1, 0, 1, 0>(arbr03);
@@ -267,13 +267,13 @@ template <typename _type>
     __m256 bdac03 = Permute2F128<1, 0>(acbd03N);
     __m256 bdac03P2301 = Permute<2, 3, 0, 1>(bdac03);
 
-    __m256 products03M0M1 = _mmx_mul_p(rcrd03N, bdac03P2301);
-    __m256 products03M2M3 = _mmx_mul_p(arbr03N, bdac03P2301);
+    __m256 products03M0M1 = _mm_mul(rcrd03N, bdac03P2301);
+    __m256 products03M2M3 = _mm_mul(arbr03N, bdac03P2301);
     __m256 products03B0011 = Blend<0, 0, 1, 1, 0, 0, 1, 1>(products03M0M1, products03M2M3);
     __m256 products03B1100 = Blend<1, 1, 0, 0, 1, 1, 0, 0>(products03M0M1, products03M2M3);
     __m256 products03B1100P2301 = Permute<2, 3, 0, 1>(products03B1100);
 
-    __m256 sum03 = _mmx_add_p(products03B0011, products03B1100P2301);
+    __m256 sum03 = _mm_add(products03B0011, products03B1100P2301);
 
 
     // Calculate last 2 products of all modified matrix determinants
@@ -283,20 +283,20 @@ template <typename _type>
 
     __m256 rP2301 = Permute<2, 3, 0, 1>(r);
 
-    __m256 components45 = _mmx_fmsub_p(acbdB0011P2301, r, _mmx_mul_p(rP2301, acbdB1100));
+    __m256 components45 = _mm_fmsub(acbdB0011P2301, r, _mm_mul(rP2301, acbdB1100));
     __m256 bdac45 = Permute2F128<1, 0>(acbd45);
     __m256 bdac45P1010 = Permute<1, 0, 1, 0>(bdac45);
 
-    __m256 products45M = _mmx_mul_p(components45, bdac45P1010);
+    __m256 products45M = _mm_mul(components45, bdac45P1010);
 
 
     // Calculate and return solution
-    __m256 sumsM = _mmx_add_p(sum03, products45M);
-    __m256 determinants00221133 = _mmx_add_p(sumsM, Permute<1, 0, 3, 2>(sumsM));
+    __m256 sumsM = _mm_add(sum03, products45M);
+    __m256 determinants00221133 = _mm_add(sumsM, Permute<1, 0, 3, 2>(sumsM));
     __m256 determinants11330022 = Permute2F128<1, 0>(determinants00221133);
     __m256 determinants = Blend<0, 1, 0, 1, 1, 0, 1, 0>(determinants00221133, determinants11330022);
 
-    __m256 solution = _mmx_div_p(determinants, detA);
+    __m256 solution = _mm_div(determinants, detA);
 
     return Vec4fSSE<true>(_mm256_castps256_ps128(solution));
 }

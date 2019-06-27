@@ -37,8 +37,8 @@ void TestBlend128d()
 template <typename _registerType, U32 _i = 0, U32 _j = 0, U32 _k = 0, U32 _l = 0>
 void TestBlend4()
 {
-    const _registerType a = _mmx_setr_p<_registerType>(1.f, 2.f, 3.f, 4.f);
-    const _registerType b = _mmx_setr_p<_registerType>(5.f, 6.f, 7.f, 8.f);
+    const _registerType a = _mm_setr<_registerType>(1.f, 2.f, 3.f, 4.f);
+    const _registerType b = _mm_setr<_registerType>(5.f, 6.f, 7.f, 8.f);
 
     const _registerType c = Blend<_i, _j, _k, _l>(a, b);
 
@@ -124,8 +124,8 @@ void TestBlendIndex()
     using Type = decltype(GetDataType<_registerType>());
     constexpr U32 numRegVals = numRegisterValues<_registerType>;
 
-    _registerType a = _mmx_setzero_p<_registerType>();
-    _registerType b = _mmx_set1_p<_registerType>(1);
+    _registerType a = _mm_setzero<_registerType>();
+    _registerType b = _mm_set1<_registerType>(1);
 
     _registerType c = BlendIndex<_index>(a, b);
     for (U32 i = 0; i < numRegVals; ++i)
@@ -159,8 +159,8 @@ void TestBlendAboveIndex()
     using Type = decltype(GetDataType<_registerType>());
     constexpr U32 numRegVals = numRegisterValues<_registerType>;
 
-    _registerType a = _mmx_setzero_p<_registerType>();
-    _registerType b = _mmx_set1_p<_registerType>(1);
+    _registerType a = _mm_setzero<_registerType>();
+    _registerType b = _mm_set1<_registerType>(1);
 
     _registerType c = BlendAboveIndex<_index>(a, b);
     for (U32 i = 0; i < numRegVals; ++i)
@@ -194,8 +194,8 @@ void TestBlendBelowIndex()
     using Type = decltype(GetDataType<_registerType>());
     constexpr U32 numRegVals = numRegisterValues<_registerType>;
 
-    _registerType a = _mmx_setzero_p<_registerType>();
-    _registerType b = _mmx_set1_p<_registerType>(1);
+    _registerType a = _mm_setzero<_registerType>();
+    _registerType b = _mm_set1<_registerType>(1);
 
     _registerType c = BlendBelowIndex<_index>(a, b);
     for (U32 i = 0; i < numRegVals; ++i)
@@ -228,7 +228,7 @@ void TestBroadcast()
     constexpr U32 numRegVals = numRegisterValues<_registerType>;
     constexpr U32 numLaneVals = numValuesPerLane<_registerType>;
 
-    _registerType a = _mmx_setzero_p<_registerType>();
+    _registerType a = _mm_setzero<_registerType>();
 
     for (U32 i = 0; i < numRegVals; ++i)
         SetValue(a, i, i);
@@ -255,7 +255,7 @@ void TestBroadcast2Lanes()
     constexpr U32 numRegVals = numRegisterValues<_registerType>;
     constexpr U32 numLaneVals = numValuesPerLane<_registerType>;
 
-    _registerType a = _mmx_setzero_p<_registerType>();
+    _registerType a = _mm_setzero<_registerType>();
     for (U32 i = 0; i < numRegVals; ++i)
         SetValue(a, i, i);
 
@@ -292,7 +292,7 @@ BOOST_AUTO_TEST_CASE(Test_Broadcast)
 template <typename _registerType, U32 _index = 0>
 void TestBroadcastAcrossLanes()
 {
-    _registerType a = _mmx_setzero_p<_registerType>();
+    _registerType a = _mm_setzero<_registerType>();
     for (U32 i = 0; i < numRegisterValues<_registerType>; ++i)
         SetValue(a, i, i);
 
@@ -328,8 +328,8 @@ void TestExchangeTest()
     using Type = decltype(GetDataType<_registerType>());
     constexpr U32 numRegVals = numRegisterValues<_registerType>;
 
-    _registerType a = _mmx_setzero_p<_registerType>();
-    _registerType b = _mmx_setzero_p<_registerType>();
+    _registerType a = _mm_setzero<_registerType>();
+    _registerType b = _mm_setzero<_registerType>();
 
     for (U32 i = 0; i < numRegVals; ++i)
     {
@@ -406,7 +406,7 @@ BOOST_AUTO_TEST_CASE(Test_Exchange)
 template <U32 _i, U32 _j>
 void TestPermute128d()
 {
-    const __m128d a = _mmx_setr_p<__m128d>(1.f, 2.f);
+    const __m128d a = _mm_setr<__m128d>(1.f, 2.f);
 
     const __m128d b = Permute<_i, _j>(a);
 
@@ -419,7 +419,7 @@ void TestPermute128d()
 template <U32 _i, U32 _j, U32 _k, U32 _l>
 void TestPermute128()
 {
-    const __m128 a = _mmx_setr_p<__m128>(1.f, 2.f, 3.f, 4.f);
+    const __m128 a = _mm_setr<__m128>(1.f, 2.f, 3.f, 4.f);
 
     const __m128 b = Permute<_i, _j, _k, _l>(a);
 
@@ -436,7 +436,7 @@ void TestPermute128()
 template <U32 _i, U32 _j, U32 _k, U32 _l>
 void TestPermute256d()
 {
-    const __m256d a = _mmx_setr_p<__m256d>(1.f, 2.f, 3.f, 4.f);
+    const __m256d a = _mm_setr<__m256d>(1.f, 2.f, 3.f, 4.f);
 
     const __m256d b = Permute<_i, _j, _k, _l>(a);
 
@@ -451,7 +451,7 @@ void TestPermute256d()
 template <U32 _i, U32 _j, U32 _k, U32 _l, U32 _m, U32 _n, U32 _o, U32 _p>
 void TestPermute256()
 {
-    const __m256 a = _mmx_setr_p<__m256>(1.f, 2.f, 3.f, 4.f, 5.f, 6.f, 7.f, 8.f);
+    const __m256 a = _mm_setr<__m256>(1.f, 2.f, 3.f, 4.f, 5.f, 6.f, 7.f, 8.f);
 
     const __m256 b = Permute<_i, _j, _k, _l, _m, _n, _o, _p>(a);
 
@@ -523,7 +523,7 @@ BOOST_AUTO_TEST_CASE(Test_Permute)
 template <typename _registerType, U32 _lane0 = 0, U32 _lane1 = 0>
 void TestPermute2F128SingleRegister()
 {
-    _registerType a = _mmx_setzero_p<_registerType>();
+    _registerType a = _mm_setzero<_registerType>();
     for (U32 i = 0; i < numRegisterValues<_registerType>; ++i)
         SetValue(a, i, i + 1);
 
@@ -548,8 +548,8 @@ void TestPermute2F128SingleRegister()
 template <typename _registerType, U32 _src0 = 0, U32 _lane0 = 0, U32 _src1 = 0, U32 _lane1 = 0>
 void TestPermute2F128TwoRegisters()
 {
-    _registerType a = _mmx_setzero_p<_registerType>();
-    _registerType b = _mmx_setzero_p<_registerType>();
+    _registerType a = _mm_setzero<_registerType>();
+    _registerType b = _mm_setzero<_registerType>();
 
     for (U32 i = 0; i < numRegisterValues<_registerType>; ++i)
     {
@@ -608,8 +608,8 @@ void TestShuffle2()
 {
 
 
-    _registerType a = _mmx_setzero_p<_registerType>();
-    _registerType b = _mmx_setzero_p<_registerType>();
+    _registerType a = _mm_setzero<_registerType>();
+    _registerType b = _mm_setzero<_registerType>();
     for (U32 i = 0; i < numRegisterValues<_registerType>; ++i)
     {
         SetValue(a, i, i + 1 + numRegisterValues<_registerType>);
@@ -644,8 +644,8 @@ template <U32 _i, U32 _j, U32 _k, U32 _l>
 void TestShuffle256d()
 {
 
-    __m256d a = _mmx_setr_p<__m256d>(1., 2., 3., 4.);
-    __m256d b = _mmx_setr_p<__m256d>(5., 6., 7., 8.);
+    __m256d a = _mm_setr<__m256d>(1., 2., 3., 4.);
+    __m256d b = _mm_setr<__m256d>(5., 6., 7., 8.);
 
     const __m256d c = Shuffle<_i, _j, _k, _l>(a, b);
 
@@ -689,8 +689,8 @@ void TestShuffle4()
 {
 
 
-    _registerType a = _mmx_setzero_p<_registerType>();
-    _registerType b = _mmx_setzero_p<_registerType>();
+    _registerType a = _mm_setzero<_registerType>();
+    _registerType b = _mm_setzero<_registerType>();
     for (U32 i = 0; i < numRegisterValues<_registerType>; ++i)
     {
         SetValue(a, i, i + 1 + numRegisterValues<_registerType>);
@@ -744,7 +744,7 @@ void TestSwapTest()
     using Type = decltype(GetDataType<_registerType>());
     constexpr U32 numRegVals = numRegisterValues<_registerType>;
 
-    _registerType a = _mmx_setzero_p<_registerType>();
+    _registerType a = _mm_setzero<_registerType>();
     for (U32 i = 0; i < numRegVals; ++i)
         SetValue(a, i, i);
 

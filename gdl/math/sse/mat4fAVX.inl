@@ -27,7 +27,7 @@ namespace GDL
 
 
 Mat4fAVX::Mat4fAVX()
-    : mData({{{_mmx_setzero_p<__m256>()}, {_mmx_setzero_p<__m256>()}}})
+    : mData({{{_mm_setzero<__m256>()}, {_mm_setzero<__m256>()}}})
 {
     DEV_EXCEPTION(!IsDataAligned(), "One or more registers of Mat4fAVX are not 32 byte aligned");
 }
@@ -35,8 +35,8 @@ Mat4fAVX::Mat4fAVX()
 
 
 Mat4fAVX::Mat4fAVX(std::array<F32, 16> data)
-    : mData({{{_mmx_setr_p<__m256>(data[0], data[1], data[2], data[3], data[4], data[5], data[6], data[7])},
-              {_mmx_setr_p<__m256>(data[8], data[9], data[10], data[11], data[12], data[13], data[14], data[15])}}})
+    : mData({{{_mm_setr<__m256>(data[0], data[1], data[2], data[3], data[4], data[5], data[6], data[7])},
+              {_mm_setr<__m256>(data[8], data[9], data[10], data[11], data[12], data[13], data[14], data[15])}}})
 {
     DEV_EXCEPTION(!IsDataAligned(), "One or more registers of Mat4fAVX are not 32 byte aligned");
 }
@@ -45,8 +45,8 @@ Mat4fAVX::Mat4fAVX(std::array<F32, 16> data)
 
 Mat4fAVX::Mat4fAVX(F32 v0, F32 v1, F32 v2, F32 v3, F32 v4, F32 v5, F32 v6, F32 v7, F32 v8, F32 v9, F32 v10, F32 v11,
                    F32 v12, F32 v13, F32 v14, F32 v15)
-    : mData({{{_mmx_setr_p<__m256>(v0, v1, v2, v3, v4, v5, v6, v7)},
-              {_mmx_setr_p<__m256>(v8, v9, v10, v11, v12, v13, v14, v15)}}})
+    : mData({{{_mm_setr<__m256>(v0, v1, v2, v3, v4, v5, v6, v7)},
+              {_mm_setr<__m256>(v8, v9, v10, v11, v12, v13, v14, v15)}}})
 {
     DEV_EXCEPTION(!IsDataAligned(), "One or more registers of Mat4fAVX are not 32 byte aligned");
 }
@@ -96,8 +96,8 @@ bool Mat4fAVX::operator!=(const Mat4fAVX& rhs) const
 Mat4fAVX& Mat4fAVX::operator+=(const Mat4fAVX& other)
 
 {
-    mData[0] = _mmx_add_p(mData[0], other.mData[0]);
-    mData[1] = _mmx_add_p(mData[1], other.mData[1]);
+    mData[0] = _mm_add(mData[0], other.mData[0]);
+    mData[1] = _mm_add(mData[1], other.mData[1]);
     return *this;
 }
 
@@ -106,7 +106,7 @@ Mat4fAVX& Mat4fAVX::operator+=(const Mat4fAVX& other)
 Mat4fAVX Mat4fAVX::operator+(const Mat4fAVX& other)
 
 {
-    return Mat4fAVX(_mmx_add_p(mData[0], other.mData[0]), _mmx_add_p(mData[1], other.mData[1]));
+    return Mat4fAVX(_mm_add(mData[0], other.mData[0]), _mm_add(mData[1], other.mData[1]));
 }
 
 
@@ -122,15 +122,15 @@ Mat4fAVX Mat4fAVX::operator*(const Mat4fAVX& rhs) const
     const __m256i mask32 = _mm256_setr_epi32(3, 3, 3, 3, 2, 2, 2, 2);
 
     return Mat4fAVX(
-            _mmx_fmadd_p(mData[0], _mm256_permutevar_ps(rhs.mData[0], mask01),
-                         _mmx_fmadd_p(tmpBA, _mm256_permutevar_ps(rhs.mData[0], mask10),
-                                      _mmx_fmadd_p(mData[1], _mm256_permutevar_ps(rhs.mData[0], mask23),
-                                                   _mmx_mul_p(tmpDC, _mm256_permutevar_ps(rhs.mData[0], mask32))))),
+            _mm_fmadd(mData[0], _mm256_permutevar_ps(rhs.mData[0], mask01),
+                         _mm_fmadd(tmpBA, _mm256_permutevar_ps(rhs.mData[0], mask10),
+                                      _mm_fmadd(mData[1], _mm256_permutevar_ps(rhs.mData[0], mask23),
+                                                   _mm_mul(tmpDC, _mm256_permutevar_ps(rhs.mData[0], mask32))))),
 
-            _mmx_fmadd_p(mData[0], _mm256_permutevar_ps(rhs.mData[1], mask01),
-                         _mmx_fmadd_p(tmpBA, _mm256_permutevar_ps(rhs.mData[1], mask10),
-                                      _mmx_fmadd_p(mData[1], _mm256_permutevar_ps(rhs.mData[1], mask23),
-                                                   _mmx_mul_p(tmpDC, _mm256_permutevar_ps(rhs.mData[1], mask32))))));
+            _mm_fmadd(mData[0], _mm256_permutevar_ps(rhs.mData[1], mask01),
+                         _mm_fmadd(tmpBA, _mm256_permutevar_ps(rhs.mData[1], mask10),
+                                      _mm_fmadd(mData[1], _mm256_permutevar_ps(rhs.mData[1], mask23),
+                                                   _mm_mul(tmpDC, _mm256_permutevar_ps(rhs.mData[1], mask32))))));
 }
 
 
@@ -142,10 +142,10 @@ Vec4fSSE<true> Mat4fAVX::operator*(const Vec4fSSE<true>& rhs) const
     const __m256i mask01 = _mm256_setr_epi32(0, 0, 0, 0, 1, 1, 1, 1);
     const __m256i mask23 = _mm256_setr_epi32(2, 2, 2, 2, 3, 3, 3, 3);
 
-    __m256 tmp2 = _mmx_fmadd_p(mData[0], _mm256_permutevar_ps(tmp, mask01),
-                               _mmx_mul_p(mData[1], _mm256_permutevar_ps(tmp, mask23)));
+    __m256 tmp2 = _mm_fmadd(mData[0], _mm256_permutevar_ps(tmp, mask01),
+                               _mm_mul(mData[1], _mm256_permutevar_ps(tmp, mask23)));
 
-    return Vec4fSSE<true>(_mmx_add_p(_mm256_extractf128_ps(tmp2, 0), _mm256_extractf128_ps(tmp2, 1)));
+    return Vec4fSSE<true>(_mm_add(_mm256_extractf128_ps(tmp2, 0), _mm256_extractf128_ps(tmp2, 1)));
 }
 
 

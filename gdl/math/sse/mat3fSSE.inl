@@ -23,16 +23,16 @@ namespace GDL
 
 
 Mat3fSSE::Mat3fSSE()
-    : mData({{{_mmx_setzero_p<__m128>()}, {_mmx_setzero_p<__m128>()}, {_mmx_setzero_p<__m128>()}}})
+    : mData({{{_mm_setzero<__m128>()}, {_mm_setzero<__m128>()}, {_mm_setzero<__m128>()}}})
 {
     DEV_EXCEPTION(!IsDataAligned(), "One or more registers of Mat3fSSE are not 16 byte aligned");
 }
 
 
 Mat3fSSE::Mat3fSSE(std::array<F32, 9> data)
-    : mData({{{_mmx_setr_p<__m128>(data[0], data[1], data[2], 0)},
-              {_mmx_setr_p<__m128>(data[3], data[4], data[5], 0)},
-              {_mmx_setr_p<__m128>(data[6], data[7], data[8], 0)}}})
+    : mData({{{_mm_setr<__m128>(data[0], data[1], data[2], 0)},
+              {_mm_setr<__m128>(data[3], data[4], data[5], 0)},
+              {_mm_setr<__m128>(data[6], data[7], data[8], 0)}}})
 {
     DEV_EXCEPTION(!IsDataAligned(), "One or more registers of Mat3fSSE are not 16 byte aligned");
 }
@@ -40,9 +40,9 @@ Mat3fSSE::Mat3fSSE(std::array<F32, 9> data)
 
 
 Mat3fSSE::Mat3fSSE(F32 v0, F32 v1, F32 v2, F32 v3, F32 v4, F32 v5, F32 v6, F32 v7, F32 v8)
-    : mData({{{_mmx_setr_p<__m128>(v0, v1, v2, 0)},
-              {_mmx_setr_p<__m128>(v3, v4, v5, 0)},
-              {_mmx_setr_p<__m128>(v6, v7, v8, 0)}}})
+    : mData({{{_mm_setr<__m128>(v0, v1, v2, 0)},
+              {_mm_setr<__m128>(v3, v4, v5, 0)},
+              {_mm_setr<__m128>(v6, v7, v8, 0)}}})
 {
     DEV_EXCEPTION(!IsDataAligned(), "One or more registers of Mat3fSSE are not 16 byte aligned");
 }
@@ -94,9 +94,9 @@ bool Mat3fSSE::operator!=(const Mat3fSSE& rhs) const
 
 Mat3fSSE& Mat3fSSE::operator+=(const Mat3fSSE& other)
 {
-    mData[0] = _mmx_add_p(mData[0], other.mData[0]);
-    mData[1] = _mmx_add_p(mData[1], other.mData[1]);
-    mData[2] = _mmx_add_p(mData[2], other.mData[2]);
+    mData[0] = _mm_add(mData[0], other.mData[0]);
+    mData[1] = _mm_add(mData[1], other.mData[1]);
+    mData[2] = _mm_add(mData[2], other.mData[2]);
     return *this;
 }
 
@@ -105,8 +105,8 @@ Mat3fSSE& Mat3fSSE::operator+=(const Mat3fSSE& other)
 Mat3fSSE Mat3fSSE::operator+(const Mat3fSSE& other)
 
 {
-    return Mat3fSSE(_mmx_add_p(mData[0], other.mData[0]), _mmx_add_p(mData[1], other.mData[1]),
-                    _mmx_add_p(mData[2], other.mData[2]));
+    return Mat3fSSE(_mm_add(mData[0], other.mData[0]), _mm_add(mData[1], other.mData[1]),
+                    _mm_add(mData[2], other.mData[2]));
 }
 
 
@@ -114,15 +114,15 @@ Mat3fSSE Mat3fSSE::operator+(const Mat3fSSE& other)
 Mat3fSSE Mat3fSSE::operator*(const Mat3fSSE& rhs) const
 {
     using namespace GDL::simd;
-    return Mat3fSSE(_mmx_fmadd_p(simd::Broadcast<0>(rhs.mData[0]), mData[0],
-                                 _mmx_fmadd_p(Broadcast<1>(rhs.mData[0]), mData[1],
-                                              _mmx_mul_p(Broadcast<2>(rhs.mData[0]), mData[2]))),
-                    _mmx_fmadd_p(Broadcast<0>(rhs.mData[1]), mData[0],
-                                 _mmx_fmadd_p(Broadcast<1>(rhs.mData[1]), mData[1],
-                                              _mmx_mul_p(Broadcast<2>(rhs.mData[1]), mData[2]))),
-                    _mmx_fmadd_p(Broadcast<0>(rhs.mData[2]), mData[0],
-                                 _mmx_fmadd_p(Broadcast<1>(rhs.mData[2]), mData[1],
-                                              _mmx_mul_p(Broadcast<2>(rhs.mData[2]), mData[2]))));
+    return Mat3fSSE(_mm_fmadd(simd::Broadcast<0>(rhs.mData[0]), mData[0],
+                                 _mm_fmadd(Broadcast<1>(rhs.mData[0]), mData[1],
+                                              _mm_mul(Broadcast<2>(rhs.mData[0]), mData[2]))),
+                    _mm_fmadd(Broadcast<0>(rhs.mData[1]), mData[0],
+                                 _mm_fmadd(Broadcast<1>(rhs.mData[1]), mData[1],
+                                              _mm_mul(Broadcast<2>(rhs.mData[1]), mData[2]))),
+                    _mm_fmadd(Broadcast<0>(rhs.mData[2]), mData[0],
+                                 _mm_fmadd(Broadcast<1>(rhs.mData[2]), mData[1],
+                                              _mm_mul(Broadcast<2>(rhs.mData[2]), mData[2]))));
 }
 
 
@@ -130,9 +130,9 @@ Mat3fSSE Mat3fSSE::operator*(const Mat3fSSE& rhs) const
 Vec3fSSE<true> Mat3fSSE::operator*(const Vec3fSSE<true>& rhs) const
 {
     using namespace GDL::simd;
-    return Vec3fSSE<true>(_mmx_fmadd_p(
+    return Vec3fSSE<true>(_mm_fmadd(
             Broadcast<0>(rhs.mData), mData[0],
-            _mmx_fmadd_p(Broadcast<1>(rhs.mData), mData[1], _mmx_mul_p(Broadcast<2>(rhs.mData), mData[2]))));
+            _mm_fmadd(Broadcast<1>(rhs.mData), mData[1], _mm_mul(Broadcast<2>(rhs.mData), mData[2]))));
 }
 
 

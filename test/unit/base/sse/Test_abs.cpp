@@ -22,10 +22,10 @@ void TestAbs()
         return true;
     };
 
-    alignas(simd::alignmentBytes<_registerType>) _registerType ref = _mmx_setzero_p<_registerType>();
-    alignas(simd::alignmentBytes<_registerType>) _registerType cmp = _mmx_setzero_p<_registerType>();
-    alignas(simd::alignmentBytes<_registerType>) _registerType cmp2 = _mmx_setzero_p<_registerType>();
-    alignas(simd::alignmentBytes<_registerType>) _registerType cmp3 = _mmx_setzero_p<_registerType>();
+    alignas(simd::alignmentBytes<_registerType>) _registerType ref = _mm_setzero<_registerType>();
+    alignas(simd::alignmentBytes<_registerType>) _registerType cmp = _mm_setzero<_registerType>();
+    alignas(simd::alignmentBytes<_registerType>) _registerType cmp2 = _mm_setzero<_registerType>();
+    alignas(simd::alignmentBytes<_registerType>) _registerType cmp3 = _mm_setzero<_registerType>();
 
     for (I32 i = 0; i < static_cast<I32>(numRegisterEntries); ++i)
     {
