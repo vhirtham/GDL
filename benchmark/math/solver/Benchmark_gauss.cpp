@@ -135,14 +135,14 @@ public:
 class SIMD : public benchmark::Fixture
 {
 public:
-    MatSSE<Type, 8, 8> A8;
-    VecSSE<Type, 8> b8;
-    MatSSE<Type, 16, 16> A16;
-    VecSSE<Type, 16> b16;
-    MatSSE<Type, 32, 32> A32;
-    VecSSE<Type, 32> b32;
-    MatSSE<Type, N, N> AN;
-    VecSSE<Type, N> bN;
+    MatSIMD<Type, 8, 8> A8;
+    VecSIMD<Type, 8> b8;
+    MatSIMD<Type, 16, 16> A16;
+    VecSIMD<Type, 16> b16;
+    MatSIMD<Type, 32, 32> A32;
+    VecSIMD<Type, 32> b32;
+    MatSIMD<Type, N, N> AN;
+    VecSIMD<Type, N> bN;
 
     // clang-format off
     SIMD()

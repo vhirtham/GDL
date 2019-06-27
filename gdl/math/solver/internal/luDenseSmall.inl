@@ -4,8 +4,8 @@
 
 #include "gdl/base/approx.h"
 #include "gdl/base/exception.h"
-#include "gdl/base/sse/directAccess.h"
-#include "gdl/base/sse/swizzle.h"
+#include "gdl/base/simd/directAccess.h"
+#include "gdl/base/simd/swizzle.h"
 #include "gdl/math/solver/internal/pivotDenseSmall.h"
 
 

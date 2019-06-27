@@ -1,6 +1,6 @@
 #pragma once
 
-#include "gdl/math/sse/vec4fSSE.h"
+#include "gdl/math/simd/vec4fSSE.h"
 
 namespace GDL
 {

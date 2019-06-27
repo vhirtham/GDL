@@ -3,8 +3,8 @@
 
 #include "gdl/math/serial/mat3Serial.h"
 #include "gdl/math/serial/vec3Serial.h"
-#include "gdl/math/sse/mat3fSSE.h"
-#include "gdl/math/sse/vec3fSSE.h"
+#include "gdl/math/simd/mat3fSSE.h"
+#include "gdl/math/simd/vec3fSSE.h"
 #include "gdl/math/solver/solver3.h"
 #include "test/tools/ExceptionChecks.h"
 

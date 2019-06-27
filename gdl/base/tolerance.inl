@@ -1,9 +1,9 @@
 #pragma once
 
 #include "gdl/base/tolerance.h"
-#include "gdl/base/sse/abs.h"
-#include "gdl/base/sse/compareAll.h"
-#include "gdl/base/sse/intrinsics.h"
+#include "gdl/base/simd/abs.h"
+#include "gdl/base/simd/compareAll.h"
+#include "gdl/base/simd/intrinsics.h"
 
 #include <cmath>
 

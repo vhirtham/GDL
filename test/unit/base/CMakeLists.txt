@@ -1,4 +1,4 @@
-add_subdirectory(sse)
+add_subdirectory(simd)
 
 addTest(approx)
 addTest(freeFunctions)

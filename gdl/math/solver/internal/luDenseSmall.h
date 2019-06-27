@@ -3,7 +3,7 @@
 
 
 #include "gdl/base/fundamentalTypes.h"
-#include "gdl/base/sse/x86intrin.h"
+#include "gdl/base/simd/x86intrin.h"
 #include "gdl/math/solver/pivot.h"
 
 #include <array>

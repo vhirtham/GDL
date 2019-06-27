@@ -3,16 +3,16 @@
 #include "gdl/math/solver/solver3.h"
 
 #include "gdl/base/approx.h"
-#include "gdl/base/sse/abs.h"
-#include "gdl/base/sse/crossProduct.h"
-#include "gdl/base/sse/determinant.h"
-#include "gdl/base/sse/directAccess.h"
-#include "gdl/base/sse/dotProduct.h"
-#include "gdl/base/sse/swizzle.h"
+#include "gdl/base/simd/abs.h"
+#include "gdl/base/simd/crossProduct.h"
+#include "gdl/base/simd/determinant.h"
+#include "gdl/base/simd/directAccess.h"
+#include "gdl/base/simd/dotProduct.h"
+#include "gdl/base/simd/swizzle.h"
 #include "gdl/math/solver/internal/GaussDenseSmall.h"
 #include "gdl/math/serial/mat3Serial.h"
 #include "gdl/math/serial/vec3Serial.h"
-#include "gdl/math/sse/mat3fSSE.h"
+#include "gdl/math/simd/mat3fSSE.h"
 
 
 namespace GDL::Solver

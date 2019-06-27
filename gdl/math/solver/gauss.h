@@ -2,7 +2,7 @@
 
 #include "gdl/base/fundamentalTypes.h"
 
-#include "gdl/base/sse/utility.h"
+#include "gdl/base/simd/utility.h"
 
 #include <array>
 
@@ -13,11 +13,11 @@ namespace GDL
 template <typename _type, I32, I32>
 class MatSerial;
 template <typename _type, I32, I32>
-class MatSSE;
+class MatSIMD;
 template <typename _type, I32, bool>
 class VecSerial;
 template <typename _type, I32, bool>
-class VecSSE;
+class VecSIMD;
 
 namespace Solver
 {
@@ -37,8 +37,8 @@ template <typename _type, I32 _size>
 //! @param b: Vector
 //! @return Result vector x
 template <typename _type, I32 _size>
-[[nodiscard]] VecSSE<_type, _size, true> GaussPartialPivot(const MatSSE<_type, _size, _size>& A,
-                                                           const VecSSE<_type, _size, true>& b);
+[[nodiscard]] VecSIMD<_type, _size, true> GaussPartialPivot(const MatSIMD<_type, _size, _size>& A,
+                                                           const VecSIMD<_type, _size, true>& b);
 
 
 
@@ -106,8 +106,8 @@ class GaussDenseSSE
     using MatrixDataArray = std::array<_registerType, numColRegisters * _size>;
     using VectorDataArray = std::array<_registerType, numColRegisters>;
     using ValueType = decltype(simd::GetDataType<_registerType>());
-    using VectorType = VecSSE<ValueType, _size, true>;
-    using MatrixType = MatSSE<ValueType, _size, _size>;
+    using VectorType = VecSIMD<ValueType, _size, true>;
+    using MatrixType = MatSIMD<ValueType, _size, _size>;
 
 
 public:

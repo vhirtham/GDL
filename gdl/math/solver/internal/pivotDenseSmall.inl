@@ -3,11 +3,11 @@
 #include "gdl/math/solver/internal/pivotDenseSmall.h"
 
 #include "gdl/base/exception.h"
-#include "gdl/base/sse/swizzle.h"
+#include "gdl/base/simd/swizzle.h"
 
 
 #include <iostream>
-#include "gdl/math/sse/mat4fSSE.h"
+#include "gdl/math/simd/mat4fSSE.h"
 
 namespace GDL::Solver
 {

@@ -1,8 +1,8 @@
 #include <boost/test/unit_test.hpp>
 
 
-#include "gdl/math/sse/vecSSE.h"
-#include "gdl/math/sse/matSSE.h"
+#include "gdl/math/simd/vecSIMD.h"
+#include "gdl/math/simd/matSIMD.h"
 #include "gdl/math/solver/gauss.h"
 #include "test/tools/ExceptionChecks.h"
 
@@ -28,8 +28,8 @@ struct FixtureSerial
 template <typename _type, U32 _size>
 struct FixtureSSE
 {
-    using MatrixType = MatSSE<_type, _size, _size>;
-    using VectorType = VecSSE<_type, _size>;
+    using MatrixType = MatSIMD<_type, _size, _size>;
+    using VectorType = VecSIMD<_type, _size>;
 };
 
 
@@ -132,7 +132,7 @@ BOOST_AUTO_TEST_CASE(Test_Gauss_Dense_Pivoting_F64_SSE)
 template <typename _type, U32 _size>
 void TestGaussDenseSSENoInvalidPivotIndexTestcase()
 {
-    using RegisterType = typename MatSSE<_type, _size, _size>::RegisterType;
+    using RegisterType = typename MatSIMD<_type, _size, _size>::RegisterType;
     constexpr U32 numColRegisters = simd::CalcMinNumArrayRegisters<RegisterType>(_size);
     constexpr U32 numRegisterValues = simd::numRegisterValues<RegisterType>;
 
@@ -160,8 +160,8 @@ void TestGaussDenseSSENoInvalidPivotIndexTestcase()
     }
 
 
-    VecSSE<_type, _size> b(vectorValues);
-    MatSSE<_type, _size, _size> A(matrixValues);
+    VecSIMD<_type, _size> b(vectorValues);
+    MatSIMD<_type, _size, _size> A(matrixValues);
 
     for (U32 i = 0; i < _size; ++i)
         for (U32 j = 0; j < numColRegisters; ++j)
@@ -172,7 +172,7 @@ void TestGaussDenseSSENoInvalidPivotIndexTestcase()
 
 
 
-    VecSSE<_type, _size> res = Solver::GaussPartialPivot(A, b);
+    VecSIMD<_type, _size> res = Solver::GaussPartialPivot(A, b);
 
     BOOST_CHECK(CheckCloseArray(res.Data(), expRes, 1));
 }

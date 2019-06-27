@@ -2,11 +2,11 @@
 
 #include "gdl/physics/collision/functions/orientation.h"
 
-#include "gdl/base/sse/determinant.h"
-#include "gdl/base/sse/intrinsics.h"
-#include "gdl/base/sse/swizzle.h"
-#include "gdl/math/sse/vec2fSSE.h"
-#include "gdl/math/sse/vec3fSSE.h"
+#include "gdl/base/simd/determinant.h"
+#include "gdl/base/simd/intrinsics.h"
+#include "gdl/base/simd/swizzle.h"
+#include "gdl/math/simd/vec2fSSE.h"
+#include "gdl/math/simd/vec3fSSE.h"
 
 namespace GDL
 {

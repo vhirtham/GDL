@@ -4,9 +4,9 @@
 
 #include "gdl/math/serial/matSerial.h"
 #include "gdl/math/serial/vecSerial.h"
-#include "gdl/base/sse/swizzle.h"
-#include "gdl/math/sse/matSSE.h"
-#include "gdl/math/sse/vecSSE.h"
+#include "gdl/base/simd/swizzle.h"
+#include "gdl/math/simd/matSIMD.h"
+#include "gdl/math/simd/vecSIMD.h"
 
 #include <cmath>
 
@@ -29,9 +29,9 @@ VecSerial<_type, _size, true> GaussPartialPivot(const MatSerial<_type, _size, _s
 // --------------------------------------------------------------------------------------------------------------------
 
 template <typename _type, I32 _size>
-VecSSE<_type, _size, true> GaussPartialPivot(const MatSSE<_type, _size, _size>& A, const VecSSE<_type, _size, true>& b)
+VecSIMD<_type, _size, true> GaussPartialPivot(const MatSIMD<_type, _size, _size>& A, const VecSIMD<_type, _size, true>& b)
 {
-    using RegisterType = typename MatSSE<_type, _size, _size>::RegisterType;
+    using RegisterType = typename MatSIMD<_type, _size, _size>::RegisterType;
     return GaussDenseSSE<RegisterType, _size>::SolvePartialPivot(A, b);
 }
 

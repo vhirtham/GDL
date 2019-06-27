@@ -3,9 +3,9 @@
 #include "gdl/physics/collision/functions/pointVolumeTests.h"
 
 #include "gdl/base/exception.h"
-#include "gdl/base/sse/determinant.h"
-#include "gdl/base/sse/intrinsics.h"
-#include "gdl/base/sse/swizzle.h"
+#include "gdl/base/simd/determinant.h"
+#include "gdl/base/simd/intrinsics.h"
+#include "gdl/base/simd/swizzle.h"
 #include "gdl/math/vec3.h"
 #include "gdl/physics/collision/functions/orientation.h"
 

@@ -1,4 +1,4 @@
-#include "gdl/math/sse/matSSE.h"
+#include "gdl/math/simd/matSIMD.h"
 #include "gdl/math/serial/matSerial.h"
 #include <benchmark/benchmark.h>
 
@@ -29,8 +29,8 @@ constexpr U32 M = N - 1;
 class SIMD : public benchmark::Fixture
 {
 public:
-    MatSSE<Type, N, N> A;
-    MatSSE<Type, N, N> B;
+    MatSIMD<Type, N, N> A;
+    MatSIMD<Type, N, N> B;
     MatSerial<Type, M, N> C;
     std::array<Type, N * N> valArray;
     std::array<Type, M * N> valArray2;
@@ -42,8 +42,8 @@ public:
         for (U32 i = 0; i < M * N; ++i)
             valArray2[i] = 2 * i;
 
-        A = MatSSE<Type, N, N>(valArray);
-        B = MatSSE<Type, N, N>(valArray);
+        A = MatSIMD<Type, N, N>(valArray);
+        B = MatSIMD<Type, N, N>(valArray);
     }
 };
 
@@ -90,7 +90,7 @@ BENCHMARK_F(Serial, Construction_Def)(benchmark::State& state)
 BENCHMARK_F(SIMD, Construction_Def)(benchmark::State& state)
 {
     for (auto _ : state)
-        benchmark::DoNotOptimize(MatSSE<Type, N, N>());
+        benchmark::DoNotOptimize(MatSIMD<Type, N, N>());
 }
 
 // Value Construction %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -106,7 +106,7 @@ BENCHMARK_F(Serial, Construction_Val)(benchmark::State& state)
 BENCHMARK_F(SIMD, Construction_Val)(benchmark::State& state)
 {
     for (auto _ : state)
-        benchmark::DoNotOptimize(MatSSE<Type, N, N>(valArray));
+        benchmark::DoNotOptimize(MatSIMD<Type, N, N>(valArray));
 }
 
 
@@ -114,7 +114,7 @@ BENCHMARK_F(SIMD, Construction_Val)(benchmark::State& state)
 BENCHMARK_F(SIMD, Construction_Val_non_full_registers)(benchmark::State& state)
 {
     for (auto _ : state)
-        benchmark::DoNotOptimize(MatSSE<Type, M, N>(valArray2));
+        benchmark::DoNotOptimize(MatSIMD<Type, M, N>(valArray2));
 }
 
 BENCHMARK_F(Serial, Construction_Val_Variadic_12x12)(benchmark::State& state)
@@ -132,7 +132,7 @@ BENCHMARK_F(Serial, Construction_Val_Variadic_12x12)(benchmark::State& state)
 BENCHMARK_F(SIMD, Construction_Val_Variadic_12x12)(benchmark::State& state)
 {
     for (auto _ : state)
-        benchmark::DoNotOptimize(MatSSE<Type, 12, 12>(
+        benchmark::DoNotOptimize(MatSIMD<Type, 12, 12>(
                 1., 2., 3., 4., 5., 6., 7., 8., 9., 10., 11., 12., 1., 2., 3., 4., 5., 6., 7., 8., 9., 10., 11., 12.,
                 1., 2., 3., 4., 5., 6., 7., 8., 9., 10., 11., 12., 1., 2., 3., 4., 5., 6., 7., 8., 9., 10., 11., 12.,
                 1., 2., 3., 4., 5., 6., 7., 8., 9., 10., 11., 12., 1., 2., 3., 4., 5., 6., 7., 8., 9., 10., 11., 12.,

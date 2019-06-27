@@ -1,9 +1,9 @@
 #include <benchmark/benchmark.h>
 
-#include "gdl/base/sse/negate.h"
-#include "gdl/base/sse/swizzle.h"
-#include "gdl/math/sse/mat2fSSE.h"
-#include "gdl/math/sse/vec2fSSE.h"
+#include "gdl/base/simd/negate.h"
+#include "gdl/base/simd/swizzle.h"
+#include "gdl/math/simd/mat2fSSE.h"
+#include "gdl/math/simd/vec2fSSE.h"
 #include "gdl/physics/collision/functions/orientation.h"
 
 using namespace GDL;

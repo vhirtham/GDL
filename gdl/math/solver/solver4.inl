@@ -3,18 +3,18 @@
 #include "gdl/math/solver/solver4.h"
 
 
-#include "gdl/base/sse/abs.h"
-#include "gdl/base/sse/crossProduct.h"
-#include "gdl/base/sse/compareAll.h"
-#include "gdl/base/sse/determinant.h"
-#include "gdl/base/sse/dotProduct.h"
-#include "gdl/base/sse/swizzle.h"
+#include "gdl/base/simd/abs.h"
+#include "gdl/base/simd/crossProduct.h"
+#include "gdl/base/simd/compareAll.h"
+#include "gdl/base/simd/determinant.h"
+#include "gdl/base/simd/dotProduct.h"
+#include "gdl/base/simd/swizzle.h"
 #include "gdl/math/solver/internal/GaussDenseSmall.h"
 #include "gdl/math/serial/mat4Serial.h"
 #include "gdl/math/serial/vec4Serial.h"
-#include "gdl/math/sse/mat4fAVX.h"
-#include "gdl/math/sse/mat4fSSE.h"
-#include "gdl/math/sse/vec4fSSE.h"
+#include "gdl/math/simd/mat4fAVX.h"
+#include "gdl/math/simd/mat4fSSE.h"
+#include "gdl/math/simd/vec4fSSE.h"
 
 
 namespace GDL::Solver

@@ -1,8 +1,8 @@
 #include <benchmark/benchmark.h>
 
-#include "gdl/base/sse/directAccess.h"
-#include "gdl/base/sse/intrinsics.h"
-#include "gdl/base/sse/swizzle.h"
+#include "gdl/base/simd/directAccess.h"
+#include "gdl/base/simd/intrinsics.h"
+#include "gdl/base/simd/swizzle.h"
 
 #include <array>
 

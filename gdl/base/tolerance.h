@@ -2,7 +2,7 @@
 
 #include "gdl/base/fundamentalTypes.h"
 
-#include "gdl/base/sse/utility.h"
+#include "gdl/base/simd/utility.h"
 
 
 

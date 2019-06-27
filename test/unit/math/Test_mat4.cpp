@@ -2,11 +2,11 @@
 
 
 #include "gdl/base/fundamentalTypes.h"
-#include "gdl/math/sse/mat4fAVX.h"
-#include "gdl/math/sse/mat4fSSE.h"
+#include "gdl/math/simd/mat4fAVX.h"
+#include "gdl/math/simd/mat4fSSE.h"
 #include "gdl/math/serial/mat4Serial.h"
 #include "gdl/math/serial/vec4Serial.h"
-#include "gdl/math/sse/vec4fSSE.h"
+#include "gdl/math/simd/vec4fSSE.h"
 
 
 #include "test/tools/arrayValueComparison.h"

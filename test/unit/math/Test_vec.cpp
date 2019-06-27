@@ -1,6 +1,6 @@
 #include <boost/test/unit_test.hpp>
 
-#include "gdl/math/sse/vecSSE.h"
+#include "gdl/math/simd/vecSIMD.h"
 #include "gdl/math/serial/vecSerial.h"
 
 #include "test/tools/arrayValueComparison.h"
@@ -41,7 +41,7 @@ template <typename _type, bool _isCol>
 void SSECtorTest()
 {
     constexpr U32 numVectorVals = 9;
-    using RegisterType = typename VecSSE<_type, numVectorVals>::RegisterType;
+    using RegisterType = typename VecSIMD<_type, numVectorVals>::RegisterType;
 
 
     constexpr U32 numArrayReg = simd::CalcMinNumArrayRegisters<RegisterType>(numVectorVals);
@@ -52,7 +52,7 @@ void SSECtorTest()
         for (U32 j = 0; j < numRegVals; ++j)
             simd::SetValue(arr[i], j, static_cast<_type>(i * numRegVals + j));
 
-    VecSSE<_type, numVectorVals, _isCol> a(arr);
+    VecSIMD<_type, numVectorVals, _isCol> a(arr);
 
     std::array<_type, numVectorVals> expA;
     for (U32 i = 0; i < numVectorVals; ++i)
@@ -75,10 +75,10 @@ BOOST_AUTO_TEST_CASE(Construction_Serial)
 
 BOOST_AUTO_TEST_CASE(Construction_SSE)
 {
-    CtorDataTest<VecSSE, F32, true>();
-    CtorDataTest<VecSSE, F32, false>();
-    CtorDataTest<VecSSE, F64, true>();
-    CtorDataTest<VecSSE, F64, false>();
+    CtorDataTest<VecSIMD, F32, true>();
+    CtorDataTest<VecSIMD, F32, false>();
+    CtorDataTest<VecSIMD, F64, true>();
+    CtorDataTest<VecSIMD, F64, false>();
     SSECtorTest<F32, true>();
     SSECtorTest<F32, false>();
     SSECtorTest<F64, true>();
@@ -124,6 +124,6 @@ BOOST_AUTO_TEST_CASE(Direct_Access_Serial)
 
 BOOST_AUTO_TEST_CASE(Direct_Access_SSE)
 {
-    DirectAccessOperatorTest<VecSSE, F32>();
-    DirectAccessOperatorTest<VecSSE, F64>();
+    DirectAccessOperatorTest<VecSIMD, F32>();
+    DirectAccessOperatorTest<VecSIMD, F64>();
 }

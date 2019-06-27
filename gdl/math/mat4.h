@@ -1,9 +1,9 @@
 #pragma once
 
 #ifndef __AVX2__
-#include "gdl/math/sse/mat4fSSE.h"
+#include "gdl/math/simd/mat4fSSE.h"
 #else
-#include "gdl/math/sse/mat4fAVX.h"
+#include "gdl/math/simd/mat4fAVX.h"
 #endif // __AVX2__
 
 

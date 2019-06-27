@@ -1,7 +1,7 @@
 #include <benchmark/benchmark.h>
 
 
-#include "gdl/math/sse/vec3fSSE.h"
+#include "gdl/math/simd/vec3fSSE.h"
 #include "gdl/physics/collision/functions/pointVolumeTests.h"
 
 using namespace GDL;

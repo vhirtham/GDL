@@ -2,7 +2,7 @@
 
 
 #include "gdl/base/fundamentalTypes.h"
-#include "gdl/math/sse/mat2fSSE.h"
+#include "gdl/math/simd/mat2fSSE.h"
 #include "gdl/math/serial/mat2Serial.h"
 
 

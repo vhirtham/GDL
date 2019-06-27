@@ -1,7 +1,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include "gdl/base/fundamentalTypes.h"
-#include "gdl/math/sse/quatfSSE.h"
+#include "gdl/math/simd/quatfSSE.h"
 #include "gdl/math/serial/quatSerial.h"
 
 #include "test/tools/arrayValueComparison.h"

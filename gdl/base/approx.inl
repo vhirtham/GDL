@@ -2,9 +2,9 @@
 
 #include "gdl/base/approx.h"
 #include "gdl/base/exception.h"
-#include "gdl/base/sse/abs.h"
-#include "gdl/base/sse/compareAll.h"
-#include "gdl/base/sse/intrinsics.h"
+#include "gdl/base/simd/abs.h"
+#include "gdl/base/simd/compareAll.h"
+#include "gdl/base/simd/intrinsics.h"
 
 #include <algorithm>
 #include <cmath>

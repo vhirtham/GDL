@@ -3,7 +3,7 @@
 #include "gdl/base/approx.h"
 #include "gdl/base/fundamentalTypes.h"
 #include "gdl/base/functions/pow.h"
-#include "gdl/base/sse/directAccess.h"
+#include "gdl/base/simd/directAccess.h"
 
 #include "test/tools/ExceptionChecks.h"
 

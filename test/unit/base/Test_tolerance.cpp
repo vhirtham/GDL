@@ -2,7 +2,7 @@
 
 #include "gdl/base/fundamentalTypes.h"
 #include "gdl/base/tolerance.h"
-#include "gdl/base/sse/directAccess.h"
+#include "gdl/base/simd/directAccess.h"
 
 #include "test/tools/ExceptionChecks.h"
 
