@@ -4,10 +4,9 @@
 
 #include "gdl/base/sse/swizzle.h"
 #include "gdl/base/sse/utility.h"
+#include "gdl/base/sse/x86intrin.h"
 
-#include <x86intrin.h>
 
-#include <iostream>
 
 namespace GDL::sse
 {

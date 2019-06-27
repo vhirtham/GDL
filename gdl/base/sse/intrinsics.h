@@ -1,11 +1,8 @@
 #pragma once
 
-#if defined __GNUC__ && __GNUC__ >= 6
-#pragma GCC diagnostic ignored "-Wignored-attributes"
-#endif
 
 #include "gdl/base/fundamentalTypes.h"
-#include <x86intrin.h>
+#include "gdl/base/sse/x86intrin.h"
 
 
 

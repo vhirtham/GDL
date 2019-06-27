@@ -1,9 +1,10 @@
 #pragma once
 
-#include <x86intrin.h>
+
 
 #include "gdl/base/fundamentalTypes.h"
 #include "gdl/base/sse/utility.h"
+#include "gdl/base/sse/x86intrin.h"
 
 namespace GDL::sse
 {
