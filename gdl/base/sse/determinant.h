@@ -4,7 +4,7 @@
 #include "gdl/base/sse/x86intrin.h"
 
 
-namespace GDL::sse
+namespace GDL::simd
 {
 
 //! @brief Calculates the determinant of a 2x2 matrix
@@ -50,6 +50,6 @@ inline F32 Determinant4x4(__m256 ab, __m256 cd);
 
 #endif // __AVX2__
 
-} // namespace GDL::sse
+} // namespace GDL::simd
 
 #include "gdl/base/sse/determinant.inl"

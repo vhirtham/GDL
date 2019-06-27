@@ -133,8 +133,8 @@ template <typename _type, U32 _size>
 void TestGaussDenseSSENoInvalidPivotIndexTestcase()
 {
     using RegisterType = typename MatSSE<_type, _size, _size>::RegisterType;
-    constexpr U32 numColRegisters = sse::CalcMinNumArrayRegisters<RegisterType>(_size);
-    constexpr U32 numRegisterValues = sse::numRegisterValues<RegisterType>;
+    constexpr U32 numColRegisters = simd::CalcMinNumArrayRegisters<RegisterType>(_size);
+    constexpr U32 numRegisterValues = simd::numRegisterValues<RegisterType>;
 
     std::array<_type, _size> expRes;
     std::array<_type, _size> vectorValues;
@@ -151,11 +151,11 @@ void TestGaussDenseSSENoInvalidPivotIndexTestcase()
             {
                 U32 globalColIdx = j * numRegisterValues + k;
                 if (globalColIdx == i)
-                    sse::SetValue(matrixValues[i * numColRegisters + j], k, 1);
+                    simd::SetValue(matrixValues[i * numColRegisters + j], k, 1);
                 else if (globalColIdx < _size)
-                    sse::SetValue(matrixValues[i * numColRegisters + j], k, 0);
+                    simd::SetValue(matrixValues[i * numColRegisters + j], k, 0);
                 else
-                    sse::SetValue(matrixValues[i * numColRegisters + j], k, 500);
+                    simd::SetValue(matrixValues[i * numColRegisters + j], k, 500);
             }
     }
 
@@ -167,7 +167,7 @@ void TestGaussDenseSSENoInvalidPivotIndexTestcase()
         for (U32 j = 0; j < numColRegisters; ++j)
             for (U32 k = 0; k < numRegisterValues; ++k)
                 if (j * numRegisterValues + k >= _size)
-                    EXCEPTION(sse::GetValue(matrixValues[i * numColRegisters + j], k) != Approx<_type>(500),
+                    EXCEPTION(simd::GetValue(matrixValues[i * numColRegisters + j], k) != Approx<_type>(500),
                               "Testcase invalid. Unused memory of matrix is not set as expected.");
 
 

@@ -4,7 +4,7 @@
 
 
 
-namespace GDL::sse
+namespace GDL::simd
 {
 
 //! @brief Transposes a 2x2 matrix which consists of 2 __m128d registers
@@ -36,7 +36,7 @@ inline void Transpose(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 in4
 
 #endif // __AVX2__
 
-} // namespace GDL::sse
+} // namespace GDL::simd
 
 
 #include "gdl/base/sse/transpose.inl"

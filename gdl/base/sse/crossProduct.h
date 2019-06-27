@@ -4,7 +4,7 @@
 #include "gdl/base/sse/x86intrin.h"
 
 
-namespace GDL::sse
+namespace GDL::simd
 {
 
 //! @brief Calculates the cross product of first 3 values of 2 registers
@@ -16,6 +16,6 @@ namespace GDL::sse
 //! register will also be 0.
 [[nodiscard]] inline __m128 CrossProduct(__m128 lhs, __m128 rhs);
 
-} // namespace GDL::sse
+} // namespace GDL::simd
 
 #include "gdl/base/sse/crossProduct.inl"

@@ -98,14 +98,14 @@ private:
 template <typename _registerType, I32 _size>
 class GaussDenseSSE
 {
-    constexpr static U32 alignment = sse::alignmentBytes<_registerType>;
-    static constexpr U32 numRegisterValues = sse::numRegisterValues<_registerType>;
-    static constexpr U32 numColRegisters = sse::CalcMinNumArrayRegisters<_registerType>(_size);
+    constexpr static U32 alignment = simd::alignmentBytes<_registerType>;
+    static constexpr U32 numRegisterValues = simd::numRegisterValues<_registerType>;
+    static constexpr U32 numColRegisters = simd::CalcMinNumArrayRegisters<_registerType>(_size);
 
 
     using MatrixDataArray = std::array<_registerType, numColRegisters * _size>;
     using VectorDataArray = std::array<_registerType, numColRegisters>;
-    using ValueType = decltype(sse::GetDataType<_registerType>());
+    using ValueType = decltype(simd::GetDataType<_registerType>());
     using VectorType = VecSSE<ValueType, _size, true>;
     using MatrixType = MatSSE<ValueType, _size, _size>;
 

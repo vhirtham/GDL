@@ -4,7 +4,7 @@
 #include "gdl/base/sse/intrinsics.h"
 
 
-namespace GDL::sse
+namespace GDL::simd
 {
 
 
@@ -43,4 +43,4 @@ inline __m256 DotProduct(const __m256& lhs, const __m256& rhs)
     return _mmx_dp_p<GetDotProductMask4<_src0, _src1, _src2, _src3, _dst0, _dst1, _dst2, _dst3>()>(lhs, rhs);
 }
 
-} // namespace GDL::sse
+} // namespace GDL::simd

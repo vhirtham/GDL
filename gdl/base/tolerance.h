@@ -15,15 +15,15 @@ namespace GDL
 //! be compared. For non sse types this value should be set to 0 (specialized case).
 //! @remark There is also the Approx class which has a quiet similar purpose. The major difference is, that the approx
 //! has a dynamic tolerance while this class only has a fixed tolerance
-template <typename _registerType, U32 _numComparedValuesSSE = sse::numRegisterValues<_registerType>>
-class alignas(sse::alignmentBytes<_registerType>) Tolerance
+template <typename _registerType, U32 _numComparedValuesSSE = simd::numRegisterValues<_registerType>>
+class alignas(simd::alignmentBytes<_registerType>) Tolerance
 {
-    static_assert(sse::IsRegisterType<_registerType>, "Type is no valid sse register type");
-    static_assert(_numComparedValuesSSE <= sse::numRegisterValues<_registerType>,
+    static_assert(simd::IsRegisterType<_registerType>, "Type is no valid sse register type");
+    static_assert(_numComparedValuesSSE <= simd::numRegisterValues<_registerType>,
                   "_numComparedValues > Number of register elements.");
 
-    alignas(sse::alignmentBytes<_registerType>) _registerType mValue;
-    alignas(sse::alignmentBytes<_registerType>) _registerType mTolerance;
+    alignas(simd::alignmentBytes<_registerType>) _registerType mValue;
+    alignas(simd::alignmentBytes<_registerType>) _registerType mTolerance;
 
 public:
     Tolerance() = delete;

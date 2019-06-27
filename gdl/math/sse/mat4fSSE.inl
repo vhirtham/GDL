@@ -77,7 +77,7 @@ F32 Mat4fSSE::operator()(const U32 row, const U32 col) const
     DEV_EXCEPTION(row > 3, "row - invalid value! [0..3]");
     DEV_EXCEPTION(col > 3, "col - invalid value! [0..3]");
 
-    return sse::GetValue(mData[col], row);
+    return simd::GetValue(mData[col], row);
 }
 
 bool Mat4fSSE::operator==(const Mat4fSSE& rhs) const
@@ -120,8 +120,8 @@ Mat4fSSE Mat4fSSE::operator+(const Mat4fSSE& other)
 
 Mat4fSSE Mat4fSSE::operator*(const Mat4fSSE& rhs) const
 {
-    using namespace GDL::sse;
-    return Mat4fSSE(_mmx_fmadd_p(sse::Broadcast<0>(rhs.mData[0]), mData[0],
+    using namespace GDL::simd;
+    return Mat4fSSE(_mmx_fmadd_p(simd::Broadcast<0>(rhs.mData[0]), mData[0],
                                  _mmx_fmadd_p(Broadcast<1>(rhs.mData[0]), mData[1],
                                               _mmx_fmadd_p(Broadcast<2>(rhs.mData[0]), mData[2],
                                                            _mmx_mul_p(Broadcast<3>(rhs.mData[0]), mData[3])))),
@@ -141,7 +141,7 @@ Mat4fSSE Mat4fSSE::operator*(const Mat4fSSE& rhs) const
 
 Vec4fSSE<true> Mat4fSSE::operator*(const Vec4fSSE<true>& rhs) const
 {
-    using namespace GDL::sse;
+    using namespace GDL::simd;
     return Vec4fSSE<true>(_mmx_fmadd_p(Broadcast<0>(rhs.mData), mData[0],
                                        _mmx_fmadd_p(Broadcast<1>(rhs.mData), mData[1],
                                                     _mmx_fmadd_p(Broadcast<2>(rhs.mData), mData[2],
@@ -167,7 +167,7 @@ const std::array<__m128, 4>& Mat4fSSE::DataSSE() const
 
 F32 Mat4fSSE::Det() const
 {
-    return sse::Determinant4x4(mData[0], mData[1], mData[2], mData[3]);
+    return simd::Determinant4x4(mData[0], mData[1], mData[2], mData[3]);
 }
 
 
@@ -175,7 +175,7 @@ F32 Mat4fSSE::Det() const
 Mat4fSSE Mat4fSSE::Transpose() const
 {
     Mat4fSSE t;
-    sse::Transpose(mData[0], mData[1], mData[2], mData[3], t.mData[0], t.mData[1], t.mData[2], t.mData[3]);
+    simd::Transpose(mData[0], mData[1], mData[2], mData[3], t.mData[0], t.mData[1], t.mData[2], t.mData[3]);
     return t;
 }
 
@@ -183,8 +183,8 @@ Mat4fSSE Mat4fSSE::Transpose() const
 
 bool Mat4fSSE::IsDataAligned() const
 {
-    return (IsAligned(&mData[0], sse::alignmentBytes<__m128>) && IsAligned(&mData[1], sse::alignmentBytes<__m128>) &&
-            IsAligned(&mData[2], sse::alignmentBytes<__m128>) && IsAligned(&mData[3], sse::alignmentBytes<__m128>));
+    return (IsAligned(&mData[0], simd::alignmentBytes<__m128>) && IsAligned(&mData[1], simd::alignmentBytes<__m128>) &&
+            IsAligned(&mData[2], simd::alignmentBytes<__m128>) && IsAligned(&mData[3], simd::alignmentBytes<__m128>));
 }
 
 

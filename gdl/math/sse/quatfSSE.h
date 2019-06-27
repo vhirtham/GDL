@@ -13,10 +13,10 @@ namespace GDL
 {
 
 //! @brief Quaternion class with x, y, z, w ordering and SSE support
-class alignas(sse::alignmentBytes<__m128>) QuatfSSE
+class alignas(simd::alignmentBytes<__m128>) QuatfSSE
 {
 
-    alignas(sse::alignmentBytes<__m128>) __m128 mData;
+    alignas(simd::alignmentBytes<__m128>) __m128 mData;
 
 public:
     inline QuatfSSE();

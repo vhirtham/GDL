@@ -13,7 +13,7 @@ using namespace GDL;
 
 BOOST_AUTO_TEST_CASE(Transpose2x2_128)
 {
-    alignas(sse::alignmentBytes<__m128d>) std::array<__m128d, 2> a, b, expected;
+    alignas(simd::alignmentBytes<__m128d>) std::array<__m128d, 2> a, b, expected;
     a[0] = _mm_setr_pd(1, 2);
     a[1] = _mm_setr_pd(3, 4);
 
@@ -21,18 +21,18 @@ BOOST_AUTO_TEST_CASE(Transpose2x2_128)
     expected[1] = _mm_setr_pd(2, 4);
 
 
-    sse::Transpose(a[0], a[1], b[0], b[1]);
+    simd::Transpose(a[0], a[1], b[0], b[1]);
 
     for (U32 i = 0; i < 2; ++i)
         for (U32 j = 0; j < 2; ++j)
-            BOOST_CHECK(sse::GetValue(b[i], j) == sse::GetValue(expected[i], j));
+            BOOST_CHECK(simd::GetValue(b[i], j) == simd::GetValue(expected[i], j));
 }
 
 
 
 BOOST_AUTO_TEST_CASE(Transpose4x4_128)
 {
-    alignas(sse::alignmentBytes<__m128>) std::array<__m128, 4> a, b, expected;
+    alignas(simd::alignmentBytes<__m128>) std::array<__m128, 4> a, b, expected;
 
     a[0] = _mm_setr_ps(1, 2, 3, 4);
     a[1] = _mm_setr_ps(5, 6, 7, 8);
@@ -45,11 +45,11 @@ BOOST_AUTO_TEST_CASE(Transpose4x4_128)
     expected[3] = _mm_setr_ps(4, 8, 12, 16);
 
 
-    sse::Transpose(a[0], a[1], a[2], a[3], b[0], b[1], b[2], b[3]);
+    simd::Transpose(a[0], a[1], a[2], a[3], b[0], b[1], b[2], b[3]);
 
     for (U32 i = 0; i < 4; ++i)
         for (U32 j = 0; j < 4; ++j)
-            BOOST_CHECK(sse::GetValue(b[i], j) == sse::GetValue(expected[i], j));
+            BOOST_CHECK(simd::GetValue(b[i], j) == simd::GetValue(expected[i], j));
 }
 
 
@@ -58,7 +58,7 @@ BOOST_AUTO_TEST_CASE(Transpose4x4_128)
 
 BOOST_AUTO_TEST_CASE(Transpose4x4_256)
 {
-    alignas(sse::alignmentBytes<__m256d>) std::array<__m256d, 4> a, b, expected;
+    alignas(simd::alignmentBytes<__m256d>) std::array<__m256d, 4> a, b, expected;
     a[0] = _mm256_setr_pd(1, 2, 3, 4);
     a[1] = _mm256_setr_pd(5, 6, 7, 8);
     a[2] = _mm256_setr_pd(9, 10, 11, 12);
@@ -69,19 +69,19 @@ BOOST_AUTO_TEST_CASE(Transpose4x4_256)
     expected[2] = _mm256_setr_pd(3, 7, 11, 15);
     expected[3] = _mm256_setr_pd(4, 8, 12, 16);
 
-    sse::Transpose(a[0], a[1], a[2], a[3], b[0], b[1], b[2], b[3]);
+    simd::Transpose(a[0], a[1], a[2], a[3], b[0], b[1], b[2], b[3]);
 
 
     for (U32 i = 0; i < 4; ++i)
         for (U32 j = 0; j < 4; ++j)
-            BOOST_CHECK(sse::GetValue(b[i], j) == sse::GetValue(expected[i], j));
+            BOOST_CHECK(simd::GetValue(b[i], j) == simd::GetValue(expected[i], j));
 }
 
 
 
 BOOST_AUTO_TEST_CASE(Transpose8x8_256)
 {
-    alignas(sse::alignmentBytes<__m256>) std::array<__m256, 8> a, b, expected;
+    alignas(simd::alignmentBytes<__m256>) std::array<__m256, 8> a, b, expected;
     a[0] = _mm256_setr_ps(1, 2, 3, 4, 5, 6, 7, 8);
     a[1] = _mm256_setr_ps(9, 10, 11, 12, 13, 14, 15, 16);
     a[2] = _mm256_setr_ps(17, 18, 19, 20, 21, 22, 23, 24);
@@ -102,11 +102,11 @@ BOOST_AUTO_TEST_CASE(Transpose8x8_256)
     expected[7] = _mm256_setr_ps(8, 16, 24, 32, 40, 48, 56, 64);
 
 
-    sse::Transpose(a[0], a[1], a[2], a[3], a[4], a[5], a[6], a[7], b[0], b[1], b[2], b[3], b[4], b[5], b[6], b[7]);
+    simd::Transpose(a[0], a[1], a[2], a[3], a[4], a[5], a[6], a[7], b[0], b[1], b[2], b[3], b[4], b[5], b[6], b[7]);
 
     for (U32 i = 0; i < 8; ++i)
         for (U32 j = 0; j < 8; ++j)
-            BOOST_CHECK(sse::GetValue(b[i], j) == sse::GetValue(expected[i], j));
+            BOOST_CHECK(simd::GetValue(b[i], j) == simd::GetValue(expected[i], j));
 }
 
 

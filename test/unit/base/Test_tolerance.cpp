@@ -52,16 +52,16 @@ BOOST_AUTO_TEST_CASE(Inside_Tolerance)
 template <typename _registerType, U32 _count = 1>
 void TestToleranceSSE()
 {
-    constexpr U32 numRegisterEntries = sse::numRegisterValues<_registerType>;
+    constexpr U32 numRegisterEntries = simd::numRegisterValues<_registerType>;
     using ToleranceType = Tolerance<_registerType, _count>;
 
     F32 toleranceValue = 1.5;
-    alignas(sse::alignmentBytes<_registerType>) _registerType ref = _mmx_setzero_p<_registerType>();
-    alignas(sse::alignmentBytes<_registerType>) _registerType toleranceValueSSE =
+    alignas(simd::alignmentBytes<_registerType>) _registerType ref = _mmx_setzero_p<_registerType>();
+    alignas(simd::alignmentBytes<_registerType>) _registerType toleranceValueSSE =
             _mmx_set1_p<_registerType>(toleranceValue);
 
     for (U32 i = 0; i < numRegisterEntries; ++i)
-        sse::SetValue(ref, i, i);
+        simd::SetValue(ref, i, i);
 
     ToleranceType tolerance(ref, toleranceValueSSE);
 
@@ -80,8 +80,8 @@ void TestToleranceSSE()
         BOOST_CHECK(tolerance != _mmx_set1_p<_registerType>(-10));
         BOOST_CHECK(_mmx_set1_p<_registerType>(-10) != tolerance);
 
-        alignas(sse::alignmentBytes<_registerType>) _registerType cmpAll;
-        alignas(sse::alignmentBytes<_registerType>) _registerType cmpSingle;
+        alignas(simd::alignmentBytes<_registerType>) _registerType cmpAll;
+        alignas(simd::alignmentBytes<_registerType>) _registerType cmpSingle;
 
         for (I32 i = -4; i < 4; ++i)
         {
@@ -91,7 +91,7 @@ void TestToleranceSSE()
 
             // Not compared values are equal to ref
             for (U32 j = _count; j < numRegisterEntries; ++j)
-                sse::SetValue(cmpAll, j, sse::GetValue(ref, j));
+                simd::SetValue(cmpAll, j, simd::GetValue(ref, j));
 
             if (std::abs(i) <= toleranceValue)
             {
@@ -107,7 +107,7 @@ void TestToleranceSSE()
             // Up to all compared values might be out of tolerance
             for (U32 j = _count; j < numRegisterEntries; ++j)
             {
-                sse::SetValue(cmpAll, j, -1337);
+                simd::SetValue(cmpAll, j, -1337);
                 if (std::abs(i) <= toleranceValue)
                 {
                     BOOST_CHECK(cmpAll == tolerance);
@@ -127,7 +127,7 @@ void TestToleranceSSE()
             {
                 cmpSingle = ref;
 
-                sse::SetValue(cmpSingle, j, sse::GetValue(cmpSingle, j) + i);
+                simd::SetValue(cmpSingle, j, simd::GetValue(cmpSingle, j) + i);
                 if (std::abs(i) <= toleranceValue)
                 {
                     BOOST_CHECK(cmpSingle == tolerance);
@@ -160,7 +160,7 @@ void TestToleranceSSE()
     for (U32 i = 0; i < numRegisterEntries; ++i)
     {
         toleranceValueSSE = _mmx_set1_p<_registerType>(toleranceValue);
-        sse::SetValue(toleranceValueSSE, i, -1);
+        simd::SetValue(toleranceValueSSE, i, -1);
         GDL_CHECK_THROW_DEV(ToleranceType(ref, toleranceValueSSE), Exception);
     }
 

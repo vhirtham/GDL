@@ -6,7 +6,7 @@
 #include "gdl/base/sse/utility.h"
 #include "gdl/base/sse/x86intrin.h"
 
-namespace GDL::sse
+namespace GDL::simd
 {
 //! @brief Creates a mask for the dot product intrinsics with 4 floating point values per 128bit (__m128 and __m256).
 //! The template parameters specify the register values that should be used to calculate the dot product and the
@@ -58,7 +58,7 @@ template <U32 _src0 = 1, U32 _src1 = 1, U32 _src2 = 1, U32 _src3 = 1, U32 _dst0 
           U32 _dst3 = 1>
 inline __m256 DotProduct(const __m256& lhs, const __m256& rhs);
 
-} // namespace GDL::sse
+} // namespace GDL::simd
 
 
 #include "gdl/base/sse/dotProduct.inl"

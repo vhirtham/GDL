@@ -20,10 +20,10 @@ class VecSSE
     static_assert(std::is_floating_point<_type>::value, "Matrix can only be created with floating point types");
 
 public:
-    using RegisterType = decltype(sse::GetFittingRegister<_type, sse::MaxRegisterSize()>());
-    constexpr static U32 mAlignment = sse::alignmentBytes<RegisterType>;
-    constexpr static U32 mNumRegisterEntries = sse::numRegisterValues<RegisterType>;
-    constexpr static U32 mNumRegisters = sse::CalcMinNumArrayRegisters<RegisterType>(_size);
+    using RegisterType = decltype(simd::GetFittingRegister<_type, simd::MaxRegisterSize()>());
+    constexpr static U32 mAlignment = simd::alignmentBytes<RegisterType>;
+    constexpr static U32 mNumRegisterEntries = simd::numRegisterValues<RegisterType>;
+    constexpr static U32 mNumRegisters = simd::CalcMinNumArrayRegisters<RegisterType>(_size);
 
 private:
     template <typename _type2, I32 _size2, bool _isCol2>

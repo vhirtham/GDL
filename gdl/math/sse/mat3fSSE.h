@@ -17,9 +17,9 @@ template <bool>
 class Vec3fSSE;
 
 //! @brief 3x3 Matrix with SSE support
-class alignas(sse::alignmentBytes<__m128>) Mat3fSSE
+class alignas(simd::alignmentBytes<__m128>) Mat3fSSE
 {
-    alignas(sse::alignmentBytes<__m128>) std::array<__m128, 3> mData;
+    alignas(simd::alignmentBytes<__m128>) std::array<__m128, 3> mData;
 
 public:
     inline Mat3fSSE();

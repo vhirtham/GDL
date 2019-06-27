@@ -44,13 +44,13 @@ void SSECtorTest()
     using RegisterType = typename VecSSE<_type, numVectorVals>::RegisterType;
 
 
-    constexpr U32 numArrayReg = sse::CalcMinNumArrayRegisters<RegisterType>(numVectorVals);
-    constexpr U32 numRegVals = sse::numRegisterValues<RegisterType>;
+    constexpr U32 numArrayReg = simd::CalcMinNumArrayRegisters<RegisterType>(numVectorVals);
+    constexpr U32 numRegVals = simd::numRegisterValues<RegisterType>;
 
     std::array<RegisterType, numArrayReg> arr{{0}};
     for (U32 i = 0; i < numArrayReg; ++i)
         for (U32 j = 0; j < numRegVals; ++j)
-            sse::SetValue(arr[i], j, static_cast<_type>(i * numRegVals + j));
+            simd::SetValue(arr[i], j, static_cast<_type>(i * numRegVals + j));
 
     VecSSE<_type, numVectorVals, _isCol> a(arr);
 

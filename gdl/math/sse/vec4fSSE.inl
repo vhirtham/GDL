@@ -63,7 +63,7 @@ F32 Vec4fSSE<_isCol>::operator[](const U32 index) const
 {
     DEV_EXCEPTION(index > 3, "Invalid index value! [0..3]");
 
-    return sse::GetValue(mData, index);
+    return simd::GetValue(mData, index);
 }
 
 
@@ -134,7 +134,7 @@ template <bool _isCol>
 template <bool _isColRhs>
 F32 Vec4fSSE<_isCol>::Dot(Vec4fSSE<_isColRhs> rhs) const
 {
-    return sse::DotProductF32(mData, rhs.mData);
+    return simd::DotProductF32(mData, rhs.mData);
 }
 
 
@@ -142,7 +142,7 @@ F32 Vec4fSSE<_isCol>::Dot(Vec4fSSE<_isColRhs> rhs) const
 template <bool _isCol>
 F32 Vec4fSSE<_isCol>::Length() const
 {
-    return _mmx_cvtsx_fx<__m128>(_mmx_sqrt_p<__m128>(sse::DotProduct(mData, mData)));
+    return _mmx_cvtsx_fx<__m128>(_mmx_sqrt_p<__m128>(simd::DotProduct(mData, mData)));
 }
 
 
@@ -151,7 +151,7 @@ template <bool _isCol>
 Vec4fSSE<_isCol>& Vec4fSSE<_isCol>::Normalize()
 {
     DEV_EXCEPTION(*this == Vec4fSSE(), "Vector length is 0. Can't normalize the vector.");
-    mData = _mmx_div_p(mData, _mmx_sqrt_p(sse::DotProduct(mData, mData)));
+    mData = _mmx_div_p(mData, _mmx_sqrt_p(simd::DotProduct(mData, mData)));
 
     return *this;
 }
@@ -161,7 +161,7 @@ Vec4fSSE<_isCol>& Vec4fSSE<_isCol>::Normalize()
 template <bool _isCol>
 bool Vec4fSSE<_isCol>::IsDataAligned() const
 {
-    return IsAligned(&mData, IsAligned(&mData, sse::alignmentBytes<__m128>));
+    return IsAligned(&mData, IsAligned(&mData, simd::alignmentBytes<__m128>));
 }
 
 

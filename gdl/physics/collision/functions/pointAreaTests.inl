@@ -15,7 +15,7 @@ template <bool _isCol>
 F32 PointInsideCircle(const Vec2fSSE<_isCol>& point, const Vec2fSSE<_isCol>& c0, const Vec2fSSE<_isCol>& c1,
                       const Vec2fSSE<_isCol>& c2)
 {
-    using namespace GDL::sse;
+    using namespace GDL::simd;
 
     DEV_EXCEPTION(Orientation(c0, c1, c2) <= 0,
                   "The passed points c0, c1 and c2 must be in counter clockwise ordering if viewed as triangle");

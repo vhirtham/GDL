@@ -3,7 +3,7 @@
 #include "gdl/base/fundamentalTypes.h"
 #include "gdl/base/sse/x86intrin.h"
 
-namespace GDL::sse
+namespace GDL::simd
 {
 
 //! @brief Constant which stores the necessary alignment in bytes for the provided register type
@@ -166,4 +166,4 @@ constexpr const bool Is__m256i<__m256i> = true;
 #endif // __AVX2__
 
 
-} // namespace GDL::sse
+} // namespace GDL::simd

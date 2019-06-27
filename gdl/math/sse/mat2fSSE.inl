@@ -66,7 +66,7 @@ F32 Mat2fSSE::operator()(const U32 row, const U32 col) const
     DEV_EXCEPTION(row > 1, "row - invalid value! [0..1]");
     DEV_EXCEPTION(col > 1, "col - invalid value! [0..1]");
 
-    return sse::GetValue(mData, row + 2 * col);
+    return simd::GetValue(mData, row + 2 * col);
 }
 
 
@@ -103,7 +103,7 @@ Mat2fSSE Mat2fSSE::operator+(const Mat2fSSE& other)
 
 Mat2fSSE Mat2fSSE::operator*(const Mat2fSSE& rhs) const
 {
-    using namespace GDL::sse;
+    using namespace GDL::simd;
     return Mat2fSSE(_mmx_fmadd_p(mData, Permute<0, 0, 3, 3>(rhs.mData),
                                  _mmx_mul_p(Permute<2, 3, 0, 1>(mData), Permute<1, 1, 2, 2>(rhs.mData))));
 }
@@ -112,7 +112,7 @@ Mat2fSSE Mat2fSSE::operator*(const Mat2fSSE& rhs) const
 
 Vec2fSSE<true> Mat2fSSE::operator*(const Vec2fSSE<true>& rhs) const
 {
-    using namespace GDL::sse;
+    using namespace GDL::simd;
     return Vec2fSSE<true>(_mmx_fmadd_p(mData, Permute<0, 0, 3, 3>(rhs.mData),
                                        _mmx_mul_p(Permute<2, 3, 0, 1>(mData), Permute<1, 1, 2, 2>(rhs.mData))));
 }
@@ -121,7 +121,7 @@ Vec2fSSE<true> Mat2fSSE::operator*(const Vec2fSSE<true>& rhs) const
 
 const std::array<F32, 4> Mat2fSSE::Data() const
 {
-    alignas(sse::alignmentBytes<__m128>) std::array<F32, 4> data;
+    alignas(simd::alignmentBytes<__m128>) std::array<F32, 4> data;
     assert(sizeof(mData) == sizeof(data));
 
     _mmx_store_p(&data[0], mData);
@@ -132,21 +132,21 @@ const std::array<F32, 4> Mat2fSSE::Data() const
 
 inline F32 Mat2fSSE::Det() const
 {
-    return sse::Determinant2x2(mData);
+    return simd::Determinant2x2(mData);
 }
 
 
 
 Mat2fSSE Mat2fSSE::Transpose() const
 {
-    return Mat2fSSE(sse::Permute<0, 2, 1, 3>(mData));
+    return Mat2fSSE(simd::Permute<0, 2, 1, 3>(mData));
 }
 
 
 
 bool Mat2fSSE::IsDataAligned() const
 {
-    return IsAligned(&mData, sse::alignmentBytes<__m128>);
+    return IsAligned(&mData, simd::alignmentBytes<__m128>);
 }
 
 

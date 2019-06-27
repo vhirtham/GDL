@@ -70,7 +70,7 @@ F32 Mat3fSSE::operator()(const U32 row, const U32 col) const
     DEV_EXCEPTION(row > 2, "row - invalid value! [0..2]");
     DEV_EXCEPTION(col > 2, "col - invalid value! [0..2]");
 
-    return sse::GetValue(mData[col], row);
+    return simd::GetValue(mData[col], row);
 }
 
 
@@ -113,8 +113,8 @@ Mat3fSSE Mat3fSSE::operator+(const Mat3fSSE& other)
 
 Mat3fSSE Mat3fSSE::operator*(const Mat3fSSE& rhs) const
 {
-    using namespace GDL::sse;
-    return Mat3fSSE(_mmx_fmadd_p(sse::Broadcast<0>(rhs.mData[0]), mData[0],
+    using namespace GDL::simd;
+    return Mat3fSSE(_mmx_fmadd_p(simd::Broadcast<0>(rhs.mData[0]), mData[0],
                                  _mmx_fmadd_p(Broadcast<1>(rhs.mData[0]), mData[1],
                                               _mmx_mul_p(Broadcast<2>(rhs.mData[0]), mData[2]))),
                     _mmx_fmadd_p(Broadcast<0>(rhs.mData[1]), mData[0],
@@ -129,7 +129,7 @@ Mat3fSSE Mat3fSSE::operator*(const Mat3fSSE& rhs) const
 
 Vec3fSSE<true> Mat3fSSE::operator*(const Vec3fSSE<true>& rhs) const
 {
-    using namespace GDL::sse;
+    using namespace GDL::simd;
     return Vec3fSSE<true>(_mmx_fmadd_p(
             Broadcast<0>(rhs.mData), mData[0],
             _mmx_fmadd_p(Broadcast<1>(rhs.mData), mData[1], _mmx_mul_p(Broadcast<2>(rhs.mData), mData[2]))));
@@ -157,7 +157,7 @@ const std::array<__m128, 3>& Mat3fSSE::DataSSE() const
 
 F32 Mat3fSSE::Det() const
 {
-    return sse::Determinant3x3(mData[0], mData[1], mData[2]);
+    return simd::Determinant3x3(mData[0], mData[1], mData[2]);
 }
 
 
@@ -167,16 +167,16 @@ Mat3fSSE Mat3fSSE::Transpose() const
     __m128 tmp0 = _mm_unpacklo_ps(mData[0], mData[1]);
     __m128 tmp1 = _mm_unpackhi_ps(mData[0], mData[1]);
 
-    return Mat3fSSE(_mm_movelh_ps(tmp0, mData[2]), sse::Shuffle<2, 3, 1, 3>(tmp0, mData[2]),
-                    sse::Shuffle<0, 1, 2, 3>(tmp1, mData[2]));
+    return Mat3fSSE(_mm_movelh_ps(tmp0, mData[2]), simd::Shuffle<2, 3, 1, 3>(tmp0, mData[2]),
+                    simd::Shuffle<0, 1, 2, 3>(tmp1, mData[2]));
 }
 
 
 
 bool Mat3fSSE::IsDataAligned() const
 {
-    return (IsAligned(&mData[0], sse::alignmentBytes<__m128>) && IsAligned(&mData[1], sse::alignmentBytes<__m128>) &&
-            IsAligned(&mData[2], sse::alignmentBytes<__m128>));
+    return (IsAligned(&mData[0], simd::alignmentBytes<__m128>) && IsAligned(&mData[1], simd::alignmentBytes<__m128>) &&
+            IsAligned(&mData[2], simd::alignmentBytes<__m128>));
 }
 
 

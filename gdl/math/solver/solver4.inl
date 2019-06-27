@@ -110,7 +110,7 @@ template <typename _type>
 
 [[nodiscard]] inline Vec4fSSE<true> Cramer(const Mat4fSSE& matA, const Vec4fSSE<true>& vecRhs)
 {
-    using namespace GDL::sse;
+    using namespace GDL::simd;
 
     const std::array<__m128, 4>& matrixData = matA.DataSSE();
     const __m128& a = matrixData[0];
@@ -219,7 +219,7 @@ template <typename _type>
 
 [[nodiscard]] inline Vec4fSSE<true> Cramer(const Mat4fAVX& matA, const Vec4fSSE<true>& vecRhs)
 {
-    using namespace GDL::sse;
+    using namespace GDL::simd;
 
     const std::array<__m256, 2>& dataA = matA.DataAVX();
     const __m256& ab = dataA[0];
@@ -331,7 +331,7 @@ template <Pivot _pivot, typename _type>
 template <Pivot _pivot>
 [[nodiscard]] inline Vec4fSSE<true> Gauss(const Mat4fSSE& matA, const Vec4fSSE<true>& vecRhs)
 {
-    using namespace GDL::sse;
+    using namespace GDL::simd;
 
     alignas(alignmentBytes<__m128>) std::array<__m128, 4> matrixData = matA.DataSSE();
     __m128 vectorData = vecRhs.DataSSE();

@@ -8,7 +8,7 @@
 
 
 
-namespace GDL::sse
+namespace GDL::simd
 {
 
 inline void Transpose(__m128d in0, __m128d in1, __m128d& out0, __m128d& out1)
@@ -106,4 +106,4 @@ inline void Transpose(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 in4
 
 #endif // __AVX2__
 
-} // namespace GDL::sse
+} // namespace GDL::simd

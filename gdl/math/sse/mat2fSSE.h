@@ -17,9 +17,9 @@ template <bool>
 class Vec2fSSE;
 
 //! @brief 2x2 Matrix with SSE support
-class alignas(sse::alignmentBytes<__m128>) Mat2fSSE
+class alignas(simd::alignmentBytes<__m128>) Mat2fSSE
 {
-    alignas(sse::alignmentBytes<__m128>) __m128 mData;
+    alignas(simd::alignmentBytes<__m128>) __m128 mData;
 
 public:
     inline Mat2fSSE();

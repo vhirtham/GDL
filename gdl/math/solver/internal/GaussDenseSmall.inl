@@ -76,7 +76,7 @@ inline void GaussDenseSmallSSE<_size, _pivot>::EliminationStep(std::array<__m128
     // INFO: This version is slightly faster than the one with the "-1". Reason: The "-1" version needs more
     // "expensive" operations in front of the for-loop. For small systems the additional blends in the loop are cheaper
     // than those extra operations.
-    using namespace GDL::sse;
+    using namespace GDL::simd;
 
     DEV_EXCEPTION(GetValue<_idx>(matrixData[_idx]) == ApproxZero<F32>(10), "Singular matrix - system not solveable");
 
@@ -122,7 +122,7 @@ inline void GaussDenseSmallSSE<_size, _pivot>::GaussStep(std::array<__m128, _siz
 //    // "expensive" operations in front of the for-loop. For small systems the additional blends in the loop are
 //    cheaper
 //    // than those extra operations.
-//    using namespace GDL::sse;
+//    using namespace GDL::simd;
 
 //    constexpr U32 regIdx = _idx / 2;
 //    constexpr U32 laneIdx = _idx % 2;

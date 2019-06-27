@@ -80,7 +80,7 @@ template <typename _type, I32 _rows, I32 _cols>
 _type MatSSE<_type, _rows, _cols>::operator()(const U32 row, const U32 col) const
 {
     assert(row < _rows && col < _cols);
-    return sse::GetValue(mData[row / mNumRegisterEntries + col * mNumRegistersPerCol], row % mNumRegisterEntries);
+    return simd::GetValue(mData[row / mNumRegisterEntries + col * mNumRegistersPerCol], row % mNumRegisterEntries);
 }
 
 
@@ -155,14 +155,14 @@ void MatSSE<_type, _rows, _cols>::TransposeFullBlocks(MatSSE<_type, _cols, _rows
 
             if constexpr (mNumRegisterEntries == 2)
             {
-                sse::Transpose(mData[firstRegisterIndexSrc + 0 * mNumRegistersPerCol],
+                simd::Transpose(mData[firstRegisterIndexSrc + 0 * mNumRegistersPerCol],
                                mData[firstRegisterIndexSrc + 1 * mNumRegistersPerCol],
                                result.mData[firstRegisterIndexRes + 0 * result.mNumRegistersPerCol],
                                result.mData[firstRegisterIndexRes + 1 * result.mNumRegistersPerCol]);
             }
             else if constexpr (mNumRegisterEntries == 4)
             {
-                sse::Transpose(mData[firstRegisterIndexSrc + 0 * mNumRegistersPerCol],
+                simd::Transpose(mData[firstRegisterIndexSrc + 0 * mNumRegistersPerCol],
                                mData[firstRegisterIndexSrc + 1 * mNumRegistersPerCol],
                                mData[firstRegisterIndexSrc + 2 * mNumRegistersPerCol],
                                mData[firstRegisterIndexSrc + 3 * mNumRegistersPerCol],
@@ -173,7 +173,7 @@ void MatSSE<_type, _rows, _cols>::TransposeFullBlocks(MatSSE<_type, _cols, _rows
             }
             else if constexpr (mNumRegisterEntries == 8)
             {
-                sse::Transpose(mData[firstRegisterIndexSrc + 0 * mNumRegistersPerCol],
+                simd::Transpose(mData[firstRegisterIndexSrc + 0 * mNumRegistersPerCol],
                                mData[firstRegisterIndexSrc + 1 * mNumRegistersPerCol],
                                mData[firstRegisterIndexSrc + 2 * mNumRegistersPerCol],
                                mData[firstRegisterIndexSrc + 3 * mNumRegistersPerCol],
@@ -236,7 +236,7 @@ void MatSSE<_type, _rows, _cols>::TransposeSparseBlocks(MatSSE<_type, _cols, _ro
         }
     }
     else
-        sse::Transpose(args...);
+        simd::Transpose(args...);
 }
 
 
@@ -361,7 +361,7 @@ inline void MatSSE<_type, _rows, _cols>::MultiplicationInnerLoops(MatSSE<_type, 
                                                                   const MatSSE<_type, _rowsRhs, _colsRhs>& rhs,
                                                                   U32 j) const
 {
-    constexpr U32 registersPerColRhs = sse::CalcMinNumArrayRegisters<RegisterType>(_rowsRhs);
+    constexpr U32 registersPerColRhs = simd::CalcMinNumArrayRegisters<RegisterType>(_rowsRhs);
 
     for (U32 i = 0; i < _colsRhs; ++i)
     {
@@ -390,10 +390,10 @@ MatSSE<_type, _rows, _cols>::MultiplyAddRegisters(const RegisterType rhsValues, 
 
     if constexpr (_count + 1 == _numOperations)
         return _mmx_fmadd_p(mData[currentBlockIndex + _count * mNumRegistersPerCol],
-                            sse::BroadcastAcrossLanes<_count>(rhsValues), currentValue);
+                            simd::BroadcastAcrossLanes<_count>(rhsValues), currentValue);
     else
         return _mmx_fmadd_p(
-                mData[currentBlockIndex + _count * mNumRegistersPerCol], sse::BroadcastAcrossLanes<_count>(rhsValues),
+                mData[currentBlockIndex + _count * mNumRegistersPerCol], simd::BroadcastAcrossLanes<_count>(rhsValues),
                 MultiplyAddRegisters<_numOperations, _count + 1>(rhsValues, currentValue, currentBlockIndex));
 }
 

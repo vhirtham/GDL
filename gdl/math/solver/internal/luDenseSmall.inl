@@ -265,7 +265,7 @@ template <U32 _size, Pivot _pivot>
 template <U32 _idx>
 inline void LUDenseSmallSSE<_size, _pivot>::BackwardSubstitution(const std::array<__m128, _size>& lu, __m128& r)
 {
-    using namespace GDL::sse;
+    using namespace GDL::simd;
 
     const __m128 zero = _mmx_setzero_p<__m128>();
 
@@ -279,7 +279,7 @@ inline void LUDenseSmallSSE<_size, _pivot>::BackwardSubstitution(const std::arra
 
     //    // Alternative version:
 
-    //    using namespace GDL::sse;
+    //    using namespace GDL::simd;
 
     //    r = BlendAboveIndex<_idx>(r, _mmx_fnmadd_p(lu[_idx], Broadcast<_idx>(r), r));
 
@@ -295,7 +295,7 @@ template <U32 _size, Pivot _pivot>
 template <U32 _idx>
 inline void LUDenseSmallSSE<_size, _pivot>::FactorizationStep(Factorization& factorization)
 {
-    using namespace GDL::sse;
+    using namespace GDL::simd;
 
     DEV_EXCEPTION(GetValue<_idx>(factorization.mLU[_idx]) == ApproxZero<F32>(1, 10),
                   "Singular matrix - system not solveable");
@@ -318,7 +318,7 @@ inline void LUDenseSmallSSE<_size, _pivot>::FactorizationStep(Factorization& fac
 
     //    // Alternative version:
 
-    //    using namespace GDL::sse;
+    //    using namespace GDL::simd;
 
     //    DEV_EXCEPTION(GetValue<_idx>(factorization.mLU[_idx]) == ApproxZero<F32>(1, 10),
     //                  "Singular matrix - system not solveable");
@@ -368,7 +368,7 @@ template <U32 _size, Pivot _pivot>
 template <U32 _idx>
 inline void LUDenseSmallSSE<_size, _pivot>::ForwardSubstitution(const std::array<__m128, _size>& lu, __m128& r)
 {
-    using namespace GDL::sse;
+    using namespace GDL::simd;
 
     const __m128 zero = _mmx_setzero_p<__m128>();
 
@@ -381,7 +381,7 @@ inline void LUDenseSmallSSE<_size, _pivot>::ForwardSubstitution(const std::array
 
     //    // Alternative version:
 
-    //    using namespace GDL::sse;
+    //    using namespace GDL::simd;
 
     //    r = BlendIndex<_idx>(r, _mmx_mul_p(lu[_idx], r));
     //    r = BlendBelowIndex<_idx>(r, _mmx_fnmadd_p(lu[_idx], Broadcast<_idx>(r), r));

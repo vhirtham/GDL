@@ -88,9 +88,9 @@ BOOST_AUTO_TEST_CASE(Zero)
 template <typename _registerType>
 void TestApproxSSE()
 {
-    constexpr U32 numRegisterEntries = sse::numRegisterValues<_registerType>;
+    constexpr U32 numRegisterEntries = simd::numRegisterValues<_registerType>;
 
-    using ElementType = decltype(sse::GetDataType<_registerType>());
+    using ElementType = decltype(simd::GetDataType<_registerType>());
 
 
 
@@ -106,7 +106,7 @@ void TestApproxSSE()
 
 
             for (U32 k = 0; k < numRegisterEntries; ++k)
-                sse::SetValue(values, k, valueBase * static_cast<ElementType>(k));
+                simd::SetValue(values, k, valueBase * static_cast<ElementType>(k));
 
             _registerType negValues = _mmx_mul_p(values, _mmx_set1_p<_registerType>(-1));
 
@@ -152,19 +152,19 @@ void TestApproxSSE()
                 cmp = values;
                 // first value is 0! ---> comparison will use valueBase
                 if (k == 0)
-                    sse::SetValue(cmp, k, valueBase * epsilonBase * (factor - 1));
+                    simd::SetValue(cmp, k, valueBase * epsilonBase * (factor - 1));
                 else
-                    sse::SetValue(cmp, k,
-                                  sse::GetValue(values, k) + sse::GetValue(values, k) * epsilonBase * (factor - 1));
+                    simd::SetValue(cmp, k,
+                                  simd::GetValue(values, k) + simd::GetValue(values, k) * epsilonBase * (factor - 1));
                 BOOST_CHECK(cmp == approx);
                 BOOST_CHECK(approx == cmp);
 
                 // first value is 0! ---> comparison will use valueBase
                 if (k == 0)
-                    sse::SetValue(cmp, k, valueBase * epsilonBase * (factor + 1));
+                    simd::SetValue(cmp, k, valueBase * epsilonBase * (factor + 1));
                 else
-                    sse::SetValue(cmp, k,
-                                  sse::GetValue(values, k) + sse::GetValue(values, k) * epsilonBase * (factor + 1));
+                    simd::SetValue(cmp, k,
+                                  simd::GetValue(values, k) + simd::GetValue(values, k) * epsilonBase * (factor + 1));
                 BOOST_CHECK(cmp != approx);
                 BOOST_CHECK(approx != cmp);
             }
@@ -179,19 +179,19 @@ void TestApproxSSE()
                 cmp = values;
                 // first value is 0! ---> comparison will use valueBase
                 if (k == 0)
-                    sse::SetValue(cmp, k, valueBase * epsilonBase * (factor - 1));
+                    simd::SetValue(cmp, k, valueBase * epsilonBase * (factor - 1));
                 else
-                    sse::SetValue(cmp, k,
-                                  sse::GetValue(values, k) + sse::GetValue(values, k) * epsilonBase * (factor - 1));
+                    simd::SetValue(cmp, k,
+                                  simd::GetValue(values, k) + simd::GetValue(values, k) * epsilonBase * (factor - 1));
                 BOOST_CHECK(cmp == approxMinus1);
                 BOOST_CHECK(approxMinus1 == cmp);
 
                 // first value is 0! ---> comparison will use valueBase
                 if (k == 0)
-                    sse::SetValue(cmp, k, valueBase * epsilonBase * (factor + 1));
+                    simd::SetValue(cmp, k, valueBase * epsilonBase * (factor + 1));
                 else
-                    sse::SetValue(cmp, k,
-                                  sse::GetValue(values, k) + sse::GetValue(values, k) * epsilonBase * (factor + 1));
+                    simd::SetValue(cmp, k,
+                                  simd::GetValue(values, k) + simd::GetValue(values, k) * epsilonBase * (factor + 1));
                 if (k < numRegisterEntries - 1)
                 {
                     BOOST_CHECK(cmp != approxMinus1);
@@ -227,9 +227,9 @@ BOOST_AUTO_TEST_CASE(Approx_Non_Zero_SSE)
 template <typename _registerType>
 void TestApproxZeroSSE()
 {
-    constexpr U32 numRegisterEntries = sse::numRegisterValues<_registerType>;
+    constexpr U32 numRegisterEntries = simd::numRegisterValues<_registerType>;
 
-    using ElementType = decltype(sse::GetDataType<_registerType>());
+    using ElementType = decltype(simd::GetDataType<_registerType>());
 
     // Base and scaling ctor
     for (U32 i = 1; i < 20; ++i)
@@ -267,7 +267,7 @@ void TestApproxZeroSSE()
             for (U32 k = 0; k < numRegisterEntries; ++k)
             {
                 cmp = zeroReg;
-                sse::SetValue(cmp, k, sse::GetValue(scaledEps, 0) * (factor + 1));
+                simd::SetValue(cmp, k, simd::GetValue(scaledEps, 0) * (factor + 1));
 
                 BOOST_CHECK(cmp != ApproxZero<_registerType>(base, factor));
             }
@@ -278,7 +278,7 @@ void TestApproxZeroSSE()
             for (U32 k = 0; k < numRegisterEntries; ++k)
             {
                 cmp = zeroReg;
-                sse::SetValue(cmp, k, sse::GetValue(scaledEps, 0) * (factor + 1));
+                simd::SetValue(cmp, k, simd::GetValue(scaledEps, 0) * (factor + 1));
 
                 auto approxZero = ApproxZero<_registerType, numRegisterEntries - 1>(base, factor);
                 if (k < numRegisterEntries - 1)

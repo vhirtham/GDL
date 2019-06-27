@@ -32,11 +32,11 @@ public:
 template <bool _isCol>
 inline F32 Orientation_Alternative1(Vec2fSSE<_isCol> a, Vec2fSSE<_isCol> b, Vec2fSSE<_isCol> c)
 {
-    __m128 tmp0 = sse::Shuffle<0, 1, 0, 1>(a.DataSSE(), b.DataSSE());
-    __m128 tmp1 = sse::Shuffle<0, 1, 0, 1>(c.DataSSE(), c.DataSSE());
+    __m128 tmp0 = simd::Shuffle<0, 1, 0, 1>(a.DataSSE(), b.DataSSE());
+    __m128 tmp1 = simd::Shuffle<0, 1, 0, 1>(c.DataSSE(), c.DataSSE());
     __m128 tmp2 = _mmx_sub_p(tmp0, tmp1);
-    __m128 tmp3 = _mmx_mul_p(tmp2, sse::Permute<3, 2, 1, 0>(tmp2));
-    return _mm_cvtss_f32(_mm_sub_ps(tmp3, sse::Permute<1, 0, 3, 1>(tmp3)));
+    __m128 tmp3 = _mmx_mul_p(tmp2, simd::Permute<3, 2, 1, 0>(tmp2));
+    return _mm_cvtss_f32(_mm_sub_ps(tmp3, simd::Permute<1, 0, 3, 1>(tmp3)));
 }
 
 
@@ -46,9 +46,9 @@ inline F32 Orientation_Alternative2(Vec2fSSE<_isCol> a, Vec2fSSE<_isCol> b, Vec2
 {
     __m128 tmp0 = _mmx_sub_p(b.DataSSE(), c.DataSSE());
 
-    __m128 tmp1 = sse::Shuffle<1, 0, 1, 0>(tmp0, c.DataSSE());
-    __m128 tmp2 = sse::Negate<0, 1, 0, 1>(sse::Shuffle<0, 1, 0, 1>(a.DataSSE(), b.DataSSE()));
-    return sse::DotProductF32(tmp1, tmp2);
+    __m128 tmp1 = simd::Shuffle<1, 0, 1, 0>(tmp0, c.DataSSE());
+    __m128 tmp2 = simd::Negate<0, 1, 0, 1>(simd::Shuffle<0, 1, 0, 1>(a.DataSSE(), b.DataSSE()));
+    return simd::DotProductF32(tmp1, tmp2);
 }
 
 

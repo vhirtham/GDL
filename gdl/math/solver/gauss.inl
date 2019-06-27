@@ -154,7 +154,7 @@ template <typename _registerType, I32 _size>
 inline typename GaussDenseSSE<_registerType, _size>::VectorType
 GaussDenseSSE<_registerType, _size>::SolvePartialPivot(const MatrixType& A, const VectorType& b)
 {
-    using namespace GDL::sse;
+    using namespace GDL::simd;
 
     alignas(alignment) MatrixDataArray matData = A.DataSSE();
     alignas(alignment) VectorDataArray vecData = b.DataSSE();
@@ -189,7 +189,7 @@ inline void GaussDenseSSE<_registerType, _size>::EliminationStepRegister(U32 ite
                                                                          MatrixDataArray& matData,
                                                                          VectorDataArray& vecData)
 {
-    using namespace GDL::sse;
+    using namespace GDL::simd;
 
     const U32 colStartIdx = iteration * numColRegisters;
     const U32 actRowRegIdx = colStartIdx + regRowIdx;
@@ -230,7 +230,7 @@ template <typename _registerType, I32 _size>
 template <U32 _regValueIdx>
 inline U32 GaussDenseSSE<_registerType, _size>::FindPivot(U32 iteration, U32 regRowIdx, const MatrixDataArray& matData)
 {
-    using namespace GDL::sse;
+    using namespace GDL::simd;
 
     const U32 colStartIdx = iteration * numColRegisters;
 
@@ -326,7 +326,7 @@ template <U32 _regIdxDst, U32 _regIdxPiv, bool _sameReg>
 inline void GaussDenseSSE<_registerType, _size>::SwapPivotAllColumns(U32 iteration, U32 pivotRegRowIdx, U32 regRowIdx,
                                                                      MatrixDataArray& matData, VectorDataArray& vecData)
 {
-    using namespace GDL::sse;
+    using namespace GDL::simd;
 
     if constexpr (_sameReg)
     {

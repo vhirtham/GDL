@@ -15,7 +15,7 @@ Tolerance<_registerType, _numComparedValuesSSE>::Tolerance(_registerType value, 
     : mValue{value}
     , mTolerance{tolerance}
 {
-    DEV_EXCEPTION(!sse::CompareAllGreaterThan(tolerance, _mmx_setzero_p<_registerType>()),
+    DEV_EXCEPTION(!simd::CompareAllGreaterThan(tolerance, _mmx_setzero_p<_registerType>()),
                   "Tolerance values must be greater than 0.");
 }
 
@@ -37,7 +37,7 @@ Tolerance<_registerType, _numComparedValuesSSE>::Tolerance(_registerType value, 
 template <typename _registerType, U32 _numComparedValuesSSE>
 bool Tolerance<_registerType, _numComparedValuesSSE>::operator==(_registerType rhs) const
 {
-    return sse::CompareAllLessEqual<_registerType, _numComparedValuesSSE>(sse::Abs(_mmx_sub_p(rhs, mValue)),
+    return simd::CompareAllLessEqual<_registerType, _numComparedValuesSSE>(simd::Abs(_mmx_sub_p(rhs, mValue)),
                                                                           mTolerance);
 }
 
@@ -81,7 +81,7 @@ template <typename _typeLhs, typename _typeTolerance, U32 _numComparedValuesSSE>
 constexpr bool operator==(const _typeLhs lhs, const Tolerance<_typeTolerance, _numComparedValuesSSE>& rhs)
 {
     static_assert(std::is_floating_point<_typeLhs>::value || std::is_integral<_typeLhs>::value ||
-                          sse::IsRegisterType<_typeLhs>,
+                          simd::IsRegisterType<_typeLhs>,
                   "Lhs type must be an integral, floating point or sse register type.");
 
     return rhs == lhs;
@@ -93,7 +93,7 @@ template <typename _typeLhs, typename _typeTolerance, U32 _numComparedValuesSSE>
 constexpr bool operator!=(const _typeLhs lhs, const Tolerance<_typeTolerance, _numComparedValuesSSE>& rhs)
 {
     static_assert(std::is_floating_point<_typeLhs>::value || std::is_integral<_typeLhs>::value ||
-                          sse::IsRegisterType<_typeLhs>,
+                          simd::IsRegisterType<_typeLhs>,
                   "Lhs type must be an integral, floating point or sse register type.");
 
     return rhs != lhs;

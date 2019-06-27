@@ -7,12 +7,12 @@
 #include <array>
 
 using namespace GDL;
-using namespace GDL::sse;
+using namespace GDL::simd;
 
 
 constexpr U32 valueIndex = 3;
 using RegisterType = __m128;
-using ValueType = decltype(sse::GetDataType<RegisterType>());
+using ValueType = decltype(simd::GetDataType<RegisterType>());
 
 
 //#define DISABLE_BENCHMARK_STATIC_GETTER
@@ -23,7 +23,7 @@ using ValueType = decltype(sse::GetDataType<RegisterType>());
 // Fixture declaration %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 template <typename _registerType>
-class alignas(sse::alignmentBytes<RegisterType>) FixtureTemplate : public benchmark::Fixture
+class alignas(simd::alignmentBytes<RegisterType>) FixtureTemplate : public benchmark::Fixture
 {
 public:
     _registerType reg;
@@ -64,7 +64,7 @@ ValueType GetterStaticUnion(RegisterType reg)
 {
     union Data {
         RegisterType sse;
-        ValueType array[sse::numRegisterValues<RegisterType>];
+        ValueType array[simd::numRegisterValues<RegisterType>];
     };
 
     Data data{reg};
@@ -76,7 +76,7 @@ ValueType GetterStaticUnion(RegisterType reg)
 template <U32 _index>
 ValueType GetterStaticStore(RegisterType reg)
 {
-    alignas(sse::alignmentBytes<RegisterType>) ValueType array[sse::numRegisterValues<RegisterType>];
+    alignas(simd::alignmentBytes<RegisterType>) ValueType array[simd::numRegisterValues<RegisterType>];
     _mmx_store_p(array, reg);
     return array[_index];
 }
@@ -90,7 +90,7 @@ ValueType GetterStaticFirstElementShuffle(__m128 reg)
     if constexpr (_index == 0)
         return _mm_cvtss_f32(reg);
     else
-        return _mm_cvtss_f32(sse::Broadcast<_index>(reg));
+        return _mm_cvtss_f32(simd::Broadcast<_index>(reg));
 }
 
 
@@ -174,7 +174,7 @@ BENCHMARK_F(FixtureBenchmark, GetterStaticCurrentImplementation)(benchmark::Stat
 {
     for (auto _ : state)
         for (U32 i = 0; i < 100; ++i)
-            benchmark::DoNotOptimize(sse::GetValue<valueIndex>(reg));
+            benchmark::DoNotOptimize(simd::GetValue<valueIndex>(reg));
 }
 #endif // DISABLE_BENCHMARK_STATIC_GETTER
 
@@ -193,7 +193,7 @@ ValueType GetterDynamicUnion(RegisterType reg, U32 index)
 {
     union Data {
         RegisterType sse;
-        ValueType array[sse::numRegisterValues<RegisterType>];
+        ValueType array[simd::numRegisterValues<RegisterType>];
     };
 
     Data data{reg};
@@ -204,7 +204,7 @@ ValueType GetterDynamicUnion(RegisterType reg, U32 index)
 
 ValueType GetterDynamicStore(RegisterType reg, U32 index)
 {
-    alignas(sse::alignmentBytes<RegisterType>) ValueType array[sse::numRegisterValues<RegisterType>];
+    alignas(simd::alignmentBytes<RegisterType>) ValueType array[simd::numRegisterValues<RegisterType>];
     _mmx_store_p(array, reg);
     return array[index];
 }
@@ -303,7 +303,7 @@ BENCHMARK_F(FixtureBenchmark, GetterDynamicCurrentImplementation)(benchmark::Sta
 {
     for (auto _ : state)
         for (U32 i = 0; i < 100; ++i)
-            benchmark::DoNotOptimize(sse::GetValue(reg, valueIndex));
+            benchmark::DoNotOptimize(simd::GetValue(reg, valueIndex));
 }
 #endif // DISABLE_BENCHMARK_DYNAMIC_GETTER
 
@@ -321,7 +321,7 @@ void SetterStaticDirectAccessOperator(RegisterType& reg, ValueType value)
 template <U32 _index>
 void SetterStaticStoreModifyLoad(RegisterType& reg, ValueType value)
 {
-    alignas(sse::alignmentBytes<RegisterType>) ValueType array[sse::numRegisterValues<RegisterType>];
+    alignas(simd::alignmentBytes<RegisterType>) ValueType array[simd::numRegisterValues<RegisterType>];
     _mmx_store_p(array, reg);
     array[_index] = value;
     reg = _mmx_load_p<RegisterType>(array);
@@ -334,7 +334,7 @@ void SetterStaticUnion(RegisterType& reg, ValueType value)
 {
     union Data {
         RegisterType sse;
-        ValueType array[sse::numRegisterValues<RegisterType>];
+        ValueType array[simd::numRegisterValues<RegisterType>];
     };
 
     Data data{reg};
@@ -378,7 +378,7 @@ BENCHMARK_F(FixtureBenchmark, SetterStaticCurrentImplementation)(benchmark::Stat
 {
     for (auto _ : state)
         for (U32 i = 0; i < 100; ++i)
-            sse::SetValue<valueIndex>(reg, static_cast<ValueType>(i));
+            simd::SetValue<valueIndex>(reg, static_cast<ValueType>(i));
 }
 
 #endif // DISABLE_BENCHMARK_STATIC_GETTER
@@ -396,7 +396,7 @@ void SetterDynamicDirectAccessOperator(RegisterType& reg, ValueType value, U32 i
 
 void SetterDynamicStoreModifyLoad(RegisterType& reg, ValueType value, U32 index)
 {
-    alignas(sse::alignmentBytes<RegisterType>) ValueType array[sse::numRegisterValues<RegisterType>];
+    alignas(simd::alignmentBytes<RegisterType>) ValueType array[simd::numRegisterValues<RegisterType>];
     _mmx_store_p(array, reg);
     array[index] = value;
     reg = _mmx_load_p<RegisterType>(array);
@@ -408,7 +408,7 @@ void SetterDynamicUnion(RegisterType& reg, ValueType value, U32 index)
 {
     union Data {
         RegisterType sse;
-        ValueType array[sse::numRegisterValues<RegisterType>];
+        ValueType array[simd::numRegisterValues<RegisterType>];
     };
 
     Data data{reg};
@@ -453,7 +453,7 @@ BENCHMARK_F(FixtureBenchmark, SetterDynamicCurrentImplementation)(benchmark::Sta
 {
     for (auto _ : state)
         for (U32 i = 0; i < 100; ++i)
-            sse::SetValue(reg, valueIndex, static_cast<ValueType>(i));
+            simd::SetValue(reg, valueIndex, static_cast<ValueType>(i));
 }
 
 #endif // DISABLE_BENCHMARK_DYNAMIC_GETTER

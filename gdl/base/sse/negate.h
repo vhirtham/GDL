@@ -4,7 +4,7 @@
 #include "gdl/base/fundamentalTypes.h"
 #include "gdl/base/sse/x86intrin.h"
 
-namespace GDL::sse
+namespace GDL::simd
 {
 
 //! @brief Creates a bit mask where only the signed bit is set to the desired value
@@ -70,6 +70,6 @@ inline __m256 NegationMask();
 
 #endif // __AVX2__
 
-} // namespace GDL::sse
+} // namespace GDL::simd
 
 #include "gdl/base/sse/negate.inl"

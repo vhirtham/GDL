@@ -21,7 +21,7 @@ class Vec4fSSE;
 //! @brief Vector class with 3 entries and SSE support
 //! @tparam _isCol: If true, the vector is treated as column vector, otherwise as row vector
 template <bool _isCol = true>
-class alignas(sse::alignmentBytes<__m128>) Vec3fSSE
+class alignas(simd::alignmentBytes<__m128>) Vec3fSSE
 {
     template <bool>
     friend class Vec3fSSE;
@@ -29,7 +29,7 @@ class alignas(sse::alignmentBytes<__m128>) Vec3fSSE
     friend class Vec4fSSE;
     friend class Mat3fSSE;
 
-    alignas(sse::alignmentBytes<__m128>) __m128 mData;
+    alignas(simd::alignmentBytes<__m128>) __m128 mData;
 
 public:
     inline Vec3fSSE();

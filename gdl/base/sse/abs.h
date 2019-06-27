@@ -2,7 +2,7 @@
 
 #include "gdl/base/sse/intrinsics.h"
 
-namespace GDL::sse
+namespace GDL::simd
 {
 
 //! @brief Calculates the absolute value of each element
@@ -18,4 +18,4 @@ inline _registerType Abs(_registerType reg)
     return _mmx_andnot_p(mask, reg);
 }
 
-} // namespace GDL::sse
+} // namespace GDL::simd

@@ -5,7 +5,7 @@
 
 
 
-namespace GDL::sse
+namespace GDL::simd
 {
 
 //! @brief Gets the value of a register at the desired position (compile time version)
@@ -42,6 +42,6 @@ inline auto SetValue(_registerType& reg, const _type value);
 template <typename _registerType, typename _type>
 inline auto SetValue(_registerType& reg, const U32 _index, const _type value);
 
-} // namespace GDL::sse
+} // namespace GDL::simd
 
 #include "gdl/base/sse/directAccess.inl"

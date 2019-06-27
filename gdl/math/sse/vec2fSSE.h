@@ -18,13 +18,13 @@ namespace GDL
 //! @brief Vector class with 2 entries and SSE support
 //! @tparam _isCol: If true, the vector is treated as column vector, otherwise as row vector
 template <bool _isCol = true>
-class alignas(sse::alignmentBytes<__m128>) Vec2fSSE
+class alignas(simd::alignmentBytes<__m128>) Vec2fSSE
 {
     template <bool>
     friend class Vec2fSSE;
     friend class Mat2fSSE;
 
-    alignas(sse::alignmentBytes<__m128>) __m128 mData;
+    alignas(simd::alignmentBytes<__m128>) __m128 mData;
 
 public:
     inline Vec2fSSE();

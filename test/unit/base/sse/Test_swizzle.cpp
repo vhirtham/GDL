@@ -7,7 +7,7 @@
 #include "gdl/base/sse/swizzle.h"
 
 using namespace GDL;
-using namespace GDL::sse;
+using namespace GDL::simd;
 
 
 
@@ -21,8 +21,8 @@ void TestBlend128d()
 
     const __m128d c = Blend<_i, _j>(a, b);
 
-    BOOST_CHECK(sse::GetValue<0>(c) == Approx((_i == 0) ? 1.f : 3.f));
-    BOOST_CHECK(sse::GetValue<1>(c) == Approx((_j == 0) ? 2.f : 4.f));
+    BOOST_CHECK(simd::GetValue<0>(c) == Approx((_i == 0) ? 1.f : 3.f));
+    BOOST_CHECK(simd::GetValue<1>(c) == Approx((_j == 0) ? 2.f : 4.f));
 
     constexpr U32 iNext = (_i < 1) ? _i + 1 : 0;
     constexpr U32 jNext = (iNext == 0) ? _j + 1 : _j;
@@ -43,10 +43,10 @@ void TestBlend4()
     const _registerType c = Blend<_i, _j, _k, _l>(a, b);
 
 
-    BOOST_CHECK(sse::GetValue<0>(c) == Approx((_i == 0) ? 1.f : 5.f));
-    BOOST_CHECK(sse::GetValue<1>(c) == Approx((_j == 0) ? 2.f : 6.f));
-    BOOST_CHECK(sse::GetValue<2>(c) == Approx((_k == 0) ? 3.f : 7.f));
-    BOOST_CHECK(sse::GetValue<3>(c) == Approx((_l == 0) ? 4.f : 8.f));
+    BOOST_CHECK(simd::GetValue<0>(c) == Approx((_i == 0) ? 1.f : 5.f));
+    BOOST_CHECK(simd::GetValue<1>(c) == Approx((_j == 0) ? 2.f : 6.f));
+    BOOST_CHECK(simd::GetValue<2>(c) == Approx((_k == 0) ? 3.f : 7.f));
+    BOOST_CHECK(simd::GetValue<3>(c) == Approx((_l == 0) ? 4.f : 8.f));
 
 
     constexpr U32 iNext = (_i < 1) ? _i + 1 : 0;
@@ -71,14 +71,14 @@ void TestBlend256()
     const __m256 c = Blend<_i, _j, _k, _l, _m, _n, _o, _p>(a, b);
 
 
-    BOOST_CHECK(sse::GetValue<0>(c) == Approx((_i == 0) ? 1.f : 9.f));
-    BOOST_CHECK(sse::GetValue<1>(c) == Approx((_j == 0) ? 2.f : 10.f));
-    BOOST_CHECK(sse::GetValue<2>(c) == Approx((_k == 0) ? 3.f : 11.f));
-    BOOST_CHECK(sse::GetValue<3>(c) == Approx((_l == 0) ? 4.f : 12.f));
-    BOOST_CHECK(sse::GetValue<4>(c) == Approx((_m == 0) ? 5.f : 13.f));
-    BOOST_CHECK(sse::GetValue<5>(c) == Approx((_n == 0) ? 6.f : 14.f));
-    BOOST_CHECK(sse::GetValue<6>(c) == Approx((_o == 0) ? 7.f : 15.f));
-    BOOST_CHECK(sse::GetValue<7>(c) == Approx((_p == 0) ? 8.f : 16.f));
+    BOOST_CHECK(simd::GetValue<0>(c) == Approx((_i == 0) ? 1.f : 9.f));
+    BOOST_CHECK(simd::GetValue<1>(c) == Approx((_j == 0) ? 2.f : 10.f));
+    BOOST_CHECK(simd::GetValue<2>(c) == Approx((_k == 0) ? 3.f : 11.f));
+    BOOST_CHECK(simd::GetValue<3>(c) == Approx((_l == 0) ? 4.f : 12.f));
+    BOOST_CHECK(simd::GetValue<4>(c) == Approx((_m == 0) ? 5.f : 13.f));
+    BOOST_CHECK(simd::GetValue<5>(c) == Approx((_n == 0) ? 6.f : 14.f));
+    BOOST_CHECK(simd::GetValue<6>(c) == Approx((_o == 0) ? 7.f : 15.f));
+    BOOST_CHECK(simd::GetValue<7>(c) == Approx((_p == 0) ? 8.f : 16.f));
 
 
     constexpr U32 iNext = (_i < 1) ? _i + 1 : 0;
@@ -236,9 +236,9 @@ void TestBroadcast()
     _registerType b = Broadcast<_index>(a);
     for (U32 i = 0; i < numLaneVals; ++i)
     {
-        BOOST_CHECK(sse::GetValue(b, i) == Approx(sse::GetValue<_index>(a)));
+        BOOST_CHECK(simd::GetValue(b, i) == Approx(simd::GetValue<_index>(a)));
         if constexpr (numLanes<_registerType> == 2)
-            BOOST_CHECK(sse::GetValue(b, i + numLaneVals) == Approx(sse::GetValue<_index + numLaneVals>(a)));
+            BOOST_CHECK(simd::GetValue(b, i + numLaneVals) == Approx(simd::GetValue<_index + numLaneVals>(a)));
     }
 
     if constexpr (_index + 1 < numValuesPerLane<_registerType>)
@@ -262,8 +262,8 @@ void TestBroadcast2Lanes()
     _registerType b = Broadcast<_idx0, _idx1>(a);
     for (U32 i = 0; i < numLaneVals; ++i)
     {
-        BOOST_CHECK(sse::GetValue(b, i) == Approx(sse::GetValue<_idx0>(a)));
-        BOOST_CHECK(sse::GetValue(b, i + numLaneVals) == Approx(sse::GetValue<_idx1 + numLaneVals>(a)));
+        BOOST_CHECK(simd::GetValue(b, i) == Approx(simd::GetValue<_idx0>(a)));
+        BOOST_CHECK(simd::GetValue(b, i + numLaneVals) == Approx(simd::GetValue<_idx1 + numLaneVals>(a)));
     }
 
     if constexpr (_idx0 + 1 < numValuesPerLane<_registerType>)
@@ -298,7 +298,7 @@ void TestBroadcastAcrossLanes()
 
     _registerType b = BroadcastAcrossLanes<_index>(a);
     for (U32 i = 0; i < numRegisterValues<_registerType>; ++i)
-        BOOST_CHECK(sse::GetValue(b, i) == Approx(sse::GetValue<_index>(a)));
+        BOOST_CHECK(simd::GetValue(b, i) == Approx(simd::GetValue<_index>(a)));
 
 
     if constexpr (_index + 1 < numRegisterValues<_registerType>)
@@ -410,8 +410,8 @@ void TestPermute128d()
 
     const __m128d b = Permute<_i, _j>(a);
 
-    BOOST_CHECK(sse::GetValue<0>(b) == Approx(sse::GetValue<_i>(a)));
-    BOOST_CHECK(sse::GetValue<1>(b) == Approx(sse::GetValue<_j>(a)));
+    BOOST_CHECK(simd::GetValue<0>(b) == Approx(simd::GetValue<_i>(a)));
+    BOOST_CHECK(simd::GetValue<1>(b) == Approx(simd::GetValue<_j>(a)));
 }
 
 
@@ -423,10 +423,10 @@ void TestPermute128()
 
     const __m128 b = Permute<_i, _j, _k, _l>(a);
 
-    BOOST_CHECK(sse::GetValue<0>(b) == Approx(sse::GetValue<_i>(a)));
-    BOOST_CHECK(sse::GetValue<1>(b) == Approx(sse::GetValue<_j>(a)));
-    BOOST_CHECK(sse::GetValue<2>(b) == Approx(sse::GetValue<_k>(a)));
-    BOOST_CHECK(sse::GetValue<3>(b) == Approx(sse::GetValue<_l>(a)));
+    BOOST_CHECK(simd::GetValue<0>(b) == Approx(simd::GetValue<_i>(a)));
+    BOOST_CHECK(simd::GetValue<1>(b) == Approx(simd::GetValue<_j>(a)));
+    BOOST_CHECK(simd::GetValue<2>(b) == Approx(simd::GetValue<_k>(a)));
+    BOOST_CHECK(simd::GetValue<3>(b) == Approx(simd::GetValue<_l>(a)));
 }
 
 
@@ -440,10 +440,10 @@ void TestPermute256d()
 
     const __m256d b = Permute<_i, _j, _k, _l>(a);
 
-    BOOST_CHECK(sse::GetValue<0>(b) == Approx(sse::GetValue<_i>(a)));
-    BOOST_CHECK(sse::GetValue<1>(b) == Approx(sse::GetValue<_j>(a)));
-    BOOST_CHECK(sse::GetValue<2>(b) == Approx(sse::GetValue<_k + 2>(a)));
-    BOOST_CHECK(sse::GetValue<3>(b) == Approx(sse::GetValue<_l + 2>(a)));
+    BOOST_CHECK(simd::GetValue<0>(b) == Approx(simd::GetValue<_i>(a)));
+    BOOST_CHECK(simd::GetValue<1>(b) == Approx(simd::GetValue<_j>(a)));
+    BOOST_CHECK(simd::GetValue<2>(b) == Approx(simd::GetValue<_k + 2>(a)));
+    BOOST_CHECK(simd::GetValue<3>(b) == Approx(simd::GetValue<_l + 2>(a)));
 }
 
 
@@ -455,26 +455,26 @@ void TestPermute256()
 
     const __m256 b = Permute<_i, _j, _k, _l, _m, _n, _o, _p>(a);
 
-    BOOST_CHECK(sse::GetValue<0>(b) == Approx(sse::GetValue<_i>(a)));
-    BOOST_CHECK(sse::GetValue<1>(b) == Approx(sse::GetValue<_j>(a)));
-    BOOST_CHECK(sse::GetValue<2>(b) == Approx(sse::GetValue<_k>(a)));
-    BOOST_CHECK(sse::GetValue<3>(b) == Approx(sse::GetValue<_l>(a)));
-    BOOST_CHECK(sse::GetValue<4>(b) == Approx(sse::GetValue<_m + 4>(a)));
-    BOOST_CHECK(sse::GetValue<5>(b) == Approx(sse::GetValue<_n + 4>(a)));
-    BOOST_CHECK(sse::GetValue<6>(b) == Approx(sse::GetValue<_o + 4>(a)));
-    BOOST_CHECK(sse::GetValue<7>(b) == Approx(sse::GetValue<_p + 4>(a)));
+    BOOST_CHECK(simd::GetValue<0>(b) == Approx(simd::GetValue<_i>(a)));
+    BOOST_CHECK(simd::GetValue<1>(b) == Approx(simd::GetValue<_j>(a)));
+    BOOST_CHECK(simd::GetValue<2>(b) == Approx(simd::GetValue<_k>(a)));
+    BOOST_CHECK(simd::GetValue<3>(b) == Approx(simd::GetValue<_l>(a)));
+    BOOST_CHECK(simd::GetValue<4>(b) == Approx(simd::GetValue<_m + 4>(a)));
+    BOOST_CHECK(simd::GetValue<5>(b) == Approx(simd::GetValue<_n + 4>(a)));
+    BOOST_CHECK(simd::GetValue<6>(b) == Approx(simd::GetValue<_o + 4>(a)));
+    BOOST_CHECK(simd::GetValue<7>(b) == Approx(simd::GetValue<_p + 4>(a)));
 
 
     const __m256 c = Permute<_i, _j, _k, _l>(a);
 
-    BOOST_CHECK(sse::GetValue<0>(c) == Approx(sse::GetValue<_i>(a)));
-    BOOST_CHECK(sse::GetValue<1>(c) == Approx(sse::GetValue<_j>(a)));
-    BOOST_CHECK(sse::GetValue<2>(c) == Approx(sse::GetValue<_k>(a)));
-    BOOST_CHECK(sse::GetValue<3>(c) == Approx(sse::GetValue<_l>(a)));
-    BOOST_CHECK(sse::GetValue<4>(c) == Approx(sse::GetValue<_i + 4>(a)));
-    BOOST_CHECK(sse::GetValue<5>(c) == Approx(sse::GetValue<_j + 4>(a)));
-    BOOST_CHECK(sse::GetValue<6>(c) == Approx(sse::GetValue<_k + 4>(a)));
-    BOOST_CHECK(sse::GetValue<7>(c) == Approx(sse::GetValue<_l + 4>(a)));
+    BOOST_CHECK(simd::GetValue<0>(c) == Approx(simd::GetValue<_i>(a)));
+    BOOST_CHECK(simd::GetValue<1>(c) == Approx(simd::GetValue<_j>(a)));
+    BOOST_CHECK(simd::GetValue<2>(c) == Approx(simd::GetValue<_k>(a)));
+    BOOST_CHECK(simd::GetValue<3>(c) == Approx(simd::GetValue<_l>(a)));
+    BOOST_CHECK(simd::GetValue<4>(c) == Approx(simd::GetValue<_i + 4>(a)));
+    BOOST_CHECK(simd::GetValue<5>(c) == Approx(simd::GetValue<_j + 4>(a)));
+    BOOST_CHECK(simd::GetValue<6>(c) == Approx(simd::GetValue<_k + 4>(a)));
+    BOOST_CHECK(simd::GetValue<7>(c) == Approx(simd::GetValue<_l + 4>(a)));
 }
 #endif // __AVX2__
 
@@ -533,8 +533,8 @@ void TestPermute2F128SingleRegister()
 
     for (U32 i = 0; i < numLaneVals; ++i)
     {
-        BOOST_CHECK(sse::GetValue(b, i) == Approx(sse::GetValue(a, i + _lane0 * numLaneVals)));
-        BOOST_CHECK(sse::GetValue(b, i + numLaneVals) == Approx(sse::GetValue(a, i + _lane1 * numLaneVals)));
+        BOOST_CHECK(simd::GetValue(b, i) == Approx(simd::GetValue(a, i + _lane0 * numLaneVals)));
+        BOOST_CHECK(simd::GetValue(b, i + numLaneVals) == Approx(simd::GetValue(a, i + _lane1 * numLaneVals)));
     }
 
 
@@ -564,13 +564,13 @@ void TestPermute2F128TwoRegisters()
     for (U32 i = 0; i < numLaneVals; ++i)
     {
         if constexpr (_src0 == 0)
-            BOOST_CHECK(sse::GetValue(c, i) == Approx(sse::GetValue(a, i + _lane0 * numLaneVals)));
+            BOOST_CHECK(simd::GetValue(c, i) == Approx(simd::GetValue(a, i + _lane0 * numLaneVals)));
         else
-            BOOST_CHECK(sse::GetValue(c, i) == Approx(sse::GetValue(b, i + _lane0 * numLaneVals)));
+            BOOST_CHECK(simd::GetValue(c, i) == Approx(simd::GetValue(b, i + _lane0 * numLaneVals)));
         if constexpr (_src1 == 0)
-            BOOST_CHECK(sse::GetValue(c, i + numLaneVals) == Approx(sse::GetValue(a, i + _lane1 * numLaneVals)));
+            BOOST_CHECK(simd::GetValue(c, i + numLaneVals) == Approx(simd::GetValue(a, i + _lane1 * numLaneVals)));
         else
-            BOOST_CHECK(sse::GetValue(c, i + numLaneVals) == Approx(sse::GetValue(b, i + _lane1 * numLaneVals)));
+            BOOST_CHECK(simd::GetValue(c, i + numLaneVals) == Approx(simd::GetValue(b, i + _lane1 * numLaneVals)));
     }
 
 
@@ -621,8 +621,8 @@ void TestShuffle2()
     for (U32 i = 0; i < numLanes<_registerType>; ++i)
     {
         U32 offset = +i * numValuesPerLane<_registerType>;
-        BOOST_CHECK(sse::GetValue(c, 0 + offset) == Approx(sse::GetValue(a, _i + offset)));
-        BOOST_CHECK(sse::GetValue(c, 1 + offset) == Approx(sse::GetValue(a, _j + offset)));
+        BOOST_CHECK(simd::GetValue(c, 0 + offset) == Approx(simd::GetValue(a, _i + offset)));
+        BOOST_CHECK(simd::GetValue(c, 1 + offset) == Approx(simd::GetValue(a, _j + offset)));
     }
 }
 
@@ -651,10 +651,10 @@ void TestShuffle256d()
 
 
 
-    BOOST_CHECK(sse::GetValue(c, 0) == Approx(sse::GetValue(a, _i)));
-    BOOST_CHECK(sse::GetValue(c, 1) == Approx(sse::GetValue(b, _j)));
-    BOOST_CHECK(sse::GetValue(c, 2) == Approx(sse::GetValue(a, _k + 2)));
-    BOOST_CHECK(sse::GetValue(c, 3) == Approx(sse::GetValue(b, _l + 2)));
+    BOOST_CHECK(simd::GetValue(c, 0) == Approx(simd::GetValue(a, _i)));
+    BOOST_CHECK(simd::GetValue(c, 1) == Approx(simd::GetValue(b, _j)));
+    BOOST_CHECK(simd::GetValue(c, 2) == Approx(simd::GetValue(a, _k + 2)));
+    BOOST_CHECK(simd::GetValue(c, 3) == Approx(simd::GetValue(b, _l + 2)));
 }
 
 
@@ -702,10 +702,10 @@ void TestShuffle4()
     for (U32 i = 0; i < numLanes<_registerType>; ++i)
     {
         U32 offset = +i * numValuesPerLane<_registerType>;
-        BOOST_CHECK(sse::GetValue(c, 0 + offset) == Approx(sse::GetValue(a, _i + offset)));
-        BOOST_CHECK(sse::GetValue(c, 1 + offset) == Approx(sse::GetValue(a, _j + offset)));
-        BOOST_CHECK(sse::GetValue(c, 2 + offset) == Approx(sse::GetValue(b, _k + offset)));
-        BOOST_CHECK(sse::GetValue(c, 3 + offset) == Approx(sse::GetValue(b, _l + offset)));
+        BOOST_CHECK(simd::GetValue(c, 0 + offset) == Approx(simd::GetValue(a, _i + offset)));
+        BOOST_CHECK(simd::GetValue(c, 1 + offset) == Approx(simd::GetValue(a, _j + offset)));
+        BOOST_CHECK(simd::GetValue(c, 2 + offset) == Approx(simd::GetValue(b, _k + offset)));
+        BOOST_CHECK(simd::GetValue(c, 3 + offset) == Approx(simd::GetValue(b, _l + offset)));
     }
 }
 

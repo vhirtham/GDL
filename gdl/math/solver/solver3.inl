@@ -49,7 +49,7 @@ inline Vec3Serial<_type, true> Cramer(const Mat3Serial<_type>& matA, const Vec3S
 
 inline Vec3fSSE<true> Cramer(const Mat3fSSE& matA, const Vec3fSSE<true>& vecRhs)
 {
-    using namespace GDL::sse;
+    using namespace GDL::simd;
 
     const std::array<__m128, 3>& dataA = matA.DataSSE();
     const __m128& a = dataA[0];
@@ -103,7 +103,7 @@ inline Vec3Serial<_type, true> Gauss(const Mat3Serial<_type>& matA, const Vec3Se
 template <Pivot _pivot>
 inline Vec3fSSE<true> Gauss(const Mat3fSSE& matA, const Vec3fSSE<true>& vecRhs)
 {
-    using namespace GDL::sse;
+    using namespace GDL::simd;
 
     alignas(alignmentBytes<__m128>) std::array<__m128, 3> matrixData = matA.DataSSE();
     __m128 vectorData = vecRhs.DataSSE();

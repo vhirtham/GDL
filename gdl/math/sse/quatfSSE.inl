@@ -58,7 +58,7 @@ F32 QuatfSSE::operator[](const U32 index) const
 {
     DEV_EXCEPTION(index > 3, "Invalid index value! [0..3]");
 
-    return sse::GetValue(mData, index);
+    return simd::GetValue(mData, index);
 }
 
 
@@ -90,7 +90,7 @@ const std::array<F32, 4> QuatfSSE::Data() const
 
 bool QuatfSSE::IsDataAligned() const
 {
-    return IsAligned(&mData, IsAligned(&mData, sse::alignmentBytes<__m128>));
+    return IsAligned(&mData, IsAligned(&mData, simd::alignmentBytes<__m128>));
 }
 
 

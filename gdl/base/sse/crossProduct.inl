@@ -4,7 +4,7 @@
 #include "gdl/base/sse/swizzle.h"
 
 
-namespace GDL::sse
+namespace GDL::simd
 {
 [[nodiscard]] inline __m128 CrossProduct(__m128 lhs, __m128 rhs)
 {
@@ -17,4 +17,4 @@ namespace GDL::sse
     return Permute<1, 2, 0, 3>(tmp);
 }
 
-} // namespace GDL::sse
+} // namespace GDL::simd

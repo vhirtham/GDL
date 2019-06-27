@@ -17,15 +17,15 @@ namespace GDL
 //! @tparam _rows: Number of rows
 //! @tparam _cols: Number of columns
 template <typename _type, I32 _rows, I32 _cols>
-class alignas(sse::alignmentBytes<decltype(sse::GetFittingRegister<_type, sse::MaxRegisterSize()>())>) MatSSE
+class alignas(simd::alignmentBytes<decltype(simd::GetFittingRegister<_type, simd::MaxRegisterSize()>())>) MatSSE
 {
     static_assert(std::is_floating_point<_type>::value, "Matrix can only be created with floating point types");
 
 public:
-    using RegisterType = decltype(sse::GetFittingRegister<_type, sse::MaxRegisterSize()>());
-    constexpr static U32 mAlignment = sse::alignmentBytes<RegisterType>;
-    constexpr static U32 mNumRegisterEntries = sse::numRegisterValues<RegisterType>;
-    constexpr static U32 mNumRegistersPerCol = sse::CalcMinNumArrayRegisters<RegisterType>(_rows);
+    using RegisterType = decltype(simd::GetFittingRegister<_type, simd::MaxRegisterSize()>());
+    constexpr static U32 mAlignment = simd::alignmentBytes<RegisterType>;
+    constexpr static U32 mNumRegisterEntries = simd::numRegisterValues<RegisterType>;
+    constexpr static U32 mNumRegistersPerCol = simd::CalcMinNumArrayRegisters<RegisterType>(_rows);
     constexpr static U32 mNumRegisters = _cols * mNumRegistersPerCol;
 
 private:

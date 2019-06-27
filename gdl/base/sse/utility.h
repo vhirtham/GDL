@@ -7,7 +7,7 @@
 
 
 
-namespace GDL::sse
+namespace GDL::simd
 {
 
 // Functions ----------------------------------------------------------------------------------------------------------
@@ -50,6 +50,6 @@ inline auto ReinterpretAsIntRegister(_registerType reg);
 
 
 
-} // namespace GDL::sse
+} // namespace GDL::simd
 
 #include "gdl/base/sse/utility.inl"

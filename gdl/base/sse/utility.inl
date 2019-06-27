@@ -9,7 +9,7 @@
 
 
 
-namespace GDL::sse
+namespace GDL::simd
 {
 
 
@@ -91,4 +91,4 @@ inline auto ReinterpretAsIntRegister(_registerType reg)
 
 
 
-} // namespace GDL::sse
+} // namespace GDL::simd

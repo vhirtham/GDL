@@ -6,7 +6,7 @@
 
 #include <limits>
 
-namespace GDL::sse
+namespace GDL::simd
 {
 
 
@@ -76,6 +76,6 @@ inline bool CompareAllLessThan(_registerType lhs, _registerType rhs);
 template <typename _registerType, U32 _numComparedValues = numRegisterValues<_registerType>>
 inline bool CompareAllGreaterThan(_registerType lhs, _registerType rhs);
 
-} // namespace GDL::sse
+} // namespace GDL::simd
 
 #include "gdl/base/sse/compareAll.inl"

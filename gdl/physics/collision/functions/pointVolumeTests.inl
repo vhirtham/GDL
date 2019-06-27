@@ -17,7 +17,7 @@ template <bool _isCol>
 F32 PointInsideSphere(const Vec3fSSE<_isCol>& point, const Vec3fSSE<_isCol>& c0, const Vec3fSSE<_isCol>& c1,
                       const Vec3fSSE<_isCol>& c2, const Vec3fSSE<_isCol>& c3)
 {
-    using namespace GDL::sse;
+    using namespace GDL::simd;
 
     DEV_EXCEPTION(Orientation(c0, c1, c2, c3) <= 0, "Invalid order of the passed points c0, c1, c2 and c3.");
 

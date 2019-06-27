@@ -4,7 +4,7 @@
 #include "gdl/base/sse/intrinsics.h"
 #include "gdl/base/sse/utility.h"
 
-namespace GDL::sse
+namespace GDL::simd
 {
 
 
@@ -51,7 +51,7 @@ inline __m256 Blend(__m256 source0, __m256 source1)
 template <U32 _index, typename _registerType>
 inline _registerType BlendIndex(_registerType source0, _registerType source1)
 {
-    using namespace GDL::sse;
+    using namespace GDL::simd;
 
     constexpr U32 numRegVals = numRegisterValues<_registerType>;
 
@@ -236,7 +236,7 @@ inline _registerType Broadcast(_registerType reg)
     else
         return Permute<_index, _index, _index, _index>(reg);
 
-} // namespace GDL::sse
+} // namespace GDL::simd
 
 
 
@@ -842,4 +842,4 @@ inline __m256d Swap(__m256d source)
 
 #endif // __AVX2__
 
-} // namespace GDL::sse
+} // namespace GDL::simd

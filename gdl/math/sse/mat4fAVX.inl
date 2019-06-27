@@ -74,7 +74,7 @@ F32 Mat4fAVX::operator()(const U32 row, const U32 col) const
     DEV_EXCEPTION(row > 3, "row - invalid value! [0..3]");
     DEV_EXCEPTION(col > 3, "col - invalid value! [0..3]");
 
-    return sse::GetValue(mData[col / 2], (col % 2) * 4 + row);
+    return simd::GetValue(mData[col / 2], (col % 2) * 4 + row);
 }
 
 
@@ -113,8 +113,8 @@ Mat4fAVX Mat4fAVX::operator+(const Mat4fAVX& other)
 
 Mat4fAVX Mat4fAVX::operator*(const Mat4fAVX& rhs) const
 {
-    const __m256 tmpBA = sse::Permute2F128<0, 1, 0, 0>(mData[0], mData[0]);
-    const __m256 tmpDC = sse::Permute2F128<0, 1, 0, 0>(mData[1], mData[1]);
+    const __m256 tmpBA = simd::Permute2F128<0, 1, 0, 0>(mData[0], mData[0]);
+    const __m256 tmpDC = simd::Permute2F128<0, 1, 0, 0>(mData[1], mData[1]);
 
     const __m256i mask01 = _mm256_setr_epi32(0, 0, 0, 0, 1, 1, 1, 1);
     const __m256i mask10 = _mm256_setr_epi32(1, 1, 1, 1, 0, 0, 0, 0);
@@ -169,21 +169,21 @@ const std::array<__m256, 2>& Mat4fAVX::DataAVX() const
 
 F32 Mat4fAVX::Det() const
 {
-    return sse::Determinant4x4(mData[0], mData[1]);
+    return simd::Determinant4x4(mData[0], mData[1]);
 }
 
 
 
 Mat4fAVX Mat4fAVX::Transpose() const
 {
-    __m256 tmp0 = sse::Shuffle<0, 2, 0, 2>(mData[0], mData[1]);
-    __m256 tmp1 = sse::Shuffle<1, 3, 1, 3>(mData[0], mData[1]);
+    __m256 tmp0 = simd::Shuffle<0, 2, 0, 2>(mData[0], mData[1]);
+    __m256 tmp1 = simd::Shuffle<1, 3, 1, 3>(mData[0], mData[1]);
 
-    __m256 tmp2 = sse::Blend<0, 0, 0, 0, 1, 1, 1, 1>(tmp0, tmp1);
-    __m256 tmp3 = sse::Permute2F128<0, 1, 1, 0>(tmp0, tmp1);
+    __m256 tmp2 = simd::Blend<0, 0, 0, 0, 1, 1, 1, 1>(tmp0, tmp1);
+    __m256 tmp3 = simd::Permute2F128<0, 1, 1, 0>(tmp0, tmp1);
 
-    tmp0 = sse::Shuffle<0, 2, 0, 2>(tmp2, tmp3);
-    tmp1 = sse::Shuffle<1, 3, 1, 3>(tmp2, tmp3);
+    tmp0 = simd::Shuffle<0, 2, 0, 2>(tmp2, tmp3);
+    tmp1 = simd::Shuffle<1, 3, 1, 3>(tmp2, tmp3);
 
     tmp2 = _mm256_permutevar_ps(tmp0, _mm256_setr_epi32(0, 2, 1, 3, 2, 0, 3, 1));
     tmp3 = _mm256_permutevar_ps(tmp1, _mm256_setr_epi32(0, 2, 1, 3, 2, 0, 3, 1));
@@ -195,7 +195,7 @@ Mat4fAVX Mat4fAVX::Transpose() const
 
 bool Mat4fAVX::IsDataAligned() const
 {
-    return (IsAligned(&mData[0], sse::alignmentBytes<__m256>) && IsAligned(&mData[1], sse::alignmentBytes<__m256>));
+    return (IsAligned(&mData[0], simd::alignmentBytes<__m256>) && IsAligned(&mData[1], simd::alignmentBytes<__m256>));
 }
 
 

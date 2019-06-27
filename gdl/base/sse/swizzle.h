@@ -4,7 +4,7 @@
 #include "gdl/base/sse/x86intrin.h"
 
 
-namespace GDL::sse
+namespace GDL::simd
 {
 
 
@@ -343,7 +343,7 @@ inline __m256d Swap(__m256d source);
 
 #endif // __AVX2__
 
-} // namespace GDL::sse
+} // namespace GDL::simd
 
 
 #include "gdl/base/sse/swizzle.inl"

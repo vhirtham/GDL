@@ -7,7 +7,7 @@
 #include <array>
 
 using namespace GDL;
-using namespace GDL::sse;
+using namespace GDL::simd;
 
 void TestDeterminant2x2(const std::array<F32, 4>& mat, F32 expectedResult)
 {

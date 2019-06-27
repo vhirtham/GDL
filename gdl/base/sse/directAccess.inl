@@ -7,17 +7,17 @@
 #include "gdl/base/sse/utility.h"
 
 
-namespace GDL::sse
+namespace GDL::simd
 {
 
 template <U32 _index, typename _registerType>
 inline auto GetValue(const _registerType reg)
 {
-    using ValueType = decltype(sse::GetDataType<_registerType>());
+    using ValueType = decltype(simd::GetDataType<_registerType>());
 
-    static_assert(_index < sse::numRegisterValues<_registerType>, "Index >= numRegisterValues");
+    static_assert(_index < simd::numRegisterValues<_registerType>, "Index >= numRegisterValues");
 
-    alignas(sse::alignmentBytes<_registerType>) ValueType array[sse::numRegisterValues<_registerType>];
+    alignas(simd::alignmentBytes<_registerType>) ValueType array[simd::numRegisterValues<_registerType>];
     _mmx_store_p(array, reg);
     return array[_index];
 }
@@ -27,11 +27,11 @@ inline auto GetValue(const _registerType reg)
 template <typename _registerType>
 inline auto GetValue(const _registerType reg, const U32 index)
 {
-    using ValueType = decltype(sse::GetDataType<_registerType>());
+    using ValueType = decltype(simd::GetDataType<_registerType>());
 
-    DEV_EXCEPTION(index >= sse::numRegisterValues<_registerType>, "Index >= numRegisterValues");
+    DEV_EXCEPTION(index >= simd::numRegisterValues<_registerType>, "Index >= numRegisterValues");
 
-    alignas(sse::alignmentBytes<_registerType>) ValueType array[sse::numRegisterValues<_registerType>];
+    alignas(simd::alignmentBytes<_registerType>) ValueType array[simd::numRegisterValues<_registerType>];
     _mmx_store_p(array, reg);
     return array[index];
 }
@@ -41,13 +41,13 @@ inline auto GetValue(const _registerType reg, const U32 index)
 template <U32 _index, typename _registerType, typename _type>
 inline auto SetValue(_registerType& reg, const _type value)
 {
-    using ValueType = decltype(sse::GetDataType<_registerType>());
+    using ValueType = decltype(simd::GetDataType<_registerType>());
 
-    static_assert(_index < sse::numRegisterValues<_registerType>, "Index >= numRegisterValues");
+    static_assert(_index < simd::numRegisterValues<_registerType>, "Index >= numRegisterValues");
     static_assert(std::is_convertible<_type, ValueType>::value,
                   "The values type can't be converted to the registers value type");
 
-    alignas(sse::alignmentBytes<_registerType>) ValueType array[sse::numRegisterValues<_registerType>];
+    alignas(simd::alignmentBytes<_registerType>) ValueType array[simd::numRegisterValues<_registerType>];
     _mmx_store_p(array, reg);
     array[_index] = static_cast<ValueType>(value);
     reg = _mmx_load_p<_registerType>(array);
@@ -58,16 +58,16 @@ inline auto SetValue(_registerType& reg, const _type value)
 template <typename _registerType, typename _type>
 inline auto SetValue(_registerType& reg, const U32 index, const _type value)
 {
-    using ValueType = decltype(sse::GetDataType<_registerType>());
+    using ValueType = decltype(simd::GetDataType<_registerType>());
 
-    DEV_EXCEPTION(index >= sse::numRegisterValues<_registerType>, "Index >= numRegisterValues");
+    DEV_EXCEPTION(index >= simd::numRegisterValues<_registerType>, "Index >= numRegisterValues");
     static_assert(std::is_convertible<_type, ValueType>::value,
                   "The values type can't be converted to the registers value type");
 
-    alignas(sse::alignmentBytes<_registerType>) ValueType array[sse::numRegisterValues<_registerType>];
+    alignas(simd::alignmentBytes<_registerType>) ValueType array[simd::numRegisterValues<_registerType>];
     _mmx_store_p(array, reg);
     array[index] = static_cast<ValueType>(value);
     reg = _mmx_load_p<_registerType>(array);
 }
 
-} // namespace GDL::sse
+} // namespace GDL::simd

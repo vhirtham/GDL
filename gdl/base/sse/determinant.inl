@@ -9,7 +9,7 @@
 #include "gdl/base/sse/swizzle.h"
 
 
-namespace GDL::sse
+namespace GDL::simd
 {
 
 inline F32 Determinant2x2(__m128 data)
@@ -122,4 +122,4 @@ inline F32 Determinant4x4(__m256 ab, __m256 cd)
 
 
 
-} // namespace GDL::sse
+} // namespace GDL::simd

@@ -17,9 +17,9 @@ template <bool>
 class Vec4fSSE;
 
 //! @brief 4x4 Matrix with SSE support
-class alignas(sse::alignmentBytes<__m256>) Mat4fAVX
+class alignas(simd::alignmentBytes<__m256>) Mat4fAVX
 {
-    alignas(sse::alignmentBytes<__m256>) std::array<__m256, 2> mData;
+    alignas(simd::alignmentBytes<__m256>) std::array<__m256, 2> mData;
 
 public:
     inline Mat4fAVX();

@@ -9,7 +9,7 @@
 
 #include <limits>
 
-namespace GDL::sse
+namespace GDL::simd
 {
 
 template <typename _registerType, U32 _numComparedValues>
@@ -83,4 +83,4 @@ inline bool CompareAllGreaterThan(_registerType lhs, _registerType rhs)
     return CompareAllTrue<_registerType, _numComparedValues, decltype(_mmx_cmpgt_p<_registerType>)>(
             lhs, rhs, &_mmx_cmpgt_p<_registerType>);
 }
-} // namespace GDL::sse
+} // namespace GDL::simd

@@ -15,7 +15,7 @@ namespace GDL
 //! @brief Vector class with 4 entries and SSE support
 //! @tparam _isCol: If true, the vector is treated as column vector, otherwise as row vector
 template <bool _isCol = true>
-class alignas(sse::alignmentBytes<__m128>) Vec4fSSE
+class alignas(simd::alignmentBytes<__m128>) Vec4fSSE
 {
     template <bool>
     friend class Vec3fSSE;
@@ -24,7 +24,7 @@ class alignas(sse::alignmentBytes<__m128>) Vec4fSSE
     friend class Mat4fSSE;
     friend class Mat4fAVX;
 
-    alignas(sse::alignmentBytes<__m128>) __m128 mData;
+    alignas(simd::alignmentBytes<__m128>) __m128 mData;
 
 public:
     inline Vec4fSSE();

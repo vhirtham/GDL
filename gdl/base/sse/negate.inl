@@ -8,7 +8,7 @@
 #include <type_traits>
 
 
-namespace GDL::sse
+namespace GDL::simd
 {
 
 
@@ -108,4 +108,4 @@ inline __m256 NegationMask()
 #endif // __AVX2__
 
 
-} // namespace GDL::sse
+} // namespace GDL::simd

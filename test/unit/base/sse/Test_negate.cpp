@@ -5,7 +5,7 @@
 #include "gdl/base/sse/negate.h"
 
 using namespace GDL;
-using namespace GDL::sse;
+using namespace GDL::simd;
 
 #include <iostream>
 
@@ -16,8 +16,8 @@ void TestNegate128d()
 
     const __m128d b = Negate<_i, _j>(a);
 
-    BOOST_CHECK(sse::GetValue<0>(b) == Approx((_i == 0) ? 1. : -1.));
-    BOOST_CHECK(sse::GetValue<1>(b) == Approx((_j == 0) ? 2. : -2.));
+    BOOST_CHECK(simd::GetValue<0>(b) == Approx((_i == 0) ? 1. : -1.));
+    BOOST_CHECK(simd::GetValue<1>(b) == Approx((_j == 0) ? 2. : -2.));
 
 
     constexpr U32 iNext = (_i < 1) ? _i + 1 : 0;
@@ -36,10 +36,10 @@ void TestNegate4()
     const _registerType b = Negate<_i, _j, _k, _l>(a);
 
 
-    BOOST_CHECK(sse::GetValue<0>(b) == Approx((_i == 0) ? 1. : -1.));
-    BOOST_CHECK(sse::GetValue<1>(b) == Approx((_j == 0) ? 2. : -2.));
-    BOOST_CHECK(sse::GetValue<2>(b) == Approx((_k == 0) ? 3. : -3.));
-    BOOST_CHECK(sse::GetValue<3>(b) == Approx((_l == 0) ? 4. : -4.));
+    BOOST_CHECK(simd::GetValue<0>(b) == Approx((_i == 0) ? 1. : -1.));
+    BOOST_CHECK(simd::GetValue<1>(b) == Approx((_j == 0) ? 2. : -2.));
+    BOOST_CHECK(simd::GetValue<2>(b) == Approx((_k == 0) ? 3. : -3.));
+    BOOST_CHECK(simd::GetValue<3>(b) == Approx((_l == 0) ? 4. : -4.));
 
 
     constexpr U32 iNext = (_i < 1) ? _i + 1 : 0;
@@ -63,14 +63,14 @@ void TestNegate256()
     const __m256 b = Negate<_i, _j, _k, _l, _m, _n, _o, _p>(a);
 
 
-    BOOST_CHECK(sse::GetValue<0>(b) == Approx((_i == 0) ? 1.f : -1.f));
-    BOOST_CHECK(sse::GetValue<1>(b) == Approx((_j == 0) ? 2.f : -2.f));
-    BOOST_CHECK(sse::GetValue<2>(b) == Approx((_k == 0) ? 3.f : -3.f));
-    BOOST_CHECK(sse::GetValue<3>(b) == Approx((_l == 0) ? 4.f : -4.f));
-    BOOST_CHECK(sse::GetValue<4>(b) == Approx((_m == 0) ? 5.f : -5.f));
-    BOOST_CHECK(sse::GetValue<5>(b) == Approx((_n == 0) ? 6.f : -6.f));
-    BOOST_CHECK(sse::GetValue<6>(b) == Approx((_o == 0) ? 7.f : -7.f));
-    BOOST_CHECK(sse::GetValue<7>(b) == Approx((_p == 0) ? 8.f : -8.f));
+    BOOST_CHECK(simd::GetValue<0>(b) == Approx((_i == 0) ? 1.f : -1.f));
+    BOOST_CHECK(simd::GetValue<1>(b) == Approx((_j == 0) ? 2.f : -2.f));
+    BOOST_CHECK(simd::GetValue<2>(b) == Approx((_k == 0) ? 3.f : -3.f));
+    BOOST_CHECK(simd::GetValue<3>(b) == Approx((_l == 0) ? 4.f : -4.f));
+    BOOST_CHECK(simd::GetValue<4>(b) == Approx((_m == 0) ? 5.f : -5.f));
+    BOOST_CHECK(simd::GetValue<5>(b) == Approx((_n == 0) ? 6.f : -6.f));
+    BOOST_CHECK(simd::GetValue<6>(b) == Approx((_o == 0) ? 7.f : -7.f));
+    BOOST_CHECK(simd::GetValue<7>(b) == Approx((_p == 0) ? 8.f : -8.f));
 
 
     constexpr U32 iNext = (_i < 1) ? _i + 1 : 0;

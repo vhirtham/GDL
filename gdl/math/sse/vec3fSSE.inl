@@ -54,7 +54,7 @@ Vec3fSSE<_isCol>::Vec3fSSE(F32 v0, F32 v1, F32 v2)
 
 template <bool _isCol>
 Vec3fSSE<_isCol>::Vec3fSSE(const Vec4fSSE<_isCol>& other)
-    : mData{sse::Blend<0, 0, 0, 1>(other.mData, _mmx_setzero_p<__m128>())}
+    : mData{simd::Blend<0, 0, 0, 1>(other.mData, _mmx_setzero_p<__m128>())}
 {
 }
 
@@ -74,7 +74,7 @@ F32 Vec3fSSE<_isCol>::operator[](const U32 index) const
 {
     DEV_EXCEPTION(index > 2, "Invalid index value! [0..2]");
 
-    return sse::GetValue(mData, index);
+    return simd::GetValue(mData, index);
 }
 
 
@@ -143,7 +143,7 @@ Vec3fSSE<_isCol> Vec3fSSE<_isCol>::Cross(Vec3fSSE rhs) const
     DEV_EXCEPTION(*this == Vec3fSSE(), "Length of this vector is 0. Can't calculate the cross product.");
     DEV_EXCEPTION(rhs == Vec3fSSE(), "Length of rhs vector is 0. Can't calculate the cross product.");
 
-    return sse::CrossProduct(mData, rhs.mData);
+    return simd::CrossProduct(mData, rhs.mData);
 }
 
 
@@ -172,7 +172,7 @@ template <bool _isCol>
 template <bool _isColRhs>
 F32 Vec3fSSE<_isCol>::Dot(Vec3fSSE<_isColRhs> rhs) const
 {
-    return sse::DotProductF32<1, 1, 1, 0>(mData, rhs.mData);
+    return simd::DotProductF32<1, 1, 1, 0>(mData, rhs.mData);
 }
 
 
@@ -180,7 +180,7 @@ F32 Vec3fSSE<_isCol>::Dot(Vec3fSSE<_isColRhs> rhs) const
 template <bool _isCol>
 F32 Vec3fSSE<_isCol>::Length() const
 {
-    return _mmx_cvtsx_fx(_mmx_sqrt_p(sse::DotProduct<1, 1, 1, 0>(mData, mData)));
+    return _mmx_cvtsx_fx(_mmx_sqrt_p(simd::DotProduct<1, 1, 1, 0>(mData, mData)));
 }
 
 
@@ -189,7 +189,7 @@ template <bool _isCol>
 Vec3fSSE<_isCol>& Vec3fSSE<_isCol>::Normalize()
 {
     DEV_EXCEPTION(*this == Vec3fSSE(), "Vector length is 0. Can't normalize the vector.");
-    mData = _mmx_div_p(mData, _mmx_sqrt_p(sse::DotProduct<1, 1, 1, 0>(mData, mData)));
+    mData = _mmx_div_p(mData, _mmx_sqrt_p(simd::DotProduct<1, 1, 1, 0>(mData, mData)));
 
     return *this;
 }
@@ -199,7 +199,7 @@ Vec3fSSE<_isCol>& Vec3fSSE<_isCol>::Normalize()
 template <bool _isCol>
 bool Vec3fSSE<_isCol>::IsDataAligned() const
 {
-    return IsAligned(&mData, IsAligned(&mData, sse::alignmentBytes<__m128>));
+    return IsAligned(&mData, IsAligned(&mData, simd::alignmentBytes<__m128>));
 }
 
 

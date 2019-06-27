@@ -23,27 +23,27 @@ using namespace GDL;
 template <U32 _src0, U32 _src1, U32 _src2, U32 _src3, U32 _dst0 = 1, U32 _dst1 = 0, U32 _dst2 = 0, U32 _dst3 = 0>
 void TestDotProduct128Destination(__m128 reg0, __m128 reg1, F32 exp0)
 {
-    __m128 result = sse::DotProduct<_src0, _src1, _src2, _src3, _dst0, _dst1, _dst2, _dst3>(reg0, reg1);
+    __m128 result = simd::DotProduct<_src0, _src1, _src2, _src3, _dst0, _dst1, _dst2, _dst3>(reg0, reg1);
 
     if (_dst0)
-        BOOST_CHECK(sse::GetValue<0>(result) == Approx(exp0));
+        BOOST_CHECK(simd::GetValue<0>(result) == Approx(exp0));
     else
-        BOOST_CHECK(sse::GetValue<0>(result) == ApproxZero<F32>());
+        BOOST_CHECK(simd::GetValue<0>(result) == ApproxZero<F32>());
 
     if (_dst1)
-        BOOST_CHECK(sse::GetValue<1>(result) == Approx(exp0));
+        BOOST_CHECK(simd::GetValue<1>(result) == Approx(exp0));
     else
-        BOOST_CHECK(sse::GetValue<1>(result) == ApproxZero<F32>());
+        BOOST_CHECK(simd::GetValue<1>(result) == ApproxZero<F32>());
 
     if (_dst2)
-        BOOST_CHECK(sse::GetValue<2>(result) == Approx(exp0));
+        BOOST_CHECK(simd::GetValue<2>(result) == Approx(exp0));
     else
-        BOOST_CHECK(sse::GetValue<2>(result) == ApproxZero<F32>());
+        BOOST_CHECK(simd::GetValue<2>(result) == ApproxZero<F32>());
 
     if (_dst3)
-        BOOST_CHECK(sse::GetValue<3>(result) == Approx(exp0));
+        BOOST_CHECK(simd::GetValue<3>(result) == Approx(exp0));
     else
-        BOOST_CHECK(sse::GetValue<3>(result) == ApproxZero<F32>());
+        BOOST_CHECK(simd::GetValue<3>(result) == ApproxZero<F32>());
 
     constexpr U32 dst0Next = (_dst0 < 1) ? _dst0 + 1 : 0;
     constexpr U32 dst1Next = (dst0Next == 0) ? (_dst1 < 1) ? _dst1 + 1 : 0 : _dst1;
@@ -69,10 +69,10 @@ void TestDotProduct128()
     __m128 reg0 = _mmx_setzero_p<__m128>();
     __m128 reg1 = _mmx_setzero_p<__m128>();
 
-    for (U32 i = 0; i < sse::numRegisterValues<__m128>; ++i)
+    for (U32 i = 0; i < simd::numRegisterValues<__m128>; ++i)
     {
-        sse::SetValue(reg0, i, testValues0[i]);
-        sse::SetValue(reg1, i, testValues1[i]);
+        simd::SetValue(reg0, i, testValues0[i]);
+        simd::SetValue(reg1, i, testValues1[i]);
     }
 
     F32 exp = 0;
@@ -85,7 +85,7 @@ void TestDotProduct128()
     if (_src3)
         exp += testValues0[3] * testValues1[3];
 
-    F32 dotProduct = sse::DotProductF32<_src0, _src1, _src2, _src3>(reg0, reg1);
+    F32 dotProduct = simd::DotProductF32<_src0, _src1, _src2, _src3>(reg0, reg1);
     BOOST_CHECK(dotProduct == Approx(exp));
 
     TestDotProduct128Destination<_src0, _src1, _src2, _src3>(reg0, reg1, exp);
@@ -118,47 +118,47 @@ BOOST_AUTO_TEST_CASE(Dot_Product_m128)
 template <U32 _src0, U32 _src1, U32 _src2, U32 _src3, U32 _dst0 = 1, U32 _dst1 = 0, U32 _dst2 = 0, U32 _dst3 = 0>
 void TestDotProduct256Destination(__m256 reg0, __m256 reg1, F32 exp0, F32 exp1)
 {
-    __m256 result = sse::DotProduct<_src0, _src1, _src2, _src3, _dst0, _dst1, _dst2, _dst3>(reg0, reg1);
+    __m256 result = simd::DotProduct<_src0, _src1, _src2, _src3, _dst0, _dst1, _dst2, _dst3>(reg0, reg1);
 
     if (_dst0)
     {
-        BOOST_CHECK(sse::GetValue<0>(result) == Approx(exp0));
-        BOOST_CHECK(sse::GetValue<4>(result) == Approx(exp1));
+        BOOST_CHECK(simd::GetValue<0>(result) == Approx(exp0));
+        BOOST_CHECK(simd::GetValue<4>(result) == Approx(exp1));
     }
     else
     {
-        BOOST_CHECK(sse::GetValue<0>(result) == ApproxZero<F32>());
-        BOOST_CHECK(sse::GetValue<4>(result) == ApproxZero<F32>());
+        BOOST_CHECK(simd::GetValue<0>(result) == ApproxZero<F32>());
+        BOOST_CHECK(simd::GetValue<4>(result) == ApproxZero<F32>());
     }
     if (_dst1)
     {
-        BOOST_CHECK(sse::GetValue<1>(result) == Approx(exp0));
-        BOOST_CHECK(sse::GetValue<5>(result) == Approx(exp1));
+        BOOST_CHECK(simd::GetValue<1>(result) == Approx(exp0));
+        BOOST_CHECK(simd::GetValue<5>(result) == Approx(exp1));
     }
     else
     {
-        BOOST_CHECK(sse::GetValue<1>(result) == ApproxZero<F32>());
-        BOOST_CHECK(sse::GetValue<5>(result) == ApproxZero<F32>());
+        BOOST_CHECK(simd::GetValue<1>(result) == ApproxZero<F32>());
+        BOOST_CHECK(simd::GetValue<5>(result) == ApproxZero<F32>());
     }
     if (_dst2)
     {
-        BOOST_CHECK(sse::GetValue<2>(result) == Approx(exp0));
-        BOOST_CHECK(sse::GetValue<6>(result) == Approx(exp1));
+        BOOST_CHECK(simd::GetValue<2>(result) == Approx(exp0));
+        BOOST_CHECK(simd::GetValue<6>(result) == Approx(exp1));
     }
     else
     {
-        BOOST_CHECK(sse::GetValue<2>(result) == ApproxZero<F32>());
-        BOOST_CHECK(sse::GetValue<6>(result) == ApproxZero<F32>());
+        BOOST_CHECK(simd::GetValue<2>(result) == ApproxZero<F32>());
+        BOOST_CHECK(simd::GetValue<6>(result) == ApproxZero<F32>());
     }
     if (_dst3)
     {
-        BOOST_CHECK(sse::GetValue<3>(result) == Approx(exp0));
-        BOOST_CHECK(sse::GetValue<7>(result) == Approx(exp1));
+        BOOST_CHECK(simd::GetValue<3>(result) == Approx(exp0));
+        BOOST_CHECK(simd::GetValue<7>(result) == Approx(exp1));
     }
     else
     {
-        BOOST_CHECK(sse::GetValue<3>(result) == ApproxZero<F32>());
-        BOOST_CHECK(sse::GetValue<7>(result) == ApproxZero<F32>());
+        BOOST_CHECK(simd::GetValue<3>(result) == ApproxZero<F32>());
+        BOOST_CHECK(simd::GetValue<7>(result) == ApproxZero<F32>());
     }
 
     constexpr U32 dst0Next = (_dst0 < 1) ? _dst0 + 1 : 0;
@@ -185,10 +185,10 @@ void TestDotProduct256()
     __m256 reg0 = _mmx_setzero_p<__m256>();
     __m256 reg1 = _mmx_setzero_p<__m256>();
 
-    for (U32 i = 0; i < sse::numRegisterValues<__m256>; ++i)
+    for (U32 i = 0; i < simd::numRegisterValues<__m256>; ++i)
     {
-        sse::SetValue(reg0, i, testValues0[i]);
-        sse::SetValue(reg1, i, testValues1[i]);
+        simd::SetValue(reg0, i, testValues0[i]);
+        simd::SetValue(reg1, i, testValues1[i]);
     }
 
     F32 exp0 = 0;

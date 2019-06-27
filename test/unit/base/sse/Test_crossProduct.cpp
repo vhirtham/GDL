@@ -5,7 +5,7 @@
 #include "gdl/base/sse/directAccess.h"
 
 using namespace GDL;
-using namespace GDL::sse;
+using namespace GDL::simd;
 
 F32 DotProduct(std::array<F32, 3> a, std::array<F32, 3> b)
 {

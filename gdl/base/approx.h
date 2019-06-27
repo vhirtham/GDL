@@ -18,14 +18,14 @@ namespace GDL
 //! be compared. For non sse types this value should be set to 0 (specialized case).
 //! @remark Inspired by
 //! https://github.com/catchorg/Catch2/blob/dfea75fc05432e4704c9de4f7058b594db14a6dd/include/internal/catch_approx.hpp
-template <typename _registerType, U32 _numComparedValuesSSE = sse::numRegisterValues<_registerType>>
-class alignas(sse::alignmentBytes<_registerType>) Approx
+template <typename _registerType, U32 _numComparedValuesSSE = simd::numRegisterValues<_registerType>>
+class alignas(simd::alignmentBytes<_registerType>) Approx
 {
-    using ElementType = decltype(sse::GetDataType<_registerType, true>());
+    using ElementType = decltype(simd::GetDataType<_registerType, true>());
 
-    alignas(sse::alignmentBytes<_registerType>) _registerType mValues;
-    alignas(sse::alignmentBytes<_registerType>) _registerType mFactor;
-    alignas(sse::alignmentBytes<_registerType>) _registerType mBaseZero;
+    alignas(simd::alignmentBytes<_registerType>) _registerType mValues;
+    alignas(simd::alignmentBytes<_registerType>) _registerType mFactor;
+    alignas(simd::alignmentBytes<_registerType>) _registerType mBaseZero;
 
 
 public:
@@ -136,8 +136,8 @@ constexpr bool operator!=(const _typeLhs lhs, const Approx<_typeApprox, _numComp
 //! @param base: Base value that is used to calculate the epsilon (minimal possible increment)
 //! @param factor: The calculated minimal increment is multiplied with this factor to scale the tolerance of the
 //! comparison.
-template <typename _classType, U32 _numComparedValuesSSE = sse::numRegisterValues<_classType>,
-          typename _baseType = decltype(sse::GetDataType<_classType, true>())>
+template <typename _classType, U32 _numComparedValuesSSE = simd::numRegisterValues<_classType>,
+          typename _baseType = decltype(simd::GetDataType<_classType, true>())>
 constexpr auto ApproxZero(_baseType base = static_cast<_baseType>(1), I32 factor = 3);
 } // namespace GDL
 

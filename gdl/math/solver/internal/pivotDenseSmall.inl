@@ -92,7 +92,7 @@ inline void PivotDenseSmallSerial<_type, _size>::PivotStep(std::array<_type, _si
 template <U32 _size>
 inline U32 PivotDenseSmallSSE<_size>::CreatePermutationHash(__m128 permutation)
 {
-    alignas(sse::alignmentBytes<__m128>) F32 P[4];
+    alignas(simd::alignmentBytes<__m128>) F32 P[4];
 
     _mmx_store_p(P, permutation);
 
@@ -108,7 +108,7 @@ template <U32 _size>
 template <U32 _idx, U32 _idxColStart>
 inline void PivotDenseSmallSSE<_size>::Partial(std::array<__m128, _size>& matrixData, __m128& vectorData)
 {
-    using namespace GDL::sse;
+    using namespace GDL::simd;
 
     static_assert(_idx + 1 < _size, "Unnecessary function call.");
 
@@ -178,7 +178,7 @@ inline void PivotDenseSmallSSE<_size>::Partial(std::array<__m128, _size>& matrix
 template <U32 _size>
 inline __m128 PivotDenseSmallSSE<_size>::PermuteVector(const __m128& vec, U32 permutationHash)
 {
-    using namespace GDL::sse;
+    using namespace GDL::simd;
 
     switch (permutationHash)
     {
