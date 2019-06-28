@@ -88,6 +88,14 @@ template <Pivot _pivot = Pivot::PARTIAL>
 
 #endif // __AVX2__
 
+//! @brief Solves the linear system A * x = r by using the Cholesky LLT decomposition.
+//! @tparam _type: Data type
+//! @param matA: Matrix
+//! @param vecRhs: Right-hand side vector
+//! @return Result vector x
+template <typename _type>
+[[nodiscard]] inline Vec4Serial<_type, true> LLT(const Mat4Serial<_type>& matA, const Vec4Serial<_type, true>& vecRhs);
+
 //! @brief Solves the linear system A * x = r by using LU decomposition.
 //! @tparam _pivot: Enum to select pivoting strategy
 //! @tparam _type: Data type

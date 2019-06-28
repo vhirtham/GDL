@@ -366,6 +366,23 @@ template <Pivot _pivot>
 
 // --------------------------------------------------------------------------------------------------------------------
 
+template <typename _type>
+[[nodiscard]] inline Vec4Serial<_type, true> LLT(const Mat4Serial<_type>& matA, const Vec4Serial<_type, true>& vecRhs)
+{
+    using LLTSolver = LLTDenseSmallSerial<_type, 4>;
+
+    typename LLTSolver::Factorization factorization =
+            LLTSolver::Factorize(matA.Data()); // LUFactorization<_pivot>(matA);
+
+
+    return Vec4Serial<_type, true>(
+            LLTSolver::Solve(factorization, vecRhs.Data())); // LU<_pivot>(factorization, vecRhs);
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
 template <Pivot _pivot, typename _type>
 [[nodiscard]] inline Vec4Serial<_type, true> LU(const Mat4Serial<_type>& matA, const Vec4Serial<_type, true>& vecRhs)
 {

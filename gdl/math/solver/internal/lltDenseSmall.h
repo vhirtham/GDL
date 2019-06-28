@@ -21,8 +21,7 @@ namespace Solver
 //! @brief Support class for LLT Cholesky solver.
 //! @tparam _type: Data type
 //! @tparam _size: Size of the linear system
-//! @tparam _pivot: Enum to select pivoting strategy
-template <typename _type, U32 _size, Pivot _pivot = Pivot::NONE>
+template <typename _type, U32 _size>
 class LLTDenseSmallSerial
 {
     static_assert(_size == 3 || _size == 4, "Unsupported system size.");
@@ -33,16 +32,11 @@ public:
     {
         friend class LLTDenseSmallSerial;
 
-        std::array<_type, _size * _size> mLU;
-        std::array<_type, _size> mPermutation;
+        std::array<_type, _size * _size> mLLT;
 
         //! @brief ctor
         //! @param matrixData: Data of the matrix that should be factorized
         Factorization(const std::array<_type, _size * _size>& matrixData);
-
-        //! @brief Provides the initialization of the permutation array
-        //! @return Permutation array
-        inline constexpr std::array<_type, _size> InitializePermutation() const;
     };
 
 
@@ -78,7 +72,7 @@ private:
     //! @tparam _idx: Current row index. This is used for template recursion and should't be set manually.
     //! @param factorization: Factorization data
     template <U32 _idx = 0>
-    static inline void FactorizeLU(Factorization& factorization);
+    static inline void FactorizeLLT(Factorization& factorization);
 
     //! @brief Performs the forward substitution of the solution process recursively (template)
     //! @tparam _idx: Current row index. This is used for template recursion and should't be set manually.
@@ -87,10 +81,6 @@ private:
     template <U32 _idx = 0>
     static inline void ForwardSubstitution(const std::array<_type, _size * _size>& llt, std::array<_type, _size>& r);
 };
-
-
-
-
 
 
 

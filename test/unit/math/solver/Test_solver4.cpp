@@ -59,6 +59,11 @@ class Mat4TestData
         std::array<F32, 4> y0 = {{1, 2, 3, 4}};
         CreateDiagonalPermutations(S0, r0, y0, mSymmetricTests, numSymmetricTestSystems);
 
+        //        std::array<F32, 16> S1 = {{9, 3, -6, 12, 3, 26, -7, -11, -6, -7, 9, 7, 12, -11, 7, 65}};
+        //        std::array<F32, 4> r1 = {{72, 34, 22, 326}};
+        //        std::array<F32, 4> y1 = {{2, 4, 3, 5}};
+        //        CreateDiagonalPermutations(S1, r1, y1, mSymmetricTests, numSymmetricTestSystems);
+
         EXCEPTION(mTests.size() < numPermutations * numSymmetricTestSystems || numSymmetricTestSystems == 0,
                   "Testcases are not added as expected");
 
@@ -217,6 +222,8 @@ void TestSolver(_solver solver, bool pivot = true, bool symmetric = false)
             Matrix ANeedPivot(0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
             GDL_CHECK_THROW_DEV(solver(ANeedPivot, Vector()), Exception);
         }
+        Matrix AThrow(2, 1, 3, 4, 2, 1, 3, 4, 2, 1, 3, 4, 2, 1, 3, 4);
+        GDL_CHECK_THROW_DEV(solver(AThrow, Vector()), Exception);
     }
 
     const auto& testcasesSymmetric = Mat4TestData::GetSymmetricTestData();
@@ -224,9 +231,11 @@ void TestSolver(_solver solver, bool pivot = true, bool symmetric = false)
         TestSolverTestcase(solver, Matrix(testcasesSymmetric[i].A), Vector(testcasesSymmetric[i].b),
                            Vector(testcasesSymmetric[i].x));
 
-
-    Matrix AThrow(2, 1, 3, 4, 2, 1, 3, 4, 2, 1, 3, 4, 2, 1, 3, 4);
-    GDL_CHECK_THROW_DEV(solver(AThrow, Vector()), Exception);
+    if (symmetric)
+    {
+        Matrix SThrow(4, 2, 4, 4, 2, 10, 5, 2, 4, 5, 0, 6, 4, 2, 6, 9);
+        GDL_CHECK_THROW_DEV(solver(SThrow, Vector()), Exception);
+    }
 }
 
 
@@ -368,4 +377,14 @@ BOOST_AUTO_TEST_CASE(TestLUPartialPivotSSE)
 {
     SSESolverPtr solver = Solver::LU<Solver::Pivot::PARTIAL>;
     TestSolver(solver);
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(TestLLTSerial)
+{
+    SerialSolverPtr solver = Solver::LLT;
+    TestSolver(solver, false, true);
 }
