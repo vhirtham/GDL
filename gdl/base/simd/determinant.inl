@@ -42,8 +42,8 @@ inline F32 Determinant4x4(__m128 a, __m128 b, __m128 c, __m128 d)
     __m128 cP1230 = Permute<1, 2, 3, 0>(c);
     __m128 dP1230 = Permute<1, 2, 3, 0>(d);
 
-    __m128 ab03 = _mm_fmsub(a, bP1230, _mm_mul_ps(aP1230, b));
-    __m128 cd03 = _mm_fmsub(c, dP1230, _mm_mul_ps(cP1230, d));
+    __m128 ab03 = _mm_fmsub(a, bP1230, _mm_mul(aP1230, b));
+    __m128 cd03 = _mm_fmsub(c, dP1230, _mm_mul(cP1230, d));
 
     __m128 cd03P2301 = Permute<2, 3, 0, 1>(cd03);
     __m128 cd03P2301N = Negate<0, 1, 0, 1>(cd03P2301);
@@ -60,15 +60,15 @@ inline F32 Determinant4x4(__m128 a, __m128 b, __m128 c, __m128 d)
     __m128 acB1100P2301 = Permute<2, 3, 0, 1>(acB1100);
     __m128 bdB1100P2301 = Permute<2, 3, 0, 1>(bdB1100);
 
-    __m128 abcd45 = _mm_fmsub(acB0011, bdB1100P2301, _mm_mul_ps(acB1100P2301, bdB0011));
+    __m128 abcd45 = _mm_fmsub(acB0011, bdB1100P2301, _mm_mul(acB1100P2301, bdB0011));
     __m128 abcd45P3210 = Permute<3, 2, 1, 0>(abcd45);
 
-    __m128 products45 = _mm_mul_ps(abcd45, abcd45P3210);
-    __m128 sum45 = _mm_add_ps(products45, Permute<1, 0, 3, 2>(products45));
+    __m128 products45 = _mm_mul(abcd45, abcd45P3210);
+    __m128 sum45 = _mm_add(products45, Permute<1, 0, 3, 2>(products45));
 
 
     // Calculate and return determinant
-    return _mm_cvtss_f32(sum03) + _mm_cvtss_f32(sum45);
+    return _mm_cvtsF(sum03) + _mm_cvtsF(sum45);
 
     // Alternative version
 
@@ -116,7 +116,7 @@ inline F32 Determinant4x4(__m256 ab, __m256 cd)
 
     __m256 determinant = _mm_add(sums, Permute2F128<1, 0>(sums));
 
-    return _mm256_cvtss_f32(determinant);
+    return _mm_cvtsF(determinant);
 }
 #endif // __AVX2__
 

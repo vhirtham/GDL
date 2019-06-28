@@ -6,7 +6,6 @@
 #include "gdl/base/simd/abs.h"
 #include "gdl/base/simd/crossProduct.h"
 #include "gdl/base/simd/compareAll.h"
-#include "gdl/base/simd/determinant.h"
 #include "gdl/base/simd/dotProduct.h"
 #include "gdl/base/simd/swizzle.h"
 #include "gdl/math/solver/internal/GaussDenseSmall.h"
@@ -154,7 +153,7 @@ template <typename _type>
     __m128 detA = _mm_add(sum03, sum45);
 
 
-    DEV_EXCEPTION(_mm_cvtss_f32(detA) == ApproxZero<F32>(10), "Singular matrix - system not solveable");
+    DEV_EXCEPTION(_mm_cvtsF(detA) == ApproxZero<F32>(10), "Singular matrix - system not solveable");
 
 
     // Calculate the first 4 terms of the modified matrix determinants
@@ -250,7 +249,7 @@ template <typename _type>
     __m256 detA = _mm_add(sums, Permute2F128<1, 0>(sums));
 
 
-    DEV_EXCEPTION(_mm256_cvtss_f32(detA) == ApproxZero<F32>(10), "Singular matrix - system not solveable");
+    DEV_EXCEPTION(_mm_cvtsF(detA) == ApproxZero<F32>(10), "Singular matrix - system not solveable");
 
     const __m256 r = _mm256_insertf128_ps(_mm256_castps128_ps256(vecRhs.DataSSE()), vecRhs.DataSSE(), 1);
 

@@ -61,7 +61,7 @@ inline Vec3fSSE<true> Cramer(const Mat3fSSE& matA, const Vec3fSSE<true>& vecRhs)
     __m128 crossbc = CrossProduct(b, c);
     __m128 detA = DotProduct<1, 1, 1, 0>(a, crossbc);
 
-    DEV_EXCEPTION(_mm_cvtss_f32(detA) == ApproxZero<F32>(10), "Singular matrix - system not solveable");
+    DEV_EXCEPTION(_mm_cvtsF(detA) == ApproxZero<F32>(10), "Singular matrix - system not solveable");
 
     __m128 crossrc = CrossProduct(r, c);
     __m128 crossbr = CrossProduct(b, r);

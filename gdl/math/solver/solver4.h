@@ -4,6 +4,7 @@
 #include "gdl/base/fundamentalTypes.h"
 #include "gdl/base/simd/x86intrin.h"
 #include "gdl/math/solver/pivot.h"
+#include "gdl/math/solver/internal/lltDenseSmall.h"
 #include "gdl/math/solver/internal/luDenseSmall.h"
 
 #include <array>
