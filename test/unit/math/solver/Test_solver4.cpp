@@ -33,29 +33,38 @@ class Mat4TestData
 
     Mat4TestData()
     {
+        U32 numTestSystems = 0;
+
         std::array<F32, 16> A0 = {{1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1}};
         std::array<F32, 4> b0 = {{1, 2, 3, 4}};
         std::array<F32, 4> x0 = {{1, 2, 3, 4}};
-        CreatePermutations(A0, b0, x0);
+        CreateRowPermutations(A0, b0, x0, mTests, numTestSystems);
 
         std::array<F32, 16> A1 = {{2, 0, 4, 6, 2, 2, -3, 1, 3, 0, 0, -6, 2, 1, 1, -5}};
         std::array<F32, 4> b1 = {{-6, 0, -21, 18}};
         std::array<F32, 4> x1 = {{-1.5, 3, 1, -6}};
-        CreatePermutations(A1, b1, x1);
+        CreateRowPermutations(A1, b1, x1, mTests, numTestSystems);
+
+        constexpr U32 numPermutations = 4 * 3 * 2 * 1;
+
+        EXCEPTION(mTests.size() < numPermutations * numTestSystems || numTestSystems == 0,
+                  "Testcases are not added as expected");
     }
 
-    void CreatePermutations(const std::array<F32, 16>& A, const std::array<F32, 4>& b, const std::array<F32, 4>& x)
+    void CreateRowPermutations(const std::array<F32, 16>& A, const std::array<F32, 4>& b, const std::array<F32, 4>& x,
+                               std::vector<LinearSystem4x4>& dataContainer, U32& numTestSystems)
     {
+        ++numTestSystems;
         for (U32 i = 0; i < 4; ++i)
             for (U32 j = 0; j < 4; ++j)
                 for (U32 k = 0; k < 4; ++k)
                     for (U32 l = 0; l < 4; ++l)
                         if (i != j && i != k && i != l && j != k && j != l && k != l)
-                            AddPermutation(A, b, x, {{i, j, k, l}});
+                            AddRowPermutation(A, b, x, {{i, j, k, l}}, dataContainer);
     }
 
-    void AddPermutation(const std::array<F32, 16>& A, const std::array<F32, 4>& b, const std::array<F32, 4>& x,
-                        const std::array<U32, 4>& permutation)
+    void AddRowPermutation(const std::array<F32, 16>& A, const std::array<F32, 4>& b, const std::array<F32, 4>& x,
+                           const std::array<U32, 4>& permutation, std::vector<LinearSystem4x4>& dataContainer)
     {
         std::array<F32, 16> AP;
         std::array<F32, 4> bP;
@@ -65,7 +74,7 @@ class Mat4TestData
             for (U32 j = 0; j < 4; ++j)
                 AP[i + j * 4] = A[permutation[i] + j * 4];
         }
-        mTests.emplace_back(AP, bP, x);
+        dataContainer.emplace_back(AP, bP, x);
     }
 
 public:

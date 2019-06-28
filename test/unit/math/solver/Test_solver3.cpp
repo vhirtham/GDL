@@ -35,33 +35,42 @@ class Mat3TestData
 
     Mat3TestData()
     {
+        U32 numTestSystems = 0;
+
         std::array<F32, 9> A0 = {{1, 0, 0, 0, 1, 0, 0, 0, 1}};
         std::array<F32, 3> b0 = {{1, 2, 3}};
         std::array<F32, 3> x0 = {{1, 2, 3}};
-        CreatePermutations(A0, b0, x0);
+        CreateRowPermutations(A0, b0, x0, mTests, numTestSystems);
 
         std::array<F32, 9> A1 = {{-2, -1, -3, -4, -1, -4, -8, -1, -5}};
         std::array<F32, 3> b1 = {{-2, -1, -2}};
         std::array<F32, 3> x1 = {{3, -3, 1}};
-        CreatePermutations(A1, b1, x1);
+        CreateRowPermutations(A1, b1, x1, mTests, numTestSystems);
 
         std::array<F32, 9> A2 = {{2, 1, 3, 4, 1, 4, 8, 1, 5}};
         std::array<F32, 3> b2 = {{2, 1, 2}};
         std::array<F32, 3> x2 = {{3, -3, 1}};
-        CreatePermutations(A2, b2, x2);
+        CreateRowPermutations(A2, b2, x2, mTests, numTestSystems);
+
+        constexpr U32 numPermutations = 3 * 2 * 1;
+
+        EXCEPTION(mTests.size() != numTestSystems * numPermutations || numTestSystems == 0,
+                  "Testcases are not added as expected");
     }
 
-    void CreatePermutations(const std::array<F32, 9>& A, const std::array<F32, 3>& b, const std::array<F32, 3>& x)
+    void CreateRowPermutations(const std::array<F32, 9>& A, const std::array<F32, 3>& b, const std::array<F32, 3>& x,
+                               std::vector<LinearSystem3x3>& dataContainer, U32& numTestSystems)
     {
+        ++numTestSystems;
         for (U32 i = 0; i < 3; ++i)
             for (U32 j = 0; j < 3; ++j)
                 for (U32 k = 0; k < 3; ++k)
                     if (i != j && i != k && j != k)
-                        AddPermutation(A, b, x, {{i, j, k}});
+                        AddRowPermutation(A, b, x, {{i, j, k}}, dataContainer);
     }
 
-    void AddPermutation(const std::array<F32, 9>& A, const std::array<F32, 3>& b, const std::array<F32, 3>& x,
-                        const std::array<U32, 3>& permutation)
+    void AddRowPermutation(const std::array<F32, 9>& A, const std::array<F32, 3>& b, const std::array<F32, 3>& x,
+                           const std::array<U32, 3>& permutation, std::vector<LinearSystem3x3>& dataContainer)
     {
         std::array<F32, 9> AP;
         std::array<F32, 3> bP;
@@ -71,7 +80,7 @@ class Mat3TestData
             for (U32 j = 0; j < 3; ++j)
                 AP[i + j * 3] = A[permutation[i] + j * 3];
         }
-        mTests.emplace_back(AP, bP, x);
+        dataContainer.emplace_back(AP, bP, x);
     }
 
 public:
