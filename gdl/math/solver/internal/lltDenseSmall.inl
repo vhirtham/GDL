@@ -10,6 +10,7 @@
 
 // REMOVE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 #include "gdl/math/serial/mat4Serial.h"
+#include "gdl/math/simd/mat4fSSE.h"
 #include <iostream>
 
 namespace GDL::Solver
@@ -35,9 +36,6 @@ LLTDenseSmallSerial<_type, _size>::Factorize(const std::array<_type, _size * _si
     Factorization factorization(matrixData);
     FactorizeLLT(factorization);
 
-
-    //    std::cout << Mat4Serial(matrixData) << std::endl;
-    //    std::cout << Mat4Serial(factorization.mLLT) << std::endl;
     return factorization;
 }
 
@@ -74,12 +72,6 @@ inline void LLTDenseSmallSerial<_type, _size>::BackwardSubstitution(const std::a
 
     if constexpr (_idx > 0)
         BackwardSubstitution<_idx - 1>(lu, r);
-
-    //    4x4 system:
-    //    r[0] = (r[0] - r[3] * LU[3] - r[2] * LU[8] - r[1] * LU[4]) / LU[0];
-    //    r[1] = (r[1] - r[3] * LU[7] - r[2] * LU[9]) / LU[5];
-    //    r[2] = (r[2] - r[3] * LU[11]) / LU[10];
-    //    r[3] /= LU[15];
 }
 
 
@@ -90,8 +82,6 @@ template <typename _type, U32 _size>
 template <U32 _idx>
 inline void LLTDenseSmallSerial<_type, _size>::FactorizationStep(Factorization& factorization)
 {
-    using namespace GDL::simd;
-
     constexpr U32 pivIdx = (_size + 1) * _idx;
 
     DEV_EXCEPTION(factorization.mLLT[pivIdx] == ApproxZero<F32>(1, 10), "Singular matrix - system not solveable");
@@ -140,14 +130,158 @@ inline void LLTDenseSmallSerial<_type, _size>::ForwardSubstitution(const std::ar
 
     if constexpr (_idx + 1 < _size)
         ForwardSubstitution<_idx + 1>(lu, r);
-
-    //    4x4 system:
-    //    r[0] = LU[0] * r[0];
-    //    r[1] = (r[1] - LU[1] * r[0]) * LU[5];
-    //    r[2] = (r[2] - LU[2] * r[0] - LU[6] * r[1]) * LU[10];
-    //    r[3] = (r[3] - LU[3] * r[0] - LU[7] * r[1] - LU[11] * r[2]) * LU[15];
 }
 
+
+
+// --------------------------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------------------------
+// SSE Version
+// --------------------------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------------------------
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+template <U32 _size>
+inline LLTDenseSmallSSE<_size>::Factorization::Factorization(const std::array<__m128, _size>& matrixData)
+    : mLLT{matrixData}
+{
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+template <U32 _size>
+[[nodiscard]] inline typename LLTDenseSmallSSE<_size>::Factorization
+LLTDenseSmallSSE<_size>::Factorize(const std::array<__m128, _size>& matrixData)
+{
+    Factorization factorization(matrixData);
+    FactorizeLLT(factorization);
+
+    return factorization;
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+template <U32 _size>
+[[nodiscard]] inline __m128 LLTDenseSmallSSE<_size>::Solve(const Factorization& factorization, __m128 r)
+{
+    ForwardSubstitution(factorization.mLLT, r);
+    BackwardSubstitution(factorization.mLLT, r);
+
+    return r;
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+template <U32 _size>
+inline void LLTDenseSmallSSE<_size>::AddLT(std::array<__m128, _size>& llt)
+{
+    static_assert(_size == 4, "Unsupported system size.");
+
+    if constexpr (_size == 4)
+    {
+        using namespace GDL::simd;
+
+        __m128 col1 = Broadcast<1>(llt[0]);
+        __m128 col2 = _mm_unpackhi_ps(llt[0], llt[1]);
+        __m128 col3 = _mm_movehl_ps(Broadcast<3>(llt[2]), col2);
+
+        llt[1] = BlendAboveIndex<1>(llt[1], col1);
+        llt[2] = BlendAboveIndex<2>(llt[2], col2);
+        llt[3] = BlendAboveIndex<3>(llt[3], col3);
+    }
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+template <U32 _size>
+template <U32 _idx>
+inline void LLTDenseSmallSSE<_size>::BackwardSubstitution(const std::array<__m128, _size>& llt, __m128& r)
+{
+
+    using namespace GDL::simd;
+
+    r = BlendIndex<_idx>(r, _mm_div(r, llt[_idx]));
+    r = BlendAboveIndex<_idx>(r, _mm_fnmadd(llt[_idx], Broadcast<_idx>(r), r));
+
+    if constexpr (_idx > 0)
+        BackwardSubstitution<_idx - 1>(llt, r);
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+template <U32 _size>
+template <U32 _idx>
+inline void LLTDenseSmallSSE<_size>::FactorizationStep(Factorization& factorization)
+{
+    using namespace GDL::simd;
+
+    DEV_EXCEPTION(GetValue<_idx>(factorization.mLLT[_idx]) == ApproxZero<F32>(1, 10),
+                  "Singular matrix - system not solveable");
+
+
+    for (U32 i = 0; i < _idx; ++i)
+    {
+        __m128 bc = Broadcast<_idx>(factorization.mLLT[i]);
+        factorization.mLLT[_idx] = _mm_fnmadd(factorization.mLLT[i], bc, factorization.mLLT[_idx]);
+    }
+
+    __m128 idxSqrt = _mm_sqrt(factorization.mLLT[_idx]);
+
+    factorization.mLLT[_idx] = BlendIndex<_idx>(factorization.mLLT[_idx], idxSqrt);
+
+    if constexpr (_idx + 1 < _size)
+    {
+        __m128 div = _mm_div(factorization.mLLT[_idx], Broadcast<_idx>(idxSqrt));
+
+        factorization.mLLT[_idx] = BlendIndex<_idx>(div, factorization.mLLT[_idx]);
+    }
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+template <U32 _size>
+template <U32 _idx>
+inline void LLTDenseSmallSSE<_size>::FactorizeLLT(Factorization& factorization)
+{
+    FactorizationStep<_idx>(factorization);
+
+    if constexpr (_idx + 1 < _size)
+        FactorizeLLT<_idx + 1>(factorization);
+    else
+        AddLT(factorization.mLLT);
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+template <U32 _size>
+template <U32 _idx>
+inline void LLTDenseSmallSSE<_size>::ForwardSubstitution(const std::array<__m128, _size>& llt, __m128& r)
+{
+    using namespace GDL::simd;
+
+    r = BlendIndex<_idx>(r, _mm_div(r, llt[_idx]));
+    r = BlendBelowIndex<_idx>(r, _mm_fnmadd(llt[_idx], Broadcast<_idx>(r), r));
+
+    if constexpr (_idx + 1 < _size)
+        ForwardSubstitution<_idx + 1>(llt, r);
+}
 
 
 } // namespace GDL::Solver

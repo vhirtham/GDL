@@ -96,6 +96,41 @@ template <Pivot _pivot = Pivot::PARTIAL>
 template <typename _type>
 [[nodiscard]] inline Vec4Serial<_type, true> LLT(const Mat4Serial<_type>& matA, const Vec4Serial<_type, true>& vecRhs);
 
+//! @brief Solves the linear system A * x = r by using the Cholesky LLT decomposition.
+//! @tparam _type: Data type
+//! @param factorization: Factorization of A
+//! @param vecRhs: Right-hand side vector
+//! @return Result vector x
+template <typename _type>
+[[nodiscard]] inline Vec4Serial<_type, true>
+LLT(const typename LLTDenseSmallSerial<_type, 4>::Factorization& factorization, const Vec4Serial<_type, true>& vecRhs);
+
+//! @brief Calculates the Cholesky LLT decomposition of a matrix.
+//! @tparam _type: Data type
+//! @param matA: Matrix
+//! @return LLT factorization of the matrix
+template <typename _type>
+[[nodiscard]] inline typename LLTDenseSmallSerial<_type, 4>::Factorization
+LLTFactorization(const Mat4Serial<_type>& matA);
+
+//! @brief Solves the linear system A * x = r by using the Cholesky LLT decomposition.
+//! @param matA: Matrix
+//! @param vecRhs: Right-hand side vector
+//! @return Result vector x
+[[nodiscard]] inline Vec4fSSE<true> LLT(const Mat4fSSE& matA, const Vec4fSSE<true>& vecRhs);
+
+//! @brief Solves the linear system A * x = r by using the Cholesky LLT decomposition.
+//! @param factorization: Factorization of A
+//! @param vecRhs: Right-hand side vector
+//! @return Result vector x
+[[nodiscard]] inline Vec4fSSE<true> LLT(const typename LLTDenseSmallSSE<4>::Factorization& factorization,
+                                        const Vec4fSSE<true>& vecRhs);
+
+//! @brief Calculates the Cholesky LLT decomposition of a matrix.
+//! @param matA: Matrix
+//! @return LLT factorization of the matrix
+[[nodiscard]] inline typename LLTDenseSmallSSE<4>::Factorization LLTFactorization(const Mat4fSSE& matA);
+
 //! @brief Solves the linear system A * x = r by using LU decomposition.
 //! @tparam _pivot: Enum to select pivoting strategy
 //! @tparam _type: Data type

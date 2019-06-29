@@ -371,12 +371,71 @@ template <typename _type>
 {
     using LLTSolver = LLTDenseSmallSerial<_type, 4>;
 
-    typename LLTSolver::Factorization factorization =
-            LLTSolver::Factorize(matA.Data()); // LUFactorization<_pivot>(matA);
+    typename LLTSolver::Factorization factorization = LLTFactorization<_type>(matA);
+
+    return LLT<_type>(factorization, vecRhs);
+}
 
 
-    return Vec4Serial<_type, true>(
-            LLTSolver::Solve(factorization, vecRhs.Data())); // LU<_pivot>(factorization, vecRhs);
+
+// --------------------------------------------------------------------------------------------------------------------
+
+template <typename _type>
+[[nodiscard]] inline Vec4Serial<_type, true>
+LLT(const typename LLTDenseSmallSerial<_type, 4>::Factorization& factorization, const Vec4Serial<_type, true>& vecRhs)
+{
+    using LLTSolver = LLTDenseSmallSerial<_type, 4>;
+
+    return Vec4Serial<_type, true>(LLTSolver::Solve(factorization, vecRhs.Data()));
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+template <typename _type>
+[[nodiscard]] inline typename LLTDenseSmallSerial<_type, 4>::Factorization
+LLTFactorization(const Mat4Serial<_type>& matA)
+{
+    using LLTSolver = LLTDenseSmallSerial<_type, 4>;
+
+    return LLTSolver::Factorize(matA.Data());
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+[[nodiscard]] inline Vec4fSSE<true> LLT(const Mat4fSSE& matA, const Vec4fSSE<true>& vecRhs)
+{
+    using LLTSolver = LLTDenseSmallSSE<4>;
+
+    typename LLTSolver::Factorization factorization = LLTFactorization(matA);
+
+    return LLT(factorization, vecRhs);
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+[[nodiscard]] inline Vec4fSSE<true> LLT(const typename LLTDenseSmallSSE<4>::Factorization& factorization,
+                                        const Vec4fSSE<true>& vecRhs)
+{
+    using LLTSolver = LLTDenseSmallSSE<4>;
+
+    return Vec4fSSE<true>(LLTSolver::Solve(factorization, vecRhs.DataSSE()));
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+[[nodiscard]] inline typename LLTDenseSmallSSE<4>::Factorization LLTFactorization(const Mat4fSSE& matA)
+{
+    using LLTSolver = LLTDenseSmallSSE<4>;
+
+    return LLTSolver::Factorize(matA.DataSSE());
 }
 
 

@@ -8,14 +8,18 @@ using namespace GDL;
 
 // OPTIONS ------------------------------------------------------------------------------------------------------------
 
+// Symmetric matrix
+#define BENCHMARK_SYMMETRIC
+
 // solver types
 //#define BENCHMARK_CRAMER
 //#define BENCHMARK_GAUSS
-#define BENCHMARK_LU
+//#define BENCHMARK_LU
+#define BENCHMARK_LLT
 
 // pivoting
 #define BENCHMARK_NOPIVOT
-#define BENCHMARK_PARTIALPIVOT
+//#define BENCHMARK_PARTIALPIVOT
 
 // factorization
 #define BENCHMARK_FACTORIZATION
@@ -23,7 +27,7 @@ using namespace GDL;
 // vectorization
 #define BENCHMARK_SERIAL
 #define BENCHMARK_SSE
-#define BENCHMARK_AVX
+//#define BENCHMARK_AVX
 
 // Eigen
 //#define BENCHMARK_EIGEN
@@ -40,11 +44,19 @@ public:
     Mat4Serial<F32> A;
     Vec4Serial<F32, true> b;
 
+#ifdef BENCHMARK_SYMMETRIC
+    Serial()
+        : A{4, 2, 4, 4, 2, 10, 5, 2, 4, 5, 9, 6, 4, 2, 6, 9}
+        , b{36, 45, 65, 62}
+    {
+    }
+#else
     Serial()
         : A{2, 0, 4, 6, 2, 2, -3, 1, 3, 0, 0, -6, 2, 1, 1, -5}
         , b{-6, 0, -21, 18}
     {
     }
+#endif
 };
 
 #endif // BENCHMARK_SERIAL
@@ -59,11 +71,19 @@ public:
     Mat4fSSE A;
     Vec4f b;
 
+#ifdef BENCHMARK_SYMMETRIC
+    SSE()
+        : A{4, 2, 4, 4, 2, 10, 5, 2, 4, 5, 9, 6, 4, 2, 6, 9}
+        , b{36, 45, 65, 62}
+    {
+    }
+#else
     SSE()
         : A{2, 0, 4, 6, 2, 2, -3, 1, 3, 0, 0, -6, 2, 1, 1, -5}
         , b{-6, 0, -21, 18}
     {
     }
+#endif
 };
 
 #endif // BENCHMARK_SSE
@@ -79,11 +99,19 @@ public:
     Mat4fAVX A;
     Vec4f b;
 
+#ifdef BENCHMARK_SYMMETRIC
+    AVX()
+        : A{4, 2, 4, 4, 2, 10, 5, 2, 4, 5, 9, 6, 4, 2, 6, 9}
+        , b{36, 45, 65, 62}
+    {
+    }
+#else
     AVX()
         : A{2, 0, 4, 6, 2, 2, -3, 1, 3, 0, 0, -6, 2, 1, 1, -5}
         , b{-6, 0, -21, 18}
     {
     }
+#endif
 };
 
 #endif // BENCHMARK_AVX
@@ -100,11 +128,19 @@ public:
     Eigen::Matrix4f A;
     Eigen::Vector4f b;
 
+#ifdef BENCHMARK_SYMMETRIC
+    Eigen3()
+    {
+        A << 4, 2, 4, 4, 2, 10, 5, 2, 4, 5, 9, 6, 4, 2, 6, 9;
+        b << 36, 45, 65, 62;
+    }
+#else
     Eigen3()
     {
         A << 2, 2, 3, 2, 0, 2, 0, 1, 4, -3, 0, 1, 6, 1, -6, -5;
         b << -6, 0, -21, 18;
     }
+#endif
 };
 
 #endif // BENCHMARK_EIGEN
@@ -374,6 +410,76 @@ BENCHMARK_F(SSE, LUPartialPivotSolve)(benchmark::State& state)
 
 
 
+// LLT - partial pivot ------------------------------------------------------------------------------------------------
+
+#ifdef BENCHMARK_SYMMETRIC
+#ifdef BENCHMARK_LLT
+#ifdef BENCHMARK_SERIAL
+
+BENCHMARK_F(Serial, LLT)(benchmark::State& state)
+{
+    for (auto _ : state)
+        benchmark::DoNotOptimize(Solver::LLT(A, b));
+}
+
+
+
+#ifdef BENCHMARK_FACTORIZATION
+
+BENCHMARK_F(Serial, LLTFactorize)(benchmark::State& state)
+{
+    for (auto _ : state)
+        benchmark::DoNotOptimize(Solver::LLTFactorization(A));
+}
+
+
+
+BENCHMARK_F(Serial, LLTSolve)(benchmark::State& state)
+{
+    auto factorization = Solver::LLTFactorization(A);
+    for (auto _ : state)
+        benchmark::DoNotOptimize(Solver::LLT(factorization, b));
+}
+
+#endif // BENCHMARK_FACTORIZATION
+#endif // BENCHMARK_SERIAL
+
+
+
+#ifdef BENCHMARK_SSE
+
+BENCHMARK_F(SSE, LLT)(benchmark::State& state)
+{
+    for (auto _ : state)
+        benchmark::DoNotOptimize(Solver::LLT(A, b));
+}
+
+
+
+#ifdef BENCHMARK_FACTORIZATION
+
+BENCHMARK_F(SSE, LLTFactorize)(benchmark::State& state)
+{
+    for (auto _ : state)
+        benchmark::DoNotOptimize(Solver::LLTFactorization(A));
+}
+
+
+
+BENCHMARK_F(SSE, LLTSolve)(benchmark::State& state)
+{
+    auto factorization = Solver::LLTFactorization(A);
+    for (auto _ : state)
+        benchmark::DoNotOptimize(Solver::LLT(factorization, b));
+}
+
+#endif // BENCHMARK_FACTORIZATION
+#endif // BENCHMARK_SSE
+#endif // BENCHMARK_LLT
+#endif // BENCHMARK_SYMMETRIC
+
+
+
 // Eigen --------------------------------------------------------------------------------------------------------------
 
 #ifdef EIGEN3_FOUND
@@ -381,6 +487,8 @@ BENCHMARK_F(SSE, LUPartialPivotSolve)(benchmark::State& state)
 
 // https://eigen.tuxfamily.org/dox/group__TutorialLinearAlgebra.html
 // https://eigen.tuxfamily.org/dox/group__DenseDecompositionBenchmark.html
+
+#ifdef BENCHMARK_SYMMETRIC
 
 BENCHMARK_F(Eigen3, LLT)(benchmark::State& state)
 {
@@ -395,6 +503,8 @@ BENCHMARK_F(Eigen3, LDLT)(benchmark::State& state)
     for (auto _ : state)
         benchmark::DoNotOptimize(A.ldlt().solve(b));
 }
+
+#endif // BENCHMARK_SYMMETRIC
 
 
 

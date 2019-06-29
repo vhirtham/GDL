@@ -388,3 +388,13 @@ BOOST_AUTO_TEST_CASE(TestLLTSerial)
     SerialSolverPtr solver = Solver::LLT;
     TestSolver(solver, false, true);
 }
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(TestLLTSSE)
+{
+    SSESolverPtr solver = Solver::LLT;
+    TestSolver(solver, false, true);
+}
