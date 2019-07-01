@@ -135,7 +135,9 @@ template <U32 _idx>
 inline void LUDenseSmallSerial<_type, _size, _pivot>::FactorizationStep(Factorization& factorization)
 {
     constexpr U32 pivIdx = _idx * _size + _idx;
-    DEV_EXCEPTION(factorization.mLU[pivIdx] == ApproxZero<_type>(1, 10), "Singular matrix - system not solveable");
+
+    DEV_EXCEPTION(factorization.mLU[pivIdx] == ApproxZero<_type>(1, 10),
+                  "Can't solve system - Singular matrix or inappropriate pivoting strategy.");
 
 
     for (U32 i = pivIdx + 1; i < _size * (_idx + 1); ++i)
@@ -298,14 +300,14 @@ inline void LUDenseSmallSSE<_size, _pivot>::FactorizationStep(Factorization& fac
     using namespace GDL::simd;
 
     DEV_EXCEPTION(GetValue<_idx>(factorization.mLU[_idx]) == ApproxZero<F32>(1, 10),
-                  "Singular matrix - system not solveable");
+                  "Can't solve system - Singular matrix or inappropriate pivoting strategy.");
 
     if constexpr (_idx + 1 < _size)
     {
         const __m128 zero = _mm_setzero<__m128>();
 
-        __m128 rowMult = BlendBelowIndex<_idx>(
-                zero, _mm_div(factorization.mLU[_idx], Broadcast<_idx>(factorization.mLU[_idx])));
+        __m128 rowMult =
+                BlendBelowIndex<_idx>(zero, _mm_div(factorization.mLU[_idx], Broadcast<_idx>(factorization.mLU[_idx])));
         factorization.mLU[_idx] = BlendBelowIndex<_idx>(factorization.mLU[_idx], rowMult);
         for (U32 i = _idx + 1; i < _size; ++i)
         {

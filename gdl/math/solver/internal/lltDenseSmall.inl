@@ -6,12 +6,9 @@
 #include "gdl/base/exception.h"
 #include "gdl/base/functions/pow.h"
 #include "gdl/base/simd/directAccess.h"
+#include "gdl/base/simd/swizzle.h"
 
 
-// REMOVE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-#include "gdl/math/serial/mat4Serial.h"
-#include "gdl/math/simd/mat4fSSE.h"
-#include <iostream>
 
 namespace GDL::Solver
 {
@@ -84,7 +81,8 @@ inline void LLTDenseSmallSerial<_type, _size>::FactorizationStep(Factorization& 
 {
     constexpr U32 pivIdx = (_size + 1) * _idx;
 
-    DEV_EXCEPTION(factorization.mLLT[pivIdx] == ApproxZero<F32>(1, 10), "Singular matrix - system not solveable");
+    DEV_EXCEPTION(factorization.mLLT[pivIdx] == ApproxZero<F32>(1, 10),
+                  "Can't solve system - Matrix is not symmetric positive definit");
 
 
     for (U32 i = _idx; i < _size; ++i)
@@ -229,7 +227,7 @@ inline void LLTDenseSmallSSE<_size>::FactorizationStep(Factorization& factorizat
     using namespace GDL::simd;
 
     DEV_EXCEPTION(GetValue<_idx>(factorization.mLLT[_idx]) == ApproxZero<F32>(1, 10),
-                  "Singular matrix - system not solveable");
+                  "Can't solve system - Matrix is not symmetric positive definit");
 
 
     for (U32 i = 0; i < _idx; ++i)

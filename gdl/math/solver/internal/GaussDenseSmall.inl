@@ -25,7 +25,8 @@ inline void GaussDenseSmallSerial<_type, _size, _pivot>::EliminationStep(std::ar
     constexpr U32 colStartIdx = _idx * _size;
     constexpr U32 pivotIdx = colStartIdx + _idx;
 
-    DEV_EXCEPTION(matrixData[pivotIdx] == ApproxZero<_type>(1, 10), "Singular matrix - system not solveable");
+    DEV_EXCEPTION(matrixData[pivotIdx] == ApproxZero<_type>(1, 10),
+                  "Can't solve system - Singular matrix or inappropriate pivoting strategy.");
 
     std::array<_type, _size> rowMult;
 
@@ -78,7 +79,8 @@ inline void GaussDenseSmallSSE<_size, _pivot>::EliminationStep(std::array<__m128
     // than those extra operations.
     using namespace GDL::simd;
 
-    DEV_EXCEPTION(GetValue<_idx>(matrixData[_idx]) == ApproxZero<F32>(10), "Singular matrix - system not solveable");
+    DEV_EXCEPTION(GetValue<_idx>(matrixData[_idx]) == ApproxZero<F32>(10),
+                  "Can't solve system - Singular matrix or inappropriate pivoting strategy.");
 
     const __m128 m1 = _mm_set1<__m128>(-1);
     const __m128 zero = _mm_setzero<__m128>();
