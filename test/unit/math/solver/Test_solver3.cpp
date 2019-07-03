@@ -209,6 +209,8 @@ void TestSolver(_solver solver, bool pivot = true, bool symmetric = false)
             Matrix ANeedPivot(0, 1, 0, 1, 0, 0, 0, 0, 1);
             GDL_CHECK_THROW_DEV(solver(ANeedPivot, Vector()), Exception);
         }
+        Matrix AThrow(2, 1, 3, 2, 1, 3, 2, 1, 3);
+        GDL_CHECK_THROW_DEV(solver(AThrow, Vector()), Exception);
     }
 
 
@@ -216,9 +218,11 @@ void TestSolver(_solver solver, bool pivot = true, bool symmetric = false)
     for (U32 i = 0; i < testcasesSymmetric.size(); ++i)
         TestSolverTestcase(solver, Matrix(testcasesSymmetric[i].A), Vector(testcasesSymmetric[i].b),
                            Vector(testcasesSymmetric[i].x));
-
-    Matrix AThrow(2, 1, 3, 2, 1, 3, 2, 1, 3);
-    GDL_CHECK_THROW_DEV(solver(AThrow, Vector()), Exception);
+    if (symmetric)
+    {
+        Matrix SThrow(4, 2, 4, 2, 0, 5, 4, 5, 9);
+        GDL_CHECK_THROW_DEV(solver(SThrow, Vector()), Exception);
+    }
 }
 
 
@@ -283,6 +287,46 @@ BOOST_AUTO_TEST_CASE(TestGaussPartialPivotSSE)
 {
     SSESolverPtr solver = Solver::Gauss<Solver::Pivot::PARTIAL>;
     TestSolver(solver);
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(TestLDLTSerial)
+{
+    SerialSolverPtr solver = Solver::LDLT;
+    TestSolver(solver, false, true);
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(TestLDLTSSE)
+{
+    SSESolverPtr solver = Solver::LDLT;
+    TestSolver(solver, false, true);
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(TestLLTSerial)
+{
+    SerialSolverPtr solver = Solver::LLT;
+    TestSolver(solver, false, true);
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(TestLLTSSE)
+{
+    SSESolverPtr solver = Solver::LLT;
+    TestSolver(solver, false, true);
 }
 
 

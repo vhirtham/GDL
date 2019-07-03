@@ -195,18 +195,19 @@ template <U32 _size>
 template <U32 _size>
 inline void LDLTDenseSmallSSE<_size>::AddLT(std::array<__m128, _size>& ldlt)
 {
-    static_assert(_size == 4, "Unsupported system size.");
+    static_assert(_size == 3 || _size == 4, "Unsupported system size.");
+
+    using namespace GDL::simd;
+
+    __m128 col1 = Broadcast<1>(ldlt[0]);
+    __m128 col2 = _mm_unpackhi_ps(ldlt[0], ldlt[1]);
+
+    ldlt[1] = BlendAboveIndex<1>(ldlt[1], col1);
+    ldlt[2] = BlendAboveIndex<2>(ldlt[2], col2);
 
     if constexpr (_size == 4)
     {
-        using namespace GDL::simd;
-
-        __m128 col1 = Broadcast<1>(ldlt[0]);
-        __m128 col2 = _mm_unpackhi_ps(ldlt[0], ldlt[1]);
         __m128 col3 = _mm_movehl_ps(Broadcast<3>(ldlt[2]), col2);
-
-        ldlt[1] = BlendAboveIndex<1>(ldlt[1], col1);
-        ldlt[2] = BlendAboveIndex<2>(ldlt[2], col2);
         ldlt[3] = BlendAboveIndex<3>(ldlt[3], col3);
     }
 }

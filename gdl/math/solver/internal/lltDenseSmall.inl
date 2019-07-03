@@ -182,18 +182,19 @@ template <U32 _size>
 template <U32 _size>
 inline void LLTDenseSmallSSE<_size>::AddLT(std::array<__m128, _size>& llt)
 {
-    static_assert(_size == 4, "Unsupported system size.");
+    static_assert(_size == 3 || _size == 4, "Unsupported system size.");
+
+    using namespace GDL::simd;
+
+    __m128 col1 = Broadcast<1>(llt[0]);
+    __m128 col2 = _mm_unpackhi_ps(llt[0], llt[1]);
+
+    llt[1] = BlendAboveIndex<1>(llt[1], col1);
+    llt[2] = BlendAboveIndex<2>(llt[2], col2);
 
     if constexpr (_size == 4)
     {
-        using namespace GDL::simd;
-
-        __m128 col1 = Broadcast<1>(llt[0]);
-        __m128 col2 = _mm_unpackhi_ps(llt[0], llt[1]);
         __m128 col3 = _mm_movehl_ps(Broadcast<3>(llt[2]), col2);
-
-        llt[1] = BlendAboveIndex<1>(llt[1], col1);
-        llt[2] = BlendAboveIndex<2>(llt[2], col2);
         llt[3] = BlendAboveIndex<3>(llt[3], col3);
     }
 }

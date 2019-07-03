@@ -346,6 +346,72 @@ BOOST_AUTO_TEST_CASE(TestGaussPartialPivotAVX)
 
 // --------------------------------------------------------------------------------------------------------------------
 
+BOOST_AUTO_TEST_CASE(TestLDLTSerial)
+{
+    SerialSolverPtr solver = Solver::LDLT;
+    TestSolver(solver, false, true);
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(TestLDLTSSE)
+{
+    SSESolverPtr solver = Solver::LDLT;
+    TestSolver(solver, false, true);
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+#ifdef __AVX__
+
+BOOST_AUTO_TEST_CASE(TestLDLTAVX)
+{
+    AVXSolverPtr solver = Solver::LDLT;
+    TestSolver(solver, false, true);
+}
+
+#endif // __AVX__
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(TestLLTSerial)
+{
+    SerialSolverPtr solver = Solver::LLT;
+    TestSolver(solver, false, true);
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(TestLLTSSE)
+{
+    SSESolverPtr solver = Solver::LLT;
+    TestSolver(solver, false, true);
+}
+
+
+
+#ifdef __AVX__
+
+BOOST_AUTO_TEST_CASE(TestLLTAVX)
+{
+    AVXSolverPtr solver = Solver::LLT;
+    TestSolver(solver, false, true);
+}
+
+#endif // __AVX__
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
 BOOST_AUTO_TEST_CASE(TestLUNoPivotSerial)
 {
     SerialSolverPtr solver = Solver::LU<Solver::Pivot::NONE>;
@@ -406,72 +472,6 @@ BOOST_AUTO_TEST_CASE(TestLUPartialPivotAVX)
 {
     AVXSolverPtr solver = Solver::LU<Solver::Pivot::PARTIAL>;
     TestSolver(solver);
-}
-
-#endif // __AVX__
-
-
-
-// --------------------------------------------------------------------------------------------------------------------
-
-BOOST_AUTO_TEST_CASE(TestLLTSerial)
-{
-    SerialSolverPtr solver = Solver::LLT;
-    TestSolver(solver, false, true);
-}
-
-
-
-// --------------------------------------------------------------------------------------------------------------------
-
-BOOST_AUTO_TEST_CASE(TestLLTSSE)
-{
-    SSESolverPtr solver = Solver::LLT;
-    TestSolver(solver, false, true);
-}
-
-
-
-#ifdef __AVX__
-
-BOOST_AUTO_TEST_CASE(TestLLTAVX)
-{
-    AVXSolverPtr solver = Solver::LLT;
-    TestSolver(solver, false, true);
-}
-
-#endif // __AVX__
-
-
-
-// --------------------------------------------------------------------------------------------------------------------
-
-BOOST_AUTO_TEST_CASE(TestLDLTSerial)
-{
-    SerialSolverPtr solver = Solver::LDLT;
-    TestSolver(solver, false, true);
-}
-
-
-
-// --------------------------------------------------------------------------------------------------------------------
-
-BOOST_AUTO_TEST_CASE(TestLDLTSSE)
-{
-    SSESolverPtr solver = Solver::LDLT;
-    TestSolver(solver, false, true);
-}
-
-
-
-// --------------------------------------------------------------------------------------------------------------------
-
-#ifdef __AVX__
-
-BOOST_AUTO_TEST_CASE(TestLDLTAVX)
-{
-    AVXSolverPtr solver = Solver::LDLT;
-    TestSolver(solver, false, true);
 }
 
 #endif // __AVX__

@@ -19,6 +19,8 @@ namespace GDL::Solver
 {
 
 // --------------------------------------------------------------------------------------------------------------------
+// Cramers Rule
+// --------------------------------------------------------------------------------------------------------------------
 
 template <typename _type>
 inline Vec3Serial<_type, true> Cramer(const Mat3Serial<_type>& matA, const Vec3Serial<_type, true>& vecRhs)
@@ -78,6 +80,8 @@ inline Vec3fSSE<true> Cramer(const Mat3fSSE& matA, const Vec3fSSE<true>& vecRhs)
 
 
 // --------------------------------------------------------------------------------------------------------------------
+// Gaussian Elimination
+// --------------------------------------------------------------------------------------------------------------------
 
 template <Pivot _pivot, typename _type>
 inline Vec3Serial<_type, true> Gauss(const Mat3Serial<_type>& matA, const Vec3Serial<_type, true>& vecRhs)
@@ -117,6 +121,163 @@ inline Vec3fSSE<true> Gauss(const Mat3fSSE& matA, const Vec3fSSE<true>& vecRhs)
 
 
 
+// --------------------------------------------------------------------------------------------------------------------
+// LDLT decomposition
+// --------------------------------------------------------------------------------------------------------------------
+
+template <typename _type>
+[[nodiscard]] inline Vec3Serial<_type, true> LDLT(const Mat3Serial<_type>& matA, const Vec3Serial<_type, true>& vecRhs)
+{
+    using LDLTSolver = LDLTDenseSmallSerial<_type, 3>;
+
+    typename LDLTSolver::Factorization factorization = LDLTFactorization<_type>(matA);
+
+    return LDLT<_type>(factorization, vecRhs);
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+template <typename _type>
+[[nodiscard]] inline Vec3Serial<_type, true>
+LDLT(const typename LDLTDenseSmallSerial<_type, 3>::Factorization& factorization, const Vec3Serial<_type, true>& vecRhs)
+{
+    using LDLTSolver = LDLTDenseSmallSerial<_type, 3>;
+
+    return Vec3Serial<_type, true>(LDLTSolver::Solve(factorization, vecRhs.Data()));
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+template <typename _type>
+[[nodiscard]] inline typename LDLTDenseSmallSerial<_type, 3>::Factorization
+LDLTFactorization(const Mat3Serial<_type>& matA)
+{
+    using LDLTSolver = LDLTDenseSmallSerial<_type, 3>;
+
+    return LDLTSolver::Factorize(matA.Data());
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+[[nodiscard]] inline Vec3fSSE<true> LDLT(const Mat3fSSE& matA, const Vec3fSSE<true>& vecRhs)
+{
+    using LDLTSolver = LDLTDenseSmallSSE<3>;
+
+    typename LDLTSolver::Factorization factorization = LDLTFactorization(matA);
+
+    return LDLT(factorization, vecRhs);
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+[[nodiscard]] inline Vec3fSSE<true> LDLT(const typename LDLTDenseSmallSSE<3>::Factorization& factorization,
+                                         const Vec3fSSE<true>& vecRhs)
+{
+    using LLTSolver = LDLTDenseSmallSSE<3>;
+
+    return Vec3fSSE<true>(LLTSolver::Solve(factorization, vecRhs.DataSSE()));
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+[[nodiscard]] inline typename LDLTDenseSmallSSE<3>::Factorization LDLTFactorization(const Mat3fSSE& matA)
+{
+    using LDLTSolver = LDLTDenseSmallSSE<3>;
+
+    return LDLTSolver::Factorize(matA.DataSSE());
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+// LLT decomposition
+// --------------------------------------------------------------------------------------------------------------------
+
+template <typename _type>
+[[nodiscard]] inline Vec3Serial<_type, true> LLT(const Mat3Serial<_type>& matA, const Vec3Serial<_type, true>& vecRhs)
+{
+    using LLTSolver = LLTDenseSmallSerial<_type, 3>;
+
+    typename LLTSolver::Factorization factorization = LLTFactorization<_type>(matA);
+    return LLT<_type>(factorization, vecRhs);
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+template <typename _type>
+[[nodiscard]] inline Vec3Serial<_type, true>
+LLT(const typename LLTDenseSmallSerial<_type, 3>::Factorization& factorization, const Vec3Serial<_type, true>& vecRhs)
+{
+    using LLTSolver = LLTDenseSmallSerial<_type, 3>;
+
+    return Vec3Serial<_type, true>(LLTSolver::Solve(factorization, vecRhs.Data()));
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+template <typename _type>
+[[nodiscard]] inline typename LLTDenseSmallSerial<_type, 3>::Factorization
+LLTFactorization(const Mat3Serial<_type>& matA)
+{
+    using LLTSolver = LLTDenseSmallSerial<_type, 3>;
+
+    return LLTSolver::Factorize(matA.Data());
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+[[nodiscard]] inline Vec3fSSE<true> LLT(const Mat3fSSE& matA, const Vec3fSSE<true>& vecRhs)
+{
+    using LLTSolver = LLTDenseSmallSSE<3>;
+
+    typename LLTSolver::Factorization factorization = LLTFactorization(matA);
+
+    return LLT(factorization, vecRhs);
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+[[nodiscard]] inline Vec3fSSE<true> LLT(const typename LLTDenseSmallSSE<3>::Factorization& factorization,
+                                        const Vec3fSSE<true>& vecRhs)
+{
+    using LLTSolver = LLTDenseSmallSSE<3>;
+
+    return Vec3fSSE<true>(LLTSolver::Solve(factorization, vecRhs.DataSSE()));
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+[[nodiscard]] inline typename LLTDenseSmallSSE<3>::Factorization LLTFactorization(const Mat3fSSE& matA)
+{
+    using LLTSolver = LLTDenseSmallSSE<3>;
+
+    return LLTSolver::Factorize(matA.DataSSE());
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+// LU decomposition
 // --------------------------------------------------------------------------------------------------------------------
 
 template <Pivot _pivot, typename _type>

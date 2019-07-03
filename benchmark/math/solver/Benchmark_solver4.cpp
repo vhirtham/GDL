@@ -14,8 +14,8 @@ using namespace GDL;
 // solver types
 //#define BENCHMARK_CRAMER
 //#define BENCHMARK_GAUSS
-#define BENCHMARK_LU
-#define BENCHMARK_LLT
+//#define BENCHMARK_LU
+//#define BENCHMARK_LLT
 #define BENCHMARK_LDLT
 
 
@@ -29,7 +29,7 @@ using namespace GDL;
 // vectorization
 //#define BENCHMARK_SERIAL
 #define BENCHMARK_SSE
-#define BENCHMARK_AVX
+//#define BENCHMARK_AVX
 
 // Eigen
 //#define BENCHMARK_EIGEN
