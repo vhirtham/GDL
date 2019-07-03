@@ -14,20 +14,22 @@ using namespace GDL;
 // solver types
 //#define BENCHMARK_CRAMER
 //#define BENCHMARK_GAUSS
-//#define BENCHMARK_LU
+#define BENCHMARK_LU
 #define BENCHMARK_LLT
+#define BENCHMARK_LDLT
+
 
 // pivoting
 #define BENCHMARK_NOPIVOT
-//#define BENCHMARK_PARTIALPIVOT
+#define BENCHMARK_PARTIALPIVOT
 
 // factorization
 #define BENCHMARK_FACTORIZATION
 
 // vectorization
-#define BENCHMARK_SERIAL
+//#define BENCHMARK_SERIAL
 #define BENCHMARK_SSE
-//#define BENCHMARK_AVX
+#define BENCHMARK_AVX
 
 // Eigen
 //#define BENCHMARK_EIGEN
@@ -337,6 +339,39 @@ BENCHMARK_F(SSE, LUNoPivotSolve)(benchmark::State& state)
 
 #endif // BENCHMARK_FACTORIZATION
 #endif // BENCHMARK_SSE
+
+
+
+#ifdef __AVX2__
+#ifdef BENCHMARK_AVX
+
+BENCHMARK_F(AVX, LUNoPivot)(benchmark::State& state)
+{
+    for (auto _ : state)
+        benchmark::DoNotOptimize(Solver::LU<Solver::Pivot::NONE>(A, b));
+}
+
+
+#ifdef BENCHMARK_FACTORIZATION
+
+BENCHMARK_F(AVX, LUNoPivotFactorize)(benchmark::State& state)
+{
+    for (auto _ : state)
+        benchmark::DoNotOptimize(Solver::LUFactorization<Solver::Pivot::NONE>(A));
+}
+
+
+
+BENCHMARK_F(AVX, LUNoPivotSolve)(benchmark::State& state)
+{
+    auto factorization = Solver::LUFactorization<Solver::Pivot::NONE>(A);
+    for (auto _ : state)
+        benchmark::DoNotOptimize(Solver::LU<Solver::Pivot::NONE>(factorization, b));
+}
+
+#endif // BENCHMARK_FACTORIZATION
+#endif // BENCHMARK_AVX
+#endif //  __AVX2__
 #endif // BENCHMARK_NOPIVOT
 
 
@@ -405,12 +440,46 @@ BENCHMARK_F(SSE, LUPartialPivotSolve)(benchmark::State& state)
 
 #endif // BENCHMARK_FACTORIZATION
 #endif // BENCHMARK_SSE
+
+
+
+#ifdef __AVX2__
+#ifdef BENCHMARK_AVX
+
+BENCHMARK_F(AVX, LUPartialPivot)(benchmark::State& state)
+{
+    for (auto _ : state)
+        benchmark::DoNotOptimize(Solver::LU<Solver::Pivot::PARTIAL>(A, b));
+}
+
+
+
+#ifdef BENCHMARK_FACTORIZATION
+
+BENCHMARK_F(AVX, LUPartialPivotFactorize)(benchmark::State& state)
+{
+    for (auto _ : state)
+        benchmark::DoNotOptimize(Solver::LUFactorization<Solver::Pivot::PARTIAL>(A));
+}
+
+
+
+BENCHMARK_F(AVX, LUPartialPivotSolve)(benchmark::State& state)
+{
+    auto factorization = Solver::LUFactorization<Solver::Pivot::PARTIAL>(A);
+    for (auto _ : state)
+        benchmark::DoNotOptimize(Solver::LU<Solver::Pivot::PARTIAL>(factorization, b));
+}
+
+#endif // BENCHMARK_FACTORIZATION
+#endif // BENCHMARK_AVX
+#endif // __AVX2__
 #endif // BENCHMARK_PARTIALPIVOT
 #endif // BENCHMARK_LU
 
 
 
-// LLT - partial pivot ------------------------------------------------------------------------------------------------
+// LLT - --------------------------------------------------------------------------------------------------------------
 
 #ifdef BENCHMARK_SYMMETRIC
 #ifdef BENCHMARK_LLT
@@ -475,7 +544,144 @@ BENCHMARK_F(SSE, LLTSolve)(benchmark::State& state)
 
 #endif // BENCHMARK_FACTORIZATION
 #endif // BENCHMARK_SSE
+
+
+
+#ifdef __AVX2__
+#ifdef BENCHMARK_AVX
+
+BENCHMARK_F(AVX, LLT)(benchmark::State& state)
+{
+    for (auto _ : state)
+        benchmark::DoNotOptimize(Solver::LLT(A, b));
+}
+
+
+
+#ifdef BENCHMARK_FACTORIZATION
+
+BENCHMARK_F(AVX, LLTFactorize)(benchmark::State& state)
+{
+    for (auto _ : state)
+        benchmark::DoNotOptimize(Solver::LLTFactorization(A));
+}
+
+
+
+BENCHMARK_F(AVX, LLTSolve)(benchmark::State& state)
+{
+    auto factorization = Solver::LLTFactorization(A);
+    for (auto _ : state)
+        benchmark::DoNotOptimize(Solver::LLT(factorization, b));
+}
+
+#endif // BENCHMARK_FACTORIZATION
+#endif // BENCHMARK_AVX
+#endif // __AVX2__
 #endif // BENCHMARK_LLT
+
+
+
+// LDLT ---------------------------------------------------------------------------------------------------------------
+
+
+#ifdef BENCHMARK_LDLT
+#ifdef BENCHMARK_SERIAL
+
+BENCHMARK_F(Serial, LDLT)(benchmark::State& state)
+{
+    for (auto _ : state)
+        benchmark::DoNotOptimize(Solver::LDLT(A, b));
+}
+
+
+
+#ifdef BENCHMARK_FACTORIZATION
+
+BENCHMARK_F(Serial, LDLTFactorize)(benchmark::State& state)
+{
+    for (auto _ : state)
+        benchmark::DoNotOptimize(Solver::LDLTFactorization(A));
+}
+
+
+
+BENCHMARK_F(Serial, LDLTSolve)(benchmark::State& state)
+{
+    auto factorization = Solver::LDLTFactorization(A);
+    for (auto _ : state)
+        benchmark::DoNotOptimize(Solver::LDLT(factorization, b));
+}
+
+#endif // BENCHMARK_FACTORIZATION
+#endif // BENCHMARK_SERIAL
+
+
+
+#ifdef BENCHMARK_SSE
+
+BENCHMARK_F(SSE, LDLT)(benchmark::State& state)
+{
+    for (auto _ : state)
+        benchmark::DoNotOptimize(Solver::LDLT(A, b));
+}
+
+
+
+#ifdef BENCHMARK_FACTORIZATION
+
+BENCHMARK_F(SSE, LDLTFactorize)(benchmark::State& state)
+{
+    for (auto _ : state)
+        benchmark::DoNotOptimize(Solver::LDLTFactorization(A));
+}
+
+
+
+BENCHMARK_F(SSE, LDLTSolve)(benchmark::State& state)
+{
+    auto factorization = Solver::LDLTFactorization(A);
+    for (auto _ : state)
+        benchmark::DoNotOptimize(Solver::LDLT(factorization, b));
+}
+
+#endif // BENCHMARK_FACTORIZATION
+#endif // BENCHMARK_SSE
+
+
+
+#ifdef __AVX2__
+#ifdef BENCHMARK_AVX
+
+BENCHMARK_F(AVX, LDLT)(benchmark::State& state)
+{
+    for (auto _ : state)
+        benchmark::DoNotOptimize(Solver::LDLT(A, b));
+}
+
+
+
+#ifdef BENCHMARK_FACTORIZATION
+
+BENCHMARK_F(AVX, LDLTFactorize)(benchmark::State& state)
+{
+    for (auto _ : state)
+        benchmark::DoNotOptimize(Solver::LDLTFactorization(A));
+}
+
+
+
+BENCHMARK_F(AVX, LDLTSolve)(benchmark::State& state)
+{
+    auto factorization = Solver::LDLTFactorization(A);
+    for (auto _ : state)
+        benchmark::DoNotOptimize(Solver::LDLT(factorization, b));
+}
+
+#endif // BENCHMARK_FACTORIZATION
+#endif // BENCHMARK_AVX
+#endif // __AVX2__
+#endif // BENCHMARK_LDLT
 #endif // BENCHMARK_SYMMETRIC
 
 

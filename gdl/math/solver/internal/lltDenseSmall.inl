@@ -57,18 +57,18 @@ LLTDenseSmallSerial<_type, _size>::Solve(const Factorization& factorization, std
 
 template <typename _type, U32 _size>
 template <U32 _idx>
-inline void LLTDenseSmallSerial<_type, _size>::BackwardSubstitution(const std::array<_type, _size * _size>& lu,
+inline void LLTDenseSmallSerial<_type, _size>::BackwardSubstitution(const std::array<_type, _size * _size>& llt,
                                                                     std::array<_type, _size>& r)
 {
     constexpr U32 pivIdx = (_size + 1) * _idx;
 
-    r[_idx] /= lu[pivIdx];
+    r[_idx] /= llt[pivIdx];
 
     for (U32 i = 0; i < _idx; ++i)
-        r[i] -= r[_idx] * lu[i * _size + _idx];
+        r[i] -= r[_idx] * llt[i * _size + _idx];
 
     if constexpr (_idx > 0)
-        BackwardSubstitution<_idx - 1>(lu, r);
+        BackwardSubstitution<_idx - 1>(llt, r);
 }
 
 
@@ -116,18 +116,18 @@ inline void LLTDenseSmallSerial<_type, _size>::FactorizeLLT(Factorization& facto
 
 template <typename _type, U32 _size>
 template <U32 _idx>
-inline void LLTDenseSmallSerial<_type, _size>::ForwardSubstitution(const std::array<_type, _size * _size>& lu,
+inline void LLTDenseSmallSerial<_type, _size>::ForwardSubstitution(const std::array<_type, _size * _size>& llt,
                                                                    std::array<_type, _size>& r)
 {
 
     constexpr U32 pivIdx = (_size + 1) * _idx;
 
-    r[_idx] /= lu[pivIdx];
+    r[_idx] /= llt[pivIdx];
     for (U32 i = _idx + 1; i < _size; ++i)
-        r[i] -= lu[i + _idx * _size] * r[_idx];
+        r[i] -= llt[i + _idx * _size] * r[_idx];
 
     if constexpr (_idx + 1 < _size)
-        ForwardSubstitution<_idx + 1>(lu, r);
+        ForwardSubstitution<_idx + 1>(llt, r);
 }
 
 

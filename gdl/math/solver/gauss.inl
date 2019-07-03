@@ -29,7 +29,8 @@ VecSerial<_type, _size, true> GaussPartialPivot(const MatSerial<_type, _size, _s
 // --------------------------------------------------------------------------------------------------------------------
 
 template <typename _type, I32 _size>
-VecSIMD<_type, _size, true> GaussPartialPivot(const MatSIMD<_type, _size, _size>& A, const VecSIMD<_type, _size, true>& b)
+VecSIMD<_type, _size, true> GaussPartialPivot(const MatSIMD<_type, _size, _size>& A,
+                                              const VecSIMD<_type, _size, true>& b)
 {
     using RegisterType = typename MatSIMD<_type, _size, _size>::RegisterType;
     return GaussDenseSSE<RegisterType, _size>::SolvePartialPivot(A, b);

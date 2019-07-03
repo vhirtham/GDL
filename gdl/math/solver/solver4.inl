@@ -22,6 +22,8 @@ namespace GDL::Solver
 
 
 // --------------------------------------------------------------------------------------------------------------------
+// Cramers Rule
+// --------------------------------------------------------------------------------------------------------------------
 
 template <typename _type>
 [[nodiscard]] inline Vec4Serial<_type, true> Cramer(const Mat4Serial<_type>& matA,
@@ -305,6 +307,8 @@ template <typename _type>
 
 
 // --------------------------------------------------------------------------------------------------------------------
+// Gaussian Elimination
+// --------------------------------------------------------------------------------------------------------------------
 
 template <Pivot _pivot, typename _type>
 [[nodiscard]] inline Vec4Serial<_type, true> Gauss(const Mat4Serial<_type>& matA, const Vec4Serial<_type, true>& vecRhs)
@@ -365,6 +369,110 @@ template <Pivot _pivot>
 
 
 // --------------------------------------------------------------------------------------------------------------------
+// LDLT decomposition
+// --------------------------------------------------------------------------------------------------------------------
+
+template <typename _type>
+[[nodiscard]] inline Vec4Serial<_type, true> LDLT(const Mat4Serial<_type>& matA, const Vec4Serial<_type, true>& vecRhs)
+{
+    using LDLTSolver = LDLTDenseSmallSerial<_type, 4>;
+
+    typename LDLTSolver::Factorization factorization = LDLTFactorization<_type>(matA);
+
+    return LDLT<_type>(factorization, vecRhs);
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+template <typename _type>
+[[nodiscard]] inline Vec4Serial<_type, true>
+LDLT(const typename LDLTDenseSmallSerial<_type, 4>::Factorization& factorization, const Vec4Serial<_type, true>& vecRhs)
+{
+    using LDLTSolver = LDLTDenseSmallSerial<_type, 4>;
+
+    return Vec4Serial<_type, true>(LDLTSolver::Solve(factorization, vecRhs.Data()));
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+template <typename _type>
+[[nodiscard]] inline typename LDLTDenseSmallSerial<_type, 4>::Factorization
+LDLTFactorization(const Mat4Serial<_type>& matA)
+{
+    using LDLTSolver = LDLTDenseSmallSerial<_type, 4>;
+
+    return LDLTSolver::Factorize(matA.Data());
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+[[nodiscard]] inline Vec4fSSE<true> LDLT(const Mat4fSSE& matA, const Vec4fSSE<true>& vecRhs)
+{
+    using LDLTSolver = LDLTDenseSmallSSE<4>;
+
+    typename LDLTSolver::Factorization factorization = LDLTFactorization(matA);
+
+    return LDLT(factorization, vecRhs);
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+[[nodiscard]] inline Vec4fSSE<true> LDLT(const typename LDLTDenseSmallSSE<4>::Factorization& factorization,
+                                         const Vec4fSSE<true>& vecRhs)
+{
+    using LLTSolver = LDLTDenseSmallSSE<4>;
+
+    return Vec4fSSE<true>(LLTSolver::Solve(factorization, vecRhs.DataSSE()));
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+[[nodiscard]] inline typename LDLTDenseSmallSSE<4>::Factorization LDLTFactorization(const Mat4fSSE& matA)
+{
+    using LDLTSolver = LDLTDenseSmallSSE<4>;
+
+    return LDLTSolver::Factorize(matA.DataSSE());
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+#ifdef __AVX2__
+
+[[nodiscard]] inline Vec4fSSE<true> LDLT(const Mat4fAVX& matA, const Vec4fSSE<true>& vecRhs)
+{
+    static_assert(sizeof(Mat4fAVX) == sizeof(Mat4fSSE), "Internal error - Matrix types have different sizes");
+    return LDLT(*reinterpret_cast<const Mat4fSSE*>(&matA), vecRhs);
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+[[nodiscard]] inline typename LDLTDenseSmallSSE<4>::Factorization LDLTFactorization(const Mat4fAVX& matA)
+{
+    static_assert(sizeof(Mat4fAVX) == sizeof(Mat4fSSE), "Internal error - Matrix types have different sizes");
+    return LDLTFactorization(*reinterpret_cast<const Mat4fSSE*>(&matA));
+}
+
+#endif // __AVX2__
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+// LLT decomposition
+// --------------------------------------------------------------------------------------------------------------------
 
 template <typename _type>
 [[nodiscard]] inline Vec4Serial<_type, true> LLT(const Mat4Serial<_type>& matA, const Vec4Serial<_type, true>& vecRhs)
@@ -372,7 +480,6 @@ template <typename _type>
     using LLTSolver = LLTDenseSmallSerial<_type, 4>;
 
     typename LLTSolver::Factorization factorization = LLTFactorization<_type>(matA);
-
     return LLT<_type>(factorization, vecRhs);
 }
 
@@ -440,6 +547,32 @@ LLTFactorization(const Mat4Serial<_type>& matA)
 
 
 
+#ifdef __AVX2__
+
+// --------------------------------------------------------------------------------------------------------------------
+
+[[nodiscard]] inline Vec4fSSE<true> LLT(const Mat4fAVX& matA, const Vec4fSSE<true>& vecRhs)
+{
+    static_assert(sizeof(Mat4fAVX) == sizeof(Mat4fSSE), "Internal error - Matrix types have different sizes");
+    return LLT(*reinterpret_cast<const Mat4fSSE*>(&matA), vecRhs);
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+[[nodiscard]] inline typename LLTDenseSmallSSE<4>::Factorization LLTFactorization(const Mat4fAVX& matA)
+{
+    static_assert(sizeof(Mat4fAVX) == sizeof(Mat4fSSE), "Internal error - Matrix types have different sizes");
+    return LLTFactorization(*reinterpret_cast<const Mat4fSSE*>(&matA));
+}
+
+#endif // __AVX2__
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+// LU decomposition
 // --------------------------------------------------------------------------------------------------------------------
 
 template <Pivot _pivot, typename _type>
@@ -517,6 +650,32 @@ template <Pivot _pivot>
 
     return LUSolver::Factorize(matA.DataSSE());
 }
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+#ifdef __AVX2__
+
+template <Pivot _pivot>
+[[nodiscard]] inline Vec4fSSE<true> LU(const Mat4fAVX& matA, const Vec4fSSE<true>& vecRhs)
+{
+    static_assert(sizeof(Mat4fAVX) == sizeof(Mat4fSSE), "Internal error - Matrix types have different sizes");
+    return LU<_pivot>(*reinterpret_cast<const Mat4fSSE*>(&matA), vecRhs);
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+template <Pivot _pivot>
+[[nodiscard]] inline typename LUDenseSmallSSE<4, _pivot>::Factorization LUFactorization(const Mat4fAVX& matA)
+{
+    static_assert(sizeof(Mat4fAVX) == sizeof(Mat4fSSE), "Internal error - Matrix types have different sizes");
+    return LUFactorization<_pivot>(*reinterpret_cast<const Mat4fSSE*>(&matA));
+}
+
+#endif // __AVX2__
 
 
 
