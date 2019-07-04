@@ -1,10 +1,12 @@
 #include <boost/test/unit_test.hpp>
 
+#include "test/unit/math/solver/solverTests.h"
+
 
 #include "gdl/math/simd/vecSIMD.h"
 #include "gdl/math/simd/matSIMD.h"
 #include "gdl/math/solver/gauss.h"
-#include "test/tools/ExceptionChecks.h"
+
 
 #include "test/tools/arrayValueComparison.h"
 #include "test/tools/ExceptionChecks.h"
@@ -72,7 +74,7 @@ void TestGaussDensePivotingTestcase(std::array<U32, _size> indices)
     VectorType b(vectorValues);
     MatrixType A(matrixValues);
 
-    VectorType res = Solver::GaussPartialPivot(A, b);
+    VectorType res = Solver::Gauss(A, b);
 
     BOOST_CHECK(CheckCloseArray(res.Data(), expRes, 1));
 
@@ -172,7 +174,7 @@ void TestGaussDenseSSENoInvalidPivotIndexTestcase()
 
 
 
-    VecSIMD<_type, _size> res = Solver::GaussPartialPivot(A, b);
+    VecSIMD<_type, _size> res = Solver::Gauss(A, b);
 
     BOOST_CHECK(CheckCloseArray(res.Data(), expRes, 1));
 }
@@ -221,7 +223,7 @@ void TestGaussDenseSingularMatrix()
 
     VectorType b(4, -5, -4, 9);
     VectorType res;
-    BOOST_CHECK_THROW(res = Solver::GaussPartialPivot(A, b), Exception);
+    BOOST_CHECK_THROW(res = Solver::Gauss(A, b), Exception);
 }
 
 
@@ -256,388 +258,245 @@ BOOST_AUTO_TEST_CASE(Test_Gauss_Dense_Singular_F64_SSE)
 
 
 
+// --------------------------------------------------------------------------------------------------------------------
+
+using namespace GDL::Solver;
+
+template <typename _type, U32 _size>
+using SerialSolverPtr = VecSerial<_type, _size, true> (*)(const MatSerial<_type, _size, _size>&,
+                                                          const VecSerial<_type, _size, true>&);
+template <typename _type, U32 _size>
+using SIMDSolverPtr = VecSIMD<_type, _size, true> (*)(const MatSIMD<_type, _size, _size>&,
+                                                      const VecSIMD<_type, _size, true>&);
+
+
+enum class SolverType
+{
+    SERIAL,
+    SIMD
+};
+
+template <typename _type, U32 _size, Pivot _pivot, SolverType _solverType>
+void TestGauss()
+{
+    if constexpr (_solverType == SolverType::SERIAL)
+    {
+        SerialSolverPtr<_type, _size> solver = Solver::Gauss<_pivot, _type, _size>;
+        TestSolverResult<_type, _size>(solver);
+    }
+    else
+    {
+        SIMDSolverPtr<_type, _size> solver = Solver::Gauss<_pivot, _type, _size>;
+        TestSolverResult<_type, _size>(solver);
+    }
+}
+
+
+
 // Test 2x2 -----------------------------------------------------------------------------------------------------------
 
-template <template <typename, U32> class _fixture, typename _type>
-void TestGaussDense_2x2()
+BOOST_AUTO_TEST_CASE(Test_Gauss_PartialPivot_2x2_F32_Serial)
 {
-    using MatrixType = typename _fixture<_type, 2>::MatrixType;
-    using VectorType = typename _fixture<_type, 2>::VectorType;
-
-
-    // clang-format off
-    MatrixType A = MatrixType( -5,  6,
-                                3, -5).Transpose();
-    // clang-format on
-
-    VectorType b(7, -7);
-    VectorType res = Solver::GaussPartialPivot(A, b);
-
-
-    VectorType expRes(1, 2);
-
-    BOOST_CHECK(CheckCloseArray(res.Data(), expRes.Data(), 100));
+    TestGauss<F32, 2, Pivot::PARTIAL, SolverType::SERIAL>();
 }
 
 
 
-BOOST_AUTO_TEST_CASE(Test_Gauss_Dense_2x2_F32_Serial)
+BOOST_AUTO_TEST_CASE(Test_Gauss_PartialPivot_2x2_F64_Serial)
 {
-    TestGaussDense_2x2<FixtureSerial, F32>();
+    TestGauss<F64, 2, Pivot::PARTIAL, SolverType::SERIAL>();
 }
 
 
 
-BOOST_AUTO_TEST_CASE(Test_Gauss_Dense_2x2_F64_Serial)
+BOOST_AUTO_TEST_CASE(Test_Gauss_PartialPivot_2x2_F32_SSE)
 {
-    TestGaussDense_2x2<FixtureSerial, F64>();
-}
-
-
-
-BOOST_AUTO_TEST_CASE(Test_Gauss_Dense_2x2_F32_SSE)
-{
-    TestGaussDense_2x2<FixtureSSE, F32>();
+    TestGauss<F32, 2, Pivot::PARTIAL, SolverType::SIMD>();
 }
 
 
 
 BOOST_AUTO_TEST_CASE(Test_Gauss_Dense_2x2_F64_SSE)
 {
-    TestGaussDense_2x2<FixtureSSE, F64>();
+    TestGauss<F64, 2, Pivot::PARTIAL, SolverType::SIMD>();
 }
 
 
 
 // Test 3x3 -----------------------------------------------------------------------------------------------------------
 
-template <template <typename, U32> class _fixture, typename _type>
-void TestGaussDense_3x3()
+BOOST_AUTO_TEST_CASE(Test_Gauss_PartialPivot_3x3_F32_Serial)
 {
-    using MatrixType = typename _fixture<_type, 3>::MatrixType;
-    using VectorType = typename _fixture<_type, 3>::VectorType;
-
-    // clang-format off
-    MatrixType A = MatrixType(-5,  6, -5,
-                               3, -5,  2,
-                               9,  8, -7).Transpose();
-    // clang-format on
-
-    VectorType b(-8, -1, 4);
-    VectorType res = Solver::GaussPartialPivot(A, b);
-
-
-    VectorType expRes(1, 2, 3);
-
-    BOOST_CHECK(CheckCloseArray(res.Data(), expRes.Data(), 100));
+    TestGauss<F32, 3, Pivot::PARTIAL, SolverType::SERIAL>();
 }
 
 
 
-BOOST_AUTO_TEST_CASE(Test_Gauss_Dense_3x3_F32_Serial)
+BOOST_AUTO_TEST_CASE(Test_Gauss_PartialPivot_3x3_F64_Serial)
 {
-    TestGaussDense_3x3<FixtureSerial, F32>();
-}
-
-
-BOOST_AUTO_TEST_CASE(Test_Gauss_Dense_3x3_F64_Serial)
-{
-    TestGaussDense_3x3<FixtureSerial, F64>();
+    TestGauss<F64, 3, Pivot::PARTIAL, SolverType::SERIAL>();
 }
 
 
 
-BOOST_AUTO_TEST_CASE(Test_Gauss_Dense_3x3_F32_SSE)
+BOOST_AUTO_TEST_CASE(Test_Gauss_PartialPivot_3x3_F32_SSE)
 {
-    TestGaussDense_3x3<FixtureSSE, F32>();
+    TestGauss<F32, 3, Pivot::PARTIAL, SolverType::SIMD>();
 }
 
 
 
 BOOST_AUTO_TEST_CASE(Test_Gauss_Dense_3x3_F64_SSE)
 {
-    TestGaussDense_3x3<FixtureSSE, F64>();
+    TestGauss<F64, 3, Pivot::PARTIAL, SolverType::SIMD>();
 }
 
 
 
 // Test 4x4 -----------------------------------------------------------------------------------------------------------
 
-template <template <typename, U32> class _fixture, typename _type>
-void TestGaussDense_4x4()
+BOOST_AUTO_TEST_CASE(Test_Gauss_PartialPivot_4x4_F32_Serial)
 {
-    using MatrixType = typename _fixture<_type, 4>::MatrixType;
-    using VectorType = typename _fixture<_type, 4>::VectorType;
-
-    // clang-format off
-    MatrixType A = MatrixType(-5,  4, -5,  4,
-                               3, -5,  2, -1,
-                               9,  8, -7, -2,
-                               4, -1,  9, -5).Transpose();
-    // clang-format on
-
-    VectorType b(4, -5, -4, 9);
-    VectorType res = Solver::GaussPartialPivot(A, b);
-
-
-    VectorType expRes(1, 2, 3, 4);
-
-    BOOST_CHECK(CheckCloseArray(res.Data(), expRes.Data(), 100));
+    TestGauss<F32, 4, Pivot::PARTIAL, SolverType::SERIAL>();
 }
 
 
 
-BOOST_AUTO_TEST_CASE(Test_Gauss_Dense_4x4_F32_Serial)
+BOOST_AUTO_TEST_CASE(Test_Gauss_PartialPivot_4x4_F64_Serial)
 {
-    TestGaussDense_4x4<FixtureSerial, F32>();
+    TestGauss<F64, 4, Pivot::PARTIAL, SolverType::SERIAL>();
 }
 
 
 
-BOOST_AUTO_TEST_CASE(Test_Gauss_Dense_4x4_F64_Serial)
+BOOST_AUTO_TEST_CASE(Test_Gauss_PartialPivot_4x4_F32_SSE)
 {
-    TestGaussDense_4x4<FixtureSerial, F64>();
-}
-
-
-
-BOOST_AUTO_TEST_CASE(Test_Gauss_Dense_4x4_F32_SSE)
-{
-    TestGaussDense_4x4<FixtureSSE, F32>();
+    TestGauss<F32, 4, Pivot::PARTIAL, SolverType::SIMD>();
 }
 
 
 
 BOOST_AUTO_TEST_CASE(Test_Gauss_Dense_4x4_F64_SSE)
 {
-    TestGaussDense_4x4<FixtureSSE, F64>();
+    TestGauss<F64, 4, Pivot::PARTIAL, SolverType::SIMD>();
 }
 
 
 
 // Test 5x5 -----------------------------------------------------------------------------------------------------------
 
-template <template <typename, U32> class _fixture, typename _type>
-void TestGaussDense_5x5()
+BOOST_AUTO_TEST_CASE(Test_Gauss_PartialPivot_5x5_F32_Serial)
 {
-    using MatrixType = typename _fixture<_type, 5>::MatrixType;
-    using VectorType = typename _fixture<_type, 5>::VectorType;
-
-    // clang-format off
-    MatrixType A = MatrixType(5,  4, -3,  8, -9,
-                              3, -5,  2, -1,  1,
-                              9,  1, -7, -6,  7,
-                              4, -1,  6, -2, -3,
-                              7,  2,  7,  3, -9).Transpose();
-    // clang-format on
-
-    VectorType b(-9, 0, 1, -3, -1);
-    VectorType res = Solver::GaussPartialPivot(A, b);
-
-
-    VectorType expRes(1, 2, 3, 4, 5);
-
-    BOOST_CHECK(CheckCloseArray(res.Data(), expRes.Data(), 100));
+    TestGauss<F32, 5, Pivot::PARTIAL, SolverType::SERIAL>();
 }
 
 
 
-BOOST_AUTO_TEST_CASE(Test_Gauss_Dense_5x5_F32_Serial)
+BOOST_AUTO_TEST_CASE(Test_Gauss_PartialPivot_5x5_F64_Serial)
 {
-    TestGaussDense_5x5<FixtureSerial, F32>();
+    TestGauss<F64, 5, Pivot::PARTIAL, SolverType::SERIAL>();
 }
 
 
 
-BOOST_AUTO_TEST_CASE(Test_Gauss_Dense_5x5_F64_Serial)
+BOOST_AUTO_TEST_CASE(Test_Gauss_PartialPivot_5x5_F32_SSE)
 {
-    TestGaussDense_5x5<FixtureSerial, F64>();
-}
-
-
-
-BOOST_AUTO_TEST_CASE(Test_Gauss_Dense_5x5_F32_SSE)
-{
-    TestGaussDense_5x5<FixtureSSE, F32>();
+    TestGauss<F32, 5, Pivot::PARTIAL, SolverType::SIMD>();
 }
 
 
 
 BOOST_AUTO_TEST_CASE(Test_Gauss_Dense_5x5_F64_SSE)
 {
-    TestGaussDense_5x5<FixtureSSE, F64>();
+    TestGauss<F64, 5, Pivot::PARTIAL, SolverType::SIMD>();
 }
 
 
 
 // Test 7x7 -----------------------------------------------------------------------------------------------------------
 
-template <template <typename, U32> class _fixture, typename _type>
-void TestGaussDense_7x7()
+BOOST_AUTO_TEST_CASE(Test_Gauss_PartialPivot_7x7_F32_Serial)
 {
-    using MatrixType = typename _fixture<_type, 7>::MatrixType;
-    using VectorType = typename _fixture<_type, 7>::VectorType;
-
-    // clang-format off
-    MatrixType A = MatrixType(2,  4, -3,  5,  9, -3, -7,
-                              3, -5,  2, -1,  1,  1, -2,
-                              9,  1, -7, -6,  7,  2, -2,
-                              4, -1,  6, -2, -3, -2,  1,
-                              7,  2,  7,  3, -9, -5,  4,
-                             -5,  5, -5,  5,  5, -6,  1,
-                              5, -6,  3, -3,  6,  3, -6).Transpose();
-    // clang-format on
-
-    VectorType b(-1, -8, -1, -8, -3, 6, -4);
-    VectorType res = Solver::GaussPartialPivot(A, b);
-
-
-    VectorType expRes(1, 2, 3, 4, 5, 6, 7);
-
-    BOOST_CHECK(CheckCloseArray(res.Data(), expRes.Data(), 100));
+    TestGauss<F32, 7, Pivot::PARTIAL, SolverType::SERIAL>();
 }
 
 
 
-BOOST_AUTO_TEST_CASE(Test_Gauss_Dense_7x7_F32_Serial)
+BOOST_AUTO_TEST_CASE(Test_Gauss_PartialPivot_7x7_F64_Serial)
 {
-    TestGaussDense_7x7<FixtureSerial, F32>();
+    TestGauss<F64, 7, Pivot::PARTIAL, SolverType::SERIAL>();
 }
 
 
 
-BOOST_AUTO_TEST_CASE(Test_Gauss_Dense_7x7_F64_Serial)
+BOOST_AUTO_TEST_CASE(Test_Gauss_PartialPivot_7x7_F32_SSE)
 {
-    TestGaussDense_7x7<FixtureSerial, F64>();
-}
-
-
-
-BOOST_AUTO_TEST_CASE(Test_Gauss_Dense_7x7_F32_SSE)
-{
-    TestGaussDense_7x7<FixtureSSE, F32>();
+    TestGauss<F32, 7, Pivot::PARTIAL, SolverType::SIMD>();
 }
 
 
 
 BOOST_AUTO_TEST_CASE(Test_Gauss_Dense_7x7_F64_SSE)
 {
-    TestGaussDense_7x7<FixtureSSE, F64>();
+    TestGauss<F64, 7, Pivot::PARTIAL, SolverType::SIMD>();
 }
 
 
 
 // Test 8x8 -----------------------------------------------------------------------------------------------------------
 
-template <template <typename, U32> class _fixture, typename _type>
-void TestGaussDense_8x8()
+BOOST_AUTO_TEST_CASE(Test_Gauss_PartialPivot_8x8_F32_Serial)
 {
-    using MatrixType = typename _fixture<_type, 8>::MatrixType;
-    using VectorType = typename _fixture<_type, 8>::VectorType;
-
-    // clang-format off
-    MatrixType A = MatrixType(2,  4, -3,  5,  9, -3, -7,  1,
-                              3, -5,  2, -1,  1,  1, -3,  1,
-                              9,  1, -7, -6,  7,  2,  5, -7,
-                              4, -1,  6, -2, -3, -8, -3,  9,
-                              7,  2,  7,  3,  9, -5, -3, -4,
-                             -5,  5, -5,  5,  5, -5,  5, -5,
-                              5, -6,  3, -3,  2,  1, -6,  5,
-                              1, -2, -3, -4, -5,  6, -7,  8).Transpose();
-    // clang-format on
-
-    VectorType b(7, -7, -8, 0, 6, 0, 4, -2);
-    VectorType res = Solver::GaussPartialPivot(A, b);
-
-
-    VectorType expRes(1, 2, 3, 4, 5, 6, 7, 8);
-
-    BOOST_CHECK(CheckCloseArray(res.Data(), expRes.Data(), 100));
+    TestGauss<F32, 8, Pivot::PARTIAL, SolverType::SERIAL>();
 }
 
 
 
-BOOST_AUTO_TEST_CASE(Test_Gauss_Dense_8x8_F32_Serial)
+BOOST_AUTO_TEST_CASE(Test_Gauss_PartialPivot_8x8_F64_Serial)
 {
-    TestGaussDense_8x8<FixtureSerial, F32>();
+    TestGauss<F64, 8, Pivot::PARTIAL, SolverType::SERIAL>();
 }
 
 
 
-BOOST_AUTO_TEST_CASE(Test_Gauss_Dense_8x8_F64_Serial)
+BOOST_AUTO_TEST_CASE(Test_Gauss_PartialPivot_8x8_F32_SSE)
 {
-    TestGaussDense_8x8<FixtureSerial, F64>();
-}
-
-
-
-BOOST_AUTO_TEST_CASE(Test_Gauss_Dense_8x8_F32_SSE)
-{
-    TestGaussDense_8x8<FixtureSSE, F32>();
+    TestGauss<F32, 8, Pivot::PARTIAL, SolverType::SIMD>();
 }
 
 
 
 BOOST_AUTO_TEST_CASE(Test_Gauss_Dense_8x8_F64_SSE)
 {
-    TestGaussDense_8x8<FixtureSSE, F64>();
+    TestGauss<F64, 8, Pivot::PARTIAL, SolverType::SIMD>();
 }
 
 
 
 // Test 9x9 -----------------------------------------------------------------------------------------------------------
 
-template <template <typename, U32> class _fixture, typename _type>
-void TestGaussDense_9x9()
+BOOST_AUTO_TEST_CASE(Test_Gauss_PartialPivot_9x9_F32_Serial)
 {
-    using MatrixType = typename _fixture<_type, 9>::MatrixType;
-    using VectorType = typename _fixture<_type, 9>::VectorType;
-
-    // clang-format off
-    MatrixType A = MatrixType(-2,  4, -3,  5,  9, -1, -7,  1, -2,
-                               3, -6,  2, -1,  1,  1, -3,  1,  2,
-                               6,  1, -7, -6, -7,  4,  5, -7,  7,
-                               4, -1,  6, -2, -3,  8, -4,  9, -9,
-                               7,  2, -7,  3,  9, -5, -3, -4,  5,
-                              -5,  9, -5,  7,  5, -5,  8, -5, -4,
-                               5, -6,  5, -3,  2,  1, -6,  5, -2,
-                              -9, -2, -5, -4, -5,  6,  7, -8,  6,
-                               4,  5,  2, -7,  1,  8, -2,  3, -7).Transpose();
-    // clang-format on
-
-    VectorType b(-3, 9, -6, 8, 9, 1, -8, 6, -8);
-    VectorType res = Solver::GaussPartialPivot(A, b);
-
-
-    VectorType expRes(1, 2, 3, 4, 5, 6, 7, 8, 9);
-
-    BOOST_CHECK(CheckCloseArray(res.Data(), expRes.Data(), 100));
+    TestGauss<F32, 9, Pivot::PARTIAL, SolverType::SERIAL>();
 }
 
 
 
-BOOST_AUTO_TEST_CASE(Test_Gauss_Dense_9x9_F32_Serial)
+BOOST_AUTO_TEST_CASE(Test_Gauss_PartialPivot_9x9_F64_Serial)
 {
-    TestGaussDense_9x9<FixtureSerial, F32>();
+    TestGauss<F64, 9, Pivot::PARTIAL, SolverType::SERIAL>();
 }
 
 
 
-BOOST_AUTO_TEST_CASE(Test_Gauss_Dense_9x9_F64_Serial)
+BOOST_AUTO_TEST_CASE(Test_Gauss_PartialPivot_9x9_F32_SSE)
 {
-    TestGaussDense_9x9<FixtureSerial, F64>();
-}
-
-
-
-BOOST_AUTO_TEST_CASE(Test_Gauss_Dense_9x9_F32_SSE)
-{
-    TestGaussDense_9x9<FixtureSSE, F32>();
+    TestGauss<F32, 9, Pivot::PARTIAL, SolverType::SIMD>();
 }
 
 
 
 BOOST_AUTO_TEST_CASE(Test_Gauss_Dense_9x9_F64_SSE)
 {
-    TestGaussDense_9x9<FixtureSSE, F64>();
+    TestGauss<F64, 9, Pivot::PARTIAL, SolverType::SIMD>();
 }

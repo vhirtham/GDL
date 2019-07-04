@@ -31,9 +31,9 @@ namespace Solver
 //! @param A: Matrix
 //! @param b: Vector
 //! @return Result vector x
-template <typename _type, I32 _size, Pivot _pivot = Pivot::PARTIAL>
-[[nodiscard]] VecSerial<_type, _size, true> GaussPartialPivot(const MatSerial<_type, _size, _size>& A,
-                                                              const VecSerial<_type, _size, true>& b);
+template <Pivot _pivot = Pivot::PARTIAL, typename _type, I32 _size>
+[[nodiscard]] VecSerial<_type, _size, true> Gauss(const MatSerial<_type, _size, _size>& A,
+                                                  const VecSerial<_type, _size, true>& b);
 
 //! @brief Solves the linear system A * x = b by using a vectorized Gauss-Jordan algorithm with partial pivoting.
 //! @tparam _type: Data type
@@ -42,9 +42,9 @@ template <typename _type, I32 _size, Pivot _pivot = Pivot::PARTIAL>
 //! @param A: Matrix
 //! @param b: Vector
 //! @return Result vector x
-template <typename _type, I32 _size, Pivot _pivot = Pivot::PARTIAL>
-[[nodiscard]] VecSIMD<_type, _size, true> GaussPartialPivot(const MatSIMD<_type, _size, _size>& A,
-                                                            const VecSIMD<_type, _size, true>& b);
+template <Pivot _pivot = Pivot::PARTIAL, typename _type, I32 _size>
+[[nodiscard]] VecSIMD<_type, _size, true> Gauss(const MatSIMD<_type, _size, _size>& A,
+                                                const VecSIMD<_type, _size, true>& b);
 
 
 
@@ -67,7 +67,7 @@ public:
     //! @param A: Matrix
     //! @param b: Vector
     //! @return Result vector x
-    [[nodiscard]] inline static VectorType SolvePartialPivot(const MatrixType& A, const VectorType& b);
+    [[nodiscard]] inline static VectorType Solve(const MatrixType& A, const VectorType& b);
 
 private:
     //! @brief Performs the elimination step of the current iteration
@@ -109,7 +109,7 @@ public:
     //! @param A: Matrix
     //! @param b: Vector
     //! @return Result vector x
-    [[nodiscard]] inline static VectorType SolvePartialPivot(const MatrixType& A, const VectorType& b);
+    [[nodiscard]] inline static VectorType Solve(const MatrixType& A, const VectorType& b);
 
 private:
     //! @brief Performs the elimination step of the current iteration

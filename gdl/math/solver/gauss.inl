@@ -19,23 +19,21 @@ namespace GDL::Solver
 
 // --------------------------------------------------------------------------------------------------------------------
 
-template <typename _type, I32 _size, Pivot _pivot>
-VecSerial<_type, _size, true> GaussPartialPivot(const MatSerial<_type, _size, _size>& A,
-                                                const VecSerial<_type, _size, true>& b)
+template <Pivot _pivot, typename _type, I32 _size>
+VecSerial<_type, _size, true> Gauss(const MatSerial<_type, _size, _size>& A, const VecSerial<_type, _size, true>& b)
 {
-    return GaussDenseSerial<_type, _size, _pivot>::SolvePartialPivot(A, b);
+    return GaussDenseSerial<_type, _size, _pivot>::Solve(A, b);
 }
 
 
 
 // --------------------------------------------------------------------------------------------------------------------
 
-template <typename _type, I32 _size, Pivot _pivot>
-VecSIMD<_type, _size, true> GaussPartialPivot(const MatSIMD<_type, _size, _size>& A,
-                                              const VecSIMD<_type, _size, true>& b)
+template <Pivot _pivot, typename _type, I32 _size>
+VecSIMD<_type, _size, true> Gauss(const MatSIMD<_type, _size, _size>& A, const VecSIMD<_type, _size, true>& b)
 {
     using RegisterType = typename MatSIMD<_type, _size, _size>::RegisterType;
-    return GaussDenseSSE<RegisterType, _size, _pivot>::SolvePartialPivot(A, b);
+    return GaussDenseSSE<RegisterType, _size, _pivot>::Solve(A, b);
 }
 
 
@@ -44,7 +42,7 @@ VecSIMD<_type, _size, true> GaussPartialPivot(const MatSIMD<_type, _size, _size>
 
 template <typename _type, I32 _size, Pivot _pivot>
 inline typename GaussDenseSerial<_type, _size, _pivot>::VectorType
-GaussDenseSerial<_type, _size, _pivot>::SolvePartialPivot(const MatrixType& A, const VectorType& b)
+GaussDenseSerial<_type, _size, _pivot>::Solve(const MatrixType& A, const VectorType& b)
 {
 
     MatrixDataArray matData = A.Data();
@@ -117,7 +115,7 @@ inline void GaussDenseSerial<_type, _size, _pivot>::GaussStep(U32 iteration, Mat
 
 template <typename _registerType, I32 _size, Pivot _pivot>
 inline typename GaussDenseSSE<_registerType, _size, _pivot>::VectorType
-GaussDenseSSE<_registerType, _size, _pivot>::SolvePartialPivot(const MatrixType& A, const VectorType& b)
+GaussDenseSSE<_registerType, _size, _pivot>::Solve(const MatrixType& A, const VectorType& b)
 {
     using namespace GDL::simd;
 

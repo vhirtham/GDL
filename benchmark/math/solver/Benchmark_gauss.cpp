@@ -246,7 +246,7 @@ public:
 BENCHMARK_F(Serial, GaussDense8x8)(benchmark::State& state)
 {
     for (auto _ : state)
-        benchmark::DoNotOptimize(Solver::GaussPartialPivot(A8, b8));
+        benchmark::DoNotOptimize(Solver::Gauss<Solver::Pivot::PARTIAL>(A8, b8));
 }
 
 
@@ -254,7 +254,7 @@ BENCHMARK_F(Serial, GaussDense8x8)(benchmark::State& state)
 BENCHMARK_F(Serial, GaussDense16x16)(benchmark::State& state)
 {
     for (auto _ : state)
-        benchmark::DoNotOptimize(Solver::GaussPartialPivot(A16, b16));
+        benchmark::DoNotOptimize(Solver::Gauss<Solver::Pivot::PARTIAL>(A16, b16));
 }
 
 
@@ -262,7 +262,7 @@ BENCHMARK_F(Serial, GaussDense16x16)(benchmark::State& state)
 BENCHMARK_F(Serial, GaussDense32x32)(benchmark::State& state)
 {
     for (auto _ : state)
-        benchmark::DoNotOptimize(Solver::GaussPartialPivot(A32, b32));
+        benchmark::DoNotOptimize(Solver::Gauss<Solver::Pivot::PARTIAL>(A32, b32));
 }
 
 
@@ -270,7 +270,7 @@ BENCHMARK_F(Serial, GaussDense32x32)(benchmark::State& state)
 BENCHMARK_F(Serial, GaussDenseNxN)(benchmark::State& state)
 {
     for (auto _ : state)
-        benchmark::DoNotOptimize(Solver::GaussPartialPivot(AN, bN));
+        benchmark::DoNotOptimize(Solver::Gauss<Solver::Pivot::PARTIAL>(AN, bN));
 }
 
 
@@ -278,7 +278,7 @@ BENCHMARK_F(Serial, GaussDenseNxN)(benchmark::State& state)
 BENCHMARK_F(SIMD, GaussDense8x8)(benchmark::State& state)
 {
     for (auto _ : state)
-        benchmark::DoNotOptimize(Solver::GaussPartialPivot(A8, b8));
+        benchmark::DoNotOptimize(Solver::Gauss<Solver::Pivot::PARTIAL>(A8, b8));
 }
 
 
@@ -286,7 +286,7 @@ BENCHMARK_F(SIMD, GaussDense8x8)(benchmark::State& state)
 BENCHMARK_F(SIMD, GaussDense16x16)(benchmark::State& state)
 {
     for (auto _ : state)
-        benchmark::DoNotOptimize(Solver::GaussPartialPivot(A16, b16));
+        benchmark::DoNotOptimize(Solver::Gauss<Solver::Pivot::PARTIAL>(A16, b16));
 }
 
 
@@ -294,7 +294,7 @@ BENCHMARK_F(SIMD, GaussDense16x16)(benchmark::State& state)
 BENCHMARK_F(SIMD, GaussDense32x32)(benchmark::State& state)
 {
     for (auto _ : state)
-        benchmark::DoNotOptimize(Solver::GaussPartialPivot(A32, b32));
+        benchmark::DoNotOptimize(Solver::Gauss<Solver::Pivot::PARTIAL>(A32, b32));
 }
 
 
@@ -302,7 +302,7 @@ BENCHMARK_F(SIMD, GaussDense32x32)(benchmark::State& state)
 BENCHMARK_F(SIMD, GaussDenseNxN)(benchmark::State& state)
 {
     for (auto _ : state)
-        benchmark::DoNotOptimize(Solver::GaussPartialPivot(AN, bN));
+        benchmark::DoNotOptimize(Solver::Gauss<Solver::Pivot::PARTIAL>(AN, bN));
 }
 
 
