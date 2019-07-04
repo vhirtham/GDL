@@ -19,42 +19,39 @@ namespace GDL::Solver
 
 // --------------------------------------------------------------------------------------------------------------------
 
-template <typename _type, I32 _size>
+template <typename _type, I32 _size, Pivot _pivot>
 VecSerial<_type, _size, true> GaussPartialPivot(const MatSerial<_type, _size, _size>& A,
                                                 const VecSerial<_type, _size, true>& b)
 {
-    return GaussDenseSerial<_type, _size>::SolvePartialPivot(A, b);
+    return GaussDenseSerial<_type, _size, _pivot>::SolvePartialPivot(A, b);
 }
 
 
 
 // --------------------------------------------------------------------------------------------------------------------
 
-template <typename _type, I32 _size>
+template <typename _type, I32 _size, Pivot _pivot>
 VecSIMD<_type, _size, true> GaussPartialPivot(const MatSIMD<_type, _size, _size>& A,
                                               const VecSIMD<_type, _size, true>& b)
 {
     using RegisterType = typename MatSIMD<_type, _size, _size>::RegisterType;
-    return GaussDenseSSE<RegisterType, _size>::SolvePartialPivot(A, b);
+    return GaussDenseSSE<RegisterType, _size, _pivot>::SolvePartialPivot(A, b);
 }
 
 
 
 // --------------------------------------------------------------------------------------------------------------------
 
-template <typename _type, I32 _size>
-inline typename GaussDenseSerial<_type, _size>::VectorType
-GaussDenseSerial<_type, _size>::SolvePartialPivot(const MatrixType& A, const VectorType& b)
+template <typename _type, I32 _size, Pivot _pivot>
+inline typename GaussDenseSerial<_type, _size, _pivot>::VectorType
+GaussDenseSerial<_type, _size, _pivot>::SolvePartialPivot(const MatrixType& A, const VectorType& b)
 {
 
     MatrixDataArray matData = A.Data();
     VectorDataArray vecData = b.Data();
 
     for (U32 i = 0; i < _size; ++i)
-    {
-        PivotDenseSerial<_type, _size>::PivotingStep(i, matData, vecData);
-        EliminationStep(i, matData, vecData);
-    }
+        GaussStep(i, matData, vecData);
 
     return VectorType(vecData);
 }
@@ -63,9 +60,9 @@ GaussDenseSerial<_type, _size>::SolvePartialPivot(const MatrixType& A, const Vec
 
 // --------------------------------------------------------------------------------------------------------------------
 
-template <typename _type, I32 _size>
-inline void GaussDenseSerial<_type, _size>::EliminationStep(U32 iteration, MatrixDataArray& matData,
-                                                            VectorDataArray& vecData)
+template <typename _type, I32 _size, Pivot _pivot>
+inline void GaussDenseSerial<_type, _size, _pivot>::EliminationStep(U32 iteration, MatrixDataArray& matData,
+                                                                    VectorDataArray& vecData)
 {
     const U32 colStartIdx = iteration * _size;
     const U32 pivotIdx = colStartIdx + iteration;
@@ -98,9 +95,29 @@ inline void GaussDenseSerial<_type, _size>::EliminationStep(U32 iteration, Matri
 
 // --------------------------------------------------------------------------------------------------------------------
 
-template <typename _registerType, I32 _size>
-inline typename GaussDenseSSE<_registerType, _size>::VectorType
-GaussDenseSSE<_registerType, _size>::SolvePartialPivot(const MatrixType& A, const VectorType& b)
+template <typename _type, I32 _size, Pivot _pivot>
+inline void GaussDenseSerial<_type, _size, _pivot>::GaussStep(U32 iteration, MatrixDataArray& matData,
+                                                              VectorDataArray& vecData)
+{
+    PivotDenseSerial<_type, _size>::template PivotingStep<_pivot>(iteration, matData, vecData);
+    EliminationStep(iteration, matData, vecData);
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------------------------
+// SSE Version
+// --------------------------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------------------------
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+template <typename _registerType, I32 _size, Pivot _pivot>
+inline typename GaussDenseSSE<_registerType, _size, _pivot>::VectorType
+GaussDenseSSE<_registerType, _size, _pivot>::SolvePartialPivot(const MatrixType& A, const VectorType& b)
 {
     using namespace GDL::simd;
 
@@ -131,11 +148,11 @@ GaussDenseSSE<_registerType, _size>::SolvePartialPivot(const MatrixType& A, cons
 
 // --------------------------------------------------------------------------------------------------------------------
 
-template <typename _registerType, I32 _size>
+template <typename _registerType, I32 _size, Pivot _pivot>
 template <U32 _regValueIdx>
-inline void GaussDenseSSE<_registerType, _size>::EliminationStepRegister(U32 iteration, U32 regRowIdx,
-                                                                         MatrixDataArray& matData,
-                                                                         VectorDataArray& vecData)
+inline void GaussDenseSSE<_registerType, _size, _pivot>::EliminationStepRegister(U32 iteration, U32 regRowIdx,
+                                                                                 MatrixDataArray& matData,
+                                                                                 VectorDataArray& vecData)
 {
     using namespace GDL::simd;
 
@@ -174,17 +191,20 @@ inline void GaussDenseSSE<_registerType, _size>::EliminationStepRegister(U32 ite
 
 // --------------------------------------------------------------------------------------------------------------------
 
-template <typename _registerType, I32 _size>
+template <typename _registerType, I32 _size, Pivot _pivot>
 template <U32 _regValueIdx, U32 _maxRecursionDepth>
-inline void GaussDenseSSE<_registerType, _size>::GaussStepsRegister(U32 regRowIdx, MatrixDataArray& matData,
-                                                                    VectorDataArray& vecData)
+inline void GaussDenseSSE<_registerType, _size, _pivot>::GaussStepsRegister(U32 regRowIdx, MatrixDataArray& matData,
+                                                                            VectorDataArray& vecData)
 {
+
     static_assert(_maxRecursionDepth <= numRegisterValues,
                   "_maxRecursionDepth must be equal or smaller than the number of register values.");
 
     const U32 iteration = regRowIdx * numRegisterValues + _regValueIdx;
-    PivotDenseSSE<_registerType, _size>::template PivotingStepRegister<_regValueIdx>(iteration, regRowIdx, matData,
-                                                                                     vecData);
+
+
+    PivotDenseSSE<_registerType, _size>::template PivotingStepRegister<_regValueIdx, _pivot>(iteration, regRowIdx,
+                                                                                             matData, vecData);
     EliminationStepRegister<_regValueIdx>(iteration, regRowIdx, matData, vecData);
 
     if constexpr (_regValueIdx + 1 < _maxRecursionDepth)

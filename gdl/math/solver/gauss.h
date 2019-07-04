@@ -2,6 +2,7 @@
 
 #include "gdl/base/fundamentalTypes.h"
 #include "gdl/base/simd/utility.h"
+#include "gdl/math/solver/pivotEnum.h"
 
 #include <array>
 
@@ -24,18 +25,24 @@ namespace Solver
 
 
 //! @brief Solves the linear system A * x = b by using a Gauss-Jordan algorithm with partial pivoting.
+//! @tparam _type: Data type
+//! @tparam _size: Size of the system
+//! @tparam _pivot: Enum to select the pivoting strategy
 //! @param A: Matrix
 //! @param b: Vector
 //! @return Result vector x
-template <typename _type, I32 _size>
+template <typename _type, I32 _size, Pivot _pivot = Pivot::PARTIAL>
 [[nodiscard]] VecSerial<_type, _size, true> GaussPartialPivot(const MatSerial<_type, _size, _size>& A,
                                                               const VecSerial<_type, _size, true>& b);
 
 //! @brief Solves the linear system A * x = b by using a vectorized Gauss-Jordan algorithm with partial pivoting.
+//! @tparam _type: Data type
+//! @tparam _size: Size of the system
+//! @tparam _pivot: Enum to select the pivoting strategy
 //! @param A: Matrix
 //! @param b: Vector
 //! @return Result vector x
-template <typename _type, I32 _size>
+template <typename _type, I32 _size, Pivot _pivot = Pivot::PARTIAL>
 [[nodiscard]] VecSIMD<_type, _size, true> GaussPartialPivot(const MatSIMD<_type, _size, _size>& A,
                                                             const VecSIMD<_type, _size, true>& b);
 
@@ -46,7 +53,8 @@ template <typename _type, I32 _size>
 //! @brief Gauss-Jordan solver class for dense static systems
 //! @tparam _type: Data type
 //! @tparam _size: Size of the linear system
-template <typename _type, I32 _size>
+//! @tparam _pivot: Enum to select the pivoting strategy
+template <typename _type, I32 _size, Pivot _pivot = Pivot::PARTIAL>
 class GaussDenseSerial
 {
     using MatrixDataArray = std::array<_type, _size * _size>;
@@ -67,6 +75,12 @@ private:
     //! @param matData: Matrix data array (column major ordering)
     //! @param vecData: Vector data array
     inline static void EliminationStep(U32 iteration, MatrixDataArray& matData, VectorDataArray& vecData);
+
+    //! @brief Performs a single Gauss step (with pivoting if selected)
+    //! @param iteration: Number of the current iteration
+    //! @param matData: Matrix data array (column major ordering)
+    //! @param vecData: Vector data array
+    inline static void GaussStep(U32 iteration, MatrixDataArray& matData, VectorDataArray& vecData);
 };
 
 
@@ -74,7 +88,8 @@ private:
 //! @brief SSE based Gauss-Jordan solver class for dense static systems
 //! @tparam _registerType: SSE register type
 //! @tparam _size: Size of the linear system
-template <typename _registerType, I32 _size>
+//! @tparam _pivot: Enum to select the pivoting strategy
+template <typename _registerType, I32 _size, Pivot _pivot = Pivot::PARTIAL>
 class GaussDenseSSE
 {
     static constexpr U32 alignment = simd::alignmentBytes<_registerType>;
