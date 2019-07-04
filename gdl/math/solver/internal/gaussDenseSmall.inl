@@ -1,6 +1,6 @@
 #pragma once
 
-#include "gdl/math/solver/internal/GaussDenseSmall.h"
+#include "gdl/math/solver/internal/gaussDenseSmall.h"
 
 #include "gdl/base/approx.h"
 #include "gdl/base/exception.h"

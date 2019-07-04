@@ -8,7 +8,7 @@
 #include "gdl/base/simd/compareAll.h"
 #include "gdl/base/simd/dotProduct.h"
 #include "gdl/base/simd/swizzle.h"
-#include "gdl/math/solver/internal/GaussDenseSmall.h"
+#include "gdl/math/solver/internal/gaussDenseSmall.h"
 #include "gdl/math/serial/mat4Serial.h"
 #include "gdl/math/serial/vec4Serial.h"
 #include "gdl/math/simd/mat4fAVX.h"

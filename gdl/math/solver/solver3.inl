@@ -9,7 +9,7 @@
 #include "gdl/base/simd/directAccess.h"
 #include "gdl/base/simd/dotProduct.h"
 #include "gdl/base/simd/swizzle.h"
-#include "gdl/math/solver/internal/GaussDenseSmall.h"
+#include "gdl/math/solver/internal/gaussDenseSmall.h"
 #include "gdl/math/serial/mat3Serial.h"
 #include "gdl/math/serial/vec3Serial.h"
 #include "gdl/math/simd/mat3fSSE.h"
