@@ -204,60 +204,6 @@ BOOST_AUTO_TEST_CASE(Test_Gauss_Dense_No_Invalid_Pivot_Index_F64)
 
 
 
-// Test for singular matrix -------------------------------------------------------------------------------------------
-
-#ifndef NDEVEXCEPTION
-
-template <template <typename, U32> class _fixture, typename _type>
-void TestGaussDenseSingularMatrix()
-{
-    using MatrixType = typename _fixture<_type, 4>::MatrixType;
-    using VectorType = typename _fixture<_type, 4>::VectorType;
-
-    // clang-format off
-    MatrixType A = MatrixType(0,  4, -5,  4,
-                                                0, -5,  2, -1,
-                                                0, -5,  2, -1,
-                                                0, -1,  9, -5).Transpose();
-    // clang-format on
-
-    VectorType b(4, -5, -4, 9);
-    VectorType res;
-    BOOST_CHECK_THROW(res = Solver::Gauss(A, b), Exception);
-}
-
-
-
-BOOST_AUTO_TEST_CASE(Test_Gauss_Dense_Singular_F32_Serial)
-{
-    TestGaussDenseSingularMatrix<FixtureSerial, F32>();
-}
-
-
-
-BOOST_AUTO_TEST_CASE(Test_Gauss_Dense_Singular_F64_Serial)
-{
-    TestGaussDenseSingularMatrix<FixtureSerial, F64>();
-}
-
-
-
-BOOST_AUTO_TEST_CASE(Test_Gauss_Dense_Singular_F32_SSE)
-{
-    TestGaussDenseSingularMatrix<FixtureSSE, F32>();
-}
-
-
-
-BOOST_AUTO_TEST_CASE(Test_Gauss_Dense_Singular_F64_SSE)
-{
-    TestGaussDenseSingularMatrix<FixtureSSE, F64>();
-}
-
-#endif
-
-
-
 // --------------------------------------------------------------------------------------------------------------------
 
 using namespace GDL::Solver;
@@ -270,24 +216,33 @@ using SIMDSolverPtr = VecSIMD<_type, _size, true> (*)(const MatSIMD<_type, _size
                                                       const VecSIMD<_type, _size, true>&);
 
 
+
+// --------------------------------------------------------------------------------------------------------------------
+
 enum class SolverType
 {
     SERIAL,
     SIMD
 };
 
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
 template <typename _type, U32 _size, Pivot _pivot, SolverType _solverType>
 void TestGauss()
 {
+
+
     if constexpr (_solverType == SolverType::SERIAL)
     {
         SerialSolverPtr<_type, _size> solver = Solver::Gauss<_pivot, _type, _size>;
-        TestSolverResult<_type, _size>(solver);
+        TestSolver<_type, _size, _pivot>(solver);
     }
     else
     {
         SIMDSolverPtr<_type, _size> solver = Solver::Gauss<_pivot, _type, _size>;
-        TestSolverResult<_type, _size>(solver);
+        TestSolver<_type, _size, _pivot>(solver);
     }
 }
 

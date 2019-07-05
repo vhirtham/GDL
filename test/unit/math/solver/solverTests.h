@@ -5,12 +5,13 @@
 #include "gdl/math/serial/matSerial.h"
 #include "gdl/math/simd/vecSIMD.h"
 #include "gdl/math/simd/matSIMD.h"
+#include "gdl/math/solver/pivotEnum.h"
 
 #include "test/tools/arrayValueComparison.h"
 #include "test/tools/ExceptionChecks.h"
 
 using namespace GDL;
-
+using namespace GDL::Solver;
 
 
 template <typename _type, U32 _size>
@@ -153,8 +154,47 @@ std::array<_type, _size> GetResultData()
 
 
 
-template <typename _type, U32 _size, typename _solver>
+//#ifndef NDEVEXCEPTION
+
+
+
+template <typename _type, U32 _size, typename _solver, typename _matrix, typename _vector>
 void TestSolverResult(_solver solver)
+{
+    _matrix A = _matrix(GetTransposedMatrixData<_type, _size>()).Transpose();
+
+    _vector b(GetRhsData<_type, _size>());
+    _vector res = solver(A, b);
+
+
+    _vector expRes(GetResultData<_type, _size>());
+
+    BOOST_CHECK(CheckCloseArray(res.Data(), expRes.Data(), 100));
+}
+
+
+
+template <typename _type, U32 _size, typename _solver, typename _matrix, typename _vector>
+void TestSolverSingularMatrix(_solver solver)
+{
+    std::array<_type, _size* _size> matData = GetTransposedMatrixData<_type, _size>();
+
+    for (U32 i = 0; i < _size * _size; i += _size)
+        matData[i + _size - 1] = matData[i];
+
+
+    _matrix A = _matrix(matData).Transpose();
+
+    _vector b(GetRhsData<_type, _size>());
+    _vector res;
+
+    BOOST_CHECK_THROW(res = solver(A, b), Exception);
+}
+
+
+
+template <typename _type, U32 _size, Pivot _pivot, typename _solver>
+void TestSolver(_solver solver)
 {
     static bool alreadyTested = false;
 
@@ -164,15 +204,11 @@ void TestSolverResult(_solver solver)
     using Matrix = typename std::conditional<std::is_same<Vector, VecSIMD<_type, _size, true>>::value,
                                              MatSIMD<_type, _size, _size>, MatSerial<_type, _size, _size>>::type;
 
-    Matrix A = Matrix(GetTransposedMatrixData<_type, _size>()).Transpose();
 
-    Vector b(GetRhsData<_type, _size>());
-    Vector res = solver(A, b);
-
-
-    Vector expRes(GetResultData<_type, _size>());
-
-    BOOST_CHECK(CheckCloseArray(res.Data(), expRes.Data(), 100));
+    TestSolverResult<_type, _size, _solver, Matrix, Vector>(solver);
+#ifndef NDEVEXCEPTION
+    TestSolverSingularMatrix<_type, _size, _solver, Matrix, Vector>(solver);
+#endif // NDEVEXCEPTION
 
     alreadyTested = true;
 }
