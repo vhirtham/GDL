@@ -154,7 +154,13 @@ std::array<_type, _size> GetResultData()
 
 
 
-//#ifndef NDEVEXCEPTION
+template <typename _type, U32 _size, typename _solver, typename _matrix, typename _vector>
+void TestSolverTestcase(_solver solver, _matrix A, _vector b, _vector expRes)
+{
+    _vector res = solver(A, b);
+
+    BOOST_CHECK(CheckCloseArray(res.Data(), expRes.Data(), 100));
+}
 
 
 
@@ -164,12 +170,10 @@ void TestSolverResult(_solver solver)
     _matrix A = _matrix(GetTransposedMatrixData<_type, _size>()).Transpose();
 
     _vector b(GetRhsData<_type, _size>());
-    _vector res = solver(A, b);
-
 
     _vector expRes(GetResultData<_type, _size>());
 
-    BOOST_CHECK(CheckCloseArray(res.Data(), expRes.Data(), 100));
+    TestSolverTestcase<_type, _size, _solver, _matrix, _vector>(solver, A, b, expRes);
 }
 
 
@@ -193,6 +197,113 @@ void TestSolverSingularMatrix(_solver solver)
 
 
 
+template <U32 _size>
+auto GetIdentityPermutations()
+{
+    using permArr = std::array<U32, _size>;
+
+    if constexpr (_size == 2)
+        // clang-format off
+        return std::array<permArr, 2>{{{{0, 1}}, {{1, 0}}}};
+    // clang-format on
+
+
+    if constexpr (_size == 3)
+        // clang-format off
+        return std::array<permArr, 3>{{{{0, 1, 2}},
+                                       {{2, 1, 0}},
+                                       {{1, 2, 0}}}};
+    // clang-format on
+
+    if constexpr (_size == 4)
+        // clang-format off
+        return std::array<permArr, 3>{{{{0, 1, 2, 3}},
+                                       {{3, 2, 1, 0}},
+                                       {{1, 3, 2, 0}}}};
+    // clang-format on
+
+
+    if constexpr (_size == 5)
+        // clang-format off
+        return std::array<permArr, 3>{{{{0, 1, 2, 3, 4}},
+                                       {{4, 3, 2, 1, 0}},
+                                       {{3, 2, 4, 0, 1}}}};
+    // clang-format on
+
+
+    if constexpr (_size == 7)
+        // clang-format off
+        return std::array<permArr, 3>{{{{0, 1, 2, 3, 4, 5, 6}},
+                                       {{6, 5, 4, 3, 2, 1, 0}},
+                                       {{5, 3, 0, 4, 6, 1, 2}}}};
+    // clang-format on
+
+
+    if constexpr (_size == 8)
+        // clang-format off
+        return std::array<permArr, 3>{{{{0, 1, 2, 3, 4, 5, 6, 7}},
+                                       {{7, 6, 5, 4, 3, 2, 1, 0}},
+                                       {{3, 6, 0, 2, 7, 1, 4, 5}}}};
+    // clang-format on
+
+
+    if constexpr (_size == 9)
+        // clang-format off
+        return std::array<permArr, 3>{{{{0, 1, 2, 3, 4, 5, 6, 7, 8}},
+                                       {{8, 7, 6, 5, 4, 3, 2, 1, 0}},
+                                       {{5, 0, 4, 2, 3, 8, 7, 1, 6}}}};
+    // clang-format on
+}
+
+
+template <typename _type, U32 _size, typename _solver, typename _matrix, typename _vector>
+void TestSolverPivoting(_solver solver)
+{
+
+    auto permutations = GetIdentityPermutations<_size>();
+
+    for (U32 i = 0; i < permutations.size(); ++i)
+        for (U32 j = 0; j < _size; ++j)
+        {
+            if (permutations[i][j] >= _size)
+                THROW("Testcase invalid. Index must be in the range [0, system size]");
+            for (U32 k = j + 1; k < _size; ++k)
+                if (permutations[i][j] == permutations[i][k])
+                    THROW("Testcase invalid. Value found multiple times");
+        }
+
+
+    std::array<_type, _size> expValues;
+    std::array<_type, _size> vectorValues;
+    std::array<_type, _size * _size> matrixValues;
+
+    for (U32 i = 0; i < 2; ++i)
+    {
+        _type posNeg = (i < 1) ? -1. : 1.;
+        for (U32 j = 0; j < permutations.size(); ++j)
+        {
+            for (U32 k = 0; k < _size; ++k)
+            {
+                expValues[k] = static_cast<_type>(k);
+                vectorValues[k] = static_cast<_type>(permutations[j][k]) * posNeg;
+                for (U32 l = 0; l < _size; ++l)
+                    if (permutations[j][k] == l)
+                        matrixValues[l * _size + k] = 1 * posNeg;
+                    else
+                        matrixValues[l * _size + k] = 0;
+            }
+
+            _matrix A(matrixValues);
+            _vector b(vectorValues);
+            _vector expRes(expValues);
+
+            TestSolverTestcase<_type, _size, _solver, _matrix, _vector>(solver, A, b, expRes);
+        }
+    }
+}
+
+
+
 template <typename _type, U32 _size, Pivot _pivot, typename _solver>
 void TestSolver(_solver solver)
 {
@@ -206,6 +317,10 @@ void TestSolver(_solver solver)
 
 
     TestSolverResult<_type, _size, _solver, Matrix, Vector>(solver);
+
+    if constexpr (_pivot != Pivot::NONE)
+        TestSolverPivoting<_type, _size, _solver, Matrix, Vector>(solver);
+
 #ifndef NDEVEXCEPTION
     TestSolverSingularMatrix<_type, _size, _solver, Matrix, Vector>(solver);
 #endif // NDEVEXCEPTION
