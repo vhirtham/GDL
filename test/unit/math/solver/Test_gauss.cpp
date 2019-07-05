@@ -238,12 +238,12 @@ void TestGauss()
     if constexpr (_solverType == SolverType::SERIAL)
     {
         SerialSolverPtr<_type, _size> solver = Solver::Gauss<_pivot, _type, _size>;
-        TestSolver<_type, _size, _pivot>(solver);
+        SolverTests<_type, _size>::template TestSolver<_pivot>(solver);
     }
     else
     {
         SIMDSolverPtr<_type, _size> solver = Solver::Gauss<_pivot, _type, _size>;
-        TestSolver<_type, _size, _pivot>(solver);
+        SolverTests<_type, _size>::template TestSolver<_pivot>(solver);
     }
 }
 
