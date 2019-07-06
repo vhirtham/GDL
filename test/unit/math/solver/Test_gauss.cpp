@@ -15,115 +15,6 @@
 
 using namespace GDL;
 
-// Helper classes -----------------------------------------------------------------------------------------------------
-
-
-template <typename _type, U32 _size>
-struct FixtureSerial
-{
-    using MatrixType = MatSerial<_type, _size, _size>;
-    using VectorType = VecSerial<_type, _size>;
-};
-
-
-
-template <typename _type, U32 _size>
-struct FixtureSSE
-{
-    using MatrixType = MatSIMD<_type, _size, _size>;
-    using VectorType = VecSIMD<_type, _size>;
-};
-
-
-
-//// Test pivoting
-///------------------------------------------------------------------------------------------------------
-
-// template <template <typename, U32> class _fixture, typename _type, U32 _size, bool _neg = false>
-// void TestGaussDensePivotingTestcase(std::array<U32, _size> indices)
-//{
-//    using MatrixType = typename _fixture<_type, _size>::MatrixType;
-//    using VectorType = typename _fixture<_type, _size>::VectorType;
-
-
-//    for (U32 i = 0; i < _size; ++i)
-//    {
-//        if (indices[i] >= _size)
-//            THROW("Testcase invalid. Index must be in the range [0, system size]");
-//        for (U32 j = i + 1; j < _size; ++j)
-//            if (indices[i] == indices[j])
-//                THROW("Testcase invalid. Value found multiple times");
-//    }
-
-//    std::array<_type, _size> expRes;
-//    std::array<_type, _size> vectorValues;
-//    std::array<_type, _size * _size> matrixValues;
-
-//    _type posNeg = (_neg) ? -1. : 1.;
-
-//    for (U32 i = 0; i < _size; ++i)
-//    {
-//        expRes[i] = static_cast<_type>(i);
-//        vectorValues[i] = static_cast<_type>(indices[i]) * posNeg;
-//        for (U32 j = 0; j < _size; ++j)
-//            if (indices[i] == j)
-//                matrixValues[j * _size + i] = 1 * posNeg;
-//            else
-//                matrixValues[j * _size + i] = 0;
-//    }
-
-//    VectorType b(vectorValues);
-//    MatrixType A(matrixValues);
-
-//    VectorType res = Solver::Gauss(A, b);
-
-//    BOOST_CHECK(CheckCloseArray(res.Data(), expRes, 1));
-
-//    if constexpr (!_neg)
-//        TestGaussDensePivotingTestcase<_fixture, _type, _size, true>(indices);
-//}
-
-
-
-// template <template <typename, U32> class _fixture, typename _type>
-// void TestGaussDensePivoting()
-//{
-//    TestGaussDensePivotingTestcase<_fixture, _type, 3>({{2, 0, 1}});
-//    TestGaussDensePivotingTestcase<_fixture, _type, 5>({{0, 4, 2, 1, 3}});
-//    TestGaussDensePivotingTestcase<_fixture, _type, 8>({{0, 1, 2, 3, 4, 5, 6, 7}});
-//    TestGaussDensePivotingTestcase<_fixture, _type, 8>({{1, 5, 4, 2, 0, 7, 6, 3}});
-//    TestGaussDensePivotingTestcase<_fixture, _type, 9>({{7, 2, 6, 4, 0, 8, 3, 5, 1}});
-//    TestGaussDensePivotingTestcase<_fixture, _type, 16>({{13, 5, 1, 11, 12, 7, 8, 0, 3, 14, 2, 6, 9, 15, 4, 10}});
-//}
-
-
-
-// BOOST_AUTO_TEST_CASE(Test_Gauss_Dense_Pivoting_F32_Serial)
-//{
-//    TestGaussDensePivoting<FixtureSerial, F32>();
-//}
-
-
-
-// BOOST_AUTO_TEST_CASE(Test_Gauss_Dense_Pivoting_F64_Serial)
-//{
-//    TestGaussDensePivoting<FixtureSerial, F64>();
-//}
-
-
-
-// BOOST_AUTO_TEST_CASE(Test_Gauss_Dense_Pivoting_F32_SSE)
-//{
-//    TestGaussDensePivoting<FixtureSSE, F32>();
-//}
-
-
-
-// BOOST_AUTO_TEST_CASE(Test_Gauss_Dense_Pivoting_F64_SSE)
-//{
-//    TestGaussDensePivoting<FixtureSSE, F64>();
-//}
-
 
 
 // Test pivoting - no invalid pivot index -----------------------------------------------------------------------------
@@ -238,12 +129,12 @@ void TestGauss()
     if constexpr (_solverType == SolverType::SERIAL)
     {
         SerialSolverPtr<_type, _size> solver = Solver::Gauss<_pivot, _type, _size>;
-        SolverTests<_type, _size>::template TestSolver<_pivot>(solver);
+        SolverTests<_type, _size, decltype(solver)>::template TestSolver<_pivot>(solver);
     }
     else
     {
         SIMDSolverPtr<_type, _size> solver = Solver::Gauss<_pivot, _type, _size>;
-        SolverTests<_type, _size>::template TestSolver<_pivot>(solver);
+        SolverTests<_type, _size, decltype(solver)>::template TestSolver<_pivot>(solver);
     }
 }
 

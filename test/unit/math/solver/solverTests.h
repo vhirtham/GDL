@@ -14,11 +14,19 @@ using namespace GDL;
 using namespace GDL::Solver;
 
 
-template <typename _type, U32 _size>
+template <typename _type, U32 _size, typename _solver>
 class SolverTests
 {
+    static constexpr auto DetermineVectorType();
+
+    using Vector = typename std::result_of<decltype (&SolverTests::DetermineVectorType)()>::type;
+    static constexpr bool isSIMD = !std::is_same<Vector, VecSerial<_type, _size, true>>::value;
+    using Matrix =
+            typename std::conditional<isSIMD, MatSIMD<_type, _size, _size>, MatSerial<_type, _size, _size>>::type;
+
+
 public:
-    template <Pivot _pivot, typename _solver>
+    template <Pivot _pivot>
     static void TestSolver(_solver solver);
 
 private:
@@ -30,17 +38,14 @@ private:
 
 
 
-    template <typename _solver, typename _matrix, typename _vector>
-    static void TestSolverTestcase(_solver solver, _matrix A, _vector b, _vector expRes);
+    static void TestSolverTestcase(_solver solver, Matrix A, Vector b, Vector expRes);
 
 
 
-    template <typename _solver, typename _matrix, typename _vector>
     static void TestSolverResult(_solver solver);
 
 
 
-    template <typename _solver, typename _matrix, typename _vector>
     static void TestSolverSingularMatrix(_solver solver);
 
 
@@ -48,7 +53,6 @@ private:
     static auto GetIdentityPermutations();
 
 
-    template <typename _solver, typename _matrix, typename _vector>
     static void TestSolverPivoting(_solver solver);
 };
 

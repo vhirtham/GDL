@@ -6,27 +6,46 @@
 
 // --------------------------------------------------------------------------------------------------------------------
 
-template <typename _type, U32 _size>
-template <Pivot _pivot, typename _solver>
-void SolverTests<_type, _size>::TestSolver(_solver solver)
+template <typename _type, U32 _size, typename _solver>
+constexpr auto SolverTests<_type, _size, _solver>::DetermineVectorType()
+{
+    _solver solver;
+    decltype(solver({}, {})) vectortype;
+    return vectortype;
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+template <typename _type, U32 _size, typename _solver>
+template <Pivot _pivot>
+void SolverTests<_type, _size, _solver>::TestSolver(_solver solver)
 {
     static bool alreadyTested = false;
-
     EXCEPTION(alreadyTested, "Testcase already tested. Copy and paste error?");
 
-    using Vector = decltype(solver({}, {}));
-    using Matrix = typename std::conditional<std::is_same<Vector, VecSIMD<_type, _size, true>>::value,
-                                             MatSIMD<_type, _size, _size>, MatSerial<_type, _size, _size>>::type;
+
+    // using Vector = typename std::result_of<decltype (&SolverTests::DetermineVectorType)()>::type;
+    //    using Vector2 = decltype(solver({}, {}));
+    //    constexpr bool isSIMD = !std::is_same<Vector, VecSerial<_type, _size, true>>::value;
+    //    using Matrix =
+    //            typename std::conditional<isSIMD, MatSIMD<_type, _size, _size>, MatSerial<_type, _size, _size>>::type;
 
 
-    TestSolverResult<_solver, Matrix, Vector>(solver);
+    // Test result
+    TestSolverResult(solver);
 
+    // Test pivoting
     if constexpr (_pivot != Pivot::NONE)
-        TestSolverPivoting<_solver, Matrix, Vector>(solver);
+        TestSolverPivoting(solver);
 
+        // Test development exceptions
 #ifndef NDEVEXCEPTION
-    TestSolverSingularMatrix<_solver, Matrix, Vector>(solver);
+    TestSolverSingularMatrix(solver);
 #endif // NDEVEXCEPTION
+
+
 
     alreadyTested = true;
 }
@@ -35,8 +54,8 @@ void SolverTests<_type, _size>::TestSolver(_solver solver)
 
 // --------------------------------------------------------------------------------------------------------------------
 
-template <typename _type, U32 _size>
-auto SolverTests<_type, _size>::GetIdentityPermutations()
+template <typename _type, U32 _size, typename _solver>
+auto SolverTests<_type, _size, _solver>::GetIdentityPermutations()
 {
     using permArr = std::array<U32, _size>;
 
@@ -98,8 +117,8 @@ auto SolverTests<_type, _size>::GetIdentityPermutations()
 
 // --------------------------------------------------------------------------------------------------------------------
 
-template <typename _type, U32 _size>
-std::array<_type, _size> SolverTests<_type, _size>::GetResultData()
+template <typename _type, U32 _size, typename _solver>
+std::array<_type, _size> SolverTests<_type, _size, _solver>::GetResultData()
 {
     if constexpr (_size == 2)
         return {{1, 2}};
@@ -133,8 +152,8 @@ std::array<_type, _size> SolverTests<_type, _size>::GetResultData()
 
 // --------------------------------------------------------------------------------------------------------------------
 
-template <typename _type, U32 _size>
-std::array<_type, _size> SolverTests<_type, _size>::GetRhsData()
+template <typename _type, U32 _size, typename _solver>
+std::array<_type, _size> SolverTests<_type, _size, _solver>::GetRhsData()
 {
     if constexpr (_size == 2)
         return {{7, -7}};
@@ -167,8 +186,8 @@ std::array<_type, _size> SolverTests<_type, _size>::GetRhsData()
 
 // --------------------------------------------------------------------------------------------------------------------
 
-template <typename _type, U32 _size>
-std::array<_type, _size * _size> SolverTests<_type, _size>::GetTransposedMatrixData()
+template <typename _type, U32 _size, typename _solver>
+std::array<_type, _size * _size> SolverTests<_type, _size, _solver>::GetTransposedMatrixData()
 {
     if constexpr (_size == 2)
         // clang-format off
@@ -247,9 +266,8 @@ std::array<_type, _size * _size> SolverTests<_type, _size>::GetTransposedMatrixD
 
 // --------------------------------------------------------------------------------------------------------------------
 
-template <typename _type, U32 _size>
-template <typename _solver, typename _matrix, typename _vector>
-void SolverTests<_type, _size>::TestSolverPivoting(_solver solver)
+template <typename _type, U32 _size, typename _solver>
+void SolverTests<_type, _size, _solver>::TestSolverPivoting(_solver solver)
 {
 
     auto permutations = GetIdentityPermutations();
@@ -285,9 +303,9 @@ void SolverTests<_type, _size>::TestSolverPivoting(_solver solver)
                         matrixValues[l * _size + k] = 0;
             }
 
-            _matrix A(matrixValues);
-            _vector b(vectorValues);
-            _vector expRes(expValues);
+            Matrix A(matrixValues);
+            Vector b(vectorValues);
+            Vector expRes(expValues);
 
             TestSolverTestcase(solver, A, b, expRes);
         }
@@ -298,15 +316,14 @@ void SolverTests<_type, _size>::TestSolverPivoting(_solver solver)
 
 // --------------------------------------------------------------------------------------------------------------------
 
-template <typename _type, U32 _size>
-template <typename _solver, typename _matrix, typename _vector>
-void SolverTests<_type, _size>::TestSolverResult(_solver solver)
+template <typename _type, U32 _size, typename _solver>
+void SolverTests<_type, _size, _solver>::TestSolverResult(_solver solver)
 {
-    _matrix A = _matrix(GetTransposedMatrixData()).Transpose();
+    Matrix A = Matrix(GetTransposedMatrixData()).Transpose();
 
-    _vector b(GetRhsData());
+    Vector b(GetRhsData());
 
-    _vector expRes(GetResultData());
+    Vector expRes(GetResultData());
 
     TestSolverTestcase(solver, A, b, expRes);
 }
@@ -315,9 +332,8 @@ void SolverTests<_type, _size>::TestSolverResult(_solver solver)
 
 // --------------------------------------------------------------------------------------------------------------------
 
-template <typename _type, U32 _size>
-template <typename _solver, typename _matrix, typename _vector>
-void SolverTests<_type, _size>::TestSolverSingularMatrix(_solver solver)
+template <typename _type, U32 _size, typename _solver>
+void SolverTests<_type, _size, _solver>::TestSolverSingularMatrix(_solver solver)
 {
     std::array<_type, _size* _size> matData = GetTransposedMatrixData();
 
@@ -325,10 +341,10 @@ void SolverTests<_type, _size>::TestSolverSingularMatrix(_solver solver)
         matData[i + _size - 1] = matData[i];
 
 
-    _matrix A = _matrix(matData).Transpose();
+    Matrix A = Matrix(matData).Transpose();
 
-    _vector b(GetRhsData());
-    _vector res;
+    Vector b(GetRhsData());
+    Vector res;
 
     BOOST_CHECK_THROW(res = solver(A, b), Exception);
 }
@@ -337,11 +353,10 @@ void SolverTests<_type, _size>::TestSolverSingularMatrix(_solver solver)
 
 // --------------------------------------------------------------------------------------------------------------------
 
-template <typename _type, U32 _size>
-template <typename _solver, typename _matrix, typename _vector>
-void SolverTests<_type, _size>::TestSolverTestcase(_solver solver, _matrix A, _vector b, _vector expRes)
+template <typename _type, U32 _size, typename _solver>
+void SolverTests<_type, _size, _solver>::TestSolverTestcase(_solver solver, Matrix A, Vector b, Vector expRes)
 {
-    _vector res = solver(A, b);
+    Vector res = solver(A, b);
 
     BOOST_CHECK(CheckCloseArray(res.Data(), expRes.Data(), 100));
 }
