@@ -3,13 +3,9 @@
 #include "gdl/base/fundamentalTypes.h"
 #include "gdl/base/functionTraits.h"
 #include "gdl/math/serial/vecSerial.h"
-#include "gdl/math/serial/matSerial.h"
-#include "gdl/math/simd/vecSIMD.h"
-#include "gdl/math/simd/matSIMD.h"
 #include "gdl/math/solver/pivotEnum.h"
 
-#include "test/tools/arrayValueComparison.h"
-#include "test/tools/ExceptionChecks.h"
+
 
 using namespace GDL;
 using namespace GDL::Solver;
@@ -33,34 +29,51 @@ class SolverTests
 
 
 public:
+    //! @brief Runs all tests for the solver
+    //! @tparam _pivot: Pivoting strategy
+    //! @param solver: Solver
     template <Pivot _pivot>
-    static void TestSolver(_solver solver);
+    static void RunTests(_solver solver);
 
 private:
-    static std::array<_type, _size * _size> GetTransposedMatrixData();
+    //! @param Gets multiple arrays of permutations
+    //! @return Arrays with permutations
+    static auto GetPermutationIndices();
 
-    static std::array<_type, _size> GetRhsData();
-
+    //! @brief Gets the expected result vector data depending on the system size
+    //! @return Expeted result vector data
     static std::array<_type, _size> GetResultData();
 
+    //! @brief Gets rhs vector data depending on the system size
+    //! @return Rhs Vector data
+    static std::array<_type, _size> GetRhsData();
 
+    //! @brief Gets the Matrix data depending on the system size
+    //! @return Matrix data
+    static std::array<_type, _size * _size> GetTransposedMatrixData();
 
-    static void TestSolverTestcase(_solver solver, Matrix A, Vector b, Vector expRes);
+    //! @brief Solves the passed system with the passed solver and checks the result
+    //! @param solver: Solver
+    //! @param A: Matrix
+    //! @param r: Right-hand side vector
+    //! @param expRes: Expected result
+    static void SolveAndCheckResult(_solver solver, Matrix A, Vector r, Vector expRes);
 
+    //! @brief Tests if the pivoting strategy prevents zeros on the main diagonal.
+    //! @param solver: Solver
+    static void TestPivoting(_solver solver);
 
+    //! @brief Solves a size dependent system and checks the result for correctness
+    //! @param solver: Solver
+    static void TestSolve(_solver solver);
 
-    static void TestSolverResult(_solver solver);
+    //! @brief Checks if unused register values are ignored during the pivoting step.
+    //! @param solver: Solver
+    static void TestSIMDPivotingUnusedValues(_solver solver);
 
-
-
-    static void TestSolverSingularMatrix(_solver solver);
-
-
-
-    static auto GetIdentityPermutations();
-
-
-    static void TestSolverPivoting(_solver solver);
+    //! @brief Checks if a singular matrix exception causes an exception
+    //! @param solver: Solver
+    static void TestSingularMatrixException(_solver solver);
 };
 
 #include "test/unit/math/solver/solverTests.inl"

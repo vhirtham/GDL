@@ -3,27 +3,38 @@
 #include "test/unit/math/solver/solverTests.h"
 
 
+#include "test/tools/arrayValueComparison.h"
+#include "test/tools/ExceptionChecks.h"
+
+#include "gdl/base/simd/directAccess.h"
+
 
 // --------------------------------------------------------------------------------------------------------------------
 
 template <typename _type, U32 _size, typename _solver>
 template <Pivot _pivot>
-void SolverTests<_type, _size, _solver>::TestSolver(_solver solver)
+void SolverTests<_type, _size, _solver>::RunTests(_solver solver)
 {
     static bool alreadyTested = false;
     EXCEPTION(alreadyTested, "Testcase already tested. Copy and paste error?");
 
 
-    // Test result
-    TestSolverResult(solver);
+    TestSolve(solver);
 
-    // Test pivoting
     if constexpr (_pivot != Pivot::NONE)
-        TestSolverPivoting(solver);
+        TestPivoting(solver);
 
-        // Test development exceptions
+    if constexpr (isSIMD)
+    {
+        using RegisterType = typename Matrix::RegisterType;
+        constexpr U32 numRegisterValues = simd::numRegisterValues<RegisterType>;
+
+        if constexpr (_size % numRegisterValues > 0)
+            TestSIMDPivotingUnusedValues(solver);
+    }
+
 #ifndef NDEVEXCEPTION
-    TestSolverSingularMatrix(solver);
+    TestSingularMatrixException(solver);
 #endif // NDEVEXCEPTION
 
 
@@ -36,7 +47,7 @@ void SolverTests<_type, _size, _solver>::TestSolver(_solver solver)
 // --------------------------------------------------------------------------------------------------------------------
 
 template <typename _type, U32 _size, typename _solver>
-auto SolverTests<_type, _size, _solver>::GetIdentityPermutations()
+auto SolverTests<_type, _size, _solver>::GetPermutationIndices()
 {
     using permArr = std::array<U32, _size>;
 
@@ -248,10 +259,22 @@ std::array<_type, _size * _size> SolverTests<_type, _size, _solver>::GetTranspos
 // --------------------------------------------------------------------------------------------------------------------
 
 template <typename _type, U32 _size, typename _solver>
-void SolverTests<_type, _size, _solver>::TestSolverPivoting(_solver solver)
+void SolverTests<_type, _size, _solver>::SolveAndCheckResult(_solver solver, Matrix A, Vector r, Vector expRes)
+{
+    Vector res = solver(A, r);
+
+    BOOST_CHECK(CheckCloseArray(res.Data(), expRes.Data(), 100));
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+template <typename _type, U32 _size, typename _solver>
+void SolverTests<_type, _size, _solver>::TestPivoting(_solver solver)
 {
 
-    auto permutations = GetIdentityPermutations();
+    auto permutations = GetPermutationIndices();
 
     for (U32 i = 0; i < permutations.size(); ++i)
         for (U32 j = 0; j < _size; ++j)
@@ -288,7 +311,7 @@ void SolverTests<_type, _size, _solver>::TestSolverPivoting(_solver solver)
             Vector b(vectorValues);
             Vector expRes(expValues);
 
-            TestSolverTestcase(solver, A, b, expRes);
+            SolveAndCheckResult(solver, A, b, expRes);
         }
     }
 }
@@ -298,7 +321,7 @@ void SolverTests<_type, _size, _solver>::TestSolverPivoting(_solver solver)
 // --------------------------------------------------------------------------------------------------------------------
 
 template <typename _type, U32 _size, typename _solver>
-void SolverTests<_type, _size, _solver>::TestSolverResult(_solver solver)
+void SolverTests<_type, _size, _solver>::TestSolve(_solver solver)
 {
     Matrix A = Matrix(GetTransposedMatrixData()).Transpose();
 
@@ -306,7 +329,7 @@ void SolverTests<_type, _size, _solver>::TestSolverResult(_solver solver)
 
     Vector expRes(GetResultData());
 
-    TestSolverTestcase(solver, A, b, expRes);
+    SolveAndCheckResult(solver, A, b, expRes);
 }
 
 
@@ -314,7 +337,59 @@ void SolverTests<_type, _size, _solver>::TestSolverResult(_solver solver)
 // --------------------------------------------------------------------------------------------------------------------
 
 template <typename _type, U32 _size, typename _solver>
-void SolverTests<_type, _size, _solver>::TestSolverSingularMatrix(_solver solver)
+void SolverTests<_type, _size, _solver>::TestSIMDPivotingUnusedValues([[maybe_unused]] _solver solver)
+{
+    if constexpr (isSIMD)
+    {
+        using RegisterType = typename Matrix::RegisterType;
+        constexpr U32 numColRegisters = simd::CalcMinNumArrayRegisters<RegisterType>(_size);
+        constexpr U32 numRegisterValues = simd::numRegisterValues<RegisterType>;
+
+        std::array<_type, _size> expectedResultValues;
+        std::array<_type, _size> vectorValues;
+        std::array<RegisterType, numColRegisters * _size> matrixValues{{0}};
+
+        for (U32 i = 0; i < _size; ++i)
+        {
+            expectedResultValues[i] = static_cast<_type>(i);
+            vectorValues[i] = static_cast<_type>(i);
+            for (U32 j = 0; j < numColRegisters; ++j)
+                for (U32 k = 0; k < numRegisterValues; ++k)
+                {
+                    U32 globalColIdx = j * numRegisterValues + k;
+                    if (globalColIdx == i)
+                        simd::SetValue(matrixValues[i * numColRegisters + j], k, 1);
+                    else if (globalColIdx < _size)
+                        simd::SetValue(matrixValues[i * numColRegisters + j], k, 0);
+                    else
+                        simd::SetValue(matrixValues[i * numColRegisters + j], k, 500);
+                }
+        }
+
+
+        Matrix A(matrixValues);
+        Vector b(vectorValues);
+        Vector expRes(expectedResultValues);
+
+        for (U32 i = 0; i < _size; ++i)
+            for (U32 j = 0; j < numColRegisters; ++j)
+                for (U32 k = 0; k < numRegisterValues; ++k)
+                    if (j * numRegisterValues + k >= _size)
+                        EXCEPTION(simd::GetValue(matrixValues[i * numColRegisters + j], k) != Approx<_type>(500),
+                                  "Testcase invalid. Unused memory of matrix is not set as expected.");
+
+        SolveAndCheckResult(solver, A, b, expRes);
+    }
+    else
+        THROW("Function should only be used by SIMD based solvers");
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+template <typename _type, U32 _size, typename _solver>
+void SolverTests<_type, _size, _solver>::TestSingularMatrixException(_solver solver)
 {
     std::array<_type, _size* _size> matData = GetTransposedMatrixData();
 
@@ -328,16 +403,4 @@ void SolverTests<_type, _size, _solver>::TestSolverSingularMatrix(_solver solver
     Vector res;
 
     BOOST_CHECK_THROW(res = solver(A, b), Exception);
-}
-
-
-
-// --------------------------------------------------------------------------------------------------------------------
-
-template <typename _type, U32 _size, typename _solver>
-void SolverTests<_type, _size, _solver>::TestSolverTestcase(_solver solver, Matrix A, Vector b, Vector expRes)
-{
-    Vector res = solver(A, b);
-
-    BOOST_CHECK(CheckCloseArray(res.Data(), expRes.Data(), 100));
 }
