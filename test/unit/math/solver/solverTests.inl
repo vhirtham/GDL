@@ -7,18 +7,6 @@
 // --------------------------------------------------------------------------------------------------------------------
 
 template <typename _type, U32 _size, typename _solver>
-constexpr auto SolverTests<_type, _size, _solver>::DetermineVectorType()
-{
-    _solver solver;
-    decltype(solver({}, {})) vectortype;
-    return vectortype;
-}
-
-
-
-// --------------------------------------------------------------------------------------------------------------------
-
-template <typename _type, U32 _size, typename _solver>
 template <Pivot _pivot>
 void SolverTests<_type, _size, _solver>::TestSolver(_solver solver)
 {

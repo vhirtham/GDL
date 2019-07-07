@@ -2,8 +2,9 @@ add_subdirectory(simd)
 
 addTest(approx)
 addTest(freeFunctions)
-addTest(tolerance)
 addTest(outputFile)
+addTest(functionTraits)
+
 
 addTest(string
     resources/memory/generalPurposeMemory.cpp
@@ -13,4 +14,5 @@ addTest(string
     resources/memory/memoryStack.cpp)
 
 addTest(timer)
+addTest(tolerance)
 

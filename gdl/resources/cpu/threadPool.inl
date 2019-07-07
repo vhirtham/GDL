@@ -79,7 +79,7 @@ void ThreadPool<_numQueues>::StartThreads(U32 numThreads, _function&& function, 
                   "The threads main loop function should not return any value.");
     static_assert(std::is_same<void, std::result_of_t<decltype(initFunction)()>>::value,
                   "The threads initialization function should not return any value.");
-    static_assert(std::is_same<void, std::result_of_t<decltype(initFunction)()>>::value,
+    static_assert(std::is_same<void, std::result_of_t<decltype(deinitFunction)()>>::value,
                   "The threads deinitialization function should not return any value.");
 
     std::lock_guard<std::mutex> lock(mMutexThreads);
