@@ -75,11 +75,11 @@ template <typename _function, typename _initFunction, typename _deinitFunction>
 void ThreadPool<_numQueues>::StartThreads(U32 numThreads, _function&& function, _initFunction&& initFunction,
                                           _deinitFunction&& deinitFunction)
 {
-    static_assert(std::is_same<void, std::result_of_t<decltype(function)()>>::value,
+    static_assert(std::is_same<void, std::invoke_result_t<decltype(function)>>::value,
                   "The threads main loop function should not return any value.");
-    static_assert(std::is_same<void, std::result_of_t<decltype(initFunction)()>>::value,
+    static_assert(std::is_same<void, std::invoke_result_t<decltype(initFunction)>>::value,
                   "The threads initialization function should not return any value.");
-    static_assert(std::is_same<void, std::result_of_t<decltype(initFunction)()>>::value,
+    static_assert(std::is_same<void, std::invoke_result_t<decltype(initFunction)>>::value,
                   "The threads deinitialization function should not return any value.");
 
     std::lock_guard<std::mutex> lock(mMutexThreads);
@@ -191,7 +191,7 @@ template <typename _function, typename... _args>
 void ThreadPool<_numQueues>::Submit(const I32 queueNum, _function&& function, _args&&... args)
 {
     using ResultType =
-            std::result_of_t<decltype(std::bind(std::forward<_function>(function), std::forward<_args>(args)...))()>;
+            std::invoke_result_t<decltype(std::bind(std::forward<_function>(function), std::forward<_args>(args)...))>;
     using TaskType = Task<decltype(std::bind(std::forward<_function>(function), std::forward<_args>(args)...))>;
 
 

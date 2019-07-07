@@ -66,7 +66,7 @@ template <typename... _args>
 TestStruct TestFuncVariadic(_args...)
 {
     return TestStruct();
-};
+}
 
 
 

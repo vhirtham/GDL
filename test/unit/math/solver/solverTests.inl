@@ -14,13 +14,6 @@ void SolverTests<_type, _size, _solver>::TestSolver(_solver solver)
     EXCEPTION(alreadyTested, "Testcase already tested. Copy and paste error?");
 
 
-    // using Vector = typename std::result_of<decltype (&SolverTests::DetermineVectorType)()>::type;
-    //    using Vector2 = decltype(solver({}, {}));
-    //    constexpr bool isSIMD = !std::is_same<Vector, VecSerial<_type, _size, true>>::value;
-    //    using Matrix =
-    //            typename std::conditional<isSIMD, MatSIMD<_type, _size, _size>, MatSerial<_type, _size, _size>>::type;
-
-
     // Test result
     TestSolverResult(solver);
 
