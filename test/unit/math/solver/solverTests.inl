@@ -243,7 +243,7 @@ std::array<_type, _size * _size> SolverTests<_type, _size, _solver>::GetTranspos
     if constexpr (_size == 9)
         // clang-format off
             return {{-2,  4, -3,  5,  9, -1, -7,  1, -2,
-                      3, -6,  2, -1,  1,  1, -3,  1,  2,
+                      1, -5,  2, -1,  1,  1, -3,  1,  2,
                       6,  1, -7, -6, -7,  4,  5, -7,  7,
                       4, -1,  6, -2, -3,  8, -4,  9, -9,
                       7,  2, -7,  3,  9, -5, -3, -4,  5,

@@ -65,7 +65,7 @@ inline void GaussDenseSerial<_type, _size, _pivot>::EliminationStep(U32 iteratio
     const U32 colStartIdx = iteration * _size;
     const U32 pivotIdx = colStartIdx + iteration;
 
-    DEV_EXCEPTION(matData[pivotIdx] == ApproxZero<_type>(1, 10), "Singular matrix - system not solveable");
+    DEV_EXCEPTION(matData[pivotIdx] == ApproxZero<_type>(1, 100), "Singular matrix - system not solveable");
 
     std::array<_type, _size> rowMult;
 
@@ -97,7 +97,9 @@ template <typename _type, I32 _size, Pivot _pivot>
 inline void GaussDenseSerial<_type, _size, _pivot>::GaussStep(U32 iteration, MatrixDataArray& matData,
                                                               VectorDataArray& vecData)
 {
-    PivotDenseSerial<_type, _size>::template PivotingStep<_pivot>(iteration, matData, vecData);
+    if constexpr (_pivot != Pivot::NONE)
+        PivotDenseSerial<_type, _size>::template PivotingStep<_pivot>(iteration, matData, vecData);
+
     EliminationStep(iteration, matData, vecData);
 }
 
@@ -157,7 +159,7 @@ inline void GaussDenseSSE<_registerType, _size, _pivot>::EliminationStepRegister
     const U32 colStartIdx = iteration * numColRegisters;
     const U32 actRowRegIdx = colStartIdx + regRowIdx;
 
-    DEV_EXCEPTION(GetValue<_regValueIdx>(matData[actRowRegIdx]) == ApproxZero<ValueType>(1, 10),
+    DEV_EXCEPTION(GetValue<_regValueIdx>(matData[actRowRegIdx]) == ApproxZero<ValueType>(1, 100),
                   "Singular matrix - system not solveable");
 
 
@@ -200,9 +202,9 @@ inline void GaussDenseSSE<_registerType, _size, _pivot>::GaussStepsRegister(U32 
 
     const U32 iteration = regRowIdx * numRegisterValues + _regValueIdx;
 
-
-    PivotDenseSSE<_registerType, _size>::template PivotingStepRegister<_regValueIdx, _pivot>(iteration, regRowIdx,
-                                                                                             matData, vecData);
+    if constexpr (_pivot != Pivot::NONE)
+        PivotDenseSSE<_registerType, _size>::template PivotingStepRegister<_regValueIdx, _pivot>(iteration, regRowIdx,
+                                                                                                 matData, vecData);
     EliminationStepRegister<_regValueIdx>(iteration, regRowIdx, matData, vecData);
 
     if constexpr (_regValueIdx + 1 < _maxRecursionDepth)
