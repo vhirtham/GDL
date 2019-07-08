@@ -263,7 +263,7 @@ void SolverTests<_type, _size, _solver>::SolveAndCheckResult(_solver solver, Mat
 {
     Vector res = solver(A, r);
 
-    BOOST_CHECK(CheckCloseArray(res.Data(), expRes.Data(), 100));
+    BOOST_CHECK(CheckCloseArray(res.Data(), expRes.Data(), 150));
 }
 
 
