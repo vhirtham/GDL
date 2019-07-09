@@ -11,7 +11,7 @@ using namespace GDL;
 
 // Fixture definition -------------------------------------------------------------------------------------------------
 
-template <template <typename, I32, bool> class _vector, typename _type, bool _isCol>
+template <template <typename, U32, bool> class _vector, typename _type, bool _isCol>
 struct Fixture
 {
     _vector<_type, 16, _isCol> a =
@@ -22,7 +22,7 @@ struct Fixture
 
 // Construction and Data function -------------------------------------------------------------------------------------
 
-template <template <typename, I32, bool> class _vector, typename _type, bool _isClol>
+template <template <typename, U32, bool> class _vector, typename _type, bool _isClol>
 void CtorDataTest()
 {
     _vector<_type, 16, _isClol> a;
@@ -89,7 +89,7 @@ BOOST_AUTO_TEST_CASE(Construction_SSE)
 
 // Operator[] test ----------------------------------------------------------------------------------------------------
 
-template <template <typename, I32, bool> class _vector, typename _type, I32 _size, bool _isCol>
+template <template <typename, U32, bool> class _vector, typename _type, U32 _size, bool _isCol>
 void DirectAccessOperatorVectorTest(const _vector<_type, _size, _isCol>& vector)
 {
     std::array<_type, _size> data = vector.Data();
@@ -102,7 +102,7 @@ void DirectAccessOperatorVectorTest(const _vector<_type, _size, _isCol>& vector)
 
 
 
-template <template <typename, I32, bool> class _vector, typename _type>
+template <template <typename, U32, bool> class _vector, typename _type>
 void DirectAccessOperatorTest()
 {
     Fixture<_vector, _type, true> fixtureC;

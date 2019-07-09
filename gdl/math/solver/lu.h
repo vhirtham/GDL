@@ -10,13 +10,13 @@
 namespace GDL
 {
 
-template <typename _type, I32, I32>
+template <typename _type, U32, U32>
 class MatSerial;
-template <typename _type, I32, I32>
+template <typename _type, U32, U32>
 class MatSIMD;
-template <typename _type, I32, bool>
+template <typename _type, U32, bool>
 class VecSerial;
-template <typename _type, I32, bool>
+template <typename _type, U32, bool>
 class VecSIMD;
 
 namespace Solver
@@ -31,7 +31,7 @@ namespace Solver
 //! @param A: Matrix
 //! @param r: Vector
 //! @return Result vector x
-template <Pivot _pivot = Pivot::PARTIAL, typename _type, I32 _size>
+template <Pivot _pivot = Pivot::PARTIAL, typename _type, U32 _size>
 [[nodiscard]] VecSerial<_type, _size, true> LU(const MatSerial<_type, _size, _size>& A,
                                                const VecSerial<_type, _size, true>& r);
 
@@ -112,12 +112,16 @@ private:
     //! @param r: Data of the right-hand side vector
     static inline void ForwardSubstitution(const MatrixDataArray& lu, VectorDataArray& r);
 
+    //! @brief Returns a vector that is permuted the same way as the factorized matrix
+    //! @param r: Vector
+    //! @param factorization: Factorization data
+    //! @return Permuted verctor
     static inline VectorDataArray GetPermutedVectorData(const VectorType& r, const Factorization& factorization);
 };
 
 
 
-template <typename _registerType, I32 _size, Pivot _pivot = Pivot::PARTIAL>
+template <typename _registerType, U32 _size, Pivot _pivot = Pivot::PARTIAL>
 class LUDenseSSE
 {
 };

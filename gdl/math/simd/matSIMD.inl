@@ -19,7 +19,7 @@ namespace GDL
 
 
 
-template <typename _type, I32 _rows, I32 _cols>
+template <typename _type, U32 _rows, U32 _cols>
 MatSIMD<_type, _rows, _cols>::MatSIMD()
     : mData{{0}}
 {
@@ -28,7 +28,7 @@ MatSIMD<_type, _rows, _cols>::MatSIMD()
 
 
 
-template <typename _type, I32 _rows, I32 _cols>
+template <typename _type, U32 _rows, U32 _cols>
 template <typename... _args>
 MatSIMD<_type, _rows, _cols>::MatSIMD(_args... args)
 {
@@ -38,7 +38,7 @@ MatSIMD<_type, _rows, _cols>::MatSIMD(_args... args)
 
 
 
-template <typename _type, I32 _rows, I32 _cols>
+template <typename _type, U32 _rows, U32 _cols>
 MatSIMD<_type, _rows, _cols>::MatSIMD(const std::array<_type, _rows * _cols>& data)
 {
     if constexpr (_rows % mNumRegisterEntries == 0)
@@ -60,7 +60,7 @@ MatSIMD<_type, _rows, _cols>::MatSIMD(const std::array<_type, _rows * _cols>& da
 
 
 
-template <typename _type, I32 _rows, I32 _cols>
+template <typename _type, U32 _rows, U32 _cols>
 MatSIMD<_type, _rows, _cols>::MatSIMD(const DataArray& data)
     : mData{data}
 {
@@ -69,14 +69,14 @@ MatSIMD<_type, _rows, _cols>::MatSIMD(const DataArray& data)
 
 
 
-template <typename _type, I32 _rows, I32 _cols>
+template <typename _type, U32 _rows, U32 _cols>
 MatSIMD<_type, _rows, _cols>::MatSIMD(bool)
 {
 }
 
 
 
-template <typename _type, I32 _rows, I32 _cols>
+template <typename _type, U32 _rows, U32 _cols>
 _type MatSIMD<_type, _rows, _cols>::operator()(const U32 row, const U32 col) const
 {
     assert(row < _rows && col < _cols);
@@ -85,7 +85,7 @@ _type MatSIMD<_type, _rows, _cols>::operator()(const U32 row, const U32 col) con
 
 
 
-template <typename _type, I32 _rows, I32 _cols>
+template <typename _type, U32 _rows, U32 _cols>
 bool MatSIMD<_type, _rows, _cols>::operator==(const MatSIMD& rhs) const
 {
     bool result = true;
@@ -112,7 +112,7 @@ bool MatSIMD<_type, _rows, _cols>::operator==(const MatSIMD& rhs) const
 
 
 
-template <typename _type, I32 _rows, I32 _cols>
+template <typename _type, U32 _rows, U32 _cols>
 bool MatSIMD<_type, _rows, _cols>::operator!=(const MatSIMD& rhs) const
 {
     return !operator==(rhs);
@@ -120,7 +120,7 @@ bool MatSIMD<_type, _rows, _cols>::operator!=(const MatSIMD& rhs) const
 
 
 
-template <typename _type, I32 _rows, I32 _cols>
+template <typename _type, U32 _rows, U32 _cols>
 MatSIMD<_type, _rows, _cols>& MatSIMD<_type, _rows, _cols>::operator+=(const MatSIMD<_type, _rows, _cols>& rhs)
 {
     for (U32 i = 0; i < mData.size(); ++i)
@@ -130,7 +130,7 @@ MatSIMD<_type, _rows, _cols>& MatSIMD<_type, _rows, _cols>::operator+=(const Mat
 
 
 
-template <typename _type, I32 _rows, I32 _cols>
+template <typename _type, U32 _rows, U32 _cols>
 MatSIMD<_type, _rows, _cols> MatSIMD<_type, _rows, _cols>::operator+(const MatSIMD<_type, _rows, _cols>& rhs) const
 {
     MatSIMD<_type, _rows, _cols> result{true};
@@ -141,7 +141,7 @@ MatSIMD<_type, _rows, _cols> MatSIMD<_type, _rows, _cols>::operator+(const MatSI
 
 
 
-template <typename _type, I32 _rows, I32 _cols>
+template <typename _type, U32 _rows, U32 _cols>
 void MatSIMD<_type, _rows, _cols>::TransposeFullBlocks(MatSIMD<_type, _cols, _rows>& result) const
 {
     constexpr U32 rowsBlock = _rows / mNumRegisterEntries;
@@ -156,39 +156,39 @@ void MatSIMD<_type, _rows, _cols>::TransposeFullBlocks(MatSIMD<_type, _cols, _ro
             if constexpr (mNumRegisterEntries == 2)
             {
                 simd::Transpose(mData[firstRegisterIndexSrc + 0 * mNumRegistersPerCol],
-                               mData[firstRegisterIndexSrc + 1 * mNumRegistersPerCol],
-                               result.mData[firstRegisterIndexRes + 0 * result.mNumRegistersPerCol],
-                               result.mData[firstRegisterIndexRes + 1 * result.mNumRegistersPerCol]);
+                                mData[firstRegisterIndexSrc + 1 * mNumRegistersPerCol],
+                                result.mData[firstRegisterIndexRes + 0 * result.mNumRegistersPerCol],
+                                result.mData[firstRegisterIndexRes + 1 * result.mNumRegistersPerCol]);
             }
             else if constexpr (mNumRegisterEntries == 4)
             {
                 simd::Transpose(mData[firstRegisterIndexSrc + 0 * mNumRegistersPerCol],
-                               mData[firstRegisterIndexSrc + 1 * mNumRegistersPerCol],
-                               mData[firstRegisterIndexSrc + 2 * mNumRegistersPerCol],
-                               mData[firstRegisterIndexSrc + 3 * mNumRegistersPerCol],
-                               result.mData[firstRegisterIndexRes + 0 * result.mNumRegistersPerCol],
-                               result.mData[firstRegisterIndexRes + 1 * result.mNumRegistersPerCol],
-                               result.mData[firstRegisterIndexRes + 2 * result.mNumRegistersPerCol],
-                               result.mData[firstRegisterIndexRes + 3 * result.mNumRegistersPerCol]);
+                                mData[firstRegisterIndexSrc + 1 * mNumRegistersPerCol],
+                                mData[firstRegisterIndexSrc + 2 * mNumRegistersPerCol],
+                                mData[firstRegisterIndexSrc + 3 * mNumRegistersPerCol],
+                                result.mData[firstRegisterIndexRes + 0 * result.mNumRegistersPerCol],
+                                result.mData[firstRegisterIndexRes + 1 * result.mNumRegistersPerCol],
+                                result.mData[firstRegisterIndexRes + 2 * result.mNumRegistersPerCol],
+                                result.mData[firstRegisterIndexRes + 3 * result.mNumRegistersPerCol]);
             }
             else if constexpr (mNumRegisterEntries == 8)
             {
                 simd::Transpose(mData[firstRegisterIndexSrc + 0 * mNumRegistersPerCol],
-                               mData[firstRegisterIndexSrc + 1 * mNumRegistersPerCol],
-                               mData[firstRegisterIndexSrc + 2 * mNumRegistersPerCol],
-                               mData[firstRegisterIndexSrc + 3 * mNumRegistersPerCol],
-                               mData[firstRegisterIndexSrc + 4 * mNumRegistersPerCol],
-                               mData[firstRegisterIndexSrc + 5 * mNumRegistersPerCol],
-                               mData[firstRegisterIndexSrc + 6 * mNumRegistersPerCol],
-                               mData[firstRegisterIndexSrc + 7 * mNumRegistersPerCol],
-                               result.mData[firstRegisterIndexRes + 0 * result.mNumRegistersPerCol],
-                               result.mData[firstRegisterIndexRes + 1 * result.mNumRegistersPerCol],
-                               result.mData[firstRegisterIndexRes + 2 * result.mNumRegistersPerCol],
-                               result.mData[firstRegisterIndexRes + 3 * result.mNumRegistersPerCol],
-                               result.mData[firstRegisterIndexRes + 4 * result.mNumRegistersPerCol],
-                               result.mData[firstRegisterIndexRes + 5 * result.mNumRegistersPerCol],
-                               result.mData[firstRegisterIndexRes + 6 * result.mNumRegistersPerCol],
-                               result.mData[firstRegisterIndexRes + 7 * result.mNumRegistersPerCol]);
+                                mData[firstRegisterIndexSrc + 1 * mNumRegistersPerCol],
+                                mData[firstRegisterIndexSrc + 2 * mNumRegistersPerCol],
+                                mData[firstRegisterIndexSrc + 3 * mNumRegistersPerCol],
+                                mData[firstRegisterIndexSrc + 4 * mNumRegistersPerCol],
+                                mData[firstRegisterIndexSrc + 5 * mNumRegistersPerCol],
+                                mData[firstRegisterIndexSrc + 6 * mNumRegistersPerCol],
+                                mData[firstRegisterIndexSrc + 7 * mNumRegistersPerCol],
+                                result.mData[firstRegisterIndexRes + 0 * result.mNumRegistersPerCol],
+                                result.mData[firstRegisterIndexRes + 1 * result.mNumRegistersPerCol],
+                                result.mData[firstRegisterIndexRes + 2 * result.mNumRegistersPerCol],
+                                result.mData[firstRegisterIndexRes + 3 * result.mNumRegistersPerCol],
+                                result.mData[firstRegisterIndexRes + 4 * result.mNumRegistersPerCol],
+                                result.mData[firstRegisterIndexRes + 5 * result.mNumRegistersPerCol],
+                                result.mData[firstRegisterIndexRes + 6 * result.mNumRegistersPerCol],
+                                result.mData[firstRegisterIndexRes + 7 * result.mNumRegistersPerCol]);
             }
             else
                 EXCEPTION(true, "Not implemented for given register size");
@@ -197,10 +197,10 @@ void MatSIMD<_type, _rows, _cols>::TransposeFullBlocks(MatSIMD<_type, _cols, _ro
 
 
 
-template <typename _type, I32 _rows, I32 _cols>
+template <typename _type, U32 _rows, U32 _cols>
 template <bool _hasSparseRows, bool _hasSparseCols, U32 _count, typename... _args>
 void MatSIMD<_type, _rows, _cols>::TransposeSparseBlocks(MatSIMD<_type, _cols, _rows>& result, U32 indexBlock,
-                                                        _args&... args) const
+                                                         _args&... args) const
 {
     static_assert(_hasSparseRows || _hasSparseCols, "This function cant be used with non sparse blocks");
 
@@ -241,7 +241,7 @@ void MatSIMD<_type, _rows, _cols>::TransposeSparseBlocks(MatSIMD<_type, _cols, _
 
 
 
-template <typename _type, I32 _rows, I32 _cols>
+template <typename _type, U32 _rows, U32 _cols>
 MatSIMD<_type, _cols, _rows> MatSIMD<_type, _rows, _cols>::Transpose() const
 {
     MatSIMD<_type, _cols, _rows> transposed;
@@ -264,7 +264,7 @@ MatSIMD<_type, _cols, _rows> MatSIMD<_type, _rows, _cols>::Transpose() const
 
 
 
-template <typename _type, I32 _rows, I32 _cols>
+template <typename _type, U32 _rows, U32 _cols>
 U32 MatSIMD<_type, _rows, _cols>::Rows() const
 {
     return _rows;
@@ -272,7 +272,7 @@ U32 MatSIMD<_type, _rows, _cols>::Rows() const
 
 
 
-template <typename _type, I32 _rows, I32 _cols>
+template <typename _type, U32 _rows, U32 _cols>
 U32 MatSIMD<_type, _rows, _cols>::Cols() const
 {
     return _cols;
@@ -280,7 +280,7 @@ U32 MatSIMD<_type, _rows, _cols>::Cols() const
 
 
 
-template <typename _type, I32 _rows, I32 _cols>
+template <typename _type, U32 _rows, U32 _cols>
 void MatSIMD<_type, _rows, _cols>::SetZero()
 {
     std::memset(&mData, 0, sizeof(mData));
@@ -288,7 +288,7 @@ void MatSIMD<_type, _rows, _cols>::SetZero()
 
 
 
-template <typename _type, I32 _rows, I32 _cols>
+template <typename _type, U32 _rows, U32 _cols>
 const std::array<_type, _rows * _cols> MatSIMD<_type, _rows, _cols>::Data() const
 {
     std::array<_type, _rows * _cols> data;
@@ -309,7 +309,7 @@ const std::array<_type, _rows * _cols> MatSIMD<_type, _rows, _cols>::Data() cons
 
 
 
-template <typename _type, I32 _rows, I32 _cols>
+template <typename _type, U32 _rows, U32 _cols>
 const typename MatSIMD<_type, _rows, _cols>::DataArray& MatSIMD<_type, _rows, _cols>::DataSSE() const
 {
     return mData;
@@ -317,7 +317,7 @@ const typename MatSIMD<_type, _rows, _cols>::DataArray& MatSIMD<_type, _rows, _c
 
 
 
-template <typename _type, I32 _rows, I32 _cols>
+template <typename _type, U32 _rows, U32 _cols>
 bool MatSIMD<_type, _rows, _cols>::IsInternalDataValid() const
 {
     static_assert(sizeof(decltype(mData)) == sizeof(RegisterType) * mNumRegisters); // Array needs to be compact
@@ -332,8 +332,8 @@ bool MatSIMD<_type, _rows, _cols>::IsInternalDataValid() const
 
 
 
-template <typename _type, I32 _rows, I32 _cols>
-template <I32 _rowsRhs, I32 _colsRhs>
+template <typename _type, U32 _rows, U32 _cols>
+template <U32 _rowsRhs, U32 _colsRhs>
 MatSIMD<_type, _rows, _colsRhs> MatSIMD<_type, _rows, _cols>::
 operator*(const MatSIMD<_type, _rowsRhs, _colsRhs>& rhs) const
 {
@@ -355,11 +355,11 @@ operator*(const MatSIMD<_type, _rowsRhs, _colsRhs>& rhs) const
 
 
 
-template <typename _type, I32 _rows, I32 _cols>
-template <I32 _rowsRhs, I32 _colsRhs, U32 _numMultipliedRegisters>
+template <typename _type, U32 _rows, U32 _cols>
+template <U32 _rowsRhs, U32 _colsRhs, U32 _numMultipliedRegisters>
 inline void MatSIMD<_type, _rows, _cols>::MultiplicationInnerLoops(MatSIMD<_type, _rows, _colsRhs>& result,
-                                                                  const MatSIMD<_type, _rowsRhs, _colsRhs>& rhs,
-                                                                  U32 j) const
+                                                                   const MatSIMD<_type, _rowsRhs, _colsRhs>& rhs,
+                                                                   U32 j) const
 {
     constexpr U32 registersPerColRhs = simd::CalcMinNumArrayRegisters<RegisterType>(_rowsRhs);
 
@@ -379,27 +379,27 @@ inline void MatSIMD<_type, _rows, _cols>::MultiplicationInnerLoops(MatSIMD<_type
 
 
 
-template <typename _type, I32 _rows, I32 _cols>
+template <typename _type, U32 _rows, U32 _cols>
 template <U32 _numOperations, U32 _count>
 typename MatSIMD<_type, _rows, _cols>::RegisterType
 MatSIMD<_type, _rows, _cols>::MultiplyAddRegisters(const RegisterType rhsValues, const RegisterType currentValue,
-                                                  const U32 currentBlockIndex) const
+                                                   const U32 currentBlockIndex) const
 {
     static_assert(_numOperations <= mNumRegisterEntries && _numOperations > 0, "Invalid number of operations.");
 
 
     if constexpr (_count + 1 == _numOperations)
         return _mm_fmadd(mData[currentBlockIndex + _count * mNumRegistersPerCol],
-                            simd::BroadcastAcrossLanes<_count>(rhsValues), currentValue);
+                         simd::BroadcastAcrossLanes<_count>(rhsValues), currentValue);
     else
-        return _mm_fmadd(
-                mData[currentBlockIndex + _count * mNumRegistersPerCol], simd::BroadcastAcrossLanes<_count>(rhsValues),
-                MultiplyAddRegisters<_numOperations, _count + 1>(rhsValues, currentValue, currentBlockIndex));
+        return _mm_fmadd(mData[currentBlockIndex + _count * mNumRegistersPerCol],
+                         simd::BroadcastAcrossLanes<_count>(rhsValues),
+                         MultiplyAddRegisters<_numOperations, _count + 1>(rhsValues, currentValue, currentBlockIndex));
 }
 
 
 
-template <typename _type, I32 _rows, I32 _cols>
+template <typename _type, U32 _rows, U32 _cols>
 std::ostream& operator<<(std::ostream& os, const MatSIMD<_type, _rows, _cols>& mat)
 {
     for (U32 i = 0; i < _rows; ++i)

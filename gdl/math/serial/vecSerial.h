@@ -11,10 +11,10 @@ namespace GDL
 //! @tparam _type: Data type of the vector
 //! @tparam _size: Number of rows
 //! @tparam _isCol: If true, the vector is treated as column vector, otherwise as row vector
-template <typename _type, I32 _size, bool _isCol = true>
+template <typename _type, U32 _size, bool _isCol = true>
 class VecSerial
 {
-    template <typename _type2, I32 _size2, bool _isCol2>
+    template <typename _type2, U32 _size2, bool _isCol2>
     friend class VecSerial;
 
     std::array<_type, _size> mData;
@@ -54,7 +54,7 @@ public:
 //! @param os: Reference to offstream object
 //! @param vec: Vector
 //! @return Reference to offstream object
-template <typename _type, I32 _size, bool _isCol>
+template <typename _type, U32 _size, bool _isCol>
 inline std::ostream& operator<<(std::ostream& os, const VecSerial<_type, _size, _isCol>& vec);
 
 

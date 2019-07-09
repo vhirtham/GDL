@@ -17,7 +17,7 @@ namespace GDL::Solver
 
 // --------------------------------------------------------------------------------------------------------------------
 
-template <Pivot _pivot, typename _type, I32 _size>
+template <Pivot _pivot, typename _type, U32 _size>
 VecSerial<_type, _size, true> LU(const MatSerial<_type, _size, _size>& A, const VecSerial<_type, _size, true>& r)
 {
     return LUDenseSerial<_type, _size, _pivot>::Solve(A, r);

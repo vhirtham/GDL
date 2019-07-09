@@ -10,13 +10,13 @@
 namespace GDL
 {
 
-template <typename _type, I32, I32>
+template <typename _type, U32, U32>
 class MatSerial;
-template <typename _type, I32, I32>
+template <typename _type, U32, U32>
 class MatSIMD;
-template <typename _type, I32, bool>
+template <typename _type, U32, bool>
 class VecSerial;
-template <typename _type, I32, bool>
+template <typename _type, U32, bool>
 class VecSIMD;
 
 namespace Solver
@@ -31,7 +31,7 @@ namespace Solver
 //! @param A: Matrix
 //! @param b: Vector
 //! @return Result vector x
-template <Pivot _pivot = Pivot::PARTIAL, typename _type, I32 _size>
+template <Pivot _pivot = Pivot::PARTIAL, typename _type, U32 _size>
 [[nodiscard]] VecSerial<_type, _size, true> Gauss(const MatSerial<_type, _size, _size>& A,
                                                   const VecSerial<_type, _size, true>& b);
 
@@ -42,7 +42,7 @@ template <Pivot _pivot = Pivot::PARTIAL, typename _type, I32 _size>
 //! @param A: Matrix
 //! @param b: Vector
 //! @return Result vector x
-template <Pivot _pivot = Pivot::PARTIAL, typename _type, I32 _size>
+template <Pivot _pivot = Pivot::PARTIAL, typename _type, U32 _size>
 [[nodiscard]] VecSIMD<_type, _size, true> Gauss(const MatSIMD<_type, _size, _size>& A,
                                                 const VecSIMD<_type, _size, true>& b);
 
@@ -54,7 +54,7 @@ template <Pivot _pivot = Pivot::PARTIAL, typename _type, I32 _size>
 //! @tparam _type: Data type
 //! @tparam _size: Size of the linear system
 //! @tparam _pivot: Enum to select the pivoting strategy
-template <typename _type, I32 _size, Pivot _pivot = Pivot::PARTIAL>
+template <typename _type, U32 _size, Pivot _pivot = Pivot::PARTIAL>
 class GaussDenseSerial
 {
     using MatrixDataArray = std::array<_type, _size * _size>;
@@ -89,7 +89,7 @@ private:
 //! @tparam _registerType: SSE register type
 //! @tparam _size: Size of the linear system
 //! @tparam _pivot: Enum to select the pivoting strategy
-template <typename _registerType, I32 _size, Pivot _pivot = Pivot::PARTIAL>
+template <typename _registerType, U32 _size, Pivot _pivot = Pivot::PARTIAL>
 class GaussDenseSSE
 {
     static constexpr U32 alignment = simd::alignmentBytes<_registerType>;

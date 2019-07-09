@@ -13,7 +13,7 @@ namespace GDL
 {
 
 
-template <typename _type, I32 _rows, I32 _cols>
+template <typename _type, U32 _rows, U32 _cols>
 MatSerial<_type, _rows, _cols>::MatSerial()
     : mData{{0}}
 {
@@ -21,7 +21,7 @@ MatSerial<_type, _rows, _cols>::MatSerial()
 
 
 
-template <typename _type, I32 _rows, I32 _cols>
+template <typename _type, U32 _rows, U32 _cols>
 template <typename... _args>
 MatSerial<_type, _rows, _cols>::MatSerial(_args... args)
     : mData{{static_cast<_type>(args)...}}
@@ -31,7 +31,7 @@ MatSerial<_type, _rows, _cols>::MatSerial(_args... args)
 
 
 
-template <typename _type, I32 _rows, I32 _cols>
+template <typename _type, U32 _rows, U32 _cols>
 MatSerial<_type, _rows, _cols>::MatSerial(const std::array<_type, _rows * _cols>& data)
     : mData(data)
 {
@@ -40,7 +40,7 @@ MatSerial<_type, _rows, _cols>::MatSerial(const std::array<_type, _rows * _cols>
 
 
 
-template <typename _type, I32 _rows, I32 _cols>
+template <typename _type, U32 _rows, U32 _cols>
 _type MatSerial<_type, _rows, _cols>::operator()(const U32 row, const U32 col) const
 {
     return mData[row + col * _rows];
@@ -48,7 +48,7 @@ _type MatSerial<_type, _rows, _cols>::operator()(const U32 row, const U32 col) c
 
 
 
-template <typename _type, I32 _rows, I32 _cols>
+template <typename _type, U32 _rows, U32 _cols>
 bool MatSerial<_type, _rows, _cols>::operator==(const MatSerial& rhs) const
 {
     bool result = true;
@@ -59,7 +59,7 @@ bool MatSerial<_type, _rows, _cols>::operator==(const MatSerial& rhs) const
 
 
 
-template <typename _type, I32 _rows, I32 _cols>
+template <typename _type, U32 _rows, U32 _cols>
 bool MatSerial<_type, _rows, _cols>::operator!=(const MatSerial& rhs) const
 {
     return !operator==(rhs);
@@ -67,7 +67,7 @@ bool MatSerial<_type, _rows, _cols>::operator!=(const MatSerial& rhs) const
 
 
 
-template <typename _type, I32 _rows, I32 _cols>
+template <typename _type, U32 _rows, U32 _cols>
 MatSerial<_type, _rows, _cols>& MatSerial<_type, _rows, _cols>::operator+=(const MatSerial<_type, _rows, _cols>& rhs)
 {
     for (U32 i = 0; i < mData.size(); ++i)
@@ -77,7 +77,7 @@ MatSerial<_type, _rows, _cols>& MatSerial<_type, _rows, _cols>::operator+=(const
 
 
 
-template <typename _type, I32 _rows, I32 _cols>
+template <typename _type, U32 _rows, U32 _cols>
 MatSerial<_type, _rows, _cols> MatSerial<_type, _rows, _cols>::operator+(const MatSerial<_type, _rows, _cols>& rhs)
 {
     MatSerial<_type, _rows, _cols> result;
@@ -88,7 +88,7 @@ MatSerial<_type, _rows, _cols> MatSerial<_type, _rows, _cols>::operator+(const M
 
 
 
-template <typename _type, I32 _rows, I32 _cols>
+template <typename _type, U32 _rows, U32 _cols>
 MatSerial<_type, _cols, _rows> MatSerial<_type, _rows, _cols>::Transpose() const
 {
     MatSerial<_type, _cols, _rows> transposed;
@@ -100,8 +100,8 @@ MatSerial<_type, _cols, _rows> MatSerial<_type, _rows, _cols>::Transpose() const
 
 
 
-template <typename _type, I32 _rows, I32 _cols>
-template <I32 _rowsRhs, I32 _colsRhs>
+template <typename _type, U32 _rows, U32 _cols>
+template <U32 _rowsRhs, U32 _colsRhs>
 MatSerial<_type, _rows, _colsRhs> MatSerial<_type, _rows, _cols>::
 operator*(const MatSerial<_type, _rowsRhs, _colsRhs>& rhs) const
 {
@@ -121,7 +121,7 @@ operator*(const MatSerial<_type, _rowsRhs, _colsRhs>& rhs) const
 
 
 
-template <typename _type, I32 _rows, I32 _cols>
+template <typename _type, U32 _rows, U32 _cols>
 U32 MatSerial<_type, _rows, _cols>::Rows() const
 {
     return _rows;
@@ -129,7 +129,7 @@ U32 MatSerial<_type, _rows, _cols>::Rows() const
 
 
 
-template <typename _type, I32 _rows, I32 _cols>
+template <typename _type, U32 _rows, U32 _cols>
 U32 MatSerial<_type, _rows, _cols>::Cols() const
 {
     return _cols;
@@ -137,7 +137,7 @@ U32 MatSerial<_type, _rows, _cols>::Cols() const
 
 
 
-template <typename _type, I32 _rows, I32 _cols>
+template <typename _type, U32 _rows, U32 _cols>
 std::array<_type, _rows * _cols> MatSerial<_type, _rows, _cols>::Data() const
 {
     return mData;
@@ -145,7 +145,7 @@ std::array<_type, _rows * _cols> MatSerial<_type, _rows, _cols>::Data() const
 
 
 
-template <typename _type, I32 _rows, I32 _cols>
+template <typename _type, U32 _rows, U32 _cols>
 void MatSerial<_type, _rows, _cols>::SetZero()
 {
     std::memset(&mData, 0, sizeof(mData));
@@ -153,7 +153,7 @@ void MatSerial<_type, _rows, _cols>::SetZero()
 
 
 
-template <typename _type, I32 _rows, I32 _cols>
+template <typename _type, U32 _rows, U32 _cols>
 std::ostream& operator<<(std::ostream& os, const MatSerial<_type, _rows, _cols>& mat)
 {
     for (U32 i = 0; i < _rows; ++i)

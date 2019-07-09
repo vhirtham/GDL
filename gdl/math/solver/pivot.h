@@ -10,24 +10,18 @@
 namespace GDL
 {
 
-// template <typename _type, I32, I32>
-// class MatSerial;
-// template <typename _type, I32, I32>
-// class MatSIMD;
-// template <typename _type, I32, bool>
-// class VecSerial;
-// template <typename _type, I32, bool>
-// class VecSIMD;
 
 namespace Solver
 {
 
 
-
-template <typename _type, I32 _size>
+//! @brief Helper class for pivoting strategies that are shared amongst multiple solvers
+//! @tparam _type: Data type of the system
+//! @tparam _size: Size of the system
+template <typename _type, U32 _size>
 class PivotDenseSerial
 {
-    template <typename, I32, Pivot>
+    template <typename, U32, Pivot>
     friend class GaussDenseSerial;
     template <typename, U32, Pivot>
     friend class LUDenseSerial;
@@ -44,6 +38,8 @@ class PivotDenseSerial
     inline static U32 FindPivotPartial(U32 iteration, const MatrixDataArray& matData);
 
     //! @brief Performs a partial pivoting step for the given iteration
+    //! @tparam _swapAllRows: Defines if the rows should be wapped in every column or just in the column to the right of
+    //! the pivot element and the one of the pivot element itself.
     //! @param iteration: Number of the current iteration
     //! @param matData: Matrix data array (column major ordering)
     //! @param vecData: Vector data array
@@ -58,6 +54,8 @@ class PivotDenseSerial
 
     //! @brief Performs the pivoting step for the given iteration
     //! @tparam _pivot: Enum to select the pivoting strategy
+    //! @tparam _swapAllRows: Defines if the rows should be wapped in every column or just in the column to the right of
+    //! the pivot element and the one of the pivot element itself.
     //! @param iteration: Number of the current iteration
     //! @param matData: Matrix data array (column major ordering)
     //! @param vecData: Vector data array
@@ -65,6 +63,8 @@ class PivotDenseSerial
     inline static void PivotingStep(U32 iteration, MatrixDataArray& matData, VectorDataArray& vecData);
 
     //! @brief Moves the row that contains the pivot element into the correct position.
+    //! @tparam _swapAllRows: Defines if the rows should be wapped in every column or just in the column to the right of
+    //! the pivot element and the one of the pivot element itself.
     //! @param pivotRowIdx: Index of the row that contains the pivot element
     //! @param iteration: Number of the current iteration
     //! @param matData: Matrix data array (column major ordering)
@@ -74,11 +74,13 @@ class PivotDenseSerial
 };
 
 
-
-template <typename _registerType, I32 _size>
+//! @brief Helper class for pivoting strategies that are shared amongst multiple solvers
+//! @tparam _registerType: Register type of the system
+//! @tparam _size: Size of the system
+template <typename _registerType, U32 _size>
 class PivotDenseSSE
 {
-    template <typename, I32, Pivot>
+    template <typename, U32, Pivot>
     friend class GaussDenseSSE;
 
     static constexpr U32 alignment = simd::alignmentBytes<_registerType>;

@@ -11,7 +11,7 @@ using namespace GDL;
 
 // Fixture definition -------------------------------------------------------------------------------------------------
 
-template <template <typename, I32, I32> class _matrix, typename _type>
+template <template <typename, U32, U32> class _matrix, typename _type>
 struct Fixture
 {
     _matrix<_type, 4, 4> A1 =
@@ -27,7 +27,7 @@ struct Fixture
 
 // Construction and Data function -------------------------------------------------------------------------------------
 
-template <template <typename, I32, I32> class _matrix, typename _type>
+template <template <typename, U32, U32> class _matrix, typename _type>
 void CtorDataTest()
 {
 
@@ -73,7 +73,7 @@ BOOST_AUTO_TEST_CASE(Construction_SSE)
 
 // Comparison Equal ---------------------------------------------------------------------------------------------------
 
-template <I32 _cols, I32 _rows, typename _type, template <typename, I32, I32> class _matrix>
+template <U32 _cols, U32 _rows, typename _type, template <typename, U32, U32> class _matrix>
 void ComparisonEqualMatrixTest(const _matrix<_type, _rows, _cols>& ref)
 {
     BOOST_CHECK(ref == ref);
@@ -127,7 +127,7 @@ void ComparisonEqualMatrixTest(const _matrix<_type, _rows, _cols>& ref)
 
 
 
-template <template <typename, I32, I32> class _matrix, typename _type>
+template <template <typename, U32, U32> class _matrix, typename _type>
 void ComparisonEqualTest()
 {
     // square matrices
@@ -164,7 +164,7 @@ BOOST_AUTO_TEST_CASE(ComparisonEqual_SSE)
 
 // Operator() test ----------------------------------------------------------------------------------------------------
 
-template <template <typename, I32, I32> class _matrix, typename _type, I32 _rows, I32 _cols>
+template <template <typename, U32, U32> class _matrix, typename _type, U32 _rows, U32 _cols>
 void ParenthesesOperatorMatrixTest(const _matrix<_type, _rows, _cols>& matrix)
 {
     std::array<_type, _rows* _cols> data = matrix.Data();
@@ -176,7 +176,7 @@ void ParenthesesOperatorMatrixTest(const _matrix<_type, _rows, _cols>& matrix)
 
 
 
-template <template <typename, I32, I32> class _matrix, typename _type>
+template <template <typename, U32, U32> class _matrix, typename _type>
 void ParenthesesOperatorTest()
 {
     Fixture<_matrix, _type> f;
@@ -209,7 +209,7 @@ BOOST_AUTO_TEST_CASE(Parentheses_Operator_SIMD)
 
 // Assignment %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-template <template <typename, I32, I32> class _matrix, typename _type>
+template <template <typename, U32, U32> class _matrix, typename _type>
 void AssignmentTest()
 {
     Fixture<_matrix, _type> f;
@@ -250,7 +250,7 @@ BOOST_AUTO_TEST_CASE(Assignment_SIMD)
 
 // Set zero %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-template <template <typename, I32, I32> class matrix, typename _type>
+template <template <typename, U32, U32> class matrix, typename _type>
 void SetZeroTest()
 {
     Fixture<matrix, _type> f;
@@ -287,7 +287,7 @@ BOOST_AUTO_TEST_CASE(SetZero_SIMD)
 
 // Addition Assignment %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-template <template <typename, I32, I32> class _matrix, typename _type>
+template <template <typename, U32, U32> class _matrix, typename _type>
 void AdditionAssignmentTest()
 {
     Fixture<_matrix, _type> f;
@@ -332,7 +332,7 @@ BOOST_AUTO_TEST_CASE(Addition_Assignment_SIMD)
 
 // Addition Assignment %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-template <template <typename, I32, I32> class _matrix, typename _type>
+template <template <typename, U32, U32> class _matrix, typename _type>
 void AdditionTest()
 {
     Fixture<_matrix, _type> f;
@@ -373,7 +373,7 @@ BOOST_AUTO_TEST_CASE(Addition_SIMD)
 
 // Multiplication %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-template <template <typename, I32, I32> class _matrix, typename _type>
+template <template <typename, U32, U32> class _matrix, typename _type>
 void MultiplicationTest()
 {
     Fixture<_matrix, _type> f;
@@ -430,7 +430,7 @@ BOOST_AUTO_TEST_CASE(Multiplication_SIMD)
 
 // Transpose %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-template <template <typename, I32, I32> class _matrix, typename _type, U32 _rows = 8, U32 _cols = 8>
+template <template <typename, U32, U32> class _matrix, typename _type, U32 _rows = 8, U32 _cols = 8>
 void TransposeTest()
 {
     // square matrix

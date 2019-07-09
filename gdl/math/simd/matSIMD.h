@@ -16,7 +16,7 @@ namespace GDL
 //! @tparam _type: Data type of the matrix
 //! @tparam _rows: Number of rows
 //! @tparam _cols: Number of columns
-template <typename _type, I32 _rows, I32 _cols>
+template <typename _type, U32 _rows, U32 _cols>
 class alignas(simd::alignmentBytes<decltype(simd::GetFittingRegister<_type, simd::MaxRegisterSize()>())>) MatSIMD
 {
     static_assert(std::is_floating_point<_type>::value, "Matrix can only be created with floating point types");
@@ -33,7 +33,7 @@ private:
 
     alignas(mAlignment) DataArray mData;
 
-    template <typename _typeOther, I32 _rowsOther, I32 _colsOther>
+    template <typename _typeOther, U32 _rowsOther, U32 _colsOther>
     friend class MatSIMD;
 
 public:
@@ -95,7 +95,7 @@ public:
     //! @tparam _colsRhs: Rhs matrix number of columns
     //! @param rhs: Rhs matrix
     //! @return Result of the multiplication
-    template <I32 _rowsRhs, I32 _colsRhs>
+    template <U32 _rowsRhs, U32 _colsRhs>
     [[nodiscard]] inline MatSIMD<_type, _rows, _colsRhs> operator*(const MatSIMD<_type, _rowsRhs, _colsRhs>& rhs) const;
 
     //! @brief Returns the transposed matrix
@@ -146,7 +146,7 @@ private:
     //! @param result: Reference to the result matrix
     //! @param rhs: Rhs matrix
     //! @param j: Current outer loop value
-    template <I32 _rowsRhs, I32 _colsRhs, U32 _numMultipliedRegisters = mNumRegisterEntries>
+    template <U32 _rowsRhs, U32 _colsRhs, U32 _numMultipliedRegisters = mNumRegisterEntries>
     inline void MultiplicationInnerLoops(MatSIMD<_type, _rows, _colsRhs>& result,
                                          const MatSIMD<_type, _rowsRhs, _colsRhs>& rhs, U32 j) const;
 
@@ -176,7 +176,7 @@ private:
 //! @param os: Reference to offstream object
 //! @param mat: Matrix
 //! @return Reference to offstream object
-template <typename _type, I32 _rows, I32 _cols>
+template <typename _type, U32 _rows, U32 _cols>
 std::ostream& operator<<(std::ostream& os, const MatSIMD<_type, _rows, _cols>& mat);
 
 

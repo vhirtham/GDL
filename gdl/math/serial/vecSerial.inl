@@ -9,7 +9,7 @@
 namespace GDL
 {
 
-template <typename _type, I32 _size, bool _isCol>
+template <typename _type, U32 _size, bool _isCol>
 VecSerial<_type, _size, _isCol>::VecSerial()
     : mData{{0}}
 {
@@ -17,7 +17,7 @@ VecSerial<_type, _size, _isCol>::VecSerial()
 
 
 
-template <typename _type, I32 _size, bool _isCol>
+template <typename _type, U32 _size, bool _isCol>
 template <typename... _args>
 VecSerial<_type, _size, _isCol>::VecSerial(_args... args)
     : mData{{static_cast<_type>(args)...}}
@@ -27,7 +27,7 @@ VecSerial<_type, _size, _isCol>::VecSerial(_args... args)
 
 
 
-template <typename _type, I32 _size, bool _isCol>
+template <typename _type, U32 _size, bool _isCol>
 VecSerial<_type, _size, _isCol>::VecSerial(const std::array<_type, _size>& data)
     : mData(data)
 {
@@ -35,7 +35,7 @@ VecSerial<_type, _size, _isCol>::VecSerial(const std::array<_type, _size>& data)
 
 
 
-template <typename _type, I32 _size, bool _isCol>
+template <typename _type, U32 _size, bool _isCol>
 [[nodiscard]] inline _type VecSerial<_type, _size, _isCol>::operator[](const U32 index) const
 {
     DEV_EXCEPTION(index >= _size, "Invalid index");
@@ -44,7 +44,7 @@ template <typename _type, I32 _size, bool _isCol>
 
 
 
-template <typename _type, I32 _size, bool _isCol>
+template <typename _type, U32 _size, bool _isCol>
 const std::array<_type, _size>& VecSerial<_type, _size, _isCol>::Data() const
 {
     return mData;
@@ -52,7 +52,7 @@ const std::array<_type, _size>& VecSerial<_type, _size, _isCol>::Data() const
 
 
 
-template <typename _type, I32 _size, bool _isCol>
+template <typename _type, U32 _size, bool _isCol>
 inline std::ostream& operator<<(std::ostream& os, const VecSerial<_type, _size, _isCol>& vec)
 {
     if constexpr (_isCol)

@@ -19,7 +19,7 @@ namespace GDL::Solver
 
 // --------------------------------------------------------------------------------------------------------------------
 
-template <Pivot _pivot, typename _type, I32 _size>
+template <Pivot _pivot, typename _type, U32 _size>
 VecSerial<_type, _size, true> Gauss(const MatSerial<_type, _size, _size>& A, const VecSerial<_type, _size, true>& b)
 {
     return GaussDenseSerial<_type, _size, _pivot>::Solve(A, b);
@@ -29,7 +29,7 @@ VecSerial<_type, _size, true> Gauss(const MatSerial<_type, _size, _size>& A, con
 
 // --------------------------------------------------------------------------------------------------------------------
 
-template <Pivot _pivot, typename _type, I32 _size>
+template <Pivot _pivot, typename _type, U32 _size>
 VecSIMD<_type, _size, true> Gauss(const MatSIMD<_type, _size, _size>& A, const VecSIMD<_type, _size, true>& b)
 {
     using RegisterType = typename MatSIMD<_type, _size, _size>::RegisterType;
@@ -40,7 +40,7 @@ VecSIMD<_type, _size, true> Gauss(const MatSIMD<_type, _size, _size>& A, const V
 
 // --------------------------------------------------------------------------------------------------------------------
 
-template <typename _type, I32 _size, Pivot _pivot>
+template <typename _type, U32 _size, Pivot _pivot>
 inline typename GaussDenseSerial<_type, _size, _pivot>::VectorType
 GaussDenseSerial<_type, _size, _pivot>::Solve(const MatrixType& A, const VectorType& b)
 {
@@ -58,7 +58,7 @@ GaussDenseSerial<_type, _size, _pivot>::Solve(const MatrixType& A, const VectorT
 
 // --------------------------------------------------------------------------------------------------------------------
 
-template <typename _type, I32 _size, Pivot _pivot>
+template <typename _type, U32 _size, Pivot _pivot>
 inline void GaussDenseSerial<_type, _size, _pivot>::EliminationStep(U32 iteration, MatrixDataArray& matData,
                                                                     VectorDataArray& vecData)
 {
@@ -93,7 +93,7 @@ inline void GaussDenseSerial<_type, _size, _pivot>::EliminationStep(U32 iteratio
 
 // --------------------------------------------------------------------------------------------------------------------
 
-template <typename _type, I32 _size, Pivot _pivot>
+template <typename _type, U32 _size, Pivot _pivot>
 inline void GaussDenseSerial<_type, _size, _pivot>::GaussStep(U32 iteration, MatrixDataArray& matData,
                                                               VectorDataArray& vecData)
 {
@@ -115,7 +115,7 @@ inline void GaussDenseSerial<_type, _size, _pivot>::GaussStep(U32 iteration, Mat
 
 // --------------------------------------------------------------------------------------------------------------------
 
-template <typename _registerType, I32 _size, Pivot _pivot>
+template <typename _registerType, U32 _size, Pivot _pivot>
 inline typename GaussDenseSSE<_registerType, _size, _pivot>::VectorType
 GaussDenseSSE<_registerType, _size, _pivot>::Solve(const MatrixType& A, const VectorType& b)
 {
@@ -148,7 +148,7 @@ GaussDenseSSE<_registerType, _size, _pivot>::Solve(const MatrixType& A, const Ve
 
 // --------------------------------------------------------------------------------------------------------------------
 
-template <typename _registerType, I32 _size, Pivot _pivot>
+template <typename _registerType, U32 _size, Pivot _pivot>
 template <U32 _regValueIdx>
 inline void GaussDenseSSE<_registerType, _size, _pivot>::EliminationStepRegister(U32 iteration, U32 regRowIdx,
                                                                                  MatrixDataArray& matData,
@@ -191,7 +191,7 @@ inline void GaussDenseSSE<_registerType, _size, _pivot>::EliminationStepRegister
 
 // --------------------------------------------------------------------------------------------------------------------
 
-template <typename _registerType, I32 _size, Pivot _pivot>
+template <typename _registerType, U32 _size, Pivot _pivot>
 template <U32 _regValueIdx, U32 _maxRecursionDepth>
 inline void GaussDenseSSE<_registerType, _size, _pivot>::GaussStepsRegister(U32 regRowIdx, MatrixDataArray& matData,
                                                                             VectorDataArray& vecData)

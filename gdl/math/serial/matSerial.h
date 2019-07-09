@@ -12,10 +12,10 @@ namespace GDL
 //! @tparam T: Data type
 //! @tparam _rows: Number of rows
 //! @tparam _cols: Number of columns
-template <typename _type, I32 _rows, I32 _cols>
+template <typename _type, U32 _rows, U32 _cols>
 class MatSerial
 {
-    template <typename _type2, I32 _rows2, I32 _cols2>
+    template <typename _type2, U32 _rows2, U32 _cols2>
     friend class MatSerial;
 
     std::array<_type, _rows * _cols> mData;
@@ -69,7 +69,7 @@ public:
     //! @tparam _colsRhs: Rhs matrix number of columns
     //! @param rhs: Rhs matrix
     //! @return Result of the multiplication
-    template <I32 _rowsRhs, I32 _colsRhs>
+    template <U32 _rowsRhs, U32 _colsRhs>
     [[nodiscard]] inline MatSerial<_type, _rows, _colsRhs>
     operator*(const MatSerial<_type, _rowsRhs, _colsRhs>& rhs) const;
 
@@ -102,7 +102,7 @@ public:
 //! @param os: Reference to offstream object
 //! @param mat: Matrix
 //! @return Reference to offstream object
-template <typename _type, I32 _rows, I32 _cols>
+template <typename _type, U32 _rows, U32 _cols>
 std::ostream& operator<<(std::ostream& os, const MatSerial<_type, _rows, _cols>& mat);
 
 

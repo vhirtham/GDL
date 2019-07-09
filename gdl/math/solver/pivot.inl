@@ -17,7 +17,7 @@ namespace GDL::Solver
 
 // --------------------------------------------------------------------------------------------------------------------
 
-template <typename _type, I32 _size>
+template <typename _type, U32 _size>
 inline U32 PivotDenseSerial<_type, _size>::FindPivotPartial(U32 iteration, const MatrixDataArray& matData)
 {
     const U32 colStartIdx = iteration * _size;
@@ -40,7 +40,7 @@ inline U32 PivotDenseSerial<_type, _size>::FindPivotPartial(U32 iteration, const
 
 // --------------------------------------------------------------------------------------------------------------------
 
-template <typename _type, I32 _size>
+template <typename _type, U32 _size>
 template <bool _swapAllRows>
 inline void PivotDenseSerial<_type, _size>::PartialPivotingStep(U32 iteration, MatrixDataArray& matData,
                                                                 VectorDataArray& vecData)
@@ -55,7 +55,7 @@ inline void PivotDenseSerial<_type, _size>::PartialPivotingStep(U32 iteration, M
 
 // --------------------------------------------------------------------------------------------------------------------
 
-template <typename _type, I32 _size>
+template <typename _type, U32 _size>
 inline std::array<_type, _size> PivotDenseSerial<_type, _size>::PermuteVector(const VectorDataArray& vec,
                                                                               const VectorDataArray& permutation)
 {
@@ -70,7 +70,7 @@ inline std::array<_type, _size> PivotDenseSerial<_type, _size>::PermuteVector(co
 
 // --------------------------------------------------------------------------------------------------------------------
 
-template <typename _type, I32 _size>
+template <typename _type, U32 _size>
 template <Pivot _pivot, bool _swapAllRows>
 inline void PivotDenseSerial<_type, _size>::PivotingStep(U32 iteration, MatrixDataArray& matData,
                                                          VectorDataArray& vecData)
@@ -86,7 +86,7 @@ inline void PivotDenseSerial<_type, _size>::PivotingStep(U32 iteration, MatrixDa
 
 // --------------------------------------------------------------------------------------------------------------------
 
-template <typename _type, I32 _size>
+template <typename _type, U32 _size>
 template <bool _swapAllRows>
 inline void PivotDenseSerial<_type, _size>::SwapRows(U32 pivotRowIdx, U32 iteration, MatrixDataArray& matData,
                                                      VectorDataArray& vecData)
@@ -118,7 +118,7 @@ inline void PivotDenseSerial<_type, _size>::SwapRows(U32 pivotRowIdx, U32 iterat
 
 // --------------------------------------------------------------------------------------------------------------------
 
-template <typename _registerType, I32 _size>
+template <typename _registerType, U32 _size>
 template <U32 _regValueIdx>
 inline U32 PivotDenseSSE<_registerType, _size>::FindPivotPartial(U32 iteration, U32 regRowIdx,
                                                                  const MatrixDataArray& matData)
@@ -160,7 +160,7 @@ inline U32 PivotDenseSSE<_registerType, _size>::FindPivotPartial(U32 iteration, 
 
 // --------------------------------------------------------------------------------------------------------------------
 
-template <typename _registerType, I32 _size>
+template <typename _registerType, U32 _size>
 template <U32 _regValueIdx>
 inline void PivotDenseSSE<_registerType, _size>::PartialPivotingStepRegister(U32 iteration, U32 regRowIdx,
                                                                              MatrixDataArray& matData,
@@ -178,7 +178,7 @@ inline void PivotDenseSSE<_registerType, _size>::PartialPivotingStepRegister(U32
 
 // --------------------------------------------------------------------------------------------------------------------
 
-template <typename _registerType, I32 _size>
+template <typename _registerType, U32 _size>
 template <U32 _regValueIdx, Pivot _pivot>
 inline void PivotDenseSSE<_registerType, _size>::PivotingStepRegister(U32 iteration, U32 regRowIdx,
                                                                       MatrixDataArray& matData,
@@ -196,7 +196,7 @@ inline void PivotDenseSSE<_registerType, _size>::PivotingStepRegister(U32 iterat
 
 // --------------------------------------------------------------------------------------------------------------------
 
-template <typename _registerType, I32 _size>
+template <typename _registerType, U32 _size>
 template <U32 _regValueIdx>
 inline void PivotDenseSSE<_registerType, _size>::SwapRows(U32 pivotRowIdx, U32 iteration, U32 regRowIdx,
                                                           MatrixDataArray& matData, VectorDataArray& vecData)
@@ -212,7 +212,7 @@ inline void PivotDenseSSE<_registerType, _size>::SwapRows(U32 pivotRowIdx, U32 i
 
 // --------------------------------------------------------------------------------------------------------------------
 
-template <typename _registerType, I32 _size>
+template <typename _registerType, U32 _size>
 template <U32 _regIdxDst, U32 _regIdxPiv, bool _sameReg>
 inline void PivotDenseSSE<_registerType, _size>::SwapRowsAllColumns(U32 iteration, U32 pivotRegRowIdx, U32 regRowIdx,
                                                                     MatrixDataArray& matData, VectorDataArray& vecData)
@@ -249,7 +249,7 @@ inline void PivotDenseSSE<_registerType, _size>::SwapRowsAllColumns(U32 iteratio
 
 // --------------------------------------------------------------------------------------------------------------------
 
-template <typename _registerType, I32 _size>
+template <typename _registerType, U32 _size>
 template <U32 _regValueIdx, bool _sameReg>
 inline void PivotDenseSSE<_registerType, _size>::SwapRowsSwitch(U32 pivotRowIdx, U32 iteration, U32 pivotRegRowIdx,
                                                                 U32 regRowIdx, MatrixDataArray& matData,
