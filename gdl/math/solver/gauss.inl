@@ -98,7 +98,7 @@ inline void GaussDenseSerial<_type, _size, _pivot>::GaussStep(U32 iteration, Mat
                                                               VectorDataArray& vecData)
 {
     if constexpr (_pivot != Pivot::NONE)
-        PivotDenseSerial<_type, _size>::template PivotingStep<_pivot>(iteration, matData, vecData);
+        PivotDenseSerial<_type, _size>::template PivotingStep<_pivot, false>(iteration, matData, vecData);
 
     EliminationStep(iteration, matData, vecData);
 }

@@ -41,30 +41,14 @@ inline U32 PivotDenseSerial<_type, _size>::FindPivotPartial(U32 iteration, const
 // --------------------------------------------------------------------------------------------------------------------
 
 template <typename _type, I32 _size>
-template <Pivot _pivot>
-inline void PivotDenseSerial<_type, _size>::PivotingStep(U32 iteration, MatrixDataArray& matData,
-                                                         VectorDataArray& vecData)
-{
-    static_assert(_pivot != Pivot::NONE, "Unneccessary function call");
-
-    static_assert(_pivot == Pivot::PARTIAL, "Unsupported pivoting strategy");
-
-    if constexpr (_pivot == Pivot::PARTIAL)
-        PartialPivotingStep(iteration, matData, vecData);
-}
-
-
-
-// --------------------------------------------------------------------------------------------------------------------
-
-template <typename _type, I32 _size>
+template <bool _swapAllRows>
 inline void PivotDenseSerial<_type, _size>::PartialPivotingStep(U32 iteration, MatrixDataArray& matData,
                                                                 VectorDataArray& vecData)
 {
     U32 pivotRowIdx = FindPivotPartial(iteration, matData);
 
     if (pivotRowIdx != iteration)
-        SwapRows(pivotRowIdx, iteration, matData, vecData);
+        SwapRows<_swapAllRows>(pivotRowIdx, iteration, matData, vecData);
 }
 
 
@@ -72,6 +56,38 @@ inline void PivotDenseSerial<_type, _size>::PartialPivotingStep(U32 iteration, M
 // --------------------------------------------------------------------------------------------------------------------
 
 template <typename _type, I32 _size>
+inline std::array<_type, _size> PivotDenseSerial<_type, _size>::PermuteVector(const VectorDataArray& vec,
+                                                                              const VectorDataArray& permutation)
+{
+    std::array<_type, _size> rPermute;
+    for (U32 i = 0; i < _size; ++i)
+        rPermute[i] = vec[permutation[i]];
+
+    return rPermute;
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+template <typename _type, I32 _size>
+template <Pivot _pivot, bool _swapAllRows>
+inline void PivotDenseSerial<_type, _size>::PivotingStep(U32 iteration, MatrixDataArray& matData,
+                                                         VectorDataArray& vecData)
+{
+    static_assert(_pivot != Pivot::NONE, "Unneccessary function call");
+    static_assert(_pivot == Pivot::PARTIAL, "Unsupported pivoting strategy");
+
+    if constexpr (_pivot == Pivot::PARTIAL)
+        PartialPivotingStep<_swapAllRows>(iteration, matData, vecData);
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+template <typename _type, I32 _size>
+template <bool _swapAllRows>
 inline void PivotDenseSerial<_type, _size>::SwapRows(U32 pivotRowIdx, U32 iteration, MatrixDataArray& matData,
                                                      VectorDataArray& vecData)
 {
@@ -79,8 +95,13 @@ inline void PivotDenseSerial<_type, _size>::SwapRows(U32 pivotRowIdx, U32 iterat
                   "Internal error. Row of the pivot element must be higher or equal to the current iteration number");
 
     const U32 rowDiff = pivotRowIdx - iteration;
-    for (U32 i = iteration * _size + iteration; i < matData.size(); i += _size)
-        std::swap(matData[i], matData[i + rowDiff]);
+
+    if constexpr (_swapAllRows)
+        for (U32 i = iteration; i < matData.size(); i += _size)
+            std::swap(matData[i], matData[i + rowDiff]);
+    else
+        for (U32 i = iteration * _size + iteration; i < matData.size(); i += _size)
+            std::swap(matData[i], matData[i + rowDiff]);
 
     std::swap(vecData[iteration], vecData[pivotRowIdx]);
 }
@@ -99,7 +120,8 @@ inline void PivotDenseSerial<_type, _size>::SwapRows(U32 pivotRowIdx, U32 iterat
 
 template <typename _registerType, I32 _size>
 template <U32 _regValueIdx>
-inline U32 PivotDenseSSE<_registerType, _size>::FindPivotPartial(U32 iteration, U32 regRowIdx, const MatrixDataArray& matData)
+inline U32 PivotDenseSSE<_registerType, _size>::FindPivotPartial(U32 iteration, U32 regRowIdx,
+                                                                 const MatrixDataArray& matData)
 {
     using namespace GDL::simd;
 
@@ -177,7 +199,7 @@ inline void PivotDenseSSE<_registerType, _size>::PivotingStepRegister(U32 iterat
 template <typename _registerType, I32 _size>
 template <U32 _regValueIdx>
 inline void PivotDenseSSE<_registerType, _size>::SwapRows(U32 pivotRowIdx, U32 iteration, U32 regRowIdx,
-                                                           MatrixDataArray& matData, VectorDataArray& vecData)
+                                                          MatrixDataArray& matData, VectorDataArray& vecData)
 {
     const U32 pivotRegRowIdx = pivotRowIdx / numRegisterValues;
     if (regRowIdx == pivotRegRowIdx)
@@ -193,7 +215,7 @@ inline void PivotDenseSSE<_registerType, _size>::SwapRows(U32 pivotRowIdx, U32 i
 template <typename _registerType, I32 _size>
 template <U32 _regIdxDst, U32 _regIdxPiv, bool _sameReg>
 inline void PivotDenseSSE<_registerType, _size>::SwapRowsAllColumns(U32 iteration, U32 pivotRegRowIdx, U32 regRowIdx,
-                                                                     MatrixDataArray& matData, VectorDataArray& vecData)
+                                                                    MatrixDataArray& matData, VectorDataArray& vecData)
 {
     using namespace GDL::simd;
 
@@ -230,8 +252,8 @@ inline void PivotDenseSSE<_registerType, _size>::SwapRowsAllColumns(U32 iteratio
 template <typename _registerType, I32 _size>
 template <U32 _regValueIdx, bool _sameReg>
 inline void PivotDenseSSE<_registerType, _size>::SwapRowsSwitch(U32 pivotRowIdx, U32 iteration, U32 pivotRegRowIdx,
-                                                                 U32 regRowIdx, MatrixDataArray& matData,
-                                                                 VectorDataArray& vecData)
+                                                                U32 regRowIdx, MatrixDataArray& matData,
+                                                                VectorDataArray& vecData)
 {
     static_assert(numRegisterValues == 2 || numRegisterValues == 4 || numRegisterValues == 8,
                   "Only registers with 2,4 or 8 values are supported.");

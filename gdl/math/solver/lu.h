@@ -31,20 +31,20 @@ namespace Solver
 //! @param A: Matrix
 //! @param r: Vector
 //! @return Result vector x
-template <Pivot _pivot = Pivot::PARTIAL, typename _type, U32 _size>
+template <Pivot _pivot = Pivot::PARTIAL, typename _type, I32 _size>
 [[nodiscard]] VecSerial<_type, _size, true> LU(const MatSerial<_type, _size, _size>& A,
                                                const VecSerial<_type, _size, true>& r);
 
-//! @brief Solves the linear system A * x = r using LU decomposition
-//! @tparam _type: Data type
-//! @tparam _size: Size of the system
-//! @tparam _pivot: Enum to select the pivoting strategy
-//! @param A: Matrix
-//! @param r: Vector
-//! @return Result vector x
-template <Pivot _pivot = Pivot::PARTIAL, typename _type, U32 _size>
-[[nodiscard]] VecSIMD<_type, _size, true> LU(const MatSIMD<_type, _size, _size>& A,
-                                             const VecSIMD<_type, _size, true>& r);
+////! @brief Solves the linear system A * x = r using LU decomposition
+////! @tparam _type: Data type
+////! @tparam _size: Size of the system
+////! @tparam _pivot: Enum to select the pivoting strategy
+////! @param A: Matrix
+////! @param r: Vector
+////! @return Result vector x
+// template <Pivot _pivot = Pivot::PARTIAL, typename _type, U32 _size>
+//[[nodiscard]] VecSIMD<_type, _size, true> LU(const MatSIMD<_type, _size, _size>& A,
+//                                             const VecSIMD<_type, _size, true>& r);
 
 
 
@@ -111,6 +111,8 @@ private:
     //! @param lu: Data of the LU decomposition
     //! @param r: Data of the right-hand side vector
     static inline void ForwardSubstitution(const MatrixDataArray& lu, VectorDataArray& r);
+
+    static inline VectorDataArray GetPermutedVectorData(const VectorType& r, const Factorization& factorization);
 };
 
 

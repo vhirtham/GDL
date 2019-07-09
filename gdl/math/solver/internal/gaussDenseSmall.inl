@@ -60,7 +60,7 @@ inline void GaussDenseSmallSerial<_type, _size, _pivot>::GaussStep(std::array<_t
                                                                    std::array<_type, _size>& vectorData)
 {
     if constexpr (_pivot != Pivot::NONE && _idx + 1 < _size)
-        PivotDenseSmallSerial<_type, _size>::template PivotStep<_pivot, _idx, _idx>(matrixData, vectorData);
+        PivotDenseSmallSerial<_type, _size>::template PivotingStep<_pivot, _idx, _idx>(matrixData, vectorData);
 
     GaussDenseSmallSerial<_type, _size, _pivot>::template EliminationStep<_idx>(matrixData, vectorData);
 }
@@ -114,7 +114,7 @@ template <U32 _idx>
 inline void GaussDenseSmallSSE<_size, _pivot>::GaussStep(std::array<__m128, _size>& matrixData, __m128& vectorData)
 {
     if constexpr (_pivot != Pivot::NONE && _idx + 1 < _size)
-        PivotDenseSmallSSE<_size>::template PivotStep<_pivot, _idx, _idx>(matrixData, vectorData);
+        PivotDenseSmallSSE<_size>::template PivotingStep<_pivot, _idx, _idx>(matrixData, vectorData);
 
     EliminationStep<_idx>(matrixData, vectorData);
 }

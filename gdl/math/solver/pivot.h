@@ -29,6 +29,9 @@ class PivotDenseSerial
 {
     template <typename, I32, Pivot>
     friend class GaussDenseSerial;
+    template <typename, U32, Pivot>
+    friend class LUDenseSerial;
+
 
     using MatrixDataArray = std::array<_type, _size * _size>;
     using VectorDataArray = std::array<_type, _size>;
@@ -44,14 +47,21 @@ class PivotDenseSerial
     //! @param iteration: Number of the current iteration
     //! @param matData: Matrix data array (column major ordering)
     //! @param vecData: Vector data array
+    template <bool _swapAllRows>
     inline static void PartialPivotingStep(U32 iteration, MatrixDataArray& matData, VectorDataArray& vecData);
+
+    //! @brief Applies a permutation to a vector
+    //! @param vec: Original vector
+    //! @param permutation: Permutation data
+    //! @return Permuted vector
+    static inline VectorDataArray PermuteVector(const VectorDataArray& vec, const VectorDataArray& permutation);
 
     //! @brief Performs the pivoting step for the given iteration
     //! @tparam _pivot: Enum to select the pivoting strategy
     //! @param iteration: Number of the current iteration
     //! @param matData: Matrix data array (column major ordering)
     //! @param vecData: Vector data array
-    template <Pivot _pivot>
+    template <Pivot _pivot, bool _swapAllRows>
     inline static void PivotingStep(U32 iteration, MatrixDataArray& matData, VectorDataArray& vecData);
 
     //! @brief Moves the row that contains the pivot element into the correct position.
@@ -59,6 +69,7 @@ class PivotDenseSerial
     //! @param iteration: Number of the current iteration
     //! @param matData: Matrix data array (column major ordering)
     //! @param vecData: Vector data array
+    template <bool _swapAllRows>
     inline static void SwapRows(U32 pivotRowIdx, U32 iteration, MatrixDataArray& matData, VectorDataArray& vecData);
 };
 

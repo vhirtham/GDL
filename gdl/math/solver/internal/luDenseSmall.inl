@@ -117,8 +117,8 @@ template <U32 _idx>
 inline void LUDenseSmallSerial<_type, _size, _pivot>::FactorizeLU(Factorization& factorization)
 {
     if constexpr (_pivot != Pivot::NONE && _idx + 1 < _size)
-        PivotDenseSmallSerial<_type, _size>::template PivotStep<_pivot, _idx>(factorization.mLU,
-                                                                              factorization.mPermutation);
+        PivotDenseSmallSerial<_type, _size>::template PivotingStep<_pivot, _idx>(factorization.mLU,
+                                                                                 factorization.mPermutation);
 
     FactorizationStep<_idx>(factorization);
 
@@ -354,7 +354,7 @@ template <U32 _idx>
 inline void LUDenseSmallSSE<_size, _pivot>::FactorizeLU(Factorization& factorization, __m128& permutation)
 {
     if constexpr (_pivot != Pivot::NONE && _idx + 1 < _size)
-        PivotDenseSmallSSE<_size>::template PivotStep<_pivot, _idx>(factorization.mLU, permutation);
+        PivotDenseSmallSSE<_size>::template PivotingStep<_pivot, _idx>(factorization.mLU, permutation);
 
     FactorizationStep<_idx>(factorization);
 

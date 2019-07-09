@@ -1,9 +1,13 @@
 addBenchmark(gauss)
+addBenchmark(lu)
 addBenchmark(solver3)
 addBenchmark(solver4)
 
 if(Eigen3_FOUND)
     target_compile_definitions(Benchmark_gauss
+        PRIVATE
+            -DEIGEN3_FOUND)
+    target_compile_definitions(Benchmark_lu
         PRIVATE
             -DEIGEN3_FOUND)
     target_compile_definitions(Benchmark_solver3

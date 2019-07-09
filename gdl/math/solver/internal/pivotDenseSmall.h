@@ -34,7 +34,8 @@ class PivotDenseSmallSerial
     //! @param matrixData: Data of the matrix (column major)
     //! @param vectorData: Vector wich is permuted the same way as the matrix
     template <U32 _idx, U32 _idxColStart = 0>
-    static inline void Partial(std::array<_type, _size * _size>& matrixData, std::array<_type, _size>& vectorData);
+    static inline void PartialPivotingStep(std::array<_type, _size * _size>& matrixData,
+                                           std::array<_type, _size>& vectorData);
 
     //! @brief Applies a permutation to a vector
     //! @param vec: Original vector
@@ -50,7 +51,7 @@ class PivotDenseSmallSerial
     //! @param matrixData: Data of the matrix (column major)
     //! @param vectorData: Vector wich is permuted the same way as the matrix
     template <Pivot _pivot, U32 _idx, U32 _idxColStart = 0>
-    static inline void PivotStep(std::array<_type, _size * _size>& matrixData, std::array<_type, _size>& vectorData);
+    static inline void PivotingStep(std::array<_type, _size * _size>& matrixData, std::array<_type, _size>& vectorData);
 };
 
 
@@ -76,7 +77,7 @@ class PivotDenseSmallSSE
     //! @param matrixData: Data of the matrix (column major)
     //! @param vectorData: Vector wich is permuted the same way as the matrix
     template <U32 _idx, U32 _idxColStart = 0>
-    static inline void Partial(std::array<__m128, _size>& matrixData, __m128& vectorData);
+    static inline void PartialPivotingStep(std::array<__m128, _size>& matrixData, __m128& vectorData);
 
     //! @brief Applies a permutation to a vector
     //! @param vec: Original vector
@@ -92,7 +93,7 @@ class PivotDenseSmallSSE
     //! @param matrixData: Data of the matrix (column major)
     //! @param vectorData: Vector wich is permuted the same way as the matrix
     template <Pivot _pivot, U32 _idx, U32 _idxColStart = 0>
-    static inline void PivotStep(std::array<__m128, _size>& matrixData, __m128& vectorData);
+    static inline void PivotingStep(std::array<__m128, _size>& matrixData, __m128& vectorData);
 };
 
 } // namespace Solver

@@ -17,7 +17,7 @@ namespace GDL::Solver
 
 // --------------------------------------------------------------------------------------------------------------------
 
-template <Pivot _pivot, typename _type, U32 _size>
+template <Pivot _pivot, typename _type, I32 _size>
 VecSerial<_type, _size, true> LU(const MatSerial<_type, _size, _size>& A, const VecSerial<_type, _size, true>& r)
 {
     return LUDenseSerial<_type, _size, _pivot>::Solve(A, r);
@@ -27,12 +27,12 @@ VecSerial<_type, _size, true> LU(const MatSerial<_type, _size, _size>& A, const 
 
 // --------------------------------------------------------------------------------------------------------------------
 
-template <Pivot _pivot, typename _type, U32 _size>
-VecSIMD<_type, _size, true> LU(const MatSIMD<_type, _size, _size>& A, const VecSIMD<_type, _size, true>& r)
-{
-    using RegisterType = typename MatSIMD<_type, _size, _size>::RegisterType;
-    return LUDenseSSE<RegisterType, _size, _pivot>::Solve(A, r);
-}
+// template <Pivot _pivot, typename _type, U32 _size>
+// VecSIMD<_type, _size, true> LU(const MatSIMD<_type, _size, _size>& A, const VecSIMD<_type, _size, true>& r)
+//{
+//    using RegisterType = typename MatSIMD<_type, _size, _size>::RegisterType;
+//    return LUDenseSSE<RegisterType, _size, _pivot>::Solve(A, r);
+//}
 
 
 
@@ -57,13 +57,8 @@ template <typename _type, U32 _size, Pivot _pivot>
 [[nodiscard]] inline typename LUDenseSerial<_type, _size, _pivot>::VectorType
 LUDenseSerial<_type, _size, _pivot>::Solve(const MatrixType& A, const VectorType& r)
 {
-
-    //    MatrixDataArray matData = A.Data();
-    //    VectorDataArray vecData = b.Data();
-
     Factorization factorization = Factorize(A.Data());
 
-    // return VectorType(vecData);
     return Solve(factorization, r);
 }
 
@@ -75,9 +70,7 @@ template <typename _type, U32 _size, Pivot _pivot>
 [[nodiscard]] inline typename LUDenseSerial<_type, _size, _pivot>::VectorType
 LUDenseSerial<_type, _size, _pivot>::Solve(const Factorization& factorization, const VectorType& r)
 {
-    VectorDataArray vectorData = r.Data();
-
-    // Add vector permutation here
+    VectorDataArray vectorData = GetPermutedVectorData(r, factorization);
 
     ForwardSubstitution(factorization.mLU, vectorData);
     BackwardSubstitution(factorization.mLU, vectorData);
@@ -116,8 +109,9 @@ LUDenseSerial<_type, _size, _pivot>::Factorize(const MatrixDataArray& matrixData
 
     for (U32 i = 0; i < _size; ++i)
     {
-        // Add pivoting here
-
+        if constexpr (_pivot != Pivot::NONE)
+            PivotDenseSerial<_type, _size>::template PivotingStep<_pivot, true>(i, factorization.mLU,
+                                                                                factorization.mPermutation);
         FactorizationStep(i, factorization);
     }
 
@@ -158,6 +152,19 @@ inline void LUDenseSerial<_type, _size, _pivot>::ForwardSubstitution(const Matri
             r[j] -= lu[j + i * _size] * r[i];
 }
 
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+template <typename _type, U32 _size, Pivot _pivot>
+inline typename LUDenseSerial<_type, _size, _pivot>::VectorDataArray
+LUDenseSerial<_type, _size, _pivot>::GetPermutedVectorData(const VectorType& r, const Factorization& factorization)
+{
+    if constexpr (_pivot != Pivot::NONE)
+        return PivotDenseSerial<_type, _size>::PermuteVector(r.Data(), factorization.mPermutation);
+    else
+        return r.Data();
+}
 
 
 } // namespace GDL::Solver
