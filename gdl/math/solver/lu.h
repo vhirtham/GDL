@@ -124,6 +124,54 @@ private:
 template <typename _registerType, U32 _size, Pivot _pivot = Pivot::PARTIAL>
 class LUDenseSSE
 {
+    static constexpr U32 alignment = simd::alignmentBytes<_registerType>;
+    static constexpr U32 numRegisterValues = simd::numRegisterValues<_registerType>;
+    static constexpr U32 numColRegisters = simd::CalcMinNumArrayRegisters<_registerType>(_size);
+
+
+    using MatrixDataArray = std::array<_registerType, numColRegisters * _size>;
+    using VectorDataArray = std::array<_registerType, numColRegisters>;
+    using ValueType = decltype(simd::GetDataType<_registerType>());
+    using VectorType = VecSIMD<ValueType, _size, true>;
+    using MatrixType = MatSIMD<ValueType, _size, _size>;
+
+public:
+    //! @brief Class that stores the LU factorization and the permutations
+    class Factorization
+    {
+        friend class LUDenseSSE;
+
+        alignas(alignment) MatrixDataArray mLU;
+
+        //! @brief ctor
+        //! @param matrixData: Data of the matrix that should be factorized
+        Factorization(const MatrixDataArray& matrixData);
+    };
+
+
+
+    //! @brief Calculates the LU factorization and returns it
+    //! @param matrix: Matrix that should be factorized
+    //! @return LU factorization
+    [[nodiscard]] static inline Factorization Factorize(const MatrixType& matrix);
+
+    //! @brief Solves the linear system A * x = r
+    //! @param A: Matrix
+    //! @param r: Vector
+    //! @return Result vector x
+    [[nodiscard]] inline static VectorType Solve(const MatrixType& A, const VectorType& r);
+
+private:
+    static inline void FactorizationLoop(Factorization& factorization);
+
+
+    template <U32 _regValueIdx>
+    static inline void FactorizationStep(U32 iteration, U32 regRowIdx, MatrixDataArray& lu);
+
+    template <U32 _regValueIdx = 0, U32 _maxRecursionDepth = numRegisterValues>
+    static inline void FactorizationStepsRegister(U32 regRowIdx, Factorization& factorization);
+
+private:
 };
 
 

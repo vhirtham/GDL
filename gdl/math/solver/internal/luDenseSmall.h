@@ -4,6 +4,7 @@
 
 #include "gdl/base/fundamentalTypes.h"
 #include "gdl/base/simd/x86intrin.h"
+#include "gdl/base/simd/utility.h"
 #include "gdl/math/solver/pivotEnum.h"
 
 #include <array>
@@ -106,7 +107,7 @@ public:
     {
         friend class LUDenseSmallSSE;
 
-        std::array<__m128, _size> mLU;
+        alignas(simd::alignmentBytes<__m128>) std::array<__m128, _size> mLU;
         U32 mPermutationHash;
 
         //! @brief ctor
