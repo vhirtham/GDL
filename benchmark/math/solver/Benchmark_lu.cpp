@@ -251,11 +251,44 @@ BENCHMARK_F(Serial, LUNoPivot8x8)(benchmark::State& state)
 }
 
 
+BENCHMARK_F(Serial, LUNoPivot8x8Factorize)(benchmark::State& state)
+{
+    for (auto _ : state)
+        benchmark::DoNotOptimize(Solver::LUFactorization<Solver::Pivot::NONE>(A8));
+}
+
+
+
+BENCHMARK_F(Serial, LUNoPivot8x8Solve)(benchmark::State& state)
+{
+    auto factorization = Solver::LUFactorization<Solver::Pivot::NONE>(A8);
+    for (auto _ : state)
+        benchmark::DoNotOptimize(Solver::LU<Solver::Pivot::NONE>(factorization, b8));
+}
+
+
 
 BENCHMARK_F(Serial, LUNoPivot16x16)(benchmark::State& state)
 {
     for (auto _ : state)
         benchmark::DoNotOptimize(Solver::LU<Solver::Pivot::NONE>(A16, b16));
+}
+
+
+
+BENCHMARK_F(Serial, LUNoPivot16x16Factorize)(benchmark::State& state)
+{
+    for (auto _ : state)
+        benchmark::DoNotOptimize(Solver::LUFactorization<Solver::Pivot::NONE>(A16));
+}
+
+
+
+BENCHMARK_F(Serial, LUNoPivot16x16Solve)(benchmark::State& state)
+{
+    auto factorization = Solver::LUFactorization<Solver::Pivot::NONE>(A16);
+    for (auto _ : state)
+        benchmark::DoNotOptimize(Solver::LU<Solver::Pivot::NONE>(factorization, b16));
 }
 
 
@@ -268,6 +301,23 @@ BENCHMARK_F(Serial, LUNoPivot32x32)(benchmark::State& state)
 
 
 
+BENCHMARK_F(Serial, LUNoPivot32x32Factorize)(benchmark::State& state)
+{
+    for (auto _ : state)
+        benchmark::DoNotOptimize(Solver::LUFactorization<Solver::Pivot::NONE>(A32));
+}
+
+
+
+BENCHMARK_F(Serial, LUNoPivot32x32Solve)(benchmark::State& state)
+{
+    auto factorization = Solver::LUFactorization<Solver::Pivot::NONE>(A32);
+    for (auto _ : state)
+        benchmark::DoNotOptimize(Solver::LU<Solver::Pivot::NONE>(factorization, b32));
+}
+
+
+
 BENCHMARK_F(Serial, LUNoPivotNxN)(benchmark::State& state)
 {
     for (auto _ : state)
@@ -276,35 +326,120 @@ BENCHMARK_F(Serial, LUNoPivotNxN)(benchmark::State& state)
 
 
 
-// BENCHMARK_F(SIMD, LUNoPivot8x8)(benchmark::State& state)
-//{
-//    for (auto _ : state)
-//        benchmark::DoNotOptimize(Solver::LU<Solver::Pivot::NONE>(A8, b8));
-//}
+BENCHMARK_F(Serial, LUNoPivotNxNFactorize)(benchmark::State& state)
+{
+    for (auto _ : state)
+        benchmark::DoNotOptimize(Solver::LUFactorization<Solver::Pivot::NONE>(AN));
+}
 
 
 
-// BENCHMARK_F(SIMD, LUNoPivot16x16)(benchmark::State& state)
-//{
-//    for (auto _ : state)
-//        benchmark::DoNotOptimize(Solver::LU<Solver::Pivot::NONE>(A16, b16));
-//}
+BENCHMARK_F(Serial, LUNoPivotNxNSolve)(benchmark::State& state)
+{
+    auto factorization = Solver::LUFactorization<Solver::Pivot::NONE>(AN);
+    for (auto _ : state)
+        benchmark::DoNotOptimize(Solver::LU<Solver::Pivot::NONE>(factorization, bN));
+}
 
 
 
-// BENCHMARK_F(SIMD, LUNoPivot32x32)(benchmark::State& state)
-//{
-//    for (auto _ : state)
-//        benchmark::DoNotOptimize(Solver::LU<Solver::Pivot::NONE>(A32, b32));
-//}
+BENCHMARK_F(SIMD, LUNoPivot8x8)(benchmark::State& state)
+{
+    for (auto _ : state)
+        benchmark::DoNotOptimize(Solver::LU<Solver::Pivot::NONE>(A8, b8));
+}
 
 
 
-// BENCHMARK_F(SIMD, LUNoPivotNxN)(benchmark::State& state)
-//{
-//    for (auto _ : state)
-//        benchmark::DoNotOptimize(Solver::LU<Solver::Pivot::NONE>(AN, bN));
-//}
+BENCHMARK_F(SIMD, LUNoPivot8x8Factorize)(benchmark::State& state)
+{
+    for (auto _ : state)
+        benchmark::DoNotOptimize(Solver::LUFactorization<Solver::Pivot::NONE>(A8));
+}
+
+
+
+BENCHMARK_F(SIMD, LUNoPivot8x8Solve)(benchmark::State& state)
+{
+    auto factorization = Solver::LUFactorization<Solver::Pivot::NONE>(A8);
+    for (auto _ : state)
+        benchmark::DoNotOptimize(Solver::LU<Solver::Pivot::NONE>(factorization, b8));
+}
+
+
+
+BENCHMARK_F(SIMD, LUNoPivot16x16)(benchmark::State& state)
+{
+    for (auto _ : state)
+        benchmark::DoNotOptimize(Solver::LU<Solver::Pivot::NONE>(A16, b16));
+}
+
+
+
+BENCHMARK_F(SIMD, LUNoPivot16x16Factorize)(benchmark::State& state)
+{
+    for (auto _ : state)
+        benchmark::DoNotOptimize(Solver::LUFactorization<Solver::Pivot::NONE>(A16));
+}
+
+
+
+BENCHMARK_F(SIMD, LUNoPivot16x16Solve)(benchmark::State& state)
+{
+    auto factorization = Solver::LUFactorization<Solver::Pivot::NONE>(A16);
+    for (auto _ : state)
+        benchmark::DoNotOptimize(Solver::LU<Solver::Pivot::NONE>(factorization, b16));
+}
+
+
+
+BENCHMARK_F(SIMD, LUNoPivot32x32)(benchmark::State& state)
+{
+    for (auto _ : state)
+        benchmark::DoNotOptimize(Solver::LU<Solver::Pivot::NONE>(A32, b32));
+}
+
+
+
+BENCHMARK_F(SIMD, LUNoPivot32x32Factorize)(benchmark::State& state)
+{
+    for (auto _ : state)
+        benchmark::DoNotOptimize(Solver::LUFactorization<Solver::Pivot::NONE>(A32));
+}
+
+
+
+BENCHMARK_F(SIMD, LUNoPivot32x32Solve)(benchmark::State& state)
+{
+    auto factorization = Solver::LUFactorization<Solver::Pivot::NONE>(A32);
+    for (auto _ : state)
+        benchmark::DoNotOptimize(Solver::LU<Solver::Pivot::NONE>(factorization, b32));
+}
+
+
+
+BENCHMARK_F(SIMD, LUNoPivotNxN)(benchmark::State& state)
+{
+    for (auto _ : state)
+        benchmark::DoNotOptimize(Solver::LU<Solver::Pivot::NONE>(AN, bN));
+}
+
+
+
+BENCHMARK_F(SIMD, LUNoPivotNxNFactorize)(benchmark::State& state)
+{
+    for (auto _ : state)
+        benchmark::DoNotOptimize(Solver::LUFactorization<Solver::Pivot::NONE>(AN));
+}
+
+
+
+BENCHMARK_F(SIMD, LUNoPivotNxNSolve)(benchmark::State& state)
+{
+    auto factorization = Solver::LUFactorization<Solver::Pivot::NONE>(AN);
+    for (auto _ : state)
+        benchmark::DoNotOptimize(Solver::LU<Solver::Pivot::NONE>(factorization, bN));
+}
 
 
 
@@ -318,10 +453,26 @@ BENCHMARK_F(Serial, LUPartialPivot8x8)(benchmark::State& state)
 
 
 
+BENCHMARK_F(Serial, LUPartialPivot8x8Factorize)(benchmark::State& state)
+{
+    for (auto _ : state)
+        benchmark::DoNotOptimize(Solver::LUFactorization<Solver::Pivot::PARTIAL>(A8));
+}
+
+
+
 BENCHMARK_F(Serial, LUPartialPivot16x16)(benchmark::State& state)
 {
     for (auto _ : state)
         benchmark::DoNotOptimize(Solver::LU<Solver::Pivot::PARTIAL>(A16, b16));
+}
+
+
+
+BENCHMARK_F(Serial, LUPartialPivot16x16Factorize)(benchmark::State& state)
+{
+    for (auto _ : state)
+        benchmark::DoNotOptimize(Solver::LUFactorization<Solver::Pivot::PARTIAL>(A16));
 }
 
 
@@ -334,12 +485,27 @@ BENCHMARK_F(Serial, LUPartialPivot32x32)(benchmark::State& state)
 
 
 
+BENCHMARK_F(Serial, LUPartialPivot32x32Factorize)(benchmark::State& state)
+{
+    for (auto _ : state)
+        benchmark::DoNotOptimize(Solver::LUFactorization<Solver::Pivot::PARTIAL>(A32));
+}
+
+
+
 BENCHMARK_F(Serial, LUPartialPivotNxN)(benchmark::State& state)
 {
     for (auto _ : state)
         benchmark::DoNotOptimize(Solver::LU<Solver::Pivot::PARTIAL>(AN, bN));
 }
 
+
+
+BENCHMARK_F(Serial, LUPartialPivotNxNFactorize)(benchmark::State& state)
+{
+    for (auto _ : state)
+        benchmark::DoNotOptimize(Solver::LUFactorization<Solver::Pivot::PARTIAL>(AN));
+}
 
 
 // BENCHMARK_F(SIMD, LUPartialPivot8x8)(benchmark::State& state)

@@ -80,17 +80,17 @@ BOOST_AUTO_TEST_CASE(Test_LU_NoPivot_2x2_F64_Serial)
 
 
 
-// BOOST_AUTO_TEST_CASE(Test_LU_NoPivot_2x2_F32_SSE)
-//{
-//    TestLU<F32, 2, Pivot::NONE, SolverType::SIMD>();
-//}
+BOOST_AUTO_TEST_CASE(Test_LU_NoPivot_2x2_F32_SSE)
+{
+    TestLU<F32, 2, Pivot::NONE, SolverType::SIMD>();
+}
 
 
 
-// BOOST_AUTO_TEST_CASE(Test_LU_NoPivot_2x2_F64_SSE)
-//{
-//    TestLU<F64, 2, Pivot::NONE, SolverType::SIMD>();
-//}
+BOOST_AUTO_TEST_CASE(Test_LU_NoPivot_2x2_F64_SSE)
+{
+    TestLU<F64, 2, Pivot::NONE, SolverType::SIMD>();
+}
 
 
 
@@ -110,17 +110,17 @@ BOOST_AUTO_TEST_CASE(Test_LU_NoPivot_3x3_F64_Serial)
 
 
 
-// BOOST_AUTO_TEST_CASE(Test_LU_NoPivot_3x3_F32_SSE)
-//{
-//    TestLU<F32, 3, Pivot::NONE, SolverType::SIMD>();
-//}
+BOOST_AUTO_TEST_CASE(Test_LU_NoPivot_3x3_F32_SSE)
+{
+    TestLU<F32, 3, Pivot::NONE, SolverType::SIMD>();
+}
 
 
 
-// BOOST_AUTO_TEST_CASE(Test_LU_NoPivot_3x3_F64_SSE)
-//{
-//    TestLU<F64, 3, Pivot::NONE, SolverType::SIMD>();
-//}
+BOOST_AUTO_TEST_CASE(Test_LU_NoPivot_3x3_F64_SSE)
+{
+    TestLU<F64, 3, Pivot::NONE, SolverType::SIMD>();
+}
 
 
 
@@ -140,17 +140,17 @@ BOOST_AUTO_TEST_CASE(Test_LU_NoPivot_4x4_F64_Serial)
 
 
 
-// BOOST_AUTO_TEST_CASE(Test_LU_NoPivot_4x4_F32_SSE)
-//{
-//    TestLU<F32, 4, Pivot::NONE, SolverType::SIMD>();
-//}
+BOOST_AUTO_TEST_CASE(Test_LU_NoPivot_4x4_F32_SSE)
+{
+    TestLU<F32, 4, Pivot::NONE, SolverType::SIMD>();
+}
 
 
 
-// BOOST_AUTO_TEST_CASE(Test_LU_NoPivot_4x4_F64_SSE)
-//{
-//    TestLU<F64, 4, Pivot::NONE, SolverType::SIMD>();
-//}
+BOOST_AUTO_TEST_CASE(Test_LU_NoPivot_4x4_F64_SSE)
+{
+    TestLU<F64, 4, Pivot::NONE, SolverType::SIMD>();
+}
 
 
 
@@ -170,17 +170,17 @@ BOOST_AUTO_TEST_CASE(Test_LU_NoPivot_5x5_F64_Serial)
 
 
 
-// BOOST_AUTO_TEST_CASE(Test_LU_NoPivot_5x5_F32_SSE)
-//{
-//    TestLU<F32, 5, Pivot::NONE, SolverType::SIMD>();
-//}
+BOOST_AUTO_TEST_CASE(Test_LU_NoPivot_5x5_F32_SSE)
+{
+    TestLU<F32, 5, Pivot::NONE, SolverType::SIMD>();
+}
 
 
 
-// BOOST_AUTO_TEST_CASE(Test_LU_NoPivot_5x5_F64_SSE)
-//{
-//    TestLU<F64, 5, Pivot::NONE, SolverType::SIMD>();
-//}
+BOOST_AUTO_TEST_CASE(Test_LU_NoPivot_5x5_F64_SSE)
+{
+    TestLU<F64, 5, Pivot::NONE, SolverType::SIMD>();
+}
 
 
 
@@ -200,17 +200,17 @@ BOOST_AUTO_TEST_CASE(Test_LU_NoPivot_7x7_F64_Serial)
 
 
 
-// BOOST_AUTO_TEST_CASE(Test_LU_NoPivot_7x7_F32_SSE)
-//{
-//    TestLU<F32, 7, Pivot::NONE, SolverType::SIMD>();
-//}
+BOOST_AUTO_TEST_CASE(Test_LU_NoPivot_7x7_F32_SSE)
+{
+    TestLU<F32, 7, Pivot::NONE, SolverType::SIMD>();
+}
 
 
 
-// BOOST_AUTO_TEST_CASE(Test_LU_NoPivot_7x7_F64_SSE)
-//{
-//    TestLU<F64, 7, Pivot::NONE, SolverType::SIMD>();
-//}
+BOOST_AUTO_TEST_CASE(Test_LU_NoPivot_7x7_F64_SSE)
+{
+    TestLU<F64, 7, Pivot::NONE, SolverType::SIMD>();
+}
 
 
 
@@ -230,17 +230,17 @@ BOOST_AUTO_TEST_CASE(Test_LU_NoPivot_8x8_F64_Serial)
 
 
 
-// BOOST_AUTO_TEST_CASE(Test_LU_NoPivot_8x8_F32_SSE)
-//{
-//    TestLU<F32, 8, Pivot::NONE, SolverType::SIMD>();
-//}
+BOOST_AUTO_TEST_CASE(Test_LU_NoPivot_8x8_F32_SSE)
+{
+    TestLU<F32, 8, Pivot::NONE, SolverType::SIMD>();
+}
 
 
 
-// BOOST_AUTO_TEST_CASE(Test_LU_NoPivot_8x8_F64_SSE)
-//{
-//    TestLU<F64, 8, Pivot::NONE, SolverType::SIMD>();
-//}
+BOOST_AUTO_TEST_CASE(Test_LU_NoPivot_8x8_F64_SSE)
+{
+    TestLU<F64, 8, Pivot::NONE, SolverType::SIMD>();
+}
 
 
 
@@ -260,17 +260,17 @@ BOOST_AUTO_TEST_CASE(Test_LU_NoPivot_9x9_F64_Serial)
 
 
 
-// BOOST_AUTO_TEST_CASE(Test_LU_NoPivot_9x9_F32_SSE)
-//{
-//    TestLU<F32, 9, Pivot::NONE, SolverType::SIMD>();
-//}
+BOOST_AUTO_TEST_CASE(Test_LU_NoPivot_9x9_F32_SSE)
+{
+    TestLU<F32, 9, Pivot::NONE, SolverType::SIMD>();
+}
 
 
 
-// BOOST_AUTO_TEST_CASE(Test_LU_NoPivot_9x9_F64_SSE)
-//{
-//    TestLU<F64, 9, Pivot::NONE, SolverType::SIMD>();
-//}
+BOOST_AUTO_TEST_CASE(Test_LU_NoPivot_9x9_F64_SSE)
+{
+    TestLU<F64, 9, Pivot::NONE, SolverType::SIMD>();
+}
 
 
 
