@@ -20,8 +20,8 @@ namespace GDL::Solver
 template <Pivot _pivot, typename _type, U32 _size>
 VecSerial<_type, _size, true> LU(const MatSerial<_type, _size, _size>& A, const VecSerial<_type, _size, true>& r)
 {
-    auto factorization = LUFactorization(A);
-    return LU(factorization, r);
+    auto factorization = LUFactorization<_pivot, _type, _size>(A);
+    return LU<_pivot, _type, _size>(factorization, r);
 }
 
 
@@ -56,8 +56,8 @@ LUFactorizationSerial<_pivot, _type, _size> LUFactorization(const MatSerial<_typ
 template <Pivot _pivot, typename _type, U32 _size>
 VecSIMD<_type, _size, true> LU(const MatSIMD<_type, _size, _size>& A, const VecSIMD<_type, _size, true>& r)
 {
-    auto factorization = LUFactorization(A);
-    return LU(factorization, r);
+    auto factorization = LUFactorization<_pivot, _type, _size>(A);
+    return LU<_pivot, _type, _size>(factorization, r);
 }
 
 

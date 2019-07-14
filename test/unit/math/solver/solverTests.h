@@ -59,6 +59,10 @@ private:
     //! @param expRes: Expected result
     static void SolveAndCheckResult(_solver solver, Matrix A, Vector r, Vector expRes);
 
+    //! @brief Tests if pivoting is really turned off
+    //! @param solver: Solver
+    static void TestNoPivoting(_solver solver);
+
     //! @brief Tests if the pivoting strategy prevents zeros on the main diagonal.
     //! @param solver: Solver
     static void TestPivoting(_solver solver);

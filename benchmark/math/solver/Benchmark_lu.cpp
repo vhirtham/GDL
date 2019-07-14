@@ -1,53 +1,52 @@
 #include <benchmark/benchmark.h>
 
-#define EIGEN_STACK_ALLOCATION_LIMIT 0
 
+#include "benchmark/math/solver/solverBenchmarkData.h"
 #include "gdl/math/solver/lu.h"
+
+
+#ifdef EIGEN3_FOUND
+
+#define EIGEN_STACK_ALLOCATION_LIMIT 0
 #include "eigen3/Eigen/Dense"
 
-#include <cstdlib>
+#endif // EIGEN3_FOUND
+
 
 using namespace GDL;
+
+
+
+// Setup --------------------------------------------------------------------------------------------------------------
 
 using Type = F32;
 constexpr U32 N = 64;
 
+// size
+#define BENCHMARK_8x8
+#define BENCHMARK_16x16
+#define BENCHMARK_32x32
+#define BENCHMARK_NxN
 
-// Helper functions ---------------------------------------------------------------------------------------------------
+// pivoting
+#define BENCHMARK_NOPIVOT
+#define BENCHMARK_PARTIALPIVOT
 
-std::array<Type, N * N> GetRandomMatrixData()
-{
-    std::array<Type, N * N> arr;
-    for (U32 i = 0; i < arr.size(); ++i)
-        arr[i] = rand() % 20 - 10;
+// factorization
+//#define BENCHMARK_FACTORIZATION
 
-    return arr;
-}
+// vectorization
+#define BENCHMARK_SERIAL
+#define BENCHMARK_SIMD
 
-std::array<Type, N> GetRandomVectorData()
-{
-    std::array<Type, N> arr;
-    for (U32 i = 0; i < arr.size(); ++i)
-        arr[i] = rand() % 20 - 10;
-
-    return arr;
-}
-
-
-const std::array<Type, N * N>& MatrixData()
-{
-    static std::array<Type, N* N> data = GetRandomMatrixData();
-    return data;
-}
+// Eigen
+#define BENCHMARK_EIGEN
 
 
-const std::array<Type, N>& VectorData()
-{
-    static std::array<Type, N> data = GetRandomVectorData();
-    return data;
-}
 
 // Fixture declaration ------------------------------------------------------------------------------------------------
+
+#ifdef BENCHMARK_SERIAL
 
 class Serial : public benchmark::Fixture
 {
@@ -61,76 +60,25 @@ public:
     MatSerial<Type, N, N> AN;
     VecSerial<Type, N> bN;
 
-    // clang-format off
-    Serial()
-        : A8{2,  4, -3,  5,  9, -3, -7,  1,
-            3, -5,  2, -1,  1,  1, -3,  1,
-            9,  1, -7, -6,  7,  2,  5, -7,
-            4, -1,  6, -2, -3, -8, -3,  9,
-            7,  2,  7,  3,  9, -5, -3, -4,
-           -5,  5, -5,  5,  5, -5,  5, -5,
-            5, -6,  3, -3,  2,  1, -6,  5,
-            1, -2, -3, -4, -5,  6, -7,  8}
-        , b8{7, -7, -8, 0, 6, 0, 4, -2}
-        ,A16{2,  4, -3,  5,  9, -3, -7,  1,  7,  1,  3, -1, -2,  4,  5,  1,
-             3, -5,  2, -1,  1,  1, -3,  1, -4,  1,  2,  4, -7, -1, -4,  5,
-             9,  1, -7, -6,  7,  2,  5, -7,  8,  2,  5,  6,  1,  4, -5,  1,
-             4, -1,  6, -2, -3, -8, -3,  9,  3,  3,  3,  1, -1, -1,  4,  1,
-             7,  2,  7,  3,  9, -5, -3, -4, -6,  8,  9,  4, -2,  1,  4,  7,
-            -5,  5, -5,  5,  5, -5,  5, -5,  7,  2,  5,  6, -4, -4,  1,  1,
-             5, -6,  3, -3,  2,  1, -6,  5,  5, -2,  4,  2,  7, -8,  3,  3,
-             1, -2, -3, -4, -5,  6, -7,  8, -1, -7, -5,  4,  3, -3,  7, -6,
-             2,  4, -5,  1,  5,  2, -5,  9, -2,  1, -2, -3, -4,  5,  8,  9,
-             7,  6,  5, -8,  5,  6,  2, -3,  1,  5, -4,  2, -9,  2,  5,  8,
-             1,  2,  3,  4,  5,  6,  7,  8, -8, -7, -6, -5, -4, -3, -2, -1,
-             1,  2,  3,  4,  5,  6,  7,  8,  1,  2,  3,  4,  5,  6,  7,  8,
-             2, -2,  4, -4,  6, -6,  8, -8,  1, -1,  3, -3,  5, -5,  7, -7,
-             1,  1,  2,  2,  3,  3,  4,  4,  5,  5,  6,  6,  7,  7,  8,  8,
-             9, -7,  5, -3,  1, -1,  3, -5,  7, -9,  1,  2,  3,  4,  5,  9,
-             4, -3, -9,  2,  5,  1, -1,  5, -1, -2, -6, -9,  4, -3,  2,  1}
-       , b16{7, -7, -8, 0, 6, 0, 4, -2, 5, 8, -1, 2, 6, 9, 0, -5}
-        ,A32{2,  4, -3,  5,  9, -3, -7,  1,  7,  1,  3, -1, -2,  4,  5,  1,  3,  6, -3,  1,  1, -3, -2,  1,  2,  1,  3, -1, -2,  4,  5,  1,
-             3, -5,  2, -1,  1,  1, -3,  1, -4,  1,  2,  4, -7, -1, -4,  5,  4,  3,  3,  5,  1, -3,  7,  3,  7,  6,  3, -1,  9,  9,  5,  4,
-             9,  1, -7, -6,  7,  2,  5, -7,  8,  2,  5,  6,  1,  4, -5,  1,  2,  2, -4,  6,  8, -3,  8,  1,  4,  2,  3, -1,  4,  4,  5,  3,
-             4, -1,  6, -2, -3, -8, -3,  9,  3,  3,  3,  1, -1, -1,  4,  1,  1,  1, -6, -5,  6, -3,  6,  2,  1, -9,  3,  4, -2,  1,  5,  2,
-             7,  2,  7,  3,  9, -5, -3, -4, -6,  8,  9,  4, -2,  1,  4,  7,  6,  2,  1,  2, -4, -3,  5,  5,  6,  3,  3, -1, -4,  4,  5,  8,
-            -5,  5, -5,  5,  5, -5,  5, -5,  7,  2,  5,  6, -4, -4,  1,  1,  7,  8,  2,  1,  5, -3, -3,  1,  8,  1,  3, -1, -3,  2,  5,  4,
-             5, -6,  3, -3,  2,  1, -6,  5,  5, -2,  4,  2,  7, -8,  3,  3,  7,  6, -4,  6,  2, -3,  2,  7,  5,  8,  3, -1, -1,  3,  5,  6,
-             1, -2, -3, -4, -5,  6, -7,  8, -1, -7, -5,  4,  3, -3,  7, -6,  2,  4,  5,  4,  3, -3,  1,  1,  2,  7,  3, -1,  6,  8,  5,  7,
-             2,  7, -5,  1,  5,  2, -5,  9, -2,  1, -2, -3, -4,  5,  8,  9,  4,  3, -2,  8,  1, -3,  9,  6, -7,  6,  3, -1, -1,  7,  3,  8,
-             7,  3,  5, -8,  5,  6,  2, -3,  1,  5, -4,  2, -9,  2,  5,  8,  6,  2, -4,  3,  9, -3,  6,  1,  6, -1,  3, -1,  6,  5,  5, -1,
-             1,  9,  3,  4,  5,  6,  7,  8, -8, -7, -6, -5, -4, -3, -2, -1,  7,  4, -1,  0,  5, -3, -7,  2,  1,  2,  3, -1, -2, -4,  4,  4,
-             1,  2,  3,  4,  5,  6,  7,  8,  1,  2,  3,  4,  5,  6,  7,  8,  4,  8,  2,  2,  9, -3, -1,  2,  2,  1,  3, -1,  1,  2,  1,  3,
-             2, -6,  4, -4,  6, -6,  8, -8,  1, -1,  3, -3,  5, -5,  7, -7,  7,  9,  1,  6,  6, -3, -4,  6,  7,  3,  3, -1,  5,  4,  2,  2,
-             1,  4,  2,  2,  3,  3,  4,  4,  5,  5,  6,  6,  7,  7,  8,  8,  8,  3,  5,  2,  2, -3, -6,  5,  4,  1,  3, -1, -2,  3,  3,  1,
-             9, -2,  5, -3,  1, -1,  3, -5,  7, -9,  1,  2,  3,  4,  5,  9,  4,  8,  2,  1,  9, -3, -7,  1,  8,  9,  2, -1,  4,  4,  6,  7,
-             4, -1, -9,  2,  5,  1, -1,  5, -1, -2, -6, -9,  4, -3,  2,  1,  2,  2,  6,  3,  8, -3, -3,  4,  7,  1,  3, -1,  7,  9,  9, -8,
-             7,  1, -3,  5,  9, -3, -7,  1,  7,  1,  3, -1, -2,  4,  5,  1,  3, -3,  1, -9,  1,  1, -2,  3, -1, -1,  2,  4,  8,  6, -8,  6,
-             8, -3,  2, -1,  1,  1, -3,  1, -4,  1,  2,  4, -7, -1, -4,  5,  4, -4,  3, -1,  3,  2, -9,  9, -2,  2,  2,  4,  3,  7, -2,  4,
-             8,  9, -7, -6,  7,  2,  5, -7,  8,  2,  5,  6,  1,  4, -5,  1,  1, -6,  7,  5,  7,  4,  6, -7, -3,  1,  2,  4,  9,  1,  4,  2,
-            -4, -3,  6, -2, -3, -8, -3,  9,  3,  3,  3,  1, -1, -1,  4,  1, -3, -2,  4, -3,  1,  1,  3,  6, -4,  4,  2,  4, -7,  3, -2,  3,
-             3,  4,  7,  3,  9, -5, -3, -4, -6,  8,  9,  4, -2,  1,  4,  7,  7, -9,  8,  2,  8,  1,  1,  3, -5,  2,  2,  4, -4,  2, -4,  7,
-            -1,  7, -5,  5,  5, -5,  5, -5,  7,  2,  5,  6, -4, -4,  1,  1,  4, -3, -2,  6,  1,  8,  4,  1, -6,  7,  2,  4,  2, -1, -2, -5,
-             5,  0,  3, -3,  2,  1, -6,  5,  5, -2,  4,  2,  7, -8,  3,  3,  1, -1, -4,  8,  2,  1, -6,  3, -7,  1,  2,  4,  6,  4,  6, -1,
-             8, -4, -3, -4, -5,  6, -7,  8, -1, -7, -5,  4,  3, -3,  7, -6, -3, -2,  5,  7, -1,  7, -5,  2, -8,  5,  2,  4,  1, -1, -3,  6,
-             4,  8, -5,  1,  5,  2, -5,  9, -2,  1, -2, -3, -4,  5,  8,  9,  3, -6,  2,  4,  5,  2, -1,  1, -9,  2,  2,  4, -7,  6, -1,  8,
-             3,  2,  5, -8,  5,  6,  2, -3,  1,  5, -4,  2, -9,  2,  5,  8, -2, -8,  1,  4,  2,  1, -2,  3,  0,  1,  2,  4,  5,  1, -4, -5,
-             2,  8,  3,  4,  5,  6,  7,  8, -8, -7, -6, -5, -4, -3, -2, -1,  1, -7,  3,  3,  1,  6, -0,  6, -1,  2,  2,  4,  3, -2, -3,  4,
-             1,  1,  3,  4,  5,  6,  7,  8,  1,  2,  3,  4,  5,  6,  7,  8,  8, -1,  6,  2,  3,  1, -1,  3, -2,  3,  2,  4,  2,  3, -4,  3,
-             7, -3,  4, -4,  6, -6,  8, -8,  1, -1,  3, -3,  5, -5,  7, -7,  5, -3,  5,  1,  3,  1, -3,  1, -3,  7,  2,  4,  1,  9, -5,  2,
-             9,  7,  2,  2,  3,  3,  4,  4,  5,  5,  6,  6,  7,  7,  8,  8,  9, -7,  3,  8,  2,  4, -2,  2, -4,  1,  2,  4,  5,  1, -4,  1,
-             1, -2,  5, -3,  1, -1,  3, -5,  7, -9,  1,  2,  3,  4,  5,  9,  2, -2,  8,  9,  6,  1, -8,  0, -5,  5,  2,  4,  4,  8,  2,  4,
-             2, -5, -9,  2,  5,  1, -1,  5, -1, -2, -6, -9,  4, -3,  2,  1,  3, -4,  1,  7,  3,  2, -9,  1, -6,  1,  2,  4,  6, -1, -4,  7},
 
-          b32{7, -7, -8, 0, 6, 0, 4, -2, 5, 8, -1, 2, 6, 9, 0, -5, 7, -7, -8, 0, 6, 0, 4, -2, 5, 8, -1, 2, 6, 9, 0, -5},
-          AN{MatrixData()},
-          bN{VectorData()}
+    Serial()
+        : A8{GetMatrixData8<Type>()}
+        , b8{GetVectorData8<Type>()}
+        , A16{GetMatrixData16<Type>()}
+        , b16{GetVectorData16<Type>()}
+        , A32{GetMatrixData32<Type>()}
+        , b32{GetVectorData32<Type>()}
+        , AN{GetMatrixDataRandom<Type, N>()}
+        , bN{GetVectorDataRandom<Type, N>()}
     {
     }
-    // clang-format on
 };
 
+#endif // BENCHMARK_SERIAL
 
+
+
+#ifdef BENCHMARK_SIMD
 
 class SIMD : public benchmark::Fixture
 {
@@ -144,114 +92,92 @@ public:
     MatSIMD<Type, N, N> AN;
     VecSIMD<Type, N> bN;
 
-    // clang-format off
     SIMD()
-        : A8{2,  4, -3,  5,  9, -3, -7,  1,
-            3, -5,  2, -1,  1,  1, -3,  1,
-            9,  1, -7, -6,  7,  2,  5, -7,
-            4, -1,  6, -2, -3, -8, -3,  9,
-            7,  2,  7,  3,  9, -5, -3, -4,
-           -5,  5, -5,  5,  5, -5,  5, -5,
-            5, -6,  3, -3,  2,  1, -6,  5,
-            1, -2, -3, -4, -5,  6, -7,  8}
-        , b8{7, -7, -8, 0, 6, 0, 4, -2}
-        ,A16{2,  4, -3,  5,  9, -3, -7,  1,  7,  1,  3, -1, -2,  4,  5,  1,
-             3, -5,  2, -1,  1,  1, -3,  1, -4,  1,  2,  4, -7, -1, -4,  5,
-             9,  1, -7, -6,  7,  2,  5, -7,  8,  2,  5,  6,  1,  4, -5,  1,
-             4, -1,  6, -2, -3, -8, -3,  9,  3,  3,  3,  1, -1, -1,  4,  1,
-             7,  2,  7,  3,  9, -5, -3, -4, -6,  8,  9,  4, -2,  1,  4,  7,
-            -5,  5, -5,  5,  5, -5,  5, -5,  7,  2,  5,  6, -4, -4,  1,  1,
-             5, -6,  3, -3,  2,  1, -6,  5,  5, -2,  4,  2,  7, -8,  3,  3,
-             1, -2, -3, -4, -5,  6, -7,  8, -1, -7, -5,  4,  3, -3,  7, -6,
-             2,  4, -5,  1,  5,  2, -5,  9, -2,  1, -2, -3, -4,  5,  8,  9,
-             7,  6,  5, -8,  5,  6,  2, -3,  1,  5, -4,  2, -9,  2,  5,  8,
-             1,  2,  3,  4,  5,  6,  7,  8, -8, -7, -6, -5, -4, -3, -2, -1,
-             1,  2,  3,  4,  5,  6,  7,  8,  1,  2,  3,  4,  5,  6,  7,  8,
-             2, -2,  4, -4,  6, -6,  8, -8,  1, -1,  3, -3,  5, -5,  7, -7,
-             1,  1,  2,  2,  3,  3,  4,  4,  5,  5,  6,  6,  7,  7,  8,  8,
-             9, -7,  5, -3,  1, -1,  3, -5,  7, -9,  1,  2,  3,  4,  5,  9,
-             4, -3, -9,  2,  5,  1, -1,  5, -1, -2, -6, -9,  4, -3,  2,  1}
-       , b16{7, -7, -8, 0, 6, 0, 4, -2, 5, 8, -1, 2, 6, 9, 0, -5}
-        ,A32{2,  4, -3,  5,  9, -3, -7,  1,  7,  1,  3, -1, -2,  4,  5,  1,  3,  6, -3,  1,  1, -3, -2,  1,  2,  1,  3, -1, -2,  4,  5,  1,
-             3, -5,  2, -1,  1,  1, -3,  1, -4,  1,  2,  4, -7, -1, -4,  5,  4,  3,  3,  5,  1, -3,  7,  3,  7,  6,  3, -1,  9,  9,  5,  4,
-             9,  1, -7, -6,  7,  2,  5, -7,  8,  2,  5,  6,  1,  4, -5,  1,  2,  2, -4,  6,  8, -3,  8,  1,  4,  2,  3, -1,  4,  4,  5,  3,
-             4, -1,  6, -2, -3, -8, -3,  9,  3,  3,  3,  1, -1, -1,  4,  1,  1,  1, -6, -5,  6, -3,  6,  2,  1, -9,  3,  4, -2,  1,  5,  2,
-             7,  2,  7,  3,  9, -5, -3, -4, -6,  8,  9,  4, -2,  1,  4,  7,  6,  2,  1,  2, -4, -3,  5,  5,  6,  3,  3, -1, -4,  4,  5,  8,
-            -5,  5, -5,  5,  5, -5,  5, -5,  7,  2,  5,  6, -4, -4,  1,  1,  7,  8,  2,  1,  5, -3, -3,  1,  8,  1,  3, -1, -3,  2,  5,  4,
-             5, -6,  3, -3,  2,  1, -6,  5,  5, -2,  4,  2,  7, -8,  3,  3,  7,  6, -4,  6,  2, -3,  2,  7,  5,  8,  3, -1, -1,  3,  5,  6,
-             1, -2, -3, -4, -5,  6, -7,  8, -1, -7, -5,  4,  3, -3,  7, -6,  2,  4,  5,  4,  3, -3,  1,  1,  2,  7,  3, -1,  6,  8,  5,  7,
-             2,  7, -5,  1,  5,  2, -5,  9, -2,  1, -2, -3, -4,  5,  8,  9,  4,  3, -2,  8,  1, -3,  9,  6, -7,  6,  3, -1, -1,  7,  3,  8,
-             7,  3,  5, -8,  5,  6,  2, -3,  1,  5, -4,  2, -9,  2,  5,  8,  6,  2, -4,  3,  9, -3,  6,  1,  6, -1,  3, -1,  6,  5,  5, -1,
-             1,  9,  3,  4,  5,  6,  7,  8, -8, -7, -6, -5, -4, -3, -2, -1,  7,  4, -1,  0,  5, -3, -7,  2,  1,  2,  3, -1, -2, -4,  4,  4,
-             1,  2,  3,  4,  5,  6,  7,  8,  1,  2,  3,  4,  5,  6,  7,  8,  4,  8,  2,  2,  9, -3, -1,  2,  2,  1,  3, -1,  1,  2,  1,  3,
-             2, -6,  4, -4,  6, -6,  8, -8,  1, -1,  3, -3,  5, -5,  7, -7,  7,  9,  1,  6,  6, -3, -4,  6,  7,  3,  3, -1,  5,  4,  2,  2,
-             1,  4,  2,  2,  3,  3,  4,  4,  5,  5,  6,  6,  7,  7,  8,  8,  8,  3,  5,  2,  2, -3, -6,  5,  4,  1,  3, -1, -2,  3,  3,  1,
-             9, -2,  5, -3,  1, -1,  3, -5,  7, -9,  1,  2,  3,  4,  5,  9,  4,  8,  2,  1,  9, -3, -7,  1,  8,  9,  2, -1,  4,  4,  6,  7,
-             4, -1, -9,  2,  5,  1, -1,  5, -1, -2, -6, -9,  4, -3,  2,  1,  2,  2,  6,  3,  8, -3, -3,  4,  7,  1,  3, -1,  7,  9,  9, -8,
-             7,  1, -3,  5,  9, -3, -7,  1,  7,  1,  3, -1, -2,  4,  5,  1,  3, -3,  1, -9,  1,  1, -2,  3, -1, -1,  2,  4,  8,  6, -8,  6,
-             8, -3,  2, -1,  1,  1, -3,  1, -4,  1,  2,  4, -7, -1, -4,  5,  4, -4,  3, -1,  3,  2, -9,  9, -2,  2,  2,  4,  3,  7, -2,  4,
-             8,  9, -7, -6,  7,  2,  5, -7,  8,  2,  5,  6,  1,  4, -5,  1,  1, -6,  7,  5,  7,  4,  6, -7, -3,  1,  2,  4,  9,  1,  4,  2,
-            -4, -3,  6, -2, -3, -8, -3,  9,  3,  3,  3,  1, -1, -1,  4,  1, -3, -2,  4, -3,  1,  1,  3,  6, -4,  4,  2,  4, -7,  3, -2,  3,
-             3,  4,  7,  3,  9, -5, -3, -4, -6,  8,  9,  4, -2,  1,  4,  7,  7, -9,  8,  2,  8,  1,  1,  3, -5,  2,  2,  4, -4,  2, -4,  7,
-            -1,  7, -5,  5,  5, -5,  5, -5,  7,  2,  5,  6, -4, -4,  1,  1,  4, -3, -2,  6,  1,  8,  4,  1, -6,  7,  2,  4,  2, -1, -2, -5,
-             5,  0,  3, -3,  2,  1, -6,  5,  5, -2,  4,  2,  7, -8,  3,  3,  1, -1, -4,  8,  2,  1, -6,  3, -7,  1,  2,  4,  6,  4,  6, -1,
-             8, -4, -3, -4, -5,  6, -7,  8, -1, -7, -5,  4,  3, -3,  7, -6, -3, -2,  5,  7, -1,  7, -5,  2, -8,  5,  2,  4,  1, -1, -3,  6,
-             4,  8, -5,  1,  5,  2, -5,  9, -2,  1, -2, -3, -4,  5,  8,  9,  3, -6,  2,  4,  5,  2, -1,  1, -9,  2,  2,  4, -7,  6, -1,  8,
-             3,  2,  5, -8,  5,  6,  2, -3,  1,  5, -4,  2, -9,  2,  5,  8, -2, -8,  1,  4,  2,  1, -2,  3,  0,  1,  2,  4,  5,  1, -4, -5,
-             2,  8,  3,  4,  5,  6,  7,  8, -8, -7, -6, -5, -4, -3, -2, -1,  1, -7,  3,  3,  1,  6, -0,  6, -1,  2,  2,  4,  3, -2, -3,  4,
-             1,  1,  3,  4,  5,  6,  7,  8,  1,  2,  3,  4,  5,  6,  7,  8,  8, -1,  6,  2,  3,  1, -1,  3, -2,  3,  2,  4,  2,  3, -4,  3,
-             7, -3,  4, -4,  6, -6,  8, -8,  1, -1,  3, -3,  5, -5,  7, -7,  5, -3,  5,  1,  3,  1, -3,  1, -3,  7,  2,  4,  1,  9, -5,  2,
-             9,  7,  2,  2,  3,  3,  4,  4,  5,  5,  6,  6,  7,  7,  8,  8,  9, -7,  3,  8,  2,  4, -2,  2, -4,  1,  2,  4,  5,  1, -4,  1,
-             1, -2,  5, -3,  1, -1,  3, -5,  7, -9,  1,  2,  3,  4,  5,  9,  2, -2,  8,  9,  6,  1, -8,  0, -5,  5,  2,  4,  4,  8,  2,  4,
-             2, -5, -9,  2,  5,  1, -1,  5, -1, -2, -6, -9,  4, -3,  2,  1,  3, -4,  1,  7,  3,  2, -9,  1, -6,  1,  2,  4,  6, -1, -4,  7},
-
-          b32{7, -7, -8, 0, 6, 0, 4, -2, 5, 8, -1, 2, 6, 9, 0, -5, 7, -7, -8, 0, 6, 0, 4, -2, 5, 8, -1, 2, 6, 9, 0, -5},
-          AN{MatrixData()},
-          bN{VectorData()}
+        : A8{GetMatrixData8<Type>()}
+        , b8{GetVectorData8<Type>()}
+        , A16{GetMatrixData16<Type>()}
+        , b16{GetVectorData16<Type>()}
+        , A32{GetMatrixData32<Type>()}
+        , b32{GetVectorData32<Type>()}
+        , AN{GetMatrixDataRandom<Type, N>()}
+        , bN{GetVectorDataRandom<Type, N>()}
     {
     }
-    // clang-format on
 };
 
+#endif // BENCHMARK_SIMD
 
+
+
+#ifdef BENCHMARK_EIGEN
 #ifdef EIGEN3_FOUND
-
-
 
 class Eigen3 : public benchmark::Fixture
 {
 public:
-    Eigen::Matrix<Type, N, N> A;
-    Eigen::Matrix<Type, N, 1> b;
+    Eigen::Matrix<Type, 8, 8> A8;
+    Eigen::Matrix<Type, 8, 1> b8;
+    Eigen::Matrix<Type, 16, 16> A16;
+    Eigen::Matrix<Type, 16, 1> b16;
+    Eigen::Matrix<Type, 32, 32> A32;
+    Eigen::Matrix<Type, 32, 1> b32;
+    Eigen::Matrix<Type, N, N> AN;
+    Eigen::Matrix<Type, N, 1> bN;
 
-    // clang-format off
+
     Eigen3()
     {
-
-        for (U32 i = 0; i<N;++i)
-            for (U32 j = 0; j<N;++j)
-                A(i,j) = MatrixData()[i*N+j];
-        for (U32 i = 0; i<N;++i)
-            b[i] = VectorData()[i];
-
+        SetMatrix<8>(A8, GetMatrixData8<Type>());
+        SetVector<8>(b8, GetVectorData8<Type>());
+        SetMatrix<16>(A16, GetMatrixData16<Type>());
+        SetVector<16>(b16, GetVectorData16<Type>());
+        SetMatrix<32>(A32, GetMatrixData32<Type>());
+        SetVector<32>(b32, GetVectorData32<Type>());
+        SetMatrix<N>(AN, GetMatrixDataRandom<Type, N>());
+        SetVector<N>(bN, GetVectorDataRandom<Type, N>());
     }
-    // clang-format on
+
+
+
+    template <U32 _size>
+    void SetMatrix(Eigen::Matrix<Type, _size, _size>& mat, const std::array<Type, _size * _size>& data)
+    {
+        for (U32 i = 0; i < _size; ++i)
+            for (U32 j = 0; j < _size; ++j)
+                mat(i, j) = data[i * _size + j];
+    }
+
+
+    template <U32 _size>
+    void SetVector(Eigen::Matrix<Type, _size, 1>& vec, const std::array<Type, _size>& data)
+    {
+        for (U32 i = 0; i < _size; ++i)
+            for (U32 j = 0; j < _size; ++j)
+                vec(i, 0) = data[i];
+    }
 };
 
 #endif // EIGEN3_FOUND
+#endif // BENCHMARK_EIGEN
 
 
+// Serial - No pivot --------------------------------------------------------------------------------------------------
 
-// LU partial pivot ------------------------------------------------------------------------------------------------
 
-BENCHMARK_F(Serial, LUNoPivot8x8)(benchmark::State& state)
+#ifdef BENCHMARK_NOPIVOT
+#ifdef BENCHMARK_SERIAL
+#ifdef BENCHMARK_8x8
+
+BENCHMARK_F(Serial, NoPivot_8x8)(benchmark::State& state)
 {
     for (auto _ : state)
         benchmark::DoNotOptimize(Solver::LU<Solver::Pivot::NONE>(A8, b8));
 }
 
 
-BENCHMARK_F(Serial, LUNoPivot8x8Factorize)(benchmark::State& state)
+#ifdef BENCHMARK_FACTORIZATION
+
+BENCHMARK_F(Serial, NoPivot_8x8_Factorize)(benchmark::State& state)
 {
     for (auto _ : state)
         benchmark::DoNotOptimize(Solver::LUFactorization<Solver::Pivot::NONE>(A8));
@@ -259,16 +185,21 @@ BENCHMARK_F(Serial, LUNoPivot8x8Factorize)(benchmark::State& state)
 
 
 
-BENCHMARK_F(Serial, LUNoPivot8x8Solve)(benchmark::State& state)
+BENCHMARK_F(Serial, NoPivot_8x8_Solve)(benchmark::State& state)
 {
     auto factorization = Solver::LUFactorization<Solver::Pivot::NONE>(A8);
     for (auto _ : state)
         benchmark::DoNotOptimize(Solver::LU<Solver::Pivot::NONE>(factorization, b8));
 }
 
+#endif // BENCHMARK_FACTORIZATION
+#endif // BENCHMARK_8x8
 
 
-BENCHMARK_F(Serial, LUNoPivot16x16)(benchmark::State& state)
+
+#ifdef BENCHMARK_16x16
+
+BENCHMARK_F(Serial, NoPivot_16x16)(benchmark::State& state)
 {
     for (auto _ : state)
         benchmark::DoNotOptimize(Solver::LU<Solver::Pivot::NONE>(A16, b16));
@@ -276,7 +207,9 @@ BENCHMARK_F(Serial, LUNoPivot16x16)(benchmark::State& state)
 
 
 
-BENCHMARK_F(Serial, LUNoPivot16x16Factorize)(benchmark::State& state)
+#ifdef BENCHMARK_FACTORIZATION
+
+BENCHMARK_F(Serial, NoPivot_16x16_Factorize)(benchmark::State& state)
 {
     for (auto _ : state)
         benchmark::DoNotOptimize(Solver::LUFactorization<Solver::Pivot::NONE>(A16));
@@ -284,24 +217,30 @@ BENCHMARK_F(Serial, LUNoPivot16x16Factorize)(benchmark::State& state)
 
 
 
-BENCHMARK_F(Serial, LUNoPivot16x16Solve)(benchmark::State& state)
+BENCHMARK_F(Serial, NoPivot_16x16_Solve)(benchmark::State& state)
 {
     auto factorization = Solver::LUFactorization<Solver::Pivot::NONE>(A16);
     for (auto _ : state)
         benchmark::DoNotOptimize(Solver::LU<Solver::Pivot::NONE>(factorization, b16));
 }
 
+#endif // BENCHMARK_FACTORIZATION
+#endif // BENCHMARK_16x16
 
 
-BENCHMARK_F(Serial, LUNoPivot32x32)(benchmark::State& state)
+
+#ifdef BENCHMARK_32x32
+
+BENCHMARK_F(Serial, NoPivot_32x32)(benchmark::State& state)
 {
     for (auto _ : state)
         benchmark::DoNotOptimize(Solver::LU<Solver::Pivot::NONE>(A32, b32));
 }
 
 
+#ifdef BENCHMARK_FACTORIZATION
 
-BENCHMARK_F(Serial, LUNoPivot32x32Factorize)(benchmark::State& state)
+BENCHMARK_F(Serial, NoPivot_32x32_Factorize)(benchmark::State& state)
 {
     for (auto _ : state)
         benchmark::DoNotOptimize(Solver::LUFactorization<Solver::Pivot::NONE>(A32));
@@ -309,16 +248,21 @@ BENCHMARK_F(Serial, LUNoPivot32x32Factorize)(benchmark::State& state)
 
 
 
-BENCHMARK_F(Serial, LUNoPivot32x32Solve)(benchmark::State& state)
+BENCHMARK_F(Serial, NoPivot_32x32_Solve)(benchmark::State& state)
 {
     auto factorization = Solver::LUFactorization<Solver::Pivot::NONE>(A32);
     for (auto _ : state)
         benchmark::DoNotOptimize(Solver::LU<Solver::Pivot::NONE>(factorization, b32));
 }
 
+#endif // BENCHMARK_FACTORIZATION
+#endif // BENCHMARK_32x32
 
 
-BENCHMARK_F(Serial, LUNoPivotNxN)(benchmark::State& state)
+
+#ifdef BENCHMARK_NxN
+
+BENCHMARK_F(Serial, NoPivot_NxN)(benchmark::State& state)
 {
     for (auto _ : state)
         benchmark::DoNotOptimize(Solver::LU<Solver::Pivot::NONE>(AN, bN));
@@ -326,7 +270,9 @@ BENCHMARK_F(Serial, LUNoPivotNxN)(benchmark::State& state)
 
 
 
-BENCHMARK_F(Serial, LUNoPivotNxNFactorize)(benchmark::State& state)
+#ifdef BENCHMARK_FACTORIZATION
+
+BENCHMARK_F(Serial, NoPivot_NxN_Factorize)(benchmark::State& state)
 {
     for (auto _ : state)
         benchmark::DoNotOptimize(Solver::LUFactorization<Solver::Pivot::NONE>(AN));
@@ -334,16 +280,25 @@ BENCHMARK_F(Serial, LUNoPivotNxNFactorize)(benchmark::State& state)
 
 
 
-BENCHMARK_F(Serial, LUNoPivotNxNSolve)(benchmark::State& state)
+BENCHMARK_F(Serial, NoPivot_NxN_Solve)(benchmark::State& state)
 {
     auto factorization = Solver::LUFactorization<Solver::Pivot::NONE>(AN);
     for (auto _ : state)
         benchmark::DoNotOptimize(Solver::LU<Solver::Pivot::NONE>(factorization, bN));
 }
 
+#endif // BENCHMARK_FACTORIZATION
+#endif // BENCHMARK_NxN
+#endif // BENCHMARK_SERIAL
 
 
-BENCHMARK_F(SIMD, LUNoPivot8x8)(benchmark::State& state)
+
+// SIMD - No pivot ----------------------------------------------------------------------------------------------------
+
+#ifdef BENCHMARK_SIMD
+#ifdef BENCHMARK_8x8
+
+BENCHMARK_F(SIMD, NoPivot_8x8)(benchmark::State& state)
 {
     for (auto _ : state)
         benchmark::DoNotOptimize(Solver::LU<Solver::Pivot::NONE>(A8, b8));
@@ -351,7 +306,9 @@ BENCHMARK_F(SIMD, LUNoPivot8x8)(benchmark::State& state)
 
 
 
-BENCHMARK_F(SIMD, LUNoPivot8x8Factorize)(benchmark::State& state)
+#ifdef BENCHMARK_FACTORIZATION
+
+BENCHMARK_F(SIMD, NoPivot_8x8__Factorize)(benchmark::State& state)
 {
     for (auto _ : state)
         benchmark::DoNotOptimize(Solver::LUFactorization<Solver::Pivot::NONE>(A8));
@@ -359,24 +316,30 @@ BENCHMARK_F(SIMD, LUNoPivot8x8Factorize)(benchmark::State& state)
 
 
 
-BENCHMARK_F(SIMD, LUNoPivot8x8Solve)(benchmark::State& state)
+BENCHMARK_F(SIMD, NoPivot_8x8__Solve)(benchmark::State& state)
 {
     auto factorization = Solver::LUFactorization<Solver::Pivot::NONE>(A8);
     for (auto _ : state)
         benchmark::DoNotOptimize(Solver::LU<Solver::Pivot::NONE>(factorization, b8));
 }
 
+#endif // BENCHMARK_FACTORIZATION
+#endif // BENCHMARK_8x8
 
 
-BENCHMARK_F(SIMD, LUNoPivot16x16)(benchmark::State& state)
+
+#ifdef BENCHMARK_16x16
+
+BENCHMARK_F(SIMD, NoPivot_16x16)(benchmark::State& state)
 {
     for (auto _ : state)
         benchmark::DoNotOptimize(Solver::LU<Solver::Pivot::NONE>(A16, b16));
 }
 
 
+#ifdef BENCHMARK_FACTORIZATION
 
-BENCHMARK_F(SIMD, LUNoPivot16x16Factorize)(benchmark::State& state)
+BENCHMARK_F(SIMD, NoPivot_16x16_Factorize)(benchmark::State& state)
 {
     for (auto _ : state)
         benchmark::DoNotOptimize(Solver::LUFactorization<Solver::Pivot::NONE>(A16));
@@ -384,16 +347,21 @@ BENCHMARK_F(SIMD, LUNoPivot16x16Factorize)(benchmark::State& state)
 
 
 
-BENCHMARK_F(SIMD, LUNoPivot16x16Solve)(benchmark::State& state)
+BENCHMARK_F(SIMD, NoPivot_16x16_Solve)(benchmark::State& state)
 {
     auto factorization = Solver::LUFactorization<Solver::Pivot::NONE>(A16);
     for (auto _ : state)
         benchmark::DoNotOptimize(Solver::LU<Solver::Pivot::NONE>(factorization, b16));
 }
 
+#endif // BENCHMARK_FACTORIZATION
+#endif // BENCHMARK_16x16
 
 
-BENCHMARK_F(SIMD, LUNoPivot32x32)(benchmark::State& state)
+
+#ifdef BENCHMARK_32x32
+
+BENCHMARK_F(SIMD, NoPivot_32x32)(benchmark::State& state)
 {
     for (auto _ : state)
         benchmark::DoNotOptimize(Solver::LU<Solver::Pivot::NONE>(A32, b32));
@@ -401,7 +369,9 @@ BENCHMARK_F(SIMD, LUNoPivot32x32)(benchmark::State& state)
 
 
 
-BENCHMARK_F(SIMD, LUNoPivot32x32Factorize)(benchmark::State& state)
+#ifdef BENCHMARK_FACTORIZATION
+
+BENCHMARK_F(SIMD, NoPivot_32x32_Factorize)(benchmark::State& state)
 {
     for (auto _ : state)
         benchmark::DoNotOptimize(Solver::LUFactorization<Solver::Pivot::NONE>(A32));
@@ -409,16 +379,21 @@ BENCHMARK_F(SIMD, LUNoPivot32x32Factorize)(benchmark::State& state)
 
 
 
-BENCHMARK_F(SIMD, LUNoPivot32x32Solve)(benchmark::State& state)
+BENCHMARK_F(SIMD, NoPivot_32x32_Solve)(benchmark::State& state)
 {
     auto factorization = Solver::LUFactorization<Solver::Pivot::NONE>(A32);
     for (auto _ : state)
         benchmark::DoNotOptimize(Solver::LU<Solver::Pivot::NONE>(factorization, b32));
 }
 
+#endif // BENCHMARK_FACTORIZATION
+#endif // BENCHMARK_32x32
 
 
-BENCHMARK_F(SIMD, LUNoPivotNxN)(benchmark::State& state)
+
+#ifdef BENCHMARK_NxN
+
+BENCHMARK_F(SIMD, NoPivot_NxN)(benchmark::State& state)
 {
     for (auto _ : state)
         benchmark::DoNotOptimize(Solver::LU<Solver::Pivot::NONE>(AN, bN));
@@ -426,7 +401,9 @@ BENCHMARK_F(SIMD, LUNoPivotNxN)(benchmark::State& state)
 
 
 
-BENCHMARK_F(SIMD, LUNoPivotNxNFactorize)(benchmark::State& state)
+#ifdef BENCHMARK_FACTORIZATION
+
+BENCHMARK_F(SIMD, NoPivot_NxN_Factorize)(benchmark::State& state)
 {
     for (auto _ : state)
         benchmark::DoNotOptimize(Solver::LUFactorization<Solver::Pivot::NONE>(AN));
@@ -434,18 +411,27 @@ BENCHMARK_F(SIMD, LUNoPivotNxNFactorize)(benchmark::State& state)
 
 
 
-BENCHMARK_F(SIMD, LUNoPivotNxNSolve)(benchmark::State& state)
+BENCHMARK_F(SIMD, NoPivot_NxN_Solve)(benchmark::State& state)
 {
     auto factorization = Solver::LUFactorization<Solver::Pivot::NONE>(AN);
     for (auto _ : state)
         benchmark::DoNotOptimize(Solver::LU<Solver::Pivot::NONE>(factorization, bN));
 }
 
+#endif // BENCHMARK_FACTORIZATION
+#endif // BENCHMARK_NxN
+#endif // BENCHMARK_SIMD
+#endif // BENCHMARK_NOPIVOT
 
 
-// LU partial pivot ------------------------------------------------------------------------------------------------
 
-BENCHMARK_F(Serial, LUPartialPivot8x8)(benchmark::State& state)
+// Serial - partial pivot ---------------------------------------------------------------------------------------------
+
+#ifdef BENCHMARK_PARTIALPIVOT
+#ifdef BENCHMARK_SERIAL
+#ifdef BENCHMARK_8x8
+
+BENCHMARK_F(Serial, PartialPivot_8x8)(benchmark::State& state)
 {
     for (auto _ : state)
         benchmark::DoNotOptimize(Solver::LU<Solver::Pivot::PARTIAL>(A8, b8));
@@ -453,7 +439,9 @@ BENCHMARK_F(Serial, LUPartialPivot8x8)(benchmark::State& state)
 
 
 
-BENCHMARK_F(Serial, LUPartialPivot8x8Factorize)(benchmark::State& state)
+#ifdef BENCHMARK_FACTORIZATION
+
+BENCHMARK_F(Serial, PartialPivot_8x8_Factorize)(benchmark::State& state)
 {
     for (auto _ : state)
         benchmark::DoNotOptimize(Solver::LUFactorization<Solver::Pivot::PARTIAL>(A8));
@@ -461,7 +449,21 @@ BENCHMARK_F(Serial, LUPartialPivot8x8Factorize)(benchmark::State& state)
 
 
 
-BENCHMARK_F(Serial, LUPartialPivot16x16)(benchmark::State& state)
+BENCHMARK_F(SIMD, PartialPivot_8x8_Solve)(benchmark::State& state)
+{
+    auto factorization = Solver::LUFactorization<Solver::Pivot::PARTIAL>(A8);
+    for (auto _ : state)
+        benchmark::DoNotOptimize(Solver::LU<Solver::Pivot::PARTIAL>(factorization, b8));
+}
+
+#endif // BENCHMARK_FACTORIZATION
+#endif // BENCHMARK_8x8
+
+
+
+#ifdef BENCHMARK_16x16
+
+BENCHMARK_F(Serial, PartialPivot_16x16)(benchmark::State& state)
 {
     for (auto _ : state)
         benchmark::DoNotOptimize(Solver::LU<Solver::Pivot::PARTIAL>(A16, b16));
@@ -469,7 +471,9 @@ BENCHMARK_F(Serial, LUPartialPivot16x16)(benchmark::State& state)
 
 
 
-BENCHMARK_F(Serial, LUPartialPivot16x16Factorize)(benchmark::State& state)
+#ifdef BENCHMARK_FACTORIZATION
+
+BENCHMARK_F(Serial, PartialPivot_16x16_Factorize)(benchmark::State& state)
 {
     for (auto _ : state)
         benchmark::DoNotOptimize(Solver::LUFactorization<Solver::Pivot::PARTIAL>(A16));
@@ -477,7 +481,20 @@ BENCHMARK_F(Serial, LUPartialPivot16x16Factorize)(benchmark::State& state)
 
 
 
-BENCHMARK_F(Serial, LUPartialPivot32x32)(benchmark::State& state)
+BENCHMARK_F(SIMD, PartialPivot_16x16_Solve)(benchmark::State& state)
+{
+    auto factorization = Solver::LUFactorization<Solver::Pivot::PARTIAL>(A16);
+    for (auto _ : state)
+        benchmark::DoNotOptimize(Solver::LU<Solver::Pivot::PARTIAL>(factorization, b16));
+}
+
+#endif // BENCHMARK_FACTORIZATION
+#endif // BENCHMARK_16x16
+
+
+#ifdef BENCHMARK_32x32
+
+BENCHMARK_F(Serial, PartialPivot_32x32)(benchmark::State& state)
 {
     for (auto _ : state)
         benchmark::DoNotOptimize(Solver::LU<Solver::Pivot::PARTIAL>(A32, b32));
@@ -485,7 +502,9 @@ BENCHMARK_F(Serial, LUPartialPivot32x32)(benchmark::State& state)
 
 
 
-BENCHMARK_F(Serial, LUPartialPivot32x32Factorize)(benchmark::State& state)
+#ifdef BENCHMARK_FACTORIZATION
+
+BENCHMARK_F(Serial, PartialPivot_32x32_Factorize)(benchmark::State& state)
 {
     for (auto _ : state)
         benchmark::DoNotOptimize(Solver::LUFactorization<Solver::Pivot::PARTIAL>(A32));
@@ -493,7 +512,21 @@ BENCHMARK_F(Serial, LUPartialPivot32x32Factorize)(benchmark::State& state)
 
 
 
-BENCHMARK_F(Serial, LUPartialPivotNxN)(benchmark::State& state)
+BENCHMARK_F(SIMD, PartialPivot_32x32_Solve)(benchmark::State& state)
+{
+    auto factorization = Solver::LUFactorization<Solver::Pivot::PARTIAL>(A32);
+    for (auto _ : state)
+        benchmark::DoNotOptimize(Solver::LU<Solver::Pivot::PARTIAL>(factorization, b32));
+}
+
+#endif // BENCHMARK_FACTORIZATION
+#endif // BENCHMARK_32x32
+
+
+
+#ifdef BENCHMARK_NxN
+
+BENCHMARK_F(Serial, PartialPivot_NxN)(benchmark::State& state)
 {
     for (auto _ : state)
         benchmark::DoNotOptimize(Solver::LU<Solver::Pivot::PARTIAL>(AN, bN));
@@ -501,14 +534,34 @@ BENCHMARK_F(Serial, LUPartialPivotNxN)(benchmark::State& state)
 
 
 
-BENCHMARK_F(Serial, LUPartialPivotNxNFactorize)(benchmark::State& state)
+#ifdef BENCHMARK_FACTORIZATION
+
+BENCHMARK_F(Serial, PartialPivot_NxN_Factorize)(benchmark::State& state)
 {
     for (auto _ : state)
         benchmark::DoNotOptimize(Solver::LUFactorization<Solver::Pivot::PARTIAL>(AN));
 }
 
 
-// BENCHMARK_F(SIMD, LUPartialPivot8x8)(benchmark::State& state)
+
+BENCHMARK_F(SIMD, PartialPivot_NxN_Solve)(benchmark::State& state)
+{
+    auto factorization = Solver::LUFactorization<Solver::Pivot::PARTIAL>(AN);
+    for (auto _ : state)
+        benchmark::DoNotOptimize(Solver::LU<Solver::Pivot::PARTIAL>(factorization, bN));
+}
+
+#endif // BENCHMARK_FACTORIZATION
+#endif // BENCHMARK_NxN
+#endif // BENCHMARK_SERIAL
+
+
+
+// SIMD - partial pivot -----------------------------------------------------------------------------------------------
+
+#ifdef BENCHMARK_SIMD
+
+// BENCHMARK_F(SIMD, PartialPivot_8x8)(benchmark::State& state)
 //{
 //    for (auto _ : state)
 //        benchmark::DoNotOptimize(Solver::LU<Solver::Pivot::PARTIAL>(A8, b8));
@@ -516,7 +569,7 @@ BENCHMARK_F(Serial, LUPartialPivotNxNFactorize)(benchmark::State& state)
 
 
 
-// BENCHMARK_F(SIMD, LUPartialPivot16x16)(benchmark::State& state)
+// BENCHMARK_F(SIMD, PartialPivot_16x16)(benchmark::State& state)
 //{
 //    for (auto _ : state)
 //        benchmark::DoNotOptimize(Solver::LU<Solver::Pivot::PARTIAL>(A16, b16));
@@ -524,7 +577,7 @@ BENCHMARK_F(Serial, LUPartialPivotNxNFactorize)(benchmark::State& state)
 
 
 
-// BENCHMARK_F(SIMD, LUPartialPivot32x32)(benchmark::State& state)
+// BENCHMARK_F(SIMD, PartialPivot_32x32)(benchmark::State& state)
 //{
 //    for (auto _ : state)
 //        benchmark::DoNotOptimize(Solver::LU<Solver::Pivot::PARTIAL>(A32, b32));
@@ -532,55 +585,123 @@ BENCHMARK_F(Serial, LUPartialPivotNxNFactorize)(benchmark::State& state)
 
 
 
-// BENCHMARK_F(SIMD, LUPartialPivotNxN)(benchmark::State& state)
+// BENCHMARK_F(SIMD, PartialPivot_NxN)(benchmark::State& state)
 //{
 //    for (auto _ : state)
 //        benchmark::DoNotOptimize(Solver::LU<Solver::Pivot::PARTIAL>(AN, bN));
 //}
 
 
+#endif // BENCHMARK_SIMD
+#endif // BENCHMARK_PARTIALPIVOT
+
+
 
 // Eigen --------------------------------------------------------------------------------------------------------------
 
+#ifdef BENCHMARK_EIGEN
 #ifdef EIGEN3_FOUND
 
 // https://eigen.tuxfamily.org/dox/group__TutorialLinearAlgebra.html
 // https://eigen.tuxfamily.org/dox/group__DenseDecompositionBenchmark.html
 
-// Does not make sense to compare --- only valid for symmetric matrices
-// BENCHMARK_F(Eigen3, LLT8x8)(benchmark::State& state)
-// {
-//     for (auto _ : state)
-//         benchmark::DoNotOptimize(A.llt().solve(b));
-// }
 
 
+#ifdef BENCHMARK_8x8
 
-BENCHMARK_F(Eigen3, LDLTNxN)(benchmark::State& state)
+BENCHMARK_F(Eigen3, PartialPiv_LU_8x8)(benchmark::State& state)
 {
     for (auto _ : state)
-        benchmark::DoNotOptimize(A.ldlt().solve(b));
+        benchmark::DoNotOptimize(A8.partialPivLu().solve(b8));
 }
 
+#endif // BENCHMARK_8x8
 
 
-BENCHMARK_F(Eigen3, HouseholderQRNxN)(benchmark::State& state)
+
+#ifdef BENCHMARK_16x16
+
+BENCHMARK_F(Eigen3, PartialPiv_LU_16x16)(benchmark::State& state)
 {
     for (auto _ : state)
-        benchmark::DoNotOptimize(A.householderQr().solve(b));
+        benchmark::DoNotOptimize(A16.partialPivLu().solve(b16));
 }
 
+#endif // BENCHMARK_16x16
 
 
-BENCHMARK_F(Eigen3, PartialPivLUNxN)(benchmark::State& state)
+
+#ifdef BENCHMARK_32x32
+
+BENCHMARK_F(Eigen3, PartialPiv_LU_32x32)(benchmark::State& state)
 {
     for (auto _ : state)
-        benchmark::DoNotOptimize(A.partialPivLu().solve(b));
+        benchmark::DoNotOptimize(A32.partialPivLu().solve(b32));
 }
 
+#endif // BENCHMARK_32x32
 
 
+
+#ifdef BENCHMARK_NxN
+
+BENCHMARK_F(Eigen3, PartialPiv_LU_NxN)(benchmark::State& state)
+{
+    for (auto _ : state)
+        benchmark::DoNotOptimize(AN.partialPivLu().solve(bN));
+}
+
+#endif // BENCHMARK_NxN
+
+
+
+//#ifdef BENCHMARK_8x8
+
+// BENCHMARK_F(Eigen3, HouseholderQR_8x8)(benchmark::State& state)
+//{
+//    for (auto _ : state)
+//        benchmark::DoNotOptimize(A8.householderQr().solve(b8));
+//}
+
+//#endif // BENCHMARK_8x8
+
+
+
+//#ifdef BENCHMARK_16x16
+
+// BENCHMARK_F(Eigen3, HouseholderQR_16x16)(benchmark::State& state)
+//{
+//    for (auto _ : state)
+//        benchmark::DoNotOptimize(A16.householderQr().solve(b16));
+//}
+
+//#endif // BENCHMARK_16x16
+
+
+
+//#ifdef BENCHMARK_32x32
+
+// BENCHMARK_F(Eigen3, HouseholderQR_32x32)(benchmark::State& state)
+//{
+//    for (auto _ : state)
+//        benchmark::DoNotOptimize(A32.householderQr().solve(b32));
+//}
+
+//#endif // BENCHMARK_32x32
+
+
+
+//#ifdef BENCHMARK_NxN
+
+// BENCHMARK_F(Eigen3, HouseholderQRNxN)(benchmark::State& state)
+//{
+//    for (auto _ : state)
+//        benchmark::DoNotOptimize(AN.householderQr().solve(bN));
+//}
+
+//#endif // BENCHMARK_NxN
 #endif // EIGEN3_FOUND
+#endif // BENCHMARK_EIGEN
 
 
 

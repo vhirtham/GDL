@@ -35,6 +35,9 @@ void SolverTests<_type, _size, _solver>::RunTests(_solver solver)
 
 #ifndef NDEVEXCEPTION
     TestSingularMatrixException(solver);
+
+    if constexpr (_pivot == Pivot::NONE)
+        TestNoPivoting(solver);
 #endif // NDEVEXCEPTION
 
 
@@ -264,6 +267,24 @@ void SolverTests<_type, _size, _solver>::SolveAndCheckResult(_solver solver, Mat
     Vector res = solver(A, r);
 
     BOOST_CHECK(CheckCloseArray(res.Data(), expRes.Data(), 150));
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+template <typename _type, U32 _size, typename _solver>
+void SolverTests<_type, _size, _solver>::TestNoPivoting(_solver solver)
+{
+    std::array<_type, _size* _size> matrixValues = GetTransposedMatrixData();
+    matrixValues[0] = 0;
+
+    Matrix A = Matrix(matrixValues).Transpose();
+    Vector b(GetRhsData());
+
+    Vector res;
+
+    BOOST_CHECK_THROW(res = solver(A, b), Exception);
 }
 
 
