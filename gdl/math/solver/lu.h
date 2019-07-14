@@ -3,6 +3,8 @@
 #include "gdl/base/fundamentalTypes.h"
 #include "gdl/base/simd/utility.h"
 #include "gdl/math/solver/pivotEnum.h"
+#include "gdl/math/solver/internal/luDenseSerial.h"
+#include "gdl/math/solver/internal/luDenseSIMD.h"
 
 #include <array>
 
@@ -24,155 +26,12 @@ namespace Solver
 
 
 
-// Support classes ----------------------------------------------------------------------------------------------------
+template <Pivot _pivot, typename _type, U32 _size>
+using LUFactorizationSerial = typename LUDenseSerial<_type, _size, _pivot>::Factorization;
 
-//! @brief LU solver class for dense static systems
-//! @tparam _type: Data type
-//! @tparam _size: Size of the linear system
-//! @tparam _pivot: Enum to select the pivoting strategy
-template <typename _type, U32 _size, Pivot _pivot>
-class LUDenseSerial
-{
-    using MatrixDataArray = std::array<_type, _size * _size>;
-    using VectorDataArray = std::array<_type, _size>;
-    using VectorType = VecSerial<_type, _size, true>;
-    using MatrixType = MatSerial<_type, _size, _size>;
-
-public:
-    //! @brief Class that stores the LU factorization and the permutations
-    class Factorization
-    {
-        friend class LUDenseSerial;
-
-        MatrixDataArray mLU;
-        VectorDataArray mPermutation;
-
-        //! @brief ctor
-        //! @param matrixData: Data of the matrix that should be factorized
-        Factorization(const MatrixDataArray& matrixData);
-    };
-
-
-
-    //! @brief Calculates the LU factorization and returns it
-    //! @param matrix: Matrix that should be factorized
-    //! @return LU factorization
-    [[nodiscard]] static inline Factorization Factorize(const MatrixType& matrix);
-
-    //! @brief Solves the linear system A * x = r
-    //! @param A: Matrix
-    //! @param r: Vector
-    //! @return Result vector x
-    [[nodiscard]] inline static VectorType Solve(const MatrixType& A, const VectorType& r);
-
-    //! @brief Solves the linear system A * x = r
-    //! @param factorization: Matrix factorization
-    //! @param r: Vector
-    //! @return Result vector x
-    [[nodiscard]] inline static VectorType Solve(const Factorization& factorization, const VectorType& r);
-
-
-private:
-    //! @brief Performs the backward substitution of the solution process
-    //! @param lu: Data of the LU decomposition
-    //! @param r: Data of the right-hand side vector
-    static inline void BackwardSubstitution(const MatrixDataArray& lu, VectorDataArray& r);
-
-    //! @brief Performs a single factorization step
-    //! @param iteration: Number of the current iteration
-    //! @param factorization: Factorization data
-    static inline void FactorizationStep(U32 iteration, Factorization& factorization);
-
-    //! @brief Performs the forward substitution of the solution process
-    //! @param lu: Data of the LU decomposition
-    //! @param r: Data of the right-hand side vector
-    static inline void ForwardSubstitution(const MatrixDataArray& lu, VectorDataArray& r);
-
-    //! @brief Returns a vector that is permuted the same way as the factorized matrix
-    //! @param r: Vector
-    //! @param factorization: Factorization data
-    //! @return Permuted verctor
-    static inline VectorDataArray GetPermutedVectorData(const VectorType& r, const Factorization& factorization);
-};
-
-
-
-template <typename _registerType, U32 _size, Pivot _pivot>
-class LUDenseSSE
-{
-    static constexpr U32 alignment = simd::alignmentBytes<_registerType>;
-    static constexpr U32 numRegisterValues = simd::numRegisterValues<_registerType>;
-    static constexpr U32 numColRegisters = simd::CalcMinNumArrayRegisters<_registerType>(_size);
-
-
-    using MatrixDataArray = std::array<_registerType, numColRegisters * _size>;
-    using VectorDataArray = std::array<_registerType, numColRegisters>;
-    using ValueType = decltype(simd::GetDataType<_registerType>());
-    using VectorType = VecSIMD<ValueType, _size, true>;
-    using MatrixType = MatSIMD<ValueType, _size, _size>;
-
-public:
-    //! @brief Class that stores the LU factorization and the permutations
-    class Factorization
-    {
-        friend class LUDenseSSE;
-
-        alignas(alignment) MatrixDataArray mLU;
-
-        //! @brief ctor
-        //! @param matrixData: Data of the matrix that should be factorized
-        Factorization(const MatrixDataArray& matrixData);
-    };
-
-
-
-    //! @brief Calculates the LU factorization and returns it
-    //! @param matrix: Matrix that should be factorized
-    //! @return LU factorization
-    [[nodiscard]] static inline Factorization Factorize(const MatrixType& matrix);
-
-    //! @brief Solves the linear system A * x = r
-    //! @param A: Matrix
-    //! @param r: Vector
-    //! @return Result vector x
-    [[nodiscard]] inline static VectorType Solve(const MatrixType& A, const VectorType& r);
-
-    //! @brief Solves the linear system A * x = r
-    //! @param factorization: Matrix factorization
-    //! @param r: Vector
-    //! @return Result vector x
-    [[nodiscard]] inline static VectorType Solve(const Factorization& factorization, const VectorType& r);
-
-private:
-    //! @brief Performs the backward substitution of the solution process
-    //! @param lu: Data of the LU decomposition
-    //! @param r: Data of the right-hand side vector
-    static inline void BackwardSubstitution(const MatrixDataArray& lu, VectorDataArray& r);
-
-    template <U32 _regValueIdx = numRegisterValues - 1>
-    static inline void BackwardSubstitutionSteps(U32 regRowIdx, const MatrixDataArray& lu, VectorDataArray& r);
-
-
-    static inline void FactorizationLoop(Factorization& factorization);
-
-
-    template <U32 _regValueIdx>
-    static inline void FactorizationStep(U32 iteration, U32 regRowIdx, MatrixDataArray& lu);
-
-    template <U32 _regValueIdx = 0, U32 _maxRecursionDepth = numRegisterValues>
-    static inline void FactorizationStepsRegister(U32 regRowIdx, Factorization& factorization);
-
-    //! @brief Performs the forward substitution of the solution process
-    //! @param lu: Data of the LU decomposition
-    //! @param r: Data of the right-hand side vector
-    static inline void ForwardSubstitution(const MatrixDataArray& lu, VectorDataArray& r);
-
-    template <U32 _regValueIdx = 0, U32 _maxRecursionDepth = numRegisterValues>
-    static inline void ForwardSubstitutionSteps(U32 regRowIdx, const MatrixDataArray& lu, VectorDataArray& r);
-
-private:
-};
-
+template <Pivot _pivot, typename _type, U32 _size>
+using LUFactorizationSIMD =
+        typename LUDenseSIMD<typename VecSIMD<_type, _size, true>::RegisterType, _size, _pivot>::Factorization;
 
 
 //! @brief Solves the linear system A * x = r using LU decomposition
@@ -194,9 +53,8 @@ template <Pivot _pivot = Pivot::PARTIAL, typename _type, U32 _size>
 //! @param r: Vector
 //! @return Result vector x
 template <Pivot _pivot = Pivot::PARTIAL, typename _type, U32 _size>
-[[nodiscard]] VecSerial<_type, _size, true>
-LU(const typename LUDenseSerial<_type, _size, _pivot>::Factorization& factorization,
-   const VecSerial<_type, _size, true>& r);
+[[nodiscard]] VecSerial<_type, _size, true> LU(const LUFactorizationSerial<_pivot, _type, _size>& factorization,
+                                               const VecSerial<_type, _size, true>& r);
 
 //! @brief Calculates the LU decomposition of a matrix.
 //! @tparam _type: Data type
@@ -205,7 +63,9 @@ LU(const typename LUDenseSerial<_type, _size, _pivot>::Factorization& factorizat
 //! @param A: Matrix
 //! @return LU decomposition
 template <Pivot _pivot = Pivot::PARTIAL, typename _type, U32 _size>
-[[nodiscard]] auto LUFactorization(const MatSerial<_type, _size, _size>& A);
+[[nodiscard]] LUFactorizationSerial<_pivot, _type, _size> LUFactorization(const MatSerial<_type, _size, _size>& A);
+
+
 
 //! @brief Solves the linear system A * x = r using LU decomposition
 //! @tparam _type: Data type
@@ -227,10 +87,8 @@ template <Pivot _pivot = Pivot::PARTIAL, typename _type, U32 _size>
 //! @param r: Vector
 //! @return Result vector x
 template <Pivot _pivot = Pivot::PARTIAL, typename _type, U32 _size>
-[[nodiscard]] VecSIMD<_type, _size, true>
-LU(const typename LUDenseSSE<typename VecSIMD<_type, _size, true>::RegisterType, _size, _pivot>::Factorization&
-           factorization,
-   const VecSIMD<_type, _size, true>& r);
+[[nodiscard]] VecSIMD<_type, _size, true> LU(const LUFactorizationSIMD<_pivot, _type, _size>& factorization,
+                                             const VecSIMD<_type, _size, true>& r);
 
 //! @brief Calculates the LU decomposition of a matrix.
 //! @tparam _type: Data type
@@ -239,7 +97,7 @@ LU(const typename LUDenseSSE<typename VecSIMD<_type, _size, true>::RegisterType,
 //! @param A: Matrix
 //! @return LU decomposition
 template <Pivot _pivot = Pivot::PARTIAL, typename _type, U32 _size>
-[[nodiscard]] auto LUFactorization(const MatSIMD<_type, _size, _size>& A);
+[[nodiscard]] LUFactorizationSIMD<_pivot, _type, _size> LUFactorization(const MatSIMD<_type, _size, _size>& A);
 
 
 
