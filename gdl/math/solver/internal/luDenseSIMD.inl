@@ -5,8 +5,6 @@
 #include "gdl/base/approx.h"
 #include "gdl/base/simd/directAccess.h"
 #include "gdl/base/simd/swizzle.h"
-#include "gdl/math/simd/matSIMD.h"
-#include "gdl/math/simd/vecSIMD.h"
 #include "gdl/math/solver/pivot.h"
 
 
@@ -56,9 +54,9 @@ LUDenseSIMD<_registerType, _size, _pivot>::Factorize(const MatrixDataArray& matr
 
 template <typename _registerType, U32 _size, Pivot _pivot>
 inline typename LUDenseSIMD<_registerType, _size, _pivot>::VectorDataArray
-LUDenseSIMD<_registerType, _size, _pivot>::Solve(const Factorization& factorization, const VectorDataArray& rData)
+LUDenseSIMD<_registerType, _size, _pivot>::Solve(const Factorization& factorization, const VectorDataArray& rhsData)
 {
-    alignas(alignment) VectorDataArray vectorData = rData;
+    alignas(alignment) VectorDataArray vectorData = rhsData;
 
     ForwardSubstitution(factorization.mLU, vectorData);
     BackwardSubstitution(factorization.mLU, vectorData);
@@ -97,10 +95,8 @@ inline void LUDenseSIMD<_registerType, _size, _pivot>::BackwardSubstitutionSteps
 {
     using namespace GDL::simd;
 
+    static_assert(_regValueIdx < numRegisterValues, "_regValueIdx must be smaller than the number of register values");
 
-
-    //    // Also remove from small matrix version!!!!!!!!!!
-    //    const __m128 zero = _mm_setzero<__m128>();
 
     const U32 iteration = regRowIdx * numRegisterValues + _regValueIdx;
     const U32 colStartIdx = iteration * numColRegisters;
@@ -134,10 +130,10 @@ inline void LUDenseSIMD<_registerType, _size, _pivot>::FactorizationLoop(Factori
     constexpr U32 numNonFullRegValues = (_size - 1) % numRegisterValues;
 
     for (U32 i = 0; i < numRowsFullRegisters; ++i)
-        FactorizationStepsRegister(i, factorization);
+        FactorizationSteps(i, factorization);
 
     if constexpr (numNonFullRegValues != 0)
-        FactorizationStepsRegister<0, numNonFullRegValues>(numColRegisters - 1, factorization);
+        FactorizationSteps<0, numNonFullRegValues>(numColRegisters - 1, factorization);
 
 
     DEV_EXCEPTION(simd::GetValue<(_size - 1) % numRegisterValues>(factorization.mLU[factorization.mLU.size() - 1]) ==
@@ -187,8 +183,7 @@ inline void LUDenseSIMD<_registerType, _size, _pivot>::FactorizationStep(U32 ite
 
 template <typename _registerType, U32 _size, Pivot _pivot>
 template <U32 _regValueIdx, U32 _maxRecursionDepth>
-inline void LUDenseSIMD<_registerType, _size, _pivot>::FactorizationStepsRegister(U32 regRowIdx,
-                                                                                  Factorization& factorization)
+inline void LUDenseSIMD<_registerType, _size, _pivot>::FactorizationSteps(U32 regRowIdx, Factorization& factorization)
 {
     static_assert(_maxRecursionDepth <= numRegisterValues,
                   "_maxRecursionDepth must be equal or smaller than the number of register values.");
@@ -198,7 +193,7 @@ inline void LUDenseSIMD<_registerType, _size, _pivot>::FactorizationStepsRegiste
     FactorizationStep<_regValueIdx>(iteration, regRowIdx, factorization.mLU);
 
     if constexpr (_regValueIdx + 1 < _maxRecursionDepth)
-        FactorizationStepsRegister<_regValueIdx + 1, _maxRecursionDepth>(regRowIdx, factorization);
+        FactorizationSteps<_regValueIdx + 1, _maxRecursionDepth>(regRowIdx, factorization);
 }
 
 
@@ -231,9 +226,8 @@ inline void LUDenseSIMD<_registerType, _size, _pivot>::ForwardSubstitutionSteps(
 {
     using namespace GDL::simd;
 
-
-    // Also remove from small matrix version!!!!!!!!!!
-    // const __m128 zero = _mm_setzero<__m128>();
+    static_assert(_maxRecursionDepth <= numRegisterValues,
+                  "_maxRecursionDepth must be equal or smaller than the number of register values.");
 
     const U32 iteration = regRowIdx * numRegisterValues + _regValueIdx;
     const U32 colStartIdx = iteration * numColRegisters;

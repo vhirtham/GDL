@@ -25,6 +25,7 @@ namespace Solver
 {
 
 
+// --------------------------------------------------------------------------------------------------------------------
 
 template <Pivot _pivot, typename _type, U32 _size>
 using LUFactorizationSerial = typename LUDenseSerial<_type, _size, _pivot>::Factorization;
@@ -33,6 +34,9 @@ template <Pivot _pivot, typename _type, U32 _size>
 using LUFactorizationSIMD =
         typename LUDenseSIMD<typename VecSIMD<_type, _size, true>::RegisterType, _size, _pivot>::Factorization;
 
+
+
+// --------------------------------------------------------------------------------------------------------------------
 
 //! @brief Solves the linear system A * x = r using LU decomposition
 //! @tparam _type: Data type

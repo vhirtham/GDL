@@ -30,9 +30,9 @@ inline LUDenseSerial<_type, _size, _pivot>::Factorization::Factorization(const M
 
 template <typename _type, U32 _size, Pivot _pivot>
 [[nodiscard]] inline typename LUDenseSerial<_type, _size, _pivot>::VectorDataArray
-LUDenseSerial<_type, _size, _pivot>::Solve(const Factorization& factorization, const VectorDataArray& r)
+LUDenseSerial<_type, _size, _pivot>::Solve(const Factorization& factorization, const VectorDataArray& rhsData)
 {
-    VectorDataArray vectorData = GetPermutedVectorData(r, factorization);
+    VectorDataArray vectorData = GetPermutedVectorData(rhsData, factorization);
 
     ForwardSubstitution(factorization.mLU, vectorData);
     BackwardSubstitution(factorization.mLU, vectorData);
@@ -45,17 +45,18 @@ LUDenseSerial<_type, _size, _pivot>::Solve(const Factorization& factorization, c
 // --------------------------------------------------------------------------------------------------------------------
 
 template <typename _type, U32 _size, Pivot _pivot>
-inline void LUDenseSerial<_type, _size, _pivot>::BackwardSubstitution(const MatrixDataArray& lu, VectorDataArray& r)
+inline void LUDenseSerial<_type, _size, _pivot>::BackwardSubstitution(const MatrixDataArray& lu,
+                                                                      VectorDataArray& rhsData)
 {
 
     for (U32 i = _size; i-- > 0;)
     {
         const U32 pivIdx = (_size + 1) * i;
 
-        r[i] /= lu[pivIdx];
+        rhsData[i] /= lu[pivIdx];
 
         for (U32 j = 0; j < i; ++j)
-            r[j] -= r[i] * lu[j + i * _size];
+            rhsData[j] -= rhsData[i] * lu[j + i * _size];
     }
 }
 
@@ -106,12 +107,13 @@ inline void LUDenseSerial<_type, _size, _pivot>::FactorizationStep(U32 iteration
 // --------------------------------------------------------------------------------------------------------------------
 
 template <typename _type, U32 _size, Pivot _pivot>
-inline void LUDenseSerial<_type, _size, _pivot>::ForwardSubstitution(const MatrixDataArray& lu, VectorDataArray& r)
+inline void LUDenseSerial<_type, _size, _pivot>::ForwardSubstitution(const MatrixDataArray& lu,
+                                                                     VectorDataArray& rhsData)
 {
 
     for (U32 i = 0; i < _size - 1; ++i)
         for (U32 j = i + 1; j < _size; ++j)
-            r[j] -= lu[j + i * _size] * r[i];
+            rhsData[j] -= lu[j + i * _size] * rhsData[i];
 }
 
 
@@ -120,12 +122,13 @@ inline void LUDenseSerial<_type, _size, _pivot>::ForwardSubstitution(const Matri
 
 template <typename _type, U32 _size, Pivot _pivot>
 inline typename LUDenseSerial<_type, _size, _pivot>::VectorDataArray
-LUDenseSerial<_type, _size, _pivot>::GetPermutedVectorData(const VectorDataArray& r, const Factorization& factorization)
+LUDenseSerial<_type, _size, _pivot>::GetPermutedVectorData(const VectorDataArray& rhsData,
+                                                           const Factorization& factorization)
 {
     if constexpr (_pivot != Pivot::NONE)
-        return PivotDenseSerial<_type, _size>::PermuteVector(r, factorization.mPermutation);
+        return PivotDenseSerial<_type, _size>::PermuteVector(rhsData, factorization.mPermutation);
     else
-        return r;
+        return rhsData;
 }
 
 

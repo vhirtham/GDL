@@ -6,17 +6,10 @@
 #include <array>
 
 
-namespace GDL
+namespace GDL::Solver
 {
 
 
-
-namespace Solver
-{
-
-
-
-// Support classes ----------------------------------------------------------------------------------------------------
 
 //! @brief LU solver class for dense static systems
 //! @tparam _type: Data type
@@ -51,16 +44,16 @@ public:
 
     //! @brief Solves the linear system A * x = r
     //! @param factorization: Matrix factorization
-    //! @param r: Vector
+    //! @param rhsData: Data of the right-hand side vector
     //! @return Result vector x
-    [[nodiscard]] inline static VectorDataArray Solve(const Factorization& factorization, const VectorDataArray& r);
-
+    [[nodiscard]] inline static VectorDataArray Solve(const Factorization& factorization,
+                                                      const VectorDataArray& rhsData);
 
 private:
     //! @brief Performs the backward substitution of the solution process
     //! @param lu: Data of the LU decomposition
-    //! @param r: Data of the right-hand side vector
-    static inline void BackwardSubstitution(const MatrixDataArray& lu, VectorDataArray& r);
+    //! @param rhsData: Data of the right-hand side vector
+    static inline void BackwardSubstitution(const MatrixDataArray& lu, VectorDataArray& rhsData);
 
     //! @brief Performs a single factorization step
     //! @param iteration: Number of the current iteration
@@ -69,21 +62,20 @@ private:
 
     //! @brief Performs the forward substitution of the solution process
     //! @param lu: Data of the LU decomposition
-    //! @param r: Data of the right-hand side vector
-    static inline void ForwardSubstitution(const MatrixDataArray& lu, VectorDataArray& r);
+    //! @param rhsData: Data of the right-hand side vector
+    static inline void ForwardSubstitution(const MatrixDataArray& lu, VectorDataArray& rhsData);
 
     //! @brief Returns a vector that is permuted the same way as the factorized matrix
-    //! @param r: Vector
+    //! @param rhsData: Vector
     //! @param factorization: Factorization data
     //! @return Permuted verctor
-    static inline VectorDataArray GetPermutedVectorData(const VectorDataArray& r, const Factorization& factorization);
+    static inline VectorDataArray GetPermutedVectorData(const VectorDataArray& rhsData,
+                                                        const Factorization& factorization);
 };
 
 
 
-} // namespace Solver
-
-} // namespace GDL
+} // namespace GDL::Solver
 
 
 #include "gdl/math/solver/internal/luDenseSerial.inl"

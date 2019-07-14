@@ -2,14 +2,10 @@
 
 #include "gdl/math/solver/lu.h"
 
-#include "gdl/base/approx.h"
-#include "gdl/base/simd/directAccess.h"
-#include "gdl/base/simd/swizzle.h"
 #include "gdl/math/serial/matSerial.h"
 #include "gdl/math/serial/vecSerial.h"
 #include "gdl/math/simd/matSIMD.h"
 #include "gdl/math/simd/vecSIMD.h"
-#include "gdl/math/solver/pivot.h"
 
 
 //#include <cmath>

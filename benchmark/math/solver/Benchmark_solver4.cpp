@@ -14,9 +14,9 @@ using namespace GDL;
 // solver types
 //#define BENCHMARK_CRAMER
 //#define BENCHMARK_GAUSS
-//#define BENCHMARK_LU
+#define BENCHMARK_LU
 //#define BENCHMARK_LLT
-#define BENCHMARK_LDLT
+//#define BENCHMARK_LDLT
 
 
 // pivoting
