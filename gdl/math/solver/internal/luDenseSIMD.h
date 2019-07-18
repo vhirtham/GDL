@@ -2,6 +2,7 @@
 
 #include "gdl/base/fundamentalTypes.h"
 #include "gdl/base/simd/utility.h"
+#include "gdl/math/solver/pivot.h"
 #include "gdl/math/solver/pivotEnum.h"
 
 #include <array>
@@ -34,7 +35,11 @@ public:
     {
         friend class LUDenseSIMD;
 
+        using PermutationDataArray = typename PivotDenseSSE<_registerType, _size>::VectorPermutationDataArray;
+
         alignas(alignment) MatrixDataArray mLU;
+        PermutationDataArray mPermutationData;
+
 
         //! @brief ctor
         //! @param matrixData: Data of the matrix that should be factorized

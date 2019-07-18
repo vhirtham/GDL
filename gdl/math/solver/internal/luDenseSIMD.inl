@@ -5,7 +5,6 @@
 #include "gdl/base/approx.h"
 #include "gdl/base/simd/directAccess.h"
 #include "gdl/base/simd/swizzle.h"
-#include "gdl/math/solver/pivot.h"
 
 
 
@@ -57,6 +56,9 @@ inline typename LUDenseSIMD<_registerType, _size, _pivot>::VectorDataArray
 LUDenseSIMD<_registerType, _size, _pivot>::Solve(const Factorization& factorization, const VectorDataArray& rhsData)
 {
     alignas(alignment) VectorDataArray vectorData = rhsData;
+
+    if constexpr (_pivot != Pivot::NONE)
+        PivotDenseSSE<_registerType, _size>::PermuteVector(vectorData, factorization.mPermutationData);
 
     ForwardSubstitution(factorization.mLU, vectorData);
     BackwardSubstitution(factorization.mLU, vectorData);
@@ -189,6 +191,10 @@ inline void LUDenseSIMD<_registerType, _size, _pivot>::FactorizationSteps(U32 re
                   "_maxRecursionDepth must be equal or smaller than the number of register values.");
 
     const U32 iteration = regRowIdx * numRegisterValues + _regValueIdx;
+
+    if constexpr (_pivot != Pivot::NONE)
+        PivotDenseSSE<_registerType, _size>::template PivotingStepRegister<_regValueIdx, _pivot>(
+                iteration, regRowIdx, factorization.mLU, factorization.mPermutationData);
 
     FactorizationStep<_regValueIdx>(iteration, regRowIdx, factorization.mLU);
 

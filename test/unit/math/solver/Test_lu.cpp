@@ -298,17 +298,17 @@ BOOST_AUTO_TEST_CASE(Test_LU_PartialPivot_2x2_F64_Serial)
 
 
 
-// BOOST_AUTO_TEST_CASE(Test_LU_PartialPivot_2x2_F32_SSE)
-//{
-//    TestLU<F32, 2, Pivot::PARTIAL, SolverType::SIMD>();
-//}
+BOOST_AUTO_TEST_CASE(Test_LU_PartialPivot_2x2_F32_SSE)
+{
+    TestLU<F32, 2, Pivot::PARTIAL, SolverType::SIMD>();
+}
 
 
 
-// BOOST_AUTO_TEST_CASE(Test_LU_PartialPivot_2x2_F64_SSE)
-//{
-//    TestLU<F64, 2, Pivot::PARTIAL, SolverType::SIMD>();
-//}
+BOOST_AUTO_TEST_CASE(Test_LU_PartialPivot_2x2_F64_SSE)
+{
+    TestLU<F64, 2, Pivot::PARTIAL, SolverType::SIMD>();
+}
 
 
 
@@ -328,17 +328,17 @@ BOOST_AUTO_TEST_CASE(Test_LU_PartialPivot_3x3_F64_Serial)
 
 
 
-// BOOST_AUTO_TEST_CASE(Test_LU_PartialPivot_3x3_F32_SSE)
-//{
-//    TestLU<F32, 3, Pivot::PARTIAL, SolverType::SIMD>();
-//}
+BOOST_AUTO_TEST_CASE(Test_LU_PartialPivot_3x3_F32_SSE)
+{
+    TestLU<F32, 3, Pivot::PARTIAL, SolverType::SIMD>();
+}
 
 
 
-// BOOST_AUTO_TEST_CASE(Test_LU_PartialPivot_3x3_F64_SSE)
-//{
-//    TestLU<F64, 3, Pivot::PARTIAL, SolverType::SIMD>();
-//}
+BOOST_AUTO_TEST_CASE(Test_LU_PartialPivot_3x3_F64_SSE)
+{
+    TestLU<F64, 3, Pivot::PARTIAL, SolverType::SIMD>();
+}
 
 
 
@@ -358,17 +358,17 @@ BOOST_AUTO_TEST_CASE(Test_LU_PartialPivot_4x4_F64_Serial)
 
 
 
-// BOOST_AUTO_TEST_CASE(Test_LU_PartialPivot_4x4_F32_SSE)
-//{
-//    TestLU<F32, 4, Pivot::PARTIAL, SolverType::SIMD>();
-//}
+BOOST_AUTO_TEST_CASE(Test_LU_PartialPivot_4x4_F32_SSE)
+{
+    TestLU<F32, 4, Pivot::PARTIAL, SolverType::SIMD>();
+}
 
 
 
-// BOOST_AUTO_TEST_CASE(Test_LU_PartialPivot_4x4_F64_SSE)
-//{
-//    TestLU<F64, 4, Pivot::PARTIAL, SolverType::SIMD>();
-//}
+BOOST_AUTO_TEST_CASE(Test_LU_PartialPivot_4x4_F64_SSE)
+{
+    TestLU<F64, 4, Pivot::PARTIAL, SolverType::SIMD>();
+}
 
 
 
@@ -388,17 +388,17 @@ BOOST_AUTO_TEST_CASE(Test_LU_PartialPivot_5x5_F64_Serial)
 
 
 
-// BOOST_AUTO_TEST_CASE(Test_LU_PartialPivot_5x5_F32_SSE)
-//{
-//    TestLU<F32, 5, Pivot::PARTIAL, SolverType::SIMD>();
-//}
+BOOST_AUTO_TEST_CASE(Test_LU_PartialPivot_5x5_F32_SSE)
+{
+    TestLU<F32, 5, Pivot::PARTIAL, SolverType::SIMD>();
+}
 
 
 
-// BOOST_AUTO_TEST_CASE(Test_LU_PartialPivot_5x5_F64_SSE)
-//{
-//    TestLU<F64, 5, Pivot::PARTIAL, SolverType::SIMD>();
-//}
+BOOST_AUTO_TEST_CASE(Test_LU_PartialPivot_5x5_F64_SSE)
+{
+    TestLU<F64, 5, Pivot::PARTIAL, SolverType::SIMD>();
+}
 
 
 
@@ -418,17 +418,17 @@ BOOST_AUTO_TEST_CASE(Test_LU_PartialPivot_7x7_F64_Serial)
 
 
 
-// BOOST_AUTO_TEST_CASE(Test_LU_PartialPivot_7x7_F32_SSE)
-//{
-//    TestLU<F32, 7, Pivot::PARTIAL, SolverType::SIMD>();
-//}
+BOOST_AUTO_TEST_CASE(Test_LU_PartialPivot_7x7_F32_SSE)
+{
+    TestLU<F32, 7, Pivot::PARTIAL, SolverType::SIMD>();
+}
 
 
 
-// BOOST_AUTO_TEST_CASE(Test_LU_PartialPivot_7x7_F64_SSE)
-//{
-//    TestLU<F64, 7, Pivot::PARTIAL, SolverType::SIMD>();
-//}
+BOOST_AUTO_TEST_CASE(Test_LU_PartialPivot_7x7_F64_SSE)
+{
+    TestLU<F64, 7, Pivot::PARTIAL, SolverType::SIMD>();
+}
 
 
 
@@ -448,17 +448,17 @@ BOOST_AUTO_TEST_CASE(Test_LU_PartialPivot_8x8_F64_Serial)
 
 
 
-// BOOST_AUTO_TEST_CASE(Test_LU_PartialPivot_8x8_F32_SSE)
-//{
-//    TestLU<F32, 8, Pivot::PARTIAL, SolverType::SIMD>();
-//}
+BOOST_AUTO_TEST_CASE(Test_LU_PartialPivot_8x8_F32_SSE)
+{
+    TestLU<F32, 8, Pivot::PARTIAL, SolverType::SIMD>();
+}
 
 
 
-// BOOST_AUTO_TEST_CASE(Test_LU_PartialPivot_8x8_F64_SSE)
-//{
-//    TestLU<F64, 8, Pivot::PARTIAL, SolverType::SIMD>();
-//}
+BOOST_AUTO_TEST_CASE(Test_LU_PartialPivot_8x8_F64_SSE)
+{
+    TestLU<F64, 8, Pivot::PARTIAL, SolverType::SIMD>();
+}
 
 
 
@@ -478,14 +478,14 @@ BOOST_AUTO_TEST_CASE(Test_LU_PartialPivot_9x9_F64_Serial)
 
 
 
-// BOOST_AUTO_TEST_CASE(Test_LU_PartialPivot_9x9_F32_SSE)
-//{
-//    TestLU<F32, 9, Pivot::PARTIAL, SolverType::SIMD>();
-//}
+BOOST_AUTO_TEST_CASE(Test_LU_PartialPivot_9x9_F32_SSE)
+{
+    TestLU<F32, 9, Pivot::PARTIAL, SolverType::SIMD>();
+}
 
 
 
-// BOOST_AUTO_TEST_CASE(Test_LU_PartialPivot_9x9_F64_SSE)
-//{
-//    TestLU<F64, 9, Pivot::PARTIAL, SolverType::SIMD>();
-//}
+BOOST_AUTO_TEST_CASE(Test_LU_PartialPivot_9x9_F64_SSE)
+{
+    TestLU<F64, 9, Pivot::PARTIAL, SolverType::SIMD>();
+}
