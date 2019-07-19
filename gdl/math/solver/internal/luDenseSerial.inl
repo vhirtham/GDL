@@ -3,7 +3,7 @@
 #include "gdl/math/solver/internal/luDenseSerial.h"
 
 #include "gdl/base/approx.h"
-#include "gdl/math/solver/pivot.h"
+#include "gdl/math/solver/internal/pivotDenseSerial.h"
 
 
 

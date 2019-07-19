@@ -7,8 +7,8 @@
 #include "gdl/math/serial/vecSerial.h"
 #include "gdl/math/simd/matSIMD.h"
 #include "gdl/math/simd/vecSIMD.h"
-#include "gdl/math/solver/pivot.h"
-
+#include "gdl/math/solver/internal/pivotDenseSerial.h"
+#include "gdl/math/solver/internal/pivotDenseSIMD.inl"
 
 #include <cmath>
 

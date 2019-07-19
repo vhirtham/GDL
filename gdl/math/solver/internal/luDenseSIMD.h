@@ -2,7 +2,7 @@
 
 #include "gdl/base/fundamentalTypes.h"
 #include "gdl/base/simd/utility.h"
-#include "gdl/math/solver/pivot.h"
+#include "gdl/math/solver/internal/pivotDenseSIMD.h"
 #include "gdl/math/solver/pivotEnum.h"
 
 #include <array>

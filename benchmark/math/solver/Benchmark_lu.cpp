@@ -33,7 +33,7 @@ constexpr U32 N = 64;
 #define BENCHMARK_PARTIALPIVOT
 
 // factorization
-#define BENCHMARK_FACTORIZATION
+//#define BENCHMARK_FACTORIZATION
 
 // vectorization
 //#define BENCHMARK_SERIAL
