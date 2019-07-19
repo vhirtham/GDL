@@ -1,25 +1,44 @@
 #pragma once
 
 #include "gdl/math/solver/internal/pivotDenseSIMD.h"
-#include "gdl/math/serial/matSerial.h"
-#include "gdl/math/serial/vecSerial.h"
+#include "gdl/base/simd/directAccess.h"
 #include "gdl/base/simd/swizzle.h"
-#include "gdl/math/simd/matSIMD.h"
-#include "gdl/math/simd/vecSIMD.h"
 
-#include <cmath>
 
 namespace GDL::Solver
 {
+
+// --------------------------------------------------------------------------------------------------------------------
+
+template <typename _registerType, U32 _size>
+inline PivotDenseSSE<_registerType, _size>::VectorPermutationData::VectorPermutationData(U32 idx0, U32 idx1,
+                                                                                         PermutationFuncPtr funcPtr)
+    : mRegIdx0{idx0}
+    , mRegIdx1{idx1}
+    , mFuncPtr{funcPtr}
+{
+}
 
 
 
 // --------------------------------------------------------------------------------------------------------------------
 
 template <typename _registerType, U32 _size>
-template <U32 _regValueIdx>
-inline U32 PivotDenseSSE<_registerType, _size>::FindPivotPartial(U32 iteration, U32 regRowIdx,
-                                                                 const MatrixDataArray& matData)
+inline void PivotDenseSSE<_registerType, _size>::VectorPermutationDataArray::AddPermutation(U32 idx0, U32 idx1,
+                                                                                            PermutationFuncPtr funcPtr)
+{
+    mPermutations[mNumPermutations] = VectorPermutationData(idx0, idx1, funcPtr);
+    ++mNumPermutations;
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+template <typename _registerType, U32 _size>
+template <U32 _regElmIdxPiv>
+inline U32 PivotDenseSSE<_registerType, _size>::FindMaxAbsValueCol(U32 iteration, U32 regRowIdxPiv,
+                                                                   const MatrixDataArray& matData)
 {
     using namespace GDL::simd;
 
@@ -28,9 +47,9 @@ inline U32 PivotDenseSSE<_registerType, _size>::FindPivotPartial(U32 iteration, 
 
     // Vectorized comparisons
     _registerType zero = _mm_setzero<_registerType>();
-    _registerType cmpAbs = Abs(BlendAboveIndex<_regValueIdx>(matData[colStartIdx + regRowIdx], zero));
-    _registerType cmpIdx = _mm_set1<_registerType>(regRowIdx);
-    for (U32 i = regRowIdx + 1; i < numColRegisters; ++i)
+    _registerType cmpAbs = Abs(BlendAboveIndex<_regElmIdxPiv>(matData[colStartIdx + regRowIdxPiv], zero));
+    _registerType cmpIdx = _mm_set1<_registerType>(regRowIdxPiv);
+    for (U32 i = regRowIdxPiv + 1; i < numColRegisters; ++i)
     {
         _registerType cmpAbs2 = Abs(matData[colStartIdx + i]);
         _registerType cmpRes = _mm_cmplt(cmpAbs, cmpAbs2);
@@ -59,17 +78,17 @@ inline U32 PivotDenseSSE<_registerType, _size>::FindPivotPartial(U32 iteration, 
 // --------------------------------------------------------------------------------------------------------------------
 
 template <typename _registerType, U32 _size>
-template <U32 _regValueIdx, typename _typeData>
-inline void PivotDenseSSE<_registerType, _size>::PartialPivotingStepRegister(U32 iteration, U32 regRowIdx,
+template <U32 _regElmIdxPiv, typename _typeVecPerm>
+inline void PivotDenseSSE<_registerType, _size>::PartialPivotingStepRegister(U32 iteration, U32 regRowIdxPiv,
                                                                              MatrixDataArray& matData,
-                                                                             _typeData& vecData)
+                                                                             _typeVecPerm& vecPermData)
 {
-    U32 pivotRowIdx = FindPivotPartial<_regValueIdx>(iteration, regRowIdx, matData);
+    U32 rowIdxSwp = FindMaxAbsValueCol<_regElmIdxPiv>(iteration, regRowIdxPiv, matData);
 
-    DEV_EXCEPTION(pivotRowIdx >= _size, "Internal error. Pivot index bigger than matrix size.");
+    DEV_EXCEPTION(rowIdxSwp >= _size, "Internal error. Pivot index bigger than matrix size.");
 
-    if (pivotRowIdx != iteration)
-        SwapRows<_regValueIdx>(pivotRowIdx, iteration, regRowIdx, matData, vecData);
+    if (rowIdxSwp != iteration)
+        SwapRowPivot<_regElmIdxPiv>(rowIdxSwp, iteration, regRowIdxPiv, matData, vecPermData);
 }
 
 
@@ -77,16 +96,16 @@ inline void PivotDenseSSE<_registerType, _size>::PartialPivotingStepRegister(U32
 // --------------------------------------------------------------------------------------------------------------------
 
 template <typename _registerType, U32 _size>
-template <U32 _regIdxDst, U32 _regIdxPiv, bool _sameReg>
+template <U32 _regElmIdx0, U32 _regElmIdx1, bool _sameReg>
 inline void PivotDenseSSE<_registerType, _size>::PermutationFunction(_registerType& reg0,
                                                                      [[maybe_unused]] _registerType& reg1)
 {
     using namespace GDL::simd;
 
     if constexpr (_sameReg)
-        reg0 = Swap<_regIdxDst, _regIdxPiv>(reg0);
+        reg0 = Swap<_regElmIdx0, _regElmIdx1>(reg0);
     else
-        Exchange<_regIdxDst, _regIdxPiv>(reg0, reg1);
+        Exchange<_regElmIdx0, _regElmIdx1>(reg0, reg1);
 }
 
 
@@ -94,14 +113,14 @@ inline void PivotDenseSSE<_registerType, _size>::PermutationFunction(_registerTy
 // --------------------------------------------------------------------------------------------------------------------
 
 template <typename _registerType, U32 _size>
-inline void PivotDenseSSE<_registerType, _size>::PermuteVector(VectorDataArray& vec,
-                                                               const VectorPermutationDataArray& permutation)
+inline void PivotDenseSSE<_registerType, _size>::PermuteVector(VectorDataArray& vectorData,
+                                                               const VectorPermutationDataArray& permutationData)
 {
-    for (U32 i = 0; i < permutation.mNumPermutations; ++i)
+    for (U32 i = 0; i < permutationData.mNumPermutations; ++i)
     {
-        U32 idx0 = permutation.mPermutations[i].mRegIdx0;
-        U32 idx1 = permutation.mPermutations[i].mRegIdx1;
-        permutation.mPermutations[i].mFuncPtr(vec[idx0], vec[idx1]);
+        U32 idx0 = permutationData.mPermutations[i].mRegIdx0;
+        U32 idx1 = permutationData.mPermutations[i].mRegIdx1;
+        permutationData.mPermutations[i].mFuncPtr(vectorData[idx0], vectorData[idx1]);
     }
 }
 
@@ -110,16 +129,17 @@ inline void PivotDenseSSE<_registerType, _size>::PermuteVector(VectorDataArray& 
 // --------------------------------------------------------------------------------------------------------------------
 
 template <typename _registerType, U32 _size>
-template <U32 _regValueIdx, Pivot _pivot, typename _typeData>
-inline void PivotDenseSSE<_registerType, _size>::PivotingStepRegister(U32 iteration, U32 regRowIdx,
-                                                                      MatrixDataArray& matData, _typeData& vecData)
+template <U32 _regElmIdxPiv, Pivot _pivot, typename _typeVecPerm>
+inline void PivotDenseSSE<_registerType, _size>::PivotingStepRegister(U32 iteration, U32 regRowIdxPiv,
+                                                                      MatrixDataArray& matData,
+                                                                      _typeVecPerm& vecPermData)
 {
     static_assert(_pivot != Pivot::NONE, "Unneccessary function call");
 
     static_assert(_pivot == Pivot::PARTIAL, "Unsupported pivoting strategy");
 
     if constexpr (_pivot == Pivot::PARTIAL)
-        PartialPivotingStepRegister<_regValueIdx>(iteration, regRowIdx, matData, vecData);
+        PartialPivotingStepRegister<_regElmIdxPiv>(iteration, regRowIdxPiv, matData, vecPermData);
 }
 
 
@@ -127,15 +147,16 @@ inline void PivotDenseSSE<_registerType, _size>::PivotingStepRegister(U32 iterat
 // --------------------------------------------------------------------------------------------------------------------
 
 template <typename _registerType, U32 _size>
-template <U32 _regValueIdx, typename _typeData>
-inline void PivotDenseSSE<_registerType, _size>::SwapRows(U32 pivotRowIdx, U32 iteration, U32 regRowIdx,
-                                                          MatrixDataArray& matData, _typeData& vecData)
+template <U32 _regElmIdxPiv, typename _typeVecPerm>
+inline void PivotDenseSSE<_registerType, _size>::SwapRowPivot(U32 rowIdxSwp, U32 iteration, U32 regRowIdxPiv,
+                                                              MatrixDataArray& matData, _typeVecPerm& vecPermData)
 {
-    const U32 pivotRegRowIdx = pivotRowIdx / numRegisterValues;
-    if (regRowIdx == pivotRegRowIdx)
-        SwapRowsSwitch<_regValueIdx, true>(pivotRowIdx, iteration, pivotRegRowIdx, regRowIdx, matData, vecData);
+    const U32 regRowIdxSwp = rowIdxSwp / numRegisterValues;
+    if (regRowIdxPiv == regRowIdxSwp)
+        SwapRowPivotSwitch<_regElmIdxPiv, true>(rowIdxSwp, iteration, regRowIdxPiv, regRowIdxSwp, matData, vecPermData);
     else
-        SwapRowsSwitch<_regValueIdx, false>(pivotRowIdx, iteration, pivotRegRowIdx, regRowIdx, matData, vecData);
+        SwapRowPivotSwitch<_regElmIdxPiv, false>(rowIdxSwp, iteration, regRowIdxPiv, regRowIdxSwp, matData,
+                                                 vecPermData);
 }
 
 
@@ -143,52 +164,53 @@ inline void PivotDenseSSE<_registerType, _size>::SwapRows(U32 pivotRowIdx, U32 i
 // --------------------------------------------------------------------------------------------------------------------
 
 template <typename _registerType, U32 _size>
-template <U32 _regIdxDst, U32 _regIdxPiv, bool _sameReg, typename _typeData>
-inline void PivotDenseSSE<_registerType, _size>::SwapRowsAllColumns(U32 iteration, U32 pivotRegRowIdx, U32 regRowIdx,
-                                                                    MatrixDataArray& matData, _typeData& vecData)
+template <U32 _regElmIdxPiv, U32 _regElmIdxSwp, bool _sameReg, typename _typeVecPerm>
+inline void PivotDenseSSE<_registerType, _size>::SwapRowPivotLoop(U32 iteration, U32 regRowIdxPiv, U32 regRowIdxSwp,
+                                                                  MatrixDataArray& matData, _typeVecPerm& vecPermData)
 {
     using namespace GDL::simd;
 
-    static_assert(std::is_same<_typeData, VectorDataArray>::value ||
-                          std::is_same<_typeData, VectorPermutationDataArray>::value,
+    static_assert(std::is_same<_typeVecPerm, VectorDataArray>::value ||
+                          std::is_same<_typeVecPerm, VectorPermutationDataArray>::value,
                   "Invalid parameter type");
 
-    constexpr bool dataIsVectorData = std::is_same<_typeData, VectorDataArray>::value;
+    constexpr bool dataIsVectorData = std::is_same<_typeVecPerm, VectorDataArray>::value;
 
-    U32 loopStartIdx = regRowIdx;
+    U32 loopStartIdx = regRowIdxPiv;
     if constexpr (dataIsVectorData)
         loopStartIdx += iteration * numColRegisters;
 
     if constexpr (_sameReg)
     {
-        if constexpr (_regIdxDst < _regIdxPiv)
+        if constexpr (_regElmIdxPiv < _regElmIdxSwp)
         {
             for (U32 i = loopStartIdx; i < matData.size(); i += numColRegisters)
-                matData[i] = Swap<_regIdxDst, _regIdxPiv>(matData[i]);
+                matData[i] = Swap<_regElmIdxPiv, _regElmIdxSwp>(matData[i]);
             if constexpr (dataIsVectorData)
-                vecData[regRowIdx] = Swap<_regIdxDst, _regIdxPiv>(vecData[regRowIdx]);
+                vecPermData[regRowIdxPiv] = Swap<_regElmIdxPiv, _regElmIdxSwp>(vecPermData[regRowIdxPiv]);
             else
-                vecData.AddPermutation(regRowIdx, regRowIdx, &PermutationFunction<_regIdxDst, _regIdxPiv, _sameReg>);
+                vecPermData.AddPermutation(regRowIdxPiv, regRowIdxPiv,
+                                           &PermutationFunction<_regElmIdxPiv, _regElmIdxSwp, _sameReg>);
         }
         else
             THROW("Internal index error - Probably singular matrix."); // LCOV_EXCL_LINE
     }
     else
     {
-        DEV_EXCEPTION(pivotRegRowIdx <= regRowIdx,
+        DEV_EXCEPTION(regRowIdxSwp <= regRowIdxPiv,
                       "Internal error. Pivot register has equal or lower index than current register");
-        DEV_EXCEPTION(pivotRegRowIdx / numColRegisters != regRowIdx / numColRegisters,
+        DEV_EXCEPTION(regRowIdxSwp / numColRegisters != regRowIdxPiv / numColRegisters,
                       "Internal error. Registers are not in the same column.");
 
-        U32 regDiff = pivotRegRowIdx - regRowIdx;
+        U32 regDiff = regRowIdxSwp - regRowIdxPiv;
 
         for (U32 i = loopStartIdx; i < matData.size(); i += numColRegisters)
-            Exchange<_regIdxDst, _regIdxPiv>(matData[i], matData[i + regDiff]);
+            Exchange<_regElmIdxPiv, _regElmIdxSwp>(matData[i], matData[i + regDiff]);
         if constexpr (dataIsVectorData)
-            Exchange<_regIdxDst, _regIdxPiv>(vecData[regRowIdx], vecData[regRowIdx + regDiff]);
+            Exchange<_regElmIdxPiv, _regElmIdxSwp>(vecPermData[regRowIdxPiv], vecPermData[regRowIdxPiv + regDiff]);
         else
-            vecData.AddPermutation(regRowIdx, regRowIdx + regDiff,
-                                   &PermutationFunction<_regIdxDst, _regIdxPiv, _sameReg>);
+            vecPermData.AddPermutation(regRowIdxPiv, regRowIdxPiv + regDiff,
+                                       &PermutationFunction<_regElmIdxPiv, _regElmIdxSwp, _sameReg>);
     }
 }
 
@@ -197,68 +219,68 @@ inline void PivotDenseSSE<_registerType, _size>::SwapRowsAllColumns(U32 iteratio
 // --------------------------------------------------------------------------------------------------------------------
 
 template <typename _registerType, U32 _size>
-template <U32 _regValueIdx, bool _sameReg, typename _typeData>
-inline void PivotDenseSSE<_registerType, _size>::SwapRowsSwitch(U32 pivotRowIdx, U32 iteration, U32 pivotRegRowIdx,
-                                                                U32 regRowIdx, MatrixDataArray& matData,
-                                                                _typeData& vecData)
+template <U32 _regElmIdxPiv, bool _sameReg, typename _typeVecPerm>
+inline void PivotDenseSSE<_registerType, _size>::SwapRowPivotSwitch(U32 rowIdxSwp, U32 iteration, U32 regRowIdxPiv,
+                                                                    U32 regRowIdxSwp, MatrixDataArray& matData,
+                                                                    _typeVecPerm& vecPermData)
 {
     static_assert(numRegisterValues == 2 || numRegisterValues == 4 || numRegisterValues == 8,
                   "Only registers with 2,4 or 8 values are supported.");
 
     if constexpr (numRegisterValues == 2)
-        switch (pivotRowIdx % numRegisterValues)
+        switch (rowIdxSwp % numRegisterValues)
         {
         case 0:
-            SwapRowsAllColumns<_regValueIdx, 0, _sameReg>(iteration, pivotRegRowIdx, regRowIdx, matData, vecData);
+            SwapRowPivotLoop<_regElmIdxPiv, 0, _sameReg>(iteration, regRowIdxPiv, regRowIdxSwp, matData, vecPermData);
             break;
         case 1:
-            SwapRowsAllColumns<_regValueIdx, 1, _sameReg>(iteration, pivotRegRowIdx, regRowIdx, matData, vecData);
+            SwapRowPivotLoop<_regElmIdxPiv, 1, _sameReg>(iteration, regRowIdxPiv, regRowIdxSwp, matData, vecPermData);
             break;
         }
 
     if constexpr (numRegisterValues == 4)
-        switch (pivotRowIdx % numRegisterValues)
+        switch (rowIdxSwp % numRegisterValues)
         {
         case 0:
-            SwapRowsAllColumns<_regValueIdx, 0, _sameReg>(iteration, pivotRegRowIdx, regRowIdx, matData, vecData);
+            SwapRowPivotLoop<_regElmIdxPiv, 0, _sameReg>(iteration, regRowIdxPiv, regRowIdxSwp, matData, vecPermData);
             break;
         case 1:
-            SwapRowsAllColumns<_regValueIdx, 1, _sameReg>(iteration, pivotRegRowIdx, regRowIdx, matData, vecData);
+            SwapRowPivotLoop<_regElmIdxPiv, 1, _sameReg>(iteration, regRowIdxPiv, regRowIdxSwp, matData, vecPermData);
             break;
         case 2:
-            SwapRowsAllColumns<_regValueIdx, 2, _sameReg>(iteration, pivotRegRowIdx, regRowIdx, matData, vecData);
+            SwapRowPivotLoop<_regElmIdxPiv, 2, _sameReg>(iteration, regRowIdxPiv, regRowIdxSwp, matData, vecPermData);
             break;
         case 3:
-            SwapRowsAllColumns<_regValueIdx, 3, _sameReg>(iteration, pivotRegRowIdx, regRowIdx, matData, vecData);
+            SwapRowPivotLoop<_regElmIdxPiv, 3, _sameReg>(iteration, regRowIdxPiv, regRowIdxSwp, matData, vecPermData);
             break;
         }
 
     if constexpr (numRegisterValues == 8)
-        switch (pivotRowIdx % numRegisterValues)
+        switch (rowIdxSwp % numRegisterValues)
         {
         case 0:
-            SwapRowsAllColumns<_regValueIdx, 0, _sameReg>(iteration, pivotRegRowIdx, regRowIdx, matData, vecData);
+            SwapRowPivotLoop<_regElmIdxPiv, 0, _sameReg>(iteration, regRowIdxPiv, regRowIdxSwp, matData, vecPermData);
             break;
         case 1:
-            SwapRowsAllColumns<_regValueIdx, 1, _sameReg>(iteration, pivotRegRowIdx, regRowIdx, matData, vecData);
+            SwapRowPivotLoop<_regElmIdxPiv, 1, _sameReg>(iteration, regRowIdxPiv, regRowIdxSwp, matData, vecPermData);
             break;
         case 2:
-            SwapRowsAllColumns<_regValueIdx, 2, _sameReg>(iteration, pivotRegRowIdx, regRowIdx, matData, vecData);
+            SwapRowPivotLoop<_regElmIdxPiv, 2, _sameReg>(iteration, regRowIdxPiv, regRowIdxSwp, matData, vecPermData);
             break;
         case 3:
-            SwapRowsAllColumns<_regValueIdx, 3, _sameReg>(iteration, pivotRegRowIdx, regRowIdx, matData, vecData);
+            SwapRowPivotLoop<_regElmIdxPiv, 3, _sameReg>(iteration, regRowIdxPiv, regRowIdxSwp, matData, vecPermData);
             break;
         case 4:
-            SwapRowsAllColumns<_regValueIdx, 4, _sameReg>(iteration, pivotRegRowIdx, regRowIdx, matData, vecData);
+            SwapRowPivotLoop<_regElmIdxPiv, 4, _sameReg>(iteration, regRowIdxPiv, regRowIdxSwp, matData, vecPermData);
             break;
         case 5:
-            SwapRowsAllColumns<_regValueIdx, 5, _sameReg>(iteration, pivotRegRowIdx, regRowIdx, matData, vecData);
+            SwapRowPivotLoop<_regElmIdxPiv, 5, _sameReg>(iteration, regRowIdxPiv, regRowIdxSwp, matData, vecPermData);
             break;
         case 6:
-            SwapRowsAllColumns<_regValueIdx, 6, _sameReg>(iteration, pivotRegRowIdx, regRowIdx, matData, vecData);
+            SwapRowPivotLoop<_regElmIdxPiv, 6, _sameReg>(iteration, regRowIdxPiv, regRowIdxSwp, matData, vecPermData);
             break;
         case 7:
-            SwapRowsAllColumns<_regValueIdx, 7, _sameReg>(iteration, pivotRegRowIdx, regRowIdx, matData, vecData);
+            SwapRowPivotLoop<_regElmIdxPiv, 7, _sameReg>(iteration, regRowIdxPiv, regRowIdxSwp, matData, vecPermData);
             break;
         }
 }

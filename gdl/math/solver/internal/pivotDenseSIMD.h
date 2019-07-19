@@ -23,9 +23,13 @@ class PivotDenseSSE
     template <typename, U32, Pivot>
     friend class LUDenseSIMD;
 
+
+
     static constexpr U32 alignment = simd::alignmentBytes<_registerType>;
     static constexpr U32 numRegisterValues = simd::numRegisterValues<_registerType>;
     static constexpr U32 numColRegisters = simd::CalcMinNumArrayRegisters<_registerType>(_size);
+
+
 
     using ValueType = decltype(simd::GetDataType<_registerType>());
     using MatrixDataArray = std::array<_registerType, numColRegisters * _size>;
@@ -33,6 +37,8 @@ class PivotDenseSSE
     using PermutationFuncPtr = void (*)(_registerType&, _registerType&);
 
 
+
+    //! @brief Struct that stores the data of a single permutation
     struct VectorPermutationData
     {
         U32 mRegIdx0 = 0;
@@ -41,123 +47,122 @@ class PivotDenseSSE
 
         VectorPermutationData() = default;
 
-        VectorPermutationData(U32 idx0, U32 idx1, PermutationFuncPtr funcPtr)
-            : mRegIdx0{idx0}
-            , mRegIdx1{idx1}
-            , mFuncPtr{funcPtr}
-        {
-        }
+        //! @brief Constructor
+        //! @param idx0: Row index of the first register of the permutation
+        //! @param idx1: Row index of the second register of the permutation
+        //! @param funcPtr: Function pointer to the permutation function
+        inline VectorPermutationData(U32 idx0, U32 idx1, PermutationFuncPtr funcPtr);
     };
 
+
+
+    //! @brief Struct that stores all permutations
     struct VectorPermutationDataArray
     {
         std::array<VectorPermutationData, _size - 1> mPermutations;
         U32 mNumPermutations = 0;
 
-        inline void AddPermutation(U32 idx0, U32 idx1, PermutationFuncPtr funcPtr)
-        {
-            mPermutations[mNumPermutations] = VectorPermutationData(idx0, idx1, funcPtr);
-            ++mNumPermutations;
-        }
+        //! @brief Adds a permutation
+        //! @param idx0: Row index of the first register of the permutation
+        //! @param idx1: Row index of the second register of the permutation
+        //! @param funcPtr: Function pointer to the permutation function
+        inline void AddPermutation(U32 idx0, U32 idx1, PermutationFuncPtr funcPtr);
     };
 
-    //! @brief Finds the pivot element (maximum absolute value) inside of a column and returns the row where it is
-    //! currently located.
-    //! @tparam _regValueIdx: Each column is composed of registers that contain multiple row values of that column. This
-    //! parameter specifies the position of the value inside of the corresponding register that belongs to the current
-    //! iterations active row.
-    //! @param iteration: Number of the current iteration
-    //! @param regRowIdx: This parameter specifies the position of the register that holds the value of the current
-    //! iterations active row inside of each column of registers.
-    //! @param matData: Matrix data array (column major ordering)
-    //! @return Row index of the pivot element
-    template <U32 _regValueIdx>
-    inline static U32 FindPivotPartial(U32 iteration, U32 regRowIdx, const MatrixDataArray& matData);
 
-    //! @brief Performs the pivoting step for the given iteration
-    //! @tparam _regValueIdx: Each column is composed of registers that contain multiple row values of that column. This
-    //! parameter specifies the position of the value inside of the corresponding register that belongs to the current
-    //! iterations active row.
-    //! @param iteration: Number of the current iteration
-    //! @param regRowIdx: This parameter specifies the position of the register that holds the value of the current
-    //! iterations active row inside of each column of registers.
-    //! iterations active row.
-    //! @param matData: Matrix data array (column major ordering)
-    //! @param vecData: Vector data array
-    template <U32 _regValueIdx, typename _typeData>
-    inline static void PartialPivotingStepRegister(U32 iteration, U32 regRowIdx, MatrixDataArray& matData,
-                                                   _typeData& vecData);
 
-    template <U32 _regIdxDst, U32 _regIdxPiv, bool _sameReg>
+    //! @brief Finds the maximum absolute value inside of the column containing the pivot element and returns its index.
+    //! Rows above the pivot element are not considered
+    //! @tparam _regElmIdxPiv: Register element index of the pivot element
+    //! @param iteration: Number of the current iteration
+    //! @param regRowIdxPiv: Row index of the register that holds the pivot element
+    //! @param matData: Matrix data array (column major ordering)
+    //! @return Index of the row containing the maximum absolute value
+    template <U32 _regElmIdxPiv>
+    inline static U32 FindMaxAbsValueCol(U32 iteration, U32 regRowIdxPiv, const MatrixDataArray& matData);
+
+    //! @brief Performs the partial pivoting step for the given iteration
+    //! @tparam _regElmIdxPiv: Register element index of the pivot element
+    //! @tparam _typeVecPerm: Data type of additional argument. Must be VecSIMD or VectorPermutationDataArray
+    //! @param iteration: Number of the current iteration
+    //! @param regRowIdxPiv: Row index of the register that holds the pivot element
+    //! @param matData: Matrix data array (column major ordering)
+    //! @param vecPermData: Vector data or permutation data
+    template <U32 _regElmIdxPiv, typename _typeVecPerm>
+    inline static void PartialPivotingStepRegister(U32 iteration, U32 regRowIdxPiv, MatrixDataArray& matData,
+                                                   _typeVecPerm& vecPermData);
+
+    //! @brief Swaps two value from the same or different register.
+    //! @tparam _regElmIdx0: Register element index of the first value
+    //! @tparam _regElmIdx1: Register element index of the second value
+    //! @tparam _sameReg: TRUE if both values are located in the same register, FALSE otherwise.
+    //! @param reg0: First register.
+    //! @param reg1: Second register - Unused if both values are located in the same register
+    //! @note This is a helper function that wraps the GDL::simd::Swap and the GDL::simd::Exchange function into a
+    //! shared interface. Therefore, both operations can be stored using the same function pointer.
+    template <U32 _regElmIdx0, U32 _regElmIdx1, bool _sameReg>
     static inline void PermutationFunction(_registerType& reg0, _registerType& reg1);
 
-    static inline void PermuteVector(VectorDataArray& vec, const VectorPermutationDataArray& permutation);
+    //! @brief Permutes a vector with the passed permutation data
+    //! @param vectorData: Vector data
+    //! @param permutationData: Permutation data
+    static inline void PermuteVector(VectorDataArray& vectorData, const VectorPermutationDataArray& permutationData);
 
     //! @brief Performs the pivoting step for the given iteration
-    //! @tparam _regValueIdx: Each column is composed of registers that contain multiple row values of that column. This
-    //! parameter specifies the position of the value inside of the corresponding register that belongs to the current
-    //! iterations active row.
+    //! @tparam _regElmIdxPiv: Register element index of the pivot element
     //! @tparam _pivot: Enum to select the pivoting strategy
+    //! @tparam _typeVecPerm: Data type of additional argument. Must be VecSIMD or VectorPermutationDataArray
     //! @param iteration: Number of the current iteration
-    //! @param regRowIdx: This parameter specifies the position of the register that holds the value of the current
-    //! iterations active row inside of each column of registers.
-    //! iterations active row.
+    //! @param regRowIdxPiv: Row index of the register that holds the pivot element
     //! @param matData: Matrix data array (column major ordering)
-    //! @param vecData: Vector data array
-    template <U32 _regValueIdx, Pivot _pivot, typename _typeData>
-    inline static void PivotingStepRegister(U32 iteration, U32 regRowIdx, MatrixDataArray& matData, _typeData& vecData);
+    //! @param vecPermData: Vector data or permutation data
+    template <U32 _regElmIdxPiv, Pivot _pivot, typename _typeVecPerm>
+    inline static void PivotingStepRegister(U32 iteration, U32 regRowIdxPiv, MatrixDataArray& matData,
+                                            _typeVecPerm& vecPermData);
 
-    //! @brief Moves the row that contains the pivot element into the correct position.
-    //! @tparam _regValueIdx: Each column is composed of registers that contain multiple row values of that column. This
-    //! parameter specifies the position of the value inside of the corresponding register that belongs to the current
-    //! iterations active row.
-    //! @param pivotRowIdx: Index of the row that contains the pivot element
+    //! @brief Swaps the row of the pivot element with the row of the value that should replace the current pivot
+    //! element
+    //! @tparam _regElmIdxPiv: Register element index of the pivot element
+    //! @tparam _typeVecPerm: Data type of additional argument. Must be VecSIMD or VectorPermutationDataArray
+    //! @param rowIdxSwp: Index of the row that will be swapped with the pivot elements row
     //! @param iteration: Number of the current iteration
-    //! @param regRowIdx: This parameter specifies the position of the register that holds the value of the current
-    //! iterations active row inside of each column of registers.
+    //! @param regRowIdxPiv: Row index of the register that holds the pivot element
     //! @param matData: Matrix data array (column major ordering)
-    //! @param vecData: Vector data array
-    template <U32 _regValueIdx, typename _typeData>
-    inline static void SwapRows(U32 pivotRowIdx, U32 iteration, U32 regRowIdx, MatrixDataArray& matData,
-                                _typeData& vecData);
+    //! @param vecPermData: Vector data or permutation data
+    template <U32 _regElmIdxPiv, typename _typeVecPerm>
+    inline static void SwapRowPivot(U32 rowIdxSwp, U32 iteration, U32 regRowIdxPiv, MatrixDataArray& matData,
+                                    _typeVecPerm& vecPermData);
 
-    //! @brief Moves the row that contains the pivot element into the correct position by performing a swap operation
-    //! for each relevant column.
-    //! @tparam _regIdxDst: Each column is composed of registers that contain multiple row values of that column. This
-    //! parameter specifies the position of the value inside of the corresponding register that belongs to the current
-    //! iterations active row.
-    //! @tparam _regIdxPiv: Each column is composed of registers that contain multiple row values of that column. This
-    //! parameter specifies the position of the pivot element inside of the corresponding register.
-    //! @tparam _sameReg: Specifies if the swap operation is performed inside the same register or not.
+    //! @brief Loops over all relevant matrix columns to swap the row of the pivot element with the row of the value
+    //! that should replace the current pivot element
+    //! @tparam _regElmIdxPiv: Register element index of the pivot element
+    //! @tparam _regElmIdxSwp: Register element index of the value that should replace the current pivot element
+    //! @tparam _sameReg: TRUE if both values are located in the same register, FALSE otherwise.
+    //! @tparam _typeVecPerm: Data type of additional argument. Must be VecSIMD or VectorPermutationDataArray
     //! @param iteration: Number of the current iteration
-    //! @param pivotRegRowIdx: This parameter specifies the position of the register that holds the pivot element inside
-    //! of each column of registers.
-    //! @param regRowIdx: This parameter specifies the position of the register that holds the value of the current
-    //! iterations active row inside of each column of registers.
+    //! @param regRowIdxPiv: Row index of the register that holds the pivot element
+    //! @param regRowIdxSwp: Row index of the register that holds the value that replaces the current pivot element
     //! @param matData: Matrix data array (column major ordering)
-    //! @param vecData: Vector data array
-    template <U32 _regIdxDst, U32 _regIdxPiv, bool _sameReg, typename _typeData>
-    inline static void SwapRowsAllColumns(U32 iteration, U32 pivotRegRowIdx, U32 regRowIdx, MatrixDataArray& matData,
-                                          _typeData& vecData);
+    //! @param vecPermData: Vector data or permutation data
+    template <U32 _regElmIdxPiv, U32 _regElmIdxSwp, bool _sameReg, typename _typeVecPerm>
+    inline static void SwapRowPivotLoop(U32 iteration, U32 regRowIdxPiv, U32 regRowIdxSwp, MatrixDataArray& matData,
+                                        _typeVecPerm& vecPermData);
 
-    //! @brief Swap operations for registers need to know the indices of the swapped elements at compile time. This
-    //! function is just a switch to select the correct compile time swap function depending on the position of the
-    //! pivot element that is determined at runtime.
-    //! @tparam _regIdxDst: Each column is composed of registers that contain multiple row values of that column. This
-    //! parameter specifies the position of the value inside of the corresponding register that belongs to the current
-    //! iterations active row.
-    //! @tparam _sameReg: Specifies if the swap operation is performed inside the same register or not.
-    //! @param pivotRowIdx: Index of the row that contains the pivot element
+    //! @brief Selects the correct swap function to swap the row of the pivot element with the row of the value that
+    //! should replace the current pivot element. This is necessary since permutations of registers need to be known at
+    //! compile time.
+    //! @tparam _regElmIdxPiv: Register element index of the pivot element
+    //! @tparam _sameReg: TRUE if both values are located in the same register, FALSE otherwise.
+    //! @tparam _typeVecPerm: Data type of additional argument. Must be VecSIMD or VectorPermutationDataArray
+    //! @param rowIdxSwp: Index of the row that will be swapped with the pivot elements row
     //! @param iteration: Number of the current iteration
-    //! @param pivotRegRowIdx: This parameter specifies the position of the register that holds the pivot element inside
-    //! of each column of registers.
-    //! @param regRowIdx: This parameter specifies the position of the register that holds the value of the current
-    //! iterations active row inside of each column of registers.
+    //! @param regRowIdxPiv: Row index of the register that holds the pivot element
+    //! @param regRowIdxSwp: Row index of the register that holds the value that replaces the current pivot element
     //! @param matData: Matrix data array (column major ordering)
-    //! @param vecData: Vector data array
-    template <U32 _regValueIdx, bool _sameReg, typename _typeData>
-    inline static void SwapRowsSwitch(U32 pivotRowIdx, U32 iteration, U32 pivotRegRowIdx, U32 regRowIdx,
-                                      MatrixDataArray& matData, _typeData& vecData);
+    //! @param vecPermData: Vector data or permutation data
+    template <U32 _regElmIdxPiv, bool _sameReg, typename _typeVecPerm>
+    inline static void SwapRowPivotSwitch(U32 rowIdxSwp, U32 iteration, U32 regRowIdxPiv, U32 regRowIdxSwp,
+                                          MatrixDataArray& matData, _typeVecPerm& vecPermData);
 };
 
 

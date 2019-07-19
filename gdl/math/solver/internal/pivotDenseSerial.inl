@@ -2,12 +2,6 @@
 
 #include "gdl/math/solver/internal/pivotDenseSerial.h"
 
-#include "gdl/math/serial/matSerial.h"
-#include "gdl/math/serial/vecSerial.h"
-#include "gdl/base/simd/swizzle.h"
-#include "gdl/math/simd/matSIMD.h"
-#include "gdl/math/simd/vecSIMD.h"
-
 #include <cmath>
 
 namespace GDL::Solver

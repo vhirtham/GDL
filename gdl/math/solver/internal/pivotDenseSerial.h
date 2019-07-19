@@ -1,7 +1,6 @@
 #pragma once
 
 #include "gdl/base/fundamentalTypes.h"
-#include "gdl/base/simd/utility.h"
 #include "gdl/math/solver/pivotEnum.h"
 
 #include <array>
