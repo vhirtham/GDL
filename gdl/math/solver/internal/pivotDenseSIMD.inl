@@ -49,6 +49,7 @@ inline U32 PivotDenseSSE<_registerType, _size>::FindMaxAbsValueCol(U32 iteration
     _registerType zero = _mm_setzero<_registerType>();
     _registerType cmpAbs = Abs(BlendAboveIndex<_regElmIdxPiv>(matData[colStartIdx + regRowIdxPiv], zero));
     _registerType cmpIdx = _mm_set1<_registerType>(regRowIdxPiv);
+
     for (U32 i = regRowIdxPiv + 1; i < numColRegisters; ++i)
     {
         _registerType cmpAbs2 = Abs(matData[colStartIdx + i]);
@@ -57,11 +58,13 @@ inline U32 PivotDenseSSE<_registerType, _size>::FindMaxAbsValueCol(U32 iteration
         cmpIdx = _mm_blendv(cmpIdx, _mm_set1<_registerType>(i), cmpRes);
     }
 
+
     // Find pivot in result register
     alignas(alignment) std::array<ValueType, numRegisterValues> values2;
     _mm_store(values2.data(), cmpAbs);
     ValueType maxVal = values2[0];
     U32 maxValIdx = 0;
+
     for (U32 i = 1; i < numRegisterValues; ++i)
         if (maxVal < values2[i])
         {
@@ -152,6 +155,7 @@ inline void PivotDenseSSE<_registerType, _size>::SwapRowPivot(U32 rowIdxSwp, U32
                                                               MatrixDataArray& matData, _typeVecPerm& vecPermData)
 {
     const U32 regRowIdxSwp = rowIdxSwp / numRegisterValues;
+
     if (regRowIdxPiv == regRowIdxSwp)
         SwapRowPivotSwitch<_regElmIdxPiv, true>(rowIdxSwp, iteration, regRowIdxPiv, regRowIdxSwp, matData, vecPermData);
     else
@@ -174,44 +178,84 @@ inline void PivotDenseSSE<_registerType, _size>::SwapRowPivotLoop(U32 iteration,
                           std::is_same<_typeVecPerm, VectorPermutationDataArray>::value,
                   "Invalid parameter type");
 
+    if constexpr (_sameReg)
+        SwapRowPivotLoopSameReg<_regElmIdxPiv, _regElmIdxSwp>(iteration, regRowIdxPiv, matData, vecPermData);
+    else
+        SwapRowPivotLoopDiffReg<_regElmIdxPiv, _regElmIdxSwp>(iteration, regRowIdxPiv, regRowIdxSwp, matData,
+                                                              vecPermData);
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+template <typename _registerType, U32 _size>
+template <U32 _regElmIdxPiv, U32 _regElmIdxSwp, typename _typeVecPerm>
+inline void PivotDenseSSE<_registerType, _size>::SwapRowPivotLoopDiffReg(U32 iteration, U32 regRowIdxPiv,
+                                                                         U32 regRowIdxSwp, MatrixDataArray& matData,
+                                                                         _typeVecPerm& vecPermData)
+{
+    using namespace GDL::simd;
+
+    DEV_EXCEPTION(regRowIdxSwp <= regRowIdxPiv,
+                  "Internal error. Pivot register has equal or lower index than current register");
+    DEV_EXCEPTION(regRowIdxSwp / numColRegisters != regRowIdxPiv / numColRegisters,
+                  "Internal error. Registers are not in the same column.");
+
+
     constexpr bool dataIsVectorData = std::is_same<_typeVecPerm, VectorDataArray>::value;
+
 
     U32 loopStartIdx = regRowIdxPiv;
     if constexpr (dataIsVectorData)
         loopStartIdx += iteration * numColRegisters;
+    U32 regDiff = regRowIdxSwp - regRowIdxPiv;
 
-    if constexpr (_sameReg)
-    {
-        if constexpr (_regElmIdxPiv < _regElmIdxSwp)
-        {
-            for (U32 i = loopStartIdx; i < matData.size(); i += numColRegisters)
-                matData[i] = Swap<_regElmIdxPiv, _regElmIdxSwp>(matData[i]);
-            if constexpr (dataIsVectorData)
-                vecPermData[regRowIdxPiv] = Swap<_regElmIdxPiv, _regElmIdxSwp>(vecPermData[regRowIdxPiv]);
-            else
-                vecPermData.AddPermutation(regRowIdxPiv, regRowIdxPiv,
-                                           &PermutationFunction<_regElmIdxPiv, _regElmIdxSwp, _sameReg>);
-        }
-        else
-            THROW("Internal index error - Probably singular matrix."); // LCOV_EXCL_LINE
-    }
+    for (U32 i = loopStartIdx; i < matData.size(); i += numColRegisters)
+        Exchange<_regElmIdxPiv, _regElmIdxSwp>(matData[i], matData[i + regDiff]);
+
+
+    if constexpr (dataIsVectorData)
+        Exchange<_regElmIdxPiv, _regElmIdxSwp>(vecPermData[regRowIdxPiv], vecPermData[regRowIdxPiv + regDiff]);
     else
-    {
-        DEV_EXCEPTION(regRowIdxSwp <= regRowIdxPiv,
-                      "Internal error. Pivot register has equal or lower index than current register");
-        DEV_EXCEPTION(regRowIdxSwp / numColRegisters != regRowIdxPiv / numColRegisters,
-                      "Internal error. Registers are not in the same column.");
+        vecPermData.AddPermutation(regRowIdxPiv, regRowIdxPiv + regDiff,
+                                   &PermutationFunction<_regElmIdxPiv, _regElmIdxSwp, false>);
+}
 
-        U32 regDiff = regRowIdxSwp - regRowIdxPiv;
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+template <typename _registerType, U32 _size>
+template <U32 _regElmIdxPiv, U32 _regElmIdxSwp, typename _typeVecPerm>
+inline void PivotDenseSSE<_registerType, _size>::SwapRowPivotLoopSameReg(U32 iteration, U32 regRowIdxPiv,
+                                                                         MatrixDataArray& matData,
+                                                                         _typeVecPerm& vecPermData)
+{
+    using namespace GDL::simd;
+
+
+    if constexpr (_regElmIdxPiv < _regElmIdxSwp)
+    {
+        constexpr bool dataIsVectorData = std::is_same<_typeVecPerm, VectorDataArray>::value;
+
+
+        U32 loopStartIdx = regRowIdxPiv;
+        if constexpr (dataIsVectorData)
+            loopStartIdx += iteration * numColRegisters;
 
         for (U32 i = loopStartIdx; i < matData.size(); i += numColRegisters)
-            Exchange<_regElmIdxPiv, _regElmIdxSwp>(matData[i], matData[i + regDiff]);
+            matData[i] = Swap<_regElmIdxPiv, _regElmIdxSwp>(matData[i]);
+
+
         if constexpr (dataIsVectorData)
-            Exchange<_regElmIdxPiv, _regElmIdxSwp>(vecPermData[regRowIdxPiv], vecPermData[regRowIdxPiv + regDiff]);
+            vecPermData[regRowIdxPiv] = Swap<_regElmIdxPiv, _regElmIdxSwp>(vecPermData[regRowIdxPiv]);
         else
-            vecPermData.AddPermutation(regRowIdxPiv, regRowIdxPiv + regDiff,
-                                       &PermutationFunction<_regElmIdxPiv, _regElmIdxSwp, _sameReg>);
+            vecPermData.AddPermutation(regRowIdxPiv, regRowIdxPiv,
+                                       &PermutationFunction<_regElmIdxPiv, _regElmIdxSwp, true>);
     }
+    else
+        THROW("Internal index error - Probably singular matrix."); // LCOV_EXCL_LINE
 }
 
 

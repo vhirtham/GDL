@@ -148,6 +148,35 @@ class PivotDenseSSE
     inline static void SwapRowPivotLoop(U32 iteration, U32 regRowIdxPiv, U32 regRowIdxSwp, MatrixDataArray& matData,
                                         _typeVecPerm& vecPermData);
 
+    //! @brief Loops over all relevant matrix columns to swap the row of the pivot element with the row of the value
+    //! that should replace the current pivot element. The swapped values of each column need to be inside of different
+    //! registers
+    //! @tparam _regElmIdxPiv: Register element index of the pivot element
+    //! @tparam _regElmIdxSwp: Register element index of the value that should replace the current pivot element
+    //! @tparam _typeVecPerm: Data type of additional argument. Must be VecSIMD or VectorPermutationDataArray
+    //! @param iteration: Number of the current iteration
+    //! @param regRowIdxPiv: Row index of the register that holds the pivot element
+    //! @param regRowIdxSwp: Row index of the register that holds the value that replaces the current pivot element
+    //! @param matData: Matrix data array (column major ordering)
+    //! @param vecPermData: Vector data or permutation data
+    template <U32 _regElmIdxPiv, U32 _regElmIdxSwp, typename _typeVecPerm>
+    inline static void SwapRowPivotLoopDiffReg(U32 iteration, U32 regRowIdxPiv, U32 regRowIdxSwp,
+                                               MatrixDataArray& matData, _typeVecPerm& vecPermData);
+
+    //! @brief Loops over all relevant matrix columns to swap the row of the pivot element with the row of the value
+    //! that should replace the current pivot element. The swapped values of each column need to be inside of the same
+    //! register
+    //! @tparam _regElmIdxPiv: Register element index of the pivot element
+    //! @tparam _regElmIdxSwp: Register element index of the value that should replace the current pivot element
+    //! @tparam _typeVecPerm: Data type of additional argument. Must be VecSIMD or VectorPermutationDataArray
+    //! @param iteration: Number of the current iteration
+    //! @param regRowIdxPiv: Row index of the register that holds the pivot element
+    //! @param matData: Matrix data array (column major ordering)
+    //! @param vecPermData: Vector data or permutation data
+    template <U32 _regElmIdxPiv, U32 _regElmIdxSwp, typename _typeVecPerm>
+    inline static void SwapRowPivotLoopSameReg(U32 iteration, U32 regRowIdxPiv, MatrixDataArray& matData,
+                                               _typeVecPerm& vecPermData);
+
     //! @brief Selects the correct swap function to swap the row of the pivot element with the row of the value that
     //! should replace the current pivot element. This is necessary since permutations of registers need to be known at
     //! compile time.
