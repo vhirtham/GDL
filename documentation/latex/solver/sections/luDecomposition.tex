@@ -1,0 +1,176 @@
+\section{LU decomposition}
+\label{sec:LU}
+\subsection{Theory}
+\subsubsection{Algorithm}
+
+LU decomposition is a variant of Gaussian elimination. It decomposes a matrix $\mathbf{A}$ into a lower triangular matrix $\mathbf{L}$ with a main diagonal composed of ones and an upper triangular matrix $\mathbf{U}$:
+\begin{align}
+\mathbf{A} = \mathbf{L}\mathbf{U}
+\end{align}
+
+For a $3\times3$ system, the matrices are:
+
+\begin{align}
+\mathbf{L} 
+& =
+\begin{bmatrix}
+1     &0     &0\\
+l_{10}&1     &0\\
+l_{20}&l_{21}&1\\
+\end{bmatrix}
+&
+\mathbf{U} 
+& =
+\begin{bmatrix}
+u_{00}&u_{01}&u_{02}\\
+0     &u_{11}&u_{12}\\
+0     &0     &u_{22}\\
+\end{bmatrix}
+\end{align}
+
+Equations to calculate the components of $\mathbf{L}$ and $\mathbf{U}$ can be derived by observing the product of both matrices.
+
+\begin{align}
+\mathbf{L} \mathbf{U}
+=
+\begin{bmatrix}
+u_{00}      &u_{01}                   &u_{02}\\
+l_{10}u_{00}&l_{10}u_{01}+u_{11}      &l_{10}u_{02}+u_{12}\\
+l_{20}u_{00}&l_{20}u_{01}+l_{21}u_{11}&l_{20}u_{02}+l_{21}u_{12}+u_{22}\\
+\end{bmatrix}
+=
+\begin{bmatrix}
+a_{00}&a_{01}&a_{02}\\
+a_{10}&a_{11}&a_{12}\\
+a_{20}&a_{21}&a_{22}\\
+\end{bmatrix}
+= 
+\mathbf{A} 
+\end{align}
+
+Comparing the elements of $\mathbf{A}$ with the product $\mathbf{L}\mathbf{U}$ yields:
+
+\begin{align*}
+a_{00} &= u_{00}\\
+a_{01} &= u_{01}\\
+a_{02} &= u_{02}\\
+a_{10} &= l_{10}u_{00}\\
+a_{11} &= l_{10}u_{01}+u_{11}\\
+a_{12} &= l_{10}u_{02}+u_{12}\\
+a_{20} &= l_{20}u_{00}\\
+a_{21} &= l_{20}u_{01}+l_{21}u_{11}\\
+a_{22} &= l_{20}u_{02}+l_{21}u_{12}+u_{22}\\
+\end{align*}
+
+Rearranging the equations to solve for the unknown values gives:
+
+\begin{align*}
+u_{00} &= a_{00}\\
+u_{01} &= a_{01}\\
+u_{02} &= a_{02}\\
+l_{10} &= \frac{a_{10}}{u_{00}}\\
+l_{20} &= \frac{a_{20}}{u_{00}}\\
+u_{11} &= a_{11} - l_{10}u_{01}\\
+u_{12} &= a_{12} - l_{10}u_{02}\\
+l_{21} &= \frac{a_{21} - l_{20}u_{01}}{u_{11}}\\
+u_{22} &= a_{22} - l_{20}u_{02} - l_{21}u_{12}\\
+\end{align*}
+
+
+Using those equations on the matrix of \cref{eq:gauss3x3unmodified} yields:
+
+
+\begin{align}
+\label{eq:luDecomposition3x3example}
+\mathbf{L} 
+& =
+\begin{bmatrix}
+1          &0     &0\\
+\frac{1}{2}&1     &0\\
+\frac{3}{2}&2     &1\\
+\end{bmatrix}
+&
+\mathbf{U} 
+& =
+\begin{bmatrix}
+2     &4     &8\\
+0     &-1    &-3\\
+0     &0     &-1\\
+\end{bmatrix}
+\end{align}
+
+$\mathbf{U}$ is identical to the triangular matrix obtained by Gaussian elimination (compare with \cref{eq:gauss3x3triangular}).
+The first column of $\mathbf{L}$ contains the factors that were used during the first elimination step of Gaussian elimination and the second column the factor from the second step.
+
+It is now obvious that both methods are closely related to each other. 
+The LU decomposition can also be computed by performing the standard Gaussian elimination algorithm and storing the factors of each elimination step in $\mathbf{L}$.
+
+Once the decomposition is known, the system $\mathbf{A}\mathbf{x} = \mathbf{b}$ can be solved.
+Therefore, $\mathbf{A}$ is replaced with $\mathbf{LU}$:
+
+\begin{align*}
+\mathbf{LU}\mathbf{x} &= \mathbf{b}\\
+\end{align*}
+
+The product $\mathbf{Ux}$ is a yet unknown vector $\mathbf{y}$. 
+It can be obtained by solving the system:
+
+\begin{align*}
+\mathbf{L}\mathbf{y} &= \mathbf{b}\\
+\end{align*}
+
+Since $\mathbf{L}$ is a lower triangular matrix, a simple forward substitution is sufficient to determine $\mathbf{y}$.
+
+Afterwards, the original system's solution $\mathbf{x}$ can be calculated by solving:
+
+\begin{align*}
+\mathbf{U}\mathbf{x} &= \mathbf{y}\\
+\end{align*}
+
+This is done with backward substitution because $\mathbf{U}$ is an upper triangular matrix.
+
+Using the LU decomposition of \cref{eq:luDecomposition3x3example} to calculate the result of \cref{eq:gauss3x3unmodified} yields:
+
+\begin{align*}
+y_0 &= b_0 = 2\\
+y_1 &= b_1 - l_{10}y_0 = 1 - \frac{1}{2} \cdot 2 = 0\\
+y_2 &= b_2 - l_{20}y_0 - l_{21}y_1 = 2 - \frac{3}{2} \cdot 2 - 2 \cdot 0 = -1
+\end{align*}
+
+\begin{align*}
+\mathbf{y} 
+& =
+\begin{bmatrix}
+2\\
+0\\
+-1\\
+\end{bmatrix}
+\end{align*}
+
+\begin{align*}
+x_2 &= \frac{y_2}{u_{22}} = \frac{-1}{-1}= 1\\
+x_1 &= \frac{y_1 - u_{12}x_2}{u_{11}} = \frac{0 - \pth{-3 \cdot 1}}{-1} = -3\\
+x_0 &= \frac{y_0 - u_{02}x_2 - u_{01}x_1}{u_{00}} = \frac{2 - 8 \cdot 1 - 4 \cdot -3}{2} =  3
+\end{align*}
+
+\begin{align*}
+\mathbf{x} 
+& =
+\begin{bmatrix}
+3\\
+-3\\
+1\\
+\end{bmatrix}
+\end{align*}
+
+The advantage of LU decomposition over Gaussian elimination is that systems with different right-hand sides but the same matrix $\mathbf{A}$ can be solved efficiently through forward and backward substitution with the matrices $\mathbf{L}$ and $\mathbf{U}$, which need to be computed only once. 
+While Gaussian elimination can also be used to solve multiple right-hand sides at once, the matrix factorization has to be repeated every time the system should be solved with a new set of right-hand sides that were previously unknown.
+Such situations occur for example in time dependent problems, were the right-hand side depends on the previous time step's solution.
+
+\subsubsection{Pivoting}
+
+\subsection{Implementation}
+\subsubsection{Arbitrary sized matrices - Serial}
+\subsubsection{Arbitrary sized matrices - SIMD}
+\subsubsection{3x3 and 4x4 matrices - Serial}
+\subsubsection{3x3 and 4x4 matrices - SIMD}

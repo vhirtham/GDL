@@ -126,7 +126,8 @@ x_2\\
 
 The upper diagonal form can now be obtained by repeating this procedure for the subsystem that remains if the rows and columns above and to the left of the second value of the main diagonal are ignored.
 
-\begin{align*}
+\begin{align}
+\nonumber
 \begin{bmatrix}
 	2&
 	4&
@@ -151,6 +152,7 @@ The upper diagonal form can now be obtained by repeating this procedure for the 
 	\left(-1 - \textcolor{blue}{\frac{-2}{-1}} \cdot \textcolor{red}{0} \right)\\
 \end{bmatrix}
 \\
+\label{eq:gauss3x3triangular}
 \begin{bmatrix}
 2&4&8\\
 0&-1&-3\\
@@ -168,7 +170,7 @@ x_2\\
 0\\
 -1\\
 \end{bmatrix}
-\end{align*}
+\end{align}
 
 If the matrix is larger than in the example, the algorithm would continue with the subsystem that remains after removing the columns and rows  above and to the left of the third main diagonal value and so on until the upper triangular form is achieved.
 
