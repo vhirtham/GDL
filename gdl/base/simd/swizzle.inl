@@ -605,7 +605,7 @@ inline _registerType Permute2F128(_registerType source0, _registerType source1)
                   "Function only compatible with __m256 and __m256d registers.");
 
     return _mm_permute2f128<Permute2F128Mask<_lane0SrcReg, _lane0SrcLane, _lane1SrcReg, _lane1SrcLane>()>(source0,
-                                                                                                             source1);
+                                                                                                          source1);
 }
 
 

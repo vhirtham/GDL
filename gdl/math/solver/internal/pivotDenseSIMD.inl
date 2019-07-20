@@ -1,6 +1,8 @@
 #pragma once
 
 #include "gdl/math/solver/internal/pivotDenseSIMD.h"
+
+#include "gdl/base/exception.h"
 #include "gdl/base/simd/directAccess.h"
 #include "gdl/base/simd/swizzle.h"
 
@@ -169,7 +171,8 @@ inline void PivotDenseSSE<_registerType, _size>::SwapRowPivot(U32 rowIdxSwp, U32
 
 template <typename _registerType, U32 _size>
 template <U32 _regElmIdxPiv, U32 _regElmIdxSwp, bool _sameReg, typename _typeVecPerm>
-inline void PivotDenseSSE<_registerType, _size>::SwapRowPivotLoop(U32 iteration, U32 regRowIdxPiv, U32 regRowIdxSwp,
+inline void PivotDenseSSE<_registerType, _size>::SwapRowPivotLoop(U32 iteration, U32 regRowIdxPiv,
+                                                                  [[maybe_unused]] U32 regRowIdxSwp,
                                                                   MatrixDataArray& matData, _typeVecPerm& vecPermData)
 {
     using namespace GDL::simd;
@@ -228,12 +231,12 @@ inline void PivotDenseSSE<_registerType, _size>::SwapRowPivotLoopDiffReg(U32 ite
 
 template <typename _registerType, U32 _size>
 template <U32 _regElmIdxPiv, U32 _regElmIdxSwp, typename _typeVecPerm>
-inline void PivotDenseSSE<_registerType, _size>::SwapRowPivotLoopSameReg(U32 iteration, U32 regRowIdxPiv,
-                                                                         MatrixDataArray& matData,
-                                                                         _typeVecPerm& vecPermData)
+inline void PivotDenseSSE<_registerType, _size>::SwapRowPivotLoopSameReg([[maybe_unused]] U32 iteration,
+                                                                         [[maybe_unused]] U32 regRowIdxPiv,
+                                                                         [[maybe_unused]] MatrixDataArray& matData,
+                                                                         [[maybe_unused]] _typeVecPerm& vecPermData)
 {
     using namespace GDL::simd;
-
 
     if constexpr (_regElmIdxPiv < _regElmIdxSwp)
     {
