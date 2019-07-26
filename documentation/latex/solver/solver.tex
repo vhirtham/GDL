@@ -27,6 +27,7 @@ No abstract.
 
 \section{Introduction}
 
+\subsection{Introduction}
 Physical simulations and collision detection algorithms often need to solve linear equation systems of the form
 
 \begin{align}
@@ -41,9 +42,28 @@ The column vector $\mathbf{x}$ is also of size $\mathrm{N}$ but its values are u
 
 
 The subject of this document is how  unknown values of $\mathbf{x}$ can be determined. 
-Different solvers and their efficient implementation in C++ using SSE and AVX instructions are discussed in \cref{sec:cramersRule,sec:gaussianElimination,sec:LU,sec:LDL,sec:choleskyDecomposition}.
+Different solvers and their efficient implementation in C++ using SSE and AVX instructions are discussed.
 The performance of each method depends on parameters like the system size $\mathrm{N}$, the symmetry of $\mathbf{A}$ and the number of solves with different $\mathbf{r}$ but identical $\mathbf{A}$.
 Therefore, \cref{sec:solverSelection} discusses when which solver should be utilized to obtain maximal performance.
+
+
+\subsection{Solver classes and functions}
+
+Most of the solvers are based on complex algorithms with multiple sub-steps and don't fit into a single function.
+The corresponding functions are grouped inside of classes which contain only static member functions.
+Classes are chosen over name spaces to protect certain functions from external access.
+The constructors are deleted because creating actual objects from those classes is not intended.
+
+The public interfaces work with matrices and vectors as data arrays instead of matrix and vector classes.
+The matrix data is expected to be in column major ordering.
+This makes them more flexible since they can be used in other algorithms that manipulate the data directly without the need to create an unnecessary matrix or vector class.
+However, there also wrapper functions to use the solvers directly with matrix and vector classes.
+
+
+Specific implementation  details of the solver classes are discussed in the implementation sections of the corresponding solver.
+
+
+
 
 \begin{comment}
 
@@ -92,9 +112,11 @@ This element naming is chosen because it can be easier translated into vectorize
 \input{sections/gaussianElimination.tex}
 \input{sections/luDecomposition.tex}
 \input{sections/lltCholesky.tex}
+\input{sections/ldltCholesky.tex}
+\input{sections/qrHouseholder.tex}
 
-\section{LDLT Cholesky decomposition}
-\label{sec:LDL}
+
+
 
 \section{Inverse Matrix}
 \label{sec:InverseMatrix}
@@ -102,7 +124,8 @@ This element naming is chosen because it can be easier translated into vectorize
 \section{Full factorization}
 \label{sec:fullFactorization}
 
-
+\section{Pivoting}
+\label{sec:pivoting}
 
 
 \section{Solver comparison}

@@ -2,6 +2,7 @@
 
 #include "gdl/base/fundamentalTypes.h"
 #include "gdl/math/solver/pivotEnum.h"
+#include "gdl/math/solver/internal/permutationDataSerial.h"
 
 #include <array>
 
@@ -21,6 +22,8 @@ class LUDenseSerial
     using MatrixDataArray = std::array<_type, _size * _size>;
     using VectorDataArray = std::array<_type, _size>;
 
+    LUDenseSerial() = delete;
+
 public:
     //! @brief Class that stores the LU factorization and the permutations
     class Factorization
@@ -28,7 +31,7 @@ public:
         friend class LUDenseSerial;
 
         MatrixDataArray mLU;
-        VectorDataArray mPermutation;
+        PermutationData<_type, _size, _pivot> mPermutationData;
 
         //! @brief ctor
         //! @param matrixData: Data of the matrix that should be factorized

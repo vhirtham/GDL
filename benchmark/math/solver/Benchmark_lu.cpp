@@ -36,8 +36,8 @@ constexpr U32 N = 64;
 //#define BENCHMARK_FACTORIZATION
 
 // vectorization
-//#define BENCHMARK_SERIAL
-#define BENCHMARK_SIMD
+#define BENCHMARK_SERIAL
+//#define BENCHMARK_SIMD
 
 // Eigen
 //#define BENCHMARK_EIGEN
@@ -747,51 +747,51 @@ BENCHMARK_F(Eigen3, PartialPiv_LU_NxN)(benchmark::State& state)
 
 
 
-//#ifdef BENCHMARK_8x8
+#ifdef BENCHMARK_8x8
 
-// BENCHMARK_F(Eigen3, HouseholderQR_8x8)(benchmark::State& state)
-//{
-//    for (auto _ : state)
-//        benchmark::DoNotOptimize(A8.householderQr().solve(b8));
-//}
+BENCHMARK_F(Eigen3, HouseholderQR_8x8)(benchmark::State& state)
+{
+    for (auto _ : state)
+        benchmark::DoNotOptimize(A8.householderQr().solve(b8));
+}
 
-//#endif // BENCHMARK_8x8
-
-
-
-//#ifdef BENCHMARK_16x16
-
-// BENCHMARK_F(Eigen3, HouseholderQR_16x16)(benchmark::State& state)
-//{
-//    for (auto _ : state)
-//        benchmark::DoNotOptimize(A16.householderQr().solve(b16));
-//}
-
-//#endif // BENCHMARK_16x16
+#endif // BENCHMARK_8x8
 
 
 
-//#ifdef BENCHMARK_32x32
+#ifdef BENCHMARK_16x16
 
-// BENCHMARK_F(Eigen3, HouseholderQR_32x32)(benchmark::State& state)
-//{
-//    for (auto _ : state)
-//        benchmark::DoNotOptimize(A32.householderQr().solve(b32));
-//}
+BENCHMARK_F(Eigen3, HouseholderQR_16x16)(benchmark::State& state)
+{
+    for (auto _ : state)
+        benchmark::DoNotOptimize(A16.householderQr().solve(b16));
+}
 
-//#endif // BENCHMARK_32x32
+#endif // BENCHMARK_16x16
 
 
 
-//#ifdef BENCHMARK_NxN
+#ifdef BENCHMARK_32x32
 
-// BENCHMARK_F(Eigen3, HouseholderQRNxN)(benchmark::State& state)
-//{
-//    for (auto _ : state)
-//        benchmark::DoNotOptimize(AN.householderQr().solve(bN));
-//}
+BENCHMARK_F(Eigen3, HouseholderQR_32x32)(benchmark::State& state)
+{
+    for (auto _ : state)
+        benchmark::DoNotOptimize(A32.householderQr().solve(b32));
+}
 
-//#endif // BENCHMARK_NxN
+#endif // BENCHMARK_32x32
+
+
+
+#ifdef BENCHMARK_NxN
+
+BENCHMARK_F(Eigen3, HouseholderQRNxN)(benchmark::State& state)
+{
+    for (auto _ : state)
+        benchmark::DoNotOptimize(AN.householderQr().solve(bN));
+}
+
+#endif // BENCHMARK_NxN
 #endif // EIGEN3_FOUND
 #endif // BENCHMARK_EIGEN
 

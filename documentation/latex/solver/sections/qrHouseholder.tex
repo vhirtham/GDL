@@ -1,0 +1,40 @@
+\section{QR decomposition (Householder)}
+\label{sec:QR}
+
+\subsection{Theory}
+
+Householder reflection to create orthogonal matrix:
+
+\begin{align}
+\mathbf{H} = \mathbf{I} - 2\mathbf{w}\mathbf{w}^T
+\end{align}
+
+Efficient matrix vector Product:
+
+\begin{align}
+\nonumber
+\mathbf{H} \mathbf{x}
+&= 
+\pth{\mathbf{I} - 2\mathbf{w}\mathbf{w}^T}\mathbf{x}
+\\&= 
+\nonumber
+\mathbf{I}\mathbf{x} - 2\mathbf{w}\mathbf{w}^T\mathbf{x}
+\\&= 
+\mathbf{x} - 2\pth{\mathbf{w}^T\mathbf{x}}\mathbf{w}
+\end{align}
+
+Note that $\mathbf{w}^T\mathbf{x}$ is the scalar product. 
+A similar approach can be used to determine the product of $\mathbf{H}$ and another matrix:
+
+\begin{align}
+\nonumber
+\mathbf{H} \mathbf{A}
+=
+\mathbf{A} - 2\mathbf{w}\pth{\mathbf{w}^T\mathbf{A}}
+\end{align}
+
+$\mathbf{w}^T\mathbf{A}$ is a row vector that contains the scalar products of $\mathbf{w}$ and each column of $\mathbf{A}$
+
+\begin{itemize}
+\item Remember that the calculation of multiple scalar products (calculation of $\mathbf{w}^T\mathbf{A}$) can be vectorized
+\end{itemize}

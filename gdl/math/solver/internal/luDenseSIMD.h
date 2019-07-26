@@ -28,6 +28,7 @@ class LUDenseSIMD
     using VectorDataArray = std::array<_registerType, numColRegisters>;
     using ValueType = decltype(simd::GetDataType<_registerType>());
 
+    LUDenseSIMD() = delete;
 
 public:
     //! @brief Class that stores the LU factorization and the permutations

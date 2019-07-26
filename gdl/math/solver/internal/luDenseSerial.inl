@@ -17,11 +17,8 @@ namespace GDL::Solver
 template <typename _type, U32 _size, Pivot _pivot>
 inline LUDenseSerial<_type, _size, _pivot>::Factorization::Factorization(const MatrixDataArray& matrixData)
     : mLU{matrixData}
-    , mPermutation{}
+    , mPermutationData()
 {
-    if constexpr (_pivot != Pivot::NONE)
-        for (U32 i = 0; i < _size; ++i)
-            mPermutation[i] = i;
 }
 
 
@@ -70,13 +67,16 @@ LUDenseSerial<_type, _size, _pivot>::Factorize(const MatrixDataArray& matrixData
 {
     Factorization factorization(matrixData);
 
-    for (U32 i = 0; i < _size; ++i)
+    for (U32 i = 0; i < _size - 1; ++i)
     {
         if constexpr (_pivot != Pivot::NONE)
             PivotDenseSerial<_type, _size>::template PivotingStep<_pivot, true>(i, factorization.mLU,
-                                                                                factorization.mPermutation);
+                                                                                factorization.mPermutationData);
         FactorizationStep(i, factorization);
     }
+
+    DEV_EXCEPTION(factorization.mLU[_size * _size - 1] == ApproxZero<_type>(1, 100),
+                  "Can't solve system - Singular matrix or inappropriate pivoting strategy.");
 
     return factorization;
 }
@@ -126,7 +126,7 @@ LUDenseSerial<_type, _size, _pivot>::GetPermutedVectorData(const VectorDataArray
                                                            const Factorization& factorization)
 {
     if constexpr (_pivot != Pivot::NONE)
-        return PivotDenseSerial<_type, _size>::PermuteVector(rhsData, factorization.mPermutation);
+        return PivotDenseSerial<_type, _size>::PermuteVector(rhsData, factorization.mPermutationData);
     else
         return rhsData;
 }

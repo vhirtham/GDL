@@ -2,6 +2,7 @@
 
 #include "gdl/base/fundamentalTypes.h"
 #include "gdl/math/solver/pivotEnum.h"
+#include "gdl/math/solver/internal/permutationDataSerial.h"
 
 #include <array>
 
@@ -9,7 +10,8 @@
 namespace GDL::Solver
 {
 
-
+template <typename, U32, Pivot>
+struct PermutationData;
 
 //! @brief Helper class for pivoting strategies that are shared amongst multiple solvers
 //! @tparam _type: Data type of the system
@@ -46,9 +48,11 @@ class PivotDenseSerial
 
     //! @brief Permutes a vector with the passed permutation data and returns it
     //! @param vectorData: Vector data
-    //! @param permutation: Permutation data
+    //! @param permutationData: Permutation data
     //! @return Permuted vector
-    static inline VectorDataArray PermuteVector(const VectorDataArray& vectorData, const VectorDataArray& permutation);
+    template <Pivot _pivot>
+    static inline VectorDataArray PermuteVector(const VectorDataArray& vectorData,
+                                                const PermutationData<_type, _size, _pivot>& permutationData);
 
     //! @brief Performs the pivoting step for the given iteration
     //! @tparam _pivot: Enum to select the pivoting strategy
@@ -58,6 +62,16 @@ class PivotDenseSerial
     //! @param vecData: Vector data array
     template <Pivot _pivot, bool _swapAllCols>
     inline static void PivotingStep(U32 iteration, MatrixDataArray& matData, VectorDataArray& vecData);
+
+    //! @brief Performs the pivoting step for the given iteration
+    //! @tparam _pivot: Enum to select the pivoting strategy
+    //! @tparam _swapAllCols: If FALSE, row elements in columns left of the pivot element are not swapped
+    //! @param iteration: Number of the current iteration
+    //! @param matData: Matrix data array (column major ordering)
+    //! @param permutatationData: Permutation
+    template <Pivot _pivot, bool _swapAllCols>
+    inline static void PivotingStep(U32 iteration, MatrixDataArray& matData,
+                                    PermutationData<_type, _size, _pivot>& permutatationData);
 
     //! @brief Swaps the row of the pivot element with the row of the value that should replace the current pivot
     //! element

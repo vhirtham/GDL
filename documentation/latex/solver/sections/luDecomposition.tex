@@ -1,3 +1,4 @@
+\newpage
 \section{LU decomposition}
 \label{sec:LU}
 \subsection{Theory}
@@ -105,18 +106,18 @@ The first column of $\mathbf{L}$ contains the factors that were used during the 
 It is now obvious that both methods are closely related to each other. 
 The LU decomposition can also be computed by performing the standard Gaussian elimination algorithm and storing the factors of each elimination step in $\mathbf{L}$.
 
-Once the decomposition is known, the system $\mathbf{A}\mathbf{x} = \mathbf{b}$ can be solved.
+Once the decomposition is known, the system $\mathbf{A}\mathbf{x} = \mathbf{r}$ can be solved.
 Therefore, $\mathbf{A}$ is replaced with $\mathbf{LU}$:
 
 \begin{align*}
-\mathbf{LU}\mathbf{x} &= \mathbf{b}\\
+\mathbf{LU}\mathbf{x} &= \mathbf{r}\\
 \end{align*}
 
 The product $\mathbf{Ux}$ is a yet unknown vector $\mathbf{y}$. 
 It can be obtained by solving the system:
 
 \begin{align*}
-\mathbf{L}\mathbf{y} &= \mathbf{b}\\
+\mathbf{L}\mathbf{y} &= \mathbf{r}\\
 \end{align*}
 
 Since $\mathbf{L}$ is a lower triangular matrix, a simple forward substitution is sufficient to determine $\mathbf{y}$.
@@ -164,13 +165,247 @@ x_0 &= \frac{y_0 - u_{02}x_2 - u_{01}x_1}{u_{00}} = \frac{2 - 8 \cdot 1 - 4 \cdo
 \end{align*}
 
 The advantage of LU decomposition over Gaussian elimination is that systems with different right-hand sides but the same matrix $\mathbf{A}$ can be solved efficiently through forward and backward substitution with the matrices $\mathbf{L}$ and $\mathbf{U}$, which need to be computed only once. 
-While Gaussian elimination can also be used to solve multiple right-hand sides at once, the matrix factorization has to be repeated every time the system should be solved with a new set of right-hand sides that were previously unknown.
+While Gaussian elimination can also be used to solve multiple right-hand sides at once, the matrix factorization has to be repeated every time the system should be solved with a new set of right-hand sides that were unknown during the first solution process.
 Such situations occur for example in time dependent problems, were the right-hand side depends on the previous time step's solution.
 
 \subsubsection{Pivoting}
 
+
+
 \subsection{Implementation}
-\subsubsection{Arbitrary sized matrices - Serial}
-\subsubsection{Arbitrary sized matrices - SIMD}
-\subsubsection{3x3 and 4x4 matrices - Serial}
-\subsubsection{3x3 and 4x4 matrices - SIMD}
+
+\subsubsection{General details}
+
+The solver class is a template class with the parameters \mintinline{cpp}{_type}, \mintinline{cpp}{_size} and \mintinline{cpp}{_pivot}.
+The parameters \mintinline{cpp}{_type} and \mintinline{cpp}{_size} determine the fundamental data type and size of the matrix/vector.
+With \mintinline{cpp}{_pivot}, a pivoting strategy can be selected.
+
+The class provides two public functions.
+The \mintinline{cpp}{Factorize} function calculates the LU decomposition of the passed matrix. 
+It returns a \mintinline{cpp}{Factorization} class that stores all relevant data from the matrix factorization.
+This class has no public interfaces and can not be manipulated.
+Passing it to the \mintinline{cpp}{Solve} function together with a right-hand side vector calculates the solution of the equation system.
+
+
+\subsubsection{General Optimizations}
+\label{sec:LUOptimizations}
+
+The main diagonal of $\mathbf{L}$ contains only ones.
+Hence, it is not necessary to store it.
+In result, the LU decomposition can be stored in a single matrix like this:
+
+\begin{align}
+\mathbf{LU} 
+& =
+\begin{bmatrix}
+u_{00} &u_{01} &u_{02}\\
+l_{10} &u_{11} &u_{12}\\
+l_{20} &l_{21} &u_{22}\\
+\end{bmatrix}
+\end{align}
+
+
+\newpage
+\subsubsection{Solver for arbitrary sized matrices - Serial}
+
+\vspace{0.5cm}
+\textbf{Solver Class}
+\vspace{0.5cm}
+
+The class declaration is:
+
+\begin{minted}{cpp}
+template <typename _type, U32 _size, Pivot _pivot>
+class LUDenseSerial
+{
+    using MatrixDataArray = std::array<_type, _size * _size>;
+    using VectorDataArray = std::array<_type, _size>;
+	
+    LUDenseSerial() = delete;
+	
+public:
+    class Factorization
+    {
+        friend class LUDenseSerial;
+		
+        MatrixDataArray mLU;
+        PermutationData<_type, _size, _pivot> mPermutationData;
+		
+        Factorization(const MatrixDataArray& matrixData);
+    };
+	
+	
+	
+    [[nodiscard]] static inline Factorization Factorize(
+                                              const MatrixDataArray& matrixData);
+	
+    [[nodiscard]] inline static VectorDataArray Solve(
+                                                const Factorization& factorization,
+                                                const VectorDataArray& rhsData);
+	
+private:
+    static inline void BackwardSubstitution(const MatrixDataArray& lu, 
+                                            VectorDataArray& rhsData);
+	
+    static inline void FactorizationStep(U32 iteration, 
+                                         Factorization& factorization);
+	
+    static inline void ForwardSubstitution(const MatrixDataArray& lu, 
+                                           VectorDataArray& rhsData);
+	
+    static inline VectorDataArray GetPermutedVectorData(
+                                  const VectorDataArray& rhsData,
+                                  const Factorization& factorization);
+};
+\end{minted}
+
+\newpage 
+The factorization member class can only be modified by the solver class.
+\mintinline{cpp}{mLU} stores the decomposition data as described in \cref{sec:LUOptimizations}.
+The permutations caused by pivoting are stored in \mintinline{cpp}{mPermutationData}.
+Have a look at \cref{sec:pivoting} for further details.
+Its constructor just copies the original matrix into \mintinline{cpp}{mLU}.
+
+\begin{minted}{cpp}
+template <typename _type, U32 _size, Pivot _pivot>
+inline LUDenseSerial<_type, _size, _pivot>::Factorization::Factorization(
+                                            const MatrixDataArray& matrixData)
+: mLU{matrixData}
+, mPermutationData()
+{
+}
+\end{minted}
+
+\vspace{1cm}
+\textbf{Factorize}
+\vspace{0.5cm}
+
+The function \mintinline{cpp}{Factorize} factorizes the passed matrix and returns the resulting \mintinline{cpp}{Factorization} structure.
+It is implemented as follows:
+\begin{minted}{cpp}
+
+Factorization factorization(matrixData);
+
+for (U32 i = 0; i < _size; ++i)
+{
+    if constexpr (_pivot != Pivot::NONE)
+        PivotDenseSerial<_type, _size>::template PivotingStep<_pivot, true>(
+                        i, factorization.mLU, factorization.mPermutationData);
+                            
+    FactorizationStep(i, factorization);
+}
+    
+DEV_EXCEPTION(factorization.mLU[_size * _size - 1] == ApproxZero<_type>(1, 100),
+"Can't solve system - Singular matrix or inappropriate pivoting strategy.");
+
+return factorization;
+\end{minted}
+
+First the factorization data is created from the original matrix.
+Afterwards, $n-1$ pivoting (if enabled - see \cref{sec:pivoting}) and factorization steps are performed.
+The exception ensures that the last diagonal element is not zero after the factorization.
+All other diagonal elements are checked inside of the \mintinline{cpp}{FactorizationStep} routine.
+Finally, the result is returned.
+
+
+
+
+
+\vspace{1cm}
+\textbf{Solve}
+\vspace{0.5cm}
+
+The \mintinline{cpp}{Solve} function expects the matrix factorization and a right-hand side vector.
+It applies all necessary permutations to the vector and performs the forward and backward substitutions to obtain the result:
+
+\begin{minted}{cpp}
+VectorDataArray vectorData = GetPermutedVectorData(rhsData, factorization);
+
+ForwardSubstitution(factorization.mLU, vectorData);
+BackwardSubstitution(factorization.mLU, vectorData);
+
+return vectorData;
+\end{minted}
+
+
+\vspace{1cm}
+\textbf{BackwardSubstitution}
+\vspace{0.5cm}
+
+This function performs the backward substitution.
+The result is written directly to the passed right-hand side vector.
+
+\begin{minted}{cpp}
+for (U32 i = _size; i-- > 0;)
+{
+    const U32 pivIdx = (_size + 1) * i;
+
+    rhsData[i] /= lu[pivIdx];
+
+     for (U32 j = 0; j < i; ++j)
+        rhsData[j] -= rhsData[i] * lu[j + i * _size];
+}
+\end{minted}
+
+\vspace{1cm}
+\textbf{FactorizationStep}
+\vspace{0.5cm}
+
+This function performs a single factorization step.
+
+\begin{minted}{cpp}
+const U32 pivIdx = iteration * _size + iteration;
+
+DEV_EXCEPTION(factorization.mLU[pivIdx] == ApproxZero<_type>(1, 100),
+"Can't solve system - Singular matrix or inappropriate pivoting strategy.");
+
+
+for (U32 i = pivIdx + 1; i < _size * (iteration + 1); ++i)
+{
+    factorization.mLU[i] /= factorization.mLU[pivIdx];
+    for (U32 j = _size; j < (_size - iteration) * _size; j += _size)
+        factorization.mLU[i + j] -= factorization.mLU[i] 
+                                  * factorization.mLU[pivIdx + j];
+}
+\end{minted}
+
+First, the index of the pivot element inside of the matrix data is calculated.
+An exception is thrown, in case the pivot element is zero.
+Because of the preceding pivoting step, this should only happen for a singular matrix or if pivoting was disabled.
+Afterwards the factors of the current pivoting step are calculated, stored and applied to all remaining active columns.
+
+
+\vspace{1cm}
+\textbf{ForwardSubstitution}
+\vspace{0.5cm}
+
+This function performs the forward substitution.
+The result is written directly to the passed right-hand side vector.
+
+\begin{minted}{cpp}
+for (U32 i = 0; i < _size - 1; ++i)
+    for (U32 j = i + 1; j < _size; ++j)
+        rhsData[j] -= lu[j + i * _size] * rhsData[i];
+\end{minted}
+
+
+\vspace{1cm}
+\textbf{GetPermutedVectorData}
+\vspace{0.5cm}
+
+If pivoting is enabled, this function applies all necessary permutations to the right-hand side vector and returns the permuted version.
+Otherwise, a copy of the right-hand side vector is returned.
+
+\begin{minted}{cpp}
+if constexpr (_pivot != Pivot::NONE)
+    return PivotDenseSerial<_type, _size>::PermuteVector(
+                                               rhsData, 
+                                               factorization.mPermutationData);
+else
+    return rhsData;
+\end{minted}
+
+\newpage
+\subsubsection{Solver for arbitrary sized matrices - SIMD}
+\subsubsection{Solver for 3x3 and 4x4 matrices - Serial}
+\subsubsection{Solver for 3x3 and 4x4 matrices - SIMD}

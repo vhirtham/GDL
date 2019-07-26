@@ -52,12 +52,14 @@ inline void PivotDenseSerial<_type, _size>::PartialPivotingStep(U32 iteration, M
 // --------------------------------------------------------------------------------------------------------------------
 
 template <typename _type, U32 _size>
-inline std::array<_type, _size> PivotDenseSerial<_type, _size>::PermuteVector(const VectorDataArray& vectorData,
-                                                                              const VectorDataArray& permutation)
+template <Pivot _pivot>
+inline std::array<_type, _size>
+PivotDenseSerial<_type, _size>::PermuteVector(const VectorDataArray& vectorData,
+                                              const PermutationData<_type, _size, _pivot>& permutationData)
 {
     std::array<_type, _size> rPermute;
     for (U32 i = 0; i < _size; ++i)
-        rPermute[i] = vectorData[permutation[i]];
+        rPermute[i] = vectorData[permutationData.mRowPermutation[i]];
 
     return rPermute;
 }
@@ -76,6 +78,18 @@ inline void PivotDenseSerial<_type, _size>::PivotingStep(U32 iteration, MatrixDa
 
     if constexpr (_pivot == Pivot::PARTIAL)
         PartialPivotingStep<_swapAllCols>(iteration, matData, vecData);
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+template <typename _type, U32 _size>
+template <Pivot _pivot, bool _swapAllCols>
+inline void PivotDenseSerial<_type, _size>::PivotingStep(U32 iteration, MatrixDataArray& matData,
+                                                         PermutationData<_type, _size, _pivot>& permutatationData)
+{
+    PivotingStep<_pivot, _swapAllCols>(iteration, matData, permutatationData.mRowPermutation);
 }
 
 
