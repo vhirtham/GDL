@@ -127,11 +127,6 @@ GaussDenseSSE<_registerType, _size, _pivot>::Solve(const MatrixType& A, const Ve
     constexpr U32 numRowsFullRegisters = _size / numRegisterValues;
     constexpr U32 numNonFullRegValues = _size % numRegisterValues;
 
-    // Set memory of unused register values to zero -> Important for pivoting step
-    if constexpr (numNonFullRegValues != 0)
-        for (U32 i = numColRegisters - 1; i < _size * numColRegisters; i += numColRegisters)
-            matData[i] = BlendBelowIndex<numNonFullRegValues - 1>(matData[i], _mm_set1<_registerType>(0));
-
     // Perform Gauss steps for all registers that do not contain unused values
     for (U32 i = 0; i < numRowsFullRegisters; ++i)
         GaussStepsRegister(i, matData, vecData);

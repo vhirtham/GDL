@@ -88,6 +88,17 @@ inline void PivotDenseSSE<_registerType, _size>::PartialPivotingStepRegister(U32
                                                                              MatrixDataArray& matData,
                                                                              _typeVecPerm& vecPermData)
 {
+    using namespace GDL::simd;
+
+    constexpr U32 numNonFullRegValues = _size % numRegisterValues;
+
+    if constexpr (numNonFullRegValues != 0)
+    {
+        U32 nonFullRegIdx = numColRegisters - 1 + iteration * numColRegisters;
+        matData[nonFullRegIdx] =
+                BlendBelowIndex<numNonFullRegValues - 1>(matData[nonFullRegIdx], _mm_set1<_registerType>(0));
+    }
+
     U32 rowIdxSwp = FindMaxAbsValueCol<_regElmIdxPiv>(iteration, regRowIdxPiv, matData);
 
     DEV_EXCEPTION(rowIdxSwp >= _size, "Internal error. Pivot index bigger than matrix size.");

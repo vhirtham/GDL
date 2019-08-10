@@ -31,16 +31,7 @@ LUDenseSIMD<_registerType, _size, _pivot>::Factorize(const MatrixDataArray& matr
 {
     using namespace GDL::simd;
 
-    constexpr U32 numNonFullRegValues = _size % numRegisterValues;
-
-
     Factorization factorization(matrixData);
-
-    // Set memory of unused register values to zero -> Important for pivoting step
-    if constexpr (numNonFullRegValues != 0)
-        for (U32 i = numColRegisters - 1; i < _size * numColRegisters; i += numColRegisters)
-            factorization.mLU[i] =
-                    BlendBelowIndex<numNonFullRegValues - 1>(factorization.mLU[i], _mm_set1<_registerType>(0));
 
     FactorizationLoop(factorization);
 

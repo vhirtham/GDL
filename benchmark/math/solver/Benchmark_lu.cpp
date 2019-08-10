@@ -36,8 +36,8 @@ constexpr U32 N = 64;
 //#define BENCHMARK_FACTORIZATION
 
 // vectorization
-#define BENCHMARK_SERIAL
-//#define BENCHMARK_SIMD
+//#define BENCHMARK_SERIAL
+#define BENCHMARK_SIMD
 
 // Eigen
 //#define BENCHMARK_EIGEN
