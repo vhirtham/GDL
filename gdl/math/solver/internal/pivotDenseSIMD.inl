@@ -40,15 +40,24 @@ inline void PivotDenseSSE<_registerType, _size>::VectorPermutationDataArray::Add
 template <typename _registerType, U32 _size>
 template <U32 _regElmIdxPiv>
 inline U32 PivotDenseSSE<_registerType, _size>::FindMaxAbsValueCol(U32 iteration, U32 regRowIdxPiv,
-                                                                   const MatrixDataArray& matData)
+                                                                   MatrixDataArray& matData)
 {
     using namespace GDL::simd;
 
+    constexpr U32 numNonFullRegValues = _size % numRegisterValues;
+
     const U32 colStartIdx = iteration * numColRegisters;
+    const _registerType zero = _mm_setzero<_registerType>();
+
+    // Set unused values of last register to 0
+    if constexpr (numNonFullRegValues != 0)
+    {
+        U32 nonFullRegIdx = colStartIdx + numColRegisters - 1;
+        matData[nonFullRegIdx] = BlendBelowIndex<numNonFullRegValues - 1>(matData[nonFullRegIdx], zero);
+    }
 
 
     // Vectorized comparisons
-    _registerType zero = _mm_setzero<_registerType>();
     _registerType cmpAbs = Abs(BlendAboveIndex<_regElmIdxPiv>(matData[colStartIdx + regRowIdxPiv], zero));
     _registerType cmpIdx = _mm_set1<_registerType>(regRowIdxPiv);
 
@@ -88,17 +97,6 @@ inline void PivotDenseSSE<_registerType, _size>::PartialPivotingStepRegister(U32
                                                                              MatrixDataArray& matData,
                                                                              _typeVecPerm& vecPermData)
 {
-    using namespace GDL::simd;
-
-    constexpr U32 numNonFullRegValues = _size % numRegisterValues;
-
-    if constexpr (numNonFullRegValues != 0)
-    {
-        U32 nonFullRegIdx = numColRegisters - 1 + iteration * numColRegisters;
-        matData[nonFullRegIdx] =
-                BlendBelowIndex<numNonFullRegValues - 1>(matData[nonFullRegIdx], _mm_set1<_registerType>(0));
-    }
-
     U32 rowIdxSwp = FindMaxAbsValueCol<_regElmIdxPiv>(iteration, regRowIdxPiv, matData);
 
     DEV_EXCEPTION(rowIdxSwp >= _size, "Internal error. Pivot index bigger than matrix size.");

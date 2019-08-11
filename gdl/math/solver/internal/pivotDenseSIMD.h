@@ -79,7 +79,7 @@ class PivotDenseSSE
     //! @param matData: Matrix data array (column major ordering)
     //! @return Index of the row containing the maximum absolute value
     template <U32 _regElmIdxPiv>
-    inline static U32 FindMaxAbsValueCol(U32 iteration, U32 regRowIdxPiv, const MatrixDataArray& matData);
+    inline static U32 FindMaxAbsValueCol(U32 iteration, U32 regRowIdxPiv, MatrixDataArray& matData);
 
     //! @brief Performs the partial pivoting step for the given iteration
     //! @tparam _regElmIdxPiv: Register element index of the pivot element
