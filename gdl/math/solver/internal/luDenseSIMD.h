@@ -75,10 +75,6 @@ private:
     template <U32 _regValueIdx = numRegisterValues - 1>
     static inline void BackwardSubstitutionSteps(U32 regRowIdx, const MatrixDataArray& lu, VectorDataArray& rhsData);
 
-    //! @brief Main loop of the factorization procedure
-    //! @param factorization: Matrix factorization
-    static inline void FactorizationLoop(Factorization& factorization);
-
     //! @brief Performs a single factorization step
     //! @tparam _regValueIdx: Specifies the current active rows position inside of its corresponding register
     //! @param iteration: Iteration number of the factorization procedure

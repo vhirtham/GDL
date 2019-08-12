@@ -29,11 +29,21 @@ template <typename _registerType, U32 _size, Pivot _pivot>
 [[nodiscard]] inline typename LUDenseSIMD<_registerType, _size, _pivot>::Factorization
 LUDenseSIMD<_registerType, _size, _pivot>::Factorize(const MatrixDataArray& matrixData)
 {
-    using namespace GDL::simd;
-
     Factorization factorization(matrixData);
 
-    FactorizationLoop(factorization);
+    constexpr U32 numRowsFullRegisters = (_size - 1) / numRegisterValues;
+    constexpr U32 numNonFullRegValues = (_size - 1) % numRegisterValues;
+
+    for (U32 i = 0; i < numRowsFullRegisters; ++i)
+        FactorizationSteps(i, factorization);
+
+    if constexpr (numNonFullRegValues != 0)
+        FactorizationSteps<0, numNonFullRegValues>(numColRegisters - 1, factorization);
+
+
+    DEV_EXCEPTION(simd::GetValue<(_size - 1) % numRegisterValues>(factorization.mLU[factorization.mLU.size() - 1]) ==
+                          ApproxZero<F32>(1, 100),
+                  "Can't solve system - Singular matrix or inappropriate pivoting strategy.");
 
     return factorization;
 }
@@ -110,28 +120,6 @@ inline void LUDenseSIMD<_registerType, _size, _pivot>::BackwardSubstitutionSteps
 
     if constexpr (_regValueIdx > 0)
         BackwardSubstitutionSteps<_regValueIdx - 1>(regRowIdx, lu, rhsData);
-}
-
-
-
-// --------------------------------------------------------------------------------------------------------------------
-
-template <typename _registerType, U32 _size, Pivot _pivot>
-inline void LUDenseSIMD<_registerType, _size, _pivot>::FactorizationLoop(Factorization& factorization)
-{
-    constexpr U32 numRowsFullRegisters = (_size - 1) / numRegisterValues;
-    constexpr U32 numNonFullRegValues = (_size - 1) % numRegisterValues;
-
-    for (U32 i = 0; i < numRowsFullRegisters; ++i)
-        FactorizationSteps(i, factorization);
-
-    if constexpr (numNonFullRegValues != 0)
-        FactorizationSteps<0, numNonFullRegValues>(numColRegisters - 1, factorization);
-
-
-    DEV_EXCEPTION(simd::GetValue<(_size - 1) % numRegisterValues>(factorization.mLU[factorization.mLU.size() - 1]) ==
-                          ApproxZero<F32>(1, 100),
-                  "Can't solve system - Singular matrix or inappropriate pivoting strategy.");
 }
 
 
