@@ -21,11 +21,11 @@ class LUDenseSIMD
 {
     static constexpr U32 alignment = simd::alignmentBytes<_registerType>;
     static constexpr U32 numRegisterValues = simd::numRegisterValues<_registerType>;
-    static constexpr U32 numColRegisters = simd::CalcMinNumArrayRegisters<_registerType>(_size);
+    static constexpr U32 numRegistersPerCol = simd::CalcMinNumArrayRegisters<_registerType>(_size);
 
 
-    using MatrixDataArray = std::array<_registerType, numColRegisters * _size>;
-    using VectorDataArray = std::array<_registerType, numColRegisters>;
+    using MatrixDataArray = std::array<_registerType, numRegistersPerCol * _size>;
+    using VectorDataArray = std::array<_registerType, numRegistersPerCol>;
     using ValueType = decltype(simd::GetDataType<_registerType>());
 
     LUDenseSIMD() = delete;

@@ -45,7 +45,6 @@ template <typename _type, U32 _size, Pivot _pivot>
 inline void LUDenseSerial<_type, _size, _pivot>::BackwardSubstitution(const MatrixDataArray& lu,
                                                                       VectorDataArray& rhsData)
 {
-
     for (U32 i = _size; i-- > 0;)
     {
         const U32 pivIdx = (_size + 1) * i;

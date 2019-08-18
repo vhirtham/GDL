@@ -59,8 +59,117 @@ The matrix data is expected to be in column major ordering.
 This makes them more flexible since they can be used in other algorithms that manipulate the data directly without the need to create an unnecessary matrix or vector class.
 However, there also wrapper functions to use the solvers directly with matrix and vector classes.
 
-
 Specific implementation  details of the solver classes are discussed in the implementation sections of the corresponding solver.
+
+
+\subsection{Generalized SIMD instructions}
+
+\subsection{Recursive template functions in SIMD classes}
+\label{sec:templateRecursion}
+
+When writing vectorized code, there is often the problem that some SSE/AVX operations need to know at compile time, which register values should be affected.
+A possible solution are branch statements that select the correct operation at run-time.
+However, this would affect the performance significantly and should be avoided if possible.
+
+If such operations occurs inside of a loop and depend on the current iteration number, it is often possible to avoid run-time branches.
+The extreme case would be to remove the loop entirely and write down every iteration explicitly.
+This way the correct operation for each iteration could be chosen at compile time.
+However, this is not really an option for several reasons.
+
+Luckily, most of the times there is a regular pattern of how those operations are incorporated inside of a loop.
+Therefore, it is only necessary to explicitly write down the single iterations of the pattern and loop as many times over it as it occurs.
+Still, this approach involves a lot of code duplication and isn't very flexible to use.
+The solution to this problem is to let the compiler generate the necessary pattern by using template recursion.
+This should be demonstrated on a short example.
+
+Let's consider that the following code snipped that should be rewritten as vectorized version:
+
+\begin{minted}{cpp}
+std::array<F32, 8> a = {0, 1, 2, 3, 4, 5, 6, 7};
+
+for (U32 i = 0; i < a.size(); ++i)
+{
+    F32 add = a[i];
+    for (U32 j = 0; j < a.size(); ++j)
+        a[j] += add;
+}
+\end{minted}
+
+All it does is to add the \mintinline{cpp}{i}-th value of an array to all elements of the same array (including itself) during each iteration of the outer loop.
+
+First, the original array is replaced by an array of two \mintinline{cpp}{__m128} registers.
+Each register stores 4 values of the original array.
+Using vectorization, the addition can be performed register-wise.
+Therefore, a new register needs to be created with all its values set to the current increment.
+This can be achieved using the GDL function \mintinline{cpp}{Broadcast} which returns a register with all its values set to a single value which is taken from a register passed to it as function parameter.
+However, the index of the value that should be broadcasted is a template parameter and needs to be known at compile time.
+
+Exploiting the fact, that the indices of the broadcasted values follow the pattern $0-1-2-3$ per register, a vectorized version of the previous example could look like this: 
+
+
+\begin{minted}{cpp}
+std::array<__m128, 2> b = {_mm_setr_ps(0, 1, 2, 3), _mm_setr_ps(4, 5, 6, 7)};
+    
+for (U32 i = 0; i < b.size(); ++i)
+{
+    __m128 add = Broadcast<0>(b[i]);
+    for (U32 j = 0; j < b.size(); ++j)
+        b[j] = _mm_add(b[j], add);
+
+    add = Broadcast<1>(b[i]);
+    for (U32 j = 0; j < b.size(); ++j)
+        b[j] = _mm_add(b[j], add);
+
+    add = Broadcast<2>(b[i]);
+    for (U32 j = 0; j < b.size(); ++j)
+        b[j] = _mm_add(b[j], add);
+
+    add = Broadcast<3>(b[i]);
+    for (U32 j = 0; j < b.size(); ++j)
+        b[j] = _mm_add(b[j], add);
+}
+\end{minted}
+
+Apart from the code duplication, there is also the problem that these lines can only be used with register types that are composed of 4 values.
+This might be solved by using compile time branches (\mintinline{cpp}{if constexpr}) to exclude or include certain lines depending on the register type, but this will further increase code duplication (a \mintinline{cpp}{__m512} register stores 16 floats!) and reduce the code's readability.
+
+The simple solution is a recursive template function:
+
+\begin{minted}{cpp}
+template <U32 _k = 0>
+void RecursiveAdd(U32 i, std::array<__m128, 2>& b)
+{
+    __m128 add = simd::Broadcast<_k>(b[i]);
+    for (U32 j = 0; j < b.size(); ++j)
+        b[j] = _mm_add(b[j], add);
+
+    if constexpr (_k + 1 < simd::numRegisterValues<__m128>)
+        RecursiveAdd<_k + 1>(i, b);
+}
+\end{minted}
+
+This function does exactly the same thing as the loops body in the previous version but without code duplication.
+Additionally, the number of recursive function calls depends on the number of register values.
+Therefore, this function can be used with any register type that is compatible with \mintinline{cpp}{Broadcast} and \mintinline{cpp}{_mm_add}.
+
+The example problem using this function would look like this:
+
+\begin{minted}{cpp}
+std::array<__m128, 2> b = {_mm_setr_ps(0, 1, 2, 3), _mm_setr_ps(4, 5, 6, 7)};
+
+for (U32 i = 0; i < b.size(); ++i)
+    RecursiveAdd(i, b);
+\end{minted}
+
+This short example should be enough to understand why template recursion is used in many of the vectorized solver classes presented in this document.
+
+
+
+
+
+
+
+
 
 
 

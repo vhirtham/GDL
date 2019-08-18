@@ -171,13 +171,15 @@ Such situations occur for example in time dependent problems, were the right-han
 \subsubsection{Pivoting}
 
 
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Implementation}
 
 \subsubsection{General details}
 
-The solver class is a template class with the parameters \mintinline{cpp}{_type}, \mintinline{cpp}{_size} and \mintinline{cpp}{_pivot}.
-The parameters \mintinline{cpp}{_type} and \mintinline{cpp}{_size} determine the fundamental data type and size of the matrix/vector.
+The solver class is a template class with the parameters \mintinline{cpp}{_type} or \mintinline{cpp}{_registerType}, \mintinline{cpp}{_size} and \mintinline{cpp}{_pivot}.
+The parameter \mintinline{cpp}{_type} determines the fundamental data type of the serial version (\mintinline{cpp}{F32} or \mintinline{cpp}{F64}). 
+With \mintinline{cpp}{_registerType}, the register type of the SIMD version is specified. 
+The system size is given by \mintinline{cpp}{_size}.
 With \mintinline{cpp}{_pivot}, a pivoting strategy can be selected.
 
 The class provides two public functions.
@@ -192,7 +194,7 @@ Passing it to the \mintinline{cpp}{Solve} function together with a right-hand si
 
 The main diagonal of $\mathbf{L}$ contains only ones.
 Hence, it is not necessary to store it.
-In result, the LU decomposition can be stored in a single matrix like this:
+Therefore, the LU decomposition can be stored in a single matrix like this:
 
 \begin{align}
 \mathbf{LU} 
@@ -204,7 +206,7 @@ l_{20} &l_{21} &u_{22}\\
 \end{bmatrix}
 \end{align}
 
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newpage
 \subsubsection{Solver for arbitrary sized matrices - Serial}
 
@@ -312,42 +314,6 @@ Finally, the result is returned.
 
 
 \vspace{1cm}
-\textbf{Solve}
-\vspace{0.5cm}
-
-The \mintinline{cpp}{Solve} function expects the matrix factorization and a right-hand side vector.
-It applies all necessary permutations to the vector and performs the forward and backward substitutions to obtain the result:
-
-\begin{minted}{cpp}
-VectorDataArray vectorData = GetPermutedVectorData(rhsData, factorization);
-
-ForwardSubstitution(factorization.mLU, vectorData);
-BackwardSubstitution(factorization.mLU, vectorData);
-
-return vectorData;
-\end{minted}
-
-
-\vspace{1cm}
-\textbf{BackwardSubstitution}
-\vspace{0.5cm}
-
-This function performs the backward substitution.
-The result is written directly to the passed right-hand side vector.
-
-\begin{minted}{cpp}
-for (U32 i = _size; i-- > 0;)
-{
-    const U32 pivIdx = (_size + 1) * i;
-
-    rhsData[i] /= lu[pivIdx];
-
-     for (U32 j = 0; j < i; ++j)
-        rhsData[j] -= rhsData[i] * lu[j + i * _size];
-}
-\end{minted}
-
-\vspace{1cm}
 \textbf{FactorizationStep}
 \vspace{0.5cm}
 
@@ -375,18 +341,26 @@ Because of the preceding pivoting step, this should only happen for a singular m
 Afterwards the factors of the current pivoting step are calculated, stored and applied to all remaining active columns.
 
 
+
+
+
 \vspace{1cm}
-\textbf{ForwardSubstitution}
+\textbf{Solve}
 \vspace{0.5cm}
 
-This function performs the forward substitution.
-The result is written directly to the passed right-hand side vector.
+The \mintinline{cpp}{Solve} function expects the matrix factorization and a right-hand side vector.
+It applies all necessary permutations to the vector and performs the forward and backward substitutions to obtain the result:
 
 \begin{minted}{cpp}
-for (U32 i = 0; i < _size - 1; ++i)
-    for (U32 j = i + 1; j < _size; ++j)
-        rhsData[j] -= lu[j + i * _size] * rhsData[i];
+VectorDataArray vectorData = GetPermutedVectorData(rhsData, factorization);
+
+ForwardSubstitution(factorization.mLU, vectorData);
+BackwardSubstitution(factorization.mLU, vectorData);
+
+return vectorData;
 \end{minted}
+
+
 
 
 \vspace{1cm}
@@ -405,7 +379,290 @@ else
     return rhsData;
 \end{minted}
 
+
+
+
+
+\vspace{1cm}
+\textbf{ForwardSubstitution}
+\vspace{0.5cm}
+
+This function performs the forward substitution.
+The result is written directly to the passed right-hand side vector.
+
+\begin{minted}{cpp}
+for (U32 i = 0; i < _size - 1; ++i)
+    for (U32 j = i + 1; j < _size; ++j)
+        rhsData[j] -= lu[j + i * _size] * rhsData[i];
+\end{minted}
+
+
+
+
+
+\vspace{1cm}
+\textbf{BackwardSubstitution}
+\vspace{0.5cm}
+
+This function performs the backward substitution.
+The result is written directly to the passed right-hand side vector.
+
+\begin{minted}{cpp}
+for (U32 i = _size; i-- > 0;)
+{
+    const U32 pivIdx = (_size + 1) * i;
+
+    rhsData[i] /= lu[pivIdx];
+
+    for (U32 j = 0; j < i; ++j)
+        rhsData[j] -= rhsData[i] * lu[j + i * _size];
+}
+\end{minted}
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newpage
 \subsubsection{Solver for arbitrary sized matrices - SIMD}
+
+\vspace{0.5cm}
+\textbf{Solver Class}
+\vspace{0.5cm}
+
+The class declaration is:
+
+\begin{minted}{cpp}
+template <typename _registerType, U32 _size, Pivot _pivot>
+class LUDenseSIMD
+{
+    static constexpr U32 alignment = simd::alignmentBytes<_registerType>;
+    static constexpr U32 numRegisterValues = simd::numRegisterValues<_registerType>;
+    static constexpr U32 numRegistersPerCol = 
+                             simd::CalcMinNumArrayRegisters<_registerType>(_size);
+
+
+    using MatrixDataArray = std::array<_registerType, numRegistersPerCol * _size>;
+    using VectorDataArray = std::array<_registerType, numRegistersPerCol>;
+    using ValueType = decltype(simd::GetDataType<_registerType>());
+
+    LUDenseSIMD() = delete;
+
+public:
+
+    class Factorization
+    {
+        friend class LUDenseSIMD;
+
+        using PermutationDataArray = 
+            typename PivotDenseSSE<_registerType, _size>::VectorPermutationDataArray;
+
+        alignas(alignment) MatrixDataArray mLU;
+        PermutationDataArray mPermutationData;
+
+        Factorization(const MatrixDataArray& matrixData);
+    };
+
+
+
+    [[nodiscard]] static inline Factorization Factorize(
+                                              const MatrixDataArray& matrixData);
+
+    [[nodiscard]] inline static VectorDataArray Solve(
+                                                const Factorization& factorization,
+                                                const VectorDataArray& rhsData);
+
+private:
+    static inline void BackwardSubstitution(const MatrixDataArray& lu, 
+                                            VectorDataArray& rhsData);
+
+    template <U32 _regValueIdx = numRegisterValues - 1>
+    static inline void BackwardSubstitutionSteps(U32 regRowIdx, 
+                                                 const MatrixDataArray& lu, 
+                                                 VectorDataArray& rhsData);
+
+    template <U32 _regValueIdx>
+    static inline void FactorizationStep(U32 iteration, 
+                                         U32 regRowIdx, 
+                                         MatrixDataArray& lu);
+
+    template <U32 _regValueIdx = 0, U32 _maxRecursionDepth = numRegisterValues>
+    static inline void FactorizationSteps(U32 regRowIdx, 
+                                          Factorization& factorization);
+
+    static inline void ForwardSubstitution(const MatrixDataArray& lu, 
+                                           VectorDataArray& rhsData);
+
+    template <U32 _regValueIdx = 0, U32 _maxRecursionDepth = numRegisterValues>
+    static inline void ForwardSubstitutionSteps(U32 regRowIdx, 
+                                                const MatrixDataArray& lu, 
+                                                VectorDataArray& rhsData);
+};
+\end{minted}
+
+The purpose of the static constants and the type definitions is to improve the readability of the function interfaces and implementations.
+
+The factorization member class can only be modified by the solver class.
+\mintinline{cpp}{mLU} stores the decomposition data as described in \cref{sec:LUOptimizations}.
+The permutations caused by pivoting are stored in \mintinline{cpp}{mPermutationData}.
+The data type is an array which stores the used permutation function and the row indices of the involved registers.
+Have a look at the SSE subsection of \cref{sec:pivoting} for further details.
+Its constructor just copies the original matrix into \mintinline{cpp}{mLU}.
+
+\begin{minted}{cpp}
+template <typename _registerType, U32 _size, Pivot _pivot>
+inline LUDenseSIMD<_registerType, _size, _pivot>::Factorization::Factorization
+                                                  (const MatrixDataArray& matrixData)
+: mLU{matrixData}
+{
+}
+\end{minted}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\vspace{1cm}
+\textbf{Factorize}
+\vspace{0.5cm}
+
+This function factorizes the passed matrix and returns the resulting \mintinline{cpp}{Factorization} structure.
+It is implemented as follows:
+
+\begin{minted}{cpp}
+constexpr U32 numFullRegistersPerCol = (_size - 1) / numRegisterValues;
+constexpr U32 numNonFullRegValues = (_size - 1) % numRegisterValues;
+
+Factorization factorization(matrixData);
+
+for (U32 i = 0; i < numFullRegistersPerCol; ++i)
+    FactorizationSteps(i, factorization);
+
+if constexpr (numNonFullRegValues != 0)
+    FactorizationSteps<0, numNonFullRegValues>(numRegistersPerCol - 1, 
+                                               factorization);
+
+
+DEV_EXCEPTION(simd::GetValue<(_size - 1) % 
+        numRegisterValues>(factorization.mLU[factorization.mLU.size() - 1]) 
+        == ApproxZero<F32>(1, 100),
+        "Can't solve system - Singular matrix or inappropriate pivoting strategy.");
+
+return factorization;
+\end{minted}
+
+First, this function initializes the factorization data by copying the original matrix.
+Subsequently, the \mintinline{cpp}{FactorizationSteps} method is called as many times as there are registers in each column of the matrix.
+This method uses template recursion to perform multiple factorization steps at once.
+By default, the number of recursive function calls equals the number of values inside of a register.
+However, in case the system's size is not a multiple of the number of register values (\mintinline{cpp}{numNonFullRegValues != 0}), the recursion depth of the last function call needs to be reduced accordingly so that the total number of factorization steps equals the matrix size.
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\vspace{1cm}
+\textbf{FactorizationSteps}
+\vspace{0.5cm}
+
+This function performs multiple factorization steps (which includes pivoting) using template recursion.
+Its template parameter \mintinline{cpp}{_regValueIdx} indicates the current number of recursive function calls.
+It is also equal to the index that specifies at which position the values of the current iterations active row are stored in their containing registers.
+Hence, the name of the variable.
+The template parameter \mintinline{cpp}{_maxRecursionDepth} limits the number of recursive function calls.
+
+The function is defined as follows:
+
+\begin{minted}{cpp}
+static_assert(_maxRecursionDepth <= numRegisterValues,
+"_maxRecursionDepth must be equal or smaller than the number of register values.");
+
+const U32 iteration = regRowIdx * numRegisterValues + _regValueIdx;
+
+if constexpr (_pivot != Pivot::NONE)
+    PivotDenseSSE<_registerType, _size>::template 
+        PivotingStepRegister<_regValueIdx, _pivot>(iteration, 
+                                                   regRowIdx, 
+                                                   factorization.mLU,
+                                                   factorization.mPermutationData);
+
+FactorizationStep<_regValueIdx>(iteration, regRowIdx, factorization.mLU);
+
+if constexpr (_regValueIdx + 1 < _maxRecursionDepth)
+    FactorizationSteps<_regValueIdx + 1, _maxRecursionDepth>(regRowIdx, 
+                                                             factorization);
+\end{minted}
+
+First a pivoting step is performed if pivoting is enabled.
+Afterwards, the factorization step follows.
+Unless the maximum recursion depth is reached, the function calls itself with an increased recursion counter (\mintinline{cpp}{_regValueIdx}).
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\vspace{1cm}
+\textbf{FactorizationStep}
+\vspace{0.5cm}
+
+This function performs a single factorization step.
+The template parameter \mintinline{cpp}{_regValueIdx} specifies at which position the values of the current iterations active row are stored in their containing registers.
+The function definition is:
+
+\begin{minted}{cpp}
+using namespace GDL::simd;
+
+const U32 colStartIdx = iteration * numRegistersPerCol;
+const U32 actRowRegIdx = colStartIdx + regRowIdx;
+
+DEV_EXCEPTION(GetValue<_regValueIdx>(lu[actRowRegIdx]) == ApproxZero<F32>(1, 100),
+        "Can't solve system - Singular matrix or inappropriate pivoting strategy.");
+
+
+const _registerType one = _mm_set1<_registerType>(1);
+const _registerType div = 
+          _mm_div(one, BroadcastAcrossLanes<_regValueIdx>(lu[actRowRegIdx]));
+
+
+lu[actRowRegIdx] = BlendBelowIndex<_regValueIdx>(lu[actRowRegIdx],
+                                                 _mm_mul(div, lu[actRowRegIdx]));
+for (U32 i = regRowIdx + 1; i < numRegistersPerCol; ++i)
+    lu[colStartIdx + i] = _mm_mul(div, lu[colStartIdx + i]);
+
+
+for (U32 i = actRowRegIdx + numRegistersPerCol; i < _size * numRegistersPerCol;
+     i += numRegistersPerCol)
+{
+    _registerType pivValue = BroadcastAcrossLanes<_regValueIdx>(lu[i]);
+    lu[i] = BlendBelowIndex<_regValueIdx>(lu[i], 
+                                          _mm_fnmadd(lu[actRowRegIdx], 
+                                                     pivValue, 
+                                                     lu[i]));
+    
+    for (U32 j = 1; j < numRegistersPerCol - regRowIdx; ++j)
+        lu[i + j] = _mm_fnmadd(lu[actRowRegIdx + j], pivValue, lu[i + j]);
+}
+\end{minted}
+
+First a check is performed, that the pivot element is not zero.
+Then the current pivot element's reciprocal is calculated and broadcasted to all elements of the variable \mintinline{cpp}{div}.
+Subsequently, this variable is used to calculate the current factorization step's factors.
+They are stored at the corresponding position inside of the $\mathbf{L}$ part from the factorization data \mintinline{cpp}{lu}.
+The overwritten values are not needed anymore.
+Note that the registers containing the pivot element is treated differently (\mintinline{cpp}{BlendBelowIndex}) because it usually contains values from rows that shouldn't be modified anymore.
+
+Finally, the values of the remaining sub-matrix are calculated by looping over each column of \mintinline{cpp}{lu}.
+
+\begin{itemize}
+\item values in current column are only 1 and 0.
+\item multiplication with pivot row
+\end{itemize}
+Therefore the value of each 
+
+
+
+
+
+
+\newpage
 \subsubsection{Solver for 3x3 and 4x4 matrices - Serial}
 \subsubsection{Solver for 3x3 and 4x4 matrices - SIMD}
