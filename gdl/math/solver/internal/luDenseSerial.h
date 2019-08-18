@@ -53,20 +53,10 @@ public:
                                                       const VectorDataArray& rhsData);
 
 private:
-    //! @brief Performs the backward substitution of the solution process
-    //! @param lu: Data of the LU decomposition
-    //! @param rhsData: Data of the right-hand side vector
-    static inline void BackwardSubstitution(const MatrixDataArray& lu, VectorDataArray& rhsData);
-
     //! @brief Performs a single factorization step
     //! @param iteration: Number of the current iteration
     //! @param factorization: Factorization data
     static inline void FactorizationStep(U32 iteration, Factorization& factorization);
-
-    //! @brief Performs the forward substitution of the solution process
-    //! @param lu: Data of the LU decomposition
-    //! @param rhsData: Data of the right-hand side vector
-    static inline void ForwardSubstitution(const MatrixDataArray& lu, VectorDataArray& rhsData);
 
     //! @brief Returns a vector that is permuted the same way as the factorized matrix
     //! @param rhsData: Vector

@@ -3,6 +3,8 @@
 #include "gdl/math/solver/internal/luDenseSerial.h"
 
 #include "gdl/base/approx.h"
+#include "gdl/math/solver/internal/backwardSubstitutionDenseSerial.h"
+#include "gdl/math/solver/internal/forwardSubstitutionDenseSerial.h"
 #include "gdl/math/solver/internal/pivotDenseSerial.h"
 
 
@@ -31,29 +33,10 @@ LUDenseSerial<_type, _size, _pivot>::Solve(const Factorization& factorization, c
 {
     VectorDataArray vectorData = GetPermutedVectorData(rhsData, factorization);
 
-    ForwardSubstitution(factorization.mLU, vectorData);
-    BackwardSubstitution(factorization.mLU, vectorData);
+    ForwardSubstitutionDenseSerial<_type, _size, true>::SolveInPlace(factorization.mLU, vectorData);
+    BackwardSubstitutionDenseSerial<_type, _size, false>::SolveInPlace(factorization.mLU, vectorData);
 
     return vectorData;
-}
-
-
-
-// --------------------------------------------------------------------------------------------------------------------
-
-template <typename _type, U32 _size, Pivot _pivot>
-inline void LUDenseSerial<_type, _size, _pivot>::BackwardSubstitution(const MatrixDataArray& lu,
-                                                                      VectorDataArray& rhsData)
-{
-    for (U32 i = _size; i-- > 0;)
-    {
-        const U32 pivIdx = (_size + 1) * i;
-
-        rhsData[i] /= lu[pivIdx];
-
-        for (U32 j = 0; j < i; ++j)
-            rhsData[j] -= rhsData[i] * lu[j + i * _size];
-    }
 }
 
 
@@ -87,7 +70,7 @@ LUDenseSerial<_type, _size, _pivot>::Factorize(const MatrixDataArray& matrixData
 template <typename _type, U32 _size, Pivot _pivot>
 inline void LUDenseSerial<_type, _size, _pivot>::FactorizationStep(U32 iteration, Factorization& factorization)
 {
-    const U32 pivIdx = iteration * _size + iteration;
+    const U32 pivIdx = (_size + 1) * iteration;
 
     DEV_EXCEPTION(factorization.mLU[pivIdx] == ApproxZero<_type>(1, 100),
                   "Can't solve system - Singular matrix or inappropriate pivoting strategy.");
@@ -99,20 +82,6 @@ inline void LUDenseSerial<_type, _size, _pivot>::FactorizationStep(U32 iteration
         for (U32 j = _size; j < (_size - iteration) * _size; j += _size)
             factorization.mLU[i + j] -= factorization.mLU[i] * factorization.mLU[pivIdx + j];
     }
-}
-
-
-
-// --------------------------------------------------------------------------------------------------------------------
-
-template <typename _type, U32 _size, Pivot _pivot>
-inline void LUDenseSerial<_type, _size, _pivot>::ForwardSubstitution(const MatrixDataArray& lu,
-                                                                     VectorDataArray& rhsData)
-{
-
-    for (U32 i = 0; i < _size - 1; ++i)
-        for (U32 j = i + 1; j < _size; ++j)
-            rhsData[j] -= lu[j + i * _size] * rhsData[i];
 }
 
 
