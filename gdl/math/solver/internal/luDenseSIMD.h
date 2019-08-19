@@ -62,19 +62,6 @@ public:
                                                       const VectorDataArray& rhsData);
 
 private:
-    //! @brief Performs the backward substitution of the solution process
-    //! @param lu: Data of the LU decomposition
-    //! @param rhsData: Data of the right-hand side vector
-    static inline void BackwardSubstitution(const MatrixDataArray& lu, VectorDataArray& rhsData);
-
-    //! @brief Performs multiple backward substitution steps using template recursion
-    //! @tparam _regValueIdx: Specifies the current active rows position inside of its corresponding register
-    //! @param regRowIdx: Row index of the register that contains the current active row
-    //! @param lu: Data of the LU decomposition
-    //! @param rhsData: Data of the right-hand side vector
-    template <U32 _regValueIdx = numRegisterValues - 1>
-    static inline void BackwardSubstitutionSteps(U32 regRowIdx, const MatrixDataArray& lu, VectorDataArray& rhsData);
-
     //! @brief Performs a single factorization step
     //! @tparam _regValueIdx: Specifies the current active rows position inside of its corresponding register
     //! @param iteration: Iteration number of the factorization procedure
@@ -90,20 +77,6 @@ private:
     //! @param factorization: Matrix factorization
     template <U32 _regValueIdx = 0, U32 _maxRecursionDepth = numRegisterValues>
     static inline void FactorizationSteps(U32 regRowIdx, Factorization& factorization);
-
-    //! @brief Performs the forward substitution of the solution process
-    //! @param lu: Data of the LU decomposition
-    //! @param rhsData: Data of the right-hand side vector
-    static inline void ForwardSubstitution(const MatrixDataArray& lu, VectorDataArray& rhsData);
-
-    //! @brief Performs multiple forward substitution steps using template recursion
-    //! @tparam _regValueIdx: Specifies the current active rows position inside of its corresponding register
-    //! @tparam _maxRecursionDepth: Maximum number of template recursions
-    //! @param regRowIdx: Row index of the register that contains the current active row
-    //! @param lu: Data of the LU decomposition
-    //! @param rhsData: Data of the right-hand side vector
-    template <U32 _regValueIdx = 0, U32 _maxRecursionDepth = numRegisterValues>
-    static inline void ForwardSubstitutionSteps(U32 regRowIdx, const MatrixDataArray& lu, VectorDataArray& rhsData);
 };
 
 

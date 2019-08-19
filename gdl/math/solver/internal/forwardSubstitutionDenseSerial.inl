@@ -18,7 +18,7 @@ inline void ForwardSubstitutionDenseSerial<_type, _size, _isUnit>::SolveInPlace(
     for (U32 i = 0; i < _size - 1; ++i)
     {
         DEV_EXCEPTION(matrixData[(_size + 1) * i] == ApproxZero<_type>(1, 100),
-                      "Can't solve system - Singular matrix or inappropriate pivoting strategy.");
+                      "Can't solve system - Singular matrix.");
 
         if constexpr (not _isUnit)
         {

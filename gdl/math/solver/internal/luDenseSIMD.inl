@@ -5,6 +5,8 @@
 #include "gdl/base/approx.h"
 #include "gdl/base/simd/directAccess.h"
 #include "gdl/base/simd/swizzle.h"
+#include "gdl/math/solver/internal/backwardSubstitutionDenseSIMD.h"
+#include "gdl/math/solver/internal/forwardSubstitutionDenseSIMD.h"
 
 
 
@@ -42,7 +44,7 @@ LUDenseSIMD<_registerType, _size, _pivot>::Factorize(const MatrixDataArray& matr
 
 
     DEV_EXCEPTION(simd::GetValue<(_size - 1) % numRegisterValues>(factorization.mLU[factorization.mLU.size() - 1]) ==
-                          ApproxZero<F32>(1, 100),
+                          ApproxZero<ValueType>(1, 100),
                   "Can't solve system - Singular matrix or inappropriate pivoting strategy.");
 
     return factorization;
@@ -61,65 +63,10 @@ LUDenseSIMD<_registerType, _size, _pivot>::Solve(const Factorization& factorizat
     if constexpr (_pivot != Pivot::NONE)
         PivotDenseSSE<_registerType, _size>::PermuteVector(vectorData, factorization.mPermutationData);
 
-    ForwardSubstitution(factorization.mLU, vectorData);
-    BackwardSubstitution(factorization.mLU, vectorData);
+    ForwardSubstitutionDenseSIMD<_registerType, _size, true>::SolveInPlace(factorization.mLU, vectorData);
+    BackwardSubstitutionDenseSIMD<_registerType, _size, false>::SolveInPlace(factorization.mLU, vectorData);
 
     return vectorData;
-}
-
-
-
-// --------------------------------------------------------------------------------------------------------------------
-
-template <typename _registerType, U32 _size, Pivot _pivot>
-inline void LUDenseSIMD<_registerType, _size, _pivot>::BackwardSubstitution(const MatrixDataArray& lu,
-                                                                            VectorDataArray& rhsData)
-{
-    constexpr U32 numRowsFullRegisters = _size / numRegisterValues;
-    constexpr U32 numNonFullRegValues = _size % numRegisterValues;
-
-
-    if constexpr (numNonFullRegValues != 0)
-        BackwardSubstitutionSteps<numNonFullRegValues - 1>(numRegistersPerCol - 1, lu, rhsData);
-
-    for (U32 i = numRowsFullRegisters; 0 < i--;)
-        BackwardSubstitutionSteps(i, lu, rhsData);
-}
-
-
-
-// --------------------------------------------------------------------------------------------------------------------
-
-template <typename _registerType, U32 _size, Pivot _pivot>
-template <U32 _regValueIdx>
-inline void LUDenseSIMD<_registerType, _size, _pivot>::BackwardSubstitutionSteps(U32 regRowIdx,
-                                                                                 const MatrixDataArray& lu,
-                                                                                 VectorDataArray& rhsData)
-{
-    using namespace GDL::simd;
-
-    static_assert(_regValueIdx < numRegisterValues, "_regValueIdx must be smaller than the number of register values");
-
-
-    const U32 iteration = regRowIdx * numRegisterValues + _regValueIdx;
-    const U32 colStartIdx = iteration * numRegistersPerCol;
-
-
-    rhsData[regRowIdx] =
-            BlendIndex<_regValueIdx>(rhsData[regRowIdx], _mm_div(rhsData[regRowIdx], lu[colStartIdx + regRowIdx]));
-
-    _registerType mult = BroadcastAcrossLanes<_regValueIdx>(rhsData[regRowIdx]);
-
-    if constexpr (_regValueIdx > 0)
-        rhsData[regRowIdx] = BlendAboveIndex<_regValueIdx>(
-                rhsData[regRowIdx], _mm_fnmadd(lu[colStartIdx + regRowIdx], mult, rhsData[regRowIdx]));
-
-    for (U32 i = regRowIdx; 0 < i--;)
-        rhsData[i] = _mm_fnmadd(lu[colStartIdx + i], mult, rhsData[i]);
-
-
-    if constexpr (_regValueIdx > 0)
-        BackwardSubstitutionSteps<_regValueIdx - 1>(regRowIdx, lu, rhsData);
 }
 
 
@@ -136,7 +83,7 @@ inline void LUDenseSIMD<_registerType, _size, _pivot>::FactorizationStep(U32 ite
     const U32 colStartIdx = iteration * numRegistersPerCol;
     const U32 actRowRegIdx = colStartIdx + regRowIdx;
 
-    DEV_EXCEPTION(GetValue<_regValueIdx>(lu[actRowRegIdx]) == ApproxZero<F32>(1, 100),
+    DEV_EXCEPTION(GetValue<_regValueIdx>(lu[actRowRegIdx]) == ApproxZero<ValueType>(1, 100),
                   "Can't solve system - Singular matrix or inappropriate pivoting strategy.");
 
 
@@ -179,57 +126,6 @@ inline void LUDenseSIMD<_registerType, _size, _pivot>::FactorizationSteps(U32 re
 
     if constexpr (_regValueIdx + 1 < _maxRecursionDepth)
         FactorizationSteps<_regValueIdx + 1, _maxRecursionDepth>(regRowIdx, factorization);
-}
-
-
-
-// --------------------------------------------------------------------------------------------------------------------
-
-template <typename _registerType, U32 _size, Pivot _pivot>
-inline void LUDenseSIMD<_registerType, _size, _pivot>::ForwardSubstitution(const MatrixDataArray& lu,
-                                                                           VectorDataArray& rhsData)
-{
-    constexpr U32 numRowsFullRegisters = (_size - 1) / numRegisterValues;
-    constexpr U32 numNonFullRegValues = (_size - 1) % numRegisterValues;
-
-    for (U32 i = 0; i < numRowsFullRegisters; ++i)
-        ForwardSubstitutionSteps(i, lu, rhsData);
-
-    if constexpr (numNonFullRegValues != 0)
-        ForwardSubstitutionSteps<0, numNonFullRegValues>(numRegistersPerCol - 1, lu, rhsData);
-}
-
-
-
-// --------------------------------------------------------------------------------------------------------------------
-
-template <typename _registerType, U32 _size, Pivot _pivot>
-template <U32 _regValueIdx, U32 _maxRecursionDepth>
-inline void LUDenseSIMD<_registerType, _size, _pivot>::ForwardSubstitutionSteps(U32 regRowIdx,
-                                                                                const MatrixDataArray& lu,
-                                                                                VectorDataArray& rhsData)
-{
-    using namespace GDL::simd;
-
-    static_assert(_maxRecursionDepth <= numRegisterValues,
-                  "_maxRecursionDepth must be equal or smaller than the number of register values.");
-
-    const U32 iteration = regRowIdx * numRegisterValues + _regValueIdx;
-    const U32 colStartIdx = iteration * numRegistersPerCol;
-
-
-    _registerType mult = BroadcastAcrossLanes<_regValueIdx>(rhsData[regRowIdx]);
-
-    if constexpr (_regValueIdx < numRegisterValues - 1)
-        rhsData[regRowIdx] = BlendBelowIndex<_regValueIdx>(
-                rhsData[regRowIdx], _mm_fnmadd(lu[colStartIdx + regRowIdx], mult, rhsData[regRowIdx]));
-
-    for (U32 i = regRowIdx + 1; i < numRegistersPerCol; ++i)
-        rhsData[i] = _mm_fnmadd(lu[colStartIdx + i], mult, rhsData[i]);
-
-
-    if constexpr (_regValueIdx + 1 < _maxRecursionDepth)
-        ForwardSubstitutionSteps<_regValueIdx + 1, _maxRecursionDepth>(regRowIdx, lu, rhsData);
 }
 
 
