@@ -30,14 +30,14 @@ constexpr U32 N = 64;
 
 // pivoting
 #define BENCHMARK_NOPIVOT
-#define BENCHMARK_PARTIALPIVOT
+//#define BENCHMARK_PARTIALPIVOT
 
 // factorization
-//#define BENCHMARK_FACTORIZATION
+#define BENCHMARK_FACTORIZATION
 
 // vectorization
-#define BENCHMARK_SERIAL
-//#define BENCHMARK_SIMD
+//#define BENCHMARK_SERIAL
+#define BENCHMARK_SIMD
 
 // Eigen
 //#define BENCHMARK_EIGEN

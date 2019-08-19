@@ -18,7 +18,6 @@ namespace GDL::Solver
 template <typename _registerType, U32 _size, bool _isUnit = false>
 class ForwardSubstitutionDenseSIMD
 {
-    static constexpr U32 alignment = simd::alignmentBytes<_registerType>;
     static constexpr U32 numRegisterValues = simd::numRegisterValues<_registerType>;
     static constexpr U32 numRegistersPerCol = simd::CalcMinNumArrayRegisters<_registerType>(_size);
 

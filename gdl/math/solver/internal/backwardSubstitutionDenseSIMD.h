@@ -18,7 +18,6 @@ namespace GDL::Solver
 template <typename _registerType, U32 _size, bool _isUnit = false>
 class BackwardSubstitutionDenseSIMD
 {
-    static constexpr U32 alignment = simd::alignmentBytes<_registerType>;
     static constexpr U32 numRegisterValues = simd::numRegisterValues<_registerType>;
     static constexpr U32 numRegistersPerCol = simd::CalcMinNumArrayRegisters<_registerType>(_size);
 
@@ -30,14 +29,14 @@ class BackwardSubstitutionDenseSIMD
     BackwardSubstitutionDenseSIMD() = delete;
 
 public:
-    //! @brief Solves the linear system A * x = r with A being a lower triangular matrix
+    //! @brief Solves the linear system A * x = r with A being a upper triangular matrix
     //! @param matrixData: Matrix data
     //! @param rhsData: Data of the right-hand side vector
     //! @return Result vector x
     //    [[nodiscard]] inline static VectorDataArray Solve(const MatrixDataArray& matrixData,
     //                                                      const VectorDataArray& rhsData);
 
-    //! @brief Solves the linear system A * x = r with A being a lower triangular matrix. The result is written into the
+    //! @brief Solves the linear system A * x = r with A being a upper triangular matrix. The result is written into the
     //! passed vector data
     //! @param matrixData: Matrix data
     //! @param rhsData: Data of the right-hand side vector. The passed data is overwritten with the result.

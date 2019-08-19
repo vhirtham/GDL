@@ -246,15 +246,10 @@ public:
                                                 const VectorDataArray& rhsData);
 	
 private:
-    static inline void BackwardSubstitution(const MatrixDataArray& lu, 
-                                            VectorDataArray& rhsData);
 	
     static inline void FactorizationStep(U32 iteration, 
                                          Factorization& factorization);
-	
-    static inline void ForwardSubstitution(const MatrixDataArray& lu, 
-                                           VectorDataArray& rhsData);
-	
+		
     static inline VectorDataArray GetPermutedVectorData(
                                   const VectorDataArray& rhsData,
                                   const Factorization& factorization);
@@ -349,13 +344,15 @@ Afterwards the factors of the current pivoting step are calculated, stored and a
 \vspace{0.5cm}
 
 The \mintinline{cpp}{Solve} function expects the matrix factorization and a right-hand side vector.
-It applies all necessary permutations to the vector and performs the forward and backward substitutions to obtain the result:
+It applies all necessary permutations to the vector and performs the forward and backward substitutions (\cref{sec:forwardSubstitution,sec:backwardSubstitution}) to obtain the result:
 
 \begin{minted}{cpp}
 VectorDataArray vectorData = GetPermutedVectorData(rhsData, factorization);
 
-ForwardSubstitution(factorization.mLU, vectorData);
-BackwardSubstitution(factorization.mLU, vectorData);
+ForwardSubstitutionDenseSerial<_type, _size, true>::SolveInPlace(factorization.mLU, 
+                                                                 vectorData);
+BackwardSubstitutionDenseSerial<_type, _size, false>::SolveInPlace(factorization.mLU, 
+                                                                   vectorData);
 
 return vectorData;
 \end{minted}
@@ -380,44 +377,6 @@ else
 \end{minted}
 
 
-
-
-
-\vspace{1cm}
-\textbf{ForwardSubstitution}
-\vspace{0.5cm}
-
-This function performs the forward substitution.
-The result is written directly to the passed right-hand side vector.
-
-\begin{minted}{cpp}
-for (U32 i = 0; i < _size - 1; ++i)
-    for (U32 j = i + 1; j < _size; ++j)
-        rhsData[j] -= lu[j + i * _size] * rhsData[i];
-\end{minted}
-
-
-
-
-
-\vspace{1cm}
-\textbf{BackwardSubstitution}
-\vspace{0.5cm}
-
-This function performs the backward substitution.
-The result is written directly to the passed right-hand side vector.
-
-\begin{minted}{cpp}
-for (U32 i = _size; i-- > 0;)
-{
-    const U32 pivIdx = (_size + 1) * i;
-
-    rhsData[i] /= lu[pivIdx];
-
-    for (U32 j = 0; j < i; ++j)
-        rhsData[j] -= rhsData[i] * lu[j + i * _size];
-}
-\end{minted}
 
 
 
@@ -474,13 +433,6 @@ public:
                                                 const VectorDataArray& rhsData);
 
 private:
-    static inline void BackwardSubstitution(const MatrixDataArray& lu, 
-                                            VectorDataArray& rhsData);
-
-    template <U32 _regValueIdx = numRegisterValues - 1>
-    static inline void BackwardSubstitutionSteps(U32 regRowIdx, 
-                                                 const MatrixDataArray& lu, 
-                                                 VectorDataArray& rhsData);
 
     template <U32 _regValueIdx>
     static inline void FactorizationStep(U32 iteration, 
@@ -490,14 +442,6 @@ private:
     template <U32 _regValueIdx = 0, U32 _maxRecursionDepth = numRegisterValues>
     static inline void FactorizationSteps(U32 regRowIdx, 
                                           Factorization& factorization);
-
-    static inline void ForwardSubstitution(const MatrixDataArray& lu, 
-                                           VectorDataArray& rhsData);
-
-    template <U32 _regValueIdx = 0, U32 _maxRecursionDepth = numRegisterValues>
-    static inline void ForwardSubstitutionSteps(U32 regRowIdx, 
-                                                const MatrixDataArray& lu, 
-                                                VectorDataArray& rhsData);
 };
 \end{minted}
 
@@ -643,6 +587,10 @@ for (U32 i = actRowRegIdx + numRegistersPerCol; i < _size * numRegistersPerCol;
 }
 \end{minted}
 
+The constant \mintinline{cpp}{colStartIdx} is the index of the first register from the pivot elements column inside of the factorization data.
+\mintinline{cpp}{actRowRegIdx} is the index of the pivot elements register.
+ 
+
 First a check is performed, that the pivot element is not zero.
 Then the current pivot element's reciprocal is calculated and broadcasted to all elements of the variable \mintinline{cpp}{div}.
 Subsequently, this variable is used to calculate the current factorization step's factors.
@@ -650,17 +598,39 @@ They are stored at the corresponding position inside of the $\mathbf{L}$ part fr
 The overwritten values are not needed anymore.
 Note that the registers containing the pivot element is treated differently (\mintinline{cpp}{BlendBelowIndex}) because it usually contains values from rows that shouldn't be modified anymore.
 
-Finally, the values of the remaining sub-matrix are calculated by looping over each column of \mintinline{cpp}{lu}.
-
-\begin{itemize}
-\item values in current column are only 1 and 0.
-\item multiplication with pivot row
-\end{itemize}
-Therefore the value of each 
+Finally, the values of the remaining sub-matrix are calculated by looping over each of its columns.
+For each column, the active row's value is broadcasted, multiplied with the calculated factors and subtracted from the current values to obtain the new ones.
+Again, the active row's registers are treated differently to avoid modifications of rows above the active row.
 
 
 
 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\vspace{1cm}
+\textbf{Solve}
+\vspace{0.5cm}
+
+The \mintinline{cpp}{Solve} function expects the matrix factorization and a right-hand side vector.
+It applies all necessary permutations to the vector and performs the forward and backward substitutions (\cref{sec:forwardSubstitution,sec:backwardSubstitution}) to obtain the result:
+
+\begin{minted}{cpp}
+alignas(alignment) VectorDataArray vectorData = rhsData;
+
+if constexpr (_pivot != Pivot::NONE)
+    PivotDenseSSE<_registerType, _size>::PermuteVector(
+                                             vectorData, 
+                                             factorization.mPermutationData);
+
+ForwardSubstitutionDenseSIMD<_registerType, _size, true>::SolveInPlace(
+                                                              factorization.mLU, 
+                                                              vectorData);
+BackwardSubstitutionDenseSIMD<_registerType, _size, false>::SolveInPlace(
+                                                                factorization.mLU, 
+                                                                vectorData);
+
+return vectorData;
+\end{minted}
 
 
 \newpage
