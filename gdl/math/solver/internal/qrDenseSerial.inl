@@ -8,6 +8,8 @@
 //#include "gdl/math/solver/internal/forwardSubstitutionDenseSerial.h"
 #include "gdl/math/solver/internal/pivotDenseSerial.h"
 
+#include <cmath>
+
 
 
 #include <iostream>
@@ -41,7 +43,7 @@ QRDenseSerial<_type, _rows, _cols, _pivot>::Factorize(const MatrixDataArray& mat
     for (U32 i = 0; i < _rows - 1; ++i)
     {
         if constexpr (_pivot != Pivot::NONE)
-            PivotDenseSerial<_type, _rows>::template PivotingStep<_pivot, true>(i, factorization.mQR,
+            PivotDenseSerial<_type, _rows>::template PivotingStep<_pivot, true>(i, factorization.mR,
                                                                                 factorization.mPermutationData);
         FactorizationStep(i, factorization);
     }
@@ -93,26 +95,28 @@ inline void QRDenseSerial<_type, _rows, _cols, _pivot>::FactorizationStep(U32 it
                   "Can't solve system - Singular matrix or inappropriate pivoting strategy.");
 
     // Calculate reflector
-    _type s = 0;
-    for (U32 i = pivIdx; i < (iteration + 1) * _rows; ++i)
-        s += Square(factorization.mR[i]);
-    s = sqrt(s);
-
-    _type diff = factorization.mR[pivIdx] - s;
-
-    _type my = 1. / sqrt(-2. * s * diff);
-
-    factorization.mQ[pivIdx] = diff * my;
+    _type sqSum = 0;
     for (U32 i = pivIdx + 1; i < (iteration + 1) * _rows; ++i)
-        factorization.mQ[i] = factorization.mR[i] * my;
+        sqSum += Square(factorization.mR[i]);
+
+    _type colSignedNorm = std::copysign(sqrt(sqSum + Square(factorization.mR[pivIdx])), factorization.mR[pivIdx]);
+
+    _type wPiv = factorization.mR[pivIdx] + colSignedNorm;
+
+    _type wNorm = 1. / sqrt(sqSum + Square(wPiv));
+
+    factorization.mQ[pivIdx] = wPiv * wNorm;
+    for (U32 i = pivIdx + 1; i < (iteration + 1) * _rows; ++i)
+        factorization.mQ[i] = factorization.mR[i] * wNorm;
+
 
 
     // calculate new R
-    factorization.mR[pivIdx] = s;
+    factorization.mR[pivIdx] = -colSignedNorm;
 
     std::array<_type, _rows> tmp{0.};
 
-    for (U32 c = iteration + 1; c < _cols; ++c)
+    for (U32 c = iteration+1; c < _cols; ++c)
     {
         for (U32 r = iteration; r < _rows; ++r)
         {
@@ -122,7 +126,7 @@ inline void QRDenseSerial<_type, _rows, _cols, _pivot>::FactorizationStep(U32 it
         tmp[c] *= 2;
     }
 
-    for (U32 c = iteration + 1; c < _cols; ++c)
+    for (U32 c = iteration +1; c < _cols; ++c)
         for (U32 r = iteration; r < _rows; ++r)
         {
             U32 idx = c * _rows + r;

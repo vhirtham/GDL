@@ -284,17 +284,17 @@ BOOST_AUTO_TEST_CASE(Test_QR_NoPivot_9x9_F64_Serial)
 
 // Test 2x2 -----------------------------------------------------------------------------------------------------------
 
-// BOOST_AUTO_TEST_CASE(Test_QR_PartialPivot_2x2_F32_Serial)
-//{
-//    TestQR<F32, 2, Pivot::PARTIAL, SolverType::SERIAL>();
-//}
+BOOST_AUTO_TEST_CASE(Test_QR_PartialPivot_2x2_F32_Serial)
+{
+    TestQR<F32, 2, Pivot::PARTIAL, SolverType::SERIAL>();
+}
 
 
 
-// BOOST_AUTO_TEST_CASE(Test_QR_PartialPivot_2x2_F64_Serial)
-//{
-//    TestQR<F64, 2, Pivot::PARTIAL, SolverType::SERIAL>();
-//}
+BOOST_AUTO_TEST_CASE(Test_QR_PartialPivot_2x2_F64_Serial)
+{
+    TestQR<F64, 2, Pivot::PARTIAL, SolverType::SERIAL>();
+}
 
 
 

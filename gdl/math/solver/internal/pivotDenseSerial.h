@@ -23,6 +23,8 @@ class PivotDenseSerial
     friend class GaussDenseSerial;
     template <typename, U32, Pivot>
     friend class LUDenseSerial;
+    template <typename, U32, U32, Pivot>
+    friend class QRDenseSerial;
 
 
 
