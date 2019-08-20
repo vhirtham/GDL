@@ -1,4 +1,5 @@
 addTest(gauss)
 addTest(lu)
+addTest(qr)
 addTest(solver3)
 addTest(solver4)
