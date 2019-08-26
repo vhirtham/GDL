@@ -13,13 +13,13 @@ namespace GDL::Solver
 
 // --------------------------------------------------------------------------------------------------------------------
 
-template <typename _type, U32 _size>
-inline U32 PivotDenseSerial<_type, _size>::FindMaxAbsValueCol(U32 iteration, const MatrixDataArray& matData)
+template <typename _type, U32 _rows, U32 _cols>
+inline U32 PivotDenseSerial<_type, _rows, _cols>::FindMaxAbsValueCol(U32 iteration, const MatrixDataArray& matData)
 {
-    const U32 colStartIdx = iteration * _size;
+    const U32 colStartIdx = iteration * _rows;
     F32 maxAbs = std::abs(matData[colStartIdx + iteration]);
     U32 maxValIdx = iteration;
-    for (U32 i = iteration + 1; i < _size; ++i)
+    for (U32 i = iteration + 1; i < _rows; ++i)
     {
         F32 cmpAbs = std::abs(matData[i + colStartIdx]);
         if (maxAbs < cmpAbs)
@@ -36,10 +36,10 @@ inline U32 PivotDenseSerial<_type, _size>::FindMaxAbsValueCol(U32 iteration, con
 
 // --------------------------------------------------------------------------------------------------------------------
 
-template <typename _type, U32 _size>
+template <typename _type, U32 _rows, U32 _cols>
 template <bool _swapAllCols>
-inline void PivotDenseSerial<_type, _size>::PartialPivotingStep(U32 iteration, MatrixDataArray& matData,
-                                                                VectorDataArray& vecData)
+inline void PivotDenseSerial<_type, _rows, _cols>::PartialPivotingStep(U32 iteration, MatrixDataArray& matData,
+                                                                       VectorDataArray& vecData)
 {
     U32 rowIdxSwp = FindMaxAbsValueCol(iteration, matData);
 
@@ -51,14 +51,14 @@ inline void PivotDenseSerial<_type, _size>::PartialPivotingStep(U32 iteration, M
 
 // --------------------------------------------------------------------------------------------------------------------
 
-template <typename _type, U32 _size>
+template <typename _type, U32 _rows, U32 _cols>
 template <Pivot _pivot>
-inline std::array<_type, _size>
-PivotDenseSerial<_type, _size>::PermuteVector(const VectorDataArray& vectorData,
-                                              const PermutationData<_type, _size, _pivot>& permutationData)
+inline std::array<_type, _rows>
+PivotDenseSerial<_type, _rows, _cols>::PermuteVector(const VectorDataArray& vectorData,
+                                                     const PermutationData<_type, _rows, _pivot>& permutationData)
 {
-    std::array<_type, _size> rPermute;
-    for (U32 i = 0; i < _size; ++i)
+    VectorDataArray rPermute;
+    for (U32 i = 0; i < _rows; ++i)
         rPermute[i] = vectorData[permutationData.mRowPermutation[i]];
 
     return rPermute;
@@ -68,10 +68,10 @@ PivotDenseSerial<_type, _size>::PermuteVector(const VectorDataArray& vectorData,
 
 // --------------------------------------------------------------------------------------------------------------------
 
-template <typename _type, U32 _size>
+template <typename _type, U32 _rows, U32 _cols>
 template <Pivot _pivot, bool _swapAllCols>
-inline void PivotDenseSerial<_type, _size>::PivotingStep(U32 iteration, MatrixDataArray& matData,
-                                                         VectorDataArray& vecData)
+inline void PivotDenseSerial<_type, _rows, _cols>::PivotingStep(U32 iteration, MatrixDataArray& matData,
+                                                                VectorDataArray& vecData)
 {
     static_assert(_pivot != Pivot::NONE, "Unneccessary function call");
     static_assert(_pivot == Pivot::PARTIAL, "Unsupported pivoting strategy");
@@ -84,10 +84,11 @@ inline void PivotDenseSerial<_type, _size>::PivotingStep(U32 iteration, MatrixDa
 
 // --------------------------------------------------------------------------------------------------------------------
 
-template <typename _type, U32 _size>
+template <typename _type, U32 _rows, U32 _cols>
 template <Pivot _pivot, bool _swapAllCols>
-inline void PivotDenseSerial<_type, _size>::PivotingStep(U32 iteration, MatrixDataArray& matData,
-                                                         PermutationData<_type, _size, _pivot>& permutatationData)
+inline void
+PivotDenseSerial<_type, _rows, _cols>::PivotingStep(U32 iteration, MatrixDataArray& matData,
+                                                    PermutationData<_type, _rows, _pivot>& permutatationData)
 {
     PivotingStep<_pivot, _swapAllCols>(iteration, matData, permutatationData.mRowPermutation);
 }
@@ -96,10 +97,10 @@ inline void PivotDenseSerial<_type, _size>::PivotingStep(U32 iteration, MatrixDa
 
 // --------------------------------------------------------------------------------------------------------------------
 
-template <typename _type, U32 _size>
+template <typename _type, U32 _rows, U32 _cols>
 template <bool _swapAllCols>
-inline void PivotDenseSerial<_type, _size>::SwapRowPivot(U32 rowIdxSwp, U32 iteration, MatrixDataArray& matData,
-                                                         VectorDataArray& vecData)
+inline void PivotDenseSerial<_type, _rows, _cols>::SwapRowPivot(U32 rowIdxSwp, U32 iteration, MatrixDataArray& matData,
+                                                                VectorDataArray& vecData)
 {
     DEV_EXCEPTION(rowIdxSwp < iteration,
                   "Internal error. Row of the pivot element must be higher or equal to the current iteration number");
@@ -107,10 +108,10 @@ inline void PivotDenseSerial<_type, _size>::SwapRowPivot(U32 rowIdxSwp, U32 iter
     const U32 rowDiff = rowIdxSwp - iteration;
 
     if constexpr (_swapAllCols)
-        for (U32 i = iteration; i < matData.size(); i += _size)
+        for (U32 i = iteration; i < matData.size(); i += _rows)
             std::swap(matData[i], matData[i + rowDiff]);
     else
-        for (U32 i = iteration * _size + iteration; i < matData.size(); i += _size)
+        for (U32 i = iteration * _rows + iteration; i < matData.size(); i += _rows)
             std::swap(matData[i], matData[i + rowDiff]);
 
     std::swap(vecData[iteration], vecData[rowIdxSwp]);

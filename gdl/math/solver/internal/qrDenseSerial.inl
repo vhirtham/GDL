@@ -119,11 +119,8 @@ QRDenseSerial<_type, _rows, _cols, _pivot>::Solve(const Factorization& factoriza
 {
     VectorDataArray vectorData = GetPermutedVectorData(rhsData, factorization);
 
-    const MatrixDataArray& R = factorization.GetR();
-    const MatrixDataArray& Q = factorization.GetQ();
-
-    MultiplyWithTransposedQ(Q, vectorData);
-    BackwardSubstitutionDenseSerial<_type, _rows, false>::SolveInPlace(R, vectorData);
+    MultiplyWithTransposedQ(factorization.GetQ(), vectorData);
+    BackwardSubstitutionDenseSerial<_type, _rows, false>::SolveInPlace(factorization.GetR(), vectorData);
 
     return vectorData;
 }

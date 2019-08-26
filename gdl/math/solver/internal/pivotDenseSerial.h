@@ -15,8 +15,9 @@ struct PermutationData;
 
 //! @brief Helper class for pivoting strategies that are shared amongst multiple solvers
 //! @tparam _type: Data type of the system
-//! @tparam _size: Size of the system
-template <typename _type, U32 _size>
+//! @tparam _rows: The system's number of rows
+//! @tparam _cols: The system's number of columns
+template <typename _type, U32 _rows, U32 _cols = _rows>
 class PivotDenseSerial
 {
     template <typename, U32, Pivot>
@@ -28,8 +29,8 @@ class PivotDenseSerial
 
 
 
-    using MatrixDataArray = std::array<_type, _size * _size>;
-    using VectorDataArray = std::array<_type, _size>;
+    using MatrixDataArray = std::array<_type, _rows * _cols>;
+    using VectorDataArray = std::array<_type, _rows>;
 
 
 
@@ -54,7 +55,7 @@ class PivotDenseSerial
     //! @return Permuted vector
     template <Pivot _pivot>
     static inline VectorDataArray PermuteVector(const VectorDataArray& vectorData,
-                                                const PermutationData<_type, _size, _pivot>& permutationData);
+                                                const PermutationData<_type, _rows, _pivot>& permutationData);
 
     //! @brief Performs the pivoting step for the given iteration
     //! @tparam _pivot: Enum to select the pivoting strategy
@@ -73,7 +74,7 @@ class PivotDenseSerial
     //! @param permutatationData: Permutation
     template <Pivot _pivot, bool _swapAllCols>
     inline static void PivotingStep(U32 iteration, MatrixDataArray& matData,
-                                    PermutationData<_type, _size, _pivot>& permutatationData);
+                                    PermutationData<_type, _rows, _pivot>& permutatationData);
 
     //! @brief Swaps the row of the pivot element with the row of the value that should replace the current pivot
     //! element
