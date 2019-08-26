@@ -24,10 +24,53 @@ namespace GDL::Solver
 
 template <typename _type, U32 _rows, U32 _cols, Pivot _pivot>
 inline QRDenseSerial<_type, _rows, _cols, _pivot>::Factorization::Factorization(const MatrixDataArray& matrixData)
-    : mQ{0}
-    , mR{matrixData}
+    : mQR{matrixData}
     , mPermutationData()
 {
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+template <typename _type, U32 _rows, U32 _cols, Pivot _pivot>
+inline typename QRDenseSerial<_type, _rows, _cols, _pivot>::MatrixDataArray&
+QRDenseSerial<_type, _rows, _cols, _pivot>::Factorization::GetQ()
+{
+    return mQR.mQData.Q;
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+template <typename _type, U32 _rows, U32 _cols, Pivot _pivot>
+inline const typename QRDenseSerial<_type, _rows, _cols, _pivot>::MatrixDataArray&
+QRDenseSerial<_type, _rows, _cols, _pivot>::Factorization::GetQ() const
+{
+    return mQR.mQData.Q;
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+template <typename _type, U32 _rows, U32 _cols, Pivot _pivot>
+inline typename QRDenseSerial<_type, _rows, _cols, _pivot>::MatrixDataArray&
+QRDenseSerial<_type, _rows, _cols, _pivot>::Factorization::GetR()
+{
+    return mQR.mRData.R;
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+template <typename _type, U32 _rows, U32 _cols, Pivot _pivot>
+inline const typename QRDenseSerial<_type, _rows, _cols, _pivot>::MatrixDataArray&
+QRDenseSerial<_type, _rows, _cols, _pivot>::Factorization::GetR() const
+{
+    return mQR.mRData.R;
 }
 
 
@@ -43,12 +86,12 @@ QRDenseSerial<_type, _rows, _cols, _pivot>::Factorize(const MatrixDataArray& mat
     for (U32 i = 0; i < _rows - 1; ++i)
     {
         if constexpr (_pivot != Pivot::NONE)
-            PivotDenseSerial<_type, _rows>::template PivotingStep<_pivot, true>(i, factorization.mR,
+            PivotDenseSerial<_type, _rows>::template PivotingStep<_pivot, true>(i, factorization.GetR(),
                                                                                 factorization.mPermutationData);
         FactorizationStep(i, factorization);
     }
 
-    DEV_EXCEPTION(factorization.mR[_rows * _cols - 1] == ApproxZero<_type>(1, 100),
+    DEV_EXCEPTION(factorization.GetR()[_rows * _cols - 1] == ApproxZero<_type>(1, 100),
                   "Can't solve system - Singular matrix or inappropriate pivoting strategy.");
 
     return factorization;
@@ -64,19 +107,22 @@ QRDenseSerial<_type, _rows, _cols, _pivot>::Solve(const Factorization& factoriza
 {
     VectorDataArray vectorData = GetPermutedVectorData(rhsData, factorization);
 
+    const MatrixDataArray& R = factorization.GetR();
+    const MatrixDataArray& Q = factorization.GetQ();
+
     for (U32 i = 0; i < _cols - 1; ++i)
     {
         const U32 colStartIdx = _rows * i;
         _type dot = 0;
         for (U32 r = i; r < _rows; ++r)
-            dot += vectorData[r] * factorization.mQ[colStartIdx + r];
+            dot += vectorData[r] * Q[colStartIdx + r];
         dot *= 2;
 
         for (U32 r = i; r < _rows; ++r)
-            vectorData[r] -= dot * factorization.mQ[colStartIdx + r];
+            vectorData[r] -= dot * Q[colStartIdx + r];
     }
 
-    BackwardSubstitutionDenseSerial<_type, _rows, false>::SolveInPlace(factorization.mR, vectorData);
+    BackwardSubstitutionDenseSerial<_type, _rows, false>::SolveInPlace(R, vectorData);
 
     return vectorData;
 }
@@ -91,46 +137,50 @@ inline void QRDenseSerial<_type, _rows, _cols, _pivot>::FactorizationStep(U32 it
     const U32 colStartIdx = _rows * iteration;
     const U32 pivIdx = colStartIdx + iteration;
 
-    DEV_EXCEPTION(factorization.mR[pivIdx] == ApproxZero<_type>(1, 100),
+    MatrixDataArray& R = factorization.GetR();
+    MatrixDataArray& Q = factorization.GetQ();
+
+    DEV_EXCEPTION(R[pivIdx] == ApproxZero<_type>(1, 100),
                   "Can't solve system - Singular matrix or inappropriate pivoting strategy.");
+
 
     // Calculate reflector
     _type sqSum = 0;
     for (U32 i = pivIdx + 1; i < (iteration + 1) * _rows; ++i)
-        sqSum += Square(factorization.mR[i]);
+        sqSum += Square(R[i]);
 
-    _type colSignedNorm = std::copysign(sqrt(sqSum + Square(factorization.mR[pivIdx])), factorization.mR[pivIdx]);
+    _type colSignedNorm = std::copysign(sqrt(sqSum + Square(R[pivIdx])), R[pivIdx]);
 
-    _type wPiv = factorization.mR[pivIdx] + colSignedNorm;
+    _type wPiv = R[pivIdx] + colSignedNorm;
 
     _type wNorm = 1. / sqrt(sqSum + Square(wPiv));
 
-    factorization.mQ[pivIdx] = wPiv * wNorm;
+    Q[pivIdx] = wPiv * wNorm;
     for (U32 i = pivIdx + 1; i < (iteration + 1) * _rows; ++i)
-        factorization.mQ[i] = factorization.mR[i] * wNorm;
+        Q[i] = R[i] * wNorm;
 
 
 
     // calculate new R
-    factorization.mR[pivIdx] = -colSignedNorm;
+    R[pivIdx] = -colSignedNorm;
 
     std::array<_type, _rows> tmp{0.};
 
-    for (U32 c = iteration+1; c < _cols; ++c)
+    for (U32 c = iteration + 1; c < _cols; ++c)
     {
         for (U32 r = iteration; r < _rows; ++r)
         {
             U32 idx = c * _rows + r;
-            tmp[c] += factorization.mQ[colStartIdx + r] * factorization.mR[idx];
+            tmp[c] += Q[colStartIdx + r] * R[idx];
         }
         tmp[c] *= 2;
     }
 
-    for (U32 c = iteration +1; c < _cols; ++c)
+    for (U32 c = iteration + 1; c < _cols; ++c)
         for (U32 r = iteration; r < _rows; ++r)
         {
             U32 idx = c * _rows + r;
-            factorization.mR[idx] -= factorization.mQ[colStartIdx + r] * tmp[c];
+            R[idx] -= Q[colStartIdx + r] * tmp[c];
         }
 }
 

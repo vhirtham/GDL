@@ -31,13 +31,54 @@ public:
     {
         friend class QRDenseSerial;
 
-        MatrixDataArray mQ;
-        MatrixDataArray mR;
+        struct RData
+        {
+            VectorDataArray Offset;
+            MatrixDataArray R;
+        };
+
+        struct QData
+        {
+            MatrixDataArray Q;
+            VectorDataArray Offset;
+        };
+
+        using QRDataArray = std::array<_type, (_rows + 1) * _cols>;
+
+
+        union QRData {
+            QData mQData;
+            RData mRData;
+            QRDataArray mQR;
+
+            QRData(const MatrixDataArray& matrixData)
+                : mRData{{0}, {matrixData}}
+            {
+            }
+        };
+
+        static_assert(sizeof(RData) == sizeof(QData) && sizeof(RData) == sizeof(QRDataArray) &&
+                              sizeof(RData) == sizeof(QRData),
+                      "Internal data format error");
+
+        QRData mQR;
+
+        // std::variant<RData, QData, QRData> mQR;
+
         PermutationData<_type, _rows, _pivot> mPermutationData;
 
         //! @brief ctor
         //! @param matrixData: Data of the matrix that should be factorized
         Factorization(const MatrixDataArray& matrixData);
+
+
+        MatrixDataArray& GetQ();
+        const MatrixDataArray& GetQ() const;
+
+        MatrixDataArray& GetR();
+        const MatrixDataArray& GetR() const;
+
+        QRDataArray& GetQR();
     };
 
 
