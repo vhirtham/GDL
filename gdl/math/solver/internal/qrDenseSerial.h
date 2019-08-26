@@ -10,7 +10,8 @@
 namespace GDL::Solver
 {
 
-
+template <typename, U32, U32, U32>
+class PivotDenseSerial;
 
 //! @brief QR solver class for dense static systems
 //! @tparam _type: Data type
@@ -22,6 +23,8 @@ class QRDenseSerial
 {
     using MatrixDataArray = std::array<_type, _rows * _cols>;
     using VectorDataArray = std::array<_type, _rows>;
+
+    using PivotClass = PivotDenseSerial<_type, _rows, _cols + 1, 1>;
 
     QRDenseSerial() = delete;
 

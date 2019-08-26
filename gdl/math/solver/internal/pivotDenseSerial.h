@@ -17,7 +17,8 @@ struct PermutationData;
 //! @tparam _type: Data type of the system
 //! @tparam _rows: The system's number of rows
 //! @tparam _cols: The system's number of columns
-template <typename _type, U32 _rows, U32 _cols = _rows>
+//! @tparam _colOffset: Offset to the relevant data inside the matrix data array (Only QR decomposition)
+template <typename _type, U32 _rows, U32 _cols = _rows, U32 _colOffset = 0>
 class PivotDenseSerial
 {
     template <typename, U32, Pivot>

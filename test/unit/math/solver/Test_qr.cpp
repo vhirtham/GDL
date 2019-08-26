@@ -314,17 +314,17 @@ BOOST_AUTO_TEST_CASE(Test_QR_PartialPivot_2x2_F64_Serial)
 
 // Test 3x3 -----------------------------------------------------------------------------------------------------------
 
-// BOOST_AUTO_TEST_CASE(Test_QR_PartialPivot_3x3_F32_Serial)
-//{
-//    TestQR<F32, 3, Pivot::PARTIAL, SolverType::SERIAL>();
-//}
+BOOST_AUTO_TEST_CASE(Test_QR_PartialPivot_3x3_F32_Serial)
+{
+    TestQR<F32, 3, Pivot::PARTIAL, SolverType::SERIAL>();
+}
 
 
 
-// BOOST_AUTO_TEST_CASE(Test_QR_PartialPivot_3x3_F64_Serial)
-//{
-//    TestQR<F64, 3, Pivot::PARTIAL, SolverType::SERIAL>();
-//}
+BOOST_AUTO_TEST_CASE(Test_QR_PartialPivot_3x3_F64_Serial)
+{
+    TestQR<F64, 3, Pivot::PARTIAL, SolverType::SERIAL>();
+}
 
 
 
@@ -344,17 +344,17 @@ BOOST_AUTO_TEST_CASE(Test_QR_PartialPivot_2x2_F64_Serial)
 
 // Test 4x4 -----------------------------------------------------------------------------------------------------------
 
-// BOOST_AUTO_TEST_CASE(Test_QR_PartialPivot_4x4_F32_Serial)
-//{
-//    TestQR<F32, 4, Pivot::PARTIAL, SolverType::SERIAL>();
-//}
+BOOST_AUTO_TEST_CASE(Test_QR_PartialPivot_4x4_F32_Serial)
+{
+    TestQR<F32, 4, Pivot::PARTIAL, SolverType::SERIAL>();
+}
 
 
 
-// BOOST_AUTO_TEST_CASE(Test_QR_PartialPivot_4x4_F64_Serial)
-//{
-//    TestQR<F64, 4, Pivot::PARTIAL, SolverType::SERIAL>();
-//}
+BOOST_AUTO_TEST_CASE(Test_QR_PartialPivot_4x4_F64_Serial)
+{
+    TestQR<F64, 4, Pivot::PARTIAL, SolverType::SERIAL>();
+}
 
 
 
@@ -374,17 +374,17 @@ BOOST_AUTO_TEST_CASE(Test_QR_PartialPivot_2x2_F64_Serial)
 
 // Test 5x5 -----------------------------------------------------------------------------------------------------------
 
-// BOOST_AUTO_TEST_CASE(Test_QR_PartialPivot_5x5_F32_Serial)
-//{
-//    TestQR<F32, 5, Pivot::PARTIAL, SolverType::SERIAL>();
-//}
+BOOST_AUTO_TEST_CASE(Test_QR_PartialPivot_5x5_F32_Serial)
+{
+    TestQR<F32, 5, Pivot::PARTIAL, SolverType::SERIAL>();
+}
 
 
 
-// BOOST_AUTO_TEST_CASE(Test_QR_PartialPivot_5x5_F64_Serial)
-//{
-//    TestQR<F64, 5, Pivot::PARTIAL, SolverType::SERIAL>();
-//}
+BOOST_AUTO_TEST_CASE(Test_QR_PartialPivot_5x5_F64_Serial)
+{
+    TestQR<F64, 5, Pivot::PARTIAL, SolverType::SERIAL>();
+}
 
 
 
@@ -404,17 +404,17 @@ BOOST_AUTO_TEST_CASE(Test_QR_PartialPivot_2x2_F64_Serial)
 
 // Test 7x7 -----------------------------------------------------------------------------------------------------------
 
-// BOOST_AUTO_TEST_CASE(Test_QR_PartialPivot_7x7_F32_Serial)
-//{
-//    TestQR<F32, 7, Pivot::PARTIAL, SolverType::SERIAL>();
-//}
+BOOST_AUTO_TEST_CASE(Test_QR_PartialPivot_7x7_F32_Serial)
+{
+    TestQR<F32, 7, Pivot::PARTIAL, SolverType::SERIAL>();
+}
 
 
 
-// BOOST_AUTO_TEST_CASE(Test_QR_PartialPivot_7x7_F64_Serial)
-//{
-//    TestQR<F64, 7, Pivot::PARTIAL, SolverType::SERIAL>();
-//}
+BOOST_AUTO_TEST_CASE(Test_QR_PartialPivot_7x7_F64_Serial)
+{
+    TestQR<F64, 7, Pivot::PARTIAL, SolverType::SERIAL>();
+}
 
 
 
@@ -434,17 +434,17 @@ BOOST_AUTO_TEST_CASE(Test_QR_PartialPivot_2x2_F64_Serial)
 
 // Test 8x8 -----------------------------------------------------------------------------------------------------------
 
-// BOOST_AUTO_TEST_CASE(Test_QR_PartialPivot_8x8_F32_Serial)
-//{
-//    TestQR<F32, 8, Pivot::PARTIAL, SolverType::SERIAL>();
-//}
+BOOST_AUTO_TEST_CASE(Test_QR_PartialPivot_8x8_F32_Serial)
+{
+    TestQR<F32, 8, Pivot::PARTIAL, SolverType::SERIAL>();
+}
 
 
 
-// BOOST_AUTO_TEST_CASE(Test_QR_PartialPivot_8x8_F64_Serial)
-//{
-//    TestQR<F64, 8, Pivot::PARTIAL, SolverType::SERIAL>();
-//}
+BOOST_AUTO_TEST_CASE(Test_QR_PartialPivot_8x8_F64_Serial)
+{
+    TestQR<F64, 8, Pivot::PARTIAL, SolverType::SERIAL>();
+}
 
 
 
@@ -464,17 +464,17 @@ BOOST_AUTO_TEST_CASE(Test_QR_PartialPivot_2x2_F64_Serial)
 
 // Test 9x9 -----------------------------------------------------------------------------------------------------------
 
-// BOOST_AUTO_TEST_CASE(Test_QR_PartialPivot_9x9_F32_Serial)
-//{
-//    TestQR<F32, 9, Pivot::PARTIAL, SolverType::SERIAL>();
-//}
+BOOST_AUTO_TEST_CASE(Test_QR_PartialPivot_9x9_F32_Serial)
+{
+    TestQR<F32, 9, Pivot::PARTIAL, SolverType::SERIAL>();
+}
 
 
 
-// BOOST_AUTO_TEST_CASE(Test_QR_PartialPivot_9x9_F64_Serial)
-//{
-//    TestQR<F64, 9, Pivot::PARTIAL, SolverType::SERIAL>();
-//}
+BOOST_AUTO_TEST_CASE(Test_QR_PartialPivot_9x9_F64_Serial)
+{
+    TestQR<F64, 9, Pivot::PARTIAL, SolverType::SERIAL>();
+}
 
 
 

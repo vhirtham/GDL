@@ -55,6 +55,17 @@ QRDenseSerial<_type, _rows, _cols, _pivot>::Factorization::GetQ()
 // --------------------------------------------------------------------------------------------------------------------
 
 template <typename _type, U32 _rows, U32 _cols, Pivot _pivot>
+inline typename QRDenseSerial<_type, _rows, _cols, _pivot>::Factorization::QRDataArray&
+QRDenseSerial<_type, _rows, _cols, _pivot>::Factorization::GetQR()
+{
+    return mQR.mQR;
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+template <typename _type, U32 _rows, U32 _cols, Pivot _pivot>
 inline const typename QRDenseSerial<_type, _rows, _cols, _pivot>::MatrixDataArray&
 QRDenseSerial<_type, _rows, _cols, _pivot>::Factorization::GetQ() const
 {
@@ -99,7 +110,7 @@ QRDenseSerial<_type, _rows, _cols, _pivot>::Factorize(const MatrixDataArray& mat
     for (U32 i = 0; i < _rows - 1; ++i)
     {
         if constexpr (_pivot != Pivot::NONE)
-            PivotDenseSerial<_type, _rows>::template PivotingStep<_pivot, true>(i, R, factorization.mPermutationData);
+            PivotClass::template PivotingStep<_pivot, true>(i, factorization.GetQR(), factorization.mPermutationData);
         FactorizationStep(i, Q, R);
     }
 
@@ -203,7 +214,7 @@ QRDenseSerial<_type, _rows, _cols, _pivot>::GetPermutedVectorData(const VectorDa
                                                                   const Factorization& factorization)
 {
     if constexpr (_pivot != Pivot::NONE)
-        return PivotDenseSerial<_type, _rows>::PermuteVector(rhsData, factorization.mPermutationData);
+        return PivotClass::PermuteVector(rhsData, factorization.mPermutationData);
     else
         return rhsData;
 }
