@@ -188,6 +188,36 @@ BOOST_AUTO_TEST_CASE(Test_Gauss_NoPivot_5x5_F64_SSE)
 
 
 
+// Test 6x6 -----------------------------------------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(Test_Gauss_NoPivot_6x6_F32_Serial)
+{
+    TestGauss<F32, 6, Pivot::NONE, SolverType::SERIAL>();
+}
+
+
+
+BOOST_AUTO_TEST_CASE(Test_Gauss_NoPivot_6x6_F64_Serial)
+{
+    TestGauss<F64, 6, Pivot::NONE, SolverType::SERIAL>();
+}
+
+
+
+BOOST_AUTO_TEST_CASE(Test_Gauss_NoPivot_6x6_F32_SSE)
+{
+    TestGauss<F32, 6, Pivot::NONE, SolverType::SIMD>();
+}
+
+
+
+BOOST_AUTO_TEST_CASE(Test_Gauss_NoPivot_6x6_F64_SSE)
+{
+    TestGauss<F64, 6, Pivot::NONE, SolverType::SIMD>();
+}
+
+
+
 // Test 7x7 -----------------------------------------------------------------------------------------------------------
 
 BOOST_AUTO_TEST_CASE(Test_Gauss_NoPivot_7x7_F32_Serial)
@@ -402,6 +432,36 @@ BOOST_AUTO_TEST_CASE(Test_Gauss_PartialPivot_5x5_F32_SSE)
 BOOST_AUTO_TEST_CASE(Test_Gauss_PartialPivot_5x5_F64_SSE)
 {
     TestGauss<F64, 5, Pivot::PARTIAL, SolverType::SIMD>();
+}
+
+
+
+// Test 6x6 -----------------------------------------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(Test_Gauss_PartialPivot_6x6_F32_Serial)
+{
+    TestGauss<F32, 6, Pivot::PARTIAL, SolverType::SERIAL>();
+}
+
+
+
+BOOST_AUTO_TEST_CASE(Test_Gauss_PartialPivot_6x6_F64_Serial)
+{
+    TestGauss<F64, 6, Pivot::PARTIAL, SolverType::SERIAL>();
+}
+
+
+
+BOOST_AUTO_TEST_CASE(Test_Gauss_PartialPivot_6x6_F32_SSE)
+{
+    TestGauss<F32, 6, Pivot::PARTIAL, SolverType::SIMD>();
+}
+
+
+
+BOOST_AUTO_TEST_CASE(Test_Gauss_PartialPivot_6x6_F64_SSE)
+{
+    TestGauss<F64, 6, Pivot::PARTIAL, SolverType::SIMD>();
 }
 
 

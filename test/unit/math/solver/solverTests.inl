@@ -83,6 +83,13 @@ auto SolverTests<_type, _size, _solver>::GetPermutationIndices()
                                    {{3, 2, 4, 0, 1}}}};
     // clang-format on
 
+    if constexpr (_size == 6)
+        // clang-format off
+    return std::array<permArr, 3>{{{{0, 1, 2, 3, 4, 5}},
+                                   {{5, 2, 1, 4, 0, 3}},
+                                   {{4, 0, 3, 1, 5, 2}}}};
+    // clang-format on
+
 
     if constexpr (_size == 7)
         // clang-format off
@@ -130,6 +137,8 @@ std::array<_type, _size> SolverTests<_type, _size, _solver>::GetResultData()
     if constexpr (_size == 5)
         return {{1, 2, 3, 4, 5}};
 
+    if constexpr (_size == 6)
+        return {{1, 2, 3, 4, 5, 6}};
 
     if constexpr (_size == 7)
         return {{1, 2, 3, 4, 5, 6, 7}};
@@ -165,6 +174,8 @@ std::array<_type, _size> SolverTests<_type, _size, _solver>::GetRhsData()
     if constexpr (_size == 5)
         return {{-9, 0, 1, -3, -1}};
 
+    if constexpr (_size == 6)
+        return {{0, -6, 2, -8, 8, 8}};
 
     if constexpr (_size == 7)
         return {{-1, -8, -1, -8, -3, 6, -4}};
@@ -217,6 +228,16 @@ std::array<_type, _size * _size> SolverTests<_type, _size, _solver>::GetTranspos
                      7,  2,  7,  3, -9}};
     // clang-format on
 
+
+    if constexpr (_size == 6)
+        // clang-format off
+            return {{2,  4, -5, -3,  1,  2,
+                    -9,  2, -8,  2, -3,  5,
+                     4,  2, -3, -1,  5, -3,
+                     1, -6,  7,  7, -8, -1,
+                     5,  7, -7, -6,  2,  4,
+                     3,  1, -2,  4,  7, -7}};
+    // clang-format on
 
     if constexpr (_size == 7)
         // clang-format off

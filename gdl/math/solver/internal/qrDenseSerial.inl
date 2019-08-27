@@ -5,7 +5,6 @@
 #include "gdl/base/approx.h"
 #include "gdl/base/functions/pow.h"
 #include "gdl/math/solver/internal/backwardSubstitutionDenseSerial.h"
-//#include "gdl/math/solver/internal/forwardSubstitutionDenseSerial.h"
 #include "gdl/math/solver/internal/pivotDenseSerial.h"
 
 #include <cmath>
