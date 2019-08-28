@@ -92,14 +92,21 @@ std::array<_type, 32 * 32> GetMatrixData32()
     // clang-format on
 }
 
-
+template <typename _type, U32 _size>
+std::array<_type, _size> GetRandomArray()
+{
+    std::array<_type, _size> arr;
+    for (U32 i = 0; i < arr.size(); ++i)
+    {
+        arr[i] = rand() % 1000 + 1;
+    }
+    return arr;
+}
 
 template <typename _type, U32 _size>
 std::array<_type, _size * _size> GetMatrixDataRandom()
 {
-    std::array<_type, _size * _size> arr;
-    for (U32 i = 0; i < arr.size(); ++i)
-        arr[i] = rand() % 20 - 10;
+    static std::array<_type, _size* _size> arr = GetRandomArray<_type, _size * _size>();
 
     return arr;
 }
@@ -133,9 +140,7 @@ std::array<_type, 32> GetVectorData32()
 template <typename _type, U32 _size>
 std::array<_type, _size> GetVectorDataRandom()
 {
-    std::array<_type, _size> arr;
-    for (U32 i = 0; i < arr.size(); ++i)
-        arr[i] = rand() % 20 - 10;
+    static std::array<_type, _size> arr = GetRandomArray<_type, _size>();
 
     return arr;
 }
