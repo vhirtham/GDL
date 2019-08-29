@@ -31,8 +31,8 @@
 
 // Run benchmark ------------------------------------------------------------------------------------------------------
 
-// REMOVE IF SIMD VERSION IS IMPLEMENTED
-#define DISABLE_BENCHMARK_SIMD
+
+#define DISABLE_BENCHMARK_SIMD // REMOVE IF SIMD VERSION IS IMPLEMENTED !!!!!!!!!!!!!!!!!!!!!!!!!
 
 
 #define SOLVER_NAME QR
