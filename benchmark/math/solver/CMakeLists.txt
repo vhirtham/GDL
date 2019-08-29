@@ -6,7 +6,7 @@ addBenchmark(solver4)
 if(Eigen3_FOUND)
     target_compile_definitions(Benchmark_gauss
         PRIVATE
-            -DEIGEN3_FOUND)
+            ${SOLVER_BENCHMARK_DEFINITIONS})
 
     target_compile_definitions(Benchmark_lu
         PRIVATE

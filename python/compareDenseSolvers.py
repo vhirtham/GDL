@@ -48,6 +48,10 @@ class SolverBenchmarkData:
         self.serial.F32.partialPivot = BenchmarkResults(solverName, 'F32', 'partial pivoting')
         self.serial.F64.noPivot = BenchmarkResults(solverName, 'F64', 'no pivoting')
         self.serial.F64.partialPivot = BenchmarkResults(solverName, 'F64', 'partial pivoting')
+        self.serial.F32.noPivot.SetVectorizationName('Serial')
+        self.serial.F32.partialPivot.SetVectorizationName('Serial')
+        self.serial.F64.noPivot.SetVectorizationName('Serial')
+        self.serial.F64.partialPivot.SetVectorizationName('Serial')
         self.vectorizationNameSet = False
 
     def SetVectorizationName(self, vectorizationName):
@@ -79,11 +83,17 @@ def RunBenchmarks():
                 "-DSOLVER_BENCHMARK_DEFINITIONS=\"-DOVERRIDE_SETUP\" " + \
                 "../..;"
 
+        # Build and run Gauss Benchmark
+        cmds += "echo Benchmark Gauss solver;"
+        cmds += "make -j8 Benchmark_gauss;"
+        cmds += "./benchmark/math/solver/Benchmark_gauss --benchmark_out_format=json --benchmark_out=" + \
+                bmResultDir + "/Gauss.json;"
+
         # Build and run LU Benchmark
         cmds += "echo Benchmark LU solver;"
         cmds += "make -j8 Benchmark_lu;"
         cmds += "./benchmark/math/solver/Benchmark_lu --benchmark_out_format=json --benchmark_out=" + \
-                bmResultDir + "/LU.json"
+                bmResultDir + "/LU.json;"
 
         # Execute command string
         subprocess.run(cmds, shell=True)
@@ -171,14 +181,19 @@ def ReadSolverBenchmarkData(solverName):
 if runBenchmarks:
     RunBenchmarks()
 
-timeScalingFactor = 1E-6
+timeScalingFactor = 1
 
+gaussData = ReadSolverBenchmarkData('Gauss')
 luData = ReadSolverBenchmarkData('LU')
 
-plt.plot(luData.simd.F32.noPivot.size, luData.simd.F32.noPivot.time, label=luData.simd.F32.noPivot.benchmarkName)
+# plt.plot(luData.simd.F32.noPivot.size, luData.simd.F32.noPivot.time, label=luData.simd.F32.noPivot.benchmarkName)
+# plt.plot(gaussData.simd.F32.noPivot.size, gaussData.simd.F32.noPivot.time,
+#         label=gaussData.simd.F32.noPivot.benchmarkName)
+plt.plot(luData.serial.F32.noPivot.size, luData.serial.F32.noPivot.time, label=luData.serial.F32.noPivot.benchmarkName)
+plt.plot(gaussData.serial.F32.noPivot.size, gaussData.serial.F32.noPivot.time,
+         label=gaussData.serial.F32.noPivot.benchmarkName)
 # plt.plot(luData.simd.F64.noPivot.size, luData.simd.F64.noPivot.time, label=luData.simd.F64.noPivot.benchmarkName)
-plt.plot(luData.simd.F32.partialPivot.size, luData.simd.F32.partialPivot.time,
-         label=luData.simd.F32.partialPivot.benchmarkName)
+# plt.plot(luData.simd.F32.partialPivot.size, luData.simd.F32.partialPivot.time, label=luData.simd.F32.partialPivot.benchmarkName)
 # plt.plot(luData.serial.F32.noPivot.size, luData.serial.F32.noPivot.time)
 # plt.plot(luData.serial.F32.partialPivot.size, luData.serial.F32.partialPivot.time)
 plt.legend()
