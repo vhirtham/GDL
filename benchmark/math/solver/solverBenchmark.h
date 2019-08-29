@@ -15,59 +15,98 @@ using namespace GDL::Solver;
 #define BENCHMARK_N 64
 #endif // BENCHMARK_N
 
-
+#ifdef __AVX2__
+#define SIMD_F32 AVX_F32
+#define SIMD_F64 AVX_F64
+#else
+#define SIMD_F32 SSE_F32
+#define SIMD_F64 SSE_F64
+#endif
 
 // Fixture declaration ------------------------------------------------------------------------------------------------
 
-using Type = F32;
 constexpr U32 N = BENCHMARK_N;
 
-template <template <typename, U32, U32> class _matrix, template <typename, U32, bool = true> class _vector>
+template <typename _type, template <typename, U32, U32> class _matrix,
+          template <typename, U32, bool = true> class _vector>
 class FixtureTemplate : public benchmark::Fixture
 {
 public:
-    _matrix<Type, 8, 8> A8;
-    _vector<Type, 8> b8;
-    _matrix<Type, 16, 16> A16;
-    _vector<Type, 16> b16;
-    _matrix<Type, 24, 24> A24;
-    _vector<Type, 24> b24;
-    _matrix<Type, 32, 32> A32;
-    _vector<Type, 32> b32;
-    _matrix<Type, 48, 48> A48;
-    _vector<Type, 48> b48;
-    _matrix<Type, 64, 64> A64;
-    _vector<Type, 64> b64;
-    _matrix<Type, 72, 72> A72;
-    _vector<Type, 72> b72;
-    _matrix<Type, N, N> AN;
-    _vector<Type, N> bN;
+    _matrix<_type, 8, 8> A8;
+    _vector<_type, 8> b8;
+    _matrix<_type, 16, 16> A16;
+    _vector<_type, 16> b16;
+    _matrix<_type, 24, 24> A24;
+    _vector<_type, 24> b24;
+    _matrix<_type, 32, 32> A32;
+    _vector<_type, 32> b32;
+    _matrix<_type, 48, 48> A48;
+    _vector<_type, 48> b48;
+    _matrix<_type, 56, 56> A56;
+    _vector<_type, 56> b56;
+    _matrix<_type, 64, 64> A64;
+    _vector<_type, 64> b64;
+    _matrix<_type, 72, 72> A72;
+    _vector<_type, 72> b72;
+    _matrix<_type, 80, 80> A80;
+    _vector<_type, 80> b80;
+    _matrix<_type, 88, 88> A88;
+    _vector<_type, 88> b88;
+    _matrix<_type, 96, 96> A96;
+    _vector<_type, 96> b96;
+    _matrix<_type, 104, 104> A104;
+    _vector<_type, 104> b104;
+    _matrix<_type, 112, 112> A112;
+    _vector<_type, 112> b112;
+    _matrix<_type, 120, 120> A120;
+    _vector<_type, 120> b120;
+    _matrix<_type, 128, 128> A128;
+    _vector<_type, 128> b128;
+    _matrix<_type, N, N> AN;
+    _vector<_type, N> bN;
 
 
     FixtureTemplate()
-        : A8{GetMatrixData8<Type>()}
-        , b8{GetVectorData8<Type>()}
-        , A16{GetMatrixData16<Type>()}
-        , b16{GetVectorData16<Type>()}
-        , A24{GetMatrixDataRandom<Type, 24>()}
-        , b24{GetVectorDataRandom<Type, 24>()}
-        , A32{GetMatrixData32<Type>()}
-        , b32{GetVectorData32<Type>()}
-        , A48{GetMatrixDataRandom<Type, 48>()}
-        , b48{GetVectorDataRandom<Type, 48>()}
-        , A64{GetMatrixDataRandom<Type, 64>()}
-        , b64{GetVectorDataRandom<Type, 64>()}
-        , A72{GetMatrixDataRandom<Type, 72>()}
-        , b72{GetVectorDataRandom<Type, 72>()}
-        , AN{GetMatrixDataRandom<Type, N>()}
-        , bN{GetVectorDataRandom<Type, N>()}
+        : A8{GetMatrixData8<_type>()}
+        , b8{GetVectorData8<_type>()}
+        , A16{GetMatrixData16<_type>()}
+        , b16{GetVectorData16<_type>()}
+        , A24{GetMatrixDataRandom<_type, 24>()}
+        , b24{GetVectorDataRandom<_type, 24>()}
+        , A32{GetMatrixData32<_type>()}
+        , b32{GetVectorData32<_type>()}
+        , A48{GetMatrixDataRandom<_type, 48>()}
+        , b48{GetVectorDataRandom<_type, 48>()}
+        , A56{GetMatrixDataRandom<_type, 56>()}
+        , b56{GetVectorDataRandom<_type, 56>()}
+        , A64{GetMatrixDataRandom<_type, 64>()}
+        , b64{GetVectorDataRandom<_type, 64>()}
+        , A72{GetMatrixDataRandom<_type, 72>()}
+        , b72{GetVectorDataRandom<_type, 72>()}
+        , A80{GetMatrixDataRandom<_type, 80>()}
+        , b80{GetVectorDataRandom<_type, 80>()}
+        , A88{GetMatrixDataRandom<_type, 88>()}
+        , b88{GetVectorDataRandom<_type, 88>()}
+        , A96{GetMatrixDataRandom<_type, 96>()}
+        , b96{GetVectorDataRandom<_type, 96>()}
+        , A104{GetMatrixDataRandom<_type, 104>()}
+        , b104{GetVectorDataRandom<_type, 104>()}
+        , A112{GetMatrixDataRandom<_type, 112>()}
+        , b112{GetVectorDataRandom<_type, 112>()}
+        , A120{GetMatrixDataRandom<_type, 120>()}
+        , b120{GetVectorDataRandom<_type, 120>()}
+        , A128{GetMatrixDataRandom<_type, 128>()}
+        , b128{GetVectorDataRandom<_type, 128>()}
+        , AN{GetMatrixDataRandom<_type, N>()}
+        , bN{GetVectorDataRandom<_type, N>()}
     {
     }
 };
 
-using Serial = FixtureTemplate<MatSerial, VecSerial>;
-using SIMD = FixtureTemplate<MatSIMD, VecSIMD>;
-
+using Serial_F32 = FixtureTemplate<F32, MatSerial, VecSerial>;
+using Serial_F64 = FixtureTemplate<F64, MatSerial, VecSerial>;
+using SIMD_F32 = FixtureTemplate<F32, MatSIMD, VecSIMD>;
+using SIMD_F64 = FixtureTemplate<F64, MatSIMD, VecSIMD>;
 
 
 // Helpers ------------------------------------------------------------------------------------------------------------
@@ -132,7 +171,15 @@ constexpr Pivot PivotEnumPartialPivot = Solver::Pivot::PARTIAL;
     SOLVER_BENCHMARK(fixture, name, solver, 24)                                                                        \
     SOLVER_BENCHMARK(fixture, name, solver, 32)                                                                        \
     SOLVER_BENCHMARK(fixture, name, solver, 48)                                                                        \
+    SOLVER_BENCHMARK(fixture, name, solver, 56)                                                                        \
     SOLVER_BENCHMARK(fixture, name, solver, 64)                                                                        \
-    SOLVER_BENCHMARK(fixture, name, solver, 72)
+    SOLVER_BENCHMARK(fixture, name, solver, 72)                                                                        \
+    SOLVER_BENCHMARK(fixture, name, solver, 80)                                                                        \
+    SOLVER_BENCHMARK(fixture, name, solver, 88)                                                                        \
+    SOLVER_BENCHMARK(fixture, name, solver, 96)                                                                        \
+    SOLVER_BENCHMARK(fixture, name, solver, 104)                                                                       \
+    SOLVER_BENCHMARK(fixture, name, solver, 112)                                                                       \
+    SOLVER_BENCHMARK(fixture, name, solver, 120)                                                                       \
+    SOLVER_BENCHMARK(fixture, name, solver, 128)
 #endif
 #endif
