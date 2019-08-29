@@ -1,5 +1,6 @@
 addBenchmark(gauss)
 addBenchmark(lu)
+addBenchmark(qr)
 addBenchmark(solver3)
 addBenchmark(solver4)
 
@@ -9,6 +10,10 @@ if(Eigen3_FOUND)
             ${SOLVER_BENCHMARK_DEFINITIONS})
 
     target_compile_definitions(Benchmark_lu
+        PRIVATE
+            ${SOLVER_BENCHMARK_DEFINITIONS})
+
+    target_compile_definitions(Benchmark_qr
         PRIVATE
             ${SOLVER_BENCHMARK_DEFINITIONS})
 

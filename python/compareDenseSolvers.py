@@ -95,6 +95,12 @@ def RunBenchmarks():
         cmds += "./benchmark/math/solver/Benchmark_lu --benchmark_out_format=json --benchmark_out=" + \
                 bmResultDir + "/LU.json;"
 
+        # Build and run QR Benchmark
+        cmds += "echo Benchmark QR solver;"
+        cmds += "make -j8 Benchmark_qr;"
+        cmds += "./benchmark/math/solver/Benchmark_qr --benchmark_out_format=json --benchmark_out=" + \
+                bmResultDir + "/QR.json;"
+
         # Execute command string
         subprocess.run(cmds, shell=True)
 
@@ -185,6 +191,7 @@ timeScalingFactor = 1
 
 gaussData = ReadSolverBenchmarkData('Gauss')
 luData = ReadSolverBenchmarkData('LU')
+qrData = ReadSolverBenchmarkData('QR')
 
 # plt.plot(luData.simd.F32.noPivot.size, luData.simd.F32.noPivot.time, label=luData.simd.F32.noPivot.benchmarkName)
 # plt.plot(gaussData.simd.F32.noPivot.size, gaussData.simd.F32.noPivot.time,
@@ -192,6 +199,8 @@ luData = ReadSolverBenchmarkData('LU')
 plt.plot(luData.serial.F32.noPivot.size, luData.serial.F32.noPivot.time, label=luData.serial.F32.noPivot.benchmarkName)
 plt.plot(gaussData.serial.F32.noPivot.size, gaussData.serial.F32.noPivot.time,
          label=gaussData.serial.F32.noPivot.benchmarkName)
+plt.plot(qrData.serial.F32.noPivot.size, qrData.serial.F32.noPivot.time,
+         label=qrData.serial.F32.noPivot.benchmarkName)
 # plt.plot(luData.simd.F64.noPivot.size, luData.simd.F64.noPivot.time, label=luData.simd.F64.noPivot.benchmarkName)
 # plt.plot(luData.simd.F32.partialPivot.size, luData.simd.F32.partialPivot.time, label=luData.simd.F32.partialPivot.benchmarkName)
 # plt.plot(luData.serial.F32.noPivot.size, luData.serial.F32.noPivot.time)
