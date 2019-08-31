@@ -5,10 +5,11 @@ import json
 
 
 class BenchmarkResults:
-    def __init__(self, solverName, typeName, pivotName):
+    def __init__(self, solverName, typeName, pivotName,color):
         self.solverName = solverName
         self.pivotName = pivotName
         self.typeName = typeName
+        self.color = color
         self.size = list()
         self.time = list()
         self.cpu = list()
@@ -19,28 +20,36 @@ class BenchmarkResults:
         self.benchmarkNameNoType = self.solverName + " - " + vectorizationName + " - " + self.pivotName
         self.benchmarkNameShort = self.solverName + " - " + self.pivotName
 
+    def GetName(self):
+        return self.solverName + " - " + self.vectorizationName + " - " + self.typeName + " - " + self.pivotName
+
+
 
 class SolverBenchmarkData:
 
-    def __init__(self, solverName, simdTypeName='SIMD'):
+    def __init__(self, solverName, color):
         self.simd = lambda: 0
         self.simd.F32 = lambda: 0
         self.simd.F64 = lambda: 0
-        self.simd.F32.noPivot = BenchmarkResults(solverName, 'F32', 'no pivoting')
-        self.simd.F32.partialPivot = BenchmarkResults(solverName, 'F32', 'partial pivoting')
-        self.simd.F64.noPivot = BenchmarkResults(solverName, 'F64', 'no pivoting')
-        self.simd.F64.partialPivot = BenchmarkResults(solverName, 'F64', 'partial pivoting')
+        self.simd.F32.noPivot = BenchmarkResults(solverName, 'F32', 'no pivoting', color)
+        self.simd.F32.partialPivot = BenchmarkResults(solverName, 'F32', 'partial pivoting', color)
+        self.simd.F64.noPivot = BenchmarkResults(solverName, 'F64', 'no pivoting', color)
+        self.simd.F64.partialPivot = BenchmarkResults(solverName, 'F64', 'partial pivoting', color)
         self.serial = lambda: 0
         self.serial.F32 = lambda: 0
         self.serial.F64 = lambda: 0
-        self.serial.F32.noPivot = BenchmarkResults(solverName, 'F32', 'no pivoting')
-        self.serial.F32.partialPivot = BenchmarkResults(solverName, 'F32', 'partial pivoting')
-        self.serial.F64.noPivot = BenchmarkResults(solverName, 'F64', 'no pivoting')
-        self.serial.F64.partialPivot = BenchmarkResults(solverName, 'F64', 'partial pivoting')
+        self.serial.F32.noPivot = BenchmarkResults(solverName, 'F32', 'no pivoting', color)
+        self.serial.F32.partialPivot = BenchmarkResults(solverName, 'F32', 'partial pivoting', color)
+        self.serial.F64.noPivot = BenchmarkResults(solverName, 'F64', 'no pivoting', color)
+        self.serial.F64.partialPivot = BenchmarkResults(solverName, 'F64', 'partial pivoting', color)
         self.serial.F32.noPivot.SetVectorizationName('Serial')
         self.serial.F32.partialPivot.SetVectorizationName('Serial')
         self.serial.F64.noPivot.SetVectorizationName('Serial')
         self.serial.F64.partialPivot.SetVectorizationName('Serial')
+        self.simd.F32.noPivot.SetVectorizationName('SIMD')
+        self.simd.F32.partialPivot.SetVectorizationName('SIMD')
+        self.simd.F64.noPivot.SetVectorizationName('SIMD')
+        self.simd.F64.partialPivot.SetVectorizationName('SIMD')
         self.vectorizationNameSet = False
 
     def SetVectorizationName(self, vectorizationName):
@@ -107,8 +116,8 @@ def AppendBenchmarkResults(bmResults, bmData, size):
     bmResults.cpu.append(float(bmData['cpu_time']))
 
 
-def ReadBenchmarkResult(solverName):
-    solverBenchmarkData = SolverBenchmarkData(solverName)
+def ReadBenchmarkResult(solverName, color):
+    solverBenchmarkData = SolverBenchmarkData(solverName, color)
     fileName = solverName + '.json'
 
     with open(fileName) as json_file:
