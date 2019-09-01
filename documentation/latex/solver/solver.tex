@@ -7,12 +7,33 @@
 \usepackage{minted}
 \usepackage{mdframed}  
 \usepackage{xcolor}
+\usepackage{tikz}
+
 
 \title{Direct solvers for dense matrices}
 
 
 \newcommand{\pth}[1]{\left(#1\right)}
+\newcommand{\abs}[1]{\ensuremath{\left\vert#1\right\vert}}
+\newcommand{\norm}[1]{\ensuremath{\abs{\abs{#1}}}}
 \surroundwithmdframed[linewidth=0pt, backgroundcolor=black!10]{minted} 
+
+
+
+
+\newcommand{\draftNote}[1]
+{
+		\begin{mdframed}[linewidth=0pt, backgroundcolor=red!10]
+			#1
+		\end{mdframed}
+}
+
+
+\newcommand{\draftNoteInline}[1]
+{
+	\textcolor{red}{(#1)}
+}
+
 
 \begin{document}
 
