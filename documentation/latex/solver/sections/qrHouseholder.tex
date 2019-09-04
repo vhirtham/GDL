@@ -251,9 +251,14 @@ Consider the linear System $\mathbf{Ax} = \mathbf{r}$ with:
 \mathbf{A}
 =
 \begin{bmatrix}
-a_0&b_0&c_0\\
-a_1&b_1&c_1\\
-a_2&b_2&c_2
+\mathbf{a} & \mathbf{b} & \mathbf{c} & \mathbf{d}
+\end{bmatrix}
+=
+\begin{bmatrix}
+a_0&b_0&c_0&d_0\\
+a_1&b_1&c_1&d_1\\
+a_2&b_2&c_2&d_2\\
+a_3&b_3&c_3&d_3
 \end{bmatrix}
 &&
 \mathbf{x}
@@ -261,7 +266,8 @@ a_2&b_2&c_2
 \begin{bmatrix}
 x_0\\
 x_1\\
-x_2
+x_2\\
+x_3
 \end{bmatrix}
 &&
 \mathbf{r}
@@ -269,31 +275,38 @@ x_2
 \begin{bmatrix}
 r_0\\
 r_1\\
-r_2
+r_2\\
+r_3
 \end{bmatrix}
 \end{align*}
-
+%
 The algorithm starts by calculating a Householder reflection that turns all values of the first column below the main diagonal into zeros:
 
 \begin{align}
-\mathbf{H}_0\mathbf{A} 
+\mathbf{H}\mathbf{A} 
 =
-\mathbf{A}_1
+\mathbf{\bar{A}}
 =
 \begin{bmatrix}
-a_0^1&b_0^1&c_0^1\\
-0    &b_1^1&c_1^1\\
-0    &b_2^1&c_2^1
+\mathbf{\bar{a}} & \mathbf{\bar{b}} & \mathbf{\bar{c}} & \mathbf{\bar{d}}
+\end{bmatrix}
+=
+\begin{bmatrix}
+\bar{a}_0&\bar{b}_0&\bar{c}_0&\bar{d}_0\\
+0        &\bar{b}_1&\bar{c}_1&\bar{d}_1\\
+0        &\bar{b}_2&\bar{c}_2&\bar{d}_2\\
+0        &\bar{b}_3&\bar{c}_3&\bar{d}_3
 \end{bmatrix}					  
 \end{align}
 %
-Note that the superscripted numbers are just used to differ between members of $\mathbf{A}$ and $\mathbf{A}_1$ and shouldn't be understood as mathematical exponent.
-The necessary transformation must reflects the first column of $\mathbf{A}$, which will be denoted as $\mathbf{a}$, onto the axis
+Note, that different numbers of bars are used to differ between multiple intermediate results.
+The necessary first Householder transformation must reflects the column $\mathbf{a}$ of the original matrix $\mathbf{A}$ onto the axis
 \begin{align}
-\mathbf{e}_0  
+\mathbf{e}  
 =
 \begin{bmatrix}
 1\\
+0\\
 0\\
 0
 \end{bmatrix}
@@ -302,56 +315,61 @@ The necessary transformation must reflects the first column of $\mathbf{A}$, whi
 Using \cref{eq:housholderCalculateReflectionNormal} yields
 
 \begin{align}
-\mathbf{v}_0 
+\mathbf{v} 
 &= 
-\frac{1}{\norm{\mathbf{a} - \lambda_0 \mathbf{e}_0}}\pth{\mathbf{a} - \lambda_0 \mathbf{e}_0}\\
+\frac{1}{\norm{\mathbf{a} - \lambda \mathbf{e}}}\pth{\mathbf{a} - \lambda \mathbf{e}}\\
 &=
-\frac{1}{\norm{\mathbf{a} - \lambda_0 \mathbf{e}_0}}
+\frac{1}{\norm{\mathbf{a} - \lambda \mathbf{e}}}
 \pth{
 \begin{bmatrix}
 a_0\\
 a_1\\
-a_2
+a_2\\
+a_3
 \end{bmatrix}
 -	
-\lambda_0	
+\lambda	
 \begin{bmatrix}
 1\\
+0\\
 0\\
 0
 \end{bmatrix}
 }\\
 \label{eq:qrReflectionVector0StillContainingLambda}
 &=
-\frac{1}{\norm{\mathbf{a} - \lambda_0 \mathbf{e}_0}}
+\frac{1}{\norm{\mathbf{a} - \lambda \mathbf{e}}}
 \begin{bmatrix}
-a_0 - \lambda_0\\
+a_0 - \lambda\\
 a_1\\
-a_2
+a_2\\
+a_3
 \end{bmatrix}
 \end{align}
 %
-Since $\mathbf{e}_0$ is of unit length, \cref{eq:housholderCalculateReflectionLambda} gives:
+Since $\mathbf{e}$ is of unit length, \cref{eq:housholderCalculateReflectionLambda} gives:
 
 \begin{align}
-\lambda_0 = \pm \norm{\mathbf{a}}
+\lambda = \pm \norm{\mathbf{a}}
 \end{align}
 %
 Generally, the sign can be chosen freely, but for numerical reasons one should pick the opposite sign of $a_0$. 
 This way the result with the larger magnitude is selected from $a_0 -  \pm \norm{\mathbf{a}}$.
-To illustrate why this is necessary, consider the case $\mathbf{a} = \mathbf{e}_0$.
+To illustrate why this is necessary, consider the case $\mathbf{a} = \mathbf{e}$.
 Using the same sign yields:
 
 \begin{align}
-\mathbf{e}_0 - \norm{\mathbf{e}_0}\mathbf{e}_0 
+\mathbf{e} - \norm{\mathbf{e}}\mathbf{e} 
 =
 \begin{bmatrix}
-1 - \norm{\mathbf{e}_0}\\
+1 - \norm{\mathbf{e}}\\
+0\\
 0\\
 0
 \end{bmatrix}
 =
 \begin{bmatrix}
+0\\
 0\\
 0\\
 0 
@@ -361,7 +379,7 @@ Using the same sign yields:
 and in result:
 
 \begin{align}
-\frac{1}{\norm{\mathbf{e}_0 - \norm{\mathbf{e}_0}\mathbf{e}_0}} = \frac{1}{\color{red}{\mathbf{0}}}
+\frac{1}{\norm{\mathbf{e} - \norm{\mathbf{e}}\mathbf{e}}} = \frac{1}{\color{red}{\mathbf{0}}}
 \end{align}
 %
 Choosing the opposite sign prevents this from happening unless $\mathbf{a}$ is already of length 0, which would indicate that the matrix is singular.
@@ -369,7 +387,7 @@ Combining
 
 
 \begin{align}
-\lambda_0 = -\textrm{sign}\pth{a_0} \norm{\mathbf{a}}
+\lambda = -\textrm{sign}\pth{a_0} \norm{\mathbf{a}}
 \end{align}
 %
 with \cref{eq:qrReflectionVector0StillContainingLambda} yields:
@@ -377,134 +395,354 @@ with \cref{eq:qrReflectionVector0StillContainingLambda} yields:
 
 
 \begin{align}
-\mathbf{v}_0 
+\mathbf{v} 
 &=
-\frac{1}{\norm{\mathbf{w}_0}}\mathbf{w}_0
+\frac{1}{\norm{\mathbf{w}}}\mathbf{w}
 \end{align}
 %
 with:
 
 \begin{align}
-\mathbf{w}_0 
+\mathbf{w} 
 &=
 \begin{bmatrix}
 a_0 + \textrm{sign}\pth{a_0} \norm{\mathbf{a}}\\
 a_1\\
-a_2
+a_2\\
+a_3
 \end{bmatrix}
 \end{align}
 %
-Now the intermediate matrix $\mathbf{A}_1$ can be determined by calculating $\mathbf{H}_0$ ( \cref{eq:householderUnitLength}) and applying it to $\mathbf{A}$.
+Now the intermediate matrix $\mathbf{\bar{A}}$ can be determined by calculating $\mathbf{H}$ with \cref{eq:householderUnitLength} and multiplying it with $\mathbf{A}$.
 However, the more efficient way is to use \cref{eq:householderEfficientMatrixMatrix}.
+Also, keep in mind that the vector $\lambda\mathbf{e}$, which was used to calculate the reflection normal, is equal to the first column $\mathbf{\bar{a}}$ of $\mathbf{\bar{A}}$.
+So there is no need to calculate $\mathbf{\bar{a}}$ again.
 
-After obtaining $\mathbf{A}_1$, another reflection $\mathbf{H}_1$ is calculated which turns every value of the second column that is located below the main diagonal into zeros:
+After obtaining $\mathbf{\bar{A}}$, another reflection $\mathbf{\bar{H}}$ is calculated which turns every value of the second column that is located below the main diagonal into zeros:
 
 \begin{align}
-\mathbf{H}_1\mathbf{H}_0\mathbf{A} 
+\mathbf{\bar{H}}\mathbf{H}\mathbf{A} 
 = 
-\mathbf{H}_1\mathbf{A}_1
+\mathbf{\bar{H}}\mathbf{\bar{A}}
 = 
-\mathbf{A}_2
+\mathbf{\bar{\bar{A}}}
 =
 \begin{bmatrix}
-a_0^2&b_0^2&c_0^2\\
-0    &b_1^2&c_1^2\\
-0    &0    &c_2^2
+\mathbf{\bar{\bar{a}}}&\mathbf{\bar{\bar{b}}}&\mathbf{\bar{\bar{c}}}&\mathbf{\bar{\bar{d}}}
+\end{bmatrix}	
+=
+\begin{bmatrix}
+\bar{\bar{a}}_0&\bar{\bar{b}}_0&\bar{\bar{c}}_0&\bar{\bar{d}}_0\\
+0              &\bar{\bar{b}}_1&\bar{\bar{c}}_1&\bar{\bar{d}}_1\\
+0              &0              &\bar{\bar{c}}_2&\bar{\bar{d}}_2\\
+0              &0              &\bar{\bar{c}}_3&\bar{\bar{d}}_3
 \end{bmatrix}					  
 \end{align}
 %
-Note that $\mathbf{H}_1$ must be constructed in a way, that it doesn't affect values that lie on the axis $\mathbf{e}_0$ (first row of $\mathbf{A}_1$).
-Otherwise, because of \cref{eq:orthogonalPreserveLength}, one or more values below $a_0^1$ in the first column of $\mathbf{A}_1$ will become different from 0 again.
-This means that the reflection plane must contain the axis $\mathbf{e}_0$.
-Hence, the reflection plane's normal $\mathbf{v}_1$ must have the form: 
+Note that $\mathbf{\bar{H}}$ must be constructed in a way, that it doesn't affect values that lie on the axis $\mathbf{e}$ (first row of $\mathbf{\bar{A}}$).
+Otherwise, because of \cref{eq:orthogonalPreserveLength}, one or more values below $\bar{a}_0$ in $\mathbf{\bar{a}}$ will become different from 0 again.
+This can only be achieved if the reflection plane contains the axis $\mathbf{e}$.
+Hence, the reflection plane's normal $\mathbf{\bar{v}}$ must have the form: 
 
 \begin{align}
 \label{eq:qrReflectionVector1Requirement}
-\mathbf{v}_1
+\mathbf{\bar{v}}
 = 
 \begin{bmatrix}
 0\\
-v_1^1\\
-v_2^1
+\bar{v}_1\\
+\bar{v}_2\\
+\bar{v}_3
 \end{bmatrix}
 \end{align}
 %
-The corresponding Householder matrix $\mathbf{H}_1$ would be (\cref{eq:householderUnitLength}):
+The corresponding Householder matrix $\mathbf{\bar{H}}$ would be (\cref{eq:householderUnitLength}):
 
 \begin{align}
-\mathbf{H}_1
+\mathbf{\bar{H}}
 =
 \begin{bmatrix}
-1    &0            &0       \\
-0    &1- v_1^1v_1^1&  v_2^1v_1^1\\
-0    &   v_1^1v_2^1&1-v_2^1v_2^1
+1    &0                   &0                   &0                   \\
+0    &1-\bar{v}_1\bar{v}_1&  \bar{v}_1\bar{v}_2&  \bar{v}_1\bar{v}_3\\
+0    &  \bar{v}_2\bar{v}_1&1-\bar{v}_2\bar{v}_2&  \bar{v}_2\bar{v}_3\\
+0    &  \bar{v}_3\bar{v}_1&  \bar{v}_3\bar{v}_2&1-\bar{v}_3\bar{v}_3
 \end{bmatrix}					  
 \end{align}
 %
-Since the values on the axis $\mathbf{e}_0$ should remain constant, it is sufficient to continue working with a reduced system by removing the corresponding rows and columns:
+As visible, this matrix wouldn't change the first column and row of $\mathbf{\bar{A}}$.
+Calculating the second reflection normal gets a bit more complicated.
+Using \cref{eq:housholderCalculateReflection} gives:
 
 \begin{align}
-\mathbf{\hat{A}}_1
-=
-\begin{bmatrix}
-b_1^1&c_1^1\\
-b_2^1&c_2^1
-\end{bmatrix}					  
-\end{align}
-
-
-\begin{align}
-\mathbf{\hat{H}}_1\mathbf{\hat{A}}_1
+\mathbf{\bar{H}} \mathbf{\bar{b}} 
 = 
-\mathbf{\hat{A}}_2
-=
+\bar{\lambda} \mathbf{\bar{e}}
+= 
+\bar{\lambda} 
 \begin{bmatrix}
-b_1^2&c_1^2\\
-0    &c_2^2
-\end{bmatrix}					  
+\bar{e}_0\\
+\bar{e}_1\\
+0\\
+0
+\end{bmatrix}
+=  
+\begin{bmatrix}
+\bar{\bar{b}}_0\\
+\bar{\bar{b}}_1\\
+0\\
+0
+\end{bmatrix}
+= 
+\mathbf{\bar{\bar{b}}} 
 \end{align}
 %
-Now the calculation of the reflection can be performed exactly as during the first step, yielding the vector 
+The vector $\mathbf{\bar{e}}$ doesn't lie on a coordinate axis, as during the first reflection's calculation, but in a plane spanned by two of the coordinate systems axes.
+Because of the constraint that the transformation is not allowed to modify the first component of $\mathbf{\bar{b}}$, the values $\bar{e}_0$ and $\bar{e}_1$ can not be chosen arbitrarily.
+However, this constraint also means that:
 
 \begin{align}
-\mathbf{\hat{v}}_1
+\bar{b}_0 = \bar{\bar{b}}_0 = \bar{\lambda}\bar{e}_0
+\end{align}
+%
+Since the difference of $\mathbf{\bar{b}}$ and $\mathbf{\bar{\bar{b}}}$ is a normal of the reflection plane (compare \cref{sec:householderCalculateSpecificReflection}) it follows:
+
+\begin{align}
+\mathbf{\bar{w}}
+= 
+\begin{bmatrix}
+\bar{w}_0\\
+\bar{w}_1\\
+\bar{w}_2\\
+\bar{w}_3
+\end{bmatrix}
+= 
+\begin{bmatrix}
+\bar{b}_0\\
+\bar{b}_1\\
+\bar{b}_2\\
+\bar{b}_3
+\end{bmatrix}
+-
+\begin{bmatrix}
+\bar{\bar{b}}_0\\
+\bar{\lambda}\bar{e}_1\\
+0\\
+0
+\end{bmatrix}
 =
 \begin{bmatrix}
-v_1^1\\
-v_2^1
+0\\
+\bar{b}_1 - \bar{\lambda}\bar{e}_1\\
+\bar{b}_2\\
+\bar{b}_3
 \end{bmatrix}
 \end{align}
 %
-which is the reduced equivalent of $\mathbf{v}_1$ (compare with \cref{eq:qrReflectionVector1Requirement}).
-At this point, the decomposition process is finished, because $\mathbf{A}_2$ is already an upper triangular matrix.
+The only remaining unknown value is the product $\bar{\lambda}\bar{e}_1$, respectively $\bar{\bar{b}}_1$.
+It can be obtained with the property of orthogonal matrices to preserve a vector's length:
 
 \begin{align}
-\mathbf{A}_2 = \mathbf{R}
+\norm{\mathbf{\bar{b}}} 
+&= 
+\norm{\mathbf{\bar{\bar{b}}}}
+\\
+\sqrt{\bar{b}_0^2 + \bar{b}_1^2 + \bar{b}_2^2 + \bar{b}_3^2}
+&=
+\sqrt{\bar{\bar{b}}_0^2 + \bar{\bar{b}}_1^2}
 \end{align}
 %
-For larger matrices the algorithm would simply continue column by column until $\mathbf{R}$ is obtained.
-Because of 
+Because of $\bar{b}_0^2 = \bar{\bar{b}}_0^2$ it follows:
 
 \begin{align}
-\mathbf{R} = \mathbf{H}_1\mathbf{H}_0\mathbf{A} = \mathbf{Q}^T\mathbf{A}
+\bar{\bar{b}}_1^2
+&=
+\bar{b}_1^2 + \bar{b}_2^2 + \bar{b}_3^2 
+\\
+\\
+\bar{\bar{b}}_1
+&=
+\pm \sqrt{\bar{b}_1^2 + \bar{b}_2^2 + \bar{b}_3^2}
+\\
+&= \pm \norm{\mathbf{\dot{\bar{b}}}}
 \end{align}
 %
-it follows: 
+The vector $\mathbf{\dot{\bar{b}}}$ is equal to $\mathbf{\bar{b}}$ without its first column.
+Therefore, $\mathbf{\bar{w}}$ and $\mathbf{\bar{v}}$ are totally independent of $\bar{b}_0$.
+In fact, the non-zero components of $\mathbf{\bar{w}}$ can also be obtained from calculating the first reflection's normal 
 
 \begin{align}
-\mathbf{Q}^T &= \mathbf{H}_1\mathbf{H}_0\\
+\mathbf{\dot{\bar{w}}}
+= 
+\begin{bmatrix}
+\bar{w}_1\\
+\bar{w}_2\\
+\bar{w}_3
+\end{bmatrix}
+\end{align}
+%
+of the reduced matrix:
+
+\begin{align}
+\mathbf{\dot{\bar{A}}}
+=
+\begin{bmatrix}
+\mathbf{\dot{\bar{b}}} & \mathbf{\dot{\bar{c}}} & \mathbf{\dot{\bar{d}}}
+\end{bmatrix}
+=
+\begin{bmatrix}
+\bar{b}_1&\bar{c}_1&\bar{d}_1\\
+\bar{b}_2&\bar{c}_2&\bar{d}_2\\
+\bar{b}_3&\bar{c}_3&\bar{d}_3
+\end{bmatrix}					  
+\end{align}
+%
+As previously detected, the transformation $\mathbf{\bar{H}}$ does not affect the first row and column of $\mathbf{\bar{A}}$.
+Therefore, all components of $\mathbf{\bar{\bar{A}}}$, that differ from those of $\mathbf{\bar{A}}$, can be determined with the reduced system
+
+\begin{align}
+\mathbf{\dot{\bar{H}}}\mathbf{\dot{\bar{A}}}
+= 
+\mathbf{\dot{\bar{\bar{A}}}}
+=
+\begin{bmatrix}
+\mathbf{\dot{\bar{\bar{b}}}}&\mathbf{\dot{\bar{\bar{c}}}}&\mathbf{\dot{\bar{\bar{d}}}}
+\end{bmatrix}	
+=
+\begin{bmatrix}
+\bar{\bar{b}}_1&\bar{\bar{c}}_1&\bar{\bar{d}}_1\\
+0              &\bar{\bar{c}}_2&\bar{\bar{d}}_2\\
+0              &\bar{\bar{c}}_3&\bar{\bar{d}}_3
+\end{bmatrix}					  
+\end{align}
+%
+Like the other matrices, $\mathbf{\dot{\bar{H}}}$ is equal to $\mathbf{\bar{H}}$ without the first row and column.
+As a graphical example, \cref{fig:householderReflection3d} shows that a reflection plane containing the x-axis  does not affect the reflected vector's x-values and that the normal can be calculated independently of the x-values from the involved vectors.
+%
+\begin{figure}
+\centering
+\begin{tikzpicture}
+[x  = {(1cm,0cm)},
+y  = {(0.5cm,0.5cm)},
+z  = {(0cm,1cm)},
+scale = 1.5]
+\fill [fill=black!30!white] (-1,-1,-0.4142) -- (-1,5,2.071) -- (5,5,2.071) -- (5,-1,-0.4142) -- (-1,-1,-0.4142);
+\draw[color= black!15!white] (0,-1,-0.4142) -- (0,5,2.071);
+\draw[color= black!15!white] (1,-1,-0.4142) -- (1,5,2.071);
+\draw[color= black!15!white] (2,-1,-0.4142) -- (2,5,2.071);
+\draw[color= black!15!white] (3,-1,-0.4142) -- (3,5,2.071);
+\draw[color= black!15!white] (4,-1,-0.4142) -- (4,5,2.071);
+\draw[color= black!15!white] (-1,1, 0.4142) -- (5,1,0.4142);
+\draw[color= black!15!white] (-1,2, 0.8284) -- (5,2,0.8284);
+\draw[color= black!15!white] (-1,3, 1.2426) -- (5,3,1.2426);
+\draw[color= black!15!white] (-1,4, 1.6568) -- (5,4,1.6568);
+
+\draw[-latex, very thick] (-1,0,0) -- (5,0,0);
+\draw[very thick] (0,-1,0) -- (0,0,0);
+\draw[-latex, dashed, very thick] (0,0,0) -- (0,5,0);
+\draw[-latex, very thick] (0,0,0) -- (0,0,5);
+\draw[dashed, very thick] (0,0,-1) -- (0,0,0);
+\draw[dashed] (-1,0,0) -- (-1,5,0) -- (3.9,5,0);
+\draw[] (3.8,5,0) -- (5,5,0) -- (5,-1,0) -- (-1,-1,0) -- (-1,0,0);
+
+\draw[] (0,2,2) -- (3,2,2);
+\draw[dashed] (0,2.83,0) -- (3,2.83,0);
+\draw[dashed] (3,0,0) -- (3,5,0);
+\draw[dashed] (0,2,0) -- (0,2,0.8284);
+\draw[] (0,2,0.8284) -- (0,2,2);
+\draw[dashed] (3,2,0) -- (3,2,0.8284);
+\draw[] (3,2,0.8284) -- (3,2,2);
+\draw[dashed] (0,2,0) -- (3,2,0);
+\draw[color=red] (3,0,0) -- (3,2,2);
+
+
+\draw[color=red,-latex, ultra thick] (0,0,0) -- (0,2,2);
+\draw[color=blue,-latex, dashed, ultra thick] (0,0,0) -- (0,2.83,0);
+\draw[color=green, dashed, ultra thick] (0,2.83,0) -- (0,2.415,1);
+\draw[color=green, -latex, ultra thick] (0,2.415,1) -- (0,2,2);
+
+\draw[color=red,-latex, ultra thick] (0,0,0) -- (3,2,2);
+\draw[color=blue,-latex, dashed, ultra thick] (0,0,0) -- (3,2.83,0);
+\draw[color=green, dashed, ultra thick] (3,2.83,0) -- (3,2.415,1);
+\draw[color=green, -latex, ultra thick] (3,2.415,1) -- (3,2,2);
+
+\node[] at (4.7,-0.5,0) {\large{x}};
+\node[] at (-0.3,4.7,0) {\large{y}};
+\node[] at (-0.3,0,4.5) {\large{z}};
+
+\node[] at (4,0,4.75) {\large{reflection plane}};
+\node[color=blue] at (2.5,0.9,0.2) {\Large{$\mathbf{Hx}$}};
+\node[color=red] at (2.7,1.5,1.5) {\Large{$\mathbf{x}$}};
+\node[color=green] at (4.1,2.1,1.9) {\Large{$\mathbf{x-Hx =w}$}};
+
+\node[color=blue] at (-0.3,2,0.2) {\Large{$\mathbf{\dot{H}\dot{x}}$}};
+\node[color=red] at (-0.3,1.5,1.5) {\Large{$\mathbf{\dot{x}}$}};
+\node[color=green] at (0.9,2,2.2) {\Large{$\mathbf{\dot{x}-\dot{H}\dot{x}=\dot{w}}$}};
+\end{tikzpicture}
+\caption{Comparison of reflections on a reflection plane containing the x-axis.}
+\label{fig:householderReflection3d}
+\end{figure}
+%
+The same procedure using reduced systems can be utilized to calculate all following reflections. Hence, the last necessary calculations to obtain 
+
+\begin{align}
+\mathbf{R}
+= 
+\mathbf{\bar{\bar{H}}}\mathbf{\bar{H}}\mathbf{H}\mathbf{A} 
+= 
+\mathbf{\bar{\bar{H}}}\mathbf{\bar{H}}\mathbf{\bar{A}}
+= 
+\mathbf{\bar{\bar{H}}}\mathbf{\bar{\bar{A}}}
+=
+\begin{bmatrix}
+\mathbf{\bar{\bar{\bar{a}}}}&\mathbf{\bar{\bar{\bar{b}}}}&\mathbf{\bar{\bar{\bar{c}}}}&\mathbf{\bar{\bar{\bar{d}}}}
+\end{bmatrix}	
+=
+\begin{bmatrix}
+\bar{\bar{a}}_0&\bar{\bar{b}}_0&\bar{\bar{c}}_0&\bar{\bar{d}}_0\\
+0              &\bar{\bar{b}}_1&\bar{\bar{c}}_1&\bar{\bar{d}}_1\\
+0              &0              &\bar{\bar{c}}_2&\bar{\bar{d}}_2\\
+0              &0              &\bar{\bar{c}}_3&\bar{\bar{d}}_3
+\end{bmatrix}					  
+\end{align}
+%
+can be done using the reduced system:
+
+\begin{align}
+\mathbf{\ddot{R}}
+= 
+\mathbf{\ddot{\bar{\bar{H}}}}\mathbf{\ddot{\bar{\bar{A}}}}
+=
+\mathbf{\ddot{\bar{\bar{H}}}}
+\begin{bmatrix}
+\bar{\bar{c}}_2&\bar{\bar{d}}_2\\
+\bar{\bar{c}}_3&\bar{\bar{d}}_3
+\end{bmatrix}	
+=
+\begin{bmatrix}
+\bar{\bar{\bar{c}}}_2&\bar{\bar{\bar{d}}}_2\\
+\bar{\bar{\bar{c}}}_3&\bar{\bar{\bar{d}}}_3
+\end{bmatrix}					  
+\end{align}
+%
+Now that $\mathbf{R}$ and all necessary reflections are known, $\mathbf{Q}$ can be determined as follows:
+
+\begin{align}
+\mathbf{R} &= \mathbf{\bar{\bar{H}}}\mathbf{\bar{H}}\mathbf{H}\mathbf{A} = \mathbf{Q}^T\mathbf{A}
+\\
+\\
+\mathbf{Q}^T &= \mathbf{\bar{\bar{H}}}\mathbf{\bar{H}}\mathbf{H}\\
 \nonumber
-\mathbf{Q}   &= \pth{\mathbf{H}_1\mathbf{H}_0}^T\\
+\mathbf{Q}   &= \pth{\mathbf{\bar{\bar{H}}}\mathbf{\bar{H}}\mathbf{H}}^T\\
 \nonumber
-&= \mathbf{H}_0^T\mathbf{H}_1^T\\
-&= \mathbf{H}_0\mathbf{H}_1
+&= \mathbf{H}^T\mathbf{\bar{H}}^T\mathbf{\bar{\bar{H}}}^T\\
+&= \mathbf{H}\mathbf{\bar{H}}\mathbf{\bar{\bar{H}}}
 \end{align}
 %
-However, calculating $\mathbf{Q}$ is usually expensive and not necessary. Instead, the reflection normals $\mathbf{v}_0$ and $\mathbf{v}_1$ are stored and used during the solution process, taking advantage of the effective matrix-vector and matrix-matrix products (\cref{eq:householderEfficientMatrixMatrix,eq:householderEfficientMatrixVector}).
+However, calculating $\mathbf{Q}$ is usually expensive and not necessary. Instead, the reflection normals $\mathbf{v}$, $\mathbf{\bar{v}}$ and $\mathbf{\bar{\bar{v}}}$ are stored and used during the solution process, taking advantage of the effective matrix-vector and matrix-matrix products (\cref{eq:householderEfficientMatrixMatrix,eq:householderEfficientMatrixVector}).
 So instead of using \cref{eq:qrSolveIntermediate}, the intermediate result $\mathbf{y}$ is calculated with:
 
 \begin{align}
-\mathbf{y} &= \mathbf{H}_1\mathbf{H}_0\mathbf{r}
+\mathbf{y} &= \mathbf{\bar{\bar{H}}}\mathbf{\bar{H}}\mathbf{H}\mathbf{r}
 \end{align}
 %
 
