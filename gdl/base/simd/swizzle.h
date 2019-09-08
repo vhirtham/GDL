@@ -165,7 +165,17 @@ inline __m128 Permute(__m128 source);
 #ifdef __AVX2__
 
 //! @brief Creates a new register with arbitrary value combination from the source register. Values cant be swizzled
-//! across lanes.
+//! across lanes. Both lanes are permuted identically.
+//! @tparam _src0 - _src1: Indices of the source register values that should be stored at corresponding position
+//! @tparam _registerType: Register type
+//! @param source: Source register
+//! @return Register with arbitrary value combination from the source register
+template <U32 _src0, U32 _src1>
+inline __m256d Permute(__m256d source);
+
+
+//! @brief Creates a new register with arbitrary value combination from the source register. Values cant be swizzled
+//! across lanes. Both lanes are permuted identically.
 //! @tparam _src0 - _src3: Indices of the source register values that should be stored at corresponding position
 //! @tparam _registerType: Register type
 //! @param source: Source register

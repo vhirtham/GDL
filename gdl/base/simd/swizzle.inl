@@ -513,6 +513,18 @@ inline __m128 Permute(__m128 source)
 
 #ifdef __AVX2__
 
+template <U32 _src0, U32 _src1>
+inline __m256d Permute(__m256d source)
+{
+    return Permute<_src0, _src1, _src0, _src1>(source);
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+
+
 template <U32 _src0, U32 _src1, U32 _src2, U32 _src3>
 inline __m256 Permute(__m256 source)
 {

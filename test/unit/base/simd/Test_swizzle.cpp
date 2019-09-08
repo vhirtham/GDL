@@ -444,6 +444,13 @@ void TestPermute256d()
     BOOST_CHECK(simd::GetValue<1>(b) == Approx(simd::GetValue<_j>(a)));
     BOOST_CHECK(simd::GetValue<2>(b) == Approx(simd::GetValue<_k + 2>(a)));
     BOOST_CHECK(simd::GetValue<3>(b) == Approx(simd::GetValue<_l + 2>(a)));
+
+    const __m256d c = Permute<_i, _j>(a);
+
+    BOOST_CHECK(simd::GetValue<0>(c) == Approx(simd::GetValue<_i>(a)));
+    BOOST_CHECK(simd::GetValue<1>(c) == Approx(simd::GetValue<_j>(a)));
+    BOOST_CHECK(simd::GetValue<2>(c) == Approx(simd::GetValue<_i + 2>(a)));
+    BOOST_CHECK(simd::GetValue<3>(c) == Approx(simd::GetValue<_j + 2>(a)));
 }
 
 
