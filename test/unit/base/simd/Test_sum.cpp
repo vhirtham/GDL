@@ -118,7 +118,109 @@ void TestRegisterArraySum()
 }
 
 
-BOOST_AUTO_TEST_CASE(Register_array_sum_m128)
+
+BOOST_AUTO_TEST_CASE(Register_Array_Sum_m128)
 {
     TestRegisterArraySum<__m128>();
+}
+
+
+
+BOOST_AUTO_TEST_CASE(Register_Array_Sum_m128d)
+{
+    TestRegisterArraySum<__m128d>();
+}
+
+
+
+BOOST_AUTO_TEST_CASE(Register_Array_Sum_m256)
+{
+    TestRegisterArraySum<__m256>();
+}
+
+
+
+BOOST_AUTO_TEST_CASE(Register_Array_Sum_m256d)
+{
+    TestRegisterArraySum<__m256d>();
+}
+
+
+
+// Test register array square sum  ------------------------------------------------------------------------------------
+
+#include <iostream>
+
+
+template <U32 _regStartIdx, typename _registerType, std::size_t _numRegistersInArray>
+void TestRegisterArraySquareSumTestcase(const std::array<_registerType, _numRegistersInArray>& arr, U32 idxStart = 0)
+{
+    using Type = decltype(GetDataType<_registerType>());
+    constexpr U32 numRegVals = numRegisterValues<_registerType>;
+    constexpr U32 numArrayVals = numRegVals * _numRegistersInArray;
+
+    Type sum = 0;
+
+    U32 firstIdx = idxStart * numRegVals + _regStartIdx;
+    for (U32 i = firstIdx; i < numArrayVals; ++i)
+        sum += static_cast<Type>((i + 1) * (i + 1));
+
+    _registerType b = SquareSum<_regStartIdx>(arr, idxStart);
+
+    for (U32 i = 0; i < numRegVals; ++i)
+        BOOST_CHECK(GetValue(b, i) == Approx(sum));
+
+    if (idxStart < _numRegistersInArray - 1)
+        TestRegisterArraySquareSumTestcase<_regStartIdx>(arr, idxStart + 1);
+}
+
+
+
+template <typename _registerType, std::size_t _numRegistersInArray = 6, U32 _regStartIdx = 0>
+void TestRegisterArraySquareSum()
+{
+    using Type = decltype(GetDataType<_registerType>());
+    constexpr U32 numRegVals = numRegisterValues<_registerType>;
+
+    std::array<_registerType, _numRegistersInArray> arr;
+
+    for (U32 i = 0; i < _numRegistersInArray; ++i)
+        for (U32 j = 0; j < numRegVals; ++j)
+        {
+            Type count = static_cast<Type>(1 + j + i * numRegVals);
+            SetValue(arr[i], j, count);
+        }
+
+    TestRegisterArraySquareSumTestcase<_regStartIdx>(arr);
+
+    if constexpr (_regStartIdx < numRegVals - 1)
+        TestRegisterArraySquareSum<_registerType, _numRegistersInArray, _regStartIdx + 1>();
+}
+
+
+
+BOOST_AUTO_TEST_CASE(Register_Array_SquareSum_m128)
+{
+    TestRegisterArraySquareSum<__m128>();
+}
+
+
+
+BOOST_AUTO_TEST_CASE(Register_Array_SquareSum_m128d)
+{
+    TestRegisterArraySquareSum<__m128d>();
+}
+
+
+
+BOOST_AUTO_TEST_CASE(Register_Array_SquareSum_m256)
+{
+    TestRegisterArraySquareSum<__m256>();
+}
+
+
+
+BOOST_AUTO_TEST_CASE(Register_Array_SquareSum_m256d)
+{
+    TestRegisterArraySquareSum<__m256d>();
 }

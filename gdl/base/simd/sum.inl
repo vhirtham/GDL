@@ -67,4 +67,21 @@ inline _registerType Sum(const std::array<_registerType, _size>& arr, U32 idxFir
 
 
 
+// --------------------------------------------------------------------------------------------------------------------
+
+template <U32 _regIdxFirst, typename _registerType, std::size_t _size>
+inline _registerType SquareSum(const std::array<_registerType, _size>& arr, U32 idxFirst)
+{
+    const _registerType zero = _mm_setzero<_registerType>();
+
+    _registerType sum = BlendAboveIndex<_regIdxFirst>(arr[idxFirst], zero);
+    sum = _mm_mul(sum, sum);
+
+    for (U32 i = idxFirst + 1; i < arr.size(); ++i)
+        sum = _mm_fmadd(arr[i], arr[i], sum);
+    return Sum(sum);
+}
+
+
+
 } // namespace GDL::simd
