@@ -51,4 +51,20 @@ inline __m256d Sum(__m256d source)
 
 
 
+// --------------------------------------------------------------------------------------------------------------------
+
+template <U32 _regIdxFirst, typename _registerType, std::size_t _size>
+inline _registerType Sum(const std::array<_registerType, _size>& arr, U32 idxFirst)
+{
+    const _registerType zero = _mm_setzero<_registerType>();
+
+    _registerType sum = BlendAboveIndex<_regIdxFirst>(arr[idxFirst], zero);
+
+    for (U32 i = idxFirst + 1; i < arr.size(); ++i)
+        sum = _mm_add(sum, arr[i]);
+    return Sum(sum);
+}
+
+
+
 } // namespace GDL::simd
