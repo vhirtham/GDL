@@ -1,4 +1,5 @@
 addTest(abs)
+addTest(copySign)
 addTest(crossProduct)
 addTest(compareAll)
 addTest(determinant)

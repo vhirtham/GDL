@@ -4,6 +4,7 @@
 #include "gdl/base/simd/directAccess.h"
 
 using namespace GDL;
+using namespace GDL::simd;
 
 
 
@@ -43,10 +44,10 @@ void TestCompareAllEqual()
             rhs = lhs;
             BOOST_CHECK(compEQ(lhs, rhs));
             simd::SetValue(rhs, i,
-                          simd::GetValue(lhs, i) + std::numeric_limits<DataType>::epsilon() * numRegisterEntries);
+                           simd::GetValue(lhs, i) + std::numeric_limits<DataType>::epsilon() * numRegisterEntries);
             BOOST_CHECK(!compEQ(lhs, rhs));
             simd::SetValue(rhs, i,
-                          simd::GetValue(lhs, i) - std::numeric_limits<DataType>::epsilon() * numRegisterEntries);
+                           simd::GetValue(lhs, i) - std::numeric_limits<DataType>::epsilon() * numRegisterEntries);
             BOOST_CHECK(!compEQ(lhs, rhs));
 
             // one unused value returns false
@@ -54,10 +55,10 @@ void TestCompareAllEqual()
             simd::SetValue(rhs, j, 0);
             BOOST_CHECK(compEQ(lhs, rhs));
             simd::SetValue(rhs, i,
-                          simd::GetValue(lhs, i) + std::numeric_limits<DataType>::epsilon() * numRegisterEntries);
+                           simd::GetValue(lhs, i) + std::numeric_limits<DataType>::epsilon() * numRegisterEntries);
             BOOST_CHECK(!compEQ(lhs, rhs));
             simd::SetValue(rhs, i,
-                          simd::GetValue(lhs, i) - std::numeric_limits<DataType>::epsilon() * numRegisterEntries);
+                           simd::GetValue(lhs, i) - std::numeric_limits<DataType>::epsilon() * numRegisterEntries);
             BOOST_CHECK(!compEQ(lhs, rhs));
         }
 
@@ -68,10 +69,10 @@ void TestCompareAllEqual()
             simd::SetValue(rhs, j, 0);
 
             simd::SetValue(rhs, i,
-                          simd::GetValue(lhs, i) + std::numeric_limits<DataType>::epsilon() * numRegisterEntries);
+                           simd::GetValue(lhs, i) + std::numeric_limits<DataType>::epsilon() * numRegisterEntries);
             BOOST_CHECK(!compEQ(lhs, rhs));
             simd::SetValue(rhs, i,
-                          simd::GetValue(lhs, i) - std::numeric_limits<DataType>::epsilon() * numRegisterEntries);
+                           simd::GetValue(lhs, i) - std::numeric_limits<DataType>::epsilon() * numRegisterEntries);
             BOOST_CHECK(!compEQ(lhs, rhs));
             simd::SetValue(rhs, i, simd::GetValue(lhs, i));
             BOOST_CHECK(compEQ(lhs, rhs));
@@ -149,10 +150,10 @@ void TestCompareAllLessEqual()
             rhs = lhs;
             BOOST_CHECK(compLE(lhs, rhs));
             simd::SetValue(rhs, i,
-                          simd::GetValue(lhs, i) + std::numeric_limits<DataType>::epsilon() * numRegisterEntries);
+                           simd::GetValue(lhs, i) + std::numeric_limits<DataType>::epsilon() * numRegisterEntries);
             BOOST_CHECK(compLE(lhs, rhs));
             simd::SetValue(rhs, i,
-                          simd::GetValue(lhs, i) - std::numeric_limits<DataType>::epsilon() * numRegisterEntries);
+                           simd::GetValue(lhs, i) - std::numeric_limits<DataType>::epsilon() * numRegisterEntries);
             BOOST_CHECK(!compLE(lhs, rhs));
 
             // one unused value returns false
@@ -160,10 +161,10 @@ void TestCompareAllLessEqual()
             simd::SetValue(rhs, 0, j);
             BOOST_CHECK(compLE(lhs, rhs));
             simd::SetValue(rhs, i,
-                          simd::GetValue(lhs, i) + std::numeric_limits<DataType>::epsilon() * numRegisterEntries);
+                           simd::GetValue(lhs, i) + std::numeric_limits<DataType>::epsilon() * numRegisterEntries);
             BOOST_CHECK(compLE(lhs, rhs));
             simd::SetValue(rhs, i,
-                          simd::GetValue(lhs, i) - std::numeric_limits<DataType>::epsilon() * numRegisterEntries);
+                           simd::GetValue(lhs, i) - std::numeric_limits<DataType>::epsilon() * numRegisterEntries);
             BOOST_CHECK(!compLE(lhs, rhs));
         }
 
@@ -174,10 +175,10 @@ void TestCompareAllLessEqual()
             simd::SetValue(rhs, j, 0);
 
             simd::SetValue(rhs, i,
-                          simd::GetValue(lhs, i) + std::numeric_limits<DataType>::epsilon() * numRegisterEntries);
+                           simd::GetValue(lhs, i) + std::numeric_limits<DataType>::epsilon() * numRegisterEntries);
             BOOST_CHECK(compLE(lhs, rhs));
             simd::SetValue(rhs, i,
-                          simd::GetValue(lhs, i) - std::numeric_limits<DataType>::epsilon() * numRegisterEntries);
+                           simd::GetValue(lhs, i) - std::numeric_limits<DataType>::epsilon() * numRegisterEntries);
             BOOST_CHECK(!compLE(lhs, rhs));
             simd::SetValue(rhs, i, simd::GetValue(lhs, i));
             BOOST_CHECK(compLE(lhs, rhs));
@@ -414,5 +415,44 @@ BOOST_AUTO_TEST_CASE(All_Less_Than)
 #ifdef __AVX2__
     TestCompareAllLessThan<__m256>();
     TestCompareAllLessThan<__m256d>();
+#endif // __AVX2__
+}
+
+
+
+// Test CompareMemoryZero ---------------------------------------------------------------------------------------------
+
+template <typename _registerType>
+void TestCompareMemoryZero()
+{
+    using DataType = decltype(simd::GetDataType<_registerType>());
+    constexpr U32 numRegisterEntries = simd::numRegisterValues<_registerType>;
+
+    _registerType a;
+    std::memset(&a, 0, sizeof(a));
+
+    BOOST_CHECK(CompareMemoryZero(a) == true);
+
+    for (U32 i = 0; i < numRegisterEntries; ++i)
+    {
+        _registerType b = a;
+        SetValue(b, i, static_cast<DataType>(-0.));
+        BOOST_CHECK(CompareMemoryZero(b) == false);
+        SetValue(b, i, static_cast<DataType>(1.));
+        BOOST_CHECK(CompareMemoryZero(b) == false);
+        SetValue(b, i, static_cast<DataType>(0.));
+        BOOST_CHECK(CompareMemoryZero(b) == true);
+    }
+}
+
+
+
+BOOST_AUTO_TEST_CASE(Memory_Zero)
+{
+    TestCompareMemoryZero<__m128>();
+    TestCompareMemoryZero<__m128d>();
+#ifdef __AVX2__
+    TestCompareMemoryZero<__m256>();
+    TestCompareMemoryZero<__m256d>();
 #endif // __AVX2__
 }

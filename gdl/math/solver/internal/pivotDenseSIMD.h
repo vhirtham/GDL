@@ -22,6 +22,8 @@ class PivotDenseSSE
     friend class GaussDenseSSE;
     template <typename, U32, Pivot>
     friend class LUDenseSIMD;
+    template <typename, U32, U32, Pivot>
+    friend class QRDenseSIMD;
 
 
 

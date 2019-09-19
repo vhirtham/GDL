@@ -202,6 +202,14 @@ inline _registerType _mm_max(_registerType lhs, _registerType rhs);
 template <typename _registerType>
 inline _registerType _mm_min(_registerType lhs, _registerType rhs);
 
+//! @brief Performs a and operation on the passed registers
+//! @tparam _registerType: Register type
+//! @param lhs: Left hand side register
+//! @param rhs: Right hand side register
+//! @return Result of the and-not operation
+template <typename _registerType>
+inline _registerType _mm_and(_registerType lhs, _registerType rhs);
+
 //! @brief Performs a and-not operation on the passed registers
 //! @tparam _registerType: Register type
 //! @param lhs: Left hand side register
@@ -209,6 +217,14 @@ inline _registerType _mm_min(_registerType lhs, _registerType rhs);
 //! @return Result of the and-not operation
 template <typename _registerType>
 inline _registerType _mm_andnot(_registerType lhs, _registerType rhs);
+
+//! @brief Performs a or operation on the passed registers
+//! @tparam _registerType: Register type
+//! @param lhs: Left hand side register
+//! @param rhs: Right hand side register
+//! @return Result of the xor operation
+template <typename _registerType>
+inline _registerType _mm_or(_registerType lhs, _registerType rhs);
 
 //! @brief Performs a xor operation on the passed registers
 //! @tparam _registerType: Register type

@@ -83,4 +83,13 @@ inline bool CompareAllGreaterThan(_registerType lhs, _registerType rhs)
     return CompareAllTrue<_registerType, _numComparedValues, decltype(_mm_cmpgt<_registerType>)>(
             lhs, rhs, &_mm_cmpgt<_registerType>);
 }
+
+
+
+template <typename _registerType>
+inline bool CompareMemoryZero(const _registerType& reg)
+{
+    const _registerType zero = _mm_set1<_registerType>(0.);
+    return !static_cast<bool>(std::memcmp(&zero, &reg, sizeof(_registerType)));
+}
 } // namespace GDL::simd

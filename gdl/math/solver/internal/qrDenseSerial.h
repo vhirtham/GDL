@@ -48,7 +48,7 @@ public:
             VectorDataArray Offset;
         };
 
-        using QRDataArray = std::array<_type, (_rows + 1) * _cols>;
+        using QRDataArray = std::array<_type, (_cols + 1) * _rows>;
 
 
         //! Union that stores the data of Q and R as compact as possible
@@ -66,8 +66,8 @@ public:
                               sizeof(RData) == sizeof(QRData),
                       "Internal data format error");
 
-        QRData mQR;
 
+        QRData mQR;
         PermutationData<_type, _rows, _pivot> mPermutationData;
 
         //! @brief ctor

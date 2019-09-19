@@ -516,6 +516,28 @@ inline _registerType _mm_min(_registerType lhs, _registerType rhs)
 // --------------------------------------------------------------------------------------------------------------------
 
 template <typename _registerType>
+inline _registerType _mm_and(_registerType lhs, _registerType rhs)
+{
+    using namespace GDL::simd;
+    static_assert(IsRegisterType<_registerType>, "Function can only be used with compatible register types.");
+
+    if constexpr (Is__m128<_registerType>)
+        return _mm_and_ps(lhs, rhs);
+    else if constexpr (Is__m128d<_registerType>)
+        return _mm_and_pd(lhs, rhs);
+#ifdef __AVX2__
+    else if constexpr (Is__m256<_registerType>)
+        return _mm256_and_ps(lhs, rhs);
+    else
+        return _mm256_and_pd(lhs, rhs);
+#endif // __AVX2__
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+template <typename _registerType>
 inline _registerType _mm_andnot(_registerType lhs, _registerType rhs)
 {
     using namespace GDL::simd;
@@ -530,6 +552,28 @@ inline _registerType _mm_andnot(_registerType lhs, _registerType rhs)
         return _mm256_andnot_ps(lhs, rhs);
     else
         return _mm256_andnot_pd(lhs, rhs);
+#endif // __AVX2__
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+template <typename _registerType>
+inline _registerType _mm_or(_registerType lhs, _registerType rhs)
+{
+    using namespace GDL::simd;
+    static_assert(IsRegisterType<_registerType>, "Function can only be used with compatible register types.");
+
+    if constexpr (Is__m128<_registerType>)
+        return _mm_or_ps(lhs, rhs);
+    else if constexpr (Is__m128d<_registerType>)
+        return _mm_or_pd(lhs, rhs);
+#ifdef __AVX2__
+    else if constexpr (Is__m256<_registerType>)
+        return _mm256_or_ps(lhs, rhs);
+    else
+        return _mm256_or_pd(lhs, rhs);
 #endif // __AVX2__
 }
 
