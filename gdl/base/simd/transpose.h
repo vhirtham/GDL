@@ -13,36 +13,51 @@ namespace GDL::simd
 //! @tparam _registerType: Register type
 //! @tparam _rows: Number of rows
 //! @tparam _cols: Number of columns
+//! @tparam _rowStart: Index of the matrix's first row in each register
 //! @tparam _colStartIn: Index of the matrix's first column inside of the passed array
 //! @tparam _arrSizeIn: Size of the array. Maximum size is equal to the number of values per register.
 //! @param matDataIn: Array containing the matrix data
 //! @return Minimum sized array containing the data of the transposed matrix
-template <typename _registerType, U32 _rows, U32 _cols, U32 _colStartIn = 0, std::size_t _arrSizeIn>
+template <typename _registerType, U32 _rows, U32 _cols, U32 _rowStart = 0, U32 _colStartIn = 0, std::size_t _arrSizeIn>
 inline auto Transpose(const std::array<_registerType, _arrSizeIn>& matDataIn);
 
 //! @brief Transposes a matrix represented by an column major register array. The maximal supported matrix size is 2x2.
 //! The returned array has the minimal size required to store the result.
 //! @tparam _rows: Number of rows
 //! @tparam _cols: Number of columns
+//! @tparam _rowStart: Index of the matrix's first row in each register
 //! @tparam _colStartIn: Index of the matrix's first column inside of the passed array
 //! @tparam _arrSizeIn: Size of the array. Maximum size is 2.
 //! @param matDataIn: Array containing the matrix data
 //! @return Minimum sized array containing the data of the transposed matrix
-template <U32 _rows = 2, U32 _cols = 2, U32 _colStartIn = 0, std::size_t _arrSizeIn = 2>
+template <U32 _rows = 2, U32 _cols = 2, U32 _rowStart = 0, U32 _colStartIn = 0, std::size_t _arrSizeIn = 2>
 inline auto Transpose(const std::array<__m128d, _arrSizeIn>& matDataIn);
+
+//! @brief Transposes a matrix represented by an column major register array. The maximal supported matrix size is 4x4.
+//! The returned array has the minimal size required to store the result.
+//! @tparam _rows: Number of rows
+//! @tparam _cols: Number of columns
+//! @tparam _rowStart: Index of the matrix's first row in each register
+//! @tparam _colStartIn: Index of the matrix's first column inside of the passed array
+//! @tparam _arrSizeIn: Size of the array. Maximum size is 4.
+//! @param matDataIn: Array containing the matrix data
+//! @return Minimum sized array containing the data of the transposed matrix
+template <U32 _rows = 4, U32 _cols = 4, U32 _rowStart = 0, U32 _colStartIn = 0, std::size_t _arrSizeIn = 2>
+inline auto Transpose(const std::array<__m128, _arrSizeIn>& matDataIn);
 
 //! @brief Transposes a matrix represented by an column major register array and writes it to the passed output array.
 //! The maximal supported matrix size is NxN where N is the number of values in a register.
 //! @tparam _registerType: Register type
 //! @tparam _rows: Number of rows
 //! @tparam _cols: Number of columns
+//! @tparam _rowStart: Index of the matrix's first row in each register
 //! @tparam _colStartIn: Index of the input matrix's first column inside of the passed input array
 //! @tparam _colStartOut: Index of the output matrix's first column inside of the passed output array
 //! @tparam _arrSizeIn: Size of the input array. Maximum size is equal to the number of values per register.
 //! @tparam _arrSizeOut: Size of the output array. Maximum size is equal to the number of values per register.
 //! @param matDataIn: Array containing the input matrix data
 //! @param matDataIn: Array containing the output matrix data
-template <typename _registerType, U32 _rows = 2, U32 _cols = 2, U32 _colStartIn = 0, U32 _colStartOut = 0,
+template <typename _registerType, U32 _rows, U32 _col, U32 _rowStart, U32 _colStartIn = 0, U32 _colStartOut = 0,
           std::size_t _arrSizeIn = 2, std::size_t _arrSizeOut = 2>
 inline void Transpose(const std::array<_registerType, _arrSizeIn>& matDataIn,
                       std::array<_registerType, _arrSizeOut>& matDataOut);
@@ -51,15 +66,31 @@ inline void Transpose(const std::array<_registerType, _arrSizeIn>& matDataIn,
 //! The maximal supported matrix size is 2x2.
 //! @tparam _rows: Number of rows
 //! @tparam _cols: Number of columns
+//! @tparam _rowStart: Index of the matrix's first row in each register
 //! @tparam _colStartIn: Index of the input matrix's first column inside of the passed input array
 //! @tparam _colStartOut: Index of the output matrix's first column inside of the passed output array
 //! @tparam _arrSizeIn: Size of the input array. Maximum size is 2.
 //! @tparam _arrSizeOut: Size of the output array. Maximum size is 2.
 //! @param matDataIn: Array containing the input matrix data
 //! @param matDataIn: Array containing the output matrix data
-template <U32 _rows = 2, U32 _cols = 2, U32 _colStartIn = 0, U32 _colStartOut = 0, std::size_t _arrSizeIn = 2,
-          std::size_t _arrSizeOut = 2>
+template <U32 _rows = 2, U32 _cols = 2, U32 _rowStart = 0, U32 _colStartIn = 0, U32 _colStartOut = 0,
+          std::size_t _arrSizeIn = 2, std::size_t _arrSizeOut = 2>
 inline void Transpose(const std::array<__m128d, _arrSizeIn>& matDataIn, std::array<__m128d, _arrSizeOut>& matDataOut);
+
+//! @brief Transposes a matrix represented by an column major register array and writes it to the passed output array.
+//! The maximal supported matrix size is 4x4.
+//! @tparam _rows: Number of rows
+//! @tparam _cols: Number of columns
+//! @tparam _rowStart: Index of the matrix's first row in each register
+//! @tparam _colStartIn: Index of the input matrix's first column inside of the passed input array
+//! @tparam _colStartOut: Index of the output matrix's first column inside of the passed output array
+//! @tparam _arrSizeIn: Size of the input array. Maximum size is 4.
+//! @tparam _arrSizeOut: Size of the output array. Maximum size is 4.
+//! @param matDataIn: Array containing the input matrix data
+//! @param matDataIn: Array containing the output matrix data
+template <U32 _rows = 4, U32 _cols = 4, U32 _rowStart = 0, U32 _colStartIn = 0, U32 _colStartOut = 0,
+          std::size_t _arrSizeIn = 2, std::size_t _arrSizeOut = 2>
+inline void Transpose(const std::array<__m128, _arrSizeIn>& matDataIn, std::array<__m128, _arrSizeOut>& matDataOut);
 
 //! @brief Transposes a 1x1 matrix which consists of 2 __m128d registers
 //! @tparam _registerType: Register type
@@ -67,7 +98,7 @@ inline void Transpose(const std::array<__m128d, _arrSizeIn>& matDataIn, std::arr
 //! @remark Unused rows are set to zero. Even though transposing a 1x1 matrix does not make that much sense, the purpose
 //! of this function is to guarantee a consisten behavior of the generalized transpose functions (setting unused values
 //! to zero).
-template <typename _registerType>
+template <U32 _rowStart = 0, typename _registerType>
 inline void Transpose1x1(_registerType in, _registerType& out);
 
 //! @brief Transposes a 2x2 matrix which consists of 2 __m128d registers
