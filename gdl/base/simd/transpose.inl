@@ -3,7 +3,6 @@
 #include "gdl/base/simd/transpose.h"
 
 #include "gdl/base/simd/swizzle.h"
-#include "gdl/base/simd/utility.h"
 #include "gdl/base/simd/x86intrin.h"
 
 
@@ -11,7 +10,79 @@
 namespace GDL::simd
 {
 
-inline void Transpose(__m128d in0, __m128d in1, __m128d& out0, __m128d& out1)
+// --------------------------------------------------------------------------------------------------------------------
+
+template <typename _registerType, U32 _rows, U32 _cols, U32 _colStartIn, std::size_t _arrSizeIn>
+inline auto Transpose(const std::array<_registerType, _arrSizeIn>& matDataIn)
+{
+    std::array<_registerType, _rows> matDataOut;
+    Transpose<_rows, _cols, _colStartIn>(matDataIn, matDataOut);
+    return matDataOut;
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+template <U32 _rows, U32 _cols, U32 _colStartIn, std::size_t _arrSizeIn>
+inline auto Transpose(const std::array<__m128d, _arrSizeIn>& matDataIn)
+{
+    return Transpose<__m128d, _rows, _cols, _colStartIn>(matDataIn);
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+template <typename _registerType, U32 _rows, U32 _cols, U32 _colStartIn, U32 _colStartOut, std::size_t _arrSizeIn,
+          std::size_t _arrSizeOut>
+inline void Transpose(const std::array<_registerType, _arrSizeIn>& matDataIn,
+                      std::array<_registerType, _arrSizeOut>& matDataOut)
+{
+    constexpr U32 numRegVals = numRegisterValues<_registerType>;
+
+    static_assert(_arrSizeIn > 0 && _arrSizeIn <= numRegVals,
+                  "Input matrix data array size must be in the range [1, numRegisterValues].");
+    static_assert(_arrSizeOut > 0 && _arrSizeOut <= numRegVals,
+                  "Output matrix data array size must be in the range [1, numRegisterValues].");
+    static_assert(_colStartIn + _cols <= _arrSizeIn, "Input submatrix exceeds array size.");
+    static_assert(_colStartOut + _rows <= _arrSizeOut, "Output submatrix exceeds array size.");
+
+    if constexpr (_rows == 2 && _cols == 2)
+        Transpose2x2(matDataIn[0], matDataIn[1], matDataOut[0], matDataOut[1]);
+    else if constexpr (_rows == 2 && _cols == 1)
+        Transpose2x1(matDataIn[0 + _colStartIn], matDataOut[0], matDataOut[1]);
+    else if constexpr (_rows == 1 && _cols == 2)
+        Transpose1x2(matDataIn[0], matDataIn[1], matDataOut[0 + _colStartOut]);
+    else
+        Transpose1x1(matDataIn[0 + _colStartIn], matDataOut[0 + _colStartOut]);
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+template <U32 _rows, U32 _cols, U32 _colStartIn, U32 _colStartOut, std::size_t _arrSizeIn, std::size_t _arrSizeOut>
+inline void Transpose(const std::array<__m128d, _arrSizeIn>& matDataIn, std::array<__m128d, _arrSizeOut>& matDataOut)
+{
+    Transpose<__m128d, _rows, _cols, _colStartIn, _colStartOut>(matDataIn, matDataOut);
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+template <typename _registerType>
+inline void Transpose1x1(_registerType in, _registerType& out)
+{
+    out = BlendBelowIndex<0>(in, _mm_setzero<_registerType>());
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+inline void Transpose2x2(__m128d in0, __m128d in1, __m128d& out0, __m128d& out1)
 {
     out0 = _mm_unpacklo_pd(in0, in1);
     out1 = _mm_unpackhi_pd(in0, in1);
@@ -19,8 +90,28 @@ inline void Transpose(__m128d in0, __m128d in1, __m128d& out0, __m128d& out1)
 
 
 
-inline void Transpose(__m128 in0, __m128 in1, __m128 in2, __m128 in3, __m128& out0, __m128& out1, __m128& out2,
-                      __m128& out3)
+// --------------------------------------------------------------------------------------------------------------------
+
+inline void Transpose2x1(__m128d in0, __m128d& out0, __m128d& out1)
+{
+    Transpose2x2(in0, _mm_setzero_pd(), out0, out1);
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+inline void Transpose1x2(__m128d in0, __m128d in1, __m128d& out0)
+{
+    out0 = _mm_unpacklo_pd(in0, in1);
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+inline void Transpose4x4(__m128 in0, __m128 in1, __m128 in2, __m128 in3, __m128& out0, __m128& out1, __m128& out2,
+                         __m128& out3)
 {
     alignas(alignmentBytes<__m128>) __m128 tmp0, tmp1, tmp2, tmp3;
 
@@ -36,10 +127,13 @@ inline void Transpose(__m128 in0, __m128 in1, __m128 in2, __m128 in3, __m128& ou
 }
 
 
+
+// --------------------------------------------------------------------------------------------------------------------
+
 #ifdef __AVX2__
 
-inline void Transpose(__m256d in0, __m256d in1, __m256d in2, __m256d in3, __m256d& out0, __m256d& out1, __m256d& out2,
-                      __m256d& out3)
+inline void Transpose4x4(__m256d in0, __m256d in1, __m256d in2, __m256d in3, __m256d& out0, __m256d& out1,
+                         __m256d& out2, __m256d& out3)
 {
     alignas(alignmentBytes<__m256d>) __m256d tmp0, tmp1, tmp2, tmp3;
 
@@ -56,9 +150,11 @@ inline void Transpose(__m256d in0, __m256d in1, __m256d in2, __m256d in3, __m256
 
 
 
-inline void Transpose(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 in4, __m256 in5, __m256 in6, __m256 in7,
-                      __m256& out0, __m256& out1, __m256& out2, __m256& out3, __m256& out4, __m256& out5, __m256& out6,
-                      __m256& out7)
+// --------------------------------------------------------------------------------------------------------------------
+
+inline void Transpose8x8(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 in4, __m256 in5, __m256 in6, __m256 in7,
+                         __m256& out0, __m256& out1, __m256& out2, __m256& out3, __m256& out4, __m256& out5,
+                         __m256& out6, __m256& out7)
 {
     alignas(alignmentBytes<__m256>) __m256 tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7, tmpBlend;
 

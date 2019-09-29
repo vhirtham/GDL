@@ -24,10 +24,7 @@ namespace GDL
 
 
 Mat4fSSE::Mat4fSSE()
-    : mData({{{_mm_setzero<__m128>()},
-              {_mm_setzero<__m128>()},
-              {_mm_setzero<__m128>()},
-              {_mm_setzero<__m128>()}}})
+    : mData({{{_mm_setzero<__m128>()}, {_mm_setzero<__m128>()}, {_mm_setzero<__m128>()}, {_mm_setzero<__m128>()}}})
 {
     DEV_EXCEPTION(!IsDataAligned(), "One or more registers of Mat4fSSE are not 16 byte aligned");
 }
@@ -122,30 +119,30 @@ Mat4fSSE Mat4fSSE::operator*(const Mat4fSSE& rhs) const
 {
     using namespace GDL::simd;
     return Mat4fSSE(_mm_fmadd(simd::Broadcast<0>(rhs.mData[0]), mData[0],
-                                 _mm_fmadd(Broadcast<1>(rhs.mData[0]), mData[1],
-                                              _mm_fmadd(Broadcast<2>(rhs.mData[0]), mData[2],
-                                                           _mm_mul(Broadcast<3>(rhs.mData[0]), mData[3])))),
+                              _mm_fmadd(Broadcast<1>(rhs.mData[0]), mData[1],
+                                        _mm_fmadd(Broadcast<2>(rhs.mData[0]), mData[2],
+                                                  _mm_mul(Broadcast<3>(rhs.mData[0]), mData[3])))),
                     _mm_fmadd(Broadcast<0>(rhs.mData[1]), mData[0],
-                                 _mm_fmadd(Broadcast<1>(rhs.mData[1]), mData[1],
-                                              _mm_fmadd(Broadcast<2>(rhs.mData[1]), mData[2],
-                                                           _mm_mul(Broadcast<3>(rhs.mData[1]), mData[3])))),
+                              _mm_fmadd(Broadcast<1>(rhs.mData[1]), mData[1],
+                                        _mm_fmadd(Broadcast<2>(rhs.mData[1]), mData[2],
+                                                  _mm_mul(Broadcast<3>(rhs.mData[1]), mData[3])))),
                     _mm_fmadd(Broadcast<0>(rhs.mData[2]), mData[0],
-                                 _mm_fmadd(Broadcast<1>(rhs.mData[2]), mData[1],
-                                              _mm_fmadd(Broadcast<2>(rhs.mData[2]), mData[2],
-                                                           _mm_mul(Broadcast<3>(rhs.mData[2]), mData[3])))),
+                              _mm_fmadd(Broadcast<1>(rhs.mData[2]), mData[1],
+                                        _mm_fmadd(Broadcast<2>(rhs.mData[2]), mData[2],
+                                                  _mm_mul(Broadcast<3>(rhs.mData[2]), mData[3])))),
                     _mm_fmadd(Broadcast<0>(rhs.mData[3]), mData[0],
-                                 _mm_fmadd(Broadcast<1>(rhs.mData[3]), mData[1],
-                                              _mm_fmadd(Broadcast<2>(rhs.mData[3]), mData[2],
-                                                           _mm_mul(Broadcast<3>(rhs.mData[3]), mData[3])))));
+                              _mm_fmadd(Broadcast<1>(rhs.mData[3]), mData[1],
+                                        _mm_fmadd(Broadcast<2>(rhs.mData[3]), mData[2],
+                                                  _mm_mul(Broadcast<3>(rhs.mData[3]), mData[3])))));
 }
 
 Vec4fSSE<true> Mat4fSSE::operator*(const Vec4fSSE<true>& rhs) const
 {
     using namespace GDL::simd;
-    return Vec4fSSE<true>(_mm_fmadd(Broadcast<0>(rhs.mData), mData[0],
-                                       _mm_fmadd(Broadcast<1>(rhs.mData), mData[1],
-                                                    _mm_fmadd(Broadcast<2>(rhs.mData), mData[2],
-                                                                 _mm_mul(Broadcast<3>(rhs.mData), mData[3])))));
+    return Vec4fSSE<true>(_mm_fmadd(
+            Broadcast<0>(rhs.mData), mData[0],
+            _mm_fmadd(Broadcast<1>(rhs.mData), mData[1],
+                      _mm_fmadd(Broadcast<2>(rhs.mData), mData[2], _mm_mul(Broadcast<3>(rhs.mData), mData[3])))));
 }
 
 
@@ -175,7 +172,7 @@ F32 Mat4fSSE::Det() const
 Mat4fSSE Mat4fSSE::Transpose() const
 {
     Mat4fSSE t;
-    simd::Transpose(mData[0], mData[1], mData[2], mData[3], t.mData[0], t.mData[1], t.mData[2], t.mData[3]);
+    simd::Transpose4x4(mData[0], mData[1], mData[2], mData[3], t.mData[0], t.mData[1], t.mData[2], t.mData[3]);
     return t;
 }
 

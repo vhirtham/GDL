@@ -155,41 +155,43 @@ void MatSIMD<_type, _rows, _cols>::TransposeFullBlocks(MatSIMD<_type, _cols, _ro
 
             if constexpr (mNumRegisterEntries == 2)
             {
-                simd::Transpose(mData[firstRegisterIndexSrc + 0 * mNumRegistersPerCol],
-                                mData[firstRegisterIndexSrc + 1 * mNumRegistersPerCol],
-                                result.mData[firstRegisterIndexRes + 0 * result.mNumRegistersPerCol],
-                                result.mData[firstRegisterIndexRes + 1 * result.mNumRegistersPerCol]);
+                simd::Transpose2x2(mData[firstRegisterIndexSrc + 0 * mNumRegistersPerCol],
+                                   mData[firstRegisterIndexSrc + 1 * mNumRegistersPerCol],
+                                   result.mData[firstRegisterIndexRes + 0 * result.mNumRegistersPerCol],
+                                   result.mData[firstRegisterIndexRes + 1 * result.mNumRegistersPerCol]);
             }
             else if constexpr (mNumRegisterEntries == 4)
             {
-                simd::Transpose(mData[firstRegisterIndexSrc + 0 * mNumRegistersPerCol],
-                                mData[firstRegisterIndexSrc + 1 * mNumRegistersPerCol],
-                                mData[firstRegisterIndexSrc + 2 * mNumRegistersPerCol],
-                                mData[firstRegisterIndexSrc + 3 * mNumRegistersPerCol],
-                                result.mData[firstRegisterIndexRes + 0 * result.mNumRegistersPerCol],
-                                result.mData[firstRegisterIndexRes + 1 * result.mNumRegistersPerCol],
-                                result.mData[firstRegisterIndexRes + 2 * result.mNumRegistersPerCol],
-                                result.mData[firstRegisterIndexRes + 3 * result.mNumRegistersPerCol]);
+                simd::Transpose4x4(mData[firstRegisterIndexSrc + 0 * mNumRegistersPerCol],
+                                   mData[firstRegisterIndexSrc + 1 * mNumRegistersPerCol],
+                                   mData[firstRegisterIndexSrc + 2 * mNumRegistersPerCol],
+                                   mData[firstRegisterIndexSrc + 3 * mNumRegistersPerCol],
+                                   result.mData[firstRegisterIndexRes + 0 * result.mNumRegistersPerCol],
+                                   result.mData[firstRegisterIndexRes + 1 * result.mNumRegistersPerCol],
+                                   result.mData[firstRegisterIndexRes + 2 * result.mNumRegistersPerCol],
+                                   result.mData[firstRegisterIndexRes + 3 * result.mNumRegistersPerCol]);
             }
+#ifdef __AVX2__
             else if constexpr (mNumRegisterEntries == 8)
             {
-                simd::Transpose(mData[firstRegisterIndexSrc + 0 * mNumRegistersPerCol],
-                                mData[firstRegisterIndexSrc + 1 * mNumRegistersPerCol],
-                                mData[firstRegisterIndexSrc + 2 * mNumRegistersPerCol],
-                                mData[firstRegisterIndexSrc + 3 * mNumRegistersPerCol],
-                                mData[firstRegisterIndexSrc + 4 * mNumRegistersPerCol],
-                                mData[firstRegisterIndexSrc + 5 * mNumRegistersPerCol],
-                                mData[firstRegisterIndexSrc + 6 * mNumRegistersPerCol],
-                                mData[firstRegisterIndexSrc + 7 * mNumRegistersPerCol],
-                                result.mData[firstRegisterIndexRes + 0 * result.mNumRegistersPerCol],
-                                result.mData[firstRegisterIndexRes + 1 * result.mNumRegistersPerCol],
-                                result.mData[firstRegisterIndexRes + 2 * result.mNumRegistersPerCol],
-                                result.mData[firstRegisterIndexRes + 3 * result.mNumRegistersPerCol],
-                                result.mData[firstRegisterIndexRes + 4 * result.mNumRegistersPerCol],
-                                result.mData[firstRegisterIndexRes + 5 * result.mNumRegistersPerCol],
-                                result.mData[firstRegisterIndexRes + 6 * result.mNumRegistersPerCol],
-                                result.mData[firstRegisterIndexRes + 7 * result.mNumRegistersPerCol]);
+                simd::Transpose8x8(mData[firstRegisterIndexSrc + 0 * mNumRegistersPerCol],
+                                   mData[firstRegisterIndexSrc + 1 * mNumRegistersPerCol],
+                                   mData[firstRegisterIndexSrc + 2 * mNumRegistersPerCol],
+                                   mData[firstRegisterIndexSrc + 3 * mNumRegistersPerCol],
+                                   mData[firstRegisterIndexSrc + 4 * mNumRegistersPerCol],
+                                   mData[firstRegisterIndexSrc + 5 * mNumRegistersPerCol],
+                                   mData[firstRegisterIndexSrc + 6 * mNumRegistersPerCol],
+                                   mData[firstRegisterIndexSrc + 7 * mNumRegistersPerCol],
+                                   result.mData[firstRegisterIndexRes + 0 * result.mNumRegistersPerCol],
+                                   result.mData[firstRegisterIndexRes + 1 * result.mNumRegistersPerCol],
+                                   result.mData[firstRegisterIndexRes + 2 * result.mNumRegistersPerCol],
+                                   result.mData[firstRegisterIndexRes + 3 * result.mNumRegistersPerCol],
+                                   result.mData[firstRegisterIndexRes + 4 * result.mNumRegistersPerCol],
+                                   result.mData[firstRegisterIndexRes + 5 * result.mNumRegistersPerCol],
+                                   result.mData[firstRegisterIndexRes + 6 * result.mNumRegistersPerCol],
+                                   result.mData[firstRegisterIndexRes + 7 * result.mNumRegistersPerCol]);
             }
+#endif //__AVX2__
             else
                 EXCEPTION(true, "Not implemented for given register size");
         }
@@ -235,8 +237,14 @@ void MatSIMD<_type, _rows, _cols>::TransposeSparseBlocks(MatSIMD<_type, _cols, _
                                                                               result.mData[registerIndexRes]);
         }
     }
+    else if constexpr (mNumRegisterEntries == 2)
+        simd::Transpose2x2(args...);
+    else if constexpr (mNumRegisterEntries == 4)
+        simd::Transpose4x4(args...);
+#ifdef __AVX2__
     else
-        simd::Transpose(args...);
+        simd::Transpose8x8(args...);
+#endif //__AVX2__
 }
 
 
