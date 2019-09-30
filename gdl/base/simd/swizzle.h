@@ -60,6 +60,16 @@ inline _registerType BlendAboveIndex(_registerType source0, _registerType source
 template <U32 _index, typename _registerType>
 inline _registerType BlendBelowIndex(_registerType source0, _registerType source1);
 
+//! @brief Blends all values in a specified range from source1 into source 0 and returns the result
+//! @tparam _idxFirst: Index of the first value
+//! @tparam _idxLast: Index of the last value
+//! @tparam _registerType: Register type
+//! @param source0: First source register
+//! @param source1: Second source register
+//! @return Register with blended values
+template <U32 _idxFirst, U32 _idxLast, typename _registerType>
+inline _registerType BlendInRange(_registerType source0, _registerType source1);
+
 //! @brief Creates a mask for blend intrinsics
 //! @tparam _src0 - _src1: Index of the source register that should provide the corresponding value
 //! @return Mask

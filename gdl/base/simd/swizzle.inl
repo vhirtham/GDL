@@ -140,6 +140,52 @@ inline _registerType BlendAboveIndex(_registerType source0, [[maybe_unused]] _re
 
 // --------------------------------------------------------------------------------------------------------------------
 
+template <U32 _idxFirst, U32 _idxLast, typename _registerType>
+inline _registerType BlendInRange(_registerType source0, _registerType source1)
+{
+    constexpr U32 numRegVals = numRegisterValues<_registerType>;
+
+    static_assert(_idxFirst < numRegVals && _idxLast < numRegVals,
+                  "Indices must be lower than the number of register values.");
+    static_assert(_idxFirst <= _idxLast, "First index must be lower or equal to the second index");
+    static_assert(numRegVals == 2 || numRegVals == 4 || numRegVals == 8,
+                  "Only registers with 2, 4 or 8 values are supported.");
+
+    if constexpr (numRegVals == 2)
+    {
+        constexpr U32 b0 = (_idxFirst <= 0 && _idxLast >= 0) ? 1 : 0;
+        constexpr U32 b1 = (_idxFirst <= 1 && _idxLast >= 1) ? 1 : 0;
+
+        return Blend<b0, b1>(source0, source1);
+    }
+    else if constexpr (numRegVals == 4)
+    {
+        constexpr U32 b0 = (_idxFirst <= 0 && _idxLast >= 0) ? 1 : 0;
+        constexpr U32 b1 = (_idxFirst <= 1 && _idxLast >= 1) ? 1 : 0;
+        constexpr U32 b2 = (_idxFirst <= 2 && _idxLast >= 2) ? 1 : 0;
+        constexpr U32 b3 = (_idxFirst <= 3 && _idxLast >= 3) ? 1 : 0;
+
+        return Blend<b0, b1, b2, b3>(source0, source1);
+    }
+    else if constexpr (numRegVals == 8)
+    {
+        constexpr U32 b0 = (_idxFirst <= 0 && _idxLast >= 0) ? 1 : 0;
+        constexpr U32 b1 = (_idxFirst <= 1 && _idxLast >= 1) ? 1 : 0;
+        constexpr U32 b2 = (_idxFirst <= 2 && _idxLast >= 2) ? 1 : 0;
+        constexpr U32 b3 = (_idxFirst <= 3 && _idxLast >= 3) ? 1 : 0;
+        constexpr U32 b4 = (_idxFirst <= 4 && _idxLast >= 4) ? 1 : 0;
+        constexpr U32 b5 = (_idxFirst <= 5 && _idxLast >= 5) ? 1 : 0;
+        constexpr U32 b6 = (_idxFirst <= 6 && _idxLast >= 6) ? 1 : 0;
+        constexpr U32 b7 = (_idxFirst <= 7 && _idxLast >= 7) ? 1 : 0;
+
+        return Blend<b0, b1, b2, b3, b4, b5, b6, b7>(source0, source1);
+    }
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
 template <U32 _index, typename _registerType>
 inline _registerType BlendBelowIndex(_registerType source0, [[maybe_unused]] _registerType source1)
 {

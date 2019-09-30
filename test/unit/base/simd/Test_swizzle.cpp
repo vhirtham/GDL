@@ -220,6 +220,44 @@ BOOST_AUTO_TEST_CASE(Test_Blend_Below_Index)
 }
 
 
+
+// Blend in range -----------------------------------------------------------------------------------------------------
+
+template <typename _registerType, U32 _idxFirst = 0, U32 _idxLast = 0>
+void TestBlendInRange()
+{
+    using Type = decltype(GetDataType<_registerType>());
+    constexpr U32 numRegVals = numRegisterValues<_registerType>;
+
+    _registerType a = _mm_setzero<_registerType>();
+    _registerType b = _mm_set1<_registerType>(1);
+
+    _registerType c = BlendInRange<_idxFirst, _idxLast>(a, b);
+    for (U32 i = 0; i < numRegVals; ++i)
+        if (i >= _idxFirst && i <= _idxLast)
+            BOOST_CHECK(GetValue(c, i) == Approx<Type>(1));
+        else
+            BOOST_CHECK(GetValue(c, i) == ApproxZero<Type>());
+
+    if constexpr (_idxLast + 1 < numRegVals)
+        TestBlendInRange<_registerType, _idxFirst, _idxLast + 1>();
+    else if constexpr (_idxFirst + 1 < numRegVals)
+        TestBlendInRange<_registerType, _idxFirst + 1, _idxFirst + 1>();
+}
+
+BOOST_AUTO_TEST_CASE(Test_Blend_In_Range)
+{
+    TestBlendInRange<__m128>();
+    TestBlendInRange<__m128d>();
+
+#ifdef __AVX2__
+    TestBlendInRange<__m256>();
+    TestBlendInRange<__m256d>();
+#endif // __AVX2__
+}
+
+
+
 // Broadcast -----------------------------------------------------------------------------------------------------------
 
 template <typename _registerType, U32 _index = 0>
