@@ -16,84 +16,150 @@ using namespace GDL::simd;
 
 // Test Template ------------------------------------------------------------------------------------------------------
 
-template <U32 _rows, U32 _cols, U32 _stepSize, std::size_t _arrSizeIn, std::size_t _arrSizeOut, U32 _rowStart,
-          U32 _colStartIn, U32 _colStartOut = 0, typename _registerType>
-inline void TestTransposeTestcase(const std::array<_registerType, _arrSizeIn>& in)
+
+template <U32 _rows, U32 _cols, U32 _colStrideIn, U32 _colStrideOut, U32 _rowStart, U32 _colStartIn, U32 _colStartOut,
+          bool _overwriteUnused = true, bool _unusedSetZero = true, std::size_t _arrSizeIn, std::size_t _arrSizeOut,
+          typename _registerType>
+inline void TestTransposeTestcase(const std::array<_registerType, _arrSizeIn>& in,
+                                  const std::array<_registerType, _arrSizeOut>& ref)
 {
     using Type = decltype(GetDataType<_registerType>());
     constexpr U32 numRegVals = numRegisterValues<_registerType>;
 
-    std::array<_registerType, _arrSizeOut> out, ref;
-    for (U32 i = 0; i < _arrSizeOut; ++i)
-        for (U32 j = 0; j < numRegVals; ++j)
-            SetValue(out[i], j, static_cast<Type>(1. / (j * _arrSizeOut + i + 10.)));
+    std::array<_registerType, _arrSizeOut> out;
 
     for (U32 i = 0; i < _arrSizeOut; ++i)
-        ref[i] = out[i];
+        out[i] = ref[i];
 
-    Transpose<_rows, _cols, _rowStart, _colStartIn, _colStartOut>(in, out);
+    Transpose<_rows, _cols, _rowStart, _colStartIn, _overwriteUnused, _unusedSetZero, _colStrideIn, _colStartOut,
+              _colStrideOut>(in, out);
 
     for (U32 i = 0; i < _arrSizeOut; ++i)
-        if (i >= _colStartOut && i <= _colStartOut + _rows - 1)
+        if (i >= _colStartOut && i <= _colStartOut + _rows * _colStrideOut - 1 &&
+            (i - _colStartOut) % _colStrideOut == 0)
+        {
             for (U32 j = 0; j < numRegVals; ++j)
                 if (j >= _rowStart && j <= _rowStart + _cols - 1)
+                {
                     BOOST_CHECK(GetValue(out[i], j) ==
-                                Approx(GetValue(in[j - _rowStart + _colStartIn], i - _colStartOut + _rowStart)));
+                                Approx(GetValue(in[(j - _rowStart) * _colStrideIn + _colStartIn],
+                                                (i - _colStartOut) / _colStrideOut + _rowStart)));
+                }
                 else
-                    BOOST_CHECK(GetValue(out[i], j) == ApproxZero<Type>());
+                {
+                    if constexpr (_overwriteUnused)
+                    {
+                        if constexpr (_unusedSetZero)
+                            BOOST_CHECK(GetValue(out[i], j) == ApproxZero<Type>());
+                    }
+                    else
+                        BOOST_CHECK(GetValue(out[i], j) == Approx(GetValue(ref[i], j)));
+                }
+        }
         else
             for (U32 j = 0; j < numRegVals; ++j)
                 BOOST_CHECK(GetValue(out[i], j) == Approx(GetValue(ref[i], j)));
 
-    if constexpr (_colStartOut == 0)
+
+
+    if constexpr (_colStartOut == 0 && _overwriteUnused)
     {
-        std::array<_registerType, _rows> out2 = Transpose<_rows, _cols, _rowStart, _colStartIn>(in);
-        for (U32 i = 0; i < _rows; ++i)
+        std::array<_registerType, _rows + (_rows - 1) * (_colStrideOut - 1)> out2 =
+                Transpose<_rows, _cols, _rowStart, _colStartIn, _unusedSetZero, _colStrideIn, _colStrideOut>(in);
+        for (U32 i = 0; i < out2.size(); ++i)
             for (U32 j = 0; j < numRegVals; ++j)
-                if (j >= _rowStart && j <= _rowStart + _cols - 1)
+                if (j >= _rowStart && j <= _rowStart + _cols - 1 && i % _colStrideOut == 0)
                     BOOST_CHECK(GetValue(out2[i], j) ==
-                                Approx(GetValue(in[j - _rowStart + _colStartIn], i + _rowStart)));
-                else
+                                Approx(GetValue(in[(j - _rowStart) * _colStrideIn + _colStartIn],
+                                                i / _colStrideOut + _rowStart)));
+                else if constexpr (_unusedSetZero)
                     BOOST_CHECK(GetValue(out2[i], j) == ApproxZero<Type>());
     }
-
-    if constexpr (_colStartOut + _cols + _stepSize <= _arrSizeOut)
-        TestTransposeTestcase<_rows, _cols, _stepSize, _arrSizeIn, _arrSizeOut, _rowStart, _colStartIn,
-                              _colStartOut + _stepSize>(in);
 }
 
 
 
-template <U32 _rows, U32 _cols, U32 _stepSize, std::size_t _arrSizeIn, std::size_t _arrSizeOut, U32 _rowStart,
-          U32 _colStartIn = 0, typename _registerType>
+template <U32 _rows, U32 _cols, U32 _colStrideIn, U32 _colStrideOut, U32 _stepColOut, std::size_t _arrSizeIn,
+          std::size_t _arrSizeOut, U32 _rowStart, U32 _colStartIn, U32 _colStartOut = 0, typename _registerType>
+inline void TestTransposeTestcasesColStartOut(const std::array<_registerType, _arrSizeIn>& in)
+{
+    using Type = decltype(GetDataType<_registerType>());
+    constexpr U32 numRegVals = numRegisterValues<_registerType>;
+
+    std::array<_registerType, _arrSizeOut> ref;
+    for (U32 i = 0; i < _arrSizeOut; ++i)
+        for (U32 j = 0; j < numRegVals; ++j)
+            SetValue(ref[i], j, static_cast<Type>(1. / (j * _arrSizeOut + i + 10.)));
+
+    //    std::cout << _arrSizeIn - 1 << "/" << _arrSizeOut - 1 << "/" << _rowStart << "/" << _colStartIn << "/"
+    //              << _colStartOut << std::endl;
+
+
+    TestTransposeTestcase<_rows, _cols, _colStrideIn, _colStrideOut, _rowStart, _colStartIn, _colStartOut>(in, ref);
+    TestTransposeTestcase<_rows, _cols, _colStrideIn, _colStrideOut, _rowStart, _colStartIn, _colStartOut, true, false>(
+            in, ref);
+    TestTransposeTestcase<_rows, _cols, _colStrideIn, _colStrideOut, _rowStart, _colStartIn, _colStartOut, false,
+                          false>(in, ref);
+
+
+
+    if constexpr (_stepColOut > 0 && _colStartOut + _rows * _colStrideOut + _stepColOut <= _arrSizeOut)
+        TestTransposeTestcasesColStartOut<_rows, _cols, _colStrideIn, _colStrideOut, _stepColOut, _arrSizeIn,
+                                          _arrSizeOut, _rowStart, _colStartIn, _colStartOut + _stepColOut>(in);
+}
+
+
+
+template <U32 _rows, U32 _cols, U32 _colStrideIn, U32 _colStrideOut, U32 _stepColIn, U32 _stepColOut,
+          std::size_t _arrSizeIn, std::size_t _arrSizeOut, U32 _rowStart, U32 _colStartIn = 0, typename _registerType>
 inline void TestTransposeTestcasesColStartIn(const std::array<_registerType, _arrSizeIn>& in)
 {
-    TestTransposeTestcase<_rows, _cols, _stepSize, _arrSizeIn, _arrSizeOut, _rowStart, _colStartIn>(in);
+    TestTransposeTestcasesColStartOut<_rows, _cols, _colStrideIn, _colStrideOut, _stepColOut, _arrSizeIn, _arrSizeOut,
+                                      _rowStart, _colStartIn>(in);
 
-    if constexpr (_colStartIn + _cols + _stepSize <= _arrSizeIn)
-        TestTransposeTestcasesColStartIn<_rows, _cols, _stepSize, _arrSizeIn, _arrSizeOut, _rowStart,
-                                         _colStartIn + _stepSize>(in);
+    if constexpr (_stepColIn > 0 && _colStartIn + _cols * _colStrideIn + _stepColIn <= _arrSizeIn)
+        TestTransposeTestcasesColStartIn<_rows, _cols, _colStrideIn, _colStrideOut, _stepColIn, _stepColOut, _arrSizeIn,
+                                         _arrSizeOut, _rowStart, _colStartIn + _stepColIn>(in);
 }
 
 
 
-template <U32 _rows, U32 _cols, U32 _stepSize, std::size_t _arrSizeIn, std::size_t _arrSizeOut, U32 _rowStart = 0,
-          typename _registerType>
+template <U32 _rows, U32 _cols, U32 _colStrideIn, U32 _colStrideOut, U32 _stepRow, U32 _stepColIn, U32 _stepColOut,
+          std::size_t _arrSizeIn, std::size_t _arrSizeOut, U32 _rowStart = 0, typename _registerType>
 inline void TestTransposeTestcases(const std::array<_registerType, _arrSizeIn>& in)
 {
     constexpr U32 numRegVals = numRegisterValues<_registerType>;
 
 
-    TestTransposeTestcasesColStartIn<_rows, _cols, _stepSize, _arrSizeIn, _arrSizeOut, _rowStart>(in);
+    TestTransposeTestcasesColStartIn<_rows, _cols, _colStrideIn, _colStrideOut, _stepColIn, _stepColOut, _arrSizeIn,
+                                     _arrSizeOut, _rowStart>(in);
 
-    if constexpr (_rowStart + _rows + _stepSize <= numRegVals)
-        TestTransposeTestcases<_rows, _cols, _stepSize, _arrSizeIn, _arrSizeOut, _rowStart + _stepSize>(in);
+    if constexpr (_stepRow > 0 && _rowStart + _rows + _stepRow <= numRegVals)
+        TestTransposeTestcases<_rows, _cols, _colStrideIn, _colStrideOut, _stepRow, _stepColIn, _stepColOut, _arrSizeIn,
+                               _arrSizeOut, _rowStart + _stepRow>(in);
 }
 
 
 
-template <typename _registerType, U32 _rows, U32 _cols, U32 _stepSize = 1, std::size_t _arrSizeIn = _cols,
-          std::size_t _arrSizeOut = _rows>
+template <U32 _rows, U32 _cols, U32 _colStrideIn, U32 _colStrideOut, U32 _stepRow, U32 _stepColIn, U32 _stepColOut,
+          U32 _stepArrSizeOut, std::size_t _arrSizeIn, std::size_t _arrSizeOut, typename _registerType>
+void TestTransposeStepArrSizeOut(const std::array<_registerType, _arrSizeIn>& in)
+{
+    constexpr U32 numRegVals = numRegisterValues<_registerType>;
+
+    TestTransposeTestcases<_rows, _cols, _colStrideIn, _colStrideOut, _stepRow, _stepColIn, _stepColOut, _arrSizeIn,
+                           _arrSizeOut>(in);
+
+    if constexpr (_stepArrSizeOut > 0 && _arrSizeOut + _stepArrSizeOut <= numRegVals)
+        TestTransposeStepArrSizeOut<_rows, _cols, _colStrideIn, _colStrideOut, _stepRow, _stepColIn, _stepColOut,
+                                    _stepArrSizeOut, _arrSizeIn, _arrSizeOut + _stepArrSizeOut>(in);
+}
+
+
+
+template <typename _registerType, U32 _rows, U32 _cols, U32 _stepRow = 1, U32 _stepColIn = 0, U32 _stepColOut = 0,
+          U32 _colStrideIn = 1, U32 _colStrideOut = 1, U32 _stepArrSizeIn = 0, U32 _stepArrSizeOut = 0,
+          std::size_t _arrSizeIn = _cols, std::size_t _arrSizeOut = _rows>
 void TestTranspose()
 {
     using Type = decltype(GetDataType<_registerType>());
@@ -104,12 +170,12 @@ void TestTranspose()
         for (U32 j = 0; j < numRegVals; ++j)
             SetValue(in[i], j, static_cast<Type>(j * _arrSizeIn + i + 1));
 
-    TestTransposeTestcases<_rows, _cols, _stepSize, _arrSizeIn, _arrSizeOut>(in);
+    TestTransposeStepArrSizeOut<_rows, _cols, _colStrideIn, _colStrideOut, _stepRow, _stepColIn, _stepColOut,
+                                _stepArrSizeOut, _arrSizeIn, _arrSizeOut>(in);
 
-    if constexpr (_arrSizeIn + _stepSize <= numRegVals)
-        TestTranspose<_registerType, _rows, _cols, _stepSize, _arrSizeIn + _stepSize, _arrSizeOut>();
-    else if constexpr (_arrSizeOut + _stepSize <= numRegVals)
-        TestTranspose<_registerType, _rows, _cols, _stepSize, _cols, _arrSizeOut + _stepSize>();
+    if constexpr (_stepArrSizeIn > 0 && _arrSizeIn + _stepArrSizeIn <= numRegVals)
+        TestTranspose<_registerType, _rows, _cols, _stepRow, _stepColIn, _stepColOut, _colStrideIn, _colStrideOut,
+                      _stepArrSizeIn, _stepArrSizeOut, _arrSizeIn + _stepArrSizeIn, _arrSizeOut>();
 }
 
 
@@ -130,29 +196,38 @@ BOOST_AUTO_TEST_CASE(Transpose1x1_128)
 
 
 
+BOOST_AUTO_TEST_CASE(Transpose1x1_256d)
+{
+    TestTranspose<__m256d, 1, 1>();
+}
+
+
+
+BOOST_AUTO_TEST_CASE(Transpose1x1_256)
+{
+    TestTranspose<__m256, 1, 1>();
+}
+
+
+
 // Transpose 2x2 ------------------------------------------------------------------------------------------------------
 
 BOOST_AUTO_TEST_CASE(Transpose2x2_128d)
 {
-    alignas(alignmentBytes<__m128d>) std::array<__m128d, 2> a, b, c, d, expected;
-    a[0] = _mm_setr_pd(1, 2);
-    a[1] = _mm_setr_pd(3, 4);
-
-    expected[0] = _mm_setr_pd(1, 3);
-    expected[1] = _mm_setr_pd(2, 4);
+    TestTranspose<__m128d, 2, 2>();
+}
 
 
-    Transpose2x2(a[0], a[1], b[0], b[1]);
-    Transpose(a, c);
-    d = Transpose(a);
 
-    for (U32 i = 0; i < 2; ++i)
-        for (U32 j = 0; j < 2; ++j)
-        {
-            BOOST_CHECK(GetValue(b[i], j) == Approx(GetValue(expected[i], j)));
-            BOOST_CHECK(GetValue(c[i], j) == Approx(GetValue(expected[i], j)));
-            BOOST_CHECK(GetValue(d[i], j) == Approx(GetValue(expected[i], j)));
-        }
+// BOOST_AUTO_TEST_CASE(Transpose2x2_128)
+//{
+//    TestTranspose<__m128, 2, 2>();
+//}
+
+
+BOOST_AUTO_TEST_CASE(Transpose2x2_256d)
+{
+    TestTranspose<__m256d, 2, 2>();
 }
 
 
@@ -223,7 +298,7 @@ BOOST_AUTO_TEST_CASE(Transpose1x2_128d)
 
     Transpose1x2(a[0], a[1], b);
     Transpose<1, 2>(a, c0);
-    Transpose<1, 2, 0, 0, 1>(a, c1);
+    Transpose<1, 2, 0, 0, true, true, 1, 1, 1>(a, c1);
     Transpose<1, 2>(a, c0_1);
     d0_1 = Transpose<1, 2>(a);
 
@@ -329,6 +404,65 @@ BOOST_AUTO_TEST_CASE(Transpose8x8_256)
     TestTranspose8x8<__m256>();
 }
 
+
+
+// Array sizes --------------------------------------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(ArraySizes_128d)
+{
+    TestTranspose<__m128d, 1, 1, 0, 0, 0, 1, 1, 1, 1>();
+}
+
+
+
+BOOST_AUTO_TEST_CASE(ArraySizes_128)
+{
+    TestTranspose<__m128, 1, 1, 0, 0, 0, 1, 1, 1, 1>();
+}
+
+
+
+BOOST_AUTO_TEST_CASE(ArraySizes_256d)
+{
+    TestTranspose<__m256d, 1, 1, 0, 0, 0, 1, 1, 1, 1>();
+}
+
+
+
+BOOST_AUTO_TEST_CASE(ArraySizes_256)
+{
+    TestTranspose<__m256, 1, 1, 0, 0, 0, 1, 1, 1, 1>();
+}
+
+
+
+// Column offsets -----------------------------------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(ColumnOffset_128d)
+{
+    TestTranspose<__m128d, 1, 1, 0, 3, 3, 1, 1, 0, 0, 4, 4>();
+}
+
+
+
+BOOST_AUTO_TEST_CASE(ColumnOffset_128)
+{
+    TestTranspose<__m128, 1, 1, 0, 5, 5, 1, 1, 0, 0, 16, 16>();
+}
+
+
+
+BOOST_AUTO_TEST_CASE(ColumnOffset_256d)
+{
+    TestTranspose<__m256d, 1, 1, 0, 5, 5, 1, 1, 0, 0, 16, 16>();
+}
+
+
+
+BOOST_AUTO_TEST_CASE(ColumnOffset_256)
+{
+    TestTranspose<__m256, 1, 1, 0, 9, 9, 1, 1, 0, 0, 64, 64>();
+}
 
 
 #endif // __AVX2__

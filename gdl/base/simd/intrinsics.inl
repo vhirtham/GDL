@@ -756,4 +756,48 @@ inline auto _mm_shuffle(_registerType src0, _registerType src1)
 
 
 
+// --------------------------------------------------------------------------------------------------------------------
+
+template <typename _registerType>
+inline auto _mm_unpackhi(_registerType src0, _registerType src1)
+{
+    using namespace GDL::simd;
+    static_assert(IsRegisterType<_registerType>, "Function can only be used with compatible register types.");
+
+    if constexpr (Is__m128<_registerType>)
+        return _mm_unpackhi_ps(src0, src1);
+    else if constexpr (Is__m128d<_registerType>)
+        return _mm_unpackhi_pd(src0, src1);
+#ifdef __AVX2__
+    else if constexpr (Is__m256<_registerType>)
+        return _mm256_unpackhi_ps(src0, src1);
+    else
+        return _mm256_unpackhi_pd(src0, src1);
+#endif // __AVX2__
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+template <typename _registerType>
+inline auto _mm_unpacklo(_registerType src0, _registerType src1)
+{
+    using namespace GDL::simd;
+    static_assert(IsRegisterType<_registerType>, "Function can only be used with compatible register types.");
+
+    if constexpr (Is__m128<_registerType>)
+        return _mm_unpacklo_ps(src0, src1);
+    else if constexpr (Is__m128d<_registerType>)
+        return _mm_unpacklo_pd(src0, src1);
+#ifdef __AVX2__
+    else if constexpr (Is__m256<_registerType>)
+        return _mm256_unpacklo_ps(src0, src1);
+    else
+        return _mm256_unpacklo_pd(src0, src1);
+#endif // __AVX2__
+}
+
+
+
 } // namespace GDL

@@ -150,8 +150,9 @@ inline _registerType BlendInRange(_registerType source0, _registerType source1)
     static_assert(_idxFirst <= _idxLast, "First index must be lower or equal to the second index");
     static_assert(numRegVals == 2 || numRegVals == 4 || numRegVals == 8,
                   "Only registers with 2, 4 or 8 values are supported.");
-
-    if constexpr (numRegVals == 2)
+    if constexpr (_idxFirst == 0 && _idxLast == numRegVals - 1)
+        return source1;
+    else if constexpr (numRegVals == 2)
     {
         constexpr U32 b0 = (_idxFirst <= 0 && _idxLast >= 0) ? 1 : 0;
         constexpr U32 b1 = (_idxFirst <= 1 && _idxLast >= 1) ? 1 : 0;

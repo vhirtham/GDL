@@ -298,6 +298,23 @@ inline auto _mm_permute2f128(_registerType src0, _registerType src1);
 template <I32 _shuffleMask, typename _registerType>
 inline auto _mm_shuffle(_registerType src0, _registerType src1);
 
+//! @brief Creates a new register with an interleaved combination of the source registers second halves.
+//! @tparam _registerType: Register type
+//! @param src0: First source register
+//! @param src1: second source register
+//! @return Register with shuffled values
+template <typename _registerType>
+inline auto _mm_unpackhi(_registerType src0, _registerType src1);
+
+//! @brief Creates a new register with an interleaved combination of the source registers first halves.
+//! @tparam _registerType: Register type
+//! @param src0: First source register
+//! @param src1: second source register
+//! @return Register with shuffled values
+template <typename _registerType>
+inline auto _mm_unpacklo(_registerType src0, _registerType src1);
+
+
 } // namespace GDL
 
 #include "gdl/base/simd/intrinsics.inl"
