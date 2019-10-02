@@ -73,7 +73,8 @@ inline void TestTransposeTestcase(const std::array<_registerType, _arrSizeIn>& i
                                 Approx(GetValue(in[(j - _rowStart) * _colStrideIn + _colStartIn],
                                                 i / _colStrideOut + _rowStart)));
                 else if constexpr (_unusedSetZero)
-                    BOOST_CHECK(GetValue(out2[i], j) == ApproxZero<Type>());
+                    if (i % _colStrideOut == 0)
+                        BOOST_CHECK(GetValue(out2[i], j) == ApproxZero<Type>());
     }
 }
 
@@ -103,7 +104,7 @@ inline void TestTransposeTestcasesColStartOut(const std::array<_registerType, _a
 
 
 
-    if constexpr (_stepColOut > 0 && _colStartOut + _rows * _colStrideOut + _stepColOut <= _arrSizeOut)
+    if constexpr (_stepColOut > 0 && _colStartOut + _colStrideOut * (_rows - 1) + 1 + _stepColOut <= _arrSizeOut)
         TestTransposeTestcasesColStartOut<_rows, _cols, _colStrideIn, _colStrideOut, _stepColOut, _arrSizeIn,
                                           _arrSizeOut, _rowStart, _colStartIn, _colStartOut + _stepColOut>(in);
 }
@@ -117,7 +118,7 @@ inline void TestTransposeTestcasesColStartIn(const std::array<_registerType, _ar
     TestTransposeTestcasesColStartOut<_rows, _cols, _colStrideIn, _colStrideOut, _stepColOut, _arrSizeIn, _arrSizeOut,
                                       _rowStart, _colStartIn>(in);
 
-    if constexpr (_stepColIn > 0 && _colStartIn + _cols * _colStrideIn + _stepColIn <= _arrSizeIn)
+    if constexpr (_stepColIn > 0 && _colStartIn + _colStrideIn * (_cols - 1) + 1 + _stepColIn <= _arrSizeIn)
         TestTransposeTestcasesColStartIn<_rows, _cols, _colStrideIn, _colStrideOut, _stepColIn, _stepColOut, _arrSizeIn,
                                          _arrSizeOut, _rowStart, _colStartIn + _stepColIn>(in);
 }
@@ -471,6 +472,37 @@ BOOST_AUTO_TEST_CASE(ColumnOffset_256)
 {
     TestTranspose<__m256, 1, 1, 0, 9, 9, 1, 1, 0, 0, 64, 64>();
 }
+
+
+
+// Column strides -----------------------------------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(ColumnStrides_128d)
+{
+    TestTranspose<__m128d, 2, 2, 0, 1, 1, 2, 2, 0, 0, 4, 4>();
+}
+
+
+
+BOOST_AUTO_TEST_CASE(ColumnStrides_128)
+{
+    TestTranspose<__m128, 2, 2, 0, 1, 1, 2, 2, 0, 0, 4, 4>();
+}
+
+
+
+BOOST_AUTO_TEST_CASE(ColumnStrides_256d)
+{
+    TestTranspose<__m256d, 2, 2, 0, 1, 1, 2, 2, 0, 0, 4, 4>();
+}
+
+
+
+BOOST_AUTO_TEST_CASE(ColumnStrides_256)
+{
+    TestTranspose<__m256, 2, 2, 0, 1, 1, 2, 2, 0, 0, 4, 4>();
+}
+
 
 
 #endif // __AVX2__

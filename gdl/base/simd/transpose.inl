@@ -88,6 +88,7 @@ inline void Transpose(const std::array<_registerType, _arrSizeIn>& matDataIn,
     static_assert(_colStartIn + _colStrideIn * (_cols - 1) + 1 <= _arrSizeIn, "Input submatrix exceeds array size.");
     static_assert(_colStartOut + _colStrideOut * (_rows - 1) + 1 <= _arrSizeOut,
                   "Output submatrix exceeds array size.");
+    static_assert(_colStrideIn > 0 && _colStrideOut > 0, "Column strides must be larger than 0.");
 
     if constexpr (_rows == 2 && _cols == 2)
         Transpose2x2<_rowStart, _overwriteUnused, _unusedSetZero>(
