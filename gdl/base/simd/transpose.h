@@ -11,7 +11,7 @@ namespace GDL::simd
 // TODO
 // documentation of test
 // add missing sizes
-// add test for strides
+// add static assert for _colStart + _rows < regVals
 
 //! @brief Transposes a matrix represented by an column major register array. The maximal supported matrix size is NxN
 //! where N is the number of values in a register. The returned array has the minimal size required to store the result.
@@ -24,11 +24,11 @@ namespace GDL::simd
 //! @tparam _colStrideIn: Distance between two input matrix registers inside the array
 //! @tparam _colStrideOut: Distance between two output matrix registers inside the array
 //! @tparam _arrSizeIn: Size of the array. Maximum size is equal to the number of values per register.
-//! @param matDataIn: Array containing the matrix data
+//! @param matDataI: Array containing the matrix data
 //! @return Minimum sized array containing the data of the transposed matrix
 template <typename _registerType, U32 _rows, U32 _cols, U32 _rowStart = 0, U32 _colStartIn = 0,
           bool _unusedSetZero = true, U32 _colStrideIn = 1, U32 _colStrideOut = 1, std::size_t _arrSizeIn>
-inline auto Transpose(const std::array<_registerType, _arrSizeIn>& matDataIn);
+inline auto Transpose(const std::array<_registerType, _arrSizeIn>& matDataI);
 
 //! @brief Transposes a matrix represented by an column major register array. The maximal supported matrix size is 2x2.
 //! The returned array has the minimal size required to store the result.
@@ -40,11 +40,11 @@ inline auto Transpose(const std::array<_registerType, _arrSizeIn>& matDataIn);
 //! @tparam _colStrideIn: Distance between two input matrix registers inside the array
 //! @tparam _colStrideOut: Distance between two output matrix registers inside the array
 //! @tparam _arrSizeIn: Size of the array. Maximum size is 2.
-//! @param matDataIn: Array containing the matrix data
+//! @param matDataI: Array containing the matrix data
 //! @return Minimum sized array containing the data of the transposed matrix
 template <U32 _rows = 2, U32 _cols = 2, U32 _rowStart = 0, U32 _colStartIn = 0, bool _unusedSetZero = true,
           U32 _colStrideIn = 1, U32 _colStrideOut = 1, std::size_t _arrSizeIn>
-inline auto Transpose(const std::array<__m128d, _arrSizeIn>& matDataIn);
+inline auto Transpose(const std::array<__m128d, _arrSizeIn>& matDataI);
 
 //! @brief Transposes a matrix represented by an column major register array. The maximal supported matrix size is 4x4.
 //! The returned array has the minimal size required to store the result.
@@ -56,11 +56,11 @@ inline auto Transpose(const std::array<__m128d, _arrSizeIn>& matDataIn);
 //! @tparam _colStrideIn: Distance between two input matrix registers inside the array
 //! @tparam _colStrideOut: Distance between two output matrix registers inside the array
 //! @tparam _arrSizeIn: Size of the array. Maximum size is 4.
-//! @param matDataIn: Array containing the matrix data
+//! @param matDataI: Array containing the matrix data
 //! @return Minimum sized array containing the data of the transposed matrix
 template <U32 _rows = 4, U32 _cols = 4, U32 _rowStart = 0, U32 _colStartIn = 0, bool _unusedSetZero = true,
           U32 _colStrideIn = 1, U32 _colStrideOut = 1, std::size_t _arrSizeIn>
-inline auto Transpose(const std::array<__m128, _arrSizeIn>& matDataIn);
+inline auto Transpose(const std::array<__m128, _arrSizeIn>& matDataI);
 
 //! @brief Transposes a matrix represented by an column major register array. The maximal supported matrix size is 4x4.
 //! The returned array has the minimal size required to store the result.
@@ -72,11 +72,11 @@ inline auto Transpose(const std::array<__m128, _arrSizeIn>& matDataIn);
 //! @tparam _colStrideIn: Distance between two input matrix registers inside the array
 //! @tparam _colStrideOut: Distance between two output matrix registers inside the array
 //! @tparam _arrSizeIn: Size of the array. Maximum size is 4.
-//! @param matDataIn: Array containing the matrix data
+//! @param matDataI: Array containing the matrix data
 //! @return Minimum sized array containing the data of the transposed matrix
 template <U32 _rows = 4, U32 _cols = 4, U32 _rowStart = 0, U32 _colStartIn = 0, bool _unusedSetZero = true,
           U32 _colStrideIn = 1, U32 _colStrideOut = 1, std::size_t _arrSizeIn>
-inline auto Transpose(const std::array<__m256d, _arrSizeIn>& matDataIn);
+inline auto Transpose(const std::array<__m256d, _arrSizeIn>& matDataI);
 
 //! @brief Transposes a matrix represented by an column major register array. The maximal supported matrix size is 8x8.
 //! The returned array has the minimal size required to store the result.
@@ -88,11 +88,11 @@ inline auto Transpose(const std::array<__m256d, _arrSizeIn>& matDataIn);
 //! @tparam _colStrideIn: Distance between two input matrix registers inside the array
 //! @tparam _colStrideOut: Distance between two output matrix registers inside the array
 //! @tparam _arrSizeIn: Size of the array. Maximum size is 8.
-//! @param matDataIn: Array containing the matrix data
+//! @param matDataI: Array containing the matrix data
 //! @return Minimum sized array containing the data of the transposed matrix
 template <U32 _rows = 8, U32 _cols = 8, U32 _rowStart = 0, U32 _colStartIn = 0, bool _unusedSetZero = true,
           U32 _colStrideIn = 1, U32 _colStrideOut = 1, std::size_t _arrSizeIn>
-inline auto Transpose(const std::array<__m256, _arrSizeIn>& matDataIn);
+inline auto Transpose(const std::array<__m256, _arrSizeIn>& matDataI);
 
 //! @brief Transposes a matrix represented by an column major register array and writes it to the passed output array.
 //! The maximal supported matrix size is NxN where N is the number of values in a register.
@@ -108,13 +108,13 @@ inline auto Transpose(const std::array<__m256, _arrSizeIn>& matDataIn);
 //! @tparam _colStrideOut: Distance between two output matrix registers inside the array
 //! @tparam _arrSizeIn: Size of the input array. Maximum size is equal to the number of values per register.
 //! @tparam _arrSizeOut: Size of the output array. Maximum size is equal to the number of values per register.
-//! @param matDataIn: Array containing the input matrix data
-//! @param matDataIn: Array containing the output matrix data
+//! @param matDataI: Array containing the input matrix data
+//! @param matDataI: Array containing the output matrix data
 template <typename _registerType, U32 _rows, U32 _col, U32 _rowStart, U32 _colStartIn = 0, bool _overwriteUnused = true,
           bool _unusedSetZero = _overwriteUnused, U32 _colStrideIn = 1, U32 _colStartOut = 0, U32 _colStrideOut = 1,
           std::size_t _arrSizeIn = 2, std::size_t _arrSizeOut = 2>
-inline void Transpose(const std::array<_registerType, _arrSizeIn>& matDataIn,
-                      std::array<_registerType, _arrSizeOut>& matDataOut);
+inline void Transpose(const std::array<_registerType, _arrSizeIn>& matDataI,
+                      std::array<_registerType, _arrSizeOut>& matDataO);
 
 //! @brief Transposes a matrix represented by an column major register array and writes it to the passed output array.
 //! The maximal supported matrix size is 2x2.
@@ -129,12 +129,12 @@ inline void Transpose(const std::array<_registerType, _arrSizeIn>& matDataIn,
 //! @tparam _colStrideOut: Distance between two output matrix registers inside the array
 //! @tparam _arrSizeIn: Size of the input array. Maximum size is 2.
 //! @tparam _arrSizeOut: Size of the output array. Maximum size is 2.
-//! @param matDataIn: Array containing the input matrix data
-//! @param matDataIn: Array containing the output matrix data
+//! @param matDataI: Array containing the input matrix data
+//! @param matDataI: Array containing the output matrix data
 template <U32 _rows = 2, U32 _cols = 2, U32 _rowStart = 0, U32 _colStartIn = 0, bool _overwriteUnused = true,
           bool _unusedSetZero = _overwriteUnused, U32 _colStrideIn = 1, U32 _colStartOut = 0, U32 _colStrideOut = 1,
           std::size_t _arrSizeIn, std::size_t _arrSizeOut>
-inline void Transpose(const std::array<__m128d, _arrSizeIn>& matDataIn, std::array<__m128d, _arrSizeOut>& matDataOut);
+inline void Transpose(const std::array<__m128d, _arrSizeIn>& matDataI, std::array<__m128d, _arrSizeOut>& matDataO);
 
 //! @brief Transposes a matrix represented by an column major register array and writes it to the passed output array.
 //! The maximal supported matrix size is 4x4.
@@ -149,12 +149,12 @@ inline void Transpose(const std::array<__m128d, _arrSizeIn>& matDataIn, std::arr
 //! @tparam _colStrideOut: Distance between two output matrix registers inside the array
 //! @tparam _arrSizeIn: Size of the input array. Maximum size is 4.
 //! @tparam _arrSizeOut: Size of the output array. Maximum size is 4.
-//! @param matDataIn: Array containing the input matrix data
-//! @param matDataIn: Array containing the output matrix data
+//! @param matDataI: Array containing the input matrix data
+//! @param matDataI: Array containing the output matrix data
 template <U32 _rows = 4, U32 _cols = 4, U32 _rowStart = 0, U32 _colStartIn = 0, bool _overwriteUnused = true,
           bool _unusedSetZero = _overwriteUnused, U32 _colStrideIn = 1, U32 _colStartOut = 0, U32 _colStrideOut = 1,
           std::size_t _arrSizeIn, std::size_t _arrSizeOut>
-inline void Transpose(const std::array<__m128, _arrSizeIn>& matDataIn, std::array<__m128, _arrSizeOut>& matDataOut);
+inline void Transpose(const std::array<__m128, _arrSizeIn>& matDataI, std::array<__m128, _arrSizeOut>& matDataO);
 
 //! @brief Transposes a matrix represented by an column major register array and writes it to the passed output array.
 //! The maximal supported matrix size is 4x4.
@@ -169,12 +169,12 @@ inline void Transpose(const std::array<__m128, _arrSizeIn>& matDataIn, std::arra
 //! @tparam _colStrideOut: Distance between two output matrix registers inside the array
 //! @tparam _arrSizeIn: Size of the input array. Maximum size is 4.
 //! @tparam _arrSizeOut: Size of the output array. Maximum size is 4.
-//! @param matDataIn: Array containing the input matrix data
-//! @param matDataIn: Array containing the output matrix data
+//! @param matDataI: Array containing the input matrix data
+//! @param matDataI: Array containing the output matrix data
 template <U32 _rows = 4, U32 _cols = 4, U32 _rowStart = 0, U32 _colStartIn = 0, bool _overwriteUnused = true,
           bool _unusedSetZero = _overwriteUnused, U32 _colStrideIn = 1, U32 _colStartOut = 0, U32 _colStrideOut = 1,
           std::size_t _arrSizeIn, std::size_t _arrSizeOut>
-inline void Transpose(const std::array<__m256d, _arrSizeIn>& matDataIn, std::array<__m256d, _arrSizeOut>& matDataOut);
+inline void Transpose(const std::array<__m256d, _arrSizeIn>& matDataI, std::array<__m256d, _arrSizeOut>& matDataO);
 
 //! @brief Transposes a matrix represented by an column major register array and writes it to the passed output array.
 //! The maximal supported matrix size is 8x8.
@@ -189,12 +189,12 @@ inline void Transpose(const std::array<__m256d, _arrSizeIn>& matDataIn, std::arr
 //! @tparam _colStrideOut: Distance between two output matrix registers inside the array
 //! @tparam _arrSizeIn: Size of the input array. Maximum size is 8.
 //! @tparam _arrSizeOut: Size of the output array. Maximum size is 8.
-//! @param matDataIn: Array containing the input matrix data
-//! @param matDataIn: Array containing the output matrix data
+//! @param matDataI: Array containing the input matrix data
+//! @param matDataI: Array containing the output matrix data
 template <U32 _rows = 8, U32 _cols = 8, U32 _rowStart = 0, U32 _colStartIn = 0, bool _overwriteUnused = true,
           bool _unusedSetZero = _overwriteUnused, U32 _colStrideIn = 1, U32 _colStartOut = 0, U32 _colStrideOut = 1,
           std::size_t _arrSizeIn, std::size_t _arrSizeOut>
-inline void Transpose(const std::array<__m256, _arrSizeIn>& matDataIn, std::array<__m256, _arrSizeOut>& matDataOut);
+inline void Transpose(const std::array<__m256, _arrSizeIn>& matDataI, std::array<__m256, _arrSizeOut>& matDataO);
 
 //! @brief Transposes a 1x1 matrix which consists of 2 __m128d registers
 //! @tparam _rowStart: Index of the matrix's first row in each register

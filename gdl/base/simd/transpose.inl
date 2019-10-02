@@ -16,12 +16,12 @@ namespace GDL::simd
 
 template <typename _registerType, U32 _rows, U32 _cols, U32 _rowStart, U32 _colStartIn, bool _unusedSetZero,
           U32 _colStrideIn, U32 _colStrideOut, std::size_t _arrSizeIn>
-inline auto Transpose(const std::array<_registerType, _arrSizeIn>& matDataIn)
+inline auto Transpose(const std::array<_registerType, _arrSizeIn>& matDataI)
 {
-    std::array<_registerType, _colStrideOut*(_rows - 1) + 1> matDataOut;
-    Transpose<_rows, _cols, _rowStart, _colStartIn, true, _unusedSetZero, _colStrideIn, 0, _colStrideOut>(matDataIn,
-                                                                                                          matDataOut);
-    return matDataOut;
+    std::array<_registerType, _colStrideOut*(_rows - 1) + 1> matDataO;
+    Transpose<_rows, _cols, _rowStart, _colStartIn, true, _unusedSetZero, _colStrideIn, 0, _colStrideOut>(matDataI,
+                                                                                                          matDataO);
+    return matDataO;
 }
 
 
@@ -30,10 +30,10 @@ inline auto Transpose(const std::array<_registerType, _arrSizeIn>& matDataIn)
 
 template <U32 _rows, U32 _cols, U32 _rowStart, U32 _colStartIn, bool _unusedSetZero, U32 _colStrideIn,
           U32 _colStrideOut, std::size_t _arrSizeIn>
-inline auto Transpose(const std::array<__m128d, _arrSizeIn>& matDataIn)
+inline auto Transpose(const std::array<__m128d, _arrSizeIn>& matDataI)
 {
     return Transpose<__m128d, _rows, _cols, _rowStart, _colStartIn, _unusedSetZero, _colStrideIn, _colStrideOut>(
-            matDataIn);
+            matDataI);
 }
 
 
@@ -42,10 +42,10 @@ inline auto Transpose(const std::array<__m128d, _arrSizeIn>& matDataIn)
 
 template <U32 _rows, U32 _cols, U32 _rowStart, U32 _colStartIn, bool _unusedSetZero, U32 _colStrideIn,
           U32 _colStrideOut, std::size_t _arrSizeIn>
-inline auto Transpose(const std::array<__m128, _arrSizeIn>& matDataIn)
+inline auto Transpose(const std::array<__m128, _arrSizeIn>& matDataI)
 {
     return Transpose<__m128, _rows, _cols, _rowStart, _colStartIn, _unusedSetZero, _colStrideIn, _colStrideOut>(
-            matDataIn);
+            matDataI);
 }
 
 
@@ -54,10 +54,10 @@ inline auto Transpose(const std::array<__m128, _arrSizeIn>& matDataIn)
 
 template <U32 _rows, U32 _cols, U32 _rowStart, U32 _colStartIn, bool _unusedSetZero, U32 _colStrideIn,
           U32 _colStrideOut, std::size_t _arrSizeIn>
-inline auto Transpose(const std::array<__m256d, _arrSizeIn>& matDataIn)
+inline auto Transpose(const std::array<__m256d, _arrSizeIn>& matDataI)
 {
     return Transpose<__m256d, _rows, _cols, _rowStart, _colStartIn, _unusedSetZero, _colStrideIn, _colStrideOut>(
-            matDataIn);
+            matDataI);
 }
 
 
@@ -66,10 +66,10 @@ inline auto Transpose(const std::array<__m256d, _arrSizeIn>& matDataIn)
 
 template <U32 _rows, U32 _cols, U32 _rowStart, U32 _colStartIn, bool _unusedSetZero, U32 _colStrideIn,
           U32 _colStrideOut, std::size_t _arrSizeIn>
-inline auto Transpose(const std::array<__m256, _arrSizeIn>& matDataIn)
+inline auto Transpose(const std::array<__m256, _arrSizeIn>& matDataI)
 {
     return Transpose<__m256, _rows, _cols, _rowStart, _colStartIn, _unusedSetZero, _colStrideIn, _colStrideOut>(
-            matDataIn);
+            matDataI);
 }
 
 
@@ -79,8 +79,8 @@ inline auto Transpose(const std::array<__m256, _arrSizeIn>& matDataIn)
 template <typename _registerType, U32 _rows, U32 _cols, U32 _rowStart, U32 _colStartIn, bool _overwriteUnused,
           bool _unusedSetZero, U32 _colStrideIn, U32 _colStartOut, U32 _colStrideOut, std::size_t _arrSizeIn,
           std::size_t _arrSizeOut>
-inline void Transpose(const std::array<_registerType, _arrSizeIn>& matDataIn,
-                      std::array<_registerType, _arrSizeOut>& matDataOut)
+inline void Transpose(const std::array<_registerType, _arrSizeIn>& matDataI,
+                      std::array<_registerType, _arrSizeOut>& matDataO)
 {
     constexpr U32 numRegVals = numRegisterValues<_registerType>;
 
@@ -90,17 +90,41 @@ inline void Transpose(const std::array<_registerType, _arrSizeIn>& matDataIn,
                   "Output submatrix exceeds array size.");
     static_assert(_colStrideIn > 0 && _colStrideOut > 0, "Column strides must be larger than 0.");
 
-    if constexpr (_rows == 2 && _cols == 2)
-        Transpose2x2<_rowStart, _overwriteUnused, _unusedSetZero>(
-                matDataIn[0 + _colStartIn], matDataIn[1 * _colStrideIn + _colStartIn], matDataOut[0 + _colStartOut],
-                matDataOut[1 * _colStrideOut + _colStartOut]);
-    else if constexpr (_rows == 2 && _cols == 1)
-        Transpose2x1(matDataIn[0 + _colStartIn], matDataOut[0], matDataOut[1]);
-    else if constexpr (_rows == 1 && _cols == 2)
-        Transpose1x2(matDataIn[0], matDataIn[1], matDataOut[0 + _colStartOut]);
-    else
-        Transpose1x1<_rowStart, _overwriteUnused, _unusedSetZero>(matDataIn[0 + _colStartIn],
-                                                                  matDataOut[0 + _colStartOut]);
+
+    // Create index arrays
+    constexpr auto funcInitIdxIn = []() {
+        std::array<U32, _cols> idxIn{};
+        for (U32 i = 0; i < idxIn.size(); ++i)
+            idxIn[i] = i * _colStrideIn + _colStartIn;
+        return idxIn;
+    };
+    constexpr auto funcInitIdxOut = []() {
+        std::array<U32, _rows> idxOut{};
+        for (U32 i = 0; i < idxOut.size(); ++i)
+            idxOut[i] = i * _colStrideOut + _colStartOut;
+        return idxOut;
+    };
+
+    constexpr std::array<U32, _cols> idxI = funcInitIdxIn();
+    constexpr std::array<U32, _rows> idxO = funcInitIdxOut();
+
+
+    // Select and execute correct transpose function
+    if constexpr (_rows == 1)
+    {
+        if constexpr (_cols == 1)
+            Transpose1x1<_rowStart, _overwriteUnused, _unusedSetZero>(matDataI[idxI[0]], matDataO[idxO[0]]);
+        else if constexpr (_cols == 2)
+            Transpose1x2(matDataI[idxI[0]], matDataI[idxI[1]], matDataO[idxO[0]]);
+    }
+    else if constexpr (_rows == 2)
+    {
+        if constexpr (_cols == 1)
+            Transpose2x1(matDataI[idxI[0]], matDataO[idxO[0]], matDataO[idxO[1]]);
+        else if constexpr (_cols == 2)
+            Transpose2x2<_rowStart, _overwriteUnused, _unusedSetZero>(matDataI[idxI[0]], matDataI[idxI[1]],
+                                                                      matDataO[idxO[0]], matDataO[idxO[1]]);
+    }
 }
 
 
@@ -109,10 +133,10 @@ inline void Transpose(const std::array<_registerType, _arrSizeIn>& matDataIn,
 
 template <U32 _rows, U32 _cols, U32 _rowStart, U32 _colStartIn, bool _overwriteUnused, bool _unusedSetZero,
           U32 _colStrideIn, U32 _colStartOut, U32 _colStrideOut, std::size_t _arrSizeIn, std::size_t _arrSizeOut>
-inline void Transpose(const std::array<__m128d, _arrSizeIn>& matDataIn, std::array<__m128d, _arrSizeOut>& matDataOut)
+inline void Transpose(const std::array<__m128d, _arrSizeIn>& matDataI, std::array<__m128d, _arrSizeOut>& matDataO)
 {
     Transpose<__m128d, _rows, _cols, _rowStart, _colStartIn, _overwriteUnused, _unusedSetZero, _colStrideIn,
-              _colStartOut, _colStrideOut>(matDataIn, matDataOut);
+              _colStartOut, _colStrideOut>(matDataI, matDataO);
 }
 
 
@@ -121,10 +145,10 @@ inline void Transpose(const std::array<__m128d, _arrSizeIn>& matDataIn, std::arr
 
 template <U32 _rows, U32 _cols, U32 _rowStart, U32 _colStartIn, bool _overwriteUnused, bool _unusedSetZero,
           U32 _colStrideIn, U32 _colStartOut, U32 _colStrideOut, std::size_t _arrSizeIn, std::size_t _arrSizeOut>
-inline void Transpose(const std::array<__m128, _arrSizeIn>& matDataIn, std::array<__m128, _arrSizeOut>& matDataOut)
+inline void Transpose(const std::array<__m128, _arrSizeIn>& matDataI, std::array<__m128, _arrSizeOut>& matDataO)
 {
     Transpose<__m128, _rows, _cols, _rowStart, _colStartIn, _overwriteUnused, _unusedSetZero, _colStrideIn,
-              _colStartOut, _colStrideOut>(matDataIn, matDataOut);
+              _colStartOut, _colStrideOut>(matDataI, matDataO);
 }
 
 
@@ -133,10 +157,10 @@ inline void Transpose(const std::array<__m128, _arrSizeIn>& matDataIn, std::arra
 
 template <U32 _rows, U32 _cols, U32 _rowStart, U32 _colStartIn, bool _overwriteUnused, bool _unusedSetZero,
           U32 _colStrideIn, U32 _colStartOut, U32 _colStrideOut, std::size_t _arrSizeIn, std::size_t _arrSizeOut>
-inline void Transpose(const std::array<__m256d, _arrSizeIn>& matDataIn, std::array<__m256d, _arrSizeOut>& matDataOut)
+inline void Transpose(const std::array<__m256d, _arrSizeIn>& matDataI, std::array<__m256d, _arrSizeOut>& matDataO)
 {
     Transpose<__m256d, _rows, _cols, _rowStart, _colStartIn, _overwriteUnused, _unusedSetZero, _colStrideIn,
-              _colStartOut, _colStrideOut>(matDataIn, matDataOut);
+              _colStartOut, _colStrideOut>(matDataI, matDataO);
 }
 
 
@@ -145,10 +169,10 @@ inline void Transpose(const std::array<__m256d, _arrSizeIn>& matDataIn, std::arr
 
 template <U32 _rows, U32 _cols, U32 _rowStart, U32 _colStartIn, bool _overwriteUnused, bool _unusedSetZero,
           U32 _colStrideIn, U32 _colStartOut, U32 _colStrideOut, std::size_t _arrSizeIn, std::size_t _arrSizeOut>
-inline void Transpose(const std::array<__m256, _arrSizeIn>& matDataIn, std::array<__m256, _arrSizeOut>& matDataOut)
+inline void Transpose(const std::array<__m256, _arrSizeIn>& matDataI, std::array<__m256, _arrSizeOut>& matDataO)
 {
     Transpose<__m256, _rows, _cols, _rowStart, _colStartIn, _overwriteUnused, _unusedSetZero, _colStrideIn,
-              _colStartOut, _colStrideOut>(matDataIn, matDataOut);
+              _colStartOut, _colStrideOut>(matDataI, matDataO);
 }
 
 
