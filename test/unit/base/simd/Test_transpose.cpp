@@ -219,15 +219,23 @@ BOOST_AUTO_TEST_CASE(Transpose2x2_128d)
 
 
 
-// BOOST_AUTO_TEST_CASE(Transpose2x2_128)
-//{
-//    TestTranspose<__m128, 2, 2>();
-//}
+BOOST_AUTO_TEST_CASE(Transpose2x2_128)
+{
+    TestTranspose<__m128, 2, 2>();
+}
+
 
 
 BOOST_AUTO_TEST_CASE(Transpose2x2_256d)
 {
     TestTranspose<__m256d, 2, 2>();
+}
+
+
+
+BOOST_AUTO_TEST_CASE(Transpose2x2_256)
+{
+    TestTranspose<__m256, 2, 2>();
 }
 
 

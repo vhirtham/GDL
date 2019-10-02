@@ -172,16 +172,6 @@ inline void Transpose1x1(_registerType in, _registerType& out)
 
 // --------------------------------------------------------------------------------------------------------------------
 
-inline void Transpose2x2(__m128d in0, __m128d in1, __m128d& out0, __m128d& out1)
-{
-    out0 = _mm_unpacklo_pd(in0, in1);
-    out1 = _mm_unpackhi_pd(in0, in1);
-}
-
-
-
-// --------------------------------------------------------------------------------------------------------------------
-
 template <U32 _rowStart, bool _overwriteUnused, bool _unusedSetZero, typename _registerType>
 inline void Transpose2x2(_registerType in0, _registerType in1, _registerType& out0, _registerType& out1)
 {
@@ -192,7 +182,7 @@ inline void Transpose2x2(_registerType in0, _registerType in1, _registerType& ou
     _registerType tmp0, tmp1;
 
 
-    // DetermDetermineine transposed for doupble precision registers
+    // Determine transposed for doupble precision registers
     if constexpr (numLaneVals == 2)
     {
         if constexpr (laneOffset == 0)
@@ -202,9 +192,9 @@ inline void Transpose2x2(_registerType in0, _registerType in1, _registerType& ou
         }
         else
         {
-            _registerType tmp = Permute2F128<0, 1, 1, 0>(in0, in1);
-            tmp0 = Shuffle<1, 1, 1, 1>(tmp, in0);
-            tmp1 = Shuffle<0, 0, 0, 0>(in1, tmp);
+            _registerType perm = Permute2F128<0, 1, 1, 0>(in0, in1);
+            tmp0 = Shuffle<1, 1, 1, 1>(perm, in0);
+            tmp1 = Shuffle<0, 0, 0, 0>(in1, perm);
         }
     }
 
@@ -214,7 +204,23 @@ inline void Transpose2x2(_registerType in0, _registerType in1, _registerType& ou
         if constexpr (laneOffset == 0)
         {
             tmp0 = _mm_unpacklo(in0, in1);
+            tmp1 = Permute<2, 3, 0, 1>(tmp0);
+        }
+        else if constexpr (laneOffset == 1)
+        {
+            tmp0 = Shuffle<0, 1, 1, 0>(in0, in1);
+            tmp1 = Shuffle<0, 2, 2, 0>(in0, in1);
+        }
+        else if constexpr (laneOffset == 2)
+        {
             tmp1 = _mm_unpackhi(in0, in1);
+            tmp0 = Permute<2, 3, 0, 1>(tmp1);
+        }
+        else
+        {
+            _registerType perm = Permute2F128<0, 1, 1, 0>(in0, in1);
+            tmp0 = Shuffle<3, 3, 3, 3>(perm, in0);
+            tmp1 = Shuffle<0, 0, 0, 0>(in1, perm);
         }
     }
 
