@@ -122,7 +122,8 @@ inline void Transpose(const std::array<_registerType, _arrSizeIn>& matDataI,
     else if constexpr (_rows == 2)
     {
         if constexpr (_cols == 1)
-            Transpose2x1(matDataI[idxI[0]], matDataO[idxO[0]], matDataO[idxO[1]]);
+            Transpose2x1<_rowStart, _overwriteUnused, _unusedSetZero>(matDataI[idxI[0]], matDataO[idxO[0]],
+                                                                      matDataO[idxO[1]]);
         else if constexpr (_cols == 2)
             Transpose2x2<_rowStart, _overwriteUnused, _unusedSetZero>(matDataI[idxI[0]], matDataI[idxI[1]],
                                                                       matDataO[idxO[0]], matDataO[idxO[1]]);
@@ -244,8 +245,66 @@ inline void Transpose1x2(_registerType in0, _registerType in1, _registerType& ou
     }
     else
         out0 = BlendInRange<_rowStart, _rowStart + 1>(out0, tmp0);
+}
 
-} // namespace GDL::simd
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+template <U32 _rowStart, bool _overwriteUnused, bool _unusedSetZero, typename _registerType>
+inline void Transpose2x1(_registerType in0, _registerType& out0, _registerType& out1)
+{
+    constexpr U32 numLaneVals = numValuesPerLane<_registerType>;
+    constexpr U32 numRegVals = numRegisterValues<_registerType>;
+    constexpr U32 laneOffset = _rowStart % numLaneVals;
+
+    _registerType tmp0;
+
+    // Determine transposed without crossing lane boundaries
+    if constexpr (laneOffset < numLaneVals - 1)
+    {
+        if constexpr (numLaneVals == 2)
+            tmp0 = _mm_unpackhi(in0, _mm_setzero<_registerType>());
+        else if constexpr (laneOffset == 1)
+            tmp0 = _mm_unpackhi(in0, in0);
+        else
+            tmp0 = _mm_movehdup(in0);
+    }
+
+    // Determine transposed accross lane boundaries
+#ifdef __AVX2__
+    else
+    {
+        _registerType perm = Permute2F128<1, 0>(in0);
+        tmp0 = Broadcast<0>(perm);
+    }
+#endif //__AVX2__
+
+
+    // Write to output registers
+    if constexpr (_overwriteUnused)
+    {
+        if constexpr (_unusedSetZero)
+        {
+            const _registerType zero = _mm_setzero<_registerType>();
+            out0 = BlendIndex<_rowStart>(zero, in0);
+            if constexpr (numRegVals > 2)
+                out1 = BlendIndex<_rowStart>(zero, tmp0);
+            else
+                out1 = tmp0;
+        }
+        else
+        {
+            out0 = in0;
+            out1 = tmp0;
+        }
+    }
+    else
+    {
+        out0 = BlendIndex<_rowStart>(out0, in0);
+        out1 = BlendIndex<_rowStart>(out1, tmp0);
+    }
+}
 
 
 
@@ -315,15 +374,6 @@ inline void Transpose2x2(_registerType in0, _registerType in1, _registerType& ou
         out0 = BlendInRange<_rowStart, _rowStart + 1>(out0, tmp0);
         out1 = BlendInRange<_rowStart, _rowStart + 1>(out1, tmp1);
     }
-}
-
-
-
-// --------------------------------------------------------------------------------------------------------------------
-
-inline void Transpose2x1(__m128d in0, __m128d& out0, __m128d& out1)
-{
-    Transpose2x2(in0, _mm_setzero_pd(), out0, out1);
 }
 
 

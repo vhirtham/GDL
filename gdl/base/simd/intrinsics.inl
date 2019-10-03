@@ -688,6 +688,47 @@ inline auto _mm_blendv(_registerType src0, _registerType src1, _registerType _bl
 
 // --------------------------------------------------------------------------------------------------------------------
 
+template <typename _registerType>
+inline auto _mm_movehdup(_registerType src)
+{
+    using namespace GDL::simd;
+    static_assert(Is__m128<_registerType> || Is__m256<_registerType>,
+                  "Function can only be used with compatible register types.");
+
+    if constexpr (Is__m128<_registerType>)
+        return _mm_movehdup_ps(src);
+#ifdef __AVX2__
+    else
+        return _mm256_movehdup_ps(src);
+#endif // __AVX2__
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+template <typename _registerType>
+inline auto _mm_moveldup(_registerType src)
+{
+    using namespace GDL::simd;
+    static_assert(IsRegisterType<_registerType>, "Function can only be used with compatible register types.");
+
+    if constexpr (Is__m128<_registerType>)
+        return _mm_moveldup_ps(src);
+    else if constexpr (Is__m128d<_registerType>)
+        return _mm_movedup_pd(src);
+#ifdef __AVX2__
+    else if constexpr (Is__m256<_registerType>)
+        return _mm256_moveldup_ps(src);
+    else
+        return _mm256_movedup_pd(src);
+#endif // __AVX2__
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
 template <I32 _permuteMask, typename _registerType>
 inline auto _mm_permute(_registerType reg)
 {

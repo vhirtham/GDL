@@ -263,6 +263,20 @@ inline auto _mm_blend(_registerType src0, _registerType src1);
 template <typename _registerType>
 inline auto _mm_blendv(_registerType src0, _registerType src1, _registerType _blendMask);
 
+//! @brief Creates a new register by overwriting even indexed values with the following odd indexed value.
+//! @tparam _registerType: Register type
+//! @param src: Source register
+//! @return Register with shuffled values
+template <typename _registerType>
+inline auto _mm_movehdup(_registerType src);
+
+//! @brief Creates a new register by overwriting odd indexed values with the previous even indexed value.
+//! @tparam _registerType: Register type
+//! @param src: Source register
+//! @return Register with shuffled values
+template <typename _registerType>
+inline auto _mm_moveldup(_registerType src);
+
 //! @brief Returns a register with an arbitrary combination of values from the input register as long as the source
 //! values and the destination are in the same SIMD lane.
 //! @tparam _permuteMask: Bitmask that determines the value composition. Have a look at Intels documentation of

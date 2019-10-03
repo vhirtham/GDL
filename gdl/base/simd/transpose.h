@@ -196,7 +196,7 @@ template <U32 _rows = 8, U32 _cols = 8, U32 _rowStart = 0, U32 _colStartIn = 0, 
           std::size_t _arrSizeIn, std::size_t _arrSizeOut>
 inline void Transpose(const std::array<__m256, _arrSizeIn>& matDataI, std::array<__m256, _arrSizeOut>& matDataO);
 
-//! @brief Transposes a 1x1 matrix which consists of 2 __m128d registers
+//! @brief Transposes a 1x1 matrix
 //! @tparam _rowStart: Index of the matrix's first row in each register
 //! @tparam _overwriteUnused: Option that specifies if unused values in the output registers can/should be overwritten
 //! @tparam _unusedSetZero: Option that specifies if unused values in the output registers are set to zero
@@ -209,7 +209,7 @@ template <U32 _rowStart = 0, bool _overwriteUnused = true, bool _unusedSetZero =
           typename _registerType>
 inline void Transpose1x1(_registerType in, _registerType& out);
 
-//! @brief Transposes a 2x2 matrix which consists of 2 __m128d registers
+//! @brief Transposes a 1x2 matrix
 //! @tparam _rowStart: Index of the matrix's first row in each register
 //! @tparam _overwriteUnused: Option that specifies if unused values in the output registers can/should be overwritten
 //! @tparam _unusedSetZero: Option that specifies if unused values in the output registers are set to zero
@@ -220,7 +220,18 @@ template <U32 _rowStart = 0, bool _overwriteUnused = true, bool _unusedSetZero =
           typename _registerType>
 inline void Transpose1x2(_registerType in0, _registerType in1, _registerType& out0);
 
-//! @brief Transposes a 2x2 matrix which consists of 2 __m128d registers
+//! @brief Transposes a 2x1 matrix
+//! @tparam _rowStart: Index of the matrix's first row in each register
+//! @tparam _overwriteUnused: Option that specifies if unused values in the output registers can/should be overwritten
+//! @tparam _unusedSetZero: Option that specifies if unused values in the output registers are set to zero
+//! @tparam _registerType: Register type
+//! @param in: Input registers
+//! @param out: Output registers
+template <U32 _rowStart = 0, bool _overwriteUnused = true, bool _unusedSetZero = _overwriteUnused,
+          typename _registerType>
+inline void Transpose2x1(_registerType in0, _registerType& out0, _registerType& out1);
+
+//! @brief Transposes a 2x2 matrix
 //! @tparam _rowStart: Index of the matrix's first row in each register
 //! @tparam _overwriteUnused: Option that specifies if unused values in the output registers can/should be overwritten
 //! @tparam _unusedSetZero: Option that specifies if unused values in the output registers are set to zero
@@ -230,13 +241,6 @@ inline void Transpose1x2(_registerType in0, _registerType in1, _registerType& ou
 template <U32 _rowStart = 0, bool _overwriteUnused = true, bool _unusedSetZero = _overwriteUnused,
           typename _registerType>
 inline void Transpose2x2(_registerType in0, _registerType in1, _registerType& out0, _registerType& out1);
-
-//! @brief Transposes a 2x1 matrix which consists of 1 __m128d registers (column major ordering).
-//! @param in: Input register
-//! @param out: Output registers
-//! @remark Unused rows are set to zero.
-inline void Transpose2x1(__m128d in0, __m128d& out0, __m128d& out1);
-
 
 //! @brief Transposes a 4x4 matrix which consists of 4 __m128 registers
 //! @param in: Input registers

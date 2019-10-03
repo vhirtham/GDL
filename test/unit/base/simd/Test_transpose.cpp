@@ -250,6 +250,41 @@ BOOST_AUTO_TEST_CASE(Transpose1x2_256)
 
 
 
+// Transpose 2x1 ------------------------------------------------------------------------------------------------------
+
+
+BOOST_AUTO_TEST_CASE(Transpose2x1_128d)
+{
+    TestTranspose<__m128d, 2, 1>();
+}
+
+
+
+BOOST_AUTO_TEST_CASE(Transpose2x1_128)
+{
+    TestTranspose<__m128, 2, 1>();
+}
+
+
+
+#ifdef __AVX2__
+
+BOOST_AUTO_TEST_CASE(Transpose2x1_256d)
+{
+    TestTranspose<__m256d, 2, 1>();
+}
+
+
+
+BOOST_AUTO_TEST_CASE(Transpose2x1_256)
+{
+    TestTranspose<__m256, 2, 1>();
+}
+
+#endif //__AVX2__
+
+
+
 // Transpose 2x2 ------------------------------------------------------------------------------------------------------
 
 BOOST_AUTO_TEST_CASE(Transpose2x2_128d)
@@ -281,53 +316,6 @@ BOOST_AUTO_TEST_CASE(Transpose2x2_256)
 }
 
 #endif //__AVX2__
-
-
-
-// Transpose 2x1 ------------------------------------------------------------------------------------------------------
-
-
-BOOST_AUTO_TEST_CASE(Transpose2x1_128d)
-{
-    alignas(alignmentBytes<__m128d>) std::array<__m128d, 2> a, b0, b1, c0, c1, c0_1, d0, d1, d0_1, exp0, exp1;
-    alignas(alignmentBytes<__m128d>) std::array<__m128d, 1> a_1;
-
-    a[0] = _mm_setr_pd(1, 2);
-    a[1] = _mm_setr_pd(3, 4);
-    a_1[0] = a[0];
-
-    exp0[0] = _mm_setr_pd(1, 0);
-    exp0[1] = _mm_setr_pd(2, 0);
-    exp1[0] = _mm_setr_pd(3, 0);
-    exp1[1] = _mm_setr_pd(4, 0);
-
-
-    Transpose2x1(a[0], b0[0], b0[1]);
-    Transpose2x1(a[1], b1[0], b1[1]);
-
-    Transpose<2, 1>(a, c0);
-    Transpose<2, 1, 0, 1>(a, c1);
-    Transpose<2, 1>(a_1, c0_1);
-
-    d0 = Transpose<2, 1>(a);
-    d1 = Transpose<2, 1, 0, 1>(a);
-    d0_1 = Transpose<2, 1>(a_1);
-
-    for (U32 i = 0; i < 2; ++i)
-        for (U32 j = 0; j < 2; ++j)
-        {
-            BOOST_CHECK(GetValue(b0[i], j) == Approx(GetValue(exp0[i], j)));
-            BOOST_CHECK(GetValue(b1[i], j) == Approx(GetValue(exp1[i], j)));
-
-            BOOST_CHECK(GetValue(c0[i], j) == Approx(GetValue(exp0[i], j)));
-            BOOST_CHECK(GetValue(c1[i], j) == Approx(GetValue(exp1[i], j)));
-            BOOST_CHECK(GetValue(c0_1[i], j) == Approx(GetValue(exp0[i], j)));
-
-            BOOST_CHECK(GetValue(d0[i], j) == Approx(GetValue(exp0[i], j)));
-            BOOST_CHECK(GetValue(d1[i], j) == Approx(GetValue(exp1[i], j)));
-            BOOST_CHECK(GetValue(d0_1[i], j) == Approx(GetValue(exp0[i], j)));
-        }
-}
 
 
 
