@@ -48,10 +48,10 @@ class HeapAllocationCounter
     static std::atomic<I32> mTotalDeleteCalls;
 
 public:
-    HeapAllocationCounter(const HeapAllocationCounter&) = default;
-    HeapAllocationCounter(HeapAllocationCounter&&) = default;
-    HeapAllocationCounter& operator=(const HeapAllocationCounter&) = default;
-    HeapAllocationCounter& operator=(HeapAllocationCounter&&) = default;
+    HeapAllocationCounter(const HeapAllocationCounter&) = delete;
+    HeapAllocationCounter(HeapAllocationCounter&&) = delete;
+    HeapAllocationCounter& operator=(const HeapAllocationCounter&) = delete;
+    HeapAllocationCounter& operator=(HeapAllocationCounter&&) = delete;
     ~HeapAllocationCounter() = default;
 
     //! @brief ctor
