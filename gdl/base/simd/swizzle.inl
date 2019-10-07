@@ -278,12 +278,18 @@ inline _registerType Broadcast(_registerType reg)
     static_assert(IsRegisterType<_registerType>,
                   "Only __m128, __m128d, __m256 and __m256d registers are supported by this function.");
 
+    // clang-format off
+#ifdef __AVX2__
+    if constexpr (_index == 0 && numLanes<_registerType> == 1)
+        return _mm_broadcasts(reg);
+    else
+#endif // __AVX2__
     if constexpr (Is__m128d<_registerType>)
         return Permute<_index, _index>(reg);
     else
         return Permute<_index, _index, _index, _index>(reg);
-
-} // namespace GDL::simd
+    // clang-format on
+}
 
 
 
@@ -314,9 +320,11 @@ inline _registerType BroadcastAcrossLanes(_registerType reg)
     static_assert(IsRegisterType<_registerType>,
                   "Only __m128, __m128d, __m256 and __m256d registers are supported by this function.");
 
-    if constexpr (numLanes<_registerType> == 1)
-        return Broadcast<_index>(reg);
 #ifdef __AVX2__
+    if constexpr (_index == 0)
+        return _mm_broadcasts(reg);
+    else if constexpr (numLanes<_registerType> == 1)
+        return Broadcast<_index>(reg);
     else
     {
 
@@ -325,7 +333,8 @@ inline _registerType BroadcastAcrossLanes(_registerType reg)
         return Permute2F128<laneIndex, laneIndex>(Broadcast<valueIndex>(reg));
     }
 
-
+#else
+    return Broadcast<_index>(reg);
 #endif // __AVX2__
 }
 

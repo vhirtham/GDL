@@ -263,6 +263,17 @@ inline auto _mm_blend(_registerType src0, _registerType src1);
 template <typename _registerType>
 inline auto _mm_blendv(_registerType src0, _registerType src1, _registerType _blendMask);
 
+#ifdef __AVX2__
+
+//! @brief Broadcasts the first value of the source register to all elements of the result register
+//! @tparam _registerType: Register type
+//! @param src: Source register
+//! @return Register with all values equal to the source registers first value
+template <typename _registerType>
+inline _registerType _mm_broadcasts(_registerType src);
+
+#endif //__AVX2__
+
 //! @brief Creates a new register by overwriting even indexed values with the following odd indexed value.
 //! @tparam _registerType: Register type
 //! @param src: Source register

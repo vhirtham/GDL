@@ -6,7 +6,7 @@
 #include "gdl/base/simd/constants.h"
 #include "gdl/base/simd/negate.h"
 
-
+#include <immintrin.h>
 
 namespace GDL
 {
@@ -683,6 +683,33 @@ inline auto _mm_blendv(_registerType src0, _registerType src1, _registerType _bl
         return _mm256_blendv_pd(src0, src1, _blendMask);
 #endif // __AVX2__
 }
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+#ifdef __AVX2__
+
+template <typename _registerType>
+inline _registerType _mm_broadcasts(_registerType src)
+{
+    using namespace GDL::simd;
+    static_assert(IsRegisterType<_registerType>, "Function can only be used with compatible register types.");
+
+    if constexpr (Is__m128<_registerType>)
+        return _mm_broadcastss_ps(src);
+    else if constexpr (Is__m128d<_registerType>)
+        // return _mm_broadcastsd_pd(src); - missing
+        // GCC bug? See:
+        // https://stackoverflow.com/questions/58270381/mm-broadcastsd-pd-missing-in-gcc-avx2intrin-h-versions-x-9-2
+        return _mm_movedup_pd(src);
+    else if constexpr (Is__m256<_registerType>)
+        return _mm256_broadcastss_ps(_mm256_castps256_ps128(src));
+    else
+        return _mm256_broadcastsd_pd(_mm256_castpd256_pd128(src));
+}
+
+#endif //__AVX2__
 
 
 
