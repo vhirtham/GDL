@@ -290,14 +290,22 @@ inline auto _mm_permute(_registerType reg);
 #ifdef __AVX2__
 
 //! @brief Returns a 256 bit AVX register with an arbitrary combination of the two source registers lanes
-//! @tparam _shuffleMask: Bitmask that determines the value composition. Have a look at Intels documentation of
-//! _mm_permute_ps or_mm_shuffle_ps for detailed informations
+//! @tparam _permuteMask: Bitmask that determines the value composition. Have a look at Intels documentation of
+//! _mm_permute2f128_ps or _mm_permute2f128_pd for detailed informations
 //! @tparam _registerType: Register type
 //! @param src0: First register which serves as source
 //! @param src1: Second register which serves as source
 //! @return AVX register with an arbitrary combination of the two source registers lanes
 template <I32 _permuteMask, typename _registerType>
 inline auto _mm_permute2f128(_registerType src0, _registerType src1);
+
+//! @brief Returns a __m256d register with an arbitrary combination of the source registers values.
+//! @tparam _permuteMask: Bitmask that determines the value composition. Have a look at Intels documentation of
+//! _mm_permute4x64_ps for detailed informations
+//! @param src: Source register
+//! @return __m256d register with an arbitrary combination of the source registers values.
+template <I32 _permuteMask>
+inline __m256d _mm_permute4x64(__m256d src0);
 
 #endif // __AVX2__
 

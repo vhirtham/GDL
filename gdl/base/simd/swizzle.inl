@@ -141,7 +141,7 @@ inline _registerType BlendAboveIndex(_registerType source0, [[maybe_unused]] _re
 // --------------------------------------------------------------------------------------------------------------------
 
 template <U32 _idxFirst, U32 _idxLast, typename _registerType>
-inline _registerType BlendInRange(_registerType source0, _registerType source1)
+inline _registerType BlendInRange([[maybe_unused]] _registerType source0, _registerType source1)
 {
     constexpr U32 numRegVals = numRegisterValues<_registerType>;
 
@@ -679,6 +679,46 @@ constexpr U32 Permute2F128Mask()
 
     return (((_lane1SrcReg) << 5) | ((_lane1SrcLane) << 4) | ((_lane0SrcReg) << 1) | (_lane0SrcLane));
 }
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+template <U32 _src0, U32 _src1, U32 _src2, U32 _src3>
+inline __m256d Permute4F64(__m256d source)
+{
+    return _mm_permute4x64<Permute4F64Mask<_src0, _src1, _src2, _src3>()>(source);
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+template <U32 _src0, U32 _src1, U32 _src2, U32 _src3>
+constexpr inline U32 Permute4F64Mask()
+{
+    static_assert(_src0 < 4 && _src1 < 4 && _src2 < 4 && _src3 < 4,
+                  "Values _src0-_src3 must be in the interval [0, 3]");
+
+    return (((_src3) << 6) | ((_src2) << 4) | ((_src1) << 2) | (_src0));
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+template <U32 _src0, U32 _src1, U32 _src2, U32 _src3, U32 _src4, U32 _src5, U32 _src6, U32 _src7>
+inline __m256 Permute8F32(__m256 source)
+{
+    static_assert(_src0 < 8 && _src1 < 8 && _src2 < 8 && _src3 < 8 && _src4 < 8 && _src5 < 8 && _src6 < 8 && _src7 < 8,
+                  "Values _src0-_src7 must be in the interval [0, 7]");
+
+    const __m256i mask = _mm256_setr_epi32(_src0, _src1, _src2, _src3, _src4, _src5, _src6, _src7);
+
+    return _mm256_permutevar8x32_ps(source, mask);
+}
+
+
 
 #endif // __AVX2__
 

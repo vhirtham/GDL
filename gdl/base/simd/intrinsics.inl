@@ -771,6 +771,16 @@ inline auto _mm_permute2f128(_registerType src0, _registerType src1)
         return _mm256_permute2f128_pd(src0, src1, _permuteMask);
 }
 
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+template <I32 _permuteMask>
+inline __m256d _mm_permute4x64(__m256d src0)
+{
+    return _mm256_permute4x64_pd(src0, _permuteMask);
+}
+
 #endif // __AVX2__
 
 

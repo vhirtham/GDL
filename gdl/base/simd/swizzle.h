@@ -263,6 +263,26 @@ inline _registerType Permute2F128(_registerType source0, _registerType source1);
 template <U32 _lane0SrcReg, U32 _lane0SrcLane, U32 _lane1SrcReg, U32 _lane1SrcLane>
 constexpr U32 Permute2F128Mask();
 
+//! @brief Creates a new __m256d register with arbitrary value combination from the source register (across lanes).
+//! @tparam _src0 - _src3: Indices of the source register values that should be stored at corresponding position
+//! @param source: Source register
+//! @return Register with arbitrary value combination from the source register.
+template <U32 _src0, U32 _src1, U32 _src2, U32 _src3>
+inline __m256d Permute4F64(__m256d source);
+
+//! @brief Creates a mask for the _mm256_permute4x64 intrinsics
+//! @tparam _src0 - _src3: Indices of the source register values that should be stored at corresponding position
+//! @return Mask
+template <U32 _src0, U32 _src1, U32 _src2, U32 _src3>
+constexpr inline U32 Permute4F64Mask();
+
+//! @brief Creates a new __m256 register with arbitrary value combination from the source register (across lanes).
+//! @tparam _src0 - _src7: Indices of the source register values that should be stored at corresponding position
+//! @param source: Source register
+//! @return Register with arbitrary value combination from the source register.
+template <U32 _src0, U32 _src1, U32 _src2, U32 _src3, U32 _src4, U32 _src5, U32 _src6, U32 _src7>
+inline __m256 Permute8F32(__m256 source);
+
 #endif // __AVX2__
 
 //! @brief Creates a new register with its first value per lane being an arbitrary value of the first registers values

@@ -642,6 +642,77 @@ BOOST_AUTO_TEST_CASE(Test_Permute2F128)
     TestPermute2F128<__m256>();
     TestPermute2F128<__m256d>();
 }
+
+
+
+// Permute4F64 --------------------------------------------------------------------------------------------------------
+
+template <U32 _i0, U32 _i1, U32 _i2, U32 _i3>
+void TestPermute4F64()
+{
+    __m256d a = _mm_setr<__m256d>(1, 2, 3, 4);
+    __m256d b = Permute4F64<_i0, _i1, _i2, _i3>(a);
+
+    BOOST_CHECK(GetValue<0>(b) == Approx(GetValue<_i0>(a)));
+    BOOST_CHECK(GetValue<1>(b) == Approx(GetValue<_i1>(a)));
+    BOOST_CHECK(GetValue<2>(b) == Approx(GetValue<_i2>(a)));
+    BOOST_CHECK(GetValue<3>(b) == Approx(GetValue<_i3>(a)));
+}
+
+
+
+BOOST_AUTO_TEST_CASE(Test_Permute4F64)
+{
+    TestPermute4F64<0, 0, 0, 0>();
+    TestPermute4F64<1, 1, 1, 1>();
+    TestPermute4F64<2, 2, 2, 2>();
+    TestPermute4F64<3, 3, 3, 3>();
+    TestPermute4F64<3, 2, 1, 0>();
+    TestPermute4F64<0, 1, 0, 1>();
+    TestPermute4F64<2, 3, 2, 3>();
+    TestPermute4F64<3, 1, 0, 2>();
+    TestPermute4F64<1, 3, 2, 3>();
+}
+
+
+
+// Permute8F32 --------------------------------------------------------------------------------------------------------
+
+template <U32 _i0, U32 _i1, U32 _i2, U32 _i3, U32 _i4, U32 _i5, U32 _i6, U32 _i7>
+void TestPermute8F32()
+{
+    __m256 a = _mm_setr<__m256>(1, 2, 3, 4, 5, 6, 7, 8);
+    __m256 b = Permute8F32<_i0, _i1, _i2, _i3, _i4, _i5, _i6, _i7>(a);
+
+    BOOST_CHECK(GetValue<0>(b) == Approx(GetValue<_i0>(a)));
+    BOOST_CHECK(GetValue<1>(b) == Approx(GetValue<_i1>(a)));
+    BOOST_CHECK(GetValue<2>(b) == Approx(GetValue<_i2>(a)));
+    BOOST_CHECK(GetValue<3>(b) == Approx(GetValue<_i3>(a)));
+    BOOST_CHECK(GetValue<4>(b) == Approx(GetValue<_i4>(a)));
+    BOOST_CHECK(GetValue<5>(b) == Approx(GetValue<_i5>(a)));
+    BOOST_CHECK(GetValue<6>(b) == Approx(GetValue<_i6>(a)));
+    BOOST_CHECK(GetValue<7>(b) == Approx(GetValue<_i7>(a)));
+}
+
+
+
+BOOST_AUTO_TEST_CASE(Test_Permute8F32)
+{
+    TestPermute8F32<0, 0, 0, 0, 0, 0, 0, 0>();
+    TestPermute8F32<1, 1, 1, 1, 1, 1, 1, 1>();
+    TestPermute8F32<2, 2, 2, 2, 2, 2, 2, 2>();
+    TestPermute8F32<3, 3, 3, 3, 3, 3, 3, 3>();
+    TestPermute8F32<4, 4, 4, 4, 4, 4, 4, 4>();
+    TestPermute8F32<5, 5, 5, 5, 5, 5, 5, 5>();
+    TestPermute8F32<6, 6, 6, 6, 6, 6, 6, 6>();
+    TestPermute8F32<7, 7, 7, 7, 7, 7, 7, 7>();
+    TestPermute8F32<0, 1, 2, 3, 4, 5, 6, 7>();
+    TestPermute8F32<1, 2, 3, 0, 1, 2, 3, 0>();
+    TestPermute8F32<5, 6, 7, 4, 5, 6, 7, 4>();
+    TestPermute8F32<1, 6, 4, 3, 2, 0, 7, 5>();
+    TestPermute8F32<5, 7, 6, 4, 1, 0, 3, 2>();
+}
+
 #endif // __AVX2__
 
 
