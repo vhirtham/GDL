@@ -15,7 +15,7 @@ namespace GDL::simd
 template <typename _registerType, U32 _numComparedValues>
 constexpr auto SSECalculateComparisonValueAllTrue()
 {
-    using ReturnType = decltype(_mm_movemaskEpi8(ReinterpretAsIntRegister(_mm_setzero<_registerType>())));
+    using ReturnType = decltype(_mm_movemaskEpi8(_mm_castFI(_mm_setzero<_registerType>())));
     constexpr U32 numRegisterEntries = numRegisterValues<_registerType>;
 
     if constexpr (_numComparedValues == numRegisterEntries)
@@ -37,7 +37,7 @@ inline bool CompareAllTrue(_registerType lhs, _registerType rhs, _compFunction c
     static_assert(_numComparedValues > 0 && _numComparedValues <= numRegisterEntries,
                   "Invalid number of compared values ---> [1 ... numRegisterEntries]");
 
-    auto cmpResult = _mm_movemaskEpi8(ReinterpretAsIntRegister(compFunction(lhs, rhs)));
+    auto cmpResult = _mm_movemaskEpi8(_mm_castFI(compFunction(lhs, rhs)));
     constexpr auto refResult = SSECalculateComparisonValueAllTrue<_registerType, _numComparedValues>();
 
     static_assert(std::is_same_v<const decltype(cmpResult), decltype(refResult)>, "Mismatching types for comparison");

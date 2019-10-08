@@ -76,19 +76,4 @@ constexpr U32 MaxRegisterSize()
 
 
 
-template <typename _registerType>
-inline auto ReinterpretAsIntRegister(_registerType reg)
-{
-    if constexpr (Is__m128<_registerType> || Is__m128d<_registerType>)
-        return reinterpret_cast<__m128i>(reg);
-#ifdef __AVX2__
-    if constexpr (Is__m256<_registerType> || Is__m256d<_registerType>)
-        return reinterpret_cast<__m256i>(reg);
-#endif // __AVX2__
-    else
-        throw Exception(__PRETTY_FUNCTION__, "Not defined for selected register type.");
-}
-
-
-
 } // namespace GDL::simd

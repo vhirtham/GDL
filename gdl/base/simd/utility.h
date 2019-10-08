@@ -41,15 +41,6 @@ constexpr auto GetDataType();
 //! @return Bitsize of the largest available register
 constexpr U32 MaxRegisterSize();
 
-//! @brief Reinterprets the passed register as a integer register of the same size
-//! @tparam _registerType: Register type
-//! @param reg: Register that should be cast
-//! @return Integer register
-template <typename _registerType>
-inline auto ReinterpretAsIntRegister(_registerType reg);
-
-
-
 } // namespace GDL::simd
 
 #include "gdl/base/simd/utility.inl"
