@@ -6,6 +6,15 @@
 
 namespace GDL::simd
 {
+//! @brief Concatenates two registers and extract byte-aligned result shifted to the right by n * sizeof(ElementType)
+//! bytes
+//! @tparam _shift: Shift in element sizes
+//! @tparam _registerType: Register type
+//! @param src0: First source register
+//! @param src1: Second source register
+//! @return Result register (see funtion description)
+template <U32 _shift, typename _registerType>
+inline _registerType AlignRight(_registerType src0, _registerType src1);
 
 
 //! @brief Blends two registers into a new register

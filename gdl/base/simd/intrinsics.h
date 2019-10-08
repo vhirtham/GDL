@@ -42,6 +42,20 @@ inline _registerType _mm_set1(_type value);
 template <typename _registerType, typename... _args>
 inline _registerType _mm_setr(_args... args);
 
+//! @brief Casts a floating point register to an equally sized integer register.
+//! @tparam _registerType: Register type
+//! @param src: Source register
+//! @return Integer register
+template <typename _registerType>
+inline auto _mm_castFI(_registerType src);
+
+//! @brief Casts an integer register to the desired float/double register
+//! @tparam _registerType: Type of the output register
+//! @tparam _intRegisterType_ Type of the integer register
+//! @param src: Source register
+//! @return Float or double register
+template <typename _registerType, typename _intRegisterType>
+inline _registerType _mm_castIF(_intRegisterType src);
 
 //! @brief Extracts the lowest element of a register. In case of 256 bit registers, the lowest element of the first
 //! 128bit is returned.
@@ -240,7 +254,6 @@ inline _registerType _mm_xor(_registerType lhs, _registerType rhs);
 //! @return Mask from the most significant bit of each 8-bit element of the source register
 template <typename _registerType>
 inline auto _mm_movemaskEpi8(_registerType reg);
-
 
 //! @brief Creates a new register where each value is selected from the two source registers values at the same
 //! position.

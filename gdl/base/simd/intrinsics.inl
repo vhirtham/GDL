@@ -623,6 +623,51 @@ inline auto _mm_movemaskEpi8(_registerType reg)
 // --------------------------------------------------------------------------------------------------------------------
 
 template <typename _registerType>
+inline auto _mm_castFI(_registerType src)
+{
+    using namespace GDL::simd;
+    static_assert(IsRegisterType<_registerType>, "Function can only be used with compatible register types.");
+
+    if constexpr (Is__m128<_registerType>)
+        return _mm_castps_si128(src);
+    else if constexpr (Is__m128d<_registerType>)
+        return _mm_castpd_si128(src);
+#ifdef __AVX2__
+    else if constexpr (Is__m256<_registerType>)
+        return _mm256_castps_si256(src);
+    else
+        return _mm256_castpd_si256(src);
+#endif // __AVX2__
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+template <typename _registerType, typename _intRegisterType>
+inline _registerType _mm_castIF(_intRegisterType src)
+{
+    using namespace GDL::simd;
+    static_assert(Is__m128i<_intRegisterType> || Is__m256i<_intRegisterType>,
+                  "Function can only be used with compatible integer register types.");
+
+    if constexpr (Is__m128<_registerType>)
+        return _mm_castsi128_ps(src);
+    else if constexpr (Is__m128d<_registerType>)
+        return _mm_castsi128_pd(src);
+#ifdef __AVX2__
+    else if constexpr (Is__m256<_registerType>)
+        return _mm256_castsi256_ps(src);
+    else
+        return _mm256_castsi256_pd(src);
+#endif // __AVX2__
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+template <typename _registerType>
 inline auto _mm_cvtsF(_registerType reg)
 {
     using namespace GDL::simd;

@@ -11,6 +11,77 @@ using namespace GDL::simd;
 
 
 
+// AlignRight ---------------------------------------------------------------------------------------------------------
+
+template <typename _registerType, U32 _shift = 0>
+void TestAlignRight()
+{
+    constexpr U32 numRegVals = numRegisterValues<_registerType>;
+    constexpr U32 nLanes = numLanes<_registerType>;
+    constexpr U32 numLaneVals = numRegVals / nLanes;
+
+    using Type = decltype(GetDataType<_registerType>());
+
+    _registerType a = _mm_setzero<_registerType>();
+    _registerType b = _mm_setzero<_registerType>();
+    _registerType exp = _mm_setzero<_registerType>();
+
+    for (U32 i = 0; i < numRegVals; ++i)
+    {
+        SetValue(a, i, static_cast<Type>(i + 1.25));
+        SetValue(b, i, static_cast<Type>(i + numRegVals + 1.33));
+    }
+
+    for (U32 i = 0; i < numLaneVals; ++i)
+        for (U32 j = 0; j < nLanes; ++j)
+            if (i < numLaneVals - _shift)
+                exp[i + j * numLaneVals] = b[i + _shift + j * numLaneVals];
+            else
+                exp[i + j * numLaneVals] = a[i - numLaneVals + _shift + j * numLaneVals];
+
+    _registerType c = AlignRight<_shift>(a, b);
+
+    for (U32 i = 0; i < numRegVals; ++i)
+        BOOST_CHECK(GetValue(c, i) == Approx(GetValue(exp, i)));
+
+    if constexpr (_shift < numLaneVals)
+        TestAlignRight<_registerType, _shift + 1>();
+}
+
+
+
+BOOST_AUTO_TEST_CASE(AlignRight_m128)
+{
+    TestAlignRight<__m128>();
+}
+
+
+
+BOOST_AUTO_TEST_CASE(AlignRight_m128d)
+{
+    TestAlignRight<__m128d>();
+}
+
+
+
+#ifdef __AVX2__
+
+BOOST_AUTO_TEST_CASE(AlignRight_m256)
+{
+    TestAlignRight<__m256>();
+}
+
+
+
+BOOST_AUTO_TEST_CASE(AlignRight_m256d)
+{
+    TestAlignRight<__m256d>();
+}
+
+#endif // __AVX2__
+
+
+
 // Blend --------------------------------------------------------------------------------------------------------------
 
 template <U32 _i = 0, U32 _j = 0>

@@ -7,6 +7,28 @@
 namespace GDL::simd
 {
 
+// --------------------------------------------------------------------------------------------------------------------
+
+template <U32 _shift, typename _registerType>
+inline _registerType AlignRight([[maybe_unused]] _registerType src0, [[maybe_unused]] _registerType src1)
+{
+    constexpr U32 elementSize = sizeof(_registerType) / numRegisterValues<_registerType>;
+    constexpr U32 numLaneVals = numValuesPerLane<_registerType>;
+
+    static_assert(_shift <= numLaneVals, "_shift must be in the range [0, numValuesPerLane]");
+
+    if constexpr (_shift == 0)
+        return src1;
+    else if constexpr (_shift == numLaneVals)
+        return src0;
+    else if constexpr (numLanes<_registerType> == 1)
+        return _mm_castIF<_registerType>(_mm_alignr_epi8(_mm_castFI(src0), _mm_castFI(src1), _shift * elementSize));
+#ifdef __AVX2__
+    else if constexpr (numLanes<_registerType> == 2)
+        return _mm_castIF<_registerType>(_mm256_alignr_epi8(_mm_castFI(src0), _mm_castFI(src1), _shift * elementSize));
+#endif //__AVX2
+}
+
 
 
 // --------------------------------------------------------------------------------------------------------------------
