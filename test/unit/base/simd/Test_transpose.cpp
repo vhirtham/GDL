@@ -113,13 +113,13 @@ inline void TestTransposeTestcasesColStartOut(const std::array<_registerType, _a
     using Type = decltype(GetDataType<_registerType>());
     constexpr U32 numRegVals = numRegisterValues<_registerType>;
 
-    std::array<_registerType, _arrSizeOut> ref;
+    std::array<_registerType, _arrSizeOut> ref = {0};
     for (U32 i = 0; i < _arrSizeOut; ++i)
         for (U32 j = 0; j < numRegVals; ++j)
             SetValue(ref[i], j, static_cast<Type>(1. / (j * _arrSizeOut + i + 10.)));
 
     //    std::cout << _arrSizeIn - 1 << "/" << _arrSizeOut - 1 << "/" << _firstRowIn << "/" << _colStartIn << "/"
-    //              << _firstRowIn << "/" << _colStartOut << std::endl;
+    //              << _firstRowOut << "/" << _colStartOut << std::endl;
 
 
     TestTransposeTestcase<_rows, _cols, _colStrideIn, _colStrideOut, _firstRowIn, _colStartIn, _firstRowOut,
@@ -133,7 +133,8 @@ inline void TestTransposeTestcasesColStartOut(const std::array<_registerType, _a
 
     if constexpr (_stepColOut > 0 && _colStartOut + _colStrideOut * (_rows - 1) + 1 + _stepColOut <= _arrSizeOut)
         TestTransposeTestcasesColStartOut<_rows, _cols, _colStrideIn, _colStrideOut, _stepColOut, _arrSizeIn,
-                                          _arrSizeOut, _firstRowIn, _colStartIn, _colStartOut + _stepColOut>(in);
+                                          _arrSizeOut, _firstRowIn, _colStartIn, _firstRowOut,
+                                          _colStartOut + _stepColOut>(in);
 }
 
 
@@ -164,8 +165,7 @@ inline void TestTransposeTestcasesRowStartOut(const std::array<_registerType, _a
     TestTransposeTestcasesColStartIn<_rows, _cols, _colStrideIn, _colStrideOut, _stepColIn, _stepColOut, _arrSizeIn,
                                      _arrSizeOut, _firstRowIn, _firstRowOut>(in);
 
-    if constexpr (_stepRowOut > 0 && _firstRowOut + _cols + _stepRowOut <= numRegVals &&
-                  _firstRowOut + _cols + _stepRowOut <= numRegVals)
+    if constexpr (_stepRowOut > 0 && _firstRowOut + _cols + _stepRowOut <= numRegVals)
         TestTransposeTestcasesRowStartOut<_rows, _cols, _colStrideIn, _colStrideOut, _stepRowOut, _stepColIn,
                                           _stepColOut, _arrSizeIn, _arrSizeOut, _firstRowIn,
                                           _firstRowOut + _stepRowOut>(in);
@@ -214,7 +214,7 @@ void TestTranspose()
     using Type = decltype(GetDataType<_registerType>());
     constexpr U32 numRegVals = numRegisterValues<_registerType>;
 
-    std::array<_registerType, _arrSizeIn> in;
+    std::array<_registerType, _arrSizeIn> in = {0};
     for (U32 i = 0; i < _arrSizeIn; ++i)
         for (U32 j = 0; j < numRegVals; ++j)
             SetValue(in[i], j, static_cast<Type>(j * _arrSizeIn + i + 1));
@@ -334,35 +334,35 @@ BOOST_AUTO_TEST_CASE(Transpose1x1_256)
 
 // Transpose 2x2 ------------------------------------------------------------------------------------------------------
 
-// BOOST_AUTO_TEST_CASE(Transpose2x2_128d)
-//{
-//    TestTranspose<__m128d, 2, 2>();
-//}
+BOOST_AUTO_TEST_CASE(Transpose2x2_128d)
+{
+    TestTranspose<__m128d, 2, 2>();
+}
 
 
 
-// BOOST_AUTO_TEST_CASE(Transpose2x2_128)
-//{
-//    TestTranspose<__m128, 2, 2>();
-//}
+BOOST_AUTO_TEST_CASE(Transpose2x2_128)
+{
+    TestTranspose<__m128, 2, 2>();
+}
 
 
 
-//#ifdef __AVX2__
+#ifdef __AVX2__
 
-// BOOST_AUTO_TEST_CASE(Transpose2x2_256d)
-//{
-//    TestTranspose<__m256d, 2, 2>();
-//}
+BOOST_AUTO_TEST_CASE(Transpose2x2_256d)
+{
+    TestTranspose<__m256d, 2, 2>();
+}
 
 
 
-// BOOST_AUTO_TEST_CASE(Transpose2x2_256)
-//{
-//    TestTranspose<__m256, 2, 2>();
-//}
+BOOST_AUTO_TEST_CASE(Transpose2x2_256)
+{
+    TestTranspose<__m256, 2, 2>();
+}
 
-//#endif //__AVX2__
+#endif //__AVX2__
 
 
 
@@ -460,100 +460,100 @@ BOOST_AUTO_TEST_CASE(Transpose8x8_256)
 
 // Array sizes --------------------------------------------------------------------------------------------------------
 
-// BOOST_AUTO_TEST_CASE(ArraySizes_128d)
-//{
-//    TestTranspose<__m128d, 1, 1, 0, 0, 0, 1, 1, 1, 1>();
-//}
+BOOST_AUTO_TEST_CASE(ArraySizes_128d)
+{
+    TestTranspose<__m128d, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1>();
+}
 
 
 
-// BOOST_AUTO_TEST_CASE(ArraySizes_128)
-//{
-//    TestTranspose<__m128, 1, 1, 0, 0, 0, 1, 1, 1, 1>();
-//}
+BOOST_AUTO_TEST_CASE(ArraySizes_128)
+{
+    TestTranspose<__m128, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1>();
+}
 
 
 
-//#ifdef __AVX2__
+#ifdef __AVX2__
 
-// BOOST_AUTO_TEST_CASE(ArraySizes_256d)
-//{
-//    TestTranspose<__m256d, 1, 1, 0, 0, 0, 1, 1, 1, 1>();
-//}
+BOOST_AUTO_TEST_CASE(ArraySizes_256d)
+{
+    TestTranspose<__m256d, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1>();
+}
 
 
 
-// BOOST_AUTO_TEST_CASE(ArraySizes_256)
-//{
-//    TestTranspose<__m256, 1, 1, 0, 0, 0, 1, 1, 1, 1>();
-//}
+BOOST_AUTO_TEST_CASE(ArraySizes_256)
+{
+    TestTranspose<__m256, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1>();
+}
 
-//#endif //__AVX2__
+#endif //__AVX2__
 
 
 
 // Column offsets -----------------------------------------------------------------------------------------------------
 
-// BOOST_AUTO_TEST_CASE(ColumnOffset_128d)
-//{
-//    TestTranspose<__m128d, 1, 1, 0, 3, 3, 1, 1, 0, 0, 4, 4>();
-//}
+BOOST_AUTO_TEST_CASE(ColumnOffset_128d)
+{
+    TestTranspose<__m128d, 1, 1, 0, 0, 3, 3, 1, 1, 0, 0, 4, 4>();
+}
 
 
 
-// BOOST_AUTO_TEST_CASE(ColumnOffset_128)
-//{
-//    TestTranspose<__m128, 1, 1, 0, 5, 5, 1, 1, 0, 0, 16, 16>();
-//}
+BOOST_AUTO_TEST_CASE(ColumnOffset_128)
+{
+    TestTranspose<__m128, 1, 1, 0, 0, 5, 5, 1, 1, 0, 0, 16, 16>();
+}
 
 
 
-//#ifdef __AVX2__
+#ifdef __AVX2__
 
-// BOOST_AUTO_TEST_CASE(ColumnOffset_256d)
-//{
-//    TestTranspose<__m256d, 1, 1, 0, 5, 5, 1, 1, 0, 0, 16, 16>();
-//}
+BOOST_AUTO_TEST_CASE(ColumnOffset_256d)
+{
+    TestTranspose<__m256d, 1, 1, 0, 0, 5, 5, 1, 1, 0, 0, 16, 16>();
+}
 
 
 
-// BOOST_AUTO_TEST_CASE(ColumnOffset_256)
-//{
-//    TestTranspose<__m256, 1, 1, 0, 9, 9, 1, 1, 0, 0, 64, 64>();
-//}
+BOOST_AUTO_TEST_CASE(ColumnOffset_256)
+{
+    TestTranspose<__m256, 1, 1, 0, 0, 9, 9, 1, 1, 0, 0, 64, 64>();
+}
 
-//#endif //__AVX2__
+#endif //__AVX2__
 
 
 
 // Column strides -----------------------------------------------------------------------------------------------------
 
-// BOOST_AUTO_TEST_CASE(ColumnStrides_128d)
-//{
-//    TestTranspose<__m128d, 2, 2, 0, 1, 1, 2, 2, 0, 0, 4, 4>();
-//}
+BOOST_AUTO_TEST_CASE(ColumnStrides_128d)
+{
+    TestTranspose<__m128d, 2, 2, 0, 0, 1, 1, 2, 2, 0, 0, 4, 4>();
+}
 
 
 
-// BOOST_AUTO_TEST_CASE(ColumnStrides_128)
-//{
-//    TestTranspose<__m128, 2, 2, 0, 1, 1, 2, 2, 0, 0, 4, 4>();
-//}
+BOOST_AUTO_TEST_CASE(ColumnStrides_128)
+{
+    TestTranspose<__m128, 2, 2, 0, 0, 1, 1, 2, 2, 0, 0, 4, 4>();
+}
 
 
 
-//#ifdef __AVX2__
+#ifdef __AVX2__
 
-// BOOST_AUTO_TEST_CASE(ColumnStrides_256d)
-//{
-//    TestTranspose<__m256d, 2, 2, 0, 1, 1, 2, 2, 0, 0, 4, 4>();
-//}
+BOOST_AUTO_TEST_CASE(ColumnStrides_256d)
+{
+    TestTranspose<__m256d, 2, 2, 0, 0, 1, 1, 2, 2, 0, 0, 4, 4>();
+}
 
 
 
-// BOOST_AUTO_TEST_CASE(ColumnStrides_256)
-//{
-//    TestTranspose<__m256, 2, 2, 0, 1, 1, 2, 2, 0, 0, 4, 4>();
-//}
+BOOST_AUTO_TEST_CASE(ColumnStrides_256)
+{
+    TestTranspose<__m256, 2, 2, 0, 0, 1, 1, 2, 2, 0, 0, 4, 4>();
+}
 
-//#endif //__AVX2__
+#endif //__AVX2__

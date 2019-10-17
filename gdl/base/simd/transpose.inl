@@ -417,61 +417,79 @@ inline void Transpose2x1(_registerType in0, _registerType& out0, _registerType& 
 }
 
 
-
 // --------------------------------------------------------------------------------------------------------------------
 
-template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unusedSetZero, typename _registerType>
-inline void Transpose2x2(_registerType in0, _registerType in1, _registerType& out0, _registerType& out1)
+template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unusedSetZero>
+inline void Transpose2x2(const __m128& in0, const __m128& in1, __m128& out0, __m128& out1)
 {
-    constexpr U32 numLaneVals = numValuesPerLane<_registerType>;
-    constexpr U32 numRegVals = numRegisterValues<_registerType>;
-    constexpr U32 laneOffset = _firstRowIn % numLaneVals;
+    __m128 tmp0, tmp1;
 
-    _registerType tmp0, tmp1;
-
-
-    // Determine transposed without crossing lane boundaries
-    if constexpr (laneOffset == 0)
+    if constexpr (_firstRowIn == 0)
     {
-        tmp0 = _mm_unpacklo(in0, in1);
-        if constexpr (numLaneVals == 2)
-            tmp1 = _mm_unpackhi(in0, in1);
-        else
-            tmp1 = Permute<2, 3, 0, 1>(tmp0);
-    }
-    else if constexpr (laneOffset < numLaneVals - 1)
-    {
-        if constexpr (laneOffset == 1)
+        if constexpr (_firstRowOut == 0)
         {
-            tmp0 = Shuffle<0, 1, 1, 0>(in0, in1);
-            tmp1 = Shuffle<0, 2, 2, 0>(in0, in1);
+            tmp0 = _mm_unpacklo(in0, in1);
+            tmp1 = _mm_movehl_ps(tmp0, tmp0);
+        }
+        else if constexpr (_firstRowOut == 1)
+        {
+            tmp0 = Shuffle<1, 0, 0, 1>(in0, in1);
+            tmp1 = _mm_unpacklo(in1, tmp0);
         }
         else
         {
-            tmp1 = _mm_unpackhi(in0, in1);
-            tmp0 = Permute<2, 3, 0, 1>(tmp1);
+            tmp1 = _mm_unpacklo(in0, in1);
+            tmp0 = _mm_movelh_ps(tmp1, tmp1);
         }
     }
-
-    // Determine transposed accross lane boundaries
-#ifdef __AVX2__
+    else if constexpr (_firstRowIn == 1)
+    {
+        if constexpr (_firstRowOut == 0)
+        {
+            __m128 tmp2 = _mm_unpacklo(in0, in1);
+            tmp0 = _mm_movehl_ps(tmp2, tmp2);
+            tmp1 = _mm_unpackhi(in0, in1);
+        }
+        else if constexpr (_firstRowOut == 1)
+        {
+            tmp0 = Shuffle<1, 1, 1, 1>(in0, in1);
+            tmp1 = Shuffle<2, 2, 2, 2>(in0, in1);
+        }
+        else
+        {
+            __m128 tmp2 = _mm_unpackhi(in0, in1);
+            tmp0 = _mm_unpacklo(in0, in1);
+            tmp1 = _mm_movelh_ps(tmp2, tmp2);
+        }
+    }
     else
     {
-        _registerType perm = Permute2F128<0, 1, 1, 0>(in0, in1);
-        tmp0 = Shuffle<laneOffset, laneOffset, laneOffset, laneOffset>(perm, in0);
-        tmp1 = Shuffle<0, 0, 0, 0>(in1, perm);
+        if constexpr (_firstRowOut == 0)
+        {
+            tmp0 = _mm_unpackhi(in0, in1);
+            tmp1 = _mm_movehl_ps(tmp0, tmp0);
+        }
+        else if constexpr (_firstRowOut == 1)
+        {
+            tmp1 = Shuffle<2, 3, 3, 2>(in0, in1);
+            tmp0 = _mm_unpackhi(tmp1, in0);
+        }
+        else
+        {
+            tmp1 = _mm_unpackhi(in0, in1);
+            tmp0 = _mm_movelh_ps(tmp1, tmp1);
+        }
     }
-#endif //__AVX2__
 
 
     // Write to output registers
-    if constexpr (numRegVals == 2 || _overwriteUnused)
+    if constexpr (_overwriteUnused)
     {
-        if constexpr (_unusedSetZero && numRegVals > 2)
+        if constexpr (_unusedSetZero)
         {
-            const _registerType zero = _mm_setzero<_registerType>();
-            out0 = BlendInRange<_firstRowIn, _firstRowIn + 1>(zero, tmp0);
-            out1 = BlendInRange<_firstRowIn, _firstRowIn + 1>(zero, tmp1);
+            const __m128 zero = _mm_setzero<__m128>();
+            out0 = BlendInRange<_firstRowOut, _firstRowOut + 1>(zero, tmp0);
+            out1 = BlendInRange<_firstRowOut, _firstRowOut + 1>(zero, tmp1);
         }
         else
         {
@@ -481,10 +499,364 @@ inline void Transpose2x2(_registerType in0, _registerType in1, _registerType& ou
     }
     else
     {
-        out0 = BlendInRange<_firstRowIn, _firstRowIn + 1>(out0, tmp0);
-        out1 = BlendInRange<_firstRowIn, _firstRowIn + 1>(out1, tmp1);
+        out0 = BlendInRange<_firstRowOut, _firstRowOut + 1>(out0, tmp0);
+        out1 = BlendInRange<_firstRowOut, _firstRowOut + 1>(out1, tmp1);
     }
 }
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unusedSetZero>
+inline void Transpose2x2(const __m128d& in0, const __m128d& in1, __m128d& out0, __m128d& out1)
+{
+    out0 = _mm_unpacklo(in0, in1);
+    out1 = _mm_unpackhi(in0, in1);
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+#ifdef __AVX2__
+
+template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unusedSetZero>
+inline void Transpose2x2(const __m256& in0, const __m256& in1, __m256& out0, __m256& out1)
+{
+    constexpr U32 numLaneVals = numValuesPerLane<__m256>;
+    constexpr U32 laneIn = _firstRowIn / numLaneVals;
+    constexpr U32 laneOut = _firstRowOut / numLaneVals;
+    constexpr U32 laneOffsetIn = _firstRowIn % numLaneVals;
+    constexpr U32 laneOffsetOut = _firstRowOut % numLaneVals;
+
+    __m256 tmp0, tmp1;
+    if constexpr (laneOffsetIn == 0)
+    {
+        if constexpr (laneIn == laneOut)
+        {
+            if constexpr (laneOffsetOut == 0)
+            {
+                tmp0 = _mm_unpacklo(in0, in1);
+                tmp1 = Permute<2, 3, 0, 1>(tmp0);
+            }
+            else if constexpr (laneOffsetOut == 1)
+            {
+                tmp0 = Shuffle<1, 0, 0, 1>(in0, in1);
+                tmp1 = _mm_unpacklo(in1, tmp0);
+            }
+            else if constexpr (laneOffsetOut == 2)
+            {
+                tmp1 = _mm_unpacklo(in0, in1);
+                tmp0 = Permute<2, 3, 0, 1>(tmp1);
+            }
+            else
+            {
+                __m256 perm = Permute2F128<1, 0>(in1);
+                tmp0 = Shuffle<0, 0, 0, 0>(perm, in0);
+                tmp1 = Shuffle<1, 1, 1, 1>(perm, in0);
+            }
+        }
+        else
+        {
+            if constexpr (laneOffsetOut == 0)
+            {
+                __m256 tmp2 = _mm_unpacklo(in0, in1);
+                tmp0 = Permute2F128<1, 0>(tmp2);
+                tmp1 = Permute<2, 3, 0, 1>(tmp0);
+            }
+            else if constexpr (laneOffsetOut == 1)
+            {
+                __m256 tmp2 = Shuffle<1, 0, 0, 1>(in0, in1);
+                tmp0 = Permute2F128<1, 0>(tmp2);
+                tmp1 = Permute<0, 0, 3, 3>(tmp0);
+            }
+            else if constexpr (laneOffsetOut == 2)
+            {
+                __m256 tmp2 = _mm_unpacklo(in0, in1);
+                tmp1 = Permute2F128<1, 0>(tmp2);
+                tmp0 = Permute<2, 3, 0, 1>(tmp1);
+            }
+            else
+            {
+                __m256 perm = Permute2F128<1, 0>(in0);
+                tmp0 = Shuffle<0, 0, 0, 0>(in1, perm);
+                tmp1 = Shuffle<1, 1, 1, 1>(in1, perm);
+            }
+        }
+    }
+    else if constexpr (laneOffsetIn == 1)
+    {
+        if constexpr (laneIn == laneOut)
+        {
+            if constexpr (laneOffsetOut == 0)
+            {
+                __m256 tmp2 = _mm_unpacklo(in0, in1);
+                tmp0 = Permute<2, 3, 0, 1>(tmp2);
+                tmp1 = _mm_unpackhi(in0, in1);
+            }
+            else if constexpr (laneOffsetOut == 1)
+            {
+                tmp0 = Shuffle<1, 1, 1, 1>(in0, in1);
+                tmp1 = Shuffle<2, 2, 2, 2>(in0, in1);
+            }
+            else if constexpr (laneOffsetOut == 2)
+            {
+                __m256 tmp2 = _mm_unpackhi(in0, in1);
+                tmp0 = _mm_unpacklo(in0, in1);
+                tmp1 = Permute<2, 3, 0, 1>(tmp2);
+            }
+            else
+            {
+                __m256 perm = Permute2F128<1, 0>(in1);
+                tmp0 = Shuffle<1, 1, 1, 1>(perm, in0);
+                tmp1 = Shuffle<2, 2, 2, 2>(perm, in0);
+            }
+        }
+        else
+        {
+            if constexpr (laneOffsetOut == 0)
+            {
+                __m256 tmp2 = Shuffle<1, 2, 1, 2>(in0, in1);
+                tmp0 = Permute8F32<4, 6, 5, 7, 0, 2, 1, 3>(tmp2);
+                tmp1 = Permute<2, 3, 0, 1>(tmp0);
+            }
+            else if constexpr (laneOffsetOut == 1)
+            {
+                __m256 tmp2 = Shuffle<2, 1, 1, 2>(in0, in1);
+                tmp0 = Permute2F128<1, 0>(tmp2);
+                tmp1 = Permute<0, 0, 3, 3>(tmp0);
+            }
+            else if constexpr (laneOffsetOut == 2)
+            {
+                __m256 tmp2 = Shuffle<1, 2, 1, 2>(in0, in1);
+                tmp1 = Permute8F32<4, 6, 5, 7, 0, 2, 1, 3>(tmp2);
+                tmp0 = Permute<2, 3, 0, 1>(tmp1);
+            }
+            else
+            {
+                __m256 perm = Permute2F128<1, 0>(in0);
+                tmp0 = Shuffle<1, 1, 1, 1>(in1, perm);
+                tmp1 = Shuffle<2, 2, 2, 2>(in1, perm);
+            }
+        }
+    }
+    else if constexpr (laneOffsetIn == 2)
+    {
+        if constexpr (laneIn == laneOut)
+        {
+            if constexpr (laneOffsetOut == 0)
+            {
+                tmp0 = _mm_unpackhi(in0, in1);
+                tmp1 = Permute<2, 3, 0, 1>(tmp0);
+            }
+            else if constexpr (laneOffsetOut == 1)
+            {
+                tmp1 = Shuffle<2, 3, 3, 2>(in0, in1);
+                tmp0 = _mm_unpackhi(tmp1, in0);
+            }
+            else if constexpr (laneOffsetOut == 2)
+            {
+                tmp1 = _mm_unpackhi(in0, in1);
+                tmp0 = Permute<2, 3, 0, 1>(tmp1);
+            }
+            else
+            {
+                __m256 perm = Permute2F128<1, 0>(in1);
+                tmp0 = Shuffle<2, 2, 2, 2>(perm, in0);
+                tmp1 = Shuffle<3, 3, 3, 3>(perm, in0);
+            }
+        }
+        else
+        {
+            if constexpr (laneOffsetOut == 0)
+            {
+                __m256 tmp2 = _mm_unpackhi(in0, in1);
+                tmp0 = Permute2F128<1, 0>(tmp2);
+                tmp1 = Permute<2, 3, 0, 1>(tmp0);
+            }
+            else if constexpr (laneOffsetOut == 1)
+            {
+                __m256 tmp2 = Shuffle<2, 3, 3, 2>(in0, in1);
+                tmp1 = Permute2F128<1, 0>(tmp2);
+                tmp0 = Permute<0, 0, 3, 3>(tmp1);
+            }
+            else if constexpr (laneOffsetOut == 2)
+            {
+                __m256 tmp2 = _mm_unpackhi(in0, in1);
+                tmp1 = Permute2F128<1, 0>(tmp2);
+                tmp0 = Permute<2, 3, 0, 1>(tmp1);
+            }
+            else
+            {
+                __m256 perm = Permute2F128<1, 0>(in0);
+                tmp0 = Shuffle<2, 2, 2, 2>(in1, perm);
+                tmp1 = Shuffle<3, 3, 3, 3>(in1, perm);
+            }
+        }
+    }
+    else
+    {
+        if constexpr (_firstRowOut == 0)
+        {
+            __m256 tmp2 = _mm_unpackhi(in0, in1);
+            __m256 tmp3 = _mm_unpacklo(in0, in1);
+            tmp0 = Permute<2, 3, 0, 1>(tmp2);
+            tmp1 = Permute2F128<1, 0>(tmp3);
+        }
+        else if constexpr (_firstRowOut == 1)
+        {
+            __m256 tmp2 = Shuffle<3, 0, 0, 3>(in0, in1);
+            tmp0 = Shuffle<0, 3, 3, 0>(in0, in1);
+            tmp1 = Permute2F128<1, 0>(tmp2);
+        }
+        else if constexpr (_firstRowOut == 2)
+        {
+            __m256 tmp2 = _mm_unpacklo(in0, in1);
+            __m256 tmp3 = Permute<2, 3, 0, 1>(tmp2);
+            tmp0 = _mm_unpackhi(in0, in1);
+            tmp1 = Permute2F128<1, 0>(tmp3);
+        }
+        else if constexpr (_firstRowOut == 3)
+        {
+            __m256 perm = Permute2F128<0, 1, 1, 0>(in0, in1);
+            tmp0 = Shuffle<3, 3, 3, 3>(perm, in0);
+            tmp1 = Shuffle<0, 0, 0, 0>(in1, perm);
+        }
+        else if constexpr (_firstRowOut == 4)
+        {
+            __m256 tmp2 = _mm_unpackhi(in0, in1);
+            __m256 tmp3 = Permute<2, 3, 0, 1>(tmp2);
+            tmp0 = Permute2F128<1, 0>(tmp3);
+            tmp1 = _mm_unpacklo(in0, in1);
+        }
+        else if constexpr (_firstRowOut == 5)
+        {
+            __m256 tmp2 = Shuffle<0, 3, 3, 0>(in0, in1);
+            tmp0 = Permute2F128<1, 0>(tmp2);
+            tmp1 = Shuffle<3, 0, 0, 3>(in0, in1);
+        }
+        else
+        {
+            __m256 tmp2 = _mm_unpackhi(in0, in1);
+            __m256 tmp3 = _mm_unpacklo(in0, in1);
+            tmp0 = Permute2F128<1, 0>(tmp2);
+            tmp1 = Permute<2, 3, 0, 1>(tmp3);
+        }
+    }
+
+
+    // Write to output registers
+    if constexpr (_overwriteUnused)
+    {
+        if constexpr (_unusedSetZero)
+        {
+            const __m256 zero = _mm_setzero<__m256>();
+            out0 = BlendInRange<_firstRowOut, _firstRowOut + 1>(zero, tmp0);
+            out1 = BlendInRange<_firstRowOut, _firstRowOut + 1>(zero, tmp1);
+        }
+        else
+        {
+            out0 = tmp0;
+            out1 = tmp1;
+        }
+    }
+    else
+    {
+        out0 = BlendInRange<_firstRowOut, _firstRowOut + 1>(out0, tmp0);
+        out1 = BlendInRange<_firstRowOut, _firstRowOut + 1>(out1, tmp1);
+    }
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unusedSetZero>
+inline void Transpose2x2(const __m256d& in0, const __m256d& in1, __m256d& out0, __m256d& out1)
+{
+    constexpr U32 numLaneVals = numValuesPerLane<__m256d>;
+    constexpr U32 laneIn = _firstRowIn / numLaneVals;
+    constexpr U32 laneOut = _firstRowOut / numLaneVals;
+    constexpr U32 laneOffsetIn = _firstRowIn % numLaneVals;
+    constexpr U32 laneOffsetOut = _firstRowOut % numLaneVals;
+
+    __m256d tmp0, tmp1;
+
+
+    if constexpr (laneOffsetIn == 0)
+    {
+        if constexpr (laneOffsetOut == 0)
+        {
+            tmp0 = _mm_unpacklo(in0, in1);
+            tmp1 = _mm_unpackhi(in0, in1);
+            if constexpr (laneIn != laneOut)
+            {
+                tmp0 = Permute2F128<1, 0>(tmp0);
+                tmp1 = Permute2F128<1, 0>(tmp1);
+            }
+        }
+        else
+        {
+            if constexpr (_firstRowIn == 0)
+            {
+                __m256d perm = Permute2F128<1, 0>(in1);
+                tmp0 = _mm_unpacklo(perm, in0);
+                tmp1 = _mm_unpackhi(perm, in0);
+            }
+            else
+            {
+                __m256d perm = Permute2F128<1, 0>(in0);
+                tmp0 = _mm_unpacklo(in1, perm);
+                tmp1 = _mm_unpackhi(in1, perm);
+            }
+        }
+    }
+    else
+    {
+        if constexpr (_firstRowOut == 0)
+        {
+            tmp0 = Shuffle<1, 1, 0, 0>(in0, in1);
+            tmp1 = Permute2F128<1, 0>(tmp0);
+        }
+        else if constexpr (_firstRowOut == 1)
+        {
+            __m256d tmp2 = Blend<1, 1, 0, 0>(in0, in1);
+            __m256d perm = Permute4F64<2, 2, 1, 1>(tmp2);
+            tmp0 = Blend<0, 0, 1, 1>(in0, perm);
+            tmp1 = Blend<0, 0, 1, 1>(perm, in1);
+        }
+        else
+        {
+            tmp1 = Shuffle<1, 1, 0, 0>(in0, in1);
+            tmp0 = Permute2F128<1, 0>(tmp1);
+        }
+    }
+
+
+    // Write to output registers
+    if constexpr (_overwriteUnused)
+    {
+        if constexpr (_unusedSetZero)
+        {
+            const __m256d zero = _mm_setzero<__m256d>();
+            out0 = BlendInRange<_firstRowOut, _firstRowOut + 1>(zero, tmp0);
+            out1 = BlendInRange<_firstRowOut, _firstRowOut + 1>(zero, tmp1);
+        }
+        else
+        {
+            out0 = tmp0;
+            out1 = tmp1;
+        }
+    }
+    else
+    {
+        out0 = BlendInRange<_firstRowOut, _firstRowOut + 1>(out0, tmp0);
+        out1 = BlendInRange<_firstRowOut, _firstRowOut + 1>(out1, tmp1);
+    }
+}
+
+#endif // __AVX2__
 
 
 
