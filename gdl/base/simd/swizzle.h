@@ -165,6 +165,32 @@ inline void Exchange(__m256d& reg0, __m256d& reg1);
 
 #endif // __AVX2__
 
+//! @brief Inserts a single value from a register into another register and returns the result. Optionally, specific
+//! values of the result can be set to zero.
+//! @tparam _idxSrc: Index of the value that should be copied inside of the source register
+//! @tparam _idxDst: Target index of the destination
+//! @tparam _setZeroIdx0: If true, the first value of the result is set to zero.
+//! @tparam _setZeroIdx1: If true, the second value of the result is set to zero.
+//! @tparam _setZeroIdx2: If true, the third value of the result is set to zero.
+//! @tparam _setZeroIdx3: If true, the fourth value of the result is set to zero.
+//! @param src: Register that provides the value.
+//! @param dst: Register that should receive the value.
+//! @return Result of the insertion
+template <U32 _idxSrc, U32 _idxDst, bool _setZeroIdx0 = false, bool _setZeroIdx1 = false, bool _setZeroIdx2 = false,
+          bool _setZeroIdx3 = false>
+inline __m128 Insert(__m128 src, __m128 dst);
+
+//! @brief Creates a mask for the _mm_insert_ps intrinsic function
+//! @tparam _idxSrc: Index of the value that should be copied inside of the source register
+//! @tparam _idxDst: Target index of the destination
+//! @tparam _setZeroIdx0: If true, the first value of the result is set to zero.
+//! @tparam _setZeroIdx1: If true, the second value of the result is set to zero.
+//! @tparam _setZeroIdx2: If true, the third value of the result is set to zero.
+//! @tparam _setZeroIdx3: If true, the fourth value of the result is set to zero.
+//! @return: Mask
+template <U32 _idxSrc, U32 _idxDst, bool _setZeroIdx0, bool _setZeroIdx1, bool _setZeroIdx2, bool _setZeroIdx3>
+inline constexpr U32 InsertMask();
+
 
 //! @brief Creates a new register with arbitrary value combination from the source register
 //! @tparam _src0 - _src1: Indices of the source register values that should be stored at corresponding position

@@ -510,6 +510,112 @@ BOOST_AUTO_TEST_CASE(Test_Exchange)
 
 
 
+// Insert -------------------------------------------------------------------------------------------------------------
+
+template <U32 _idxSrc = 0, U32 _idxDst = 0>
+void TestInsert()
+{
+    __m128 a = _mm_setr<__m128>(1, 2, 3, 4);
+    __m128 b = _mm_setr<__m128>(5, 6, 7, 8);
+
+    __m128 c = Insert<_idxSrc, _idxDst>(a, b);
+
+    for (U32 i = 0; i < 4; ++i)
+        if (i == _idxDst)
+            BOOST_CHECK_MESSAGE(GetValue<_idxSrc>(a) == Approx(GetValue(c, i)),
+                                "Source value is not copied to destination");
+        else
+            BOOST_CHECK_MESSAGE(GetValue(b, i) == Approx(GetValue(c, i)),
+                                "Wrong value of destination register modified");
+
+    if constexpr (_idxSrc + 1 < 4)
+        TestInsert<_idxSrc + 1, _idxDst>();
+    else if constexpr (_idxDst + 1 < 4)
+        TestInsert<0, _idxDst + 1>();
+}
+
+
+
+template <bool _setZeroIdx0 = false, bool _setZeroIdx1 = false, bool _setZeroIdx2 = false, bool _setZeroIdx3 = false>
+void TestInsertSetZero()
+{
+    __m128 a = _mm_setr<__m128>(1, 2, 3, 4);
+    __m128 b = _mm_setr<__m128>(5, 6, 7, 8);
+
+    __m128 c = Insert<3, 1, _setZeroIdx0, _setZeroIdx1, _setZeroIdx2, _setZeroIdx3>(a, b);
+    __m128 d = Insert<1, 3, _setZeroIdx0, _setZeroIdx1, _setZeroIdx2, _setZeroIdx3>(a, b);
+
+    if constexpr (_setZeroIdx0)
+    {
+        BOOST_CHECK(GetValue<0>(c) == ApproxZero<F32>());
+        BOOST_CHECK(GetValue<0>(d) == ApproxZero<F32>());
+    }
+    else
+    {
+        BOOST_CHECK(GetValue<0>(c) >= 1.f);
+        BOOST_CHECK(GetValue<0>(d) >= 1.f);
+    }
+
+    if constexpr (_setZeroIdx1)
+    {
+        BOOST_CHECK(GetValue<1>(c) == ApproxZero<F32>());
+        BOOST_CHECK(GetValue<1>(d) == ApproxZero<F32>());
+    }
+    else
+    {
+        BOOST_CHECK(GetValue<1>(c) >= 1.f);
+        BOOST_CHECK(GetValue<1>(d) >= 1.f);
+    }
+
+    if constexpr (_setZeroIdx2)
+    {
+        BOOST_CHECK(GetValue<2>(c) == ApproxZero<F32>());
+        BOOST_CHECK(GetValue<2>(d) == ApproxZero<F32>());
+    }
+    else
+    {
+        BOOST_CHECK(GetValue<2>(c) >= 1.f);
+        BOOST_CHECK(GetValue<2>(d) >= 1.f);
+    }
+
+    if constexpr (_setZeroIdx3)
+    {
+        BOOST_CHECK(GetValue<3>(c) == ApproxZero<F32>());
+        BOOST_CHECK(GetValue<3>(d) == ApproxZero<F32>());
+    }
+    else
+    {
+        BOOST_CHECK(GetValue<3>(c) >= 1.f);
+        BOOST_CHECK(GetValue<3>(d) >= 1.f);
+    }
+
+
+    if constexpr (not _setZeroIdx0)
+        TestInsertSetZero<true, _setZeroIdx1, _setZeroIdx2, _setZeroIdx3>();
+    else if constexpr (not _setZeroIdx1)
+        TestInsertSetZero<false, true, _setZeroIdx2, _setZeroIdx3>();
+    else if constexpr (not _setZeroIdx2)
+        TestInsertSetZero<false, false, true, _setZeroIdx3>();
+    else if constexpr (not _setZeroIdx3)
+        TestInsertSetZero<false, false, false, true>();
+}
+
+
+
+BOOST_AUTO_TEST_CASE(Test_Insert)
+{
+    TestInsert();
+}
+
+
+
+BOOST_AUTO_TEST_CASE(Test_Insert_SetZero)
+{
+    TestInsertSetZero();
+}
+
+
+
 // Permute ------------------------------------------------------------------------------------------------------------
 
 template <U32 _i, U32 _j>

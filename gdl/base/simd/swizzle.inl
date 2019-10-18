@@ -569,6 +569,32 @@ inline void Exchange(__m256d& reg0, __m256d& reg1)
 
 // --------------------------------------------------------------------------------------------------------------------
 
+template <U32 _idxSrc, U32 _idxDst, bool _setZeroIdx0, bool _setZeroIdx1, bool _setZeroIdx2, bool _setZeroIdx3>
+inline __m128 Insert(__m128 src, __m128 dst)
+{
+    constexpr U32 mask = InsertMask<_idxSrc, _idxDst, _setZeroIdx0, _setZeroIdx1, _setZeroIdx2, _setZeroIdx3>();
+    return _mm_insert_ps(dst, src, mask);
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+template <U32 _idxSrc, U32 _idxDst, bool _setZeroIdx0, bool _setZeroIdx1, bool _setZeroIdx2, bool _setZeroIdx3>
+inline constexpr U32 InsertMask()
+{
+    constexpr U32 sz0 = (_setZeroIdx0) ? 1 : 0;
+    constexpr U32 sz1 = (_setZeroIdx1) ? 1 : 0;
+    constexpr U32 sz2 = (_setZeroIdx2) ? 1 : 0;
+    constexpr U32 sz3 = (_setZeroIdx3) ? 1 : 0;
+
+    return (((_idxSrc) << 6) | ((_idxDst) << 4) | ((sz3) << 3) | ((sz2) << 2) | ((sz1) << 1) | (sz0));
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
 template <U32 _src0, U32 _src1>
 inline __m128d Permute(__m128d source)
 {
