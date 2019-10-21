@@ -142,7 +142,7 @@ BOOST_AUTO_TEST_CASE(Test_QR_NoPivot_4x4_F64_Serial)
 
 // BOOST_AUTO_TEST_CASE(Test_QR_NoPivot_4x4_F32_SIMD)
 //{
-//    TestQR<F32, 4, Pivot::NONE, SolverType::SIMD>();
+//    TestQR<F32, 4, 4, Pivot::NONE, SolverType::SIMD>();
 //}
 
 

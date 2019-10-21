@@ -10,7 +10,7 @@ namespace GDL
 
 template <typename _type, U32 _size, bool _isCol>
 VecSIMD<_type, _size, _isCol>::VecSIMD()
-    : mData{{0}}
+    : mData{{{0}}}
 {
     DEV_EXCEPTION(!IsInternalDataValid(), "Internal data is not valid. Alignment or size is not as expected.");
 }

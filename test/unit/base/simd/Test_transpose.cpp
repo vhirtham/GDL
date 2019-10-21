@@ -93,7 +93,7 @@ inline void TestTransposeTestcase(const std::array<_registerType, _arrSizeIn>& i
 
     if constexpr (_colStartOut == 0 && _overwriteUnused)
     {
-        std::array<_registerType, _rows + (_rows - 1) * (_colStrideOut - 1)> ref2 = {0};
+        std::array<_registerType, _rows + (_rows - 1) * (_colStrideOut - 1)> ref2 = {{_mm_setzero<_registerType>()}};
         std::array<_registerType, _rows + (_rows - 1) * (_colStrideOut - 1)> out2 =
                 Transpose<_rows, _cols, _firstRowIn, _colStartIn, _firstRowOut, _unusedSetZero, _colStrideIn,
                           _colStrideOut>(in);
@@ -113,7 +113,7 @@ inline void TestTransposeTestcasesColStartOut(const std::array<_registerType, _a
     using Type = decltype(GetDataType<_registerType>());
     constexpr U32 numRegVals = numRegisterValues<_registerType>;
 
-    std::array<_registerType, _arrSizeOut> ref = {0};
+    std::array<_registerType, _arrSizeOut> ref = {{_mm_setzero<_registerType>()}};
     for (U32 i = 0; i < _arrSizeOut; ++i)
         for (U32 j = 0; j < numRegVals; ++j)
             SetValue(ref[i], j, static_cast<Type>(1. / (j * _arrSizeOut + i + 10.)));
@@ -214,7 +214,7 @@ void TestTranspose()
     using Type = decltype(GetDataType<_registerType>());
     constexpr U32 numRegVals = numRegisterValues<_registerType>;
 
-    std::array<_registerType, _arrSizeIn> in = {0};
+    std::array<_registerType, _arrSizeIn> in = {{_mm_setzero<_registerType>()}};
     for (U32 i = 0; i < _arrSizeIn; ++i)
         for (U32 j = 0; j < numRegVals; ++j)
             SetValue(in[i], j, static_cast<Type>(j * _arrSizeIn + i + 1));

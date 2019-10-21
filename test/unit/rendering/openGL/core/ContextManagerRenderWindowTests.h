@@ -8,7 +8,7 @@ using namespace GDL;
 using namespace GDL::OpenGL;
 
 
-template<typename _contextManagerType, typename _renderWindowType>
+template <typename _contextManagerType, typename _renderWindowType>
 void TestContextManagerAndRenderWindow()
 {
     _contextManagerType& contextManagerGLUT = _contextManagerType::Instance();
@@ -33,7 +33,7 @@ void TestContextManagerAndRenderWindow()
 
 
 
-template<typename _contextManagerType>
+template <typename _contextManagerType>
 void TestDebugMessageHandler()
 {
     DebugMessageHandler& debugMessageHandler = _contextManagerType::Instance().GetDebugMessageHandler();
@@ -66,14 +66,10 @@ void TestDebugMessageHandler()
 
 
 
-    std::array<GLenum, 8> validMessageTypes = {GL_DEBUG_TYPE_ERROR,
-                                               GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR,
-                                               GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR,
-                                               GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR,
-                                               GL_DEBUG_TYPE_PORTABILITY,
-                                               GL_DEBUG_TYPE_PERFORMANCE,
-                                               GL_DEBUG_TYPE_MARKER,
-                                               GL_DEBUG_TYPE_OTHER};
+    std::array<GLenum, 8> validMessageTypes = {{GL_DEBUG_TYPE_ERROR, GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR,
+                                                GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR, GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR,
+                                                GL_DEBUG_TYPE_PORTABILITY, GL_DEBUG_TYPE_PERFORMANCE,
+                                                GL_DEBUG_TYPE_MARKER, GL_DEBUG_TYPE_OTHER}};
 
     newOutputMethod = OutputMethod::LOGGER;
     newSeverity = GL_DEBUG_SEVERITY_MEDIUM;

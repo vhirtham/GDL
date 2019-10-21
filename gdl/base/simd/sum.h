@@ -10,6 +10,13 @@
 namespace GDL::simd
 {
 
+
+
+template <U32 _first, U32 _last, typename _registerType, std::size_t _size>
+inline _registerType MultiSum(const std::array<_registerType, _size>& arr);
+
+
+
 //! @brief Calculates the sum of all register values and returns a new register with all values set to the sum.
 //! @param source: Source register
 //! @return Register with all values equal to the sum of the source register's values.
@@ -57,6 +64,7 @@ inline _registerType Sum(const std::array<_registerType, _size>& arr, U32 idxFir
 //! @return Register with all values equal to the sum
 template <U32 _regIdxFirst = 0, typename _registerType, std::size_t _size>
 inline _registerType SquareSum(const std::array<_registerType, _size>& arr, U32 idxFirst = 0);
+
 
 
 } // namespace GDL::simd

@@ -18,7 +18,7 @@ void TestRegisterSum()
     using Type = decltype(GetDataType<_registerType>());
     constexpr U32 numRegVals = numRegisterValues<_registerType>;
 
-    _registerType a;
+    _registerType a = _mm_setzero<_registerType>();
     Type sum = 0;
 
     for (U32 i = 0; i < numRegVals; ++i)
@@ -133,6 +133,8 @@ BOOST_AUTO_TEST_CASE(Register_Array_Sum_m128d)
 
 
 
+#ifdef __AVX2__
+
 BOOST_AUTO_TEST_CASE(Register_Array_Sum_m256)
 {
     TestRegisterArraySum<__m256>();
@@ -144,6 +146,9 @@ BOOST_AUTO_TEST_CASE(Register_Array_Sum_m256d)
 {
     TestRegisterArraySum<__m256d>();
 }
+
+
+#endif //__AVX2__
 
 
 
@@ -213,6 +218,8 @@ BOOST_AUTO_TEST_CASE(Register_Array_SquareSum_m128d)
 
 
 
+#ifdef __AVX2__
+
 BOOST_AUTO_TEST_CASE(Register_Array_SquareSum_m256)
 {
     TestRegisterArraySquareSum<__m256>();
@@ -223,4 +230,43 @@ BOOST_AUTO_TEST_CASE(Register_Array_SquareSum_m256)
 BOOST_AUTO_TEST_CASE(Register_Array_SquareSum_m256d)
 {
     TestRegisterArraySquareSum<__m256d>();
+}
+
+#endif //__AVX2__
+
+
+
+// Test multi register sum --------------------------------------------------------------------------------------------
+
+
+// template <typename _registerType, U32 _start = 0, U32 _end = numRegisterValues<_registerType> - 1>
+// inline void TestMultiRegisterSumTestCase(const std::array<_registerType, numRegisterValues<_registerType>>& a)
+//{
+//    //    using Type = decltype(GetDataType<_registerType>());
+//    //    constexpr U32 numRegVals = numRegisterValues<_registerType>;
+
+//    //    _registerType r = MultiSum<_start, _end>(a);
+
+//    //    int g = 0;
+//}
+
+
+template <typename _registerType>
+void TestMultiRegisterSum()
+{
+    using Type = decltype(GetDataType<_registerType>());
+    constexpr U32 numRegVals = numRegisterValues<_registerType>;
+
+    std::array<_registerType, numRegVals> a;
+    for (U32 i = 0; i < numRegVals; ++i)
+        for (U32 j = 0; j < numRegVals; ++j)
+            SetValue(a[i], j, static_cast<Type>(j * numRegVals + i + 1));
+
+    // TestMultiRegisterSumTestCase(a);
+}
+
+
+BOOST_AUTO_TEST_CASE(Register_Multi_Sum_m128)
+{
+    TestMultiRegisterSum<__m128d>();
 }

@@ -21,7 +21,7 @@ namespace GDL
 
 template <typename _type, U32 _rows, U32 _cols>
 MatSIMD<_type, _rows, _cols>::MatSIMD()
-    : mData{{0}}
+    : mData{{{0}}}
 {
     DEV_EXCEPTION(!IsInternalDataValid(), "Internal data is not valid. Alignment or size is not as expected.");
 }

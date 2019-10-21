@@ -3,7 +3,9 @@
 #include "gdl/math/solver/internal/qrDenseSIMD.h"
 
 #include "gdl/base/approx.h"
+#include "gdl/base/simd/copySign.h"
 #include "gdl/base/simd/directAccess.h"
+#include "gdl/base/simd/negate.h"
 #include "gdl/base/simd/sum.h"
 #include "gdl/base/simd/swizzle.h"
 #include "gdl/math/solver/internal/backwardSubstitutionDenseSIMD.h"
@@ -30,7 +32,7 @@ inline QRDenseSIMD<_registerType, _rows, _cols, _pivot>::Factorization::Factoriz
 
 template <typename _registerType, U32 _rows, U32 _cols, Pivot _pivot>
 inline QRDenseSIMD<_registerType, _rows, _cols, _pivot>::Factorization::VRData::VRData(const MatrixDataArray& dataQ)
-    : mRData{{0}, {dataQ}}
+    : mRData{{{{0}}}, {dataQ}}
 {
 }
 
@@ -178,6 +180,18 @@ inline void QRDenseSIMD<_registerType, _rows, _cols, _pivot>::FactorizationStep(
 
     _registerType squaredSum = CalculateSquareSum<_regValueIdx>(regRowIdx, colStartIdx, R);
 
+    // const _registerType zero = _mm_setzero<_registerType>();
+
+    _registerType colNorm = _mm_sqrt(_mm_fmadd(R[actRowRegIdx], R[actRowRegIdx], squaredSum));
+    _registerType colSignedNorm = Negate(CopySign<true>(R[actRowRegIdx], colNorm));
+
+    _registerType wPiv = BlendIndex<_regValueIdx>(R[actRowRegIdx], _mm_sub(R[actRowRegIdx], colSignedNorm));
+    _registerType wNorm = BroadcastAcrossLanes<_regValueIdx>(_mm_sqrt(_mm_fmadd(wPiv, wPiv, squaredSum)));
+
+
+    V[actRowRegIdx] = BlendAboveIndex<_regValueIdx>(_mm_div(wPiv, wNorm), V[actRowRegIdx]);
+
+    return;
     //    const _registerType one = _mm_set1<_registerType>(1);
     //    const _registerType div = _mm_div(one, BroadcastAcrossLanes<_regValueIdx>(qr[actRowRegIdx]));
 

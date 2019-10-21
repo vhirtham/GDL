@@ -197,7 +197,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
         program.Use();
         vaoCuboid.Bind();
         program.SetUniform(modelWorldLocation, modelWorldMatrixCuboid);
-        program.SetUniform(textureScaleLocation, std::array<F32, 2>{1, 1});
+        program.SetUniform(textureScaleLocation, std::array<F32, 2>{{1, 1}});
         texture1.Bind(0);
 
         renderWindow.EnableDepthTest();

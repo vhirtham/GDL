@@ -47,7 +47,7 @@ void SSECtorTest()
     constexpr U32 numArrayReg = simd::CalcMinNumArrayRegisters<RegisterType>(numVectorVals);
     constexpr U32 numRegVals = simd::numRegisterValues<RegisterType>;
 
-    std::array<RegisterType, numArrayReg> arr{{0}};
+    std::array<RegisterType, numArrayReg> arr{{_mm_setzero<RegisterType>()}};
     for (U32 i = 0; i < numArrayReg; ++i)
         for (U32 j = 0; j < numRegVals; ++j)
             simd::SetValue(arr[i], j, static_cast<_type>(i * numRegVals + j));

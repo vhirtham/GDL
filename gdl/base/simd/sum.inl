@@ -2,10 +2,27 @@
 
 #include "gdl/base/simd/sum.h"
 
+#include "gdl/base/simd/transpose.h"
 #include "gdl/base/simd/swizzle.h"
 
 namespace GDL::simd
 {
+
+
+template <U32 _first, U32 _last, typename _registerType, std::size_t _size>
+inline _registerType MultiSum(const std::array<_registerType, _size>& arr)
+{
+    constexpr U32 numAdds = _last - _first;
+
+    std::array<__m128d, numAdds + 1> transposed = Transpose<numAdds + 1, _size, _first>(arr);
+
+    if constexpr (numAdds == 0)
+        return transposed[0];
+    if constexpr (numAdds == 1)
+        return _mm_add(transposed[0], transposed[1]);
+}
+
+
 
 // --------------------------------------------------------------------------------------------------------------------
 

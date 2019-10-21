@@ -389,7 +389,7 @@ void SolverTests<_type, _size, _solver>::TestSIMDPivotingUnusedValues([[maybe_un
 
         std::array<_type, _size> expectedResultValues;
         std::array<_type, _size> vectorValues;
-        std::array<RegisterType, numColRegisters * _size> matrixValues{{0}};
+        std::array<RegisterType, numColRegisters * _size> matrixValues{{_mm_setzero<RegisterType>()}};
 
         for (U32 i = 0; i < _size; ++i)
         {

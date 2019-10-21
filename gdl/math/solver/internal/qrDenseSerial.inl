@@ -34,7 +34,7 @@ inline QRDenseSerial<_type, _rows, _cols, _pivot>::Factorization::Factorization(
 
 template <typename _type, U32 _rows, U32 _cols, Pivot _pivot>
 inline QRDenseSerial<_type, _rows, _cols, _pivot>::Factorization::QRData::QRData(const MatrixDataArray& dataQ)
-    : mRData{{0}, {dataQ}}
+    : mRData{{{0}}, {dataQ}}
 {
 }
 

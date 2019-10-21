@@ -13,7 +13,7 @@ set(GDL_COMPILE_DEFINITIONS "")
 # --------------
 # https://stackoverflow.com/questions/32940860/gcc-optimization-levels-which-is-better
 # optional:  -funroll-loops
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native -Wall -Wextra -Wpedantic -pthread")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native -Wall -Wextra -Wpedantic -Wmissing-braces -pthread ")
 
 # Options
 # -------
