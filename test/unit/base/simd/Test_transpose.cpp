@@ -265,70 +265,70 @@ BOOST_AUTO_TEST_CASE(Transpose1x1_256)
 
 // Transpose 1x2 ------------------------------------------------------------------------------------------------------
 
-// BOOST_AUTO_TEST_CASE(Transpose1x2_128d)
-//{
-//    TestTranspose<__m128d, 1, 2>();
-//}
+BOOST_AUTO_TEST_CASE(Transpose1x2_128d)
+{
+    TestTranspose<__m128d, 1, 2>();
+}
 
 
 
-// BOOST_AUTO_TEST_CASE(Transpose1x2_128)
-//{
-//    TestTranspose<__m128, 1, 2>();
-//}
+BOOST_AUTO_TEST_CASE(Transpose1x2_128)
+{
+    TestTranspose<__m128, 1, 2>();
+}
 
 
 
-//#ifdef __AVX2__
+#ifdef __AVX2__
 
-// BOOST_AUTO_TEST_CASE(Transpose1x2_256d)
-//{
-//    TestTranspose<__m256d, 1, 2>();
-//}
+BOOST_AUTO_TEST_CASE(Transpose1x2_256d)
+{
+    TestTranspose<__m256d, 1, 2>();
+}
 
 
 
-// BOOST_AUTO_TEST_CASE(Transpose1x2_256)
-//{
-//    TestTranspose<__m256, 1, 2>();
-//}
+BOOST_AUTO_TEST_CASE(Transpose1x2_256)
+{
+    TestTranspose<__m256, 1, 2>();
+}
 
-//#endif //__AVX2__
+#endif //__AVX2__
 
 
 
 // Transpose 2x1 ------------------------------------------------------------------------------------------------------
 
 
-// BOOST_AUTO_TEST_CASE(Transpose2x1_128d)
-//{
-//    TestTranspose<__m128d, 2, 1>();
-//}
+BOOST_AUTO_TEST_CASE(Transpose2x1_128d)
+{
+    TestTranspose<__m128d, 2, 1>();
+}
 
 
 
-// BOOST_AUTO_TEST_CASE(Transpose2x1_128)
-//{
-//    TestTranspose<__m128, 2, 1>();
-//}
+BOOST_AUTO_TEST_CASE(Transpose2x1_128)
+{
+    TestTranspose<__m128, 2, 1>();
+}
 
 
 
-//#ifdef __AVX2__
+#ifdef __AVX2__
 
-// BOOST_AUTO_TEST_CASE(Transpose2x1_256d)
-//{
-//    TestTranspose<__m256d, 2, 1>();
-//}
+BOOST_AUTO_TEST_CASE(Transpose2x1_256d)
+{
+    TestTranspose<__m256d, 2, 1>();
+}
 
 
 
-// BOOST_AUTO_TEST_CASE(Transpose2x1_256)
-//{
-//    TestTranspose<__m256, 2, 1>();
-//}
+BOOST_AUTO_TEST_CASE(Transpose2x1_256)
+{
+    TestTranspose<__m256, 2, 1>();
+}
 
-//#endif //__AVX2__
+#endif //__AVX2__
 
 
 
