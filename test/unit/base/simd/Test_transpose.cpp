@@ -77,8 +77,8 @@ inline void TestTransposeCheckResults(const std::array<_registerType, _arrSizeIn
 
 
 template <U32 _rows, U32 _cols, U32 _colStrideIn, U32 _colStrideOut, U32 _firstRowIn, U32 _colStartIn, U32 _firstRowOut,
-          U32 _colStartOut, bool _overwriteUnused = true, bool _unusedSetZero = true, std::size_t _arrSizeIn,
-          std::size_t _arrSizeOut, typename _registerType>
+          U32 _colStartOut, bool _overwriteUnused, bool _unusedSetZero, std::size_t _arrSizeIn, std::size_t _arrSizeOut,
+          typename _registerType>
 inline void TestTransposeTestcase(const std::array<_registerType, _arrSizeIn>& in,
                                   const std::array<_registerType, _arrSizeOut>& ref)
 {
@@ -123,7 +123,7 @@ inline void TestTransposeTestcasesColStartOut(const std::array<_registerType, _a
 
 
     TestTransposeTestcase<_rows, _cols, _colStrideIn, _colStrideOut, _firstRowIn, _colStartIn, _firstRowOut,
-                          _colStartOut>(in, ref);
+                          _colStartOut, true, true>(in, ref);
     TestTransposeTestcase<_rows, _cols, _colStrideIn, _colStrideOut, _firstRowIn, _colStartIn, _firstRowOut,
                           _colStartOut, true, false>(in, ref);
     TestTransposeTestcase<_rows, _cols, _colStrideIn, _colStrideOut, _firstRowIn, _colStartIn, _firstRowOut,
@@ -360,6 +360,33 @@ BOOST_AUTO_TEST_CASE(Transpose2x2_256d)
 BOOST_AUTO_TEST_CASE(Transpose2x2_256)
 {
     TestTranspose<__m256, 2, 2>();
+}
+
+#endif //__AVX2__
+
+
+
+// Transpose 3x3 ------------------------------------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(Transpose3x3_128d)
+{
+    TestTranspose<__m128, 3, 3>();
+}
+
+
+
+#ifdef __AVX2__
+
+BOOST_AUTO_TEST_CASE(Transpose3x3_256d)
+{
+    TestTranspose<__m256d, 3, 3>();
+}
+
+
+
+BOOST_AUTO_TEST_CASE(Transpose3x3_256)
+{
+    TestTranspose<__m256, 3, 3>();
 }
 
 #endif //__AVX2__

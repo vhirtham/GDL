@@ -29,7 +29,7 @@ namespace GDL::simd
 //! @param matDataI: Array containing the matrix data
 //! @return Minimum sized array containing the data of the transposed matrix
 template <typename _registerType, U32 _rows, U32 _cols, U32 _firstRowIn = 0, U32 _firstColIn = 0,
-          U32 _firstRowOut = _firstRowIn, bool _unusedSetZero = true, U32 _colStrideIn = 1, U32 _colStrideOut = 1,
+          U32 _firstRowOut = _firstRowIn, bool _unusedSetZero = false, U32 _colStrideIn = 1, U32 _colStrideOut = 1,
           std::size_t _arrSizeIn>
 inline auto Transpose(const std::array<_registerType, _arrSizeIn>& matDataI);
 
@@ -47,7 +47,7 @@ inline auto Transpose(const std::array<_registerType, _arrSizeIn>& matDataI);
 //! @param matDataI: Array containing the matrix data
 //! @return Minimum sized array containing the data of the transposed matrix
 template <U32 _rows = 2, U32 _cols = 2, U32 _firstRowIn = 0, U32 _firstColIn = 0, U32 _firstRowOut = _firstRowIn,
-          bool _unusedSetZero = true, U32 _colStrideIn = 1, U32 _colStrideOut = 1, std::size_t _arrSizeIn>
+          bool _unusedSetZero = false, U32 _colStrideIn = 1, U32 _colStrideOut = 1, std::size_t _arrSizeIn>
 inline auto Transpose(const std::array<__m128d, _arrSizeIn>& matDataI);
 
 //! @brief Transposes a matrix represented by an column major register array. The maximal supported matrix size is 4x4.
@@ -64,7 +64,7 @@ inline auto Transpose(const std::array<__m128d, _arrSizeIn>& matDataI);
 //! @param matDataI: Array containing the matrix data
 //! @return Minimum sized array containing the data of the transposed matrix
 template <U32 _rows = 4, U32 _cols = 4, U32 _firstRowIn = 0, U32 _firstColIn = 0, U32 _firstRowOut = _firstRowIn,
-          bool _unusedSetZero = true, U32 _colStrideIn = 1, U32 _colStrideOut = 1, std::size_t _arrSizeIn>
+          bool _unusedSetZero = false, U32 _colStrideIn = 1, U32 _colStrideOut = 1, std::size_t _arrSizeIn>
 inline auto Transpose(const std::array<__m128, _arrSizeIn>& matDataI);
 
 //! @brief Transposes a matrix represented by an column major register array. The maximal supported matrix size is 4x4.
@@ -81,7 +81,7 @@ inline auto Transpose(const std::array<__m128, _arrSizeIn>& matDataI);
 //! @param matDataI: Array containing the matrix data
 //! @return Minimum sized array containing the data of the transposed matrix
 template <U32 _rows = 4, U32 _cols = 4, U32 _firstRowIn = 0, U32 _firstColIn = 0, U32 _firstRowOut = _firstRowIn,
-          bool _unusedSetZero = true, U32 _colStrideIn = 1, U32 _colStrideOut = 1, std::size_t _arrSizeIn>
+          bool _unusedSetZero = false, U32 _colStrideIn = 1, U32 _colStrideOut = 1, std::size_t _arrSizeIn>
 inline auto Transpose(const std::array<__m256d, _arrSizeIn>& matDataI);
 
 //! @brief Transposes a matrix represented by an column major register array. The maximal supported matrix size is 8x8.
@@ -98,7 +98,7 @@ inline auto Transpose(const std::array<__m256d, _arrSizeIn>& matDataI);
 //! @param matDataI: Array containing the matrix data
 //! @return Minimum sized array containing the data of the transposed matrix
 template <U32 _rows = 8, U32 _cols = 8, U32 _firstRowIn = 0, U32 _firstColIn = 0, U32 _firstRowOut = _firstRowIn,
-          bool _unusedSetZero = true, U32 _colStrideIn = 1, U32 _colStrideOut = 1, std::size_t _arrSizeIn>
+          bool _unusedSetZero = false, U32 _colStrideIn = 1, U32 _colStrideOut = 1, std::size_t _arrSizeIn>
 inline auto Transpose(const std::array<__m256, _arrSizeIn>& matDataI);
 
 //! @brief Transposes a matrix represented by an column major register array and writes it to the passed output array.
@@ -119,7 +119,7 @@ inline auto Transpose(const std::array<__m256, _arrSizeIn>& matDataI);
 //! @param matDataI: Array containing the input matrix data
 //! @param matDataI: Array containing the output matrix data
 template <typename _registerType, U32 _rows, U32 _col, U32 _firstRowIn, U32 _firstColIn = 0,
-          bool _overwriteUnused = true, bool _unusedSetZero = _overwriteUnused, U32 _colStrideIn = 1,
+          bool _overwriteUnused = true, bool _unusedSetZero = false, U32 _colStrideIn = 1,
           U32 _firstRowOut = _firstRowIn, U32 _firstColOut = 0, U32 _colStrideOut = 1, std::size_t _arrSizeIn = 2,
           std::size_t _arrSizeOut = 2>
 inline void Transpose(const std::array<_registerType, _arrSizeIn>& matDataI,
@@ -142,8 +142,8 @@ inline void Transpose(const std::array<_registerType, _arrSizeIn>& matDataI,
 //! @param matDataI: Array containing the input matrix data
 //! @param matDataI: Array containing the output matrix data
 template <U32 _rows = 2, U32 _cols = 2, U32 _firstRowIn = 0, U32 _firstColIn = 0, bool _overwriteUnused = true,
-          bool _unusedSetZero = _overwriteUnused, U32 _colStrideIn = 1, U32 _firstRowOut = _firstRowIn,
-          U32 _firstColOut = 0, U32 _colStrideOut = 1, std::size_t _arrSizeIn, std::size_t _arrSizeOut>
+          bool _unusedSetZero = false, U32 _colStrideIn = 1, U32 _firstRowOut = _firstRowIn, U32 _firstColOut = 0,
+          U32 _colStrideOut = 1, std::size_t _arrSizeIn, std::size_t _arrSizeOut>
 inline void Transpose(const std::array<__m128d, _arrSizeIn>& matDataI, std::array<__m128d, _arrSizeOut>& matDataO);
 
 //! @brief Transposes a matrix represented by an column major register array and writes it to the passed output array.
@@ -164,8 +164,8 @@ inline void Transpose(const std::array<__m128d, _arrSizeIn>& matDataI, std::arra
 //! @param matDataI: Array containing the input matrix data
 //! @param matDataI: Array containing the output matrix data
 template <U32 _rows = 4, U32 _cols = 4, U32 _firstRowIn = 0, U32 _firstColIn = 0, bool _overwriteUnused = true,
-          bool _unusedSetZero = _overwriteUnused, U32 _colStrideIn = 1, U32 _firstRowOut = _firstRowIn,
-          U32 _firstColOut = 0, U32 _colStrideOut = 1, std::size_t _arrSizeIn, std::size_t _arrSizeOut>
+          bool _unusedSetZero = false, U32 _colStrideIn = 1, U32 _firstRowOut = _firstRowIn, U32 _firstColOut = 0,
+          U32 _colStrideOut = 1, std::size_t _arrSizeIn, std::size_t _arrSizeOut>
 inline void Transpose(const std::array<__m128, _arrSizeIn>& matDataI, std::array<__m128, _arrSizeOut>& matDataO);
 
 //! @brief Transposes a matrix represented by an column major register array and writes it to the passed output array.
@@ -185,8 +185,8 @@ inline void Transpose(const std::array<__m128, _arrSizeIn>& matDataI, std::array
 //! @param matDataI: Array containing the input matrix data
 //! @param matDataI: Array containing the output matrix data
 template <U32 _rows = 4, U32 _cols = 4, U32 _firstRowIn = 0, U32 _firstColIn = 0, bool _overwriteUnused = true,
-          bool _unusedSetZero = _overwriteUnused, U32 _colStrideIn = 1, U32 _firstRowOut = _firstRowIn,
-          U32 _firstColOut = 0, U32 _colStrideOut = 1, std::size_t _arrSizeIn, std::size_t _arrSizeOut>
+          bool _unusedSetZero = false, U32 _colStrideIn = 1, U32 _firstRowOut = _firstRowIn, U32 _firstColOut = 0,
+          U32 _colStrideOut = 1, std::size_t _arrSizeIn, std::size_t _arrSizeOut>
 inline void Transpose(const std::array<__m256d, _arrSizeIn>& matDataI, std::array<__m256d, _arrSizeOut>& matDataO);
 
 //! @brief Transposes a matrix represented by an column major register array and writes it to the passed output array.
@@ -206,8 +206,8 @@ inline void Transpose(const std::array<__m256d, _arrSizeIn>& matDataI, std::arra
 //! @param matDataI: Array containing the input matrix data
 //! @param matDataI: Array containing the output matrix data
 template <U32 _rows = 8, U32 _cols = 8, U32 _firstRowIn = 0, U32 _firstColIn = 0, bool _overwriteUnused = true,
-          bool _unusedSetZero = _overwriteUnused, U32 _colStrideIn = 1, U32 _firstRowOut = _firstRowIn,
-          U32 _firstColOut = 0, U32 _colStrideOut = 1, std::size_t _arrSizeIn, std::size_t _arrSizeOut>
+          bool _unusedSetZero = false, U32 _colStrideIn = 1, U32 _firstRowOut = _firstRowIn, U32 _firstColOut = 0,
+          U32 _colStrideOut = 1, std::size_t _arrSizeIn, std::size_t _arrSizeOut>
 inline void Transpose(const std::array<__m256, _arrSizeIn>& matDataI, std::array<__m256, _arrSizeOut>& matDataO);
 
 
@@ -224,8 +224,8 @@ inline void Transpose(const std::array<__m256, _arrSizeIn>& matDataI, std::array
 //! @remark Unused rows are set to zero. Even though transposing a 1x1 matrix does not make that much sense, the purpose
 //! of this function is to guarantee a consisten behavior of the generalized transpose functions (setting unused values
 //! to zero).
-template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true,
-          bool _unusedSetZero = _overwriteUnused, typename _registerType>
+template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false,
+          typename _registerType>
 inline void Transpose1x1(_registerType in, _registerType& out);
 
 
@@ -239,8 +239,7 @@ inline void Transpose1x1(_registerType in, _registerType& out);
 //! @tparam _unusedSetZero: Option that specifies if unused values in the output registers are set to zero
 //! @param in: Input registers
 //! @param out: Output registers
-template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true,
-          bool _unusedSetZero = _overwriteUnused>
+template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
 inline void Transpose1x2(const __m128& in0, const __m128& in1, __m128& out0);
 
 //! @brief Transposes a 1x2 matrix
@@ -250,8 +249,7 @@ inline void Transpose1x2(const __m128& in0, const __m128& in1, __m128& out0);
 //! @tparam _unusedSetZero: Option that specifies if unused values in the output registers are set to zero
 //! @param in: Input registers
 //! @param out: Output registers
-template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true,
-          bool _unusedSetZero = _overwriteUnused>
+template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
 inline void Transpose1x2(const __m128d& in0, const __m128d& in1, __m128d& out0);
 
 #ifdef __AVX2__
@@ -264,8 +262,7 @@ inline void Transpose1x2(const __m128d& in0, const __m128d& in1, __m128d& out0);
 //! @tparam _registerType: Register type
 //! @param in: Input registers
 //! @param out: Output registers
-template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true,
-          bool _unusedSetZero = _overwriteUnused>
+template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
 inline void Transpose1x2(const __m256& in0, const __m256& in1, __m256& out0);
 
 //! @brief Transposes a 1x2 matrix
@@ -276,8 +273,7 @@ inline void Transpose1x2(const __m256& in0, const __m256& in1, __m256& out0);
 //! @tparam _registerType: Register type
 //! @param in: Input registers
 //! @param out: Output registers
-template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true,
-          bool _unusedSetZero = _overwriteUnused>
+template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
 inline void Transpose1x2(const __m256d& in0, const __m256d& in1, __m256d& out0);
 
 #endif //__AVX2__
@@ -293,8 +289,7 @@ inline void Transpose1x2(const __m256d& in0, const __m256d& in1, __m256d& out0);
 //! @tparam _unusedSetZero: Option that specifies if unused values in the output registers are set to zero
 //! @param in: Input registers
 //! @param out: Output registers
-template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true,
-          bool _unusedSetZero = _overwriteUnused>
+template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
 inline void Transpose2x1(const __m128& in0, __m128& out0, __m128& out1);
 
 //! @brief Transposes a 2x1 matrix
@@ -304,8 +299,7 @@ inline void Transpose2x1(const __m128& in0, __m128& out0, __m128& out1);
 //! @tparam _unusedSetZero: Option that specifies if unused values in the output registers are set to zero
 //! @param in: Input registers
 //! @param out: Output registers
-template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true,
-          bool _unusedSetZero = _overwriteUnused>
+template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
 inline void Transpose2x1(const __m128d& in0, __m128d& out0, __m128d& out1);
 
 #ifdef __AVX2__
@@ -317,8 +311,7 @@ inline void Transpose2x1(const __m128d& in0, __m128d& out0, __m128d& out1);
 //! @tparam _unusedSetZero: Option that specifies if unused values in the output registers are set to zero
 //! @param in: Input registers
 //! @param out: Output registers
-template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true,
-          bool _unusedSetZero = _overwriteUnused>
+template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
 inline void Transpose2x1(const __m256& in0, __m256& out0, __m256& out1);
 
 //! @brief Transposes a 2x1 matrix
@@ -328,8 +321,7 @@ inline void Transpose2x1(const __m256& in0, __m256& out0, __m256& out1);
 //! @tparam _unusedSetZero: Option that specifies if unused values in the output registers are set to zero
 //! @param in: Input registers
 //! @param out: Output registers
-template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true,
-          bool _unusedSetZero = _overwriteUnused>
+template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
 inline void Transpose2x1(const __m256d& in0, __m256d& out0, __m256d& out1);
 
 #endif //__AVX2__
@@ -343,8 +335,7 @@ inline void Transpose2x1(const __m256d& in0, __m256d& out0, __m256d& out1);
 //! @tparam _unusedSetZero: Option that specifies if unused values in the output registers are set to zero
 //! @param in: Input registers
 //! @param out: Output registers
-template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true,
-          bool _unusedSetZero = _overwriteUnused>
+template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
 inline void Transpose2x2(const __m128& in0, const __m128& in1, __m128& out0, __m128& out1);
 
 //! @brief Transposes a 2x2 matrix
@@ -354,8 +345,7 @@ inline void Transpose2x2(const __m128& in0, const __m128& in1, __m128& out0, __m
 //! @tparam _unusedSetZero: Option that specifies if unused values in the output registers are set to zero
 //! @param in: Input registers
 //! @param out: Output registers
-template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true,
-          bool _unusedSetZero = _overwriteUnused>
+template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
 inline void Transpose2x2(const __m128d& in0, const __m128d& in1, __m128d& out0, __m128d& out1);
 
 #ifdef __AVX2__
@@ -367,8 +357,7 @@ inline void Transpose2x2(const __m128d& in0, const __m128d& in1, __m128d& out0, 
 //! @tparam _unusedSetZero: Option that specifies if unused values in the output registers are set to zero
 //! @param in: Input registers
 //! @param out: Output registers
-template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true,
-          bool _unusedSetZero = _overwriteUnused>
+template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
 inline void Transpose2x2(const __m256& in0, const __m256& in1, __m256& out0, __m256& out1);
 
 //! @brief Transposes a 2x2 matrix
@@ -378,9 +367,52 @@ inline void Transpose2x2(const __m256& in0, const __m256& in1, __m256& out0, __m
 //! @tparam _unusedSetZero: Option that specifies if unused values in the output registers are set to zero
 //! @param in: Input registers
 //! @param out: Output registers
-template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true,
-          bool _unusedSetZero = _overwriteUnused>
+template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
 inline void Transpose2x2(const __m256d& in0, const __m256d& in1, __m256d& out0, __m256d& out1);
+
+#endif // __AVX2__
+
+
+
+// 3x3 ----------------------------------------------------------------------------------------------------------------
+
+//! @brief Transposes a 3x3 matrix
+//! @tparam _firstRowIn: Index of the matrix's first row in each register
+//! @tparam _firstRowOut: Index of the output matrix's first row in each register
+//! @tparam _overwriteUnused: Option that specifies if unused values in the output registers can/should be overwritten
+//! @tparam _unusedSetZero: Option that specifies if unused values in the output registers are set to zero
+//! @param in: Input registers
+//! @param out: Output registers
+template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
+inline void Transpose3x3(const __m128& in0, const __m128& in1, const __m128& in2, __m128& out0, __m128& out1,
+                         __m128& out2);
+
+
+
+#ifdef __AVX2__
+
+//! @brief Transposes a 3x3 matrix
+//! @tparam _firstRowIn: Index of the matrix's first row in each register
+//! @tparam _firstRowOut: Index of the output matrix's first row in each register
+//! @tparam _overwriteUnused: Option that specifies if unused values in the output registers can/should be overwritten
+//! @tparam _unusedSetZero: Option that specifies if unused values in the output registers are set to zero
+//! @param in: Input registers
+//! @param out: Output registers
+template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
+inline void Transpose3x3(const __m256d& in0, const __m256d& in1, const __m256d& in2, __m256d& out0, __m256d& out1,
+                         __m256d& out2);
+
+//! @brief Transposes a 3x3 matrix
+//! @tparam _firstRowIn: Index of the matrix's first row in each register
+//! @tparam _firstRowOut: Index of the output matrix's first row in each register
+//! @tparam _overwriteUnused: Option that specifies if unused values in the output registers can/should be overwritten
+//! @tparam _unusedSetZero: Option that specifies if unused values in the output registers are set to zero
+//! @param in: Input registers
+//! @param out: Output registers
+template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
+inline void Transpose3x3(const __m256& in0, const __m256& in1, const __m256& in2, __m256& out0, __m256& out1,
+                         __m256& out2);
+
 
 #endif // __AVX2__
 

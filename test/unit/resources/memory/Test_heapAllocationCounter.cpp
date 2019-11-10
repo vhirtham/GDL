@@ -1,6 +1,7 @@
 #include <boost/test/unit_test.hpp>
 
 
+#include "gdl/base/exception.h"
 #include "gdl/base/fundamentalTypes.h"
 #include "gdl/resources/memory/utility/heapAllocationCounter.h"
 
@@ -97,8 +98,11 @@ BOOST_AUTO_TEST_CASE(New_Delete_Unaligned)
         F32 b;
     };
 
-    myStruct* g = new myStruct;
+    volatile myStruct* g = new myStruct;
     expAlloc++;
+
+    // Prevents aggressive optimization by Clang
+    g->a = expAlloc;
 
     BOOST_CHECK(gnc.GetNumNewCalls() == expAlloc);
     BOOST_CHECK(gnc.GetNumDeleteCalls() == expDealloc);
