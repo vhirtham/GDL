@@ -19,7 +19,7 @@ void TestTolerance()
 
     for (I32 tol = 1; tol < 6; ++tol)
     {
-        tolerance = Tolerance<_type>(refValue, tol);
+        tolerance = Tolerance<_type>(refValue, static_cast<_type>(tol));
         for (I32 i = -10; i < 10; ++i)
         {
             cmp = refValue + static_cast<_type>(i);
@@ -54,6 +54,7 @@ void TestToleranceSSE()
 {
     constexpr U32 numRegisterEntries = simd::numRegisterValues<_registerType>;
     using ToleranceType = Tolerance<_registerType, _count>;
+    using Type = decltype(simd::GetDataType<_registerType>());
 
     F32 toleranceValue = 1.5;
     alignas(simd::alignmentBytes<_registerType>) _registerType ref = _mm_setzero<_registerType>();
@@ -93,7 +94,7 @@ void TestToleranceSSE()
             for (U32 j = _count; j < numRegisterEntries; ++j)
                 simd::SetValue(cmpAll, j, simd::GetValue(ref, j));
 
-            if (std::abs(i) <= toleranceValue)
+            if (std::abs(static_cast<F32>(i)) <= toleranceValue)
             {
                 BOOST_CHECK(cmpAll == tolerance);
                 BOOST_CHECK(!(cmpAll != tolerance));
@@ -108,7 +109,7 @@ void TestToleranceSSE()
             for (U32 j = _count; j < numRegisterEntries; ++j)
             {
                 simd::SetValue(cmpAll, j, -1337);
-                if (std::abs(i) <= toleranceValue)
+                if (std::abs(static_cast<F32>(i)) <= toleranceValue)
                 {
                     BOOST_CHECK(cmpAll == tolerance);
                     BOOST_CHECK(!(cmpAll != tolerance));
@@ -127,8 +128,8 @@ void TestToleranceSSE()
             {
                 cmpSingle = ref;
 
-                simd::SetValue(cmpSingle, j, simd::GetValue(cmpSingle, j) + i);
-                if (std::abs(i) <= toleranceValue)
+                simd::SetValue(cmpSingle, j, simd::GetValue(cmpSingle, j) + static_cast<Type>(i));
+                if (std::abs(static_cast<F32>(i)) <= toleranceValue)
                 {
                     BOOST_CHECK(cmpSingle == tolerance);
                     BOOST_CHECK(!(cmpSingle != tolerance));

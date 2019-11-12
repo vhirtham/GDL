@@ -155,7 +155,7 @@ void TestApproxSSE()
                     simd::SetValue(cmp, k, valueBase * epsilonBase * (factor - 1));
                 else
                     simd::SetValue(cmp, k,
-                                  simd::GetValue(values, k) + simd::GetValue(values, k) * epsilonBase * (factor - 1));
+                                   simd::GetValue(values, k) + simd::GetValue(values, k) * epsilonBase * (factor - 1));
                 BOOST_CHECK(cmp == approx);
                 BOOST_CHECK(approx == cmp);
 
@@ -164,7 +164,7 @@ void TestApproxSSE()
                     simd::SetValue(cmp, k, valueBase * epsilonBase * (factor + 1));
                 else
                     simd::SetValue(cmp, k,
-                                  simd::GetValue(values, k) + simd::GetValue(values, k) * epsilonBase * (factor + 1));
+                                   simd::GetValue(values, k) + simd::GetValue(values, k) * epsilonBase * (factor + 1));
                 BOOST_CHECK(cmp != approx);
                 BOOST_CHECK(approx != cmp);
             }
@@ -182,7 +182,7 @@ void TestApproxSSE()
                     simd::SetValue(cmp, k, valueBase * epsilonBase * (factor - 1));
                 else
                     simd::SetValue(cmp, k,
-                                  simd::GetValue(values, k) + simd::GetValue(values, k) * epsilonBase * (factor - 1));
+                                   simd::GetValue(values, k) + simd::GetValue(values, k) * epsilonBase * (factor - 1));
                 BOOST_CHECK(cmp == approxMinus1);
                 BOOST_CHECK(approxMinus1 == cmp);
 
@@ -191,7 +191,7 @@ void TestApproxSSE()
                     simd::SetValue(cmp, k, valueBase * epsilonBase * (factor + 1));
                 else
                     simd::SetValue(cmp, k,
-                                  simd::GetValue(values, k) + simd::GetValue(values, k) * epsilonBase * (factor + 1));
+                                   simd::GetValue(values, k) + simd::GetValue(values, k) * epsilonBase * (factor + 1));
                 if (k < numRegisterEntries - 1)
                 {
                     BOOST_CHECK(cmp != approxMinus1);
@@ -239,7 +239,7 @@ void TestApproxZeroSSE()
             ElementType base = Pow(static_cast<ElementType>(10.), static_cast<I32>(i - 10));
 
             _registerType scaledEps = _mm_set1<_registerType>(std::numeric_limits<ElementType>::epsilon() *
-                                                                 base); // Epsilon of the current value
+                                                              base); // Epsilon of the current value
 
             I32 factor = static_cast<I32>(j); // Scales the tolerance (1 = epsilon of value)
 
@@ -257,10 +257,10 @@ void TestApproxZeroSSE()
             BOOST_CHECK(cmp != ApproxZero<_registerType>(-base, factor));
 
 
-            BOOST_CHECK(zeroReg == Approx<_registerType>(_mm_mul(scaledEps, _mm_set1<_registerType>(factor - 1)),
-                                                         factor, base));
-            BOOST_CHECK(zeroReg != Approx<_registerType>(_mm_mul(scaledEps, _mm_set1<_registerType>(factor + 1)),
-                                                         factor, base));
+            BOOST_CHECK(zeroReg ==
+                        Approx<_registerType>(_mm_mul(scaledEps, _mm_set1<_registerType>(factor - 1)), factor, base));
+            BOOST_CHECK(zeroReg !=
+                        Approx<_registerType>(_mm_mul(scaledEps, _mm_set1<_registerType>(factor + 1)), factor, base));
 
 
             // Only one comparison fails

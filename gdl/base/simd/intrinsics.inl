@@ -88,14 +88,14 @@ inline _registerType _mm_set1(_type value)
     static_assert(IsRegisterType<_registerType>, "Function can only be used with compatible register types.");
 
     if constexpr (Is__m128<_registerType>)
-        return _mm_set1_ps(value);
+        return _mm_set1_ps(static_cast<F32>(value));
     else if constexpr (Is__m128d<_registerType>)
-        return _mm_set1_pd(value);
+        return _mm_set1_pd(static_cast<F64>(value));
 #ifdef __AVX2__
     else if constexpr (Is__m256<_registerType>)
-        return _mm256_set1_ps(value);
+        return _mm256_set1_ps(static_cast<F32>(value));
     else
-        return _mm256_set1_pd(value);
+        return _mm256_set1_pd(static_cast<F64>(value));
 #endif // __AVX2__
 }
 

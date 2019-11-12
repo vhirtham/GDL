@@ -17,8 +17,7 @@ template <typename _registerType, U32 _numComparedValuesSSE>
 Approx<_registerType, _numComparedValuesSSE>::Approx(const _registerType values, const I32 factor,
                                                      const ElementType minimalBase)
     : mValues{values}
-    , mFactor{_mm_set1<_registerType>(
-              static_cast<ElementType>(factor * std::numeric_limits<ElementType>::epsilon()))}
+    , mFactor{_mm_set1<_registerType>(static_cast<ElementType>(factor) * std::numeric_limits<ElementType>::epsilon())}
     , mBaseZero{_mm_set1<_registerType>(std::abs(minimalBase))}
 {
     DEV_EXCEPTION(factor <= 0, "Scaling factor must be bigger than 0.");
@@ -30,11 +29,9 @@ Approx<_registerType, _numComparedValuesSSE>::Approx(const _registerType values,
 template <typename _registerType, U32 _numComparedValuesSSE>
 bool Approx<_registerType, _numComparedValuesSSE>::operator==(const _registerType rhs) const
 {
-    const _registerType tolerance =
-            _mm_mul(mFactor, _mm_max(_mm_max(simd::Abs(rhs), simd::Abs(mValues)), mBaseZero));
+    const _registerType tolerance = _mm_mul(mFactor, _mm_max(_mm_max(simd::Abs(rhs), simd::Abs(mValues)), mBaseZero));
 
-    return simd::CompareAllLessEqual<_registerType, _numComparedValuesSSE>(simd::Abs(_mm_sub(rhs, mValues)),
-                                                                          tolerance);
+    return simd::CompareAllLessEqual<_registerType, _numComparedValuesSSE>(simd::Abs(_mm_sub(rhs, mValues)), tolerance);
 }
 
 
@@ -50,7 +47,7 @@ bool Approx<_registerType, _numComparedValuesSSE>::operator!=(const _registerTyp
 template <typename _type>
 constexpr Approx<_type, 0>::Approx(const _type value, const I32 factor, const _type minimalBase)
     : mValue{value}
-    , mFactor{static_cast<_type>(factor * std::numeric_limits<_type>::epsilon())}
+    , mFactor{static_cast<_type>(factor) * std::numeric_limits<_type>::epsilon()}
     , mBaseZero{std::abs(minimalBase)}
 {
     DEV_EXCEPTION(factor <= 0, "Scaling factor must be bigger than 0.");
@@ -101,9 +98,13 @@ template <typename _classType, U32 _numComparedValuesSSE, typename _baseType>
 constexpr auto ApproxZero(_baseType base, I32 factor)
 {
     if constexpr (simd::IsRegisterType<_classType>)
-        return Approx<_classType, _numComparedValuesSSE>(_mm_setzero<_classType>(), factor, base);
+    {
+        using RegDataType = decltype(simd::GetDataType<_classType>());
+        return Approx<_classType, _numComparedValuesSSE>(_mm_setzero<_classType>(), factor,
+                                                         static_cast<RegDataType>(base));
+    }
     else
-        return Approx<_classType>(static_cast<_baseType>(0), factor, static_cast<_baseType>(base));
+        return Approx<_classType>(static_cast<_classType>(0), factor, static_cast<_classType>(base));
 }
 
 

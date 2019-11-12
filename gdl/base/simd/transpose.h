@@ -240,7 +240,7 @@ inline void Transpose1x1(_registerType in, _registerType& out);
 //! @param in: Input registers
 //! @param out: Output registers
 template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
-inline void Transpose1x2(const __m128& in0, const __m128& in1, __m128& out0);
+inline void Transpose1x2(__m128 in0, __m128 in1, __m128& out0);
 
 //! @brief Transposes a 1x2 matrix
 //! @tparam _firstRowIn: Index of the matrix's first row in each register
@@ -250,7 +250,7 @@ inline void Transpose1x2(const __m128& in0, const __m128& in1, __m128& out0);
 //! @param in: Input registers
 //! @param out: Output registers
 template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
-inline void Transpose1x2(const __m128d& in0, const __m128d& in1, __m128d& out0);
+inline void Transpose1x2(__m128d in0, __m128d in1, __m128d& out0);
 
 #ifdef __AVX2__
 
@@ -263,7 +263,7 @@ inline void Transpose1x2(const __m128d& in0, const __m128d& in1, __m128d& out0);
 //! @param in: Input registers
 //! @param out: Output registers
 template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
-inline void Transpose1x2(const __m256& in0, const __m256& in1, __m256& out0);
+inline void Transpose1x2(__m256 in0, __m256 in1, __m256& out0);
 
 //! @brief Transposes a 1x2 matrix
 //! @tparam _firstRowIn: Index of the matrix's first row in each register
@@ -274,7 +274,7 @@ inline void Transpose1x2(const __m256& in0, const __m256& in1, __m256& out0);
 //! @param in: Input registers
 //! @param out: Output registers
 template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
-inline void Transpose1x2(const __m256d& in0, const __m256d& in1, __m256d& out0);
+inline void Transpose1x2(__m256d in0, __m256d in1, __m256d& out0);
 
 #endif //__AVX2__
 
@@ -290,7 +290,7 @@ inline void Transpose1x2(const __m256d& in0, const __m256d& in1, __m256d& out0);
 //! @param in: Input registers
 //! @param out: Output registers
 template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
-inline void Transpose2x1(const __m128& in0, __m128& out0, __m128& out1);
+inline void Transpose2x1(__m128 in0, __m128& out0, __m128& out1);
 
 //! @brief Transposes a 2x1 matrix
 //! @tparam _firstRowIn: Index of the matrix's first row in each register
@@ -300,7 +300,7 @@ inline void Transpose2x1(const __m128& in0, __m128& out0, __m128& out1);
 //! @param in: Input registers
 //! @param out: Output registers
 template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
-inline void Transpose2x1(const __m128d& in0, __m128d& out0, __m128d& out1);
+inline void Transpose2x1(__m128d in0, __m128d& out0, __m128d& out1);
 
 #ifdef __AVX2__
 
@@ -312,7 +312,7 @@ inline void Transpose2x1(const __m128d& in0, __m128d& out0, __m128d& out1);
 //! @param in: Input registers
 //! @param out: Output registers
 template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
-inline void Transpose2x1(const __m256& in0, __m256& out0, __m256& out1);
+inline void Transpose2x1(__m256 in0, __m256& out0, __m256& out1);
 
 //! @brief Transposes a 2x1 matrix
 //! @tparam _firstRowIn: Index of the matrix's first row in each register
@@ -322,9 +322,11 @@ inline void Transpose2x1(const __m256& in0, __m256& out0, __m256& out1);
 //! @param in: Input registers
 //! @param out: Output registers
 template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
-inline void Transpose2x1(const __m256d& in0, __m256d& out0, __m256d& out1);
+inline void Transpose2x1(__m256d in0, __m256d& out0, __m256d& out1);
 
 #endif //__AVX2__
+
+
 
 // 2x2 ----------------------------------------------------------------------------------------------------------------
 
@@ -336,7 +338,7 @@ inline void Transpose2x1(const __m256d& in0, __m256d& out0, __m256d& out1);
 //! @param in: Input registers
 //! @param out: Output registers
 template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
-inline void Transpose2x2(const __m128& in0, const __m128& in1, __m128& out0, __m128& out1);
+inline void Transpose2x2(__m128 in0, __m128 in1, __m128& out0, __m128& out1);
 
 //! @brief Transposes a 2x2 matrix
 //! @tparam _firstRowIn: Index of the matrix's first row in each register
@@ -346,7 +348,7 @@ inline void Transpose2x2(const __m128& in0, const __m128& in1, __m128& out0, __m
 //! @param in: Input registers
 //! @param out: Output registers
 template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
-inline void Transpose2x2(const __m128d& in0, const __m128d& in1, __m128d& out0, __m128d& out1);
+inline void Transpose2x2(__m128d in0, __m128d in1, __m128d& out0, __m128d& out1);
 
 #ifdef __AVX2__
 
@@ -358,7 +360,7 @@ inline void Transpose2x2(const __m128d& in0, const __m128d& in1, __m128d& out0, 
 //! @param in: Input registers
 //! @param out: Output registers
 template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
-inline void Transpose2x2(const __m256& in0, const __m256& in1, __m256& out0, __m256& out1);
+inline void Transpose2x2(__m256 in0, __m256 in1, __m256& out0, __m256& out1);
 
 //! @brief Transposes a 2x2 matrix
 //! @tparam _firstRowIn: Index of the matrix's first row in each register
@@ -368,11 +370,47 @@ inline void Transpose2x2(const __m256& in0, const __m256& in1, __m256& out0, __m
 //! @param in: Input registers
 //! @param out: Output registers
 template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
-inline void Transpose2x2(const __m256d& in0, const __m256d& in1, __m256d& out0, __m256d& out1);
+inline void Transpose2x2(__m256d in0, __m256d in1, __m256d& out0, __m256d& out1);
 
 #endif // __AVX2__
 
 
+
+// 3x2 ----------------------------------------------------------------------------------------------------------------
+
+//! @brief Transposes a 3x2 matrix
+//! @tparam _firstRowIn: Index of the matrix's first row in each register
+//! @tparam _firstRowOut: Index of the output matrix's first row in each register
+//! @tparam _overwriteUnused: Option that specifies if unused values in the output registers can/should be overwritten
+//! @tparam _unusedSetZero: Option that specifies if unused values in the output registers are set to zero
+//! @param in: Input registers
+//! @param out: Output registers
+template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
+inline void Transpose3x2(__m128 in0, __m128 in1, __m128& out0, __m128& out1, __m128& out2);
+
+#ifdef __AVX2__
+
+//! @brief Transposes a 3x2 matrix
+//! @tparam _firstRowIn: Index of the matrix's first row in each register
+//! @tparam _firstRowOut: Index of the output matrix's first row in each register
+//! @tparam _overwriteUnused: Option that specifies if unused values in the output registers can/should be overwritten
+//! @tparam _unusedSetZero: Option that specifies if unused values in the output registers are set to zero
+//! @param in: Input registers
+//! @param out: Output registers
+template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
+inline void Transpose3x2(__m256 in0, __m256 in1, __m256& out0, __m256& out1, __m256& out2);
+
+//! @brief Transposes a 3x2 matrix
+//! @tparam _firstRowIn: Index of the matrix's first row in each register
+//! @tparam _firstRowOut: Index of the output matrix's first row in each register
+//! @tparam _overwriteUnused: Option that specifies if unused values in the output registers can/should be overwritten
+//! @tparam _unusedSetZero: Option that specifies if unused values in the output registers are set to zero
+//! @param in: Input registers
+//! @param out: Output registers
+template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
+inline void Transpose3x2(__m256d in0, __m256d in1, __m256d& out0, __m256d& out1, __m256d& out2);
+
+#endif //__AVX2__
 
 // 3x3 ----------------------------------------------------------------------------------------------------------------
 
@@ -384,8 +422,7 @@ inline void Transpose2x2(const __m256d& in0, const __m256d& in1, __m256d& out0, 
 //! @param in: Input registers
 //! @param out: Output registers
 template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
-inline void Transpose3x3(const __m128& in0, const __m128& in1, const __m128& in2, __m128& out0, __m128& out1,
-                         __m128& out2);
+inline void Transpose3x3(__m128 in0, __m128 in1, __m128 in2, __m128& out0, __m128& out1, __m128& out2);
 
 
 
@@ -399,8 +436,7 @@ inline void Transpose3x3(const __m128& in0, const __m128& in1, const __m128& in2
 //! @param in: Input registers
 //! @param out: Output registers
 template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
-inline void Transpose3x3(const __m256d& in0, const __m256d& in1, const __m256d& in2, __m256d& out0, __m256d& out1,
-                         __m256d& out2);
+inline void Transpose3x3(__m256 in0, __m256 in1, __m256 in2, __m256& out0, __m256& out1, __m256& out2);
 
 //! @brief Transposes a 3x3 matrix
 //! @tparam _firstRowIn: Index of the matrix's first row in each register
@@ -410,9 +446,7 @@ inline void Transpose3x3(const __m256d& in0, const __m256d& in1, const __m256d& 
 //! @param in: Input registers
 //! @param out: Output registers
 template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
-inline void Transpose3x3(const __m256& in0, const __m256& in1, const __m256& in2, __m256& out0, __m256& out1,
-                         __m256& out2);
-
+inline void Transpose3x3(__m256d in0, __m256d in1, __m256d in2, __m256d& out0, __m256d& out1, __m256d& out2);
 
 #endif // __AVX2__
 
