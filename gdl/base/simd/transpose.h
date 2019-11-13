@@ -378,7 +378,7 @@ inline void Transpose2x2(__m256d in0, __m256d in1, __m256d& out0, __m256d& out1)
 
 // 3x1 ----------------------------------------------------------------------------------------------------------------
 
-//! @brief Transposes a 3x2 matrix
+//! @brief Transposes a 3x1 matrix
 //! @tparam _firstRowIn: Index of the matrix's first row in each register
 //! @tparam _firstRowOut: Index of the output matrix's first row in each register
 //! @tparam _overwriteUnused: Option that specifies if unused values in the output registers can/should be overwritten
@@ -387,6 +387,30 @@ inline void Transpose2x2(__m256d in0, __m256d in1, __m256d& out0, __m256d& out1)
 //! @param out: Output registers
 template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
 inline void Transpose3x1(__m128 in0, __m128& out0, __m128& out1, __m128& out2);
+
+#ifdef __AVX2__
+
+//! @brief Transposes a 3x1 matrix
+//! @tparam _firstRowIn: Index of the matrix's first row in each register
+//! @tparam _firstRowOut: Index of the output matrix's first row in each register
+//! @tparam _overwriteUnused: Option that specifies if unused values in the output registers can/should be overwritten
+//! @tparam _unusedSetZero: Option that specifies if unused values in the output registers are set to zero
+//! @param in: Input registers
+//! @param out: Output registers
+template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
+inline void Transpose3x1(__m256 in0, __m256& out0, __m256& out1, __m256& out2);
+
+//! @brief Transposes a 3x1 matrix
+//! @tparam _firstRowIn: Index of the matrix's first row in each register
+//! @tparam _firstRowOut: Index of the output matrix's first row in each register
+//! @tparam _overwriteUnused: Option that specifies if unused values in the output registers can/should be overwritten
+//! @tparam _unusedSetZero: Option that specifies if unused values in the output registers are set to zero
+//! @param in: Input registers
+//! @param out: Output registers
+template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
+inline void Transpose3x1(__m256d in0, __m256d& out0, __m256d& out1, __m256d& out2);
+
+#endif //__AVX2__
 
 
 
