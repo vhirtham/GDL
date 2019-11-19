@@ -297,6 +297,33 @@ BOOST_AUTO_TEST_CASE(Transpose1x2_256)
 
 
 
+// Transpose 1x3 ------------------------------------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(Transpose1x3_128)
+{
+    TestTranspose<__m128, 1, 3>();
+}
+
+
+
+#ifdef __AVX2__
+
+BOOST_AUTO_TEST_CASE(Transpose1x3_256d)
+{
+    TestTranspose<__m256d, 1, 3>();
+}
+
+
+
+BOOST_AUTO_TEST_CASE(Transpose1x3_256)
+{
+    TestTranspose<__m256, 1, 3>();
+}
+
+#endif //__AVX2__
+
+
+
 // Transpose 2x1 ------------------------------------------------------------------------------------------------------
 
 
