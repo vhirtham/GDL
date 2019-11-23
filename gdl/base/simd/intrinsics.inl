@@ -761,7 +761,7 @@ inline _registerType _mm_broadcasts(_registerType src)
 // --------------------------------------------------------------------------------------------------------------------
 
 template <typename _registerType>
-inline auto _mm_movehdup(_registerType src)
+inline _registerType _mm_movehdup(_registerType src)
 {
     using namespace GDL::simd;
     static_assert(Is__m128<_registerType> || Is__m256<_registerType>,
@@ -780,7 +780,7 @@ inline auto _mm_movehdup(_registerType src)
 // --------------------------------------------------------------------------------------------------------------------
 
 template <typename _registerType>
-inline auto _mm_moveldup(_registerType src)
+inline _registerType _mm_moveldup(_registerType src)
 {
     using namespace GDL::simd;
     static_assert(IsRegisterType<_registerType>, "Function can only be used with compatible register types.");
@@ -794,6 +794,47 @@ inline auto _mm_moveldup(_registerType src)
         return _mm256_moveldup_ps(src);
     else
         return _mm256_movedup_pd(src);
+#endif // __AVX2__
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+template <typename _registerType>
+inline _registerType _mm_movehl(_registerType src0, _registerType src1)
+{
+    using namespace GDL::simd;
+    static_assert(Is__m128<_registerType> || Is__m256<_registerType>, "Only __m128 and __m256 registers supported.");
+
+    if constexpr (Is__m128<_registerType>)
+        return _mm_movehl_ps(src0, src1);
+#ifdef __AVX2__
+    else
+        // See: https://stackoverflow.com/questions/58954801/avx-equivalent-for-mm-movelh-ps?noredirect=1#58955087
+        // return _mm256_castpd_ps(_mm256_unpackhi_pd(_mm256_castps_pd(src1), _mm256_castps_pd(src0)));
+        return _mm256_shuffle_ps(src1, src0, 0xee);
+#endif // __AVX2__
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+template <typename _registerType>
+inline _registerType _mm_movelh(_registerType src0, _registerType src1)
+{
+    using namespace GDL::simd;
+    static_assert(Is__m128<_registerType> || Is__m256<_registerType>, "Only __m128 and __m256 registers supported.");
+
+    if constexpr (Is__m128<_registerType>)
+        return _mm_movelh_ps(src0, src1);
+#ifdef __AVX2__
+    else
+        // See: https://stackoverflow.com/questions/58954801/avx-equivalent-for-mm-movelh-ps?noredirect=1#58955087
+        // return _mm256_castpd_ps(_mm256_unpacklo_pd(_mm256_castps_pd(src0), _mm256_castps_pd(src1)));
+        return _mm256_shuffle_ps(src0, src1, 0x44);
+
 #endif // __AVX2__
 }
 

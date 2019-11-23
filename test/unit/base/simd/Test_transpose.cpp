@@ -504,34 +504,9 @@ BOOST_AUTO_TEST_CASE(Transpose3x3_256)
 // Transpose 4x4 ------------------------------------------------------------------------------------------------------
 
 
-template <typename _registerType>
-void TestTranspose4x4()
-{
-    alignas(alignmentBytes<_registerType>) std::array<_registerType, 4> a, b, expected;
-
-    a[0] = _mm_setr<_registerType>(1, 2, 3, 4);
-    a[1] = _mm_setr<_registerType>(5, 6, 7, 8);
-    a[2] = _mm_setr<_registerType>(9, 10, 11, 12);
-    a[3] = _mm_setr<_registerType>(13, 14, 15, 16);
-
-    expected[0] = _mm_setr<_registerType>(1, 5, 9, 13);
-    expected[1] = _mm_setr<_registerType>(2, 6, 10, 14);
-    expected[2] = _mm_setr<_registerType>(3, 7, 11, 15);
-    expected[3] = _mm_setr<_registerType>(4, 8, 12, 16);
-
-
-    Transpose4x4(a[0], a[1], a[2], a[3], b[0], b[1], b[2], b[3]);
-
-    for (U32 i = 0; i < 4; ++i)
-        for (U32 j = 0; j < 4; ++j)
-            BOOST_CHECK(GetValue(b[i], j) == Approx(GetValue(expected[i], j)));
-}
-
-
-
 BOOST_AUTO_TEST_CASE(Transpose4x4_128)
 {
-    TestTranspose4x4<__m128>();
+    TestTranspose<__m128, 4, 4>();
 }
 
 
@@ -540,10 +515,17 @@ BOOST_AUTO_TEST_CASE(Transpose4x4_128)
 
 BOOST_AUTO_TEST_CASE(Transpose4x4_256d)
 {
-    TestTranspose4x4<__m256d>();
+    TestTranspose<__m256d, 4, 4>();
 }
 
-#endif // __AVX2__
+
+
+BOOST_AUTO_TEST_CASE(Transpose4x4_256)
+{
+    TestTranspose<__m256, 4, 4>();
+}
+
+#endif //__AVX2__
 
 
 

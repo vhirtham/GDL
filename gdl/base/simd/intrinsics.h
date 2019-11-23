@@ -292,14 +292,30 @@ inline _registerType _mm_broadcasts(_registerType src);
 //! @param src: Source register
 //! @return Register with shuffled values
 template <typename _registerType>
-inline auto _mm_movehdup(_registerType src);
+inline _registerType _mm_movehdup(_registerType src);
 
 //! @brief Creates a new register by overwriting odd indexed values with the previous even indexed value.
 //! @tparam _registerType: Register type
 //! @param src: Source register
 //! @return Register with shuffled values
 template <typename _registerType>
-inline auto _mm_moveldup(_registerType src);
+inline _registerType _mm_moveldup(_registerType src);
+
+//! @brief Copies the higher 64 bits of the second register into the lower 64 bits of the first register
+//! @tparam _registerType: Register type
+//! @param src0: First source register
+//! @param src1: Second source register
+//! @return Register with shuffled values
+template <typename _registerType>
+inline _registerType _mm_movehl(_registerType src0, _registerType src1);
+
+//! @brief Copies the lower 64 bits of the second register into the higher 64 bits of the first register
+//! @tparam _registerType: Register type
+//! @param src0: First source register
+//! @param src1: Second source register
+//! @return Register with shuffled values
+template <typename _registerType>
+inline _registerType _mm_movelh(_registerType src0, _registerType src1);
 
 //! @brief Returns a register with an arbitrary combination of values from the input register as long as the source
 //! values and the destination are in the same SIMD lane.
