@@ -501,8 +501,34 @@ BOOST_AUTO_TEST_CASE(Transpose3x3_256)
 
 
 
-// Transpose 4x3 ------------------------------------------------------------------------------------------------------
+// Transpose 4x2 ------------------------------------------------------------------------------------------------------
 
+BOOST_AUTO_TEST_CASE(Transpose4x2_128)
+{
+    TestTranspose<__m128, 4, 2>();
+}
+
+
+
+#ifdef __AVX2__
+
+BOOST_AUTO_TEST_CASE(Transpose4x2_256d)
+{
+    TestTranspose<__m256d, 4, 2>();
+}
+
+
+
+BOOST_AUTO_TEST_CASE(Transpose4x2_256)
+{
+    TestTranspose<__m256, 4, 2>();
+}
+
+#endif //__AVX2__
+
+
+
+// Transpose 4x3 ------------------------------------------------------------------------------------------------------
 
 BOOST_AUTO_TEST_CASE(Transpose4x3_128)
 {
@@ -530,7 +556,6 @@ BOOST_AUTO_TEST_CASE(Transpose4x3_256)
 
 
 // Transpose 4x4 ------------------------------------------------------------------------------------------------------
-
 
 BOOST_AUTO_TEST_CASE(Transpose4x4_128)
 {
