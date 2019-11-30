@@ -122,6 +122,9 @@ inline void Transpose(const std::array<_registerType, _arrSizeIn>& matDataI,
         else if constexpr (_cols == 3)
             Transpose1x3<_firstRowIn, _firstRowOut, _overwriteUnused, _unusedSetZero>(
                     matDataI[idxI[0]], matDataI[idxI[1]], matDataI[idxI[2]], matDataO[idxO[0]]);
+        else if constexpr (_cols == 4)
+            Transpose1x4<_firstRowIn, _firstRowOut, _overwriteUnused, _unusedSetZero>(
+                    matDataI[idxI[0]], matDataI[idxI[1]], matDataI[idxI[2]], matDataI[idxI[3]], matDataO[idxO[0]]);
     }
     else if constexpr (_rows == 2)
     {
@@ -993,6 +996,223 @@ inline void Transpose1x3(__m256d in0, __m256d in1, __m256d in2, __m256d& out0)
             out0 = tmp0;
     else
         out0 = BlendInRange<_firstRowOut, _firstRowOut + 2>(out0, tmp0);
+}
+
+#endif //__AVX2__
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+// 1x4
+// --------------------------------------------------------------------------------------------------------------------
+
+template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unusedSetZero>
+inline void Transpose1x4(__m128 in0, __m128 in1, __m128 in2, __m128 in3, __m128& out0)
+{
+    if constexpr (_firstRowIn == 0)
+    {
+        __m128 tmp0 = _mm_unpacklo(in0, in1);
+        __m128 tmp1 = _mm_unpacklo(in2, in3);
+
+        out0 = _mm_movelh(tmp0, tmp1);
+    }
+    else if constexpr (_firstRowIn == 1)
+    {
+        __m128 tmp0 = _mm_unpacklo(in0, in1);
+        __m128 tmp1 = _mm_unpacklo(in2, in3);
+
+        out0 = _mm_movehl(tmp1, tmp0);
+    }
+    else if constexpr (_firstRowIn == 2)
+    {
+        __m128 tmp0 = _mm_unpackhi(in0, in1);
+        __m128 tmp1 = _mm_unpackhi(in2, in3);
+
+        out0 = _mm_movelh(tmp0, tmp1);
+    }
+    else
+    {
+        __m128 tmp0 = _mm_unpackhi(in0, in1);
+        __m128 tmp1 = _mm_unpackhi(in2, in3);
+
+        out0 = _mm_movehl(tmp1, tmp0);
+    }
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+#ifdef __AVX2__
+
+
+template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unusedSetZero>
+inline void Transpose1x4(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256& out0)
+{
+
+    constexpr U32 numLaneVals = numValuesPerLane<__m256>;
+    constexpr U32 laneIn = _firstRowIn / numLaneVals;
+    constexpr U32 laneOut = _firstRowOut / numLaneVals;
+    constexpr U32 laneOffsetIn = _firstRowIn % numLaneVals;
+    constexpr U32 laneOffsetOut = _firstRowOut % numLaneVals;
+
+
+    __m256 tmp0;
+
+    if constexpr (laneOffsetIn == 0)
+    {
+        __m256 tmp1, tmp2;
+        if constexpr (laneOffsetOut == 0)
+        {
+            tmp1 = _mm_unpacklo(in0, in1);
+            tmp2 = _mm_unpacklo(in2, in3);
+        }
+        else if constexpr (laneOffsetOut == 1)
+        {
+            tmp1 = _mm_unpacklo(in3, in0);
+            tmp2 = _mm_unpacklo(in1, in2);
+        }
+        else if constexpr (laneOffsetOut == 2)
+        {
+            tmp1 = _mm_unpacklo(in2, in3);
+            tmp2 = _mm_unpacklo(in0, in1);
+        }
+        else
+        {
+            tmp1 = _mm_unpacklo(in1, in2);
+            tmp2 = _mm_unpacklo(in3, in0);
+        }
+
+        tmp0 = _mm_movelh(tmp1, tmp2);
+    }
+    else if constexpr (laneOffsetIn == 1)
+    {
+        __m256 tmp1, tmp2;
+        if constexpr (laneOffsetOut == 0)
+        {
+            tmp1 = _mm_unpacklo(in0, in1);
+            tmp2 = _mm_unpacklo(in2, in3);
+        }
+        else if constexpr (laneOffsetOut == 1)
+        {
+            tmp1 = _mm_unpacklo(in3, in0);
+            tmp2 = _mm_unpacklo(in1, in2);
+        }
+        else if constexpr (laneOffsetOut == 2)
+        {
+            tmp1 = _mm_unpacklo(in2, in3);
+            tmp2 = _mm_unpacklo(in0, in1);
+        }
+        else
+        {
+            tmp1 = _mm_unpacklo(in1, in2);
+            tmp2 = _mm_unpacklo(in3, in0);
+        }
+
+        tmp0 = _mm_movehl(tmp2, tmp1);
+    }
+    else if constexpr (laneOffsetIn == 2)
+    {
+        __m256 tmp1, tmp2;
+        if constexpr (laneOffsetOut == 0)
+        {
+            tmp1 = _mm_unpackhi(in0, in1);
+            tmp2 = _mm_unpackhi(in2, in3);
+        }
+        else if constexpr (laneOffsetOut == 1)
+        {
+            tmp1 = _mm_unpackhi(in3, in0);
+            tmp2 = _mm_unpackhi(in1, in2);
+        }
+        else if constexpr (laneOffsetOut == 2)
+        {
+            tmp1 = _mm_unpackhi(in2, in3);
+            tmp2 = _mm_unpackhi(in0, in1);
+        }
+        else
+        {
+            tmp1 = _mm_unpackhi(in1, in2);
+            tmp2 = _mm_unpackhi(in3, in0);
+        }
+
+        tmp0 = _mm_movelh(tmp1, tmp2);
+    }
+    else
+    {
+        __m256 tmp1, tmp2;
+        if constexpr (laneOffsetOut == 0)
+        {
+            tmp1 = _mm_unpackhi(in0, in1);
+            tmp2 = _mm_unpackhi(in2, in3);
+        }
+        else if constexpr (laneOffsetOut == 1)
+        {
+            tmp1 = _mm_unpackhi(in3, in0);
+            tmp2 = _mm_unpackhi(in1, in2);
+        }
+        else if constexpr (laneOffsetOut == 2)
+        {
+            tmp1 = _mm_unpackhi(in2, in3);
+            tmp2 = _mm_unpackhi(in0, in1);
+        }
+        else
+        {
+            tmp1 = _mm_unpackhi(in1, in2);
+            tmp2 = _mm_unpackhi(in3, in0);
+        }
+
+        tmp0 = _mm_movehl(tmp2, tmp1);
+    }
+
+    if constexpr (laneIn != laneOut || laneOffsetOut > 0)
+        tmp0 = Permute2F128<laneIn, laneIn>(tmp0);
+
+    // Write to output registers
+    if constexpr (_overwriteUnused)
+        if constexpr (_unusedSetZero)
+            out0 = BlendInRange<_firstRowOut, _firstRowOut + 3>(_mm_setzero<__m256>(), tmp0);
+        else
+            out0 = tmp0;
+    else
+        out0 = BlendInRange<_firstRowOut, _firstRowOut + 3>(out0, tmp0);
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unusedSetZero>
+inline void Transpose1x4(__m256d in0, __m256d in1, __m256d in2, __m256d in3, __m256d& out0)
+{
+
+    if constexpr (_firstRowIn == 0)
+    {
+        __m256d tmp0 = _mm_unpacklo(in0, in1);
+        __m256d tmp1 = _mm_unpacklo(in2, in3);
+
+        out0 = Permute2F128<0, 0, 1, 0>(tmp0, tmp1);
+    }
+    else if constexpr (_firstRowIn == 1)
+    {
+        __m256d tmp0 = _mm_unpackhi(in0, in1);
+        __m256d tmp1 = _mm_unpackhi(in2, in3);
+
+        out0 = Permute2F128<0, 0, 1, 0>(tmp0, tmp1);
+    }
+    else if constexpr (_firstRowIn == 2)
+    {
+        __m256d tmp0 = _mm_unpacklo(in0, in1);
+        __m256d tmp1 = _mm_unpacklo(in2, in3);
+
+        out0 = Permute2F128<0, 1, 1, 1>(tmp0, tmp1);
+    }
+    else
+    {
+        __m256d tmp0 = _mm_unpackhi(in0, in1);
+        __m256d tmp1 = _mm_unpackhi(in2, in3);
+
+        out0 = Permute2F128<0, 1, 1, 1>(tmp0, tmp1);
+    }
 }
 
 #endif //__AVX2__
