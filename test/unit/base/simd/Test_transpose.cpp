@@ -688,6 +688,20 @@ BOOST_AUTO_TEST_CASE(Transpose4x4_256)
 
 
 
+#ifdef __AVX2__
+
+// Transpose 5x5 ------------------------------------------------------------------------------------------------------
+
+
+BOOST_AUTO_TEST_CASE(Transpose5x5_256)
+{
+    TestTranspose<__m256, 5, 5>();
+}
+
+#endif //__AVX2__
+
+
+
 // Transpose 8x8 ------------------------------------------------------------------------------------------------------
 
 template <typename _registerType>
