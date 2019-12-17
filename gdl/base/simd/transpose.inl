@@ -176,6 +176,10 @@ inline void Transpose(const std::array<_registerType, _arrSizeIn>& matDataI,
             Transpose4x4<_firstRowIn, _firstRowOut, _overwriteUnused, _unusedSetZero>(
                     matDataI[idxI[0]], matDataI[idxI[1]], matDataI[idxI[2]], matDataI[idxI[3]], matDataO[idxO[0]],
                     matDataO[idxO[1]], matDataO[idxO[2]], matDataO[idxO[3]]);
+        else if constexpr (_cols == 5)
+            Transpose4x5<_firstRowIn, _firstRowOut, _overwriteUnused, _unusedSetZero>(
+                    matDataI[idxI[0]], matDataI[idxI[1]], matDataI[idxI[2]], matDataI[idxI[3]], matDataI[idxI[4]],
+                    matDataO[idxO[0]], matDataO[idxO[1]], matDataO[idxO[2]], matDataO[idxO[3]]);
     }
     else if constexpr (_rows == 5)
     {
@@ -6085,6 +6089,74 @@ inline void Transpose4x4(__m256d in0, __m256d in1, __m256d in2, __m256d in3, __m
     out1 = _mm_unpackhi(tmp0, tmp1);
     out2 = _mm_unpacklo(tmp2, tmp3);
     out3 = _mm_unpackhi(tmp2, tmp3);
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+// 4x5
+// --------------------------------------------------------------------------------------------------------------------
+
+template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unusedSetZero>
+inline void Transpose4x5(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 in4, __m256& out0, __m256& out1,
+                         __m256& out2, __m256& out3)
+{
+    __m256 tmp0, tmp1, tmp2, tmp3, tmp4;
+
+    if constexpr (_firstRowIn == 0)
+    {
+        tmp4 = Permute2F128<0, 0, 1, 0>(in0, in4);
+    }
+    else if constexpr (_firstRowIn == 1)
+    {
+        __m256 tmp5 = Permute2F128<1, 0>(in4);
+        tmp4 = BlendInRange<1, 4>(tmp5, in0);
+    }
+    else if constexpr (_firstRowIn == 2)
+    {
+        __m256 tmp5 = Permute2F128<1, 0>(in4);
+        tmp4 = BlendInRange<2, 5>(tmp5, in0);
+    }
+    else if constexpr (_firstRowIn == 3)
+    {
+        __m256 tmp5 = Permute2F128<1, 0>(in4);
+        tmp4 = BlendInRange<3, 6>(tmp5, in0);
+    }
+    else
+    {
+        tmp4 = Permute2F128<0, 1, 1, 1>(in4, in0);
+    }
+
+
+    Transpose4x4<_firstRowIn, _firstRowOut>(tmp4, in1, in2, in3, tmp0, tmp1, tmp2, tmp3);
+
+
+    // Write to output registers
+    if constexpr (_overwriteUnused)
+    {
+        if constexpr (_unusedSetZero)
+        {
+            const __m256 zero = _mm_setzero<__m256>();
+            out0 = BlendInRange<_firstRowOut, _firstRowOut + 4>(zero, tmp0);
+            out1 = BlendInRange<_firstRowOut, _firstRowOut + 4>(zero, tmp1);
+            out2 = BlendInRange<_firstRowOut, _firstRowOut + 4>(zero, tmp2);
+            out3 = BlendInRange<_firstRowOut, _firstRowOut + 4>(zero, tmp3);
+        }
+        else
+        {
+            out0 = tmp0;
+            out1 = tmp1;
+            out2 = tmp2;
+            out3 = tmp3;
+        }
+    }
+    else
+    {
+        out0 = BlendInRange<_firstRowOut, _firstRowOut + 4>(out0, tmp0);
+        out1 = BlendInRange<_firstRowOut, _firstRowOut + 4>(out1, tmp1);
+        out2 = BlendInRange<_firstRowOut, _firstRowOut + 4>(out2, tmp2);
+        out3 = BlendInRange<_firstRowOut, _firstRowOut + 4>(out3, tmp3);
+    }
 }
 
 
