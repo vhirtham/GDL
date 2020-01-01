@@ -183,11 +183,15 @@ inline void Transpose(const std::array<_registerType, _arrSizeIn>& matDataI,
     }
     else if constexpr (_rows == 5)
     {
-        if constexpr (_cols == 2)
+        if constexpr (_cols == 1)
+            Transpose5x1<_firstRowIn, _firstRowOut, _overwriteUnused, _unusedSetZero>(
+                    matDataI[idxI[0]], matDataO[idxO[0]], matDataO[idxO[1]], matDataO[idxO[2]], matDataO[idxO[3]],
+                    matDataO[idxO[4]]);
+        else if constexpr (_cols == 2)
             Transpose5x2<_firstRowIn, _firstRowOut, _overwriteUnused, _unusedSetZero>(
                     matDataI[idxI[0]], matDataI[idxI[1]], matDataO[idxO[0]], matDataO[idxO[1]], matDataO[idxO[2]],
                     matDataO[idxO[3]], matDataO[idxO[4]]);
-        if constexpr (_cols == 3)
+        else if constexpr (_cols == 3)
             Transpose5x3<_firstRowIn, _firstRowOut, _overwriteUnused, _unusedSetZero>(
                     matDataI[idxI[0]], matDataI[idxI[1]], matDataI[idxI[2]], matDataO[idxO[0]], matDataO[idxO[1]],
                     matDataO[idxO[2]], matDataO[idxO[3]], matDataO[idxO[4]]);
@@ -6168,6 +6172,85 @@ inline void Transpose4x5(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 
         out1 = BlendInRange<_firstRowOut, _firstRowOut + 4>(out1, tmp1);
         out2 = BlendInRange<_firstRowOut, _firstRowOut + 4>(out2, tmp2);
         out3 = BlendInRange<_firstRowOut, _firstRowOut + 4>(out3, tmp3);
+    }
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+// 5x1
+// --------------------------------------------------------------------------------------------------------------------
+
+template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unusedSetZero>
+inline void Transpose5x1(__m256 in0, __m256& out0, __m256& out1, __m256& out2, __m256& out3, __m256& out4)
+{
+    constexpr U32 numLaneVals = numValuesPerLane<__m256>;
+
+    __m256 tmp0, tmp1, tmp2, tmp3, tmp4;
+    __m256 tmp5 = Permute2F128<1, 0>(in0);
+
+    if constexpr (_firstRowIn == _firstRowOut)
+        tmp0 = in0;
+    else if constexpr (_firstRowIn / numLaneVals == _firstRowOut / numLaneVals)
+        tmp0 = Broadcast<_firstRowIn % numLaneVals>(in0);
+    else
+        tmp0 = Broadcast<_firstRowIn % numLaneVals>(tmp5);
+
+    if constexpr (_firstRowIn + 1 == _firstRowOut)
+        tmp1 = in0;
+    else if constexpr ((_firstRowIn + 1) / numLaneVals == _firstRowOut / numLaneVals)
+        tmp1 = Broadcast<(_firstRowIn + 1) % numLaneVals>(in0);
+    else
+        tmp1 = Broadcast<(_firstRowIn + 1) % numLaneVals>(tmp5);
+
+    if constexpr (_firstRowIn + 2 == _firstRowOut)
+        tmp2 = in0;
+    else if constexpr ((_firstRowIn + 2) / numLaneVals == _firstRowOut / numLaneVals)
+        tmp2 = Broadcast<(_firstRowIn + 2) % numLaneVals>(in0);
+    else
+        tmp2 = Broadcast<(_firstRowIn + 2) % numLaneVals>(tmp5);
+
+    if constexpr (_firstRowIn + 3 == _firstRowOut)
+        tmp3 = in0;
+    else if constexpr ((_firstRowIn + 3) / numLaneVals == _firstRowOut / numLaneVals)
+        tmp3 = Broadcast<(_firstRowIn + 3) % numLaneVals>(in0);
+    else
+        tmp3 = Broadcast<(_firstRowIn + 3) % numLaneVals>(tmp5);
+
+    if constexpr (_firstRowIn + 4 == _firstRowOut)
+        tmp4 = in0;
+    else if constexpr ((_firstRowIn + 4) / numLaneVals == _firstRowOut / numLaneVals)
+        tmp4 = Broadcast<(_firstRowIn + 4) % numLaneVals>(in0);
+    else
+        tmp4 = Broadcast<(_firstRowIn + 4) % numLaneVals>(tmp5);
+    // Write to output registers
+    if constexpr (_overwriteUnused)
+    {
+        if constexpr (_unusedSetZero)
+        {
+            const __m256 zero = _mm_setzero<__m256>();
+            out0 = BlendIndex<_firstRowOut>(zero, tmp0);
+            out1 = BlendIndex<_firstRowOut>(zero, tmp1);
+            out2 = BlendIndex<_firstRowOut>(zero, tmp2);
+            out3 = BlendIndex<_firstRowOut>(zero, tmp3);
+            out4 = BlendIndex<_firstRowOut>(zero, tmp4);
+        }
+        else
+        {
+            out0 = tmp0;
+            out1 = tmp1;
+            out2 = tmp2;
+            out3 = tmp3;
+            out4 = tmp4;
+        }
+    }
+    else
+    {
+        out0 = BlendIndex<_firstRowOut>(out0, tmp0);
+        out1 = BlendIndex<_firstRowOut>(out1, tmp1);
+        out2 = BlendIndex<_firstRowOut>(out2, tmp2);
+        out3 = BlendIndex<_firstRowOut>(out3, tmp3);
+        out4 = BlendIndex<_firstRowOut>(out4, tmp4);
     }
 }
 
