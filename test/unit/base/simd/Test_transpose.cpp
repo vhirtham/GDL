@@ -578,6 +578,17 @@ BOOST_AUTO_TEST_CASE(Transpose3x4_256)
     TestTranspose<__m256, 3, 4>();
 }
 
+
+
+// Transpose 3x5 ------------------------------------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(Transpose3x5_256)
+{
+    TestTranspose<__m256, 3, 5>();
+}
+
+
+
 #endif //__AVX2__
 
 
