@@ -360,6 +360,20 @@ inline void Transpose1x4(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256&
 template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
 inline void Transpose1x4(__m256d in0, __m256d in1, __m256d in2, __m256d in3, __m256d& out0);
 
+
+
+// 1x5 ----------------------------------------------------------------------------------------------------------------
+
+//! @brief Transposes a 1x5 matrix
+//! @tparam _firstRowIn: Index of the matrix's first row in each register
+//! @tparam _firstRowOut: Index of the output matrix's first row in each register
+//! @tparam _overwriteUnused: Option that specifies if unused values in the output registers can/should be overwritten
+//! @tparam _unusedSetZero: Option that specifies if unused values in the output registers are set to zero
+//! @param in: Input registers
+//! @param out: Output registers
+template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
+inline void Transpose1x5(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 in4, __m256& out0);
+
 #endif //__AVX2__
 
 
