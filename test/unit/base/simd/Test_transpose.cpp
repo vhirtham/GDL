@@ -782,10 +782,10 @@ BOOST_AUTO_TEST_CASE(Transpose5x5_256)
 
 // Transpose 6x6 ------------------------------------------------------------------------------------------------------
 
-// BOOST_AUTO_TEST_CASE(Transpose6x6_256)
-//{
-//    TestTranspose<__m256, 6, 6>();
-//}
+BOOST_AUTO_TEST_CASE(Transpose6x6_256)
+{
+    TestTranspose<__m256, 6, 6>();
+}
 
 
 

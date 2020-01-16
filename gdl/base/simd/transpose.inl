@@ -220,7 +220,40 @@ inline void Transpose(const std::array<_registerType, _arrSizeIn>& matDataI,
                     matDataI[idxI[0]], matDataI[idxI[1]], matDataI[idxI[2]], matDataI[idxI[3]], matDataI[idxI[4]],
                     matDataO[idxO[0]], matDataO[idxO[1]], matDataO[idxO[2]], matDataO[idxO[3]], matDataO[idxO[4]]);
     }
-}
+    else if constexpr (_rows == 6)
+    {
+        // if constexpr (_cols == 1)
+        //                Transpose5x1<_firstRowIn, _firstRowOut, _overwriteUnused, _unusedSetZero>(
+        //                        matDataI[idxI[0]], matDataO[idxO[0]], matDataO[idxO[1]], matDataO[idxO[2]],
+        //                        matDataO[idxO[3]], matDataO[idxO[4]]);
+        //            else if constexpr (_cols == 2)
+        //                Transpose5x2<_firstRowIn, _firstRowOut, _overwriteUnused, _unusedSetZero>(
+        //                        matDataI[idxI[0]], matDataI[idxI[1]], matDataO[idxO[0]], matDataO[idxO[1]],
+        //                        matDataO[idxO[2]], matDataO[idxO[3]], matDataO[idxO[4]]);
+        //            else if constexpr (_cols == 3)
+        //                Transpose5x3<_firstRowIn, _firstRowOut, _overwriteUnused, _unusedSetZero>(
+        //                        matDataI[idxI[0]], matDataI[idxI[1]], matDataI[idxI[2]], matDataO[idxO[0]],
+        //                        matDataO[idxO[1]], matDataO[idxO[2]], matDataO[idxO[3]], matDataO[idxO[4]]);
+        //            else if constexpr (_cols == 4)
+        //                Transpose5x4<_firstRowIn, _firstRowOut, _overwriteUnused, _unusedSetZero>(
+        //                        matDataI[idxI[0]], matDataI[idxI[1]], matDataI[idxI[2]], matDataI[idxI[3]],
+        //                        matDataO[idxO[0]], matDataO[idxO[1]], matDataO[idxO[2]], matDataO[idxO[3]],
+        //                        matDataO[idxO[4]]);
+        //            else if constexpr (_cols == 5)
+        //                Transpose5x5<_firstRowIn, _firstRowOut, _overwriteUnused, _unusedSetZero>(
+        //                        matDataI[idxI[0]], matDataI[idxI[1]], matDataI[idxI[2]], matDataI[idxI[3]],
+        //                        matDataI[idxI[4]], matDataO[idxO[0]], matDataO[idxO[1]], matDataO[idxO[2]],
+        //                        matDataO[idxO[3]], matDataO[idxO[4]]);
+        //            else
+        if constexpr (_cols == 6)
+        {
+            Transpose6x6<_firstRowIn, _firstRowOut, _overwriteUnused, _unusedSetZero>(
+                    matDataI[idxI[0]], matDataI[idxI[1]], matDataI[idxI[2]], matDataI[idxI[3]], matDataI[idxI[4]],
+                    matDataI[idxI[5]], matDataO[idxO[0]], matDataO[idxO[1]], matDataO[idxO[2]], matDataO[idxO[3]],
+                    matDataO[idxO[4]], matDataO[idxO[5]]);
+        }
+    }
+} // namespace GDL::simd
 
 
 
@@ -7436,140 +7469,61 @@ inline void Transpose6x6(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 
 
     __m256 tmp0, tmp1, tmp2, tmp3, tmp4, tmp5;
 
-    //    Transpose4x5<_firstRowIn, _firstRowOut>(in0, in1, in2, in3, in4, tmp0, tmp1, tmp2, tmp3);
+    __m256 tmp6, tmp7, tmp8, tmp9, tmp10, tmp11, tmp12, tmp13;
 
-    //    if constexpr (laneOffsetIn == 0)
-    //    {
-    //        if constexpr (laneOffsetOut == 0)
-    //        {
-    //            __m256 tmp6 = BlendIndex<4>(tmp0, in0);
+    if constexpr (_firstRowOut == 0)
+    {
+        tmp6 = Permute2F128<0, 0, 1, 0>(in0, in4);
+        tmp7 = Permute2F128<0, 0, 1, 0>(in1, in5);
+        tmp8 = in2;
+        tmp9 = in3;
 
-    //            tmp4 = Permute2F128<0, 1, 1, 1>(tmp6, in4);
-    //        }
-    //        else if constexpr (laneOffsetOut == 1)
-    //        {
-    //            __m256 tmp6 = Shuffle<1, 0, 2, 3>(in0, tmp0);
-    //            __m256 tmp7 = _mm_unpacklo(in3, in4);
+        tmp10 = Permute2F128<0, 1, 1, 1>(in0, in4);
+        tmp11 = Permute2F128<0, 1, 1, 1>(in1, in5);
+        tmp12 = Permute2F128<1, 0>(in2);
+        tmp13 = Permute2F128<1, 0>(in3);
+    }
+    else if constexpr (_firstRowOut == 1)
+    {
+        tmp6 = Permute2F128<1, 0>(in3);
+        tmp7 = Permute2F128<0, 0, 1, 0>(in0, in4);
+        tmp8 = Permute2F128<0, 0, 1, 0>(in1, in5);
+        tmp9 = in2;
 
-    //            tmp4 = Permute2F128<0, 1, 1, 1>(tmp6, tmp7);
-    //        }
-    //        else if constexpr (laneOffsetOut == 2)
-    //        {
-    //            __m256 tmp6 = _mm_unpacklo(in0, in1);
-    //            __m256 tmp7 = Permute2F128<0, 1, 1, 0>(tmp6, tmp0);
-    //            __m256 tmp8 = BlendIndex<4>(tmp7, in4);
+        tmp10 = in3;
+        tmp11 = Permute2F128<0, 1, 1, 1>(in0, in4);
+        tmp12 = Permute2F128<0, 1, 1, 1>(in1, in5);
+        tmp13 = Permute2F128<1, 0>(in2);
+    }
+    else
+    {
+        tmp6 = Permute2F128<1, 0>(in2);
+        tmp7 = Permute2F128<1, 0>(in3);
+        tmp8 = Permute2F128<0, 0, 1, 0>(in0, in4);
+        tmp9 = Permute2F128<0, 0, 1, 0>(in1, in5);
 
-    //            tmp4 = _mm_movelh(tmp7, tmp8);
-    //        }
-    //        else
-    //        {
-    //            __m256 tmp6 = Permute2F128<0, 1, 1, 0>(in0, tmp0);
-    //            __m256 tmp7 = BlendIndex<0>(in4, tmp6);
-    //            __m256 tmp8 = Broadcast<0>(tmp7);
+        tmp10 = in2;
+        tmp11 = in3;
+        tmp12 = Permute2F128<0, 1, 1, 1>(in0, in4);
+        tmp13 = Permute2F128<0, 1, 1, 1>(in1, in5);
+    }
 
-    //            tmp4 = BlendInRange<4, 6>(tmp8, tmp6);
-    //        }
-    //    }
-    //    else if constexpr (laneOffsetIn == 1)
-    //    {
-    //        if constexpr (laneOffsetOut == 0)
-    //        {
-    //            __m256 tmp7 = _mm_movehdup(in0);
-    //            __m256 tmp8 = _mm_movehdup(in4);
-    //            __m256 tmp9 = BlendIndex<4>(tmp0, tmp7);
+    if constexpr (_firstRowIn == 0)
+    {
+        Transpose4x4<0, 0>(tmp6, tmp7, tmp8, tmp9, tmp0, tmp1, tmp2, tmp3);
+        Transpose2x4<0, 0>(tmp10, tmp11, tmp12, tmp13, tmp4, tmp5);
+    }
+    else if constexpr (_firstRowIn == 1)
+    {
+        Transpose3x4<1, 0>(tmp6, tmp7, tmp8, tmp9, tmp0, tmp1, tmp2);
+        Transpose3x4<0, 0>(tmp10, tmp11, tmp12, tmp13, tmp3, tmp4, tmp5);
+    }
+    else
+    {
+        Transpose2x4<2, 0>(tmp6, tmp7, tmp8, tmp9, tmp0, tmp1);
+        Transpose4x4<0, 0>(tmp10, tmp11, tmp12, tmp13, tmp2, tmp3, tmp4, tmp5);
+    }
 
-    //            tmp4 = Permute2F128<0, 1, 1, 1>(tmp9, tmp8);
-    //        }
-    //        else if constexpr (laneOffsetOut == 1)
-    //        {
-    //            __m256 tmp7 = BlendIndex<5>(tmp0, in0);
-    //            __m256 tmp8 = Permute2F128<1, 0>(tmp7);
-
-    //            tmp4 = BlendIndex<5>(tmp8, in4);
-    //        }
-    //        else if constexpr (laneOffsetOut == 2)
-    //        {
-    //            __m256 tmp7 = _mm_unpacklo(in0, in1);
-    //            __m256 tmp8 = Permute2F128<0, 1, 1, 0>(tmp7, tmp0);
-    //            __m256 tmp9 = Broadcast<1>(in4);
-
-    //            tmp4 = BlendIndex<6>(tmp8, tmp9);
-    //        }
-    //        else
-    //        {
-    //            __m256 tmp7 = _mm_movelh(in0, in0);
-    //            __m256 tmp8 = Permute2F128<0, 1, 1, 0>(tmp7, tmp0);
-    //            __m256 tmp9 = _mm_movelh(in4, in4);
-
-    //            tmp4 = BlendIndex<7>(tmp8, tmp9);
-    //        }
-    //    }
-    //    else if constexpr (laneOffsetIn == 2)
-    //    {
-    //        if constexpr (laneOffsetOut == 0)
-    //        {
-    //            __m256 tmp7 = _mm_movehl(in0, in0);
-    //            __m256 tmp8 = _mm_movehl(in4, in4);
-    //            __m256 tmp9 = BlendIndex<4>(tmp0, tmp7);
-
-    //            tmp4 = Permute2F128<0, 1, 1, 1>(tmp9, tmp8);
-    //        }
-    //        else if constexpr (laneOffsetOut == 1)
-    //        {
-    //            __m256 tmp7 = Shuffle<3, 2, 2, 3>(in0, tmp0);
-    //            __m256 tmp8 = _mm_unpackhi(in3, in4);
-
-    //            tmp4 = Permute2F128<0, 1, 1, 1>(tmp7, tmp8);
-    //        }
-    //        else if constexpr (laneOffsetOut == 2)
-    //        {
-    //            __m256 tmp7 = BlendIndex<6>(tmp0, in0);
-    //            __m256 tmp8 = Permute2F128<1, 0>(tmp7);
-
-    //            tmp4 = BlendIndex<6>(tmp8, in4);
-    //        }
-    //        else
-    //        {
-    //            __m256 tmp7 = _mm_moveldup(in0);
-    //            __m256 tmp8 = _mm_moveldup(in4);
-    //            __m256 tmp9 = Permute2F128<0, 1, 1, 0>(tmp7, tmp0);
-
-    //            tmp4 = BlendIndex<7>(tmp9, tmp8);
-    //        }
-    //    }
-    //    else
-    //    {
-    //        if constexpr (laneOffsetOut == 0)
-    //        {
-    //            __m256 tmp7 = Broadcast<3>(in0);
-    //            __m256 tmp8 = Broadcast<3>(in4);
-    //            __m256 tmp9 = BlendIndex<4>(tmp0, tmp7);
-
-    //            tmp4 = Permute2F128<0, 1, 1, 1>(tmp9, tmp8);
-    //        }
-    //        else if constexpr (laneOffsetOut == 1)
-    //        {
-    //            __m256 tmp7 = _mm_movehl(tmp0, in0);
-    //            __m256 tmp8 = Broadcast<3>(in4);
-    //            __m256 tmp10 = Permute2F128<0, 1, 1, 0>(tmp7, tmp0);
-
-    //            tmp4 = BlendIndex<5>(tmp10, tmp8);
-    //        }
-    //        else if constexpr (laneOffsetOut == 2)
-    //        {
-    //            __m256 tmp7 = _mm_unpackhi(in0, in1);
-    //            __m256 tmp8 = _mm_movehdup(in4);
-    //            __m256 tmp9 = Permute2F128<0, 1, 1, 0>(tmp7, tmp0);
-
-    //            tmp4 = BlendIndex<6>(tmp9, tmp8);
-    //        }
-    //        else
-    //        {
-    //            __m256 tmp7 = Permute2F128<0, 1, 1, 0>(in0, tmp0);
-
-    //            tmp4 = BlendIndex<7>(tmp7, in4);
-    //        }
-    //    }
 
 
     // Write to output registers
@@ -7602,7 +7556,7 @@ inline void Transpose6x6(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 
         out2 = BlendInRange<_firstRowOut, _firstRowOut + 5>(out2, tmp2);
         out3 = BlendInRange<_firstRowOut, _firstRowOut + 5>(out3, tmp3);
         out4 = BlendInRange<_firstRowOut, _firstRowOut + 5>(out4, tmp4);
-        out5 = BlendInRange<_firstRowOut, _firstRowOut + 5>(out4, tmp5);
+        out5 = BlendInRange<_firstRowOut, _firstRowOut + 5>(out5, tmp5);
     }
 }
 
