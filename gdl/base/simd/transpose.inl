@@ -267,6 +267,14 @@ inline void Transpose(const std::array<_registerType, _arrSizeIn>& matDataI,
                     matDataI[idxI[5]], matDataO[idxO[0]], matDataO[idxO[1]], matDataO[idxO[2]], matDataO[idxO[3]],
                     matDataO[idxO[4]], matDataO[idxO[5]]);
     }
+    else if constexpr (_rows == 7)
+    {
+        if constexpr (_cols == 7)
+            Transpose7x7<_firstRowIn, _firstRowOut, _overwriteUnused, _unusedSetZero>(
+                    matDataI[idxI[0]], matDataI[idxI[1]], matDataI[idxI[2]], matDataI[idxI[3]], matDataI[idxI[4]],
+                    matDataI[idxI[5]], matDataI[idxI[6]], matDataO[idxO[0]], matDataO[idxO[1]], matDataO[idxO[2]],
+                    matDataO[idxO[3]], matDataO[idxO[4]], matDataO[idxO[5]], matDataO[idxO[6]]);
+    }
 } // namespace GDL::simd
 
 
@@ -8627,6 +8635,96 @@ inline void Transpose6x6(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 
         out3 = BlendInRange<_firstRowOut, _firstRowOut + 5>(out3, tmp3);
         out4 = BlendInRange<_firstRowOut, _firstRowOut + 5>(out4, tmp4);
         out5 = BlendInRange<_firstRowOut, _firstRowOut + 5>(out5, tmp5);
+    }
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+// 7x7
+// --------------------------------------------------------------------------------------------------------------------
+
+template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unusedSetZero>
+inline void Transpose7x7(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 in4, __m256 in5, __m256 in6,
+                         __m256& out0, __m256& out1, __m256& out2, __m256& out3, __m256& out4, __m256& out5,
+                         __m256& out6)
+{
+    __m256 tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6;
+
+    __m256 tmp7, tmp8, tmp9, tmp10, tmp11, tmp12, tmp13, tmp14;
+
+    if constexpr (_firstRowOut == 0)
+    {
+        tmp7 = Permute2F128<0, 0, 1, 0>(in0, in4);
+        tmp8 = Permute2F128<0, 0, 1, 0>(in1, in5);
+        tmp9 = Permute2F128<0, 0, 1, 0>(in2, in6);
+        tmp10 = in3;
+
+        tmp11 = Permute2F128<0, 1, 1, 1>(in0, in4);
+        tmp12 = Permute2F128<0, 1, 1, 1>(in1, in5);
+        tmp13 = Permute2F128<0, 1, 1, 1>(in2, in6);
+        tmp14 = Permute2F128<1, 0>(in3);
+    }
+    else
+    {
+        tmp7 = Permute2F128<1, 0>(in3);
+        tmp8 = Permute2F128<0, 0, 1, 0>(in0, in4);
+        tmp9 = Permute2F128<0, 0, 1, 0>(in1, in5);
+        tmp10 = Permute2F128<0, 0, 1, 0>(in2, in6);
+
+        tmp11 = in3;
+        tmp12 = Permute2F128<0, 1, 1, 1>(in0, in4);
+        tmp13 = Permute2F128<0, 1, 1, 1>(in1, in5);
+        tmp14 = Permute2F128<0, 1, 1, 1>(in2, in6);
+    }
+
+    if constexpr (_firstRowIn == 0)
+    {
+        Transpose4x4<0, 0>(tmp7, tmp8, tmp9, tmp10, tmp0, tmp1, tmp2, tmp3);
+        Transpose3x4<0, 0>(tmp11, tmp12, tmp13, tmp14, tmp4, tmp5, tmp6);
+    }
+    else
+    {
+        Transpose3x4<1, 0>(tmp7, tmp8, tmp9, tmp10, tmp0, tmp1, tmp2);
+        Transpose4x4<0, 0>(tmp11, tmp12, tmp13, tmp14, tmp3, tmp4, tmp5, tmp6);
+    }
+
+
+
+    // Write to output registers
+    if constexpr (_overwriteUnused)
+    {
+        if constexpr (_unusedSetZero)
+        {
+            const __m256 zero = _mm_setzero<__m256>();
+            out0 = BlendInRange<_firstRowOut, _firstRowOut + 6>(zero, tmp0);
+            out1 = BlendInRange<_firstRowOut, _firstRowOut + 6>(zero, tmp1);
+            out2 = BlendInRange<_firstRowOut, _firstRowOut + 6>(zero, tmp2);
+            out3 = BlendInRange<_firstRowOut, _firstRowOut + 6>(zero, tmp3);
+            out4 = BlendInRange<_firstRowOut, _firstRowOut + 6>(zero, tmp4);
+            out5 = BlendInRange<_firstRowOut, _firstRowOut + 6>(zero, tmp5);
+            out6 = BlendInRange<_firstRowOut, _firstRowOut + 6>(zero, tmp6);
+        }
+        else
+        {
+            out0 = tmp0;
+            out1 = tmp1;
+            out2 = tmp2;
+            out3 = tmp3;
+            out4 = tmp4;
+            out5 = tmp5;
+            out6 = tmp6;
+        }
+    }
+    else
+    {
+        out0 = BlendInRange<_firstRowOut, _firstRowOut + 6>(out0, tmp0);
+        out1 = BlendInRange<_firstRowOut, _firstRowOut + 6>(out1, tmp1);
+        out2 = BlendInRange<_firstRowOut, _firstRowOut + 6>(out2, tmp2);
+        out3 = BlendInRange<_firstRowOut, _firstRowOut + 6>(out3, tmp3);
+        out4 = BlendInRange<_firstRowOut, _firstRowOut + 6>(out4, tmp4);
+        out5 = BlendInRange<_firstRowOut, _firstRowOut + 6>(out5, tmp5);
+        out6 = BlendInRange<_firstRowOut, _firstRowOut + 6>(out6, tmp6);
     }
 }
 
