@@ -389,6 +389,21 @@ inline void Transpose1x5(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 
 template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
 inline void Transpose1x6(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 in4, __m256 in5, __m256& out0);
 
+
+
+// 1x7 ----------------------------------------------------------------------------------------------------------------
+
+//! @brief Transposes a 1x7 matrix
+//! @tparam _firstRowIn: Index of the matrix's first row in each register
+//! @tparam _firstRowOut: Index of the output matrix's first row in each register
+//! @tparam _overwriteUnused: Option that specifies if unused values in the output registers can/should be overwritten
+//! @tparam _unusedSetZero: Option that specifies if unused values in the output registers are set to zero
+//! @param in: Input registers
+//! @param out: Output registers
+template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
+inline void Transpose1x7(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 in4, __m256 in5, __m256 in6,
+                         __m256& out0);
+
 #endif //__AVX2__
 
 
@@ -604,8 +619,6 @@ inline void Transpose2x6(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 
 template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
 inline void Transpose2x7(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 in4, __m256 in5, __m256 in6,
                          __m256& out0, __m256& out1);
-
-
 
 #endif // __AVX2__
 
