@@ -330,6 +330,15 @@ inline void Transpose(const std::array<_registerType, _arrSizeIn>& matDataI,
                     matDataI[idxI[5]], matDataI[idxI[6]], matDataO[idxO[0]], matDataO[idxO[1]], matDataO[idxO[2]],
                     matDataO[idxO[3]], matDataO[idxO[4]], matDataO[idxO[5]], matDataO[idxO[6]]);
     }
+    else if constexpr (_rows == 8)
+    {
+        if constexpr (_cols == 8)
+            Transpose8x8<_firstRowIn, _firstRowOut, _overwriteUnused, _unusedSetZero>(
+                    matDataI[idxI[0]], matDataI[idxI[1]], matDataI[idxI[2]], matDataI[idxI[3]], matDataI[idxI[4]],
+                    matDataI[idxI[5]], matDataI[idxI[6]], matDataI[idxI[7]], matDataO[idxO[0]], matDataO[idxO[1]],
+                    matDataO[idxO[2]], matDataO[idxO[3]], matDataO[idxO[4]], matDataO[idxO[5]], matDataO[idxO[6]],
+                    matDataO[idxO[7]]);
+    }
 } // namespace GDL::simd
 
 
@@ -10016,11 +10025,12 @@ inline void Transpose7x7(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 
 // 8x8
 // --------------------------------------------------------------------------------------------------------------------
 
+template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unusedSetZero>
 inline void Transpose8x8(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 in4, __m256 in5, __m256 in6, __m256 in7,
                          __m256& out0, __m256& out1, __m256& out2, __m256& out3, __m256& out4, __m256& out5,
                          __m256& out6, __m256& out7)
 {
-    alignas(alignmentBytes<__m256>) __m256 tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7, tmpBlend;
+    __m256 tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7;
 
     out0 = _mm256_unpacklo_ps(in0, in1);
     out1 = _mm256_unpackhi_ps(in0, in1);
@@ -10031,28 +10041,22 @@ inline void Transpose8x8(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 
     out6 = _mm256_unpacklo_ps(in6, in7);
     out7 = _mm256_unpackhi_ps(in6, in7);
 
-    //    tmp0 = Shuffle<0, 1, 0, 1>(out0, out2);
-    //    tmp1 = Shuffle<2, 3, 2, 3>(out0, out2);
-    //    tmp2 = Shuffle<0, 1, 0, 1>(out1, out3);
-    //    tmp3 = Shuffle<2, 3, 2, 3>(out1, out3);
-    //    tmp4 = Shuffle<0, 1, 0, 1>(out4, out6);
-    //    tmp5 = Shuffle<2, 3, 2, 3>(out4, out6);
-    //    tmp6 = Shuffle<0, 1, 0, 1>(out5, out7);
-    //    tmp7 = Shuffle<2, 3, 2, 3>(out5, out7);
+    // Faster than pure shuffle (Around 6-8%) due to instruction parallelism of Blend.
+    // source: https://stackoverflow.com/questions/25622745/transpose-an-8x8-float-using-avx-avx2
 
-    // Faster than pure shuffle (Around 6-8%). Have a look at the link in the function description
-    tmpBlend = Shuffle<2, 3, 0, 1>(out0, out2);
-    tmp0 = Blend<0, 0, 1, 1, 0, 0, 1, 1>(out0, tmpBlend);
-    tmp1 = Blend<1, 1, 0, 0, 1, 1, 0, 0>(out2, tmpBlend);
-    tmpBlend = Shuffle<2, 3, 0, 1>(out1, out3);
-    tmp2 = Blend<0, 0, 1, 1, 0, 0, 1, 1>(out1, tmpBlend);
-    tmp3 = Blend<1, 1, 0, 0, 1, 1, 0, 0>(out3, tmpBlend);
-    tmpBlend = Shuffle<2, 3, 0, 1>(out4, out6);
-    tmp4 = Blend<0, 0, 1, 1, 0, 0, 1, 1>(out4, tmpBlend);
-    tmp5 = Blend<1, 1, 0, 0, 1, 1, 0, 0>(out6, tmpBlend);
-    tmpBlend = Shuffle<2, 3, 0, 1>(out5, out7);
-    tmp6 = Blend<0, 0, 1, 1, 0, 0, 1, 1>(out5, tmpBlend);
-    tmp7 = Blend<1, 1, 0, 0, 1, 1, 0, 0>(out7, tmpBlend);
+    __m256 tmpBlend0 = Shuffle<2, 3, 0, 1>(out0, out2);
+    __m256 tmpBlend1 = Shuffle<2, 3, 0, 1>(out1, out3);
+    __m256 tmpBlend2 = Shuffle<2, 3, 0, 1>(out4, out6);
+    __m256 tmpBlend3 = Shuffle<2, 3, 0, 1>(out5, out7);
+
+    tmp0 = Blend<0, 0, 1, 1, 0, 0, 1, 1>(out0, tmpBlend0);
+    tmp1 = Blend<1, 1, 0, 0, 1, 1, 0, 0>(out2, tmpBlend0);
+    tmp2 = Blend<0, 0, 1, 1, 0, 0, 1, 1>(out1, tmpBlend1);
+    tmp3 = Blend<1, 1, 0, 0, 1, 1, 0, 0>(out3, tmpBlend1);
+    tmp4 = Blend<0, 0, 1, 1, 0, 0, 1, 1>(out4, tmpBlend2);
+    tmp5 = Blend<1, 1, 0, 0, 1, 1, 0, 0>(out6, tmpBlend2);
+    tmp6 = Blend<0, 0, 1, 1, 0, 0, 1, 1>(out5, tmpBlend3);
+    tmp7 = Blend<1, 1, 0, 0, 1, 1, 0, 0>(out7, tmpBlend3);
 
     out0 = Permute2F128<0, 0, 1, 0>(tmp0, tmp4);
     out1 = Permute2F128<0, 0, 1, 0>(tmp1, tmp5);
