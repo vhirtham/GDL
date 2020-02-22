@@ -228,7 +228,6 @@ void TestTranspose()
 }
 
 
-
 // Transpose 1x1 ------------------------------------------------------------------------------------------------------
 
 BOOST_AUTO_TEST_CASE(Transpose1x1_128d)
@@ -858,6 +857,15 @@ BOOST_AUTO_TEST_CASE(Transpose5x6_256)
 BOOST_AUTO_TEST_CASE(Transpose5x7_256)
 {
     TestTranspose<__m256, 5, 7>();
+}
+
+
+
+// Transpose 5x8 ------------------------------------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(Transpose5x8_256)
+{
+    TestTranspose<__m256, 5, 8>();
 }
 
 

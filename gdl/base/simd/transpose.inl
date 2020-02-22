@@ -258,6 +258,11 @@ inline void Transpose(const std::array<_registerType, _arrSizeIn>& matDataI,
                     matDataI[idxI[0]], matDataI[idxI[1]], matDataI[idxI[2]], matDataI[idxI[3]], matDataI[idxI[4]],
                     matDataI[idxI[5]], matDataI[idxI[6]], matDataO[idxO[0]], matDataO[idxO[1]], matDataO[idxO[2]],
                     matDataO[idxO[3]], matDataO[idxO[4]]);
+        else if constexpr (_cols == 8)
+            Transpose5x8<_firstRowIn, _firstRowOut, _overwriteUnused, _unusedSetZero>(
+                    matDataI[idxI[0]], matDataI[idxI[1]], matDataI[idxI[2]], matDataI[idxI[3]], matDataI[idxI[4]],
+                    matDataI[idxI[5]], matDataI[idxI[6]], matDataI[idxI[7]], matDataO[idxO[0]], matDataO[idxO[1]],
+                    matDataO[idxO[2]], matDataO[idxO[3]], matDataO[idxO[4]]);
     }
     else if constexpr (_rows == 6)
     {
@@ -8482,6 +8487,69 @@ inline void Transpose5x7(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 
 
 
 // --------------------------------------------------------------------------------------------------------------------
+// 5x8
+// --------------------------------------------------------------------------------------------------------------------
+
+template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unusedSetZero>
+inline void Transpose5x8(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 in4, __m256 in5, __m256 in6, __m256 in7,
+                         __m256& out0, __m256& out1, __m256& out2, __m256& out3, __m256& out4)
+{
+    __m256 tmp0, tmp1, tmp2, tmp3, tmp4;
+
+    __m256 tmp6, tmp7, tmp8, tmp9, tmp10, tmp11, tmp12, tmp13;
+
+
+    Transpose4x4<0, 0>(in0, in1, in2, in3, tmp6, tmp7, tmp8, tmp9);
+    Transpose4x4<0, 0>(in4, in5, in6, in7, tmp10, tmp11, tmp12, tmp13);
+
+
+
+    if constexpr (_firstRowIn == 0)
+    {
+        tmp0 = Permute2F128<0, 0, 1, 0>(tmp6, tmp10);
+        tmp1 = Permute2F128<0, 0, 1, 0>(tmp7, tmp11);
+        tmp2 = Permute2F128<0, 0, 1, 0>(tmp8, tmp12);
+        tmp3 = Permute2F128<0, 0, 1, 0>(tmp9, tmp13);
+        tmp4 = Permute2F128<0, 1, 1, 1>(tmp6, tmp10);
+    }
+    else if constexpr (_firstRowIn == 1)
+    {
+        tmp0 = Permute2F128<0, 0, 1, 0>(tmp7, tmp11);
+        tmp1 = Permute2F128<0, 0, 1, 0>(tmp8, tmp12);
+        tmp2 = Permute2F128<0, 0, 1, 0>(tmp9, tmp13);
+        tmp3 = Permute2F128<0, 1, 1, 1>(tmp6, tmp10);
+        tmp4 = Permute2F128<0, 1, 1, 1>(tmp7, tmp11);
+    }
+    else if constexpr (_firstRowIn == 2)
+    {
+        tmp0 = Permute2F128<0, 0, 1, 0>(tmp8, tmp12);
+        tmp1 = Permute2F128<0, 0, 1, 0>(tmp9, tmp13);
+        tmp2 = Permute2F128<0, 1, 1, 1>(tmp6, tmp10);
+        tmp3 = Permute2F128<0, 1, 1, 1>(tmp7, tmp11);
+        tmp4 = Permute2F128<0, 1, 1, 1>(tmp8, tmp12);
+    }
+    else
+    {
+        tmp0 = Permute2F128<0, 0, 1, 0>(tmp9, tmp13);
+        tmp1 = Permute2F128<0, 1, 1, 1>(tmp6, tmp10);
+        tmp2 = Permute2F128<0, 1, 1, 1>(tmp7, tmp11);
+        tmp3 = Permute2F128<0, 1, 1, 1>(tmp8, tmp12);
+        tmp4 = Permute2F128<0, 1, 1, 1>(tmp9, tmp13);
+    }
+
+
+
+    // Write to output registers
+    out0 = tmp0;
+    out1 = tmp1;
+    out2 = tmp2;
+    out3 = tmp3;
+    out4 = tmp4;
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
 // 6x1
 // --------------------------------------------------------------------------------------------------------------------
 
@@ -10886,7 +10954,7 @@ inline void Transpose8x8(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 
     out6 = _mm256_unpacklo_ps(in6, in7);
     out7 = _mm256_unpackhi_ps(in6, in7);
 
-    // Faster than pure shuffle (Around 6-8%) due to instruction parallelism of Blend.
+    // Faster than pure shuffle (around 6-8%) due to instruction parallelism of Blend.
     // source: https://stackoverflow.com/questions/25622745/transpose-an-8x8-float-using-avx-avx2
 
     __m256 tmpBlend0 = Shuffle<2, 3, 0, 1>(out0, out2);
