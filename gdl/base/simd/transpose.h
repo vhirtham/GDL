@@ -1332,6 +1332,22 @@ inline void Transpose7x7(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 
 
 
 
+// 7x8 ----------------------------------------------------------------------------------------------------------------
+
+//! @brief Transposes a 7x8 matrix
+//! @tparam _firstRowIn: Index of the matrix's first row in each register
+//! @tparam _firstRowOut: Index of the output matrix's first row in each register
+//! @tparam _overwriteUnused: Option that specifies if unused values in the output registers can/should be overwritten
+//! @tparam _unusedSetZero: Option that specifies if unused values in the output registers are set to zero
+//! @param in: Input registers
+//! @param out: Output registers
+template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
+inline void Transpose7x8(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 in4, __m256 in5, __m256 in6, __m256 in7,
+                         __m256& out0, __m256& out1, __m256& out2, __m256& out3, __m256& out4, __m256& out5,
+                         __m256& out6);
+
+
+
 // 8x1 ----------------------------------------------------------------------------------------------------------------
 
 //! @brief Transposes a 8x1 matrix

@@ -329,6 +329,11 @@ inline void Transpose(const std::array<_registerType, _arrSizeIn>& matDataI,
                     matDataI[idxI[0]], matDataI[idxI[1]], matDataI[idxI[2]], matDataI[idxI[3]], matDataI[idxI[4]],
                     matDataI[idxI[5]], matDataI[idxI[6]], matDataO[idxO[0]], matDataO[idxO[1]], matDataO[idxO[2]],
                     matDataO[idxO[3]], matDataO[idxO[4]], matDataO[idxO[5]], matDataO[idxO[6]]);
+        else if constexpr (_cols == 8)
+            Transpose7x8<_firstRowIn, _firstRowOut, _overwriteUnused, _unusedSetZero>(
+                    matDataI[idxI[0]], matDataI[idxI[1]], matDataI[idxI[2]], matDataI[idxI[3]], matDataI[idxI[4]],
+                    matDataI[idxI[5]], matDataI[idxI[6]], matDataI[idxI[7]], matDataO[idxO[0]], matDataO[idxO[1]],
+                    matDataO[idxO[2]], matDataO[idxO[3]], matDataO[idxO[4]], matDataO[idxO[5]], matDataO[idxO[6]]);
     }
     else if constexpr (_rows == 8)
     {
@@ -10050,6 +10055,56 @@ inline void Transpose7x7(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 
         out5 = BlendInRange<_firstRowOut, _firstRowOut + 6>(out5, tmp5);
         out6 = BlendInRange<_firstRowOut, _firstRowOut + 6>(out6, tmp6);
     }
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+// 7x8
+// --------------------------------------------------------------------------------------------------------------------
+
+template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unusedSetZero>
+inline void Transpose7x8(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 in4, __m256 in5, __m256 in6, __m256 in7,
+                         __m256& out0, __m256& out1, __m256& out2, __m256& out3, __m256& out4, __m256& out5,
+                         __m256& out6)
+{
+    __m256 tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6;
+
+    __m256 tmp7, tmp8, tmp9, tmp10, tmp11, tmp12, tmp13, tmp14;
+
+    if constexpr (_firstRowOut == 0)
+    {
+        tmp7 = Permute2F128<0, 0, 1, 0>(in0, in4);
+        tmp8 = Permute2F128<0, 0, 1, 0>(in1, in5);
+        tmp9 = Permute2F128<0, 0, 1, 0>(in2, in6);
+        tmp10 = Permute2F128<0, 0, 1, 0>(in3, in7);
+
+        tmp11 = Permute2F128<0, 1, 1, 1>(in0, in4);
+        tmp12 = Permute2F128<0, 1, 1, 1>(in1, in5);
+        tmp13 = Permute2F128<0, 1, 1, 1>(in2, in6);
+        tmp14 = Permute2F128<0, 1, 1, 1>(in3, in7);
+    }
+
+
+    if constexpr (_firstRowIn == 0)
+    {
+        Transpose4x4<0, 0>(tmp7, tmp8, tmp9, tmp10, tmp0, tmp1, tmp2, tmp3);
+        Transpose3x4<0, 0>(tmp11, tmp12, tmp13, tmp14, tmp4, tmp5, tmp6);
+    }
+    else
+    {
+        Transpose3x4<1, 0>(tmp7, tmp8, tmp9, tmp10, tmp0, tmp1, tmp2);
+        Transpose4x4<0, 0>(tmp11, tmp12, tmp13, tmp14, tmp3, tmp4, tmp5, tmp6);
+    }
+
+    // Write to output registers
+    out0 = tmp0;
+    out1 = tmp1;
+    out2 = tmp2;
+    out3 = tmp3;
+    out4 = tmp4;
+    out5 = tmp5;
+    out6 = tmp6;
 }
 
 
