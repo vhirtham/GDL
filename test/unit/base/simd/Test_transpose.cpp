@@ -374,6 +374,15 @@ BOOST_AUTO_TEST_CASE(Transpose1x7_256)
     TestTranspose<__m256, 1, 7>();
 }
 
+
+
+// Transpose 1x8 ------------------------------------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(Transpose1x8_256)
+{
+    TestTranspose<__m256, 1, 8>();
+}
+
 #endif //__AVX2__
 
 

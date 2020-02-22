@@ -137,6 +137,10 @@ inline void Transpose(const std::array<_registerType, _arrSizeIn>& matDataI,
             Transpose1x7<_firstRowIn, _firstRowOut, _overwriteUnused, _unusedSetZero>(
                     matDataI[idxI[0]], matDataI[idxI[1]], matDataI[idxI[2]], matDataI[idxI[3]], matDataI[idxI[4]],
                     matDataI[idxI[5]], matDataI[idxI[6]], matDataO[idxO[0]]);
+        else if constexpr (_cols == 8)
+            Transpose1x8<_firstRowIn, _firstRowOut, _overwriteUnused, _unusedSetZero>(
+                    matDataI[idxI[0]], matDataI[idxI[1]], matDataI[idxI[2]], matDataI[idxI[3]], matDataI[idxI[4]],
+                    matDataI[idxI[5]], matDataI[idxI[6]], matDataI[idxI[7]], matDataO[idxO[0]]);
     }
     else if constexpr (_rows == 2)
     {
@@ -1584,6 +1588,38 @@ inline void Transpose1x7(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 
             out0 = tmp0;
     else
         out0 = BlendInRange<_firstRowOut, _firstRowOut + 6>(out0, tmp0);
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+// 1x8
+// --------------------------------------------------------------------------------------------------------------------
+
+
+template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unusedSetZero>
+inline void Transpose1x8(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 in4, __m256 in5, __m256 in6, __m256 in7,
+                         __m256& out0)
+{
+
+    constexpr U32 numLaneVals = numValuesPerLane<__m256>;
+    constexpr U32 laneIn = _firstRowIn / numLaneVals;
+    constexpr U32 laneOffsetIn = _firstRowIn % numLaneVals;
+
+
+    __m256 tmp0;
+
+    __m256 tmp1, tmp2;
+
+    Transpose1x4<laneOffsetIn, 0>(in0, in1, in2, in3, tmp1);
+    Transpose1x4<laneOffsetIn, 0>(in4, in5, in6, in7, tmp2);
+
+
+    tmp0 = Permute2F128<0, laneIn, 1, laneIn>(tmp1, tmp2);
+
+
+    // Write to output registers
+    out0 = tmp0;
 }
 
 #endif //__AVX2__
