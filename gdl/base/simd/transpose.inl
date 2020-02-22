@@ -165,6 +165,10 @@ inline void Transpose(const std::array<_registerType, _arrSizeIn>& matDataI,
             Transpose2x7<_firstRowIn, _firstRowOut, _overwriteUnused, _unusedSetZero>(
                     matDataI[idxI[0]], matDataI[idxI[1]], matDataI[idxI[2]], matDataI[idxI[3]], matDataI[idxI[4]],
                     matDataI[idxI[5]], matDataI[idxI[6]], matDataO[idxO[0]], matDataO[idxO[1]]);
+        else if constexpr (_cols == 8)
+            Transpose2x8<_firstRowIn, _firstRowOut, _overwriteUnused, _unusedSetZero>(
+                    matDataI[idxI[0]], matDataI[idxI[1]], matDataI[idxI[2]], matDataI[idxI[3]], matDataI[idxI[4]],
+                    matDataI[idxI[5]], matDataI[idxI[6]], matDataI[idxI[7]], matDataO[idxO[0]], matDataO[idxO[1]]);
     }
     else if constexpr (_rows == 3)
     {
@@ -3639,6 +3643,60 @@ inline void Transpose2x7(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 
         out0 = BlendInRange<_firstRowOut, _firstRowOut + 6>(out0, tmp0);
         out1 = BlendInRange<_firstRowOut, _firstRowOut + 6>(out1, tmp1);
     }
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+// 2x8
+// --------------------------------------------------------------------------------------------------------------------
+
+template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unusedSetZero>
+inline void Transpose2x8(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 in4, __m256 in5, __m256 in6, __m256 in7,
+                         __m256& out0, __m256& out1)
+{
+    constexpr U32 numLaneVals = numValuesPerLane<__m256>;
+    constexpr U32 laneIn = _firstRowIn / numLaneVals;
+    constexpr U32 laneOffsetIn = _firstRowIn % numLaneVals;
+
+    __m256 tmp0, tmp1;
+
+    if constexpr (laneOffsetIn < 3)
+    {
+        __m256 tmp4, tmp5, tmp6, tmp7;
+        if constexpr (laneIn == 0)
+        {
+
+            tmp4 = Permute2F128<0, 0, 1, 0>(in0, in4);
+            tmp5 = Permute2F128<0, 0, 1, 0>(in1, in5);
+            tmp6 = Permute2F128<0, 0, 1, 0>(in2, in6);
+            tmp7 = Permute2F128<0, 0, 1, 0>(in3, in7);
+        }
+        else
+        {
+
+            tmp4 = Permute2F128<0, 1, 1, 1>(in0, in4);
+            tmp5 = Permute2F128<0, 1, 1, 1>(in1, in5);
+            tmp6 = Permute2F128<0, 1, 1, 1>(in2, in6);
+            tmp7 = Permute2F128<0, 1, 1, 1>(in3, in7);
+        }
+        Transpose2x4<laneOffsetIn, 0>(tmp4, tmp5, tmp6, tmp7, tmp0, tmp1);
+    }
+    else
+    {
+        __m256 tmp6, tmp7, tmp8, tmp9, tmp10, tmp11, tmp12, tmp13;
+
+        Transpose4x4<0, 0>(in0, in1, in2, in3, tmp6, tmp7, tmp8, tmp9);
+        Transpose4x4<0, 0>(in4, in5, in6, in7, tmp10, tmp11, tmp12, tmp13);
+
+        tmp0 = Permute2F128<0, 0, 1, 0>(tmp9, tmp13);
+        tmp1 = Permute2F128<0, 1, 1, 1>(tmp6, tmp10);
+    }
+
+
+    // Write to output registers
+    out0 = tmp0;
+    out1 = tmp1;
 }
 
 #endif // __AVX2__
