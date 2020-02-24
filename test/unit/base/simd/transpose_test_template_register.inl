@@ -15,9 +15,10 @@ using namespace GDL::simd;
 
 namespace GDL::simd
 {
-template <U32, U32, bool, bool, typename _registerType>
-void Transpose1x1(_registerType, _registerType&);
 
+
+template <U32, U32, bool, bool>
+void Transpose1x1(__m128d, __m128d&);
 template <U32, U32, bool, bool>
 void Transpose1x2(__m128d, __m128d, __m128d&);
 template <U32, U32, bool, bool>
@@ -25,6 +26,8 @@ void Transpose2x1(__m128d, __m128d&, __m128d&);
 template <U32, U32, bool, bool>
 void Transpose2x2(__m128d, __m128d, __m128d&, __m128d&);
 
+template <U32, U32, bool, bool>
+void Transpose1x1(__m128, __m128&);
 template <U32, U32, bool, bool>
 void Transpose1x2(__m128, __m128, __m128&);
 template <U32, U32, bool, bool>
@@ -59,6 +62,8 @@ void Transpose4x4(__m128, __m128, __m128, __m128, __m128&, __m128&, __m128&, __m
 #ifdef __AVX2__
 
 template <U32, U32, bool, bool>
+void Transpose1x1(__m256d, __m256d&);
+template <U32, U32, bool, bool>
 void Transpose1x2(__m256d, __m256d, __m256d&);
 template <U32, U32, bool, bool>
 void Transpose1x3(__m256d, __m256d, __m256d, __m256d&);
@@ -90,6 +95,8 @@ template <U32, U32, bool, bool>
 void Transpose4x4(__m256d, __m256d, __m256d, __m256d, __m256d&, __m256d&, __m256d&, __m256d&);
 
 
+template <U32, U32, bool, bool>
+void Transpose1x1(__m256, __m256&);
 template <U32, U32, bool, bool>
 void Transpose1x2(__m256, __m256, __m256&);
 template <U32, U32, bool, bool>

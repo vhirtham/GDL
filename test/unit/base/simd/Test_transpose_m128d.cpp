@@ -1,7 +1,7 @@
 #include <boost/test/unit_test.hpp>
 
 
-#include "gdl/base/simd/transpose.h"
+#include "gdl/base/simd/_transpose/transpose_m128d.h"
 #include "test/unit/base/simd/transpose_test_template_register.h"
 
 

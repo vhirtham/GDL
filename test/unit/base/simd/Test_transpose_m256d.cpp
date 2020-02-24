@@ -1,7 +1,7 @@
 #include <boost/test/unit_test.hpp>
 
 
-#include "gdl/base/simd/transpose.h"
+#include "gdl/base/simd/_transpose/transpose_m256d.h"
 #include "test/unit/base/simd/transpose_test_template_register.h"
 
 
@@ -116,56 +116,6 @@ BOOST_AUTO_TEST_CASE(Test_transpose3x3)
 BOOST_AUTO_TEST_CASE(Test_transpose3x4)
 {
     TestTranspose<__m256d, 3, 4>();
-}
-
-
-
-BOOST_AUTO_TEST_CASE(Transpose3x4_256d)
-{
-    TestTranspose<__m256d, 3, 4>();
-}
-
-
-
-BOOST_AUTO_TEST_CASE(Transpose3x4_256)
-{
-    TestTranspose<__m256, 3, 4>();
-}
-
-
-
-// Transpose 3x5 ------------------------------------------------------------------------------------------------------
-
-BOOST_AUTO_TEST_CASE(Transpose3x5_256)
-{
-    TestTranspose<__m256, 3, 5>();
-}
-
-
-
-// Transpose 3x6 ------------------------------------------------------------------------------------------------------
-
-BOOST_AUTO_TEST_CASE(Transpose3x6_256)
-{
-    TestTranspose<__m256, 3, 6>();
-}
-
-
-
-// Transpose 3x7 ------------------------------------------------------------------------------------------------------
-
-BOOST_AUTO_TEST_CASE(Transpose3x7_256)
-{
-    TestTranspose<__m256, 3, 7>();
-}
-
-
-
-// Transpose 3x8 ------------------------------------------------------------------------------------------------------
-
-BOOST_AUTO_TEST_CASE(Transpose3x8_256)
-{
-    TestTranspose<__m256, 3, 8>();
 }
 
 

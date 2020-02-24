@@ -1,7 +1,7 @@
 #include <boost/test/unit_test.hpp>
 
 
-#include "gdl/base/simd/transpose.h"
+#include "gdl/base/simd/_transpose/transpose_m128.h"
 #include "test/unit/base/simd/transpose_test_template_register.h"
 
 
@@ -16,8 +16,6 @@ BOOST_AUTO_TEST_CASE(Test_transpose1x1)
 
 
 // Transpose 1x2 ------------------------------------------------------------------------------------------------------
-
-
 
 BOOST_AUTO_TEST_CASE(Test_transpose1x2)
 {
@@ -45,8 +43,6 @@ BOOST_AUTO_TEST_CASE(Test_transpose1x4)
 
 
 // Transpose 2x1 ------------------------------------------------------------------------------------------------------
-
-
 
 BOOST_AUTO_TEST_CASE(Test_transpose2x1)
 {
