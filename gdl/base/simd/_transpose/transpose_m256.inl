@@ -4,6 +4,7 @@
 
 #include "gdl/base/simd/swizzle.h"
 #include "gdl/base/simd/intrinsics.h"
+#include "gdl/base/simd/_transpose/transpose_utility.h"
 
 
 #ifdef __AVX2__
@@ -103,13 +104,7 @@ inline void Transpose1x1(__m256 in, __m256& out)
 
 
     // Write to output registers
-    if constexpr (_overwriteUnused)
-        if constexpr (_unusedSetZero)
-            out = BlendIndex<_firstRowOut>(_mm_setzero<__m256>(), tmp);
-        else
-            out = tmp;
-    else
-        out = BlendIndex<_firstRowOut>(out, tmp);
+    TransposeSetOutput<_firstRowOut, 1, _overwriteUnused, _unusedSetZero>(out, tmp);
 }
 
 
@@ -206,15 +201,7 @@ inline void Transpose1x2(__m256 in0, __m256 in1, __m256& out0)
 
 
     // Write to output registers
-    if constexpr (_overwriteUnused)
-    {
-        if constexpr (_unusedSetZero)
-            out0 = BlendInRange<_firstRowOut, _firstRowOut + 1>(_mm_setzero<__m256>(), tmp0);
-        else
-            out0 = tmp0;
-    }
-    else
-        out0 = BlendInRange<_firstRowOut, _firstRowOut + 1>(out0, tmp0);
+    TransposeSetOutput<_firstRowOut, 2, _overwriteUnused, _unusedSetZero>(out0, tmp0);
 }
 
 
@@ -376,13 +363,7 @@ inline void Transpose1x3(__m256 in0, __m256 in1, __m256 in2, __m256& out0)
 
 
     // Write to output registers
-    if constexpr (_overwriteUnused)
-        if constexpr (_unusedSetZero)
-            out0 = BlendInRange<_firstRowOut, _firstRowOut + 2>(_mm_setzero<__m256>(), tmp0);
-        else
-            out0 = tmp0;
-    else
-        out0 = BlendInRange<_firstRowOut, _firstRowOut + 2>(out0, tmp0);
+    TransposeSetOutput<_firstRowOut, 3, _overwriteUnused, _unusedSetZero>(out0, tmp0);
 }
 
 
@@ -511,13 +492,7 @@ inline void Transpose1x4(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256&
         tmp0 = Permute2F128<laneIn, laneIn>(tmp0);
 
     // Write to output registers
-    if constexpr (_overwriteUnused)
-        if constexpr (_unusedSetZero)
-            out0 = BlendInRange<_firstRowOut, _firstRowOut + 3>(_mm_setzero<__m256>(), tmp0);
-        else
-            out0 = tmp0;
-    else
-        out0 = BlendInRange<_firstRowOut, _firstRowOut + 3>(out0, tmp0);
+    TransposeSetOutput<_firstRowOut, 4, _overwriteUnused, _unusedSetZero>(out0, tmp0);
 }
 
 
@@ -562,13 +537,7 @@ inline void Transpose1x5(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 
 
 
     // Write to output registers
-    if constexpr (_overwriteUnused)
-        if constexpr (_unusedSetZero)
-            out0 = BlendInRange<_firstRowOut, _firstRowOut + 4>(_mm_setzero<__m256>(), tmp0);
-        else
-            out0 = tmp0;
-    else
-        out0 = BlendInRange<_firstRowOut, _firstRowOut + 4>(out0, tmp0);
+    TransposeSetOutput<_firstRowOut, 5, _overwriteUnused, _unusedSetZero>(out0, tmp0);
 }
 
 
@@ -607,13 +576,7 @@ inline void Transpose1x6(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 
 
 
     // Write to output registers
-    if constexpr (_overwriteUnused)
-        if constexpr (_unusedSetZero)
-            out0 = BlendInRange<_firstRowOut, _firstRowOut + 5>(_mm_setzero<__m256>(), tmp0);
-        else
-            out0 = tmp0;
-    else
-        out0 = BlendInRange<_firstRowOut, _firstRowOut + 5>(out0, tmp0);
+    TransposeSetOutput<_firstRowOut, 6, _overwriteUnused, _unusedSetZero>(out0, tmp0);
 }
 
 
@@ -649,13 +612,7 @@ inline void Transpose1x7(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 
 
 
     // Write to output registers
-    if constexpr (_overwriteUnused)
-        if constexpr (_unusedSetZero)
-            out0 = BlendInRange<_firstRowOut, _firstRowOut + 6>(_mm_setzero<__m256>(), tmp0);
-        else
-            out0 = tmp0;
-    else
-        out0 = BlendInRange<_firstRowOut, _firstRowOut + 6>(out0, tmp0);
+    TransposeSetOutput<_firstRowOut, 7, _overwriteUnused, _unusedSetZero>(out0, tmp0);
 }
 
 
@@ -838,25 +795,7 @@ inline void Transpose2x1(__m256 in0, __m256& out0, __m256& out1)
 
 
     // Write to output registers
-    if constexpr (_overwriteUnused)
-    {
-        if constexpr (_unusedSetZero)
-        {
-            const __m256 zero = _mm_setzero<__m256>();
-            out0 = BlendIndex<_firstRowOut>(zero, tmp0);
-            out1 = BlendIndex<_firstRowOut>(zero, tmp1);
-        }
-        else
-        {
-            out0 = tmp0;
-            out1 = tmp1;
-        }
-    }
-    else
-    {
-        out0 = BlendIndex<_firstRowOut>(out0, tmp0);
-        out1 = BlendIndex<_firstRowOut>(out1, tmp1);
-    }
+    TransposeSetOutput<_firstRowOut, 1, _overwriteUnused, _unusedSetZero>(out0, out1, tmp0, tmp1);
 }
 
 
@@ -1089,25 +1028,7 @@ inline void Transpose2x2(__m256 in0, __m256 in1, __m256& out0, __m256& out1)
 
 
     // Write to output registers
-    if constexpr (_overwriteUnused)
-    {
-        if constexpr (_unusedSetZero)
-        {
-            const __m256 zero = _mm_setzero<__m256>();
-            out0 = BlendInRange<_firstRowOut, _firstRowOut + 1>(zero, tmp0);
-            out1 = BlendInRange<_firstRowOut, _firstRowOut + 1>(zero, tmp1);
-        }
-        else
-        {
-            out0 = tmp0;
-            out1 = tmp1;
-        }
-    }
-    else
-    {
-        out0 = BlendInRange<_firstRowOut, _firstRowOut + 1>(out0, tmp0);
-        out1 = BlendInRange<_firstRowOut, _firstRowOut + 1>(out1, tmp1);
-    }
+    TransposeSetOutput<_firstRowOut, 2, _overwriteUnused, _unusedSetZero>(out0, out1, tmp0, tmp1);
 }
 
 
@@ -1336,25 +1257,7 @@ inline void Transpose2x3(__m256 in0, __m256 in1, __m256 in2, __m256& out0, __m25
 
 
     // Write to output registers
-    if constexpr (_overwriteUnused)
-    {
-        if constexpr (_unusedSetZero)
-        {
-            const __m256 zero = _mm_setzero<__m256>();
-            out0 = BlendInRange<_firstRowOut, _firstRowOut + 2>(zero, tmp0);
-            out1 = BlendInRange<_firstRowOut, _firstRowOut + 2>(zero, tmp1);
-        }
-        else
-        {
-            out0 = tmp0;
-            out1 = tmp1;
-        }
-    }
-    else
-    {
-        out0 = BlendInRange<_firstRowOut, _firstRowOut + 2>(out0, tmp0);
-        out1 = BlendInRange<_firstRowOut, _firstRowOut + 2>(out1, tmp1);
-    }
+    TransposeSetOutput<_firstRowOut, 3, _overwriteUnused, _unusedSetZero>(out0, out1, tmp0, tmp1);
 }
 
 
@@ -1666,25 +1569,7 @@ inline void Transpose2x4(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256&
     }
 
     // Write to output registers
-    if constexpr (_overwriteUnused)
-    {
-        if constexpr (_unusedSetZero)
-        {
-            const __m256 zero = _mm_setzero<__m256>();
-            out0 = BlendInRange<_firstRowOut, _firstRowOut + 3>(zero, tmp0);
-            out1 = BlendInRange<_firstRowOut, _firstRowOut + 3>(zero, tmp1);
-        }
-        else
-        {
-            out0 = tmp0;
-            out1 = tmp1;
-        }
-    }
-    else
-    {
-        out0 = BlendInRange<_firstRowOut, _firstRowOut + 3>(out0, tmp0);
-        out1 = BlendInRange<_firstRowOut, _firstRowOut + 3>(out1, tmp1);
-    }
+    TransposeSetOutput<_firstRowOut, 4, _overwriteUnused, _unusedSetZero>(out0, out1, tmp0, tmp1);
 }
 
 
@@ -1852,25 +1737,7 @@ inline void Transpose2x5(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 
 
 
     // Write to output registers
-    if constexpr (_overwriteUnused)
-    {
-        if constexpr (_unusedSetZero)
-        {
-            const __m256 zero = _mm_setzero<__m256>();
-            out0 = BlendInRange<_firstRowOut, _firstRowOut + 4>(zero, tmp0);
-            out1 = BlendInRange<_firstRowOut, _firstRowOut + 4>(zero, tmp1);
-        }
-        else
-        {
-            out0 = tmp0;
-            out1 = tmp1;
-        }
-    }
-    else
-    {
-        out0 = BlendInRange<_firstRowOut, _firstRowOut + 4>(out0, tmp0);
-        out1 = BlendInRange<_firstRowOut, _firstRowOut + 4>(out1, tmp1);
-    }
+    TransposeSetOutput<_firstRowOut, 5, _overwriteUnused, _unusedSetZero>(out0, out1, tmp0, tmp1);
 }
 
 
@@ -1989,25 +1856,7 @@ inline void Transpose2x6(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 
 
 
     // Write to output registers
-    if constexpr (_overwriteUnused)
-    {
-        if constexpr (_unusedSetZero)
-        {
-            const __m256 zero = _mm_setzero<__m256>();
-            out0 = BlendInRange<_firstRowOut, _firstRowOut + 5>(zero, tmp0);
-            out1 = BlendInRange<_firstRowOut, _firstRowOut + 5>(zero, tmp1);
-        }
-        else
-        {
-            out0 = tmp0;
-            out1 = tmp1;
-        }
-    }
-    else
-    {
-        out0 = BlendInRange<_firstRowOut, _firstRowOut + 5>(out0, tmp0);
-        out1 = BlendInRange<_firstRowOut, _firstRowOut + 5>(out1, tmp1);
-    }
+    TransposeSetOutput<_firstRowOut, 6, _overwriteUnused, _unusedSetZero>(out0, out1, tmp0, tmp1);
 }
 
 
@@ -2085,25 +1934,7 @@ inline void Transpose2x7(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 
 
 
     // Write to output registers
-    if constexpr (_overwriteUnused)
-    {
-        if constexpr (_unusedSetZero)
-        {
-            const __m256 zero = _mm_setzero<__m256>();
-            out0 = BlendInRange<_firstRowOut, _firstRowOut + 6>(zero, tmp0);
-            out1 = BlendInRange<_firstRowOut, _firstRowOut + 6>(zero, tmp1);
-        }
-        else
-        {
-            out0 = tmp0;
-            out1 = tmp1;
-        }
-    }
-    else
-    {
-        out0 = BlendInRange<_firstRowOut, _firstRowOut + 6>(out0, tmp0);
-        out1 = BlendInRange<_firstRowOut, _firstRowOut + 6>(out1, tmp1);
-    }
+    TransposeSetOutput<_firstRowOut, 7, _overwriteUnused, _unusedSetZero>(out0, out1, tmp0, tmp1);
 }
 
 
@@ -2323,28 +2154,7 @@ inline void Transpose3x1(__m256 in0, __m256& out0, __m256& out1, __m256& out2)
 
 
     // Write to output registers
-    if constexpr (_overwriteUnused)
-    {
-        if constexpr (_unusedSetZero)
-        {
-            const __m256 zero = _mm_setzero<__m256>();
-            out0 = BlendIndex<_firstRowOut>(zero, tmp0);
-            out1 = BlendIndex<_firstRowOut>(zero, tmp1);
-            out2 = BlendIndex<_firstRowOut>(zero, tmp2);
-        }
-        else
-        {
-            out0 = tmp0;
-            out1 = tmp1;
-            out2 = tmp2;
-        }
-    }
-    else
-    {
-        out0 = BlendIndex<_firstRowOut>(out0, tmp0);
-        out1 = BlendIndex<_firstRowOut>(out1, tmp1);
-        out2 = BlendIndex<_firstRowOut>(out2, tmp2);
-    }
+    TransposeSetOutput<_firstRowOut, 1, _overwriteUnused, _unusedSetZero>(out0, out1, out2, tmp0, tmp1, tmp2);
 }
 
 
@@ -2602,28 +2412,7 @@ inline void Transpose3x2(__m256 in0, __m256 in1, __m256& out0, __m256& out1, __m
 
 
     // Write to output registers
-    if constexpr (_overwriteUnused)
-    {
-        if constexpr (_unusedSetZero)
-        {
-            const __m256 zero = _mm_setzero<__m256>();
-            out0 = BlendInRange<_firstRowOut, _firstRowOut + 1>(zero, tmp0);
-            out1 = BlendInRange<_firstRowOut, _firstRowOut + 1>(zero, tmp1);
-            out2 = BlendInRange<_firstRowOut, _firstRowOut + 1>(zero, tmp2);
-        }
-        else
-        {
-            out0 = tmp0;
-            out1 = tmp1;
-            out2 = tmp2;
-        }
-    }
-    else
-    {
-        out0 = BlendInRange<_firstRowOut, _firstRowOut + 1>(out0, tmp0);
-        out1 = BlendInRange<_firstRowOut, _firstRowOut + 1>(out1, tmp1);
-        out2 = BlendInRange<_firstRowOut, _firstRowOut + 1>(out2, tmp2);
-    }
+    TransposeSetOutput<_firstRowOut, 2, _overwriteUnused, _unusedSetZero>(out0, out1, out2, tmp0, tmp1, tmp2);
 }
 
 
@@ -2926,28 +2715,7 @@ inline void Transpose3x3(__m256 in0, __m256 in1, __m256 in2, __m256& out0, __m25
 
 
     // Write to output registers
-    if constexpr (_overwriteUnused)
-    {
-        if constexpr (_unusedSetZero)
-        {
-            const __m256 zero = _mm_setzero<__m256>();
-            out0 = BlendInRange<_firstRowOut, _firstRowOut + 2>(zero, tmp0);
-            out1 = BlendInRange<_firstRowOut, _firstRowOut + 2>(zero, tmp1);
-            out2 = BlendInRange<_firstRowOut, _firstRowOut + 2>(zero, tmp2);
-        }
-        else
-        {
-            out0 = tmp0;
-            out1 = tmp1;
-            out2 = tmp2;
-        }
-    }
-    else
-    {
-        out0 = BlendInRange<_firstRowOut, _firstRowOut + 2>(out0, tmp0);
-        out1 = BlendInRange<_firstRowOut, _firstRowOut + 2>(out1, tmp1);
-        out2 = BlendInRange<_firstRowOut, _firstRowOut + 2>(out2, tmp2);
-    }
+    TransposeSetOutput<_firstRowOut, 3, _overwriteUnused, _unusedSetZero>(out0, out1, out2, tmp0, tmp1, tmp2);
 }
 
 
@@ -3251,28 +3019,7 @@ inline void Transpose3x4(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256&
     }
 
     // Write to output registers
-    if constexpr (_overwriteUnused)
-    {
-        if constexpr (_unusedSetZero)
-        {
-            const __m256 zero = _mm_setzero<__m256>();
-            out0 = BlendInRange<_firstRowOut, _firstRowOut + 3>(zero, tmp0);
-            out1 = BlendInRange<_firstRowOut, _firstRowOut + 3>(zero, tmp1);
-            out2 = BlendInRange<_firstRowOut, _firstRowOut + 3>(zero, tmp2);
-        }
-        else
-        {
-            out0 = tmp0;
-            out1 = tmp1;
-            out2 = tmp2;
-        }
-    }
-    else
-    {
-        out0 = BlendInRange<_firstRowOut, _firstRowOut + 3>(out0, tmp0);
-        out1 = BlendInRange<_firstRowOut, _firstRowOut + 3>(out1, tmp1);
-        out2 = BlendInRange<_firstRowOut, _firstRowOut + 3>(out2, tmp2);
-    }
+    TransposeSetOutput<_firstRowOut, 4, _overwriteUnused, _unusedSetZero>(out0, out1, out2, tmp0, tmp1, tmp2);
 }
 
 
@@ -3572,28 +3319,7 @@ inline void Transpose3x5(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 
     }
 
     // Write to output registers
-    if constexpr (_overwriteUnused)
-    {
-        if constexpr (_unusedSetZero)
-        {
-            const __m256 zero = _mm_setzero<__m256>();
-            out0 = BlendInRange<_firstRowOut, _firstRowOut + 4>(zero, tmp0);
-            out1 = BlendInRange<_firstRowOut, _firstRowOut + 4>(zero, tmp1);
-            out2 = BlendInRange<_firstRowOut, _firstRowOut + 4>(zero, tmp2);
-        }
-        else
-        {
-            out0 = tmp0;
-            out1 = tmp1;
-            out2 = tmp2;
-        }
-    }
-    else
-    {
-        out0 = BlendInRange<_firstRowOut, _firstRowOut + 4>(out0, tmp0);
-        out1 = BlendInRange<_firstRowOut, _firstRowOut + 4>(out1, tmp1);
-        out2 = BlendInRange<_firstRowOut, _firstRowOut + 4>(out2, tmp2);
-    }
+    TransposeSetOutput<_firstRowOut, 5, _overwriteUnused, _unusedSetZero>(out0, out1, out2, tmp0, tmp1, tmp2);
 }
 
 
@@ -3719,28 +3445,7 @@ inline void Transpose3x6(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 
 
 
     // Write to output registers
-    if constexpr (_overwriteUnused)
-    {
-        if constexpr (_unusedSetZero)
-        {
-            const __m256 zero = _mm_setzero<__m256>();
-            out0 = BlendInRange<_firstRowOut, _firstRowOut + 5>(zero, tmp0);
-            out1 = BlendInRange<_firstRowOut, _firstRowOut + 5>(zero, tmp1);
-            out2 = BlendInRange<_firstRowOut, _firstRowOut + 5>(zero, tmp2);
-        }
-        else
-        {
-            out0 = tmp0;
-            out1 = tmp1;
-            out2 = tmp2;
-        }
-    }
-    else
-    {
-        out0 = BlendInRange<_firstRowOut, _firstRowOut + 5>(out0, tmp0);
-        out1 = BlendInRange<_firstRowOut, _firstRowOut + 5>(out1, tmp1);
-        out2 = BlendInRange<_firstRowOut, _firstRowOut + 5>(out2, tmp2);
-    }
+    TransposeSetOutput<_firstRowOut, 6, _overwriteUnused, _unusedSetZero>(out0, out1, out2, tmp0, tmp1, tmp2);
 }
 
 
@@ -3827,28 +3532,7 @@ inline void Transpose3x7(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 
 
 
     // Write to output registers
-    if constexpr (_overwriteUnused)
-    {
-        if constexpr (_unusedSetZero)
-        {
-            const __m256 zero = _mm_setzero<__m256>();
-            out0 = BlendInRange<_firstRowOut, _firstRowOut + 6>(zero, tmp0);
-            out1 = BlendInRange<_firstRowOut, _firstRowOut + 6>(zero, tmp1);
-            out2 = BlendInRange<_firstRowOut, _firstRowOut + 6>(zero, tmp2);
-        }
-        else
-        {
-            out0 = tmp0;
-            out1 = tmp1;
-            out2 = tmp2;
-        }
-    }
-    else
-    {
-        out0 = BlendInRange<_firstRowOut, _firstRowOut + 6>(out0, tmp0);
-        out1 = BlendInRange<_firstRowOut, _firstRowOut + 6>(out1, tmp1);
-        out2 = BlendInRange<_firstRowOut, _firstRowOut + 6>(out2, tmp2);
-    }
+    TransposeSetOutput<_firstRowOut, 7, _overwriteUnused, _unusedSetZero>(out0, out1, out2, tmp0, tmp1, tmp2);
 }
 
 
@@ -4102,31 +3786,8 @@ inline void Transpose4x1(__m256 in0, __m256& out0, __m256& out1, __m256& out2, _
 
 
     // Write to output registers
-    if constexpr (_overwriteUnused)
-    {
-        if constexpr (_unusedSetZero)
-        {
-            const __m256 zero = _mm_setzero<__m256>();
-            out0 = BlendIndex<_firstRowOut>(zero, tmp0);
-            out1 = BlendIndex<_firstRowOut>(zero, tmp1);
-            out2 = BlendIndex<_firstRowOut>(zero, tmp2);
-            out3 = BlendIndex<_firstRowOut>(zero, tmp3);
-        }
-        else
-        {
-            out0 = tmp0;
-            out1 = tmp1;
-            out2 = tmp2;
-            out3 = tmp3;
-        }
-    }
-    else
-    {
-        out0 = BlendIndex<_firstRowOut>(out0, tmp0);
-        out1 = BlendIndex<_firstRowOut>(out1, tmp1);
-        out2 = BlendIndex<_firstRowOut>(out2, tmp2);
-        out3 = BlendIndex<_firstRowOut>(out3, tmp3);
-    }
+    TransposeSetOutput<_firstRowOut, 1, _overwriteUnused, _unusedSetZero>(out0, out1, out2, out3, tmp0, tmp1, tmp2,
+                                                                          tmp3);
 }
 
 
@@ -4345,31 +4006,8 @@ inline void Transpose4x2(__m256 in0, __m256 in1, __m256& out0, __m256& out1, __m
 
 
     // Write to output registers
-    if constexpr (_overwriteUnused)
-    {
-        if constexpr (_unusedSetZero)
-        {
-            const __m256 zero = _mm_setzero<__m256>();
-            out0 = BlendInRange<_firstRowOut, _firstRowOut + 1>(zero, tmp0);
-            out1 = BlendInRange<_firstRowOut, _firstRowOut + 1>(zero, tmp1);
-            out2 = BlendInRange<_firstRowOut, _firstRowOut + 1>(zero, tmp2);
-            out3 = BlendInRange<_firstRowOut, _firstRowOut + 1>(zero, tmp3);
-        }
-        else
-        {
-            out0 = tmp0;
-            out1 = tmp1;
-            out2 = tmp2;
-            out3 = tmp3;
-        }
-    }
-    else
-    {
-        out0 = BlendInRange<_firstRowOut, _firstRowOut + 1>(out0, tmp0);
-        out1 = BlendInRange<_firstRowOut, _firstRowOut + 1>(out1, tmp1);
-        out2 = BlendInRange<_firstRowOut, _firstRowOut + 1>(out2, tmp2);
-        out3 = BlendInRange<_firstRowOut, _firstRowOut + 1>(out3, tmp3);
-    }
+    TransposeSetOutput<_firstRowOut, 2, _overwriteUnused, _unusedSetZero>(out0, out1, out2, out3, tmp0, tmp1, tmp2,
+                                                                          tmp3);
 }
 
 
@@ -4676,31 +4314,8 @@ inline void Transpose4x3(__m256 in0, __m256 in1, __m256 in2, __m256& out0, __m25
     }
 
     // Write to output registers
-    if constexpr (_overwriteUnused)
-    {
-        if constexpr (_unusedSetZero)
-        {
-            const __m256 zero = _mm_setzero<__m256>();
-            out0 = BlendInRange<_firstRowOut, _firstRowOut + 2>(zero, tmp0);
-            out1 = BlendInRange<_firstRowOut, _firstRowOut + 2>(zero, tmp1);
-            out2 = BlendInRange<_firstRowOut, _firstRowOut + 2>(zero, tmp2);
-            out3 = BlendInRange<_firstRowOut, _firstRowOut + 2>(zero, tmp3);
-        }
-        else
-        {
-            out0 = tmp0;
-            out1 = tmp1;
-            out2 = tmp2;
-            out3 = tmp3;
-        }
-    }
-    else
-    {
-        out0 = BlendInRange<_firstRowOut, _firstRowOut + 2>(out0, tmp0);
-        out1 = BlendInRange<_firstRowOut, _firstRowOut + 2>(out1, tmp1);
-        out2 = BlendInRange<_firstRowOut, _firstRowOut + 2>(out2, tmp2);
-        out3 = BlendInRange<_firstRowOut, _firstRowOut + 2>(out3, tmp3);
-    }
+    TransposeSetOutput<_firstRowOut, 3, _overwriteUnused, _unusedSetZero>(out0, out1, out2, out3, tmp0, tmp1, tmp2,
+                                                                          tmp3);
 }
 
 
@@ -4980,31 +4595,8 @@ inline void Transpose4x4(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256&
     }
 
     // Write to output registers
-    if constexpr (_overwriteUnused)
-    {
-        if constexpr (_unusedSetZero)
-        {
-            const __m256 zero = _mm_setzero<__m256>();
-            out0 = BlendInRange<_firstRowOut, _firstRowOut + 3>(zero, tmp0);
-            out1 = BlendInRange<_firstRowOut, _firstRowOut + 3>(zero, tmp1);
-            out2 = BlendInRange<_firstRowOut, _firstRowOut + 3>(zero, tmp2);
-            out3 = BlendInRange<_firstRowOut, _firstRowOut + 3>(zero, tmp3);
-        }
-        else
-        {
-            out0 = tmp0;
-            out1 = tmp1;
-            out2 = tmp2;
-            out3 = tmp3;
-        }
-    }
-    else
-    {
-        out0 = BlendInRange<_firstRowOut, _firstRowOut + 3>(out0, tmp0);
-        out1 = BlendInRange<_firstRowOut, _firstRowOut + 3>(out1, tmp1);
-        out2 = BlendInRange<_firstRowOut, _firstRowOut + 3>(out2, tmp2);
-        out3 = BlendInRange<_firstRowOut, _firstRowOut + 3>(out3, tmp3);
-    }
+    TransposeSetOutput<_firstRowOut, 4, _overwriteUnused, _unusedSetZero>(out0, out1, out2, out3, tmp0, tmp1, tmp2,
+                                                                          tmp3);
 }
 
 
@@ -5046,31 +4638,8 @@ inline void Transpose4x5(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 
 
 
     // Write to output registers
-    if constexpr (_overwriteUnused)
-    {
-        if constexpr (_unusedSetZero)
-        {
-            const __m256 zero = _mm_setzero<__m256>();
-            out0 = BlendInRange<_firstRowOut, _firstRowOut + 4>(zero, tmp0);
-            out1 = BlendInRange<_firstRowOut, _firstRowOut + 4>(zero, tmp1);
-            out2 = BlendInRange<_firstRowOut, _firstRowOut + 4>(zero, tmp2);
-            out3 = BlendInRange<_firstRowOut, _firstRowOut + 4>(zero, tmp3);
-        }
-        else
-        {
-            out0 = tmp0;
-            out1 = tmp1;
-            out2 = tmp2;
-            out3 = tmp3;
-        }
-    }
-    else
-    {
-        out0 = BlendInRange<_firstRowOut, _firstRowOut + 4>(out0, tmp0);
-        out1 = BlendInRange<_firstRowOut, _firstRowOut + 4>(out1, tmp1);
-        out2 = BlendInRange<_firstRowOut, _firstRowOut + 4>(out2, tmp2);
-        out3 = BlendInRange<_firstRowOut, _firstRowOut + 4>(out3, tmp3);
-    }
+    TransposeSetOutput<_firstRowOut, 5, _overwriteUnused, _unusedSetZero>(out0, out1, out2, out3, tmp0, tmp1, tmp2,
+                                                                          tmp3);
 }
 
 
@@ -5119,31 +4688,8 @@ inline void Transpose4x6(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 
 
 
     // Write to output registers
-    if constexpr (_overwriteUnused)
-    {
-        if constexpr (_unusedSetZero)
-        {
-            const __m256 zero = _mm_setzero<__m256>();
-            out0 = BlendInRange<_firstRowOut, _firstRowOut + 5>(zero, tmp0);
-            out1 = BlendInRange<_firstRowOut, _firstRowOut + 5>(zero, tmp1);
-            out2 = BlendInRange<_firstRowOut, _firstRowOut + 5>(zero, tmp2);
-            out3 = BlendInRange<_firstRowOut, _firstRowOut + 5>(zero, tmp3);
-        }
-        else
-        {
-            out0 = tmp0;
-            out1 = tmp1;
-            out2 = tmp2;
-            out3 = tmp3;
-        }
-    }
-    else
-    {
-        out0 = BlendInRange<_firstRowOut, _firstRowOut + 5>(out0, tmp0);
-        out1 = BlendInRange<_firstRowOut, _firstRowOut + 5>(out1, tmp1);
-        out2 = BlendInRange<_firstRowOut, _firstRowOut + 5>(out2, tmp2);
-        out3 = BlendInRange<_firstRowOut, _firstRowOut + 5>(out3, tmp3);
-    }
+    TransposeSetOutput<_firstRowOut, 6, _overwriteUnused, _unusedSetZero>(out0, out1, out2, out3, tmp0, tmp1, tmp2,
+                                                                          tmp3);
 }
 
 
@@ -5240,31 +4786,8 @@ inline void Transpose4x7(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 
 
 
     // Write to output registers
-    if constexpr (_overwriteUnused)
-    {
-        if constexpr (_unusedSetZero)
-        {
-            const __m256 zero = _mm_setzero<__m256>();
-            out0 = BlendInRange<_firstRowOut, _firstRowOut + 6>(zero, tmp0);
-            out1 = BlendInRange<_firstRowOut, _firstRowOut + 6>(zero, tmp1);
-            out2 = BlendInRange<_firstRowOut, _firstRowOut + 6>(zero, tmp2);
-            out3 = BlendInRange<_firstRowOut, _firstRowOut + 6>(zero, tmp3);
-        }
-        else
-        {
-            out0 = tmp0;
-            out1 = tmp1;
-            out2 = tmp2;
-            out3 = tmp3;
-        }
-    }
-    else
-    {
-        out0 = BlendInRange<_firstRowOut, _firstRowOut + 6>(out0, tmp0);
-        out1 = BlendInRange<_firstRowOut, _firstRowOut + 6>(out1, tmp1);
-        out2 = BlendInRange<_firstRowOut, _firstRowOut + 6>(out2, tmp2);
-        out3 = BlendInRange<_firstRowOut, _firstRowOut + 6>(out3, tmp3);
-    }
+    TransposeSetOutput<_firstRowOut, 7, _overwriteUnused, _unusedSetZero>(out0, out1, out2, out3, tmp0, tmp1, tmp2,
+                                                                          tmp3);
 }
 
 
@@ -5389,35 +4912,10 @@ inline void Transpose5x1(__m256 in0, __m256& out0, __m256& out1, __m256& out2, _
         tmp4 = Broadcast<(_firstRowIn + 4) % numLaneVals>(in0);
     else
         tmp4 = Broadcast<(_firstRowIn + 4) % numLaneVals>(tmp5);
+
     // Write to output registers
-    if constexpr (_overwriteUnused)
-    {
-        if constexpr (_unusedSetZero)
-        {
-            const __m256 zero = _mm_setzero<__m256>();
-            out0 = BlendIndex<_firstRowOut>(zero, tmp0);
-            out1 = BlendIndex<_firstRowOut>(zero, tmp1);
-            out2 = BlendIndex<_firstRowOut>(zero, tmp2);
-            out3 = BlendIndex<_firstRowOut>(zero, tmp3);
-            out4 = BlendIndex<_firstRowOut>(zero, tmp4);
-        }
-        else
-        {
-            out0 = tmp0;
-            out1 = tmp1;
-            out2 = tmp2;
-            out3 = tmp3;
-            out4 = tmp4;
-        }
-    }
-    else
-    {
-        out0 = BlendIndex<_firstRowOut>(out0, tmp0);
-        out1 = BlendIndex<_firstRowOut>(out1, tmp1);
-        out2 = BlendIndex<_firstRowOut>(out2, tmp2);
-        out3 = BlendIndex<_firstRowOut>(out3, tmp3);
-        out4 = BlendIndex<_firstRowOut>(out4, tmp4);
-    }
+    TransposeSetOutput<_firstRowOut, 1, _overwriteUnused, _unusedSetZero>(out0, out1, out2, out3, out4, tmp0, tmp1,
+                                                                          tmp2, tmp3, tmp4);
 }
 
 
@@ -5522,34 +5020,8 @@ inline void Transpose5x2(__m256 in0, __m256 in1, __m256& out0, __m256& out1, __m
     }
 
     // Write to output registers
-    if constexpr (_overwriteUnused)
-    {
-        if constexpr (_unusedSetZero)
-        {
-            const __m256 zero = _mm_setzero<__m256>();
-            out0 = BlendInRange<_firstRowOut, _firstRowOut + 1>(zero, tmp0);
-            out1 = BlendInRange<_firstRowOut, _firstRowOut + 1>(zero, tmp1);
-            out2 = BlendInRange<_firstRowOut, _firstRowOut + 1>(zero, tmp2);
-            out3 = BlendInRange<_firstRowOut, _firstRowOut + 1>(zero, tmp3);
-            out4 = BlendInRange<_firstRowOut, _firstRowOut + 1>(zero, tmp4);
-        }
-        else
-        {
-            out0 = tmp0;
-            out1 = tmp1;
-            out2 = tmp2;
-            out3 = tmp3;
-            out4 = tmp4;
-        }
-    }
-    else
-    {
-        out0 = BlendInRange<_firstRowOut, _firstRowOut + 1>(out0, tmp0);
-        out1 = BlendInRange<_firstRowOut, _firstRowOut + 1>(out1, tmp1);
-        out2 = BlendInRange<_firstRowOut, _firstRowOut + 1>(out2, tmp2);
-        out3 = BlendInRange<_firstRowOut, _firstRowOut + 1>(out3, tmp3);
-        out4 = BlendInRange<_firstRowOut, _firstRowOut + 1>(out4, tmp4);
-    }
+    TransposeSetOutput<_firstRowOut, 2, _overwriteUnused, _unusedSetZero>(out0, out1, out2, out3, out4, tmp0, tmp1,
+                                                                          tmp2, tmp3, tmp4);
 }
 
 
@@ -5661,34 +5133,8 @@ inline void Transpose5x3(__m256 in0, __m256 in1, __m256 in2, __m256& out0, __m25
 
 
     // Write to output registers
-    if constexpr (_overwriteUnused)
-    {
-        if constexpr (_unusedSetZero)
-        {
-            const __m256 zero = _mm_setzero<__m256>();
-            out0 = BlendInRange<_firstRowOut, _firstRowOut + 2>(zero, tmp0);
-            out1 = BlendInRange<_firstRowOut, _firstRowOut + 2>(zero, tmp1);
-            out2 = BlendInRange<_firstRowOut, _firstRowOut + 2>(zero, tmp2);
-            out3 = BlendInRange<_firstRowOut, _firstRowOut + 2>(zero, tmp3);
-            out4 = BlendInRange<_firstRowOut, _firstRowOut + 2>(zero, tmp4);
-        }
-        else
-        {
-            out0 = tmp0;
-            out1 = tmp1;
-            out2 = tmp2;
-            out3 = tmp3;
-            out4 = tmp4;
-        }
-    }
-    else
-    {
-        out0 = BlendInRange<_firstRowOut, _firstRowOut + 2>(out0, tmp0);
-        out1 = BlendInRange<_firstRowOut, _firstRowOut + 2>(out1, tmp1);
-        out2 = BlendInRange<_firstRowOut, _firstRowOut + 2>(out2, tmp2);
-        out3 = BlendInRange<_firstRowOut, _firstRowOut + 2>(out3, tmp3);
-        out4 = BlendInRange<_firstRowOut, _firstRowOut + 2>(out4, tmp4);
-    }
+    TransposeSetOutput<_firstRowOut, 3, _overwriteUnused, _unusedSetZero>(out0, out1, out2, out3, out4, tmp0, tmp1,
+                                                                          tmp2, tmp3, tmp4);
 }
 
 
@@ -5706,34 +5152,8 @@ inline void Transpose5x4(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256&
     tmp4 = Permute2F128<1, 0>(tmp0);
 
     // Write to output registers
-    if constexpr (_overwriteUnused)
-    {
-        if constexpr (_unusedSetZero)
-        {
-            const __m256 zero = _mm_setzero<__m256>();
-            out0 = BlendInRange<_firstRowOut, _firstRowOut + 3>(zero, tmp0);
-            out1 = BlendInRange<_firstRowOut, _firstRowOut + 3>(zero, tmp1);
-            out2 = BlendInRange<_firstRowOut, _firstRowOut + 3>(zero, tmp2);
-            out3 = BlendInRange<_firstRowOut, _firstRowOut + 3>(zero, tmp3);
-            out4 = BlendInRange<_firstRowOut, _firstRowOut + 3>(zero, tmp4);
-        }
-        else
-        {
-            out0 = tmp0;
-            out1 = tmp1;
-            out2 = tmp2;
-            out3 = tmp3;
-            out4 = tmp4;
-        }
-    }
-    else
-    {
-        out0 = BlendInRange<_firstRowOut, _firstRowOut + 3>(out0, tmp0);
-        out1 = BlendInRange<_firstRowOut, _firstRowOut + 3>(out1, tmp1);
-        out2 = BlendInRange<_firstRowOut, _firstRowOut + 3>(out2, tmp2);
-        out3 = BlendInRange<_firstRowOut, _firstRowOut + 3>(out3, tmp3);
-        out4 = BlendInRange<_firstRowOut, _firstRowOut + 3>(out4, tmp4);
-    }
+    TransposeSetOutput<_firstRowOut, 4, _overwriteUnused, _unusedSetZero>(out0, out1, out2, out3, out4, tmp0, tmp1,
+                                                                          tmp2, tmp3, tmp4);
 }
 
 
@@ -5888,34 +5308,8 @@ inline void Transpose5x5(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 
 
 
     // Write to output registers
-    if constexpr (_overwriteUnused)
-    {
-        if constexpr (_unusedSetZero)
-        {
-            const __m256 zero = _mm_setzero<__m256>();
-            out0 = BlendInRange<_firstRowOut, _firstRowOut + 4>(zero, tmp0);
-            out1 = BlendInRange<_firstRowOut, _firstRowOut + 4>(zero, tmp1);
-            out2 = BlendInRange<_firstRowOut, _firstRowOut + 4>(zero, tmp2);
-            out3 = BlendInRange<_firstRowOut, _firstRowOut + 4>(zero, tmp3);
-            out4 = BlendInRange<_firstRowOut, _firstRowOut + 4>(zero, tmp4);
-        }
-        else
-        {
-            out0 = tmp0;
-            out1 = tmp1;
-            out2 = tmp2;
-            out3 = tmp3;
-            out4 = tmp4;
-        }
-    }
-    else
-    {
-        out0 = BlendInRange<_firstRowOut, _firstRowOut + 4>(out0, tmp0);
-        out1 = BlendInRange<_firstRowOut, _firstRowOut + 4>(out1, tmp1);
-        out2 = BlendInRange<_firstRowOut, _firstRowOut + 4>(out2, tmp2);
-        out3 = BlendInRange<_firstRowOut, _firstRowOut + 4>(out3, tmp3);
-        out4 = BlendInRange<_firstRowOut, _firstRowOut + 4>(out4, tmp4);
-    }
+    TransposeSetOutput<_firstRowOut, 5, _overwriteUnused, _unusedSetZero>(out0, out1, out2, out3, out4, tmp0, tmp1,
+                                                                          tmp2, tmp3, tmp4);
 }
 
 
@@ -5982,34 +5376,8 @@ inline void Transpose5x6(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 
 
 
     // Write to output registers
-    if constexpr (_overwriteUnused)
-    {
-        if constexpr (_unusedSetZero)
-        {
-            const __m256 zero = _mm_setzero<__m256>();
-            out0 = BlendInRange<_firstRowOut, _firstRowOut + 5>(zero, tmp0);
-            out1 = BlendInRange<_firstRowOut, _firstRowOut + 5>(zero, tmp1);
-            out2 = BlendInRange<_firstRowOut, _firstRowOut + 5>(zero, tmp2);
-            out3 = BlendInRange<_firstRowOut, _firstRowOut + 5>(zero, tmp3);
-            out4 = BlendInRange<_firstRowOut, _firstRowOut + 5>(zero, tmp4);
-        }
-        else
-        {
-            out0 = tmp0;
-            out1 = tmp1;
-            out2 = tmp2;
-            out3 = tmp3;
-            out4 = tmp4;
-        }
-    }
-    else
-    {
-        out0 = BlendInRange<_firstRowOut, _firstRowOut + 5>(out0, tmp0);
-        out1 = BlendInRange<_firstRowOut, _firstRowOut + 5>(out1, tmp1);
-        out2 = BlendInRange<_firstRowOut, _firstRowOut + 5>(out2, tmp2);
-        out3 = BlendInRange<_firstRowOut, _firstRowOut + 5>(out3, tmp3);
-        out4 = BlendInRange<_firstRowOut, _firstRowOut + 5>(out4, tmp4);
-    }
+    TransposeSetOutput<_firstRowOut, 6, _overwriteUnused, _unusedSetZero>(out0, out1, out2, out3, out4, tmp0, tmp1,
+                                                                          tmp2, tmp3, tmp4);
 }
 
 
@@ -6072,34 +5440,8 @@ inline void Transpose5x7(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 
 
 
     // Write to output registers
-    if constexpr (_overwriteUnused)
-    {
-        if constexpr (_unusedSetZero)
-        {
-            const __m256 zero = _mm_setzero<__m256>();
-            out0 = BlendInRange<_firstRowOut, _firstRowOut + 6>(zero, tmp0);
-            out1 = BlendInRange<_firstRowOut, _firstRowOut + 6>(zero, tmp1);
-            out2 = BlendInRange<_firstRowOut, _firstRowOut + 6>(zero, tmp2);
-            out3 = BlendInRange<_firstRowOut, _firstRowOut + 6>(zero, tmp3);
-            out4 = BlendInRange<_firstRowOut, _firstRowOut + 6>(zero, tmp4);
-        }
-        else
-        {
-            out0 = tmp0;
-            out1 = tmp1;
-            out2 = tmp2;
-            out3 = tmp3;
-            out4 = tmp4;
-        }
-    }
-    else
-    {
-        out0 = BlendInRange<_firstRowOut, _firstRowOut + 6>(out0, tmp0);
-        out1 = BlendInRange<_firstRowOut, _firstRowOut + 6>(out1, tmp1);
-        out2 = BlendInRange<_firstRowOut, _firstRowOut + 6>(out2, tmp2);
-        out3 = BlendInRange<_firstRowOut, _firstRowOut + 6>(out3, tmp3);
-        out4 = BlendInRange<_firstRowOut, _firstRowOut + 6>(out4, tmp4);
-    }
+    TransposeSetOutput<_firstRowOut, 7, _overwriteUnused, _unusedSetZero>(out0, out1, out2, out3, out4, tmp0, tmp1,
+                                                                          tmp2, tmp3, tmp4);
 }
 
 
@@ -6208,37 +5550,8 @@ inline void Transpose6x1(__m256 in0, __m256& out0, __m256& out1, __m256& out2, _
 
 
     // Write to output registers
-    if constexpr (_overwriteUnused)
-    {
-        if constexpr (_unusedSetZero)
-        {
-            const __m256 zero = _mm_setzero<__m256>();
-            out0 = BlendIndex<_firstRowOut>(zero, tmp0);
-            out1 = BlendIndex<_firstRowOut>(zero, tmp1);
-            out2 = BlendIndex<_firstRowOut>(zero, tmp2);
-            out3 = BlendIndex<_firstRowOut>(zero, tmp3);
-            out4 = BlendIndex<_firstRowOut>(zero, tmp4);
-            out5 = BlendIndex<_firstRowOut>(zero, tmp5);
-        }
-        else
-        {
-            out0 = tmp0;
-            out1 = tmp1;
-            out2 = tmp2;
-            out3 = tmp3;
-            out4 = tmp4;
-            out5 = tmp5;
-        }
-    }
-    else
-    {
-        out0 = BlendIndex<_firstRowOut>(out0, tmp0);
-        out1 = BlendIndex<_firstRowOut>(out1, tmp1);
-        out2 = BlendIndex<_firstRowOut>(out2, tmp2);
-        out3 = BlendIndex<_firstRowOut>(out3, tmp3);
-        out4 = BlendIndex<_firstRowOut>(out4, tmp4);
-        out5 = BlendIndex<_firstRowOut>(out5, tmp5);
-    }
+    TransposeSetOutput<_firstRowOut, 1, _overwriteUnused, _unusedSetZero>(out0, out1, out2, out3, out4, out5, tmp0,
+                                                                          tmp1, tmp2, tmp3, tmp4, tmp5);
 }
 
 
@@ -6339,37 +5652,8 @@ inline void Transpose6x2(__m256 in0, __m256 in1, __m256& out0, __m256& out1, __m
 
 
     // Write to output registers
-    if constexpr (_overwriteUnused)
-    {
-        if constexpr (_unusedSetZero)
-        {
-            const __m256 zero = _mm_setzero<__m256>();
-            out0 = BlendInRange<_firstRowOut, _firstRowOut + 1>(zero, tmp0);
-            out1 = BlendInRange<_firstRowOut, _firstRowOut + 1>(zero, tmp1);
-            out2 = BlendInRange<_firstRowOut, _firstRowOut + 1>(zero, tmp2);
-            out3 = BlendInRange<_firstRowOut, _firstRowOut + 1>(zero, tmp3);
-            out4 = BlendInRange<_firstRowOut, _firstRowOut + 1>(zero, tmp4);
-            out5 = BlendInRange<_firstRowOut, _firstRowOut + 1>(zero, tmp5);
-        }
-        else
-        {
-            out0 = tmp0;
-            out1 = tmp1;
-            out2 = tmp2;
-            out3 = tmp3;
-            out4 = tmp4;
-            out5 = tmp5;
-        }
-    }
-    else
-    {
-        out0 = BlendInRange<_firstRowOut, _firstRowOut + 1>(out0, tmp0);
-        out1 = BlendInRange<_firstRowOut, _firstRowOut + 1>(out1, tmp1);
-        out2 = BlendInRange<_firstRowOut, _firstRowOut + 1>(out2, tmp2);
-        out3 = BlendInRange<_firstRowOut, _firstRowOut + 1>(out3, tmp3);
-        out4 = BlendInRange<_firstRowOut, _firstRowOut + 1>(out4, tmp4);
-        out5 = BlendInRange<_firstRowOut, _firstRowOut + 1>(out5, tmp5);
-    }
+    TransposeSetOutput<_firstRowOut, 2, _overwriteUnused, _unusedSetZero>(out0, out1, out2, out3, out4, out5, tmp0,
+                                                                          tmp1, tmp2, tmp3, tmp4, tmp5);
 }
 
 
@@ -6483,37 +5767,8 @@ inline void Transpose6x3(__m256 in0, __m256 in1, __m256 in2, __m256& out0, __m25
 
 
     // Write to output registers
-    if constexpr (_overwriteUnused)
-    {
-        if constexpr (_unusedSetZero)
-        {
-            const __m256 zero = _mm_setzero<__m256>();
-            out0 = BlendInRange<_firstRowOut, _firstRowOut + 2>(zero, tmp0);
-            out1 = BlendInRange<_firstRowOut, _firstRowOut + 2>(zero, tmp1);
-            out2 = BlendInRange<_firstRowOut, _firstRowOut + 2>(zero, tmp2);
-            out3 = BlendInRange<_firstRowOut, _firstRowOut + 2>(zero, tmp3);
-            out4 = BlendInRange<_firstRowOut, _firstRowOut + 2>(zero, tmp4);
-            out5 = BlendInRange<_firstRowOut, _firstRowOut + 2>(zero, tmp5);
-        }
-        else
-        {
-            out0 = tmp0;
-            out1 = tmp1;
-            out2 = tmp2;
-            out3 = tmp3;
-            out4 = tmp4;
-            out5 = tmp5;
-        }
-    }
-    else
-    {
-        out0 = BlendInRange<_firstRowOut, _firstRowOut + 2>(out0, tmp0);
-        out1 = BlendInRange<_firstRowOut, _firstRowOut + 2>(out1, tmp1);
-        out2 = BlendInRange<_firstRowOut, _firstRowOut + 2>(out2, tmp2);
-        out3 = BlendInRange<_firstRowOut, _firstRowOut + 2>(out3, tmp3);
-        out4 = BlendInRange<_firstRowOut, _firstRowOut + 2>(out4, tmp4);
-        out5 = BlendInRange<_firstRowOut, _firstRowOut + 2>(out5, tmp5);
-    }
+    TransposeSetOutput<_firstRowOut, 3, _overwriteUnused, _unusedSetZero>(out0, out1, out2, out3, out4, out5, tmp0,
+                                                                          tmp1, tmp2, tmp3, tmp4, tmp5);
 }
 
 
@@ -6634,37 +5889,8 @@ inline void Transpose6x4(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256&
 
 
     // Write to output registers
-    if constexpr (_overwriteUnused)
-    {
-        if constexpr (_unusedSetZero)
-        {
-            const __m256 zero = _mm_setzero<__m256>();
-            out0 = BlendInRange<_firstRowOut, _firstRowOut + 3>(zero, tmp0);
-            out1 = BlendInRange<_firstRowOut, _firstRowOut + 3>(zero, tmp1);
-            out2 = BlendInRange<_firstRowOut, _firstRowOut + 3>(zero, tmp2);
-            out3 = BlendInRange<_firstRowOut, _firstRowOut + 3>(zero, tmp3);
-            out4 = BlendInRange<_firstRowOut, _firstRowOut + 3>(zero, tmp4);
-            out5 = BlendInRange<_firstRowOut, _firstRowOut + 3>(zero, tmp5);
-        }
-        else
-        {
-            out0 = tmp0;
-            out1 = tmp1;
-            out2 = tmp2;
-            out3 = tmp3;
-            out4 = tmp4;
-            out5 = tmp5;
-        }
-    }
-    else
-    {
-        out0 = BlendInRange<_firstRowOut, _firstRowOut + 3>(out0, tmp0);
-        out1 = BlendInRange<_firstRowOut, _firstRowOut + 3>(out1, tmp1);
-        out2 = BlendInRange<_firstRowOut, _firstRowOut + 3>(out2, tmp2);
-        out3 = BlendInRange<_firstRowOut, _firstRowOut + 3>(out3, tmp3);
-        out4 = BlendInRange<_firstRowOut, _firstRowOut + 3>(out4, tmp4);
-        out5 = BlendInRange<_firstRowOut, _firstRowOut + 3>(out5, tmp5);
-    }
+    TransposeSetOutput<_firstRowOut, 4, _overwriteUnused, _unusedSetZero>(out0, out1, out2, out3, out4, out5, tmp0,
+                                                                          tmp1, tmp2, tmp3, tmp4, tmp5);
 }
 
 
@@ -6675,109 +5901,30 @@ template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unused
 inline void Transpose6x5(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 in4, __m256& out0, __m256& out1,
                          __m256& out2, __m256& out3, __m256& out4, __m256& out5)
 {
-    __m256 tmp0, tmp1, tmp2, tmp3, tmp4, tmp5;
+    __m256 tout0, tout1, tout2, tout3, tout4, tout5;
+    __m256 tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7;
 
-    __m256 tmp6, tmp7, tmp8, tmp9, tmp10, tmp11, tmp12, tmp13;
-
-    if constexpr (_firstRowOut == 0)
-    {
-        tmp6 = Permute2F128<0, 0, 1, 0>(in0, in4);
-        tmp7 = in1;
-        tmp8 = in2;
-        tmp9 = in3;
-
-        tmp10 = Permute2F128<0, 1, 1, 1>(in0, in4);
-        tmp11 = Permute2F128<1, 0>(in1);
-        tmp12 = Permute2F128<1, 0>(in2);
-        tmp13 = Permute2F128<1, 0>(in3);
-    }
-    else if constexpr (_firstRowOut == 1)
-    {
-        tmp6 = Permute2F128<1, 0>(in3);
-        tmp7 = Permute2F128<0, 0, 1, 0>(in0, in4);
-        tmp8 = in1;
-        tmp9 = in2;
-
-        tmp10 = in3;
-        tmp11 = Permute2F128<0, 1, 1, 1>(in0, in4);
-        tmp12 = Permute2F128<1, 0>(in1);
-        tmp13 = Permute2F128<1, 0>(in2);
-    }
-    else if constexpr (_firstRowOut == 2)
-    {
-        tmp6 = Permute2F128<1, 0>(in2);
-        tmp7 = Permute2F128<1, 0>(in3);
-        tmp8 = Permute2F128<0, 0, 1, 0>(in0, in4);
-        tmp9 = in1;
-
-        tmp10 = in2;
-        tmp11 = in3;
-        tmp12 = Permute2F128<0, 1, 1, 1>(in0, in4);
-        tmp13 = Permute2F128<1, 0>(in1);
-    }
-    else
-    {
-        tmp6 = Permute2F128<1, 0>(in1);
-        tmp7 = Permute2F128<1, 0>(in2);
-        tmp8 = Permute2F128<1, 0>(in3);
-        tmp9 = Permute2F128<0, 0, 1, 0>(in0, in4);
-
-        tmp10 = in1;
-        tmp11 = in2;
-        tmp12 = in3;
-        tmp13 = Permute2F128<0, 1, 1, 1>(in0, in4);
-    }
+    PermuteBeforeIntraLaneTranspose<_firstRowOut>(tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7, in0, in1, in2, in3,
+                                                  in4);
 
     if constexpr (_firstRowIn == 0)
     {
-        Transpose4x4<0, 0>(tmp6, tmp7, tmp8, tmp9, tmp0, tmp1, tmp2, tmp3);
-        Transpose2x4<0, 0>(tmp10, tmp11, tmp12, tmp13, tmp4, tmp5);
+        Transpose4x4<0, 0>(tmp0, tmp1, tmp2, tmp3, tout0, tout1, tout2, tout3);
+        Transpose2x4<0, 0>(tmp4, tmp5, tmp6, tmp7, tout4, tout5);
     }
     else if constexpr (_firstRowIn == 1)
     {
-        Transpose3x4<1, 0>(tmp6, tmp7, tmp8, tmp9, tmp0, tmp1, tmp2);
-        Transpose3x4<0, 0>(tmp10, tmp11, tmp12, tmp13, tmp3, tmp4, tmp5);
+        Transpose3x4<1, 0>(tmp0, tmp1, tmp2, tmp3, tout0, tout1, tout2);
+        Transpose3x4<0, 0>(tmp4, tmp5, tmp6, tmp7, tout3, tout4, tout5);
     }
     else
     {
-        Transpose2x4<2, 0>(tmp6, tmp7, tmp8, tmp9, tmp0, tmp1);
-        Transpose4x4<0, 0>(tmp10, tmp11, tmp12, tmp13, tmp2, tmp3, tmp4, tmp5);
+        Transpose2x4<2, 0>(tmp0, tmp1, tmp2, tmp3, tout0, tout1);
+        Transpose4x4<0, 0>(tmp4, tmp5, tmp6, tmp7, tout2, tout3, tout4, tout5);
     }
 
-
-
-    // Write to output registers
-    if constexpr (_overwriteUnused)
-    {
-        if constexpr (_unusedSetZero)
-        {
-            const __m256 zero = _mm_setzero<__m256>();
-            out0 = BlendInRange<_firstRowOut, _firstRowOut + 4>(zero, tmp0);
-            out1 = BlendInRange<_firstRowOut, _firstRowOut + 4>(zero, tmp1);
-            out2 = BlendInRange<_firstRowOut, _firstRowOut + 4>(zero, tmp2);
-            out3 = BlendInRange<_firstRowOut, _firstRowOut + 4>(zero, tmp3);
-            out4 = BlendInRange<_firstRowOut, _firstRowOut + 4>(zero, tmp4);
-            out5 = BlendInRange<_firstRowOut, _firstRowOut + 4>(zero, tmp5);
-        }
-        else
-        {
-            out0 = tmp0;
-            out1 = tmp1;
-            out2 = tmp2;
-            out3 = tmp3;
-            out4 = tmp4;
-            out5 = tmp5;
-        }
-    }
-    else
-    {
-        out0 = BlendInRange<_firstRowOut, _firstRowOut + 4>(out0, tmp0);
-        out1 = BlendInRange<_firstRowOut, _firstRowOut + 4>(out1, tmp1);
-        out2 = BlendInRange<_firstRowOut, _firstRowOut + 4>(out2, tmp2);
-        out3 = BlendInRange<_firstRowOut, _firstRowOut + 4>(out3, tmp3);
-        out4 = BlendInRange<_firstRowOut, _firstRowOut + 4>(out4, tmp4);
-        out5 = BlendInRange<_firstRowOut, _firstRowOut + 4>(out5, tmp5);
-    }
+    TransposeSetOutput<_firstRowOut, 5, _overwriteUnused, _unusedSetZero>(out0, out1, out2, out3, out4, out5, tout0,
+                                                                          tout1, tout2, tout3, tout4, tout5);
 }
 
 
@@ -6788,97 +5935,30 @@ template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unused
 inline void Transpose6x6(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 in4, __m256 in5, __m256& out0,
                          __m256& out1, __m256& out2, __m256& out3, __m256& out4, __m256& out5)
 {
-    __m256 tmp0, tmp1, tmp2, tmp3, tmp4, tmp5;
+    __m256 tout0, tout1, tout2, tout3, tout4, tout5;
+    __m256 tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7;
 
-    __m256 tmp6, tmp7, tmp8, tmp9, tmp10, tmp11, tmp12, tmp13;
-
-    if constexpr (_firstRowOut == 0)
-    {
-        tmp6 = Permute2F128<0, 0, 1, 0>(in0, in4);
-        tmp7 = Permute2F128<0, 0, 1, 0>(in1, in5);
-        tmp8 = in2;
-        tmp9 = in3;
-
-        tmp10 = Permute2F128<0, 1, 1, 1>(in0, in4);
-        tmp11 = Permute2F128<0, 1, 1, 1>(in1, in5);
-        tmp12 = Permute2F128<1, 0>(in2);
-        tmp13 = Permute2F128<1, 0>(in3);
-    }
-    else if constexpr (_firstRowOut == 1)
-    {
-        tmp6 = Permute2F128<1, 0>(in3);
-        tmp7 = Permute2F128<0, 0, 1, 0>(in0, in4);
-        tmp8 = Permute2F128<0, 0, 1, 0>(in1, in5);
-        tmp9 = in2;
-
-        tmp10 = in3;
-        tmp11 = Permute2F128<0, 1, 1, 1>(in0, in4);
-        tmp12 = Permute2F128<0, 1, 1, 1>(in1, in5);
-        tmp13 = Permute2F128<1, 0>(in2);
-    }
-    else
-    {
-        tmp6 = Permute2F128<1, 0>(in2);
-        tmp7 = Permute2F128<1, 0>(in3);
-        tmp8 = Permute2F128<0, 0, 1, 0>(in0, in4);
-        tmp9 = Permute2F128<0, 0, 1, 0>(in1, in5);
-
-        tmp10 = in2;
-        tmp11 = in3;
-        tmp12 = Permute2F128<0, 1, 1, 1>(in0, in4);
-        tmp13 = Permute2F128<0, 1, 1, 1>(in1, in5);
-    }
+    PermuteBeforeIntraLaneTranspose<_firstRowOut>(tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7, in0, in1, in2, in3,
+                                                  in4, in5);
 
     if constexpr (_firstRowIn == 0)
     {
-        Transpose4x4<0, 0>(tmp6, tmp7, tmp8, tmp9, tmp0, tmp1, tmp2, tmp3);
-        Transpose2x4<0, 0>(tmp10, tmp11, tmp12, tmp13, tmp4, tmp5);
+        Transpose4x4<0, 0>(tmp0, tmp1, tmp2, tmp3, tout0, tout1, tout2, tout3);
+        Transpose2x4<0, 0>(tmp4, tmp5, tmp6, tmp7, tout4, tout5);
     }
     else if constexpr (_firstRowIn == 1)
     {
-        Transpose3x4<1, 0>(tmp6, tmp7, tmp8, tmp9, tmp0, tmp1, tmp2);
-        Transpose3x4<0, 0>(tmp10, tmp11, tmp12, tmp13, tmp3, tmp4, tmp5);
+        Transpose3x4<1, 0>(tmp0, tmp1, tmp2, tmp3, tout0, tout1, tout2);
+        Transpose3x4<0, 0>(tmp4, tmp5, tmp6, tmp7, tout3, tout4, tout5);
     }
     else
     {
-        Transpose2x4<2, 0>(tmp6, tmp7, tmp8, tmp9, tmp0, tmp1);
-        Transpose4x4<0, 0>(tmp10, tmp11, tmp12, tmp13, tmp2, tmp3, tmp4, tmp5);
+        Transpose2x4<2, 0>(tmp0, tmp1, tmp2, tmp3, tout0, tout1);
+        Transpose4x4<0, 0>(tmp4, tmp5, tmp6, tmp7, tout2, tout3, tout4, tout5);
     }
 
-
-
-    // Write to output registers
-    if constexpr (_overwriteUnused)
-    {
-        if constexpr (_unusedSetZero)
-        {
-            const __m256 zero = _mm_setzero<__m256>();
-            out0 = BlendInRange<_firstRowOut, _firstRowOut + 5>(zero, tmp0);
-            out1 = BlendInRange<_firstRowOut, _firstRowOut + 5>(zero, tmp1);
-            out2 = BlendInRange<_firstRowOut, _firstRowOut + 5>(zero, tmp2);
-            out3 = BlendInRange<_firstRowOut, _firstRowOut + 5>(zero, tmp3);
-            out4 = BlendInRange<_firstRowOut, _firstRowOut + 5>(zero, tmp4);
-            out5 = BlendInRange<_firstRowOut, _firstRowOut + 5>(zero, tmp5);
-        }
-        else
-        {
-            out0 = tmp0;
-            out1 = tmp1;
-            out2 = tmp2;
-            out3 = tmp3;
-            out4 = tmp4;
-            out5 = tmp5;
-        }
-    }
-    else
-    {
-        out0 = BlendInRange<_firstRowOut, _firstRowOut + 5>(out0, tmp0);
-        out1 = BlendInRange<_firstRowOut, _firstRowOut + 5>(out1, tmp1);
-        out2 = BlendInRange<_firstRowOut, _firstRowOut + 5>(out2, tmp2);
-        out3 = BlendInRange<_firstRowOut, _firstRowOut + 5>(out3, tmp3);
-        out4 = BlendInRange<_firstRowOut, _firstRowOut + 5>(out4, tmp4);
-        out5 = BlendInRange<_firstRowOut, _firstRowOut + 5>(out5, tmp5);
-    }
+    TransposeSetOutput<_firstRowOut, 6, _overwriteUnused, _unusedSetZero>(out0, out1, out2, out3, out4, out5, tout0,
+                                                                          tout1, tout2, tout3, tout4, tout5);
 }
 
 
@@ -6936,37 +6016,8 @@ inline void Transpose6x7(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 
 
 
     // Write to output registers
-    if constexpr (_overwriteUnused)
-    {
-        if constexpr (_unusedSetZero)
-        {
-            const __m256 zero = _mm_setzero<__m256>();
-            out0 = BlendInRange<_firstRowOut, _firstRowOut + 6>(zero, tmp0);
-            out1 = BlendInRange<_firstRowOut, _firstRowOut + 6>(zero, tmp1);
-            out2 = BlendInRange<_firstRowOut, _firstRowOut + 6>(zero, tmp2);
-            out3 = BlendInRange<_firstRowOut, _firstRowOut + 6>(zero, tmp3);
-            out4 = BlendInRange<_firstRowOut, _firstRowOut + 6>(zero, tmp4);
-            out5 = BlendInRange<_firstRowOut, _firstRowOut + 6>(zero, tmp5);
-        }
-        else
-        {
-            out0 = tmp0;
-            out1 = tmp1;
-            out2 = tmp2;
-            out3 = tmp3;
-            out4 = tmp4;
-            out5 = tmp5;
-        }
-    }
-    else
-    {
-        out0 = BlendInRange<_firstRowOut, _firstRowOut + 6>(out0, tmp0);
-        out1 = BlendInRange<_firstRowOut, _firstRowOut + 6>(out1, tmp1);
-        out2 = BlendInRange<_firstRowOut, _firstRowOut + 6>(out2, tmp2);
-        out3 = BlendInRange<_firstRowOut, _firstRowOut + 6>(out3, tmp3);
-        out4 = BlendInRange<_firstRowOut, _firstRowOut + 6>(out4, tmp4);
-        out5 = BlendInRange<_firstRowOut, _firstRowOut + 6>(out5, tmp5);
-    }
+    TransposeSetOutput<_firstRowOut, 7, _overwriteUnused, _unusedSetZero>(out0, out1, out2, out3, out4, out5, tmp0,
+                                                                          tmp1, tmp2, tmp3, tmp4, tmp5);
 }
 
 
@@ -7066,40 +6117,8 @@ inline void Transpose7x1(__m256 in0, __m256& out0, __m256& out1, __m256& out2, _
     }
 
     // Write to output registers
-    if constexpr (_overwriteUnused)
-    {
-        if constexpr (_unusedSetZero)
-        {
-            const __m256 zero = _mm_setzero<__m256>();
-            out0 = BlendIndex<_firstRowOut>(zero, tmp0);
-            out1 = BlendIndex<_firstRowOut>(zero, tmp1);
-            out2 = BlendIndex<_firstRowOut>(zero, tmp2);
-            out3 = BlendIndex<_firstRowOut>(zero, tmp3);
-            out4 = BlendIndex<_firstRowOut>(zero, tmp4);
-            out5 = BlendIndex<_firstRowOut>(zero, tmp5);
-            out6 = BlendIndex<_firstRowOut>(zero, tmp6);
-        }
-        else
-        {
-            out0 = tmp0;
-            out1 = tmp1;
-            out2 = tmp2;
-            out3 = tmp3;
-            out4 = tmp4;
-            out5 = tmp5;
-            out6 = tmp6;
-        }
-    }
-    else
-    {
-        out0 = BlendIndex<_firstRowOut>(out0, tmp0);
-        out1 = BlendIndex<_firstRowOut>(out1, tmp1);
-        out2 = BlendIndex<_firstRowOut>(out2, tmp2);
-        out3 = BlendIndex<_firstRowOut>(out3, tmp3);
-        out4 = BlendIndex<_firstRowOut>(out4, tmp4);
-        out5 = BlendIndex<_firstRowOut>(out5, tmp5);
-        out6 = BlendIndex<_firstRowOut>(out6, tmp6);
-    }
+    TransposeSetOutput<_firstRowOut, 1, _overwriteUnused, _unusedSetZero>(out0, out1, out2, out3, out4, out5, out6,
+                                                                          tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6);
 }
 
 
@@ -7180,40 +6199,8 @@ inline void Transpose7x2(__m256 in0, __m256 in1, __m256& out0, __m256& out1, __m
     }
 
     // Write to output registers
-    if constexpr (_overwriteUnused)
-    {
-        if constexpr (_unusedSetZero)
-        {
-            const __m256 zero = _mm_setzero<__m256>();
-            out0 = BlendInRange<_firstRowOut, _firstRowOut + 1>(zero, tmp0);
-            out1 = BlendInRange<_firstRowOut, _firstRowOut + 1>(zero, tmp1);
-            out2 = BlendInRange<_firstRowOut, _firstRowOut + 1>(zero, tmp2);
-            out3 = BlendInRange<_firstRowOut, _firstRowOut + 1>(zero, tmp3);
-            out4 = BlendInRange<_firstRowOut, _firstRowOut + 1>(zero, tmp4);
-            out5 = BlendInRange<_firstRowOut, _firstRowOut + 1>(zero, tmp5);
-            out6 = BlendInRange<_firstRowOut, _firstRowOut + 1>(zero, tmp6);
-        }
-        else
-        {
-            out0 = tmp0;
-            out1 = tmp1;
-            out2 = tmp2;
-            out3 = tmp3;
-            out4 = tmp4;
-            out5 = tmp5;
-            out6 = tmp6;
-        }
-    }
-    else
-    {
-        out0 = BlendInRange<_firstRowOut, _firstRowOut + 1>(out0, tmp0);
-        out1 = BlendInRange<_firstRowOut, _firstRowOut + 1>(out1, tmp1);
-        out2 = BlendInRange<_firstRowOut, _firstRowOut + 1>(out2, tmp2);
-        out3 = BlendInRange<_firstRowOut, _firstRowOut + 1>(out3, tmp3);
-        out4 = BlendInRange<_firstRowOut, _firstRowOut + 1>(out4, tmp4);
-        out5 = BlendInRange<_firstRowOut, _firstRowOut + 1>(out5, tmp5);
-        out6 = BlendInRange<_firstRowOut, _firstRowOut + 1>(out6, tmp6);
-    }
+    TransposeSetOutput<_firstRowOut, 2, _overwriteUnused, _unusedSetZero>(out0, out1, out2, out3, out4, out5, out6,
+                                                                          tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6);
 }
 
 
@@ -7308,40 +6295,8 @@ inline void Transpose7x3(__m256 in0, __m256 in1, __m256 in2, __m256& out0, __m25
     }
 
     // Write to output registers
-    if constexpr (_overwriteUnused)
-    {
-        if constexpr (_unusedSetZero)
-        {
-            const __m256 zero = _mm_setzero<__m256>();
-            out0 = BlendInRange<_firstRowOut, _firstRowOut + 2>(zero, tmp0);
-            out1 = BlendInRange<_firstRowOut, _firstRowOut + 2>(zero, tmp1);
-            out2 = BlendInRange<_firstRowOut, _firstRowOut + 2>(zero, tmp2);
-            out3 = BlendInRange<_firstRowOut, _firstRowOut + 2>(zero, tmp3);
-            out4 = BlendInRange<_firstRowOut, _firstRowOut + 2>(zero, tmp4);
-            out5 = BlendInRange<_firstRowOut, _firstRowOut + 2>(zero, tmp5);
-            out6 = BlendInRange<_firstRowOut, _firstRowOut + 2>(zero, tmp6);
-        }
-        else
-        {
-            out0 = tmp0;
-            out1 = tmp1;
-            out2 = tmp2;
-            out3 = tmp3;
-            out4 = tmp4;
-            out5 = tmp5;
-            out6 = tmp6;
-        }
-    }
-    else
-    {
-        out0 = BlendInRange<_firstRowOut, _firstRowOut + 2>(out0, tmp0);
-        out1 = BlendInRange<_firstRowOut, _firstRowOut + 2>(out1, tmp1);
-        out2 = BlendInRange<_firstRowOut, _firstRowOut + 2>(out2, tmp2);
-        out3 = BlendInRange<_firstRowOut, _firstRowOut + 2>(out3, tmp3);
-        out4 = BlendInRange<_firstRowOut, _firstRowOut + 2>(out4, tmp4);
-        out5 = BlendInRange<_firstRowOut, _firstRowOut + 2>(out5, tmp5);
-        out6 = BlendInRange<_firstRowOut, _firstRowOut + 2>(out6, tmp6);
-    }
+    TransposeSetOutput<_firstRowOut, 3, _overwriteUnused, _unusedSetZero>(out0, out1, out2, out3, out4, out5, out6,
+                                                                          tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6);
 }
 
 
@@ -7445,40 +6400,8 @@ inline void Transpose7x4(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256&
     }
 
     // Write to output registers
-    if constexpr (_overwriteUnused)
-    {
-        if constexpr (_unusedSetZero)
-        {
-            const __m256 zero = _mm_setzero<__m256>();
-            out0 = BlendInRange<_firstRowOut, _firstRowOut + 3>(zero, tmp0);
-            out1 = BlendInRange<_firstRowOut, _firstRowOut + 3>(zero, tmp1);
-            out2 = BlendInRange<_firstRowOut, _firstRowOut + 3>(zero, tmp2);
-            out3 = BlendInRange<_firstRowOut, _firstRowOut + 3>(zero, tmp3);
-            out4 = BlendInRange<_firstRowOut, _firstRowOut + 3>(zero, tmp4);
-            out5 = BlendInRange<_firstRowOut, _firstRowOut + 3>(zero, tmp5);
-            out6 = BlendInRange<_firstRowOut, _firstRowOut + 3>(zero, tmp6);
-        }
-        else
-        {
-            out0 = tmp0;
-            out1 = tmp1;
-            out2 = tmp2;
-            out3 = tmp3;
-            out4 = tmp4;
-            out5 = tmp5;
-            out6 = tmp6;
-        }
-    }
-    else
-    {
-        out0 = BlendInRange<_firstRowOut, _firstRowOut + 3>(out0, tmp0);
-        out1 = BlendInRange<_firstRowOut, _firstRowOut + 3>(out1, tmp1);
-        out2 = BlendInRange<_firstRowOut, _firstRowOut + 3>(out2, tmp2);
-        out3 = BlendInRange<_firstRowOut, _firstRowOut + 3>(out3, tmp3);
-        out4 = BlendInRange<_firstRowOut, _firstRowOut + 3>(out4, tmp4);
-        out5 = BlendInRange<_firstRowOut, _firstRowOut + 3>(out5, tmp5);
-        out6 = BlendInRange<_firstRowOut, _firstRowOut + 3>(out6, tmp6);
-    }
+    TransposeSetOutput<_firstRowOut, 4, _overwriteUnused, _unusedSetZero>(out0, out1, out2, out3, out4, out5, out6,
+                                                                          tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6);
 }
 
 
@@ -7489,105 +6412,25 @@ template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unused
 inline void Transpose7x5(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 in4, __m256& out0, __m256& out1,
                          __m256& out2, __m256& out3, __m256& out4, __m256& out5, __m256& out6)
 {
-    __m256 tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6;
+    __m256 tout0, tout1, tout2, tout3, tout4, tout5, tout6;
+    __m256 tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7;
 
-    __m256 tmp7, tmp8, tmp9, tmp10, tmp11, tmp12, tmp13, tmp14;
-
-    if constexpr (_firstRowOut == 0)
-    {
-        tmp7 = Permute2F128<0, 0, 1, 0>(in0, in4);
-        tmp8 = in1;
-        tmp9 = in2;
-        tmp10 = in3;
-
-        tmp11 = Permute2F128<0, 1, 1, 1>(in0, in4);
-        tmp12 = Permute2F128<1, 0>(in1);
-        tmp13 = Permute2F128<1, 0>(in2);
-        tmp14 = Permute2F128<1, 0>(in3);
-    }
-    else if constexpr (_firstRowOut == 1)
-    {
-        tmp7 = Permute2F128<1, 0>(in3);
-        tmp8 = Permute2F128<0, 0, 1, 0>(in0, in4);
-        tmp9 = in1;
-        tmp10 = in2;
-
-        tmp11 = in3;
-        tmp12 = Permute2F128<0, 1, 1, 1>(in0, in4);
-        tmp13 = Permute2F128<1, 0>(in1);
-        tmp14 = Permute2F128<1, 0>(in2);
-    }
-    else if constexpr (_firstRowOut == 2)
-    {
-        tmp7 = Permute2F128<1, 0>(in2);
-        tmp8 = Permute2F128<1, 0>(in3);
-        tmp9 = Permute2F128<0, 0, 1, 0>(in0, in4);
-        tmp10 = in1;
-
-        tmp11 = in2;
-        tmp12 = in3;
-        tmp13 = Permute2F128<0, 1, 1, 1>(in0, in4);
-        tmp14 = Permute2F128<1, 0>(in1);
-    }
-    else
-    {
-        tmp7 = Permute2F128<1, 0>(in1);
-        tmp8 = Permute2F128<1, 0>(in2);
-        tmp9 = Permute2F128<1, 0>(in3);
-        tmp10 = Permute2F128<0, 0, 1, 0>(in0, in4);
-
-        tmp11 = in1;
-        tmp12 = in2;
-        tmp13 = in3;
-        tmp14 = Permute2F128<0, 1, 1, 1>(in0, in4);
-    }
+    PermuteBeforeIntraLaneTranspose<_firstRowOut>(tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7, in0, in1, in2, in3,
+                                                  in4);
 
     if constexpr (_firstRowIn == 0)
     {
-        Transpose4x4<0, 0>(tmp7, tmp8, tmp9, tmp10, tmp0, tmp1, tmp2, tmp3);
-        Transpose3x4<0, 0>(tmp11, tmp12, tmp13, tmp14, tmp4, tmp5, tmp6);
+        Transpose4x4<0, 0>(tmp0, tmp1, tmp2, tmp3, tout0, tout1, tout2, tout3);
+        Transpose3x4<0, 0>(tmp4, tmp5, tmp6, tmp7, tout4, tout5, tout6);
     }
     else
     {
-        Transpose3x4<1, 0>(tmp7, tmp8, tmp9, tmp10, tmp0, tmp1, tmp2);
-        Transpose4x4<0, 0>(tmp11, tmp12, tmp13, tmp14, tmp3, tmp4, tmp5, tmp6);
+        Transpose3x4<1, 0>(tmp0, tmp1, tmp2, tmp3, tout0, tout1, tout2);
+        Transpose4x4<0, 0>(tmp4, tmp5, tmp6, tmp7, tout3, tout4, tout5, tout6);
     }
 
-    // Write to output registers
-    if constexpr (_overwriteUnused)
-    {
-        if constexpr (_unusedSetZero)
-        {
-            const __m256 zero = _mm_setzero<__m256>();
-            out0 = BlendInRange<_firstRowOut, _firstRowOut + 4>(zero, tmp0);
-            out1 = BlendInRange<_firstRowOut, _firstRowOut + 4>(zero, tmp1);
-            out2 = BlendInRange<_firstRowOut, _firstRowOut + 4>(zero, tmp2);
-            out3 = BlendInRange<_firstRowOut, _firstRowOut + 4>(zero, tmp3);
-            out4 = BlendInRange<_firstRowOut, _firstRowOut + 4>(zero, tmp4);
-            out5 = BlendInRange<_firstRowOut, _firstRowOut + 4>(zero, tmp5);
-            out6 = BlendInRange<_firstRowOut, _firstRowOut + 4>(zero, tmp6);
-        }
-        else
-        {
-            out0 = tmp0;
-            out1 = tmp1;
-            out2 = tmp2;
-            out3 = tmp3;
-            out4 = tmp4;
-            out5 = tmp5;
-            out6 = tmp6;
-        }
-    }
-    else
-    {
-        out0 = BlendInRange<_firstRowOut, _firstRowOut + 4>(out0, tmp0);
-        out1 = BlendInRange<_firstRowOut, _firstRowOut + 4>(out1, tmp1);
-        out2 = BlendInRange<_firstRowOut, _firstRowOut + 4>(out2, tmp2);
-        out3 = BlendInRange<_firstRowOut, _firstRowOut + 4>(out3, tmp3);
-        out4 = BlendInRange<_firstRowOut, _firstRowOut + 4>(out4, tmp4);
-        out5 = BlendInRange<_firstRowOut, _firstRowOut + 4>(out5, tmp5);
-        out6 = BlendInRange<_firstRowOut, _firstRowOut + 4>(out6, tmp6);
-    }
+    TransposeSetOutput<_firstRowOut, 5, _overwriteUnused, _unusedSetZero>(
+            out0, out1, out2, out3, out4, out5, out6, tout0, tout1, tout2, tout3, tout4, tout5, tout6);
 }
 
 
@@ -7598,93 +6441,25 @@ template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unused
 inline void Transpose7x6(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 in4, __m256 in5, __m256& out0,
                          __m256& out1, __m256& out2, __m256& out3, __m256& out4, __m256& out5, __m256& out6)
 {
-    __m256 tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6;
+    __m256 tout0, tout1, tout2, tout3, tout4, tout5, tout6;
+    __m256 tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7;
 
-    __m256 tmp7, tmp8, tmp9, tmp10, tmp11, tmp12, tmp13, tmp14;
-
-    if constexpr (_firstRowOut == 0)
-    {
-        tmp7 = Permute2F128<0, 0, 1, 0>(in0, in4);
-        tmp8 = Permute2F128<0, 0, 1, 0>(in1, in5);
-        tmp9 = in2;
-        tmp10 = in3;
-
-        tmp11 = Permute2F128<0, 1, 1, 1>(in0, in4);
-        tmp12 = Permute2F128<0, 1, 1, 1>(in1, in5);
-        tmp13 = Permute2F128<1, 0>(in2);
-        tmp14 = Permute2F128<1, 0>(in3);
-    }
-    else if constexpr (_firstRowOut == 1)
-    {
-        tmp7 = Permute2F128<1, 0>(in3);
-        tmp8 = Permute2F128<0, 0, 1, 0>(in0, in4);
-        tmp9 = Permute2F128<0, 0, 1, 0>(in1, in5);
-        tmp10 = in2;
-
-        tmp11 = in3;
-        tmp12 = Permute2F128<0, 1, 1, 1>(in0, in4);
-        tmp13 = Permute2F128<0, 1, 1, 1>(in1, in5);
-        tmp14 = Permute2F128<1, 0>(in2);
-    }
-    else
-    {
-        tmp7 = Permute2F128<1, 0>(in2);
-        tmp8 = Permute2F128<1, 0>(in3);
-        tmp9 = Permute2F128<0, 0, 1, 0>(in0, in4);
-        tmp10 = Permute2F128<0, 0, 1, 0>(in1, in5);
-
-        tmp11 = in2;
-        tmp12 = in3;
-        tmp13 = Permute2F128<0, 1, 1, 1>(in0, in4);
-        tmp14 = Permute2F128<0, 1, 1, 1>(in1, in5);
-    }
+    PermuteBeforeIntraLaneTranspose<_firstRowOut>(tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7, in0, in1, in2, in3,
+                                                  in4, in5);
 
     if constexpr (_firstRowIn == 0)
     {
-        Transpose4x4<0, 0>(tmp7, tmp8, tmp9, tmp10, tmp0, tmp1, tmp2, tmp3);
-        Transpose3x4<0, 0>(tmp11, tmp12, tmp13, tmp14, tmp4, tmp5, tmp6);
+        Transpose4x4<0, 0>(tmp0, tmp1, tmp2, tmp3, tout0, tout1, tout2, tout3);
+        Transpose3x4<0, 0>(tmp4, tmp5, tmp6, tmp7, tout4, tout5, tout6);
     }
     else
     {
-        Transpose3x4<1, 0>(tmp7, tmp8, tmp9, tmp10, tmp0, tmp1, tmp2);
-        Transpose4x4<0, 0>(tmp11, tmp12, tmp13, tmp14, tmp3, tmp4, tmp5, tmp6);
+        Transpose3x4<1, 0>(tmp0, tmp1, tmp2, tmp3, tout0, tout1, tout2);
+        Transpose4x4<0, 0>(tmp4, tmp5, tmp6, tmp7, tout3, tout4, tout5, tout6);
     }
 
-    // Write to output registers
-    if constexpr (_overwriteUnused)
-    {
-        if constexpr (_unusedSetZero)
-        {
-            const __m256 zero = _mm_setzero<__m256>();
-            out0 = BlendInRange<_firstRowOut, _firstRowOut + 5>(zero, tmp0);
-            out1 = BlendInRange<_firstRowOut, _firstRowOut + 5>(zero, tmp1);
-            out2 = BlendInRange<_firstRowOut, _firstRowOut + 5>(zero, tmp2);
-            out3 = BlendInRange<_firstRowOut, _firstRowOut + 5>(zero, tmp3);
-            out4 = BlendInRange<_firstRowOut, _firstRowOut + 5>(zero, tmp4);
-            out5 = BlendInRange<_firstRowOut, _firstRowOut + 5>(zero, tmp5);
-            out6 = BlendInRange<_firstRowOut, _firstRowOut + 5>(zero, tmp6);
-        }
-        else
-        {
-            out0 = tmp0;
-            out1 = tmp1;
-            out2 = tmp2;
-            out3 = tmp3;
-            out4 = tmp4;
-            out5 = tmp5;
-            out6 = tmp6;
-        }
-    }
-    else
-    {
-        out0 = BlendInRange<_firstRowOut, _firstRowOut + 5>(out0, tmp0);
-        out1 = BlendInRange<_firstRowOut, _firstRowOut + 5>(out1, tmp1);
-        out2 = BlendInRange<_firstRowOut, _firstRowOut + 5>(out2, tmp2);
-        out3 = BlendInRange<_firstRowOut, _firstRowOut + 5>(out3, tmp3);
-        out4 = BlendInRange<_firstRowOut, _firstRowOut + 5>(out4, tmp4);
-        out5 = BlendInRange<_firstRowOut, _firstRowOut + 5>(out5, tmp5);
-        out6 = BlendInRange<_firstRowOut, _firstRowOut + 5>(out6, tmp6);
-    }
+    TransposeSetOutput<_firstRowOut, 6, _overwriteUnused, _unusedSetZero>(
+            out0, out1, out2, out3, out4, out5, out6, tout0, tout1, tout2, tout3, tout4, tout5, tout6);
 }
 
 
@@ -7696,83 +6471,25 @@ inline void Transpose7x7(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 
                          __m256& out0, __m256& out1, __m256& out2, __m256& out3, __m256& out4, __m256& out5,
                          __m256& out6)
 {
-    __m256 tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6;
+    __m256 tout0, tout1, tout2, tout3, tout4, tout5, tout6;
+    __m256 tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7;
 
-    __m256 tmp7, tmp8, tmp9, tmp10, tmp11, tmp12, tmp13, tmp14;
-
-    if constexpr (_firstRowOut == 0)
-    {
-        tmp7 = Permute2F128<0, 0, 1, 0>(in0, in4);
-        tmp8 = Permute2F128<0, 0, 1, 0>(in1, in5);
-        tmp9 = Permute2F128<0, 0, 1, 0>(in2, in6);
-        tmp10 = in3;
-
-        tmp11 = Permute2F128<0, 1, 1, 1>(in0, in4);
-        tmp12 = Permute2F128<0, 1, 1, 1>(in1, in5);
-        tmp13 = Permute2F128<0, 1, 1, 1>(in2, in6);
-        tmp14 = Permute2F128<1, 0>(in3);
-    }
-    else
-    {
-        tmp7 = Permute2F128<1, 0>(in3);
-        tmp8 = Permute2F128<0, 0, 1, 0>(in0, in4);
-        tmp9 = Permute2F128<0, 0, 1, 0>(in1, in5);
-        tmp10 = Permute2F128<0, 0, 1, 0>(in2, in6);
-
-        tmp11 = in3;
-        tmp12 = Permute2F128<0, 1, 1, 1>(in0, in4);
-        tmp13 = Permute2F128<0, 1, 1, 1>(in1, in5);
-        tmp14 = Permute2F128<0, 1, 1, 1>(in2, in6);
-    }
+    PermuteBeforeIntraLaneTranspose<_firstRowOut>(tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7, in0, in1, in2, in3,
+                                                  in4, in5, in6);
 
     if constexpr (_firstRowIn == 0)
     {
-        Transpose4x4<0, 0>(tmp7, tmp8, tmp9, tmp10, tmp0, tmp1, tmp2, tmp3);
-        Transpose3x4<0, 0>(tmp11, tmp12, tmp13, tmp14, tmp4, tmp5, tmp6);
+        Transpose4x4<0, 0>(tmp0, tmp1, tmp2, tmp3, tout0, tout1, tout2, tout3);
+        Transpose3x4<0, 0>(tmp4, tmp5, tmp6, tmp7, tout4, tout5, tout6);
     }
     else
     {
-        Transpose3x4<1, 0>(tmp7, tmp8, tmp9, tmp10, tmp0, tmp1, tmp2);
-        Transpose4x4<0, 0>(tmp11, tmp12, tmp13, tmp14, tmp3, tmp4, tmp5, tmp6);
+        Transpose3x4<1, 0>(tmp0, tmp1, tmp2, tmp3, tout0, tout1, tout2);
+        Transpose4x4<0, 0>(tmp4, tmp5, tmp6, tmp7, tout3, tout4, tout5, tout6);
     }
 
-
-
-    // Write to output registers
-    if constexpr (_overwriteUnused)
-    {
-        if constexpr (_unusedSetZero)
-        {
-            const __m256 zero = _mm_setzero<__m256>();
-            out0 = BlendInRange<_firstRowOut, _firstRowOut + 6>(zero, tmp0);
-            out1 = BlendInRange<_firstRowOut, _firstRowOut + 6>(zero, tmp1);
-            out2 = BlendInRange<_firstRowOut, _firstRowOut + 6>(zero, tmp2);
-            out3 = BlendInRange<_firstRowOut, _firstRowOut + 6>(zero, tmp3);
-            out4 = BlendInRange<_firstRowOut, _firstRowOut + 6>(zero, tmp4);
-            out5 = BlendInRange<_firstRowOut, _firstRowOut + 6>(zero, tmp5);
-            out6 = BlendInRange<_firstRowOut, _firstRowOut + 6>(zero, tmp6);
-        }
-        else
-        {
-            out0 = tmp0;
-            out1 = tmp1;
-            out2 = tmp2;
-            out3 = tmp3;
-            out4 = tmp4;
-            out5 = tmp5;
-            out6 = tmp6;
-        }
-    }
-    else
-    {
-        out0 = BlendInRange<_firstRowOut, _firstRowOut + 6>(out0, tmp0);
-        out1 = BlendInRange<_firstRowOut, _firstRowOut + 6>(out1, tmp1);
-        out2 = BlendInRange<_firstRowOut, _firstRowOut + 6>(out2, tmp2);
-        out3 = BlendInRange<_firstRowOut, _firstRowOut + 6>(out3, tmp3);
-        out4 = BlendInRange<_firstRowOut, _firstRowOut + 6>(out4, tmp4);
-        out5 = BlendInRange<_firstRowOut, _firstRowOut + 6>(out5, tmp5);
-        out6 = BlendInRange<_firstRowOut, _firstRowOut + 6>(out6, tmp6);
-    }
+    TransposeSetOutput<_firstRowOut, 7, _overwriteUnused, _unusedSetZero>(
+            out0, out1, out2, out3, out4, out5, out6, tout0, tout1, tout2, tout3, tout4, tout5, tout6);
 }
 
 
@@ -7854,43 +6571,8 @@ inline void Transpose8x1(__m256 in0, __m256& out0, __m256& out1, __m256& out2, _
 
 
     // Write to output registers
-    if constexpr (_overwriteUnused)
-    {
-        if constexpr (_unusedSetZero)
-        {
-            const __m256 zero = _mm_setzero<__m256>();
-            out0 = BlendIndex<_firstRowOut>(zero, tmp0);
-            out1 = BlendIndex<_firstRowOut>(zero, tmp1);
-            out2 = BlendIndex<_firstRowOut>(zero, tmp2);
-            out3 = BlendIndex<_firstRowOut>(zero, tmp3);
-            out4 = BlendIndex<_firstRowOut>(zero, tmp4);
-            out5 = BlendIndex<_firstRowOut>(zero, tmp5);
-            out6 = BlendIndex<_firstRowOut>(zero, tmp6);
-            out7 = BlendIndex<_firstRowOut>(zero, tmp7);
-        }
-        else
-        {
-            out0 = tmp0;
-            out1 = tmp1;
-            out2 = tmp2;
-            out3 = tmp3;
-            out4 = tmp4;
-            out5 = tmp5;
-            out6 = tmp6;
-            out7 = tmp7;
-        }
-    }
-    else
-    {
-        out0 = BlendIndex<_firstRowOut>(out0, tmp0);
-        out1 = BlendIndex<_firstRowOut>(out1, tmp1);
-        out2 = BlendIndex<_firstRowOut>(out2, tmp2);
-        out3 = BlendIndex<_firstRowOut>(out3, tmp3);
-        out4 = BlendIndex<_firstRowOut>(out4, tmp4);
-        out5 = BlendIndex<_firstRowOut>(out5, tmp5);
-        out6 = BlendIndex<_firstRowOut>(out6, tmp6);
-        out7 = BlendIndex<_firstRowOut>(out7, tmp7);
-    }
+    TransposeSetOutput<_firstRowOut, 1, _overwriteUnused, _unusedSetZero>(
+            out0, out1, out2, out3, out4, out5, out6, out7, tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7);
 }
 
 
@@ -7948,43 +6630,8 @@ inline void Transpose8x2(__m256 in0, __m256 in1, __m256& out0, __m256& out1, __m
     }
 
     // Write to output registers
-    if constexpr (_overwriteUnused)
-    {
-        if constexpr (_unusedSetZero)
-        {
-            const __m256 zero = _mm_setzero<__m256>();
-            out0 = BlendInRange<_firstRowOut, _firstRowOut + 1>(zero, tmp0);
-            out1 = BlendInRange<_firstRowOut, _firstRowOut + 1>(zero, tmp1);
-            out2 = BlendInRange<_firstRowOut, _firstRowOut + 1>(zero, tmp2);
-            out3 = BlendInRange<_firstRowOut, _firstRowOut + 1>(zero, tmp3);
-            out4 = BlendInRange<_firstRowOut, _firstRowOut + 1>(zero, tmp4);
-            out5 = BlendInRange<_firstRowOut, _firstRowOut + 1>(zero, tmp5);
-            out6 = BlendInRange<_firstRowOut, _firstRowOut + 1>(zero, tmp6);
-            out7 = BlendInRange<_firstRowOut, _firstRowOut + 1>(zero, tmp7);
-        }
-        else
-        {
-            out0 = tmp0;
-            out1 = tmp1;
-            out2 = tmp2;
-            out3 = tmp3;
-            out4 = tmp4;
-            out5 = tmp5;
-            out6 = tmp6;
-            out7 = tmp7;
-        }
-    }
-    else
-    {
-        out0 = BlendInRange<_firstRowOut, _firstRowOut + 1>(out0, tmp0);
-        out1 = BlendInRange<_firstRowOut, _firstRowOut + 1>(out1, tmp1);
-        out2 = BlendInRange<_firstRowOut, _firstRowOut + 1>(out2, tmp2);
-        out3 = BlendInRange<_firstRowOut, _firstRowOut + 1>(out3, tmp3);
-        out4 = BlendInRange<_firstRowOut, _firstRowOut + 1>(out4, tmp4);
-        out5 = BlendInRange<_firstRowOut, _firstRowOut + 1>(out5, tmp5);
-        out6 = BlendInRange<_firstRowOut, _firstRowOut + 1>(out6, tmp6);
-        out7 = BlendInRange<_firstRowOut, _firstRowOut + 1>(out7, tmp7);
-    }
+    TransposeSetOutput<_firstRowOut, 2, _overwriteUnused, _unusedSetZero>(
+            out0, out1, out2, out3, out4, out5, out6, out7, tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7);
 }
 
 
@@ -8055,43 +6702,8 @@ inline void Transpose8x3(__m256 in0, __m256 in1, __m256 in2, __m256& out0, __m25
     }
 
     // Write to output registers
-    if constexpr (_overwriteUnused)
-    {
-        if constexpr (_unusedSetZero)
-        {
-            const __m256 zero = _mm_setzero<__m256>();
-            out0 = BlendInRange<_firstRowOut, _firstRowOut + 2>(zero, tmp0);
-            out1 = BlendInRange<_firstRowOut, _firstRowOut + 2>(zero, tmp1);
-            out2 = BlendInRange<_firstRowOut, _firstRowOut + 2>(zero, tmp2);
-            out3 = BlendInRange<_firstRowOut, _firstRowOut + 2>(zero, tmp3);
-            out4 = BlendInRange<_firstRowOut, _firstRowOut + 2>(zero, tmp4);
-            out5 = BlendInRange<_firstRowOut, _firstRowOut + 2>(zero, tmp5);
-            out6 = BlendInRange<_firstRowOut, _firstRowOut + 2>(zero, tmp6);
-            out7 = BlendInRange<_firstRowOut, _firstRowOut + 2>(zero, tmp7);
-        }
-        else
-        {
-            out0 = tmp0;
-            out1 = tmp1;
-            out2 = tmp2;
-            out3 = tmp3;
-            out4 = tmp4;
-            out5 = tmp5;
-            out6 = tmp6;
-            out7 = tmp7;
-        }
-    }
-    else
-    {
-        out0 = BlendInRange<_firstRowOut, _firstRowOut + 2>(out0, tmp0);
-        out1 = BlendInRange<_firstRowOut, _firstRowOut + 2>(out1, tmp1);
-        out2 = BlendInRange<_firstRowOut, _firstRowOut + 2>(out2, tmp2);
-        out3 = BlendInRange<_firstRowOut, _firstRowOut + 2>(out3, tmp3);
-        out4 = BlendInRange<_firstRowOut, _firstRowOut + 2>(out4, tmp4);
-        out5 = BlendInRange<_firstRowOut, _firstRowOut + 2>(out5, tmp5);
-        out6 = BlendInRange<_firstRowOut, _firstRowOut + 2>(out6, tmp6);
-        out7 = BlendInRange<_firstRowOut, _firstRowOut + 2>(out7, tmp7);
-    }
+    TransposeSetOutput<_firstRowOut, 3, _overwriteUnused, _unusedSetZero>(
+            out0, out1, out2, out3, out4, out5, out6, out7, tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7);
 }
 
 
@@ -8102,111 +6714,48 @@ template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unused
 inline void Transpose8x4(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256& out0, __m256& out1, __m256& out2,
                          __m256& out3, __m256& out4, __m256& out5, __m256& out6, __m256& out7)
 {
-    __m256 tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7;
+    __m256 tout0, tout1, tout2, tout3, tout4, tout5, tout6, tout7;
 
 
     if constexpr (_firstRowOut == 0)
     {
-
-        Transpose4x4(in0, in1, in2, in3, tmp0, tmp1, tmp2, tmp3);
-        tmp4 = Permute2F128<1, 0>(tmp0);
-        tmp5 = Permute2F128<1, 0>(tmp1);
-        tmp6 = Permute2F128<1, 0>(tmp2);
-        tmp7 = Permute2F128<1, 0>(tmp3);
+        Transpose4x4(in0, in1, in2, in3, tout0, tout1, tout2, tout3);
+        tout4 = Permute2F128<1, 0>(tout0);
+        tout5 = Permute2F128<1, 0>(tout1);
+        tout6 = Permute2F128<1, 0>(tout2);
+        tout7 = Permute2F128<1, 0>(tout3);
     }
     else if constexpr (_firstRowOut == 4)
     {
-
-        Transpose4x4(in0, in1, in2, in3, tmp4, tmp5, tmp6, tmp7);
-        tmp0 = Permute2F128<1, 0>(tmp4);
-        tmp1 = Permute2F128<1, 0>(tmp5);
-        tmp2 = Permute2F128<1, 0>(tmp6);
-        tmp3 = Permute2F128<1, 0>(tmp7);
+        Transpose4x4(in0, in1, in2, in3, tout4, tout5, tout6, tout7);
+        tout0 = Permute2F128<1, 0>(tout4);
+        tout1 = Permute2F128<1, 0>(tout5);
+        tout2 = Permute2F128<1, 0>(tout6);
+        tout3 = Permute2F128<1, 0>(tout7);
     }
     else
     {
-        __m256 tmp8, tmp9, tmp10, tmp11, tmp12, tmp13, tmp14, tmp15;
+        __m256 tmp0, tmp1, tmp2, tmp3;
 
         if constexpr (_firstRowOut == 1)
-        {
-            tmp8 = Permute2F128<1, 0>(in3);
-            tmp9 = in0;
-            tmp10 = in1;
-            tmp11 = in2;
-
-            tmp12 = in3;
-            tmp13 = Permute2F128<1, 0>(in0);
-            tmp14 = Permute2F128<1, 0>(in1);
-            tmp15 = Permute2F128<1, 0>(in2);
-        }
+            Transpose4x4(in3, in0, in1, in2, tmp0, tmp1, tmp2, tmp3);
         else if constexpr (_firstRowOut == 2)
-        {
-            tmp8 = Permute2F128<1, 0>(in2);
-            tmp9 = Permute2F128<1, 0>(in3);
-            tmp10 = in0;
-            tmp11 = in1;
-
-            tmp12 = in2;
-            tmp13 = in3;
-            tmp14 = Permute2F128<1, 0>(in0);
-            tmp15 = Permute2F128<1, 0>(in1);
-        }
+            Transpose4x4(in2, in3, in0, in1, tmp0, tmp1, tmp2, tmp3);
         else
-        {
-            tmp8 = Permute2F128<1, 0>(in1);
-            tmp9 = Permute2F128<1, 0>(in2);
-            tmp10 = Permute2F128<1, 0>(in3);
-            tmp11 = in0;
+            Transpose4x4(in1, in2, in3, in0, tmp0, tmp1, tmp2, tmp3);
 
-            tmp12 = in1;
-            tmp13 = in2;
-            tmp14 = in3;
-            tmp15 = Permute2F128<1, 0>(in0);
-        }
-
-
-        Transpose4x4(tmp8, tmp9, tmp10, tmp11, tmp0, tmp1, tmp2, tmp3);
-        Transpose4x4(tmp12, tmp13, tmp14, tmp15, tmp4, tmp5, tmp6, tmp7);
+        tout0 = Permute2F128<0, 0>(tmp0);
+        tout1 = Permute2F128<0, 0>(tmp1);
+        tout2 = Permute2F128<0, 0>(tmp2);
+        tout3 = Permute2F128<0, 0>(tmp3);
+        tout4 = Permute2F128<1, 1>(tmp0);
+        tout5 = Permute2F128<1, 1>(tmp1);
+        tout6 = Permute2F128<1, 1>(tmp2);
+        tout7 = Permute2F128<1, 1>(tmp3);
     }
 
-    // Write to output registers
-    if constexpr (_overwriteUnused)
-    {
-        if constexpr (_unusedSetZero)
-        {
-            const __m256 zero = _mm_setzero<__m256>();
-            out0 = BlendInRange<_firstRowOut, _firstRowOut + 3>(zero, tmp0);
-            out1 = BlendInRange<_firstRowOut, _firstRowOut + 3>(zero, tmp1);
-            out2 = BlendInRange<_firstRowOut, _firstRowOut + 3>(zero, tmp2);
-            out3 = BlendInRange<_firstRowOut, _firstRowOut + 3>(zero, tmp3);
-            out4 = BlendInRange<_firstRowOut, _firstRowOut + 3>(zero, tmp4);
-            out5 = BlendInRange<_firstRowOut, _firstRowOut + 3>(zero, tmp5);
-            out6 = BlendInRange<_firstRowOut, _firstRowOut + 3>(zero, tmp6);
-            out7 = BlendInRange<_firstRowOut, _firstRowOut + 3>(zero, tmp7);
-        }
-        else
-        {
-            out0 = tmp0;
-            out1 = tmp1;
-            out2 = tmp2;
-            out3 = tmp3;
-            out4 = tmp4;
-            out5 = tmp5;
-            out6 = tmp6;
-            out7 = tmp7;
-        }
-    }
-    else
-    {
-        out0 = BlendInRange<_firstRowOut, _firstRowOut + 3>(out0, tmp0);
-        out1 = BlendInRange<_firstRowOut, _firstRowOut + 3>(out1, tmp1);
-        out2 = BlendInRange<_firstRowOut, _firstRowOut + 3>(out2, tmp2);
-        out3 = BlendInRange<_firstRowOut, _firstRowOut + 3>(out3, tmp3);
-        out4 = BlendInRange<_firstRowOut, _firstRowOut + 3>(out4, tmp4);
-        out5 = BlendInRange<_firstRowOut, _firstRowOut + 3>(out5, tmp5);
-        out6 = BlendInRange<_firstRowOut, _firstRowOut + 3>(out6, tmp6);
-        out7 = BlendInRange<_firstRowOut, _firstRowOut + 3>(out7, tmp7);
-    }
+    TransposeSetOutput<_firstRowOut, 4, _overwriteUnused, _unusedSetZero>(
+            out0, out1, out2, out3, out4, out5, out6, out7, tout0, tout1, tout2, tout3, tout4, tout5, tout6, tout7);
 }
 
 
@@ -8217,105 +6766,17 @@ template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unused
 inline void Transpose8x5(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 in4, __m256& out0, __m256& out1,
                          __m256& out2, __m256& out3, __m256& out4, __m256& out5, __m256& out6, __m256& out7)
 {
+    __m256 tout0, tout1, tout2, tout3, tout4, tout5, tout6, tout7;
     __m256 tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7;
 
-    __m256 tmp8, tmp9, tmp10, tmp11, tmp12, tmp13, tmp14, tmp15;
+    PermuteBeforeIntraLaneTranspose<_firstRowOut>(tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7, in0, in1, in2, in3,
+                                                  in4);
 
-    if constexpr (_firstRowOut == 0)
-    {
-        tmp8 = Permute2F128<0, 0, 1, 0>(in0, in4);
-        tmp9 = in1;
-        tmp10 = in2;
-        tmp11 = in3;
+    Transpose4x4(tmp0, tmp1, tmp2, tmp3, tout0, tout1, tout2, tout3);
+    Transpose4x4(tmp4, tmp5, tmp6, tmp7, tout4, tout5, tout6, tout7);
 
-        tmp12 = Permute2F128<0, 1, 1, 1>(in0, in4);
-        tmp13 = Permute2F128<1, 0>(in1);
-        tmp14 = Permute2F128<1, 0>(in2);
-        tmp15 = Permute2F128<1, 0>(in3);
-    }
-    else if constexpr (_firstRowOut == 1)
-    {
-        tmp8 = Permute2F128<1, 0>(in3);
-        tmp9 = Permute2F128<0, 0, 1, 0>(in0, in4);
-        tmp10 = in1;
-        tmp11 = in2;
-
-        tmp12 = in3;
-        tmp13 = Permute2F128<0, 1, 1, 1>(in0, in4);
-        tmp14 = Permute2F128<1, 0>(in1);
-        tmp15 = Permute2F128<1, 0>(in2);
-    }
-    else if constexpr (_firstRowOut == 2)
-    {
-        tmp8 = Permute2F128<1, 0>(in2);
-        tmp9 = Permute2F128<1, 0>(in3);
-        tmp10 = Permute2F128<0, 0, 1, 0>(in0, in4);
-        tmp11 = in1;
-
-        tmp12 = in2;
-        tmp13 = in3;
-        tmp14 = Permute2F128<0, 1, 1, 1>(in0, in4);
-        tmp15 = Permute2F128<1, 0>(in1);
-    }
-    else
-    {
-        tmp8 = Permute2F128<1, 0>(in1);
-        tmp9 = Permute2F128<1, 0>(in2);
-        tmp10 = Permute2F128<1, 0>(in3);
-        tmp11 = Permute2F128<0, 0, 1, 0>(in0, in4);
-
-        tmp12 = in1;
-        tmp13 = in2;
-        tmp14 = in3;
-        tmp15 = Permute2F128<0, 1, 1, 1>(in0, in4);
-    }
-
-
-    Transpose4x4(tmp8, tmp9, tmp10, tmp11, tmp0, tmp1, tmp2, tmp3);
-    Transpose4x4(tmp12, tmp13, tmp14, tmp15, tmp4, tmp5, tmp6, tmp7);
-
-
-
-    // Write to output registers
-
-    // Write to output registers
-    if constexpr (_overwriteUnused)
-    {
-        if constexpr (_unusedSetZero)
-        {
-            const __m256 zero = _mm_setzero<__m256>();
-            out0 = BlendInRange<_firstRowOut, _firstRowOut + 4>(zero, tmp0);
-            out1 = BlendInRange<_firstRowOut, _firstRowOut + 4>(zero, tmp1);
-            out2 = BlendInRange<_firstRowOut, _firstRowOut + 4>(zero, tmp2);
-            out3 = BlendInRange<_firstRowOut, _firstRowOut + 4>(zero, tmp3);
-            out4 = BlendInRange<_firstRowOut, _firstRowOut + 4>(zero, tmp4);
-            out5 = BlendInRange<_firstRowOut, _firstRowOut + 4>(zero, tmp5);
-            out6 = BlendInRange<_firstRowOut, _firstRowOut + 4>(zero, tmp6);
-            out7 = BlendInRange<_firstRowOut, _firstRowOut + 4>(zero, tmp7);
-        }
-        else
-        {
-            out0 = tmp0;
-            out1 = tmp1;
-            out2 = tmp2;
-            out3 = tmp3;
-            out4 = tmp4;
-            out5 = tmp5;
-            out6 = tmp6;
-            out7 = tmp7;
-        }
-    }
-    else
-    {
-        out0 = BlendInRange<_firstRowOut, _firstRowOut + 4>(out0, tmp0);
-        out1 = BlendInRange<_firstRowOut, _firstRowOut + 4>(out1, tmp1);
-        out2 = BlendInRange<_firstRowOut, _firstRowOut + 4>(out2, tmp2);
-        out3 = BlendInRange<_firstRowOut, _firstRowOut + 4>(out3, tmp3);
-        out4 = BlendInRange<_firstRowOut, _firstRowOut + 4>(out4, tmp4);
-        out5 = BlendInRange<_firstRowOut, _firstRowOut + 4>(out5, tmp5);
-        out6 = BlendInRange<_firstRowOut, _firstRowOut + 4>(out6, tmp6);
-        out7 = BlendInRange<_firstRowOut, _firstRowOut + 4>(out7, tmp7);
-    }
+    TransposeSetOutput<_firstRowOut, 5, _overwriteUnused, _unusedSetZero>(
+            out0, out1, out2, out3, out4, out5, out6, out7, tout0, tout1, tout2, tout3, tout4, tout5, tout6, tout7);
 }
 
 
@@ -8327,93 +6788,17 @@ inline void Transpose8x6(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 
                          __m256& out1, __m256& out2, __m256& out3, __m256& out4, __m256& out5, __m256& out6,
                          __m256& out7)
 {
+    __m256 tout0, tout1, tout2, tout3, tout4, tout5, tout6, tout7;
     __m256 tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7;
 
-    __m256 tmp8, tmp9, tmp10, tmp11, tmp12, tmp13, tmp14, tmp15;
+    PermuteBeforeIntraLaneTranspose<_firstRowOut>(tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7, in0, in1, in2, in3,
+                                                  in4, in5);
 
-    if constexpr (_firstRowOut == 0)
-    {
-        tmp8 = Permute2F128<0, 0, 1, 0>(in0, in4);
-        tmp9 = Permute2F128<0, 0, 1, 0>(in1, in5);
-        tmp10 = in2;
-        tmp11 = in3;
+    Transpose4x4(tmp0, tmp1, tmp2, tmp3, tout0, tout1, tout2, tout3);
+    Transpose4x4(tmp4, tmp5, tmp6, tmp7, tout4, tout5, tout6, tout7);
 
-        tmp12 = Permute2F128<0, 1, 1, 1>(in0, in4);
-        tmp13 = Permute2F128<0, 1, 1, 1>(in1, in5);
-        tmp14 = Permute2F128<1, 0>(in2);
-        tmp15 = Permute2F128<1, 0>(in3);
-    }
-    else if constexpr (_firstRowOut == 1)
-    {
-        tmp8 = Permute2F128<1, 0>(in3);
-        tmp9 = Permute2F128<0, 0, 1, 0>(in0, in4);
-        tmp10 = Permute2F128<0, 0, 1, 0>(in1, in5);
-        tmp11 = in2;
-
-        tmp12 = in3;
-        tmp13 = Permute2F128<0, 1, 1, 1>(in0, in4);
-        tmp14 = Permute2F128<0, 1, 1, 1>(in1, in5);
-        tmp15 = Permute2F128<1, 0>(in2);
-    }
-    else
-    {
-        tmp8 = Permute2F128<1, 0>(in2);
-        tmp9 = Permute2F128<1, 0>(in3);
-        tmp10 = Permute2F128<0, 0, 1, 0>(in0, in4);
-        tmp11 = Permute2F128<0, 0, 1, 0>(in1, in5);
-
-        tmp12 = in2;
-        tmp13 = in3;
-        tmp14 = Permute2F128<0, 1, 1, 1>(in0, in4);
-        tmp15 = Permute2F128<0, 1, 1, 1>(in1, in5);
-    }
-
-
-    Transpose4x4(tmp8, tmp9, tmp10, tmp11, tmp0, tmp1, tmp2, tmp3);
-    Transpose4x4(tmp12, tmp13, tmp14, tmp15, tmp4, tmp5, tmp6, tmp7);
-
-
-
-    // Write to output registers
-
-    // Write to output registers
-    if constexpr (_overwriteUnused)
-    {
-        if constexpr (_unusedSetZero)
-        {
-            const __m256 zero = _mm_setzero<__m256>();
-            out0 = BlendInRange<_firstRowOut, _firstRowOut + 5>(zero, tmp0);
-            out1 = BlendInRange<_firstRowOut, _firstRowOut + 5>(zero, tmp1);
-            out2 = BlendInRange<_firstRowOut, _firstRowOut + 5>(zero, tmp2);
-            out3 = BlendInRange<_firstRowOut, _firstRowOut + 5>(zero, tmp3);
-            out4 = BlendInRange<_firstRowOut, _firstRowOut + 5>(zero, tmp4);
-            out5 = BlendInRange<_firstRowOut, _firstRowOut + 5>(zero, tmp5);
-            out6 = BlendInRange<_firstRowOut, _firstRowOut + 5>(zero, tmp6);
-            out7 = BlendInRange<_firstRowOut, _firstRowOut + 5>(zero, tmp7);
-        }
-        else
-        {
-            out0 = tmp0;
-            out1 = tmp1;
-            out2 = tmp2;
-            out3 = tmp3;
-            out4 = tmp4;
-            out5 = tmp5;
-            out6 = tmp6;
-            out7 = tmp7;
-        }
-    }
-    else
-    {
-        out0 = BlendInRange<_firstRowOut, _firstRowOut + 5>(out0, tmp0);
-        out1 = BlendInRange<_firstRowOut, _firstRowOut + 5>(out1, tmp1);
-        out2 = BlendInRange<_firstRowOut, _firstRowOut + 5>(out2, tmp2);
-        out3 = BlendInRange<_firstRowOut, _firstRowOut + 5>(out3, tmp3);
-        out4 = BlendInRange<_firstRowOut, _firstRowOut + 5>(out4, tmp4);
-        out5 = BlendInRange<_firstRowOut, _firstRowOut + 5>(out5, tmp5);
-        out6 = BlendInRange<_firstRowOut, _firstRowOut + 5>(out6, tmp6);
-        out7 = BlendInRange<_firstRowOut, _firstRowOut + 5>(out7, tmp7);
-    }
+    TransposeSetOutput<_firstRowOut, 6, _overwriteUnused, _unusedSetZero>(
+            out0, out1, out2, out3, out4, out5, out6, out7, tout0, tout1, tout2, tout3, tout4, tout5, tout6, tout7);
 }
 
 
@@ -8425,81 +6810,17 @@ inline void Transpose8x7(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 
                          __m256& out0, __m256& out1, __m256& out2, __m256& out3, __m256& out4, __m256& out5,
                          __m256& out6, __m256& out7)
 {
+    __m256 tout0, tout1, tout2, tout3, tout4, tout5, tout6, tout7;
     __m256 tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7;
 
-    __m256 tmp8, tmp9, tmp10, tmp11, tmp12, tmp13, tmp14, tmp15;
+    PermuteBeforeIntraLaneTranspose<_firstRowOut>(tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7, in0, in1, in2, in3,
+                                                  in4, in5, in6);
 
-    if constexpr (_firstRowOut == 0)
-    {
-        tmp8 = Permute2F128<0, 0, 1, 0>(in0, in4);
-        tmp9 = Permute2F128<0, 0, 1, 0>(in1, in5);
-        tmp10 = Permute2F128<0, 0, 1, 0>(in2, in6);
-        tmp11 = in3;
+    Transpose4x4(tmp0, tmp1, tmp2, tmp3, tout0, tout1, tout2, tout3);
+    Transpose4x4(tmp4, tmp5, tmp6, tmp7, tout4, tout5, tout6, tout7);
 
-        tmp12 = Permute2F128<0, 1, 1, 1>(in0, in4);
-        tmp13 = Permute2F128<0, 1, 1, 1>(in1, in5);
-        tmp14 = Permute2F128<0, 1, 1, 1>(in2, in6);
-        tmp15 = Permute2F128<1, 0>(in3);
-    }
-    else
-    {
-        tmp8 = Permute2F128<1, 0>(in3);
-        tmp9 = Permute2F128<0, 0, 1, 0>(in0, in4);
-        tmp10 = Permute2F128<0, 0, 1, 0>(in1, in5);
-        tmp11 = Permute2F128<0, 0, 1, 0>(in2, in6);
-
-        tmp12 = in3;
-        tmp13 = Permute2F128<0, 1, 1, 1>(in0, in4);
-        tmp14 = Permute2F128<0, 1, 1, 1>(in1, in5);
-        tmp15 = Permute2F128<0, 1, 1, 1>(in2, in6);
-    }
-
-
-    Transpose4x4(tmp8, tmp9, tmp10, tmp11, tmp0, tmp1, tmp2, tmp3);
-    Transpose4x4(tmp12, tmp13, tmp14, tmp15, tmp4, tmp5, tmp6, tmp7);
-
-
-
-    // Write to output registers
-
-    // Write to output registers
-    if constexpr (_overwriteUnused)
-    {
-        if constexpr (_unusedSetZero)
-        {
-            const __m256 zero = _mm_setzero<__m256>();
-            out0 = BlendInRange<_firstRowOut, _firstRowOut + 6>(zero, tmp0);
-            out1 = BlendInRange<_firstRowOut, _firstRowOut + 6>(zero, tmp1);
-            out2 = BlendInRange<_firstRowOut, _firstRowOut + 6>(zero, tmp2);
-            out3 = BlendInRange<_firstRowOut, _firstRowOut + 6>(zero, tmp3);
-            out4 = BlendInRange<_firstRowOut, _firstRowOut + 6>(zero, tmp4);
-            out5 = BlendInRange<_firstRowOut, _firstRowOut + 6>(zero, tmp5);
-            out6 = BlendInRange<_firstRowOut, _firstRowOut + 6>(zero, tmp6);
-            out7 = BlendInRange<_firstRowOut, _firstRowOut + 6>(zero, tmp7);
-        }
-        else
-        {
-            out0 = tmp0;
-            out1 = tmp1;
-            out2 = tmp2;
-            out3 = tmp3;
-            out4 = tmp4;
-            out5 = tmp5;
-            out6 = tmp6;
-            out7 = tmp7;
-        }
-    }
-    else
-    {
-        out0 = BlendInRange<_firstRowOut, _firstRowOut + 6>(out0, tmp0);
-        out1 = BlendInRange<_firstRowOut, _firstRowOut + 6>(out1, tmp1);
-        out2 = BlendInRange<_firstRowOut, _firstRowOut + 6>(out2, tmp2);
-        out3 = BlendInRange<_firstRowOut, _firstRowOut + 6>(out3, tmp3);
-        out4 = BlendInRange<_firstRowOut, _firstRowOut + 6>(out4, tmp4);
-        out5 = BlendInRange<_firstRowOut, _firstRowOut + 6>(out5, tmp5);
-        out6 = BlendInRange<_firstRowOut, _firstRowOut + 6>(out6, tmp6);
-        out7 = BlendInRange<_firstRowOut, _firstRowOut + 6>(out7, tmp7);
-    }
+    TransposeSetOutput<_firstRowOut, 7, _overwriteUnused, _unusedSetZero>(
+            out0, out1, out2, out3, out4, out5, out6, out7, tout0, tout1, tout2, tout3, tout4, tout5, tout6, tout7);
 }
 
 

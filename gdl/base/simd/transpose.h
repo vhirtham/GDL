@@ -17,8 +17,7 @@ namespace GDL::simd
 // (Benchmark it). Original idea was to reduce number of instructions, but since the throughput of Permute2F128 is 1, it
 // should be faster to handle all Permutes at once as long as there are less than 2 additional instructions
 
-// move content to multiple files, were each file covers a single register -> transpose_m128.h + transpose_m128.inl etc.
-// same goes for the tests.
+// test all brancehes of the general transpose function
 // use "out" parameters already for intermediate results -> before the set zero etc. lines
 // Try to reuse as much code as possible -> setzero etc parts in extra function
 
