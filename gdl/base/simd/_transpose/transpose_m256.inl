@@ -6307,101 +6307,71 @@ template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unused
 inline void Transpose7x4(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256& out0, __m256& out1, __m256& out2,
                          __m256& out3, __m256& out4, __m256& out5, __m256& out6)
 {
-    __m256 tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6;
+    __m256 tout0, tout1, tout2, tout3, tout4, tout5, tout6;
 
 
     if constexpr (_firstRowOut == 0)
     {
         if constexpr (_firstRowIn == 0)
-        {
-            Transpose4x4(in0, in1, in2, in3, tmp0, tmp1, tmp2, tmp3);
-            tmp4 = Permute2F128<1, 0>(tmp0);
-            tmp5 = Permute2F128<1, 0>(tmp1);
-            tmp6 = Permute2F128<1, 0>(tmp2);
-        }
+            Transpose4x4(in0, in1, in2, in3, tout0, tout1, tout2, tout3);
         else
         {
-            Transpose4x4(in0, in1, in2, in3, tmp3, tmp0, tmp1, tmp2);
-            tmp3 = Permute2F128<1, 0>(tmp3);
-            tmp4 = Permute2F128<1, 0>(tmp0);
-            tmp5 = Permute2F128<1, 0>(tmp1);
-            tmp6 = Permute2F128<1, 0>(tmp2);
+            Transpose4x4(in0, in1, in2, in3, tout3, tout0, tout1, tout2);
+            tout3 = Permute2F128<1, 0>(tout3);
         }
+        tout4 = Permute2F128<1, 0>(tout0);
+        tout5 = Permute2F128<1, 0>(tout1);
+        tout6 = Permute2F128<1, 0>(tout2);
     }
     else if constexpr (_firstRowOut == 4)
     {
         if constexpr (_firstRowIn == 0)
         {
-            Transpose4x4(in0, in1, in2, in3, tmp4, tmp5, tmp6, tmp3);
-            tmp0 = Permute2F128<1, 0>(tmp4);
-            tmp1 = Permute2F128<1, 0>(tmp5);
-            tmp2 = Permute2F128<1, 0>(tmp6);
-            tmp3 = Permute2F128<1, 0>(tmp3);
+            Transpose4x4(in0, in1, in2, in3, tout4, tout5, tout6, tout3);
+            tout3 = Permute2F128<1, 0>(tout3);
         }
         else
-        {
-            Transpose4x4(in0, in1, in2, in3, tmp3, tmp4, tmp5, tmp6);
-            tmp0 = Permute2F128<1, 0>(tmp4);
-            tmp1 = Permute2F128<1, 0>(tmp5);
-            tmp2 = Permute2F128<1, 0>(tmp6);
-        }
+            Transpose4x4(in0, in1, in2, in3, tout3, tout4, tout5, tout6);
+
+        tout0 = Permute2F128<1, 0>(tout4);
+        tout1 = Permute2F128<1, 0>(tout5);
+        tout2 = Permute2F128<1, 0>(tout6);
     }
     else
     {
-        __m256 tmp7, tmp8, tmp9, tmp10, tmp11, tmp12, tmp13, tmp14;
+        __m256 tmp0, tmp1, tmp2, tmp3;
 
         if constexpr (_firstRowOut == 1)
-        {
-            tmp7 = Permute2F128<0, 1, 1, 0>(in0, in3);
-            tmp8 = in0;
-            tmp9 = in1;
-            tmp10 = in2;
-
-            tmp11 = in3;
-            tmp12 = tmp7;
-            tmp13 = Permute2F128<1, 0>(in1);
-            tmp14 = Permute2F128<1, 0>(in2);
-        }
+            Transpose4x4(in3, in0, in1, in2, tmp0, tmp1, tmp2, tmp3);
         else if constexpr (_firstRowOut == 2)
-        {
-            tmp7 = Permute2F128<1, 0>(in2);
-            tmp8 = Permute2F128<0, 1, 1, 0>(in0, in3);
-            tmp9 = in0;
-            tmp10 = in1;
-
-            tmp11 = in2;
-            tmp12 = in3;
-            tmp13 = tmp8;
-            tmp14 = Permute2F128<1, 0>(in1);
-        }
+            Transpose4x4(in2, in3, in0, in1, tmp0, tmp1, tmp2, tmp3);
         else
-        {
-            tmp7 = Permute2F128<1, 0>(in1);
-            tmp8 = Permute2F128<1, 0>(in2);
-            tmp9 = Permute2F128<0, 1, 1, 0>(in0, in3);
-            tmp10 = in0;
-
-            tmp11 = in1;
-            tmp12 = in2;
-            tmp13 = in3;
-            tmp14 = tmp9;
-        }
+            Transpose4x4(in1, in2, in3, in0, tmp0, tmp1, tmp2, tmp3);
 
         if constexpr (_firstRowIn == 0)
         {
-            Transpose4x4<0, 0>(tmp7, tmp8, tmp9, tmp10, tmp0, tmp1, tmp2, tmp3);
-            Transpose3x4<0, 0>(tmp11, tmp12, tmp13, tmp14, tmp4, tmp5, tmp6);
+            tout0 = Permute2F128<0, 0>(tmp0);
+            tout1 = Permute2F128<0, 0>(tmp1);
+            tout2 = Permute2F128<0, 0>(tmp2);
+            tout3 = Permute2F128<0, 0>(tmp3);
+            tout4 = Permute2F128<1, 1>(tmp0);
+            tout5 = Permute2F128<1, 1>(tmp1);
+            tout6 = Permute2F128<1, 1>(tmp2);
         }
         else
         {
-            Transpose3x4<1, 0>(tmp7, tmp8, tmp9, tmp10, tmp0, tmp1, tmp2);
-            Transpose4x4<0, 0>(tmp11, tmp12, tmp13, tmp14, tmp3, tmp4, tmp5, tmp6);
+            tout0 = Permute2F128<0, 0>(tmp1);
+            tout1 = Permute2F128<0, 0>(tmp2);
+            tout2 = Permute2F128<0, 0>(tmp3);
+            tout3 = Permute2F128<1, 1>(tmp0);
+            tout4 = Permute2F128<1, 1>(tmp1);
+            tout5 = Permute2F128<1, 1>(tmp2);
+            tout6 = Permute2F128<1, 1>(tmp3);
         }
     }
 
-    // Write to output registers
-    TransposeSetOutput<_firstRowOut, 4, _overwriteUnused, _unusedSetZero>(out0, out1, out2, out3, out4, out5, out6,
-                                                                          tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6);
+    TransposeSetOutput<_firstRowOut, 4, _overwriteUnused, _unusedSetZero>(
+            out0, out1, out2, out3, out4, out5, out6, tout0, tout1, tout2, tout3, tout4, tout5, tout6);
 }
 
 
