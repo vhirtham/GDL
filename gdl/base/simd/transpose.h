@@ -21,7 +21,7 @@ namespace GDL::simd
 // use "out" parameters already for intermediate results -> before the set zero etc. lines
 // Try to reuse as much code as possible -> setzero etc parts in extra function
 // add SwapLanes function to replace Permute2F128<1,0>
-// add Conditional swap lanes function that either returns the input or the input with swapped lanes -> SwapLanesIf<>()
+// move SwapLanesIf to swizzle header and write a test
 // add Permute2F128If -> like SwapLanesIf --- just let Permute2F128<0,1> return the input
 
 //! @brief Transposes a matrix represented by an column major register array. The maximal supported matrix size is NxN

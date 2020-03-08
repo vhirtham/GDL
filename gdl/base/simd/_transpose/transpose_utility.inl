@@ -8,6 +8,19 @@
 namespace GDL::simd
 {
 
+// --------------------------------------------------------------------------------------------------------------------
+
+template <bool _condition, typename _registerType>
+inline _registerType SwapLanesIf(_registerType in)
+{
+    static_assert(numLanes<_registerType> == 2, "Only registers with 2 lanes supported.");
+    if constexpr (_condition)
+        return Permute2F128<1, 0>(in);
+    else
+        return in;
+}
+
+
 
 // --------------------------------------------------------------------------------------------------------------------
 

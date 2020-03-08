@@ -5170,35 +5170,17 @@ inline void Transpose5x4(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256&
     if constexpr (_firstRowOut == 0)
     {
         tout0 = tmp[0];
-        if constexpr (_firstRowIn <= 2)
-            tout1 = tmp[1];
-        else
-            tout1 = Permute2F128<1, 0>(tmp[1]);
-        if constexpr (_firstRowIn <= 1)
-            tout2 = tmp[2];
-        else
-            tout2 = Permute2F128<1, 0>(tmp[2]);
-        if constexpr (_firstRowIn == 0)
-            tout3 = tmp[3];
-        else
-            tout3 = Permute2F128<1, 0>(tmp[3]);
+        tout1 = SwapLanesIf<(_firstRowIn > 2)>(tmp[1]);
+        tout2 = SwapLanesIf<(_firstRowIn > 1)>(tmp[2]);
+        tout3 = SwapLanesIf<(_firstRowIn > 0)>(tmp[3]);
         tout4 = Permute2F128<1, 0>(tmp[0]);
     }
     else if constexpr (_firstRowOut == 4)
     {
         tout0 = Permute2F128<1, 0>(tmp[0]);
-        if constexpr (_firstRowIn <= 2)
-            tout1 = Permute2F128<1, 0>(tmp[1]);
-        else
-            tout1 = tmp[1];
-        if constexpr (_firstRowIn <= 1)
-            tout2 = Permute2F128<1, 0>(tmp[2]);
-        else
-            tout2 = tmp[2];
-        if constexpr (_firstRowIn == 0)
-            tout3 = Permute2F128<1, 0>(tmp[3]);
-        else
-            tout3 = tmp[3];
+        tout1 = SwapLanesIf<_firstRowIn <= 2>(tmp[1]);
+        tout2 = SwapLanesIf<_firstRowIn <= 1>(tmp[2]);
+        tout3 = SwapLanesIf<_firstRowIn <= 0>(tmp[3]);
         tout4 = tmp[0];
     }
     else
@@ -5866,14 +5848,8 @@ inline void Transpose6x4(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256&
     {
         tout0 = tmp[0];
         tout1 = tmp[1];
-        if constexpr (_firstRowIn <= 1)
-            tout2 = tmp[2];
-        else
-            tout2 = Permute2F128<1, 0>(tmp[2]);
-        if constexpr (_firstRowIn == 0)
-            tout3 = tmp[3];
-        else
-            tout3 = Permute2F128<1, 0>(tmp[3]);
+        tout2 = SwapLanesIf<(_firstRowIn > 1)>(tmp[2]);
+        tout3 = SwapLanesIf<(_firstRowIn > 0)>(tmp[3]);
         tout4 = Permute2F128<1, 0>(tmp[0]);
         tout5 = Permute2F128<1, 0>(tmp[1]);
     }
@@ -5881,14 +5857,8 @@ inline void Transpose6x4(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256&
     {
         tout0 = Permute2F128<1, 0>(tmp[0]);
         tout1 = Permute2F128<1, 0>(tmp[1]);
-        if constexpr (_firstRowIn <= 1)
-            tout2 = Permute2F128<1, 0>(tmp[2]);
-        else
-            tout2 = tmp[2];
-        if constexpr (_firstRowIn == 0)
-            tout3 = Permute2F128<1, 0>(tmp[3]);
-        else
-            tout3 = tmp[3];
+        tout2 = SwapLanesIf<_firstRowIn <= 1>(tmp[2]);
+        tout3 = SwapLanesIf<_firstRowIn == 0>(tmp[3]);
         tout4 = tmp[0];
         tout5 = tmp[1];
     }
@@ -6349,10 +6319,7 @@ inline void Transpose7x4(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256&
         tout0 = tmp[0];
         tout1 = tmp[1];
         tout2 = tmp[2];
-        if constexpr (_firstRowIn == 0)
-            tout3 = tmp[3];
-        else
-            tout3 = Permute2F128<1, 0>(tmp[3]);
+        tout3 = SwapLanesIf<_firstRowIn != 0>(tmp[3]);
         tout4 = Permute2F128<1, 0>(tmp[0]);
         tout5 = Permute2F128<1, 0>(tmp[1]);
         tout6 = Permute2F128<1, 0>(tmp[2]);
@@ -6362,10 +6329,7 @@ inline void Transpose7x4(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256&
         tout0 = Permute2F128<1, 0>(tmp[0]);
         tout1 = Permute2F128<1, 0>(tmp[1]);
         tout2 = Permute2F128<1, 0>(tmp[2]);
-        if constexpr (_firstRowIn == 0)
-            tout3 = Permute2F128<1, 0>(tmp[3]);
-        else
-            tout3 = tmp[3];
+        tout3 = SwapLanesIf<_firstRowIn == 0>(tmp[3]);
         tout4 = tmp[0];
         tout5 = tmp[1];
         tout6 = tmp[2];
