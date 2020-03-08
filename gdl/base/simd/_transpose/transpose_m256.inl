@@ -5146,15 +5146,76 @@ template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unused
 inline void Transpose5x4(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256& out0, __m256& out1, __m256& out2,
                          __m256& out3, __m256& out4)
 {
-    __m256 tmp0, tmp1, tmp2, tmp3, tmp4;
+    constexpr U32 idx_in_0 = (0 + _firstRowOut) % 4;
+    constexpr U32 idx_in_1 = (1 + _firstRowOut) % 4;
+    constexpr U32 idx_in_2 = (2 + _firstRowOut) % 4;
+    constexpr U32 idx_in_3 = (3 + _firstRowOut) % 4;
+    constexpr U32 idx_tmp_0 = (0 - _firstRowIn) % 4;
+    constexpr U32 idx_tmp_1 = (1 - _firstRowIn) % 4;
+    constexpr U32 idx_tmp_2 = (2 - _firstRowIn) % 4;
+    constexpr U32 idx_tmp_3 = (3 - _firstRowIn) % 4;
 
-    Transpose4x4<_firstRowIn, _firstRowOut>(in0, in1, in2, in3, tmp0, tmp1, tmp2, tmp3);
+    std::array<__m256, 4> tmp;
+    std::array<__m256, 4> tin;
+    tin[idx_in_0] = in0;
+    tin[idx_in_1] = in1;
+    tin[idx_in_2] = in2;
+    tin[idx_in_3] = in3;
 
-    tmp4 = Permute2F128<1, 0>(tmp0);
 
-    // Write to output registers
-    TransposeSetOutput<_firstRowOut, 4, _overwriteUnused, _unusedSetZero>(out0, out1, out2, out3, out4, tmp0, tmp1,
-                                                                          tmp2, tmp3, tmp4);
+    Transpose4x4(tin[0], tin[1], tin[2], tin[3], tmp[idx_tmp_0], tmp[idx_tmp_1], tmp[idx_tmp_2], tmp[idx_tmp_3]);
+
+
+    __m256 tout0, tout1, tout2, tout3, tout4;
+    if constexpr (_firstRowOut == 0)
+    {
+        tout0 = tmp[0];
+        if constexpr (_firstRowIn <= 2)
+            tout1 = tmp[1];
+        else
+            tout1 = Permute2F128<1, 0>(tmp[1]);
+        if constexpr (_firstRowIn <= 1)
+            tout2 = tmp[2];
+        else
+            tout2 = Permute2F128<1, 0>(tmp[2]);
+        if constexpr (_firstRowIn == 0)
+            tout3 = tmp[3];
+        else
+            tout3 = Permute2F128<1, 0>(tmp[3]);
+        tout4 = Permute2F128<1, 0>(tmp[0]);
+    }
+    else if constexpr (_firstRowOut == 4)
+    {
+        tout0 = Permute2F128<1, 0>(tmp[0]);
+        if constexpr (_firstRowIn <= 2)
+            tout1 = Permute2F128<1, 0>(tmp[1]);
+        else
+            tout1 = tmp[1];
+        if constexpr (_firstRowIn <= 1)
+            tout2 = Permute2F128<1, 0>(tmp[2]);
+        else
+            tout2 = tmp[2];
+        if constexpr (_firstRowIn == 0)
+            tout3 = Permute2F128<1, 0>(tmp[3]);
+        else
+            tout3 = tmp[3];
+        tout4 = tmp[0];
+    }
+    else
+    {
+        constexpr U32 sel_out1 = (_firstRowIn < 3) ? 0 : 1;
+        constexpr U32 sel_out2 = (_firstRowIn < 2) ? 0 : 1;
+        constexpr U32 sel_out3 = (_firstRowIn < 1) ? 0 : 1;
+
+        tout0 = Permute2F128<0, 0>(tmp[0]);
+        tout1 = Permute2F128<sel_out1, sel_out1>(tmp[1]);
+        tout2 = Permute2F128<sel_out2, sel_out2>(tmp[2]);
+        tout3 = Permute2F128<sel_out3, sel_out3>(tmp[3]);
+        tout4 = Permute2F128<1, 1>(tmp[0]);
+    }
+
+    TransposeSetOutput<_firstRowOut, 4, _overwriteUnused, _unusedSetZero>(out0, out1, out2, out3, out4, tout0, tout1,
+                                                                          tout2, tout3, tout4);
 }
 
 
