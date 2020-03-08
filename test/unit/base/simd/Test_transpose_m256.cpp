@@ -7,7 +7,7 @@
 
 
 #ifdef __AVX2__
-
+/*
 // Transpose 1x1 ------------------------------------------------------------------------------------------------------
 
 BOOST_AUTO_TEST_CASE(Test_transpose1x1)
@@ -469,7 +469,7 @@ BOOST_AUTO_TEST_CASE(Test_transpose7x3)
     TestTranspose<__m256, 7, 3>();
 }
 
-
+*/
 
 // Transpose 7x4 ------------------------------------------------------------------------------------------------------
 
@@ -478,7 +478,7 @@ BOOST_AUTO_TEST_CASE(Test_transpose7x4)
     TestTranspose<__m256, 7, 4>();
 }
 
-
+/*
 
 // Transpose 7x5 ------------------------------------------------------------------------------------------------------
 
@@ -593,5 +593,5 @@ BOOST_AUTO_TEST_CASE(Test_transpose8x8)
 BOOST_AUTO_TEST_CASE(No_test)
 {
 }
-
+*/
 #endif // __AVX2__
