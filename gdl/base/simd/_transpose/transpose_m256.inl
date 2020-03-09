@@ -13,6 +13,32 @@
 namespace GDL::simd
 {
 
+
+template <U32 _firstRowIn, U32 _firstRowOut>
+inline std::array<__m256, 4> TransposeNx4TemporaryArray(__m256 in0, __m256 in1, __m256 in2, __m256 in3)
+{
+    constexpr U32 idx_in_0 = (0 + _firstRowOut) % 4;
+    constexpr U32 idx_in_1 = (1 + _firstRowOut) % 4;
+    constexpr U32 idx_in_2 = (2 + _firstRowOut) % 4;
+    constexpr U32 idx_in_3 = (3 + _firstRowOut) % 4;
+    constexpr U32 idx_tmp_0 = (0 - _firstRowIn) % 4;
+    constexpr U32 idx_tmp_1 = (1 - _firstRowIn) % 4;
+    constexpr U32 idx_tmp_2 = (2 - _firstRowIn) % 4;
+    constexpr U32 idx_tmp_3 = (3 - _firstRowIn) % 4;
+
+    std::array<__m256, 4> tin;
+    tin[idx_in_0] = in0;
+    tin[idx_in_1] = in1;
+    tin[idx_in_2] = in2;
+    tin[idx_in_3] = in3;
+
+    std::array<__m256, 4> tmp;
+    Transpose4x4(tin[0], tin[1], tin[2], tin[3], tmp[idx_tmp_0], tmp[idx_tmp_1], tmp[idx_tmp_2], tmp[idx_tmp_3]);
+    return tmp;
+}
+
+
+
 // --------------------------------------------------------------------------------------------------------------------
 
 template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unusedSetZero>
@@ -5146,24 +5172,7 @@ template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unused
 inline void Transpose5x4(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256& out0, __m256& out1, __m256& out2,
                          __m256& out3, __m256& out4)
 {
-    constexpr U32 idx_in_0 = (0 + _firstRowOut) % 4;
-    constexpr U32 idx_in_1 = (1 + _firstRowOut) % 4;
-    constexpr U32 idx_in_2 = (2 + _firstRowOut) % 4;
-    constexpr U32 idx_in_3 = (3 + _firstRowOut) % 4;
-    constexpr U32 idx_tmp_0 = (0 - _firstRowIn) % 4;
-    constexpr U32 idx_tmp_1 = (1 - _firstRowIn) % 4;
-    constexpr U32 idx_tmp_2 = (2 - _firstRowIn) % 4;
-    constexpr U32 idx_tmp_3 = (3 - _firstRowIn) % 4;
-
-    std::array<__m256, 4> tmp;
-    std::array<__m256, 4> tin;
-    tin[idx_in_0] = in0;
-    tin[idx_in_1] = in1;
-    tin[idx_in_2] = in2;
-    tin[idx_in_3] = in3;
-
-
-    Transpose4x4(tin[0], tin[1], tin[2], tin[3], tmp[idx_tmp_0], tmp[idx_tmp_1], tmp[idx_tmp_2], tmp[idx_tmp_3]);
+    std::array<__m256, 4> tmp = TransposeNx4TemporaryArray<_firstRowIn, _firstRowOut>(in0, in1, in2, in3);
 
 
     __m256 tout0, tout1, tout2, tout3, tout4;
@@ -5823,25 +5832,7 @@ template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unused
 inline void Transpose6x4(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256& out0, __m256& out1, __m256& out2,
                          __m256& out3, __m256& out4, __m256& out5)
 {
-    constexpr U32 idx_in_0 = (0 + _firstRowOut) % 4;
-    constexpr U32 idx_in_1 = (1 + _firstRowOut) % 4;
-    constexpr U32 idx_in_2 = (2 + _firstRowOut) % 4;
-    constexpr U32 idx_in_3 = (3 + _firstRowOut) % 4;
-    constexpr U32 idx_tmp_0 = (0 - _firstRowIn) % 4;
-    constexpr U32 idx_tmp_1 = (1 - _firstRowIn) % 4;
-    constexpr U32 idx_tmp_2 = (2 - _firstRowIn) % 4;
-    constexpr U32 idx_tmp_3 = (3 - _firstRowIn) % 4;
-
-    std::array<__m256, 4> tmp;
-    std::array<__m256, 4> tin;
-    tin[idx_in_0] = in0;
-    tin[idx_in_1] = in1;
-    tin[idx_in_2] = in2;
-    tin[idx_in_3] = in3;
-
-
-    Transpose4x4(tin[0], tin[1], tin[2], tin[3], tmp[idx_tmp_0], tmp[idx_tmp_1], tmp[idx_tmp_2], tmp[idx_tmp_3]);
-
+    std::array<__m256, 4> tmp = TransposeNx4TemporaryArray<_firstRowIn, _firstRowOut>(in0, in1, in2, in3);
 
     __m256 tout0, tout1, tout2, tout3, tout4, tout5;
     if constexpr (_firstRowOut == 0)
@@ -6293,25 +6284,7 @@ template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unused
 inline void Transpose7x4(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256& out0, __m256& out1, __m256& out2,
                          __m256& out3, __m256& out4, __m256& out5, __m256& out6)
 {
-    constexpr U32 idx_in_0 = (0 + _firstRowOut) % 4;
-    constexpr U32 idx_in_1 = (1 + _firstRowOut) % 4;
-    constexpr U32 idx_in_2 = (2 + _firstRowOut) % 4;
-    constexpr U32 idx_in_3 = (3 + _firstRowOut) % 4;
-    constexpr U32 idx_tmp_0 = (0 - _firstRowIn) % 4;
-    constexpr U32 idx_tmp_1 = (1 - _firstRowIn) % 4;
-    constexpr U32 idx_tmp_2 = (2 - _firstRowIn) % 4;
-    constexpr U32 idx_tmp_3 = (3 - _firstRowIn) % 4;
-
-    std::array<__m256, 4> tmp;
-    std::array<__m256, 4> tin;
-    tin[idx_in_0] = in0;
-    tin[idx_in_1] = in1;
-    tin[idx_in_2] = in2;
-    tin[idx_in_3] = in3;
-
-
-    Transpose4x4(tin[0], tin[1], tin[2], tin[3], tmp[idx_tmp_0], tmp[idx_tmp_1], tmp[idx_tmp_2], tmp[idx_tmp_3]);
-
+    std::array<__m256, 4> tmp = TransposeNx4TemporaryArray<_firstRowIn, _firstRowOut>(in0, in1, in2, in3);
 
     __m256 tout0, tout1, tout2, tout3, tout4, tout5, tout6;
     if constexpr (_firstRowOut == 0)
@@ -6660,21 +6633,7 @@ template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unused
 inline void Transpose8x4(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256& out0, __m256& out1, __m256& out2,
                          __m256& out3, __m256& out4, __m256& out5, __m256& out6, __m256& out7)
 {
-    constexpr U32 idx_in_0 = (0 + _firstRowOut) % 4;
-    constexpr U32 idx_in_1 = (1 + _firstRowOut) % 4;
-    constexpr U32 idx_in_2 = (2 + _firstRowOut) % 4;
-    constexpr U32 idx_in_3 = (3 + _firstRowOut) % 4;
-
-    std::array<__m256, 4> tmp;
-    std::array<__m256, 4> tin;
-    tin[idx_in_0] = in0;
-    tin[idx_in_1] = in1;
-    tin[idx_in_2] = in2;
-    tin[idx_in_3] = in3;
-
-
-    Transpose4x4(tin[0], tin[1], tin[2], tin[3], tmp[0], tmp[1], tmp[2], tmp[3]);
-
+    std::array<__m256, 4> tmp = TransposeNx4TemporaryArray<_firstRowIn, _firstRowOut>(in0, in1, in2, in3);
 
     __m256 tout0, tout1, tout2, tout3, tout4, tout5, tout6, tout7;
     if constexpr (_firstRowOut == 0)
