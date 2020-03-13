@@ -4414,39 +4414,65 @@ template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unused
 inline void Transpose4x5(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 in4, __m256& out0, __m256& out1,
                          __m256& out2, __m256& out3)
 {
-    __m256 tmp0, tmp1, tmp2, tmp3, tmp4;
+    constexpr U32 numLaneVals = numValuesPerLane<__m256>;
+    constexpr U32 laneIn = _firstRowIn / numLaneVals;
+    constexpr U32 laneOffsetIn = _firstRowIn % numLaneVals;
 
-    if constexpr (_firstRowIn == 0)
+    constexpr U32 idx_in_0 = (0 + _firstRowOut) % 4;
+    constexpr U32 idx_in_1 = (1 + _firstRowOut) % 4;
+    constexpr U32 idx_in_2 = (2 + _firstRowOut) % 4;
+    constexpr U32 idx_in_3 = (3 + _firstRowOut) % 4;
+
+    constexpr U32 trgt_lane_0 = (laneIn == 0) ? 1 : 0;
+    constexpr U32 comp_lane_1 = (_firstRowOut + 1) / 4;
+    constexpr U32 comp_lane_2 = (_firstRowOut + 2) / 4;
+    constexpr U32 comp_lane_3 = (_firstRowOut + 3) / 4;
+
+    std::array<__m256, 8> tin;
+    tin[idx_in_0] = Permute2F128<0, laneIn, 1, laneIn>(in0, in4);
+    tin[idx_in_1] = SwapLanesIf<laneIn != comp_lane_1>(in1);
+    tin[idx_in_2] = SwapLanesIf<laneIn != comp_lane_2>(in2);
+
+    tin[idx_in_0 + 4] = Permute2F128<0, trgt_lane_0, 1, trgt_lane_0>(in0, in4);
+    tin[idx_in_2 + 4] = SwapLanesIf<laneIn == comp_lane_2>(in2);
+    tin[idx_in_3 + 4] = SwapLanesIf<laneIn == comp_lane_3>(in3);
+
+    if constexpr (_firstRowOut == 0 || _firstRowOut == 3)
     {
-        tmp4 = Permute2F128<0, 0, 1, 0>(in0, in4);
-    }
-    else if constexpr (_firstRowIn == 1)
-    {
-        __m256 tmp5 = Permute2F128<1, 0>(in4);
-        tmp4 = BlendInRange<1, 4>(tmp5, in0);
-    }
-    else if constexpr (_firstRowIn == 2)
-    {
-        __m256 tmp5 = Permute2F128<1, 0>(in4);
-        tmp4 = BlendInRange<2, 5>(tmp5, in0);
-    }
-    else if constexpr (_firstRowIn == 3)
-    {
-        __m256 tmp5 = Permute2F128<1, 0>(in4);
-        tmp4 = BlendInRange<3, 6>(tmp5, in0);
+        tin[idx_in_3] = SwapLanesIf<laneIn != comp_lane_3>(in3);
+        tin[idx_in_1 + 4] = SwapLanesIf<laneIn == comp_lane_1>(in1);
     }
     else
     {
-        tmp4 = Permute2F128<0, 1, 1, 1>(in4, in0);
+        tin[idx_in_3] = Permute2F128<0, trgt_lane_0, 1, laneIn>(in1, in3);
+        tin[idx_in_1 + 4] = tin[idx_in_3];
     }
 
 
-    Transpose4x4<_firstRowIn, _firstRowOut>(tmp4, in1, in2, in3, tmp0, tmp1, tmp2, tmp3);
+    __m256 tout0, tout1, tout2, tout3;
+    if constexpr (laneOffsetIn == 0)
+    {
+        Transpose4x4(tin[0], tin[1], tin[2], tin[3], tout0, tout1, tout2, tout3);
+    }
+    else if constexpr (laneOffsetIn == 1)
+    {
+        Transpose3x4<_firstRowIn>(tin[0], tin[1], tin[2], tin[3], tout0, tout1, tout2);
+        Transpose1x4(tin[4], tin[5], tin[6], tin[7], tout3);
+    }
+    else if constexpr (laneOffsetIn == 2)
+    {
+        Transpose2x4<_firstRowIn>(tin[0], tin[1], tin[2], tin[3], tout0, tout1);
+        Transpose2x4(tin[4], tin[5], tin[6], tin[7], tout2, tout3);
+    }
+    else
+    {
+        Transpose1x4<_firstRowIn>(tin[0], tin[1], tin[2], tin[3], tout0);
+        Transpose3x4(tin[4], tin[5], tin[6], tin[7], tout1, tout2, tout3);
+    }
 
 
-    // Write to output registers
-    TransposeSetOutput<_firstRowOut, 5, _overwriteUnused, _unusedSetZero>(out0, out1, out2, out3, tmp0, tmp1, tmp2,
-                                                                          tmp3);
+    TransposeSetOutput<_firstRowOut, 5, _overwriteUnused, _unusedSetZero>(out0, out1, out2, out3, tout0, tout1, tout2,
+                                                                          tout3);
 }
 
 
