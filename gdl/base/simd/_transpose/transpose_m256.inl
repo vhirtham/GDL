@@ -4983,152 +4983,32 @@ template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unused
 inline void Transpose5x5(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 in4, __m256& out0, __m256& out1,
                          __m256& out2, __m256& out3, __m256& out4)
 {
+    std::array<__m256, 8> tmp = PermuteBeforeIntraLaneTranspose<_firstRowIn, _firstRowOut>(in0, in1, in2, in3, in4);
 
-    constexpr U32 numLaneVals = numValuesPerLane<__m256>;
-    constexpr U32 laneOffsetIn = _firstRowIn % numLaneVals;
-    constexpr U32 laneOffsetOut = _firstRowOut % numLaneVals;
-
-    __m256 tmp0, tmp1, tmp2, tmp3, tmp4;
-
-    Transpose4x5<_firstRowIn, _firstRowOut>(in0, in1, in2, in3, in4, tmp0, tmp1, tmp2, tmp3);
-
-    if constexpr (laneOffsetIn == 0)
+    __m256 tout0, tout1, tout2, tout3, tout4;
+    if constexpr (_firstRowIn == 0)
     {
-        if constexpr (laneOffsetOut == 0)
-        {
-            __m256 tmp6 = BlendIndex<4>(tmp0, in0);
-
-            tmp4 = Permute2F128<0, 1, 1, 1>(tmp6, in4);
-        }
-        else if constexpr (laneOffsetOut == 1)
-        {
-            __m256 tmp6 = Shuffle<1, 0, 2, 3>(in0, tmp0);
-            __m256 tmp7 = _mm_unpacklo(in3, in4);
-
-            tmp4 = Permute2F128<0, 1, 1, 1>(tmp6, tmp7);
-        }
-        else if constexpr (laneOffsetOut == 2)
-        {
-            __m256 tmp6 = _mm_unpacklo(in0, in1);
-            __m256 tmp7 = Permute2F128<0, 1, 1, 0>(tmp6, tmp0);
-            __m256 tmp8 = BlendIndex<4>(tmp7, in4);
-
-            tmp4 = _mm_movelh(tmp7, tmp8);
-        }
-        else
-        {
-            __m256 tmp6 = Permute2F128<0, 1, 1, 0>(in0, tmp0);
-            __m256 tmp7 = BlendIndex<0>(in4, tmp6);
-            __m256 tmp8 = Broadcast<0>(tmp7);
-
-            tmp4 = BlendInRange<4, 6>(tmp8, tmp6);
-        }
+        Transpose4x4<0, 0>(tmp[0], tmp[1], tmp[2], tmp[3], tout0, tout1, tout2, tout3);
+        Transpose1x4<0, 0>(tmp[4], tmp[5], tmp[6], tmp[7], tout4);
     }
-    else if constexpr (laneOffsetIn == 1)
+    else if constexpr (_firstRowIn == 1)
     {
-        if constexpr (laneOffsetOut == 0)
-        {
-            __m256 tmp7 = _mm_movehdup(in0);
-            __m256 tmp8 = _mm_movehdup(in4);
-            __m256 tmp9 = BlendIndex<4>(tmp0, tmp7);
-
-            tmp4 = Permute2F128<0, 1, 1, 1>(tmp9, tmp8);
-        }
-        else if constexpr (laneOffsetOut == 1)
-        {
-            __m256 tmp7 = BlendIndex<5>(tmp0, in0);
-            __m256 tmp8 = Permute2F128<1, 0>(tmp7);
-
-            tmp4 = BlendIndex<5>(tmp8, in4);
-        }
-        else if constexpr (laneOffsetOut == 2)
-        {
-            __m256 tmp7 = _mm_unpacklo(in0, in1);
-            __m256 tmp8 = Permute2F128<0, 1, 1, 0>(tmp7, tmp0);
-            __m256 tmp9 = Broadcast<1>(in4);
-
-            tmp4 = BlendIndex<6>(tmp8, tmp9);
-        }
-        else
-        {
-            __m256 tmp7 = _mm_movelh(in0, in0);
-            __m256 tmp8 = Permute2F128<0, 1, 1, 0>(tmp7, tmp0);
-            __m256 tmp9 = _mm_movelh(in4, in4);
-
-            tmp4 = BlendIndex<7>(tmp8, tmp9);
-        }
+        Transpose3x4<1, 0>(tmp[0], tmp[1], tmp[2], tmp[3], tout0, tout1, tout2);
+        Transpose2x4<0, 0>(tmp[4], tmp[5], tmp[6], tmp[7], tout3, tout4);
     }
-    else if constexpr (laneOffsetIn == 2)
+    else if constexpr (_firstRowIn == 2)
     {
-        if constexpr (laneOffsetOut == 0)
-        {
-            __m256 tmp7 = _mm_movehl(in0, in0);
-            __m256 tmp8 = _mm_movehl(in4, in4);
-            __m256 tmp9 = BlendIndex<4>(tmp0, tmp7);
-
-            tmp4 = Permute2F128<0, 1, 1, 1>(tmp9, tmp8);
-        }
-        else if constexpr (laneOffsetOut == 1)
-        {
-            __m256 tmp7 = Shuffle<3, 2, 2, 3>(in0, tmp0);
-            __m256 tmp8 = _mm_unpackhi(in3, in4);
-
-            tmp4 = Permute2F128<0, 1, 1, 1>(tmp7, tmp8);
-        }
-        else if constexpr (laneOffsetOut == 2)
-        {
-            __m256 tmp7 = BlendIndex<6>(tmp0, in0);
-            __m256 tmp8 = Permute2F128<1, 0>(tmp7);
-
-            tmp4 = BlendIndex<6>(tmp8, in4);
-        }
-        else
-        {
-            __m256 tmp7 = _mm_moveldup(in0);
-            __m256 tmp8 = _mm_moveldup(in4);
-            __m256 tmp9 = Permute2F128<0, 1, 1, 0>(tmp7, tmp0);
-
-            tmp4 = BlendIndex<7>(tmp9, tmp8);
-        }
+        Transpose2x4<2, 0>(tmp[0], tmp[1], tmp[2], tmp[3], tout0, tout1);
+        Transpose3x4<0, 0>(tmp[4], tmp[5], tmp[6], tmp[7], tout2, tout3, tout4);
     }
     else
     {
-        if constexpr (laneOffsetOut == 0)
-        {
-            __m256 tmp7 = Broadcast<3>(in0);
-            __m256 tmp8 = Broadcast<3>(in4);
-            __m256 tmp9 = BlendIndex<4>(tmp0, tmp7);
-
-            tmp4 = Permute2F128<0, 1, 1, 1>(tmp9, tmp8);
-        }
-        else if constexpr (laneOffsetOut == 1)
-        {
-            __m256 tmp7 = _mm_movehl(tmp0, in0);
-            __m256 tmp8 = Broadcast<3>(in4);
-            __m256 tmp10 = Permute2F128<0, 1, 1, 0>(tmp7, tmp0);
-
-            tmp4 = BlendIndex<5>(tmp10, tmp8);
-        }
-        else if constexpr (laneOffsetOut == 2)
-        {
-            __m256 tmp7 = _mm_unpackhi(in0, in1);
-            __m256 tmp8 = _mm_movehdup(in4);
-            __m256 tmp9 = Permute2F128<0, 1, 1, 0>(tmp7, tmp0);
-
-            tmp4 = BlendIndex<6>(tmp9, tmp8);
-        }
-        else
-        {
-            __m256 tmp7 = Permute2F128<0, 1, 1, 0>(in0, tmp0);
-
-            tmp4 = BlendIndex<7>(tmp7, in4);
-        }
+        Transpose1x4<3, 0>(tmp[0], tmp[1], tmp[2], tmp[3], tout0);
+        Transpose4x4<0, 0>(tmp[4], tmp[5], tmp[6], tmp[7], tout1, tout2, tout3, tout4);
     }
 
-
-    // Write to output registers
-    TransposeSetOutput<_firstRowOut, 5, _overwriteUnused, _unusedSetZero>(out0, out1, out2, out3, out4, tmp0, tmp1,
-                                                                          tmp2, tmp3, tmp4);
+    TransposeSetOutput<_firstRowOut, 5, _overwriteUnused, _unusedSetZero>(out0, out1, out2, out3, out4, tout0, tout1,
+                                                                          tout2, tout3, tout4);
 }
 
 
