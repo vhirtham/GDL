@@ -4417,7 +4417,8 @@ inline void Transpose4x5(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 
     constexpr U32 numLaneVals = numValuesPerLane<__m256>;
     constexpr U32 laneOffsetIn = _firstRowIn % numLaneVals;
 
-    std::array<__m256, 8> tmp = PermuteBeforeIntraLaneTranspose<_firstRowIn, _firstRowOut>(in0, in1, in2, in3, in4);
+    std::array<__m256, 8> tmp =
+            PermuteBeforeIntraLaneTranspose<_firstRowIn, _firstRowOut, laneOffsetIn != 0>(in0, in1, in2, in3, in4);
 
     __m256 tout0, tout1, tout2, tout3;
     if constexpr (laneOffsetIn == 0)
@@ -4453,46 +4454,35 @@ template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unused
 inline void Transpose4x6(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 in4, __m256 in5, __m256& out0,
                          __m256& out1, __m256& out2, __m256& out3)
 {
-    __m256 tmp0, tmp1, tmp2, tmp3, tmp4, tmp5;
+    constexpr U32 numLaneVals = numValuesPerLane<__m256>;
+    constexpr U32 laneOffsetIn = _firstRowIn % numLaneVals;
 
-    if constexpr (_firstRowIn == 0)
+    std::array<__m256, 8> tmp =
+            PermuteBeforeIntraLaneTranspose<_firstRowIn, _firstRowOut, laneOffsetIn != 0>(in0, in1, in2, in3, in4, in5);
+
+    __m256 tout0, tout1, tout2, tout3;
+    if constexpr (laneOffsetIn == 0)
     {
-        tmp4 = Permute2F128<0, 0, 1, 0>(in0, in4);
-        tmp5 = Permute2F128<0, 0, 1, 0>(in1, in5);
+        Transpose4x4(tmp[0], tmp[1], tmp[2], tmp[3], tout0, tout1, tout2, tout3);
     }
-    else if constexpr (_firstRowIn == 1)
+    else if constexpr (laneOffsetIn == 1)
     {
-        __m256 tmp6 = Permute2F128<1, 0>(in4);
-        __m256 tmp7 = Permute2F128<1, 0>(in5);
-        tmp4 = BlendInRange<1, 4>(tmp6, in0);
-        tmp5 = BlendInRange<1, 4>(tmp7, in1);
+        Transpose3x4<_firstRowIn>(tmp[0], tmp[1], tmp[2], tmp[3], tout0, tout1, tout2);
+        Transpose1x4(tmp[4], tmp[5], tmp[6], tmp[7], tout3);
     }
-    else if constexpr (_firstRowIn == 2)
+    else if constexpr (laneOffsetIn == 2)
     {
-        __m256 tmp6 = Permute2F128<1, 0>(in4);
-        __m256 tmp7 = Permute2F128<1, 0>(in5);
-        tmp4 = BlendInRange<2, 5>(tmp6, in0);
-        tmp5 = BlendInRange<2, 5>(tmp7, in1);
-    }
-    else if constexpr (_firstRowIn == 3)
-    {
-        __m256 tmp6 = Permute2F128<1, 0>(in4);
-        __m256 tmp7 = Permute2F128<1, 0>(in5);
-        tmp4 = BlendInRange<3, 6>(tmp6, in0);
-        tmp5 = BlendInRange<3, 6>(tmp7, in1);
+        Transpose2x4<_firstRowIn>(tmp[0], tmp[1], tmp[2], tmp[3], tout0, tout1);
+        Transpose2x4(tmp[4], tmp[5], tmp[6], tmp[7], tout2, tout3);
     }
     else
     {
-        tmp4 = Permute2F128<0, 1, 1, 1>(in4, in0);
-        tmp5 = Permute2F128<0, 1, 1, 1>(in5, in1);
+        Transpose1x4<_firstRowIn>(tmp[0], tmp[1], tmp[2], tmp[3], tout0);
+        Transpose3x4(tmp[4], tmp[5], tmp[6], tmp[7], tout1, tout2, tout3);
     }
-    Transpose4x4<_firstRowIn, _firstRowOut>(tmp4, tmp5, in2, in3, tmp0, tmp1, tmp2, tmp3);
 
-
-
-    // Write to output registers
-    TransposeSetOutput<_firstRowOut, 6, _overwriteUnused, _unusedSetZero>(out0, out1, out2, out3, tmp0, tmp1, tmp2,
-                                                                          tmp3);
+    TransposeSetOutput<_firstRowOut, 6, _overwriteUnused, _unusedSetZero>(out0, out1, out2, out3, tout0, tout1, tout2,
+                                                                          tout3);
 }
 
 
@@ -5685,26 +5675,24 @@ template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unused
 inline void Transpose6x6(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 in4, __m256 in5, __m256& out0,
                          __m256& out1, __m256& out2, __m256& out3, __m256& out4, __m256& out5)
 {
+    std::array<__m256, 8> tmp =
+            PermuteBeforeIntraLaneTranspose<_firstRowOut, _firstRowOut>(in0, in1, in2, in3, in4, in5);
+
     __m256 tout0, tout1, tout2, tout3, tout4, tout5;
-    __m256 tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7;
-
-    PermuteBeforeIntraLaneTranspose<_firstRowOut>(tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7, in0, in1, in2, in3,
-                                                  in4, in5);
-
     if constexpr (_firstRowIn == 0)
     {
-        Transpose4x4<0, 0>(tmp0, tmp1, tmp2, tmp3, tout0, tout1, tout2, tout3);
-        Transpose2x4<0, 0>(tmp4, tmp5, tmp6, tmp7, tout4, tout5);
+        Transpose4x4<0, 0>(tmp[0], tmp[1], tmp[2], tmp[3], tout0, tout1, tout2, tout3);
+        Transpose2x4<0, 0>(tmp[4], tmp[5], tmp[6], tmp[7], tout4, tout5);
     }
     else if constexpr (_firstRowIn == 1)
     {
-        Transpose3x4<1, 0>(tmp0, tmp1, tmp2, tmp3, tout0, tout1, tout2);
-        Transpose3x4<0, 0>(tmp4, tmp5, tmp6, tmp7, tout3, tout4, tout5);
+        Transpose3x4<1, 0>(tmp[0], tmp[1], tmp[2], tmp[3], tout0, tout1, tout2);
+        Transpose3x4<0, 0>(tmp[4], tmp[5], tmp[6], tmp[7], tout3, tout4, tout5);
     }
     else
     {
-        Transpose2x4<2, 0>(tmp0, tmp1, tmp2, tmp3, tout0, tout1);
-        Transpose4x4<0, 0>(tmp4, tmp5, tmp6, tmp7, tout2, tout3, tout4, tout5);
+        Transpose2x4<2, 0>(tmp[0], tmp[1], tmp[2], tmp[3], tout0, tout1);
+        Transpose4x4<0, 0>(tmp[4], tmp[5], tmp[6], tmp[7], tout2, tout3, tout4, tout5);
     }
 
     TransposeSetOutput<_firstRowOut, 6, _overwriteUnused, _unusedSetZero>(out0, out1, out2, out3, out4, out5, tout0,
@@ -6130,21 +6118,19 @@ template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unused
 inline void Transpose7x6(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 in4, __m256 in5, __m256& out0,
                          __m256& out1, __m256& out2, __m256& out3, __m256& out4, __m256& out5, __m256& out6)
 {
+    std::array<__m256, 8> tmp =
+            PermuteBeforeIntraLaneTranspose<_firstRowOut, _firstRowOut>(in0, in1, in2, in3, in4, in5);
+
     __m256 tout0, tout1, tout2, tout3, tout4, tout5, tout6;
-    __m256 tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7;
-
-    PermuteBeforeIntraLaneTranspose<_firstRowOut>(tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7, in0, in1, in2, in3,
-                                                  in4, in5);
-
     if constexpr (_firstRowIn == 0)
     {
-        Transpose4x4<0, 0>(tmp0, tmp1, tmp2, tmp3, tout0, tout1, tout2, tout3);
-        Transpose3x4<0, 0>(tmp4, tmp5, tmp6, tmp7, tout4, tout5, tout6);
+        Transpose4x4<0, 0>(tmp[0], tmp[1], tmp[2], tmp[3], tout0, tout1, tout2, tout3);
+        Transpose3x4<0, 0>(tmp[4], tmp[5], tmp[6], tmp[7], tout4, tout5, tout6);
     }
     else
     {
-        Transpose3x4<1, 0>(tmp0, tmp1, tmp2, tmp3, tout0, tout1, tout2);
-        Transpose4x4<0, 0>(tmp4, tmp5, tmp6, tmp7, tout3, tout4, tout5, tout6);
+        Transpose3x4<1, 0>(tmp[0], tmp[1], tmp[2], tmp[3], tout0, tout1, tout2);
+        Transpose4x4<0, 0>(tmp[4], tmp[5], tmp[6], tmp[7], tout3, tout4, tout5, tout6);
     }
 
     TransposeSetOutput<_firstRowOut, 6, _overwriteUnused, _unusedSetZero>(
@@ -6471,14 +6457,12 @@ inline void Transpose8x6(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 
                          __m256& out1, __m256& out2, __m256& out3, __m256& out4, __m256& out5, __m256& out6,
                          __m256& out7)
 {
+    std::array<__m256, 8> tmp =
+            PermuteBeforeIntraLaneTranspose<_firstRowOut, _firstRowOut>(in0, in1, in2, in3, in4, in5);
+
     __m256 tout0, tout1, tout2, tout3, tout4, tout5, tout6, tout7;
-    __m256 tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7;
-
-    PermuteBeforeIntraLaneTranspose<_firstRowOut>(tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7, in0, in1, in2, in3,
-                                                  in4, in5);
-
-    Transpose4x4(tmp0, tmp1, tmp2, tmp3, tout0, tout1, tout2, tout3);
-    Transpose4x4(tmp4, tmp5, tmp6, tmp7, tout4, tout5, tout6, tout7);
+    Transpose4x4(tmp[0], tmp[1], tmp[2], tmp[3], tout0, tout1, tout2, tout3);
+    Transpose4x4(tmp[4], tmp[5], tmp[6], tmp[7], tout4, tout5, tout6, tout7);
 
     TransposeSetOutput<_firstRowOut, 6, _overwriteUnused, _unusedSetZero>(
             out0, out1, out2, out3, out4, out5, out6, out7, tout0, tout1, tout2, tout3, tout4, tout5, tout6, tout7);

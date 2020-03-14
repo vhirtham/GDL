@@ -74,7 +74,7 @@ inline void PermuteBeforeIntraLaneTranspose(_registerType& out0, _registerType& 
 
 // --------------------------------------------------------------------------------------------------------------------
 
-template <U32 _firstRowIn, U32 _firstRowOut, typename _registerType>
+template <U32 _firstRowIn, U32 _firstRowOut, bool _allValuesNeeded = true, typename _registerType>
 inline std::array<_registerType, 8> PermuteBeforeIntraLaneTranspose(_registerType in0, _registerType in1,
                                                                     _registerType in2, _registerType in3,
                                                                     _registerType in4)
@@ -87,30 +87,33 @@ inline std::array<_registerType, 8> PermuteBeforeIntraLaneTranspose(_registerTyp
     constexpr U32 idx_2 = (2 + _firstRowOut) % 4;
     constexpr U32 idx_3 = (3 + _firstRowOut) % 4;
 
-    constexpr U32 trgt_lane_0 = (laneIn == 0) ? 1 : 0;
+    [[maybe_unused]] constexpr U32 trgt_lane_0 = (laneIn == 0) ? 1 : 0;
     constexpr U32 comp_lane_1 = (_firstRowOut + 1) / 4;
     constexpr U32 comp_lane_2 = (_firstRowOut + 2) / 4;
     constexpr U32 comp_lane_3 = (_firstRowOut + 3) / 4;
+
 
     std::array<__m256, 8> out;
     out[idx_0] = Permute2F128<0, laneIn, 1, laneIn>(in0, in4);
     out[idx_1] = SwapLanesIf<laneIn != comp_lane_1>(in1);
     out[idx_2] = SwapLanesIf<laneIn != comp_lane_2>(in2);
-
-    out[idx_0 + 4] = Permute2F128<0, trgt_lane_0, 1, trgt_lane_0>(in0, in4);
-    out[idx_2 + 4] = SwapLanesIf<laneIn == comp_lane_2>(in2);
-    out[idx_3 + 4] = SwapLanesIf<laneIn == comp_lane_3>(in3);
-
     if constexpr (_firstRowOut == 0 || _firstRowOut == 3)
-    {
         out[idx_3] = SwapLanesIf<laneIn != comp_lane_3>(in3);
-        out[idx_1 + 4] = SwapLanesIf<laneIn == comp_lane_1>(in1);
-    }
     else
-    {
         out[idx_3] = Permute2F128<0, trgt_lane_0, 1, laneIn>(in1, in3);
-        out[idx_1 + 4] = out[idx_3];
+
+
+    if constexpr (_allValuesNeeded)
+    {
+        out[idx_0 + 4] = Permute2F128<0, trgt_lane_0, 1, trgt_lane_0>(in0, in4);
+        out[idx_2 + 4] = SwapLanesIf<laneIn == comp_lane_2>(in2);
+        out[idx_3 + 4] = SwapLanesIf<laneIn == comp_lane_3>(in3);
+        if constexpr (_firstRowOut == 0 || _firstRowOut == 3)
+            out[idx_1 + 4] = SwapLanesIf<laneIn == comp_lane_1>(in1);
+        else
+            out[idx_1 + 4] = out[idx_3];
     }
+
 
     return out;
 }
@@ -119,49 +122,47 @@ inline std::array<_registerType, 8> PermuteBeforeIntraLaneTranspose(_registerTyp
 
 // --------------------------------------------------------------------------------------------------------------------
 
-template <U32 _firstRowOut, typename _registerType>
-inline void PermuteBeforeIntraLaneTranspose(_registerType& out0, _registerType& out1, _registerType& out2,
-                                            _registerType& out3, _registerType& out4, _registerType& out5,
-                                            _registerType& out6, _registerType& out7, _registerType in0,
-                                            _registerType in1, _registerType in2, _registerType in3, _registerType in4,
-                                            _registerType in5)
+template <U32 _firstRowIn, U32 _firstRowOut, bool _allValuesNeeded = true, typename _registerType>
+inline std::array<_registerType, 8> PermuteBeforeIntraLaneTranspose(_registerType in0, _registerType in1,
+                                                                    _registerType in2, _registerType in3,
+                                                                    _registerType in4, _registerType in5)
 {
-    if constexpr (_firstRowOut == 0)
-    {
-        out0 = Permute2F128<0, 0, 1, 0>(in0, in4);
-        out1 = Permute2F128<0, 0, 1, 0>(in1, in5);
-        out2 = in2;
-        out3 = in3;
+    constexpr U32 numLaneVals = numValuesPerLane<__m256>;
+    constexpr U32 laneIn = _firstRowIn / numLaneVals;
 
-        out4 = Permute2F128<0, 1, 1, 1>(in0, in4);
-        out5 = Permute2F128<0, 1, 1, 1>(in1, in5);
-        out6 = Permute2F128<1, 0>(in2);
-        out7 = Permute2F128<1, 0>(in3);
-    }
-    else if constexpr (_firstRowOut == 1)
-    {
-        out0 = Permute2F128<1, 0>(in3);
-        out1 = Permute2F128<0, 0, 1, 0>(in0, in4);
-        out2 = Permute2F128<0, 0, 1, 0>(in1, in5);
-        out3 = in2;
+    constexpr U32 idx_0 = (0 + _firstRowOut) % 4;
+    constexpr U32 idx_1 = (1 + _firstRowOut) % 4;
+    constexpr U32 idx_2 = (2 + _firstRowOut) % 4;
+    constexpr U32 idx_3 = (3 + _firstRowOut) % 4;
 
-        out4 = in3;
-        out5 = Permute2F128<0, 1, 1, 1>(in0, in4);
-        out6 = Permute2F128<0, 1, 1, 1>(in1, in5);
-        out7 = Permute2F128<1, 0>(in2);
-    }
+    [[maybe_unused]] constexpr U32 notLaneIn = (laneIn == 0) ? 1 : 0;
+    constexpr U32 comp_lane_2 = (_firstRowOut + 2) / 4;
+    constexpr U32 comp_lane_3 = (_firstRowOut + 3) / 4;
+
+
+    std::array<__m256, 8> out;
+    out[idx_0] = Permute2F128<0, laneIn, 1, laneIn>(in0, in4);
+    out[idx_1] = Permute2F128<0, laneIn, 1, laneIn>(in1, in5);
+    out[idx_2] = SwapLanesIf<laneIn != comp_lane_2>(in2);
+    if constexpr (_firstRowOut == 0 || _firstRowOut == 2)
+        out[idx_3] = SwapLanesIf<laneIn != comp_lane_3>(in3);
     else
-    {
-        out0 = Permute2F128<1, 0>(in2);
-        out1 = Permute2F128<1, 0>(in3);
-        out2 = Permute2F128<0, 0, 1, 0>(in0, in4);
-        out3 = Permute2F128<0, 0, 1, 0>(in1, in5);
+        out[idx_3] = Permute2F128<0, notLaneIn, 1, laneIn>(in2, in3);
 
-        out4 = in2;
-        out5 = in3;
-        out6 = Permute2F128<0, 1, 1, 1>(in0, in4);
-        out7 = Permute2F128<0, 1, 1, 1>(in1, in5);
+
+    if constexpr (_allValuesNeeded)
+    {
+        out[idx_0 + 4] = Permute2F128<0, notLaneIn, 1, notLaneIn>(in0, in4);
+        out[idx_1 + 4] = Permute2F128<0, notLaneIn, 1, notLaneIn>(in1, in5);
+        out[idx_3 + 4] = SwapLanesIf<laneIn == comp_lane_3>(in3);
+        if constexpr (_firstRowOut == 0 || _firstRowOut == 2)
+            out[idx_2 + 4] = SwapLanesIf<laneIn == comp_lane_2>(in2);
+        else
+            out[idx_2 + 4] = out[idx_3];
     }
+
+
+    return out;
 }
 
 
