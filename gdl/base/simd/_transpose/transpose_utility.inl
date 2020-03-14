@@ -5,6 +5,8 @@
 #include "gdl/base/simd/swizzle.h"
 #include "gdl/base/simd/intrinsics.h"
 
+#include <array>
+
 namespace GDL::simd
 {
 
@@ -72,60 +74,62 @@ inline void PermuteBeforeIntraLaneTranspose(_registerType& out0, _registerType& 
 
 // --------------------------------------------------------------------------------------------------------------------
 
-template <U32 _firstRowOut, typename _registerType>
-inline void PermuteBeforeIntraLaneTranspose(_registerType& out0, _registerType& out1, _registerType& out2,
-                                            _registerType& out3, _registerType& out4, _registerType& out5,
-                                            _registerType& out6, _registerType& out7, _registerType in0,
-                                            _registerType in1, _registerType in2, _registerType in3, _registerType in4)
+template <U32 _firstRowIn, U32 _firstRowOut, typename _registerType>
+inline std::array<_registerType, 8> PermuteBeforeIntraLaneTranspose(_registerType in0, _registerType in1,
+                                                                    _registerType in2, _registerType in3,
+                                                                    _registerType in4)
 {
+    std::array<_registerType, 8> out;
     if constexpr (_firstRowOut == 0)
     {
-        out0 = Permute2F128<0, 0, 1, 0>(in0, in4);
-        out1 = in1;
-        out2 = in2;
-        out3 = in3;
+        out[0] = Permute2F128<0, 0, 1, 0>(in0, in4);
+        out[1] = in1;
+        out[2] = in2;
+        out[3] = in3;
 
-        out4 = Permute2F128<0, 1, 1, 1>(in0, in4);
-        out5 = Permute2F128<1, 0>(in1);
-        out6 = Permute2F128<1, 0>(in2);
-        out7 = Permute2F128<1, 0>(in3);
+        out[4] = Permute2F128<0, 1, 1, 1>(in0, in4);
+        out[5] = Permute2F128<1, 0>(in1);
+        out[6] = Permute2F128<1, 0>(in2);
+        out[7] = Permute2F128<1, 0>(in3);
     }
     else if constexpr (_firstRowOut == 1)
     {
-        out0 = Permute2F128<1, 0>(in3);
-        out1 = Permute2F128<0, 0, 1, 0>(in0, in4);
-        out2 = in1;
-        out3 = in2;
+        out[0] = Permute2F128<1, 0>(in3);
+        out[1] = Permute2F128<0, 0, 1, 0>(in0, in4);
+        out[2] = in1;
+        out[3] = in2;
 
-        out4 = in3;
-        out5 = Permute2F128<0, 1, 1, 1>(in0, in4);
-        out6 = Permute2F128<1, 0>(in1);
-        out7 = Permute2F128<1, 0>(in2);
+        out[4] = in3;
+        out[5] = Permute2F128<0, 1, 1, 1>(in0, in4);
+        out[6] = Permute2F128<1, 0>(in1);
+        out[7] = Permute2F128<1, 0>(in2);
     }
     else if constexpr (_firstRowOut == 2)
     {
-        out0 = Permute2F128<1, 0>(in2);
-        out1 = Permute2F128<1, 0>(in3);
-        out2 = Permute2F128<0, 0, 1, 0>(in0, in4);
-        out3 = in1;
+        out[0] = Permute2F128<1, 0>(in2);
+        out[1] = Permute2F128<1, 0>(in3);
+        out[2] = Permute2F128<0, 0, 1, 0>(in0, in4);
+        out[3] = in1;
 
-        out4 = in2;
-        out5 = in3;
-        out6 = Permute2F128<0, 1, 1, 1>(in0, in4);
-        out7 = Permute2F128<1, 0>(in1);
+        out[4] = in2;
+        out[5] = in3;
+        out[6] = Permute2F128<0, 1, 1, 1>(in0, in4);
+        out[7] = Permute2F128<1, 0>(in1);
     }
     else
     {
-        out0 = Permute2F128<1, 0>(in1);
-        out1 = Permute2F128<1, 0>(in2);
-        out2 = Permute2F128<1, 0>(in3);
-        out3 = Permute2F128<0, 0, 1, 0>(in0, in4);
+        out[0] = Permute2F128<1, 0>(in1);
+        out[1] = Permute2F128<1, 0>(in2);
+        out[2] = Permute2F128<1, 0>(in3);
+        out[3] = Permute2F128<0, 0, 1, 0>(in0, in4);
 
-        out4 = in1;
-        out5 = in2;
-        out6 = in3;
-        out7 = Permute2F128<0, 1, 1, 1>(in0, in4);
+        out[4] = in1;
+        out[5] = in2;
+        out[6] = in3;
+        out[7] = Permute2F128<0, 1, 1, 1>(in0, in4);
     }
+
+    return out;
 }
 
 
