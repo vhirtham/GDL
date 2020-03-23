@@ -14,6 +14,11 @@ set(GDL_COMPILE_DEFINITIONS "")
 # https://stackoverflow.com/questions/32940860/gcc-optimization-levels-which-is-better
 # optional:  -funroll-loops
 # consider additionally for tests: -Wconversion
+# Sanitizer:
+# - see: https://clang.llvm.org/docs/AddressSanitizer.html
+# - see: https://gcc.gnu.org/onlinedocs/gcc/Instrumentation-Options.html
+# - add extra build with  -fsanitize=address -fsanitize-address-use-after-scope
+
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native -Wall -Wextra -Wpedantic -Wmissing-braces -Wshadow -pthread ")
 
 # Options
