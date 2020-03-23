@@ -22,13 +22,13 @@ constexpr U32 maxNumThreads = 4;
 
 void SubmitToThreadpool(ThreadPool<1>& tp, std::vector<U32>& val, std::vector<U32>& res)
 {
-    for (U32 i = 0; i < res.size(); ++i)
+    for (U32 k = 0; k < res.size(); ++k)
         tp.Submit(
-                [](U32 i, std::vector<U32>& res, const std::vector<U32>& val) {
-                    for (U32 j = 0; j < val.size(); ++j)
-                        res[i] += val[j];
+                [](U32 i, std::vector<U32>& result, const std::vector<U32>& value) {
+                    for (U32 j = 0; j < value.size(); ++j)
+                        result[i] += value[j];
                 },
-                i, std::ref(res), std::ref(val));
+                k, std::ref(res), std::ref(val));
 }
 
 Microseconds GetThreadPoolPerformance(ThreadPool<1>& tp, Timer& timer, std::vector<U32>& val)

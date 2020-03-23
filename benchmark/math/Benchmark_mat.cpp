@@ -289,17 +289,17 @@ BENCHMARK_F(Eigen3, Addition_Assignment)(benchmark::State& state)
 
 BENCHMARK_F(Serial, Addition)(benchmark::State& state)
 {
-    decltype(A) C;
+    decltype(A) D;
     for (auto _ : state)
-        benchmark::DoNotOptimize(C = A + B);
+        benchmark::DoNotOptimize(D = A + B);
 }
 
 
 BENCHMARK_F(SIMD, Addition)(benchmark::State& state)
 {
-    decltype(A) C;
+    decltype(A) D;
     for (auto _ : state)
-        benchmark::DoNotOptimize(C = A + B);
+        benchmark::DoNotOptimize(D = A + B);
 }
 
 

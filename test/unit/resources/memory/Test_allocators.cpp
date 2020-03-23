@@ -250,8 +250,8 @@ void ThreadSafetyTest()
                     std::this_thread::yield();
 
                 std::set<U64, std::less<U64>, _allocator<U64>> s;
-                for (U32 i = 1; i <= numInsertionsPerThread; ++i)
-                    s.emplace(static_cast<U64>(i));
+                for (U32 j = 1; j <= numInsertionsPerThread; ++j)
+                    s.emplace(static_cast<U64>(j));
 
                 U64 sum = 0;
                 for (auto val : s)

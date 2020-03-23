@@ -47,10 +47,10 @@ BOOST_AUTO_TEST_CASE(traceBuffer_Multi_Index_Correct)
     for (U32 i = 0; i < numLogsForThread.size(); ++i)
     {
         threads.emplace_back([&numLogsForThread, i]() {
-            TraceBuffer<bufferSize>& tb = TraceBuffer<bufferSize>::Instance();
+            TraceBuffer<bufferSize>& traceBuffer = TraceBuffer<bufferSize>::Instance();
             for (U32 j = 0; j < numLogsForThread[i]; ++j)
             {
-                tb.LogEvent("event");
+                traceBuffer.LogEvent("event");
             }
         });
         totalNumberOfEvents += numLogsForThread[i];
@@ -80,10 +80,10 @@ BOOST_AUTO_TEST_CASE(traceBuffer_Multi_Unique_Indices)
     for (U32 i = 0; i < numLogsForThread.size(); ++i)
     {
         threads.emplace_back([&numLogsForThread, i]() {
-            TraceBuffer<bufferSize>& tb = TraceBuffer<bufferSize>::Instance();
+            TraceBuffer<bufferSize>& traceBuffer = TraceBuffer<bufferSize>::Instance();
             for (U32 j = 0; j < numLogsForThread[i]; ++j)
             {
-                tb.LogEvent("e");
+                traceBuffer.LogEvent("e");
             }
         });
         totalNumberOfEvents += numLogsForThread[i];
