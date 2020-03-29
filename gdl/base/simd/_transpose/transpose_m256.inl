@@ -847,13 +847,12 @@ inline void Transpose1x1(__m256 in, __m256& out)
         tout = in;
     else
     {
-        constexpr U32 numLaneVals = numValuesPerLane<__m256>;
-        constexpr U32 laneIn = _firstRowIn / numLaneVals;
-        constexpr U32 laneOut = _firstRowOut / numLaneVals;
+        constexpr U32 laneIn = _firstRowIn / numValuesPerLane<__m256>;
+        constexpr U32 laneOut = _firstRowOut / numValuesPerLane<__m256>;
 
         if constexpr (laneIn == laneOut)
         {
-            constexpr U32 laneOffsetIn = _firstRowIn % numLaneVals;
+            constexpr U32 laneOffsetIn = _firstRowIn % numValuesPerLane<__m256>;
             tout = Broadcast<laneOffsetIn>(in);
         }
         else
@@ -872,11 +871,10 @@ inline void Transpose1x1(__m256 in, __m256& out)
 template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unusedSetZero>
 inline void Transpose1x2(__m256 in0, __m256 in1, __m256& out0)
 {
-    constexpr U32 numLaneVals = numValuesPerLane<__m256>;
-    constexpr U32 laneIn = _firstRowIn / numLaneVals;
-    constexpr U32 laneOut = _firstRowOut / numLaneVals;
-    constexpr U32 laneOffsetIn = _firstRowIn % numLaneVals;
-    constexpr U32 laneOffsetOut = _firstRowOut % numLaneVals;
+    constexpr U32 laneIn = _firstRowIn / numValuesPerLane<__m256>;
+    constexpr U32 laneOut = _firstRowOut / numValuesPerLane<__m256>;
+    constexpr U32 laneOffsetIn = _firstRowIn % numValuesPerLane<__m256>;
+    constexpr U32 laneOffsetOut = _firstRowOut % numValuesPerLane<__m256>;
 
     __m256 tout;
 
@@ -915,9 +913,8 @@ inline void Transpose1x2(__m256 in0, __m256 in1, __m256& out0)
 template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unusedSetZero>
 inline void Transpose1x3(__m256 in0, __m256 in1, __m256 in2, __m256& out0)
 {
-    constexpr U32 numLaneVals = numValuesPerLane<__m256>;
-    constexpr U32 laneOffsetIn = _firstRowIn % numLaneVals;
-    constexpr U32 laneOffsetOut = _firstRowOut % numLaneVals;
+    constexpr U32 laneOffsetIn = _firstRowIn % numValuesPerLane<__m256>;
+    constexpr U32 laneOffsetOut = _firstRowOut % numValuesPerLane<__m256>;
 
     std::array<__m256, 3> tin = {{in0, in1, in2}};
 
@@ -949,8 +946,8 @@ inline void Transpose1x3(__m256 in0, __m256 in1, __m256 in2, __m256& out0)
         tmp1 = Shuffle<idx_0, idx_1, 0, idx_2>(tmp0, tin[idx_in_2]);
 
 
-    constexpr U32 laneIn = _firstRowIn / numLaneVals;
-    constexpr U32 laneOut = _firstRowOut / numLaneVals;
+    constexpr U32 laneIn = _firstRowIn / numValuesPerLane<__m256>;
+    constexpr U32 laneOut = _firstRowOut / numValuesPerLane<__m256>;
     __m256 tout;
 
     if constexpr (laneOffsetOut < 2)
@@ -969,12 +966,10 @@ inline void Transpose1x3(__m256 in0, __m256 in1, __m256 in2, __m256& out0)
 template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unusedSetZero>
 inline void Transpose1x4(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256& out0)
 {
-
-    constexpr U32 numLaneVals = numValuesPerLane<__m256>;
-    constexpr U32 laneIn = _firstRowIn / numLaneVals;
-    constexpr U32 laneOut = _firstRowOut / numLaneVals;
-    constexpr U32 laneOffsetIn = _firstRowIn % numLaneVals;
-    constexpr U32 laneOffsetOut = _firstRowOut % numLaneVals;
+    constexpr U32 laneIn = _firstRowIn / numValuesPerLane<__m256>;
+    constexpr U32 laneOut = _firstRowOut / numValuesPerLane<__m256>;
+    constexpr U32 laneOffsetIn = _firstRowIn % numValuesPerLane<__m256>;
+    constexpr U32 laneOffsetOut = _firstRowOut % numValuesPerLane<__m256>;
 
     std::array<__m256, 4> tin = {{in0, in1, in2, in3}};
 
@@ -1016,42 +1011,36 @@ inline void Transpose1x4(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256&
 template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unusedSetZero>
 inline void Transpose1x5(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 in4, __m256& out0)
 {
-
-    constexpr U32 numLaneVals = numValuesPerLane<__m256>;
-    constexpr U32 laneIn = _firstRowIn / numLaneVals;
-    constexpr U32 laneOffsetIn = _firstRowIn % numLaneVals;
-    constexpr U32 laneOffsetOut = _firstRowOut % numLaneVals;
+    constexpr U32 laneOffsetIn = _firstRowIn % numValuesPerLane<__m256>;
+    constexpr U32 laneOffsetOut = _firstRowOut % numValuesPerLane<__m256>;
 
 
-    __m256 tmp0;
-
-
-    __m256 tmp1, tmp2;
+    __m256 tmp0, tmp1;
     if constexpr (laneOffsetOut == 0)
     {
-        Transpose1x4<laneOffsetIn, 0>(in0, in1, in2, in3, tmp1);
-        Transpose1x1<laneOffsetIn, 0>(in4, tmp2);
+        Transpose1x4<laneOffsetIn, 0>(in0, in1, in2, in3, tmp0);
+        Transpose1x1<laneOffsetIn, 0>(in4, tmp1);
     }
     else if constexpr (laneOffsetOut == 1)
     {
-        Transpose1x3<laneOffsetIn, 1>(in0, in1, in2, tmp1);
-        Transpose1x2<laneOffsetIn, 0>(in3, in4, tmp2);
+        Transpose1x3<laneOffsetIn, 1>(in0, in1, in2, tmp0);
+        Transpose1x2<laneOffsetIn, 0>(in3, in4, tmp1);
     }
     else if constexpr (laneOffsetOut == 2)
     {
-        Transpose1x2<laneOffsetIn, 2>(in0, in1, tmp1);
-        Transpose1x3<laneOffsetIn, 0>(in2, in3, in4, tmp2);
+        Transpose1x2<laneOffsetIn, 2>(in0, in1, tmp0);
+        Transpose1x3<laneOffsetIn, 0>(in2, in3, in4, tmp1);
     }
     else
     {
-        Transpose1x1<laneOffsetIn, 3>(in0, tmp1);
-        Transpose1x4<laneOffsetIn, 0>(in1, in2, in3, in4, tmp2);
+        Transpose1x1<laneOffsetIn, 3>(in0, tmp0);
+        Transpose1x4<laneOffsetIn, 0>(in1, in2, in3, in4, tmp1);
     }
-    tmp0 = Permute2F128<0, laneIn, 1, laneIn>(tmp1, tmp2);
 
+    constexpr U32 laneIn = _firstRowIn / numValuesPerLane<__m256>;
+    __m256 tout = Permute2F128<0, laneIn, 1, laneIn>(tmp0, tmp1);
 
-    // Write to output registers
-    TransposeSetOutput<_firstRowOut, 5, _overwriteUnused, _unusedSetZero>(out0, tmp0);
+    TransposeSetOutput<_firstRowOut, 5, _overwriteUnused, _unusedSetZero>(out0, tout);
 }
 
 
@@ -1061,36 +1050,31 @@ inline void Transpose1x5(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 
 template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unusedSetZero>
 inline void Transpose1x6(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 in4, __m256 in5, __m256& out0)
 {
-
-    constexpr U32 numLaneVals = numValuesPerLane<__m256>;
-    constexpr U32 laneIn = _firstRowIn / numLaneVals;
-    constexpr U32 laneOffsetIn = _firstRowIn % numLaneVals;
-    constexpr U32 laneOffsetOut = _firstRowOut % numLaneVals;
+    constexpr U32 laneOffsetIn = _firstRowIn % numValuesPerLane<__m256>;
+    constexpr U32 laneOffsetOut = _firstRowOut % numValuesPerLane<__m256>;
 
 
-    __m256 tmp0;
-
-    __m256 tmp1, tmp2;
+    __m256 tmp0, tmp1;
     if constexpr (laneOffsetOut == 0)
     {
-        Transpose1x4<laneOffsetIn, 0>(in0, in1, in2, in3, tmp1);
-        Transpose1x2<laneOffsetIn, 0>(in4, in5, tmp2);
+        Transpose1x4<laneOffsetIn, 0>(in0, in1, in2, in3, tmp0);
+        Transpose1x2<laneOffsetIn, 0>(in4, in5, tmp1);
     }
     else if constexpr (laneOffsetOut == 1)
     {
-        Transpose1x3<laneOffsetIn, 1>(in0, in1, in2, tmp1);
-        Transpose1x3<laneOffsetIn, 0>(in3, in4, in5, tmp2);
+        Transpose1x3<laneOffsetIn, 1>(in0, in1, in2, tmp0);
+        Transpose1x3<laneOffsetIn, 0>(in3, in4, in5, tmp1);
     }
     else
     {
-        Transpose1x2<laneOffsetIn, 2>(in0, in1, tmp1);
-        Transpose1x4<laneOffsetIn, 0>(in2, in3, in4, in5, tmp2);
+        Transpose1x2<laneOffsetIn, 2>(in0, in1, tmp0);
+        Transpose1x4<laneOffsetIn, 0>(in2, in3, in4, in5, tmp1);
     }
-    tmp0 = Permute2F128<0, laneIn, 1, laneIn>(tmp1, tmp2);
 
+    constexpr U32 laneIn = _firstRowIn / numValuesPerLane<__m256>;
+    __m256 tout = Permute2F128<0, laneIn, 1, laneIn>(tmp0, tmp1);
 
-    // Write to output registers
-    TransposeSetOutput<_firstRowOut, 6, _overwriteUnused, _unusedSetZero>(out0, tmp0);
+    TransposeSetOutput<_firstRowOut, 6, _overwriteUnused, _unusedSetZero>(out0, tout);
 }
 
 
@@ -1101,32 +1085,26 @@ template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unused
 inline void Transpose1x7(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 in4, __m256 in5, __m256 in6,
                          __m256& out0)
 {
-
-    constexpr U32 numLaneVals = numValuesPerLane<__m256>;
-    constexpr U32 laneIn = _firstRowIn / numLaneVals;
-    constexpr U32 laneOffsetIn = _firstRowIn % numLaneVals;
-    constexpr U32 laneOffsetOut = _firstRowOut % numLaneVals;
+    constexpr U32 laneOffsetIn = _firstRowIn % numValuesPerLane<__m256>;
+    constexpr U32 laneOffsetOut = _firstRowOut % numValuesPerLane<__m256>;
 
 
-    __m256 tmp0;
-
-    __m256 tmp1, tmp2;
+    __m256 tmp0, tmp1;
     if constexpr (laneOffsetOut == 0)
     {
-        Transpose1x4<laneOffsetIn, 0>(in0, in1, in2, in3, tmp1);
-        Transpose1x3<laneOffsetIn, 0>(in4, in5, in6, tmp2);
+        Transpose1x4<laneOffsetIn, 0>(in0, in1, in2, in3, tmp0);
+        Transpose1x3<laneOffsetIn, 0>(in4, in5, in6, tmp1);
     }
     else
     {
-        Transpose1x3<laneOffsetIn, 1>(in0, in1, in2, tmp1);
-        Transpose1x4<laneOffsetIn, 0>(in3, in4, in5, in6, tmp2);
+        Transpose1x3<laneOffsetIn, 1>(in0, in1, in2, tmp0);
+        Transpose1x4<laneOffsetIn, 0>(in3, in4, in5, in6, tmp1);
     }
 
-    tmp0 = Permute2F128<0, laneIn, 1, laneIn>(tmp1, tmp2);
+    constexpr U32 laneIn = _firstRowIn / numValuesPerLane<__m256>;
+    __m256 tout = Permute2F128<0, laneIn, 1, laneIn>(tmp0, tmp1);
 
-
-    // Write to output registers
-    TransposeSetOutput<_firstRowOut, 7, _overwriteUnused, _unusedSetZero>(out0, tmp0);
+    TransposeSetOutput<_firstRowOut, 7, _overwriteUnused, _unusedSetZero>(out0, tout);
 }
 
 
@@ -1137,25 +1115,17 @@ template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unused
 inline void Transpose1x8(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 in4, __m256 in5, __m256 in6, __m256 in7,
                          __m256& out0)
 {
+    constexpr U32 laneOffsetIn = _firstRowIn % numValuesPerLane<__m256>;
 
-    constexpr U32 numLaneVals = numValuesPerLane<__m256>;
-    constexpr U32 laneIn = _firstRowIn / numLaneVals;
-    constexpr U32 laneOffsetIn = _firstRowIn % numLaneVals;
+    __m256 tmp0, tmp1;
 
+    Transpose1x4<laneOffsetIn, 0>(in0, in1, in2, in3, tmp0);
+    Transpose1x4<laneOffsetIn, 0>(in4, in5, in6, in7, tmp1);
 
-    __m256 tmp0;
+    constexpr U32 laneIn = _firstRowIn / numValuesPerLane<__m256>;
+    __m256 tout = Permute2F128<0, laneIn, 1, laneIn>(tmp0, tmp1);
 
-    __m256 tmp1, tmp2;
-
-    Transpose1x4<laneOffsetIn, 0>(in0, in1, in2, in3, tmp1);
-    Transpose1x4<laneOffsetIn, 0>(in4, in5, in6, in7, tmp2);
-
-
-    tmp0 = Permute2F128<0, laneIn, 1, laneIn>(tmp1, tmp2);
-
-
-    // Write to output registers
-    out0 = tmp0;
+    out0 = tout;
 }
 
 
