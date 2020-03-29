@@ -18,6 +18,9 @@ set(GDL_COMPILE_DEFINITIONS "")
 # - see: https://clang.llvm.org/docs/AddressSanitizer.html
 # - see: https://gcc.gnu.org/onlinedocs/gcc/Instrumentation-Options.html
 # - add extra build with  -fsanitize=address -fsanitize-address-use-after-scope
+# Link time optimizations: -flto
+# - can lead to errors, see for example: https://github.com/mesonbuild/meson/issues/1646
+# - fix problems if possible and use LTO for release builds
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native -Wall -Wextra -Wpedantic -Wmissing-braces -Wshadow -pthread ")
 
