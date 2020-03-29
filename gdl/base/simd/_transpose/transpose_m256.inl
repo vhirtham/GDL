@@ -976,119 +976,37 @@ inline void Transpose1x4(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256&
     constexpr U32 laneOffsetIn = _firstRowIn % numLaneVals;
     constexpr U32 laneOffsetOut = _firstRowOut % numLaneVals;
 
+    std::array<__m256, 4> tin = {{in0, in1, in2, in3}};
 
-    __m256 tmp0;
+    constexpr U32 idx_in_0 = (4 - laneOffsetOut) % 4;
+    constexpr U32 idx_in_1 = (5 - laneOffsetOut) % 4;
+    constexpr U32 idx_in_2 = (6 - laneOffsetOut) % 4;
+    constexpr U32 idx_in_3 = (7 - laneOffsetOut) % 4;
 
-    if constexpr (laneOffsetIn == 0)
+    __m256 tmp0, tmp1;
+    if constexpr (laneOffsetIn < 2)
     {
-        __m256 tmp1, tmp2;
-        if constexpr (laneOffsetOut == 0)
-        {
-            tmp1 = _mm_unpacklo(in0, in1);
-            tmp2 = _mm_unpacklo(in2, in3);
-        }
-        else if constexpr (laneOffsetOut == 1)
-        {
-            tmp1 = _mm_unpacklo(in3, in0);
-            tmp2 = _mm_unpacklo(in1, in2);
-        }
-        else if constexpr (laneOffsetOut == 2)
-        {
-            tmp1 = _mm_unpacklo(in2, in3);
-            tmp2 = _mm_unpacklo(in0, in1);
-        }
-        else
-        {
-            tmp1 = _mm_unpacklo(in1, in2);
-            tmp2 = _mm_unpacklo(in3, in0);
-        }
-
-        tmp0 = _mm_movelh(tmp1, tmp2);
-    }
-    else if constexpr (laneOffsetIn == 1)
-    {
-        __m256 tmp1, tmp2;
-        if constexpr (laneOffsetOut == 0)
-        {
-            tmp1 = _mm_unpacklo(in0, in1);
-            tmp2 = _mm_unpacklo(in2, in3);
-        }
-        else if constexpr (laneOffsetOut == 1)
-        {
-            tmp1 = _mm_unpacklo(in3, in0);
-            tmp2 = _mm_unpacklo(in1, in2);
-        }
-        else if constexpr (laneOffsetOut == 2)
-        {
-            tmp1 = _mm_unpacklo(in2, in3);
-            tmp2 = _mm_unpacklo(in0, in1);
-        }
-        else
-        {
-            tmp1 = _mm_unpacklo(in1, in2);
-            tmp2 = _mm_unpacklo(in3, in0);
-        }
-
-        tmp0 = _mm_movehl(tmp2, tmp1);
-    }
-    else if constexpr (laneOffsetIn == 2)
-    {
-        __m256 tmp1, tmp2;
-        if constexpr (laneOffsetOut == 0)
-        {
-            tmp1 = _mm_unpackhi(in0, in1);
-            tmp2 = _mm_unpackhi(in2, in3);
-        }
-        else if constexpr (laneOffsetOut == 1)
-        {
-            tmp1 = _mm_unpackhi(in3, in0);
-            tmp2 = _mm_unpackhi(in1, in2);
-        }
-        else if constexpr (laneOffsetOut == 2)
-        {
-            tmp1 = _mm_unpackhi(in2, in3);
-            tmp2 = _mm_unpackhi(in0, in1);
-        }
-        else
-        {
-            tmp1 = _mm_unpackhi(in1, in2);
-            tmp2 = _mm_unpackhi(in3, in0);
-        }
-
-        tmp0 = _mm_movelh(tmp1, tmp2);
+        tmp0 = _mm_unpacklo(tin[idx_in_0], tin[idx_in_1]);
+        tmp1 = _mm_unpacklo(tin[idx_in_2], tin[idx_in_3]);
     }
     else
     {
-        __m256 tmp1, tmp2;
-        if constexpr (laneOffsetOut == 0)
-        {
-            tmp1 = _mm_unpackhi(in0, in1);
-            tmp2 = _mm_unpackhi(in2, in3);
-        }
-        else if constexpr (laneOffsetOut == 1)
-        {
-            tmp1 = _mm_unpackhi(in3, in0);
-            tmp2 = _mm_unpackhi(in1, in2);
-        }
-        else if constexpr (laneOffsetOut == 2)
-        {
-            tmp1 = _mm_unpackhi(in2, in3);
-            tmp2 = _mm_unpackhi(in0, in1);
-        }
-        else
-        {
-            tmp1 = _mm_unpackhi(in1, in2);
-            tmp2 = _mm_unpackhi(in3, in0);
-        }
-
-        tmp0 = _mm_movehl(tmp2, tmp1);
+        tmp0 = _mm_unpackhi(tin[idx_in_0], tin[idx_in_1]);
+        tmp1 = _mm_unpackhi(tin[idx_in_2], tin[idx_in_3]);
     }
 
-    if constexpr (laneIn != laneOut || laneOffsetOut > 0)
-        tmp0 = Permute2F128<laneIn, laneIn>(tmp0);
+    __m256 tout;
+    if constexpr (laneOffsetIn % 2 == 0)
+        tout = _mm_movelh(tmp0, tmp1);
+    else
+        tout = _mm_movehl(tmp1, tmp0);
 
-    // Write to output registers
-    TransposeSetOutput<_firstRowOut, 4, _overwriteUnused, _unusedSetZero>(out0, tmp0);
+
+    if constexpr (laneIn != laneOut || laneOffsetOut > 0)
+        tout = Permute2F128<laneIn, laneIn>(tout);
+
+
+    TransposeSetOutput<_firstRowOut, 4, _overwriteUnused, _unusedSetZero>(out0, tout);
 }
 
 
