@@ -1135,27 +1135,23 @@ inline void Transpose1x8(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 
 template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unusedSetZero>
 inline void Transpose2x1(__m256 in0, __m256& out0, __m256& out1)
 {
-    constexpr U32 laneOut = _firstRowOut / numValuesPerLane<__m256>;
-    constexpr U32 laneOffsetIn = _firstRowIn % numValuesPerLane<__m256>;
-    constexpr U32 laneOffsetOut = _firstRowOut % numValuesPerLane<__m256>;
+    using Lane = TranspositionLaneData<__m256, _firstRowIn, _firstRowOut>;
 
     std::array<__m256, 2> tout;
 
-    if constexpr (laneOffsetIn < 3)
+    if constexpr (Lane::OffsetIn < 3)
     {
-        constexpr U32 laneIn = _firstRowIn / numValuesPerLane<__m256>;
-
-        __m256 tmp0 = SwapLanesIf<laneIn != laneOut>(in0);
-        Transpose1x1<laneOffsetIn, laneOffsetOut>(tmp0, tout[0]);
-        Transpose1x1<laneOffsetIn + 1, laneOffsetOut>(tmp0, tout[1]);
+        __m256 tmp0 = SwapLanesIf<Lane::In != Lane::Out>(in0);
+        Transpose1x1<Lane::OffsetIn, Lane::OffsetOut>(tmp0, tout[0]);
+        Transpose1x1<Lane::OffsetIn + 1, Lane::OffsetOut>(tmp0, tout[1]);
     }
     else
     {
-        __m256 tmp0 = SwapLanesIf<laneOut == 1>(in0);
-        __m256 tmp1 = SwapLanesIf<laneOut == 0>(in0);
+        __m256 tmp0 = SwapLanesIf<Lane::Out == 1>(in0);
+        __m256 tmp1 = SwapLanesIf<Lane::Out == 0>(in0);
 
-        Transpose1x1<laneOffsetIn, laneOffsetOut>(tmp0, tout[0]);
-        Transpose1x1<0, laneOffsetOut>(tmp1, tout[1]);
+        Transpose1x1<Lane::OffsetIn, Lane::OffsetOut>(tmp0, tout[0]);
+        Transpose1x1<0, Lane::OffsetOut>(tmp1, tout[1]);
     }
 
     TransposeSetOutput<_firstRowOut, 1, _overwriteUnused, _unusedSetZero>(out0, out1, tout[0], tout[1]);
@@ -1564,165 +1560,37 @@ inline void Transpose2x8(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 
 template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unusedSetZero>
 inline void Transpose3x1(__m256 in0, __m256& out0, __m256& out1, __m256& out2)
 {
-    constexpr U32 numLaneVals = numValuesPerLane<__m256>;
-    constexpr U32 laneIn = _firstRowIn / numLaneVals;
-    constexpr U32 laneOut = _firstRowOut / numLaneVals;
-    constexpr U32 laneOffsetIn = _firstRowIn % numLaneVals;
-    constexpr U32 laneOffsetOut = _firstRowOut % numLaneVals;
+    using Lane = TranspositionLaneData<__m256, _firstRowIn, _firstRowOut>;
 
-    __m256 tmp0, tmp1, tmp2;
+    std::array<__m256, 3> tout;
 
-    if constexpr (laneOffsetIn == 0)
+    if constexpr (Lane::OffsetIn < 2)
     {
-        __m256 tmp3;
-
-        if constexpr (laneOut != laneIn)
-            tmp3 = Permute2F128<1, 0>(in0);
-        else
-            tmp3 = in0;
-
-        if constexpr (laneOffsetOut == 0)
-        {
-            tmp0 = tmp3;
-            tmp1 = _mm_movehdup(tmp3);
-            tmp2 = _mm_unpackhi(tmp3, tmp3);
-        }
-        else if constexpr (laneOffsetOut == 1)
-        {
-            tmp0 = _mm_moveldup(tmp3);
-            tmp1 = tmp3;
-            tmp2 = _mm_unpackhi(tmp3, tmp3);
-        }
-        else if constexpr (laneOffsetOut == 2)
-        {
-            tmp2 = tmp3;
-            tmp1 = _mm_unpacklo(tmp3, tmp3);
-            tmp0 = _mm_unpacklo(tmp1, tmp1);
-        }
-        else
-        {
-            tmp2 = _mm_moveldup(tmp3);
-            tmp1 = _mm_unpacklo(tmp3, tmp3);
-            tmp0 = _mm_unpacklo(tmp1, tmp1);
-        }
+        __m256 tmp0 = SwapLanesIf<Lane::In != Lane::Out>(in0);
+        Transpose1x1<Lane::OffsetIn, Lane::OffsetOut>(tmp0, tout[0]);
+        Transpose1x1<Lane::OffsetIn + 1, Lane::OffsetOut>(tmp0, tout[1]);
+        Transpose1x1<Lane::OffsetIn + 2, Lane::OffsetOut>(tmp0, tout[2]);
     }
-    else if constexpr (laneOffsetIn == 1)
+    else if constexpr (Lane::OffsetIn < 3)
     {
-        __m256 tmp3;
+        __m256 tmp0 = SwapLanesIf<Lane::Out == 1>(in0);
+        __m256 tmp1 = SwapLanesIf<Lane::Out == 0>(in0);
 
-        if constexpr (laneOut != laneIn)
-            tmp3 = Permute2F128<1, 0>(in0);
-        else
-            tmp3 = in0;
-
-        if constexpr (laneOffsetOut == 0)
-        {
-            tmp0 = _mm_movehdup(tmp3);
-            tmp1 = _mm_unpackhi(tmp3, tmp3);
-            tmp2 = _mm_unpackhi(tmp1, tmp1);
-        }
-        else if constexpr (laneOffsetOut == 1)
-        {
-            tmp0 = tmp3;
-            tmp1 = _mm_unpackhi(tmp3, tmp3);
-            tmp2 = _mm_unpackhi(tmp1, tmp1);
-        }
-        else if constexpr (laneOffsetOut == 2)
-        {
-            tmp0 = _mm_unpacklo(tmp3, tmp3);
-            tmp1 = tmp3;
-            tmp2 = _mm_movehdup(tmp3);
-        }
-        else
-        {
-            tmp0 = _mm_unpacklo(tmp3, tmp3);
-            tmp1 = _mm_moveldup(tmp3);
-            tmp2 = tmp3;
-        }
-    }
-    else if constexpr (laneOffsetIn == 2)
-    {
-        __m256 tmp3, tmp4;
-        if constexpr (laneOut == laneIn)
-        {
-            tmp3 = in0;
-            tmp4 = Permute2F128<1, 0>(in0);
-        }
-        else
-        {
-            tmp3 = Permute2F128<1, 0>(in0);
-            tmp4 = in0;
-        }
-
-        if constexpr (laneOffsetOut == 0)
-        {
-            tmp0 = _mm_unpackhi(tmp3, tmp3);
-            tmp1 = _mm_unpackhi(tmp0, tmp0);
-            tmp2 = tmp4;
-        }
-        else if constexpr (laneOffsetOut == 1)
-        {
-            tmp0 = _mm_unpackhi(tmp3, tmp3);
-            tmp1 = _mm_unpackhi(tmp0, tmp0);
-            tmp2 = _mm_moveldup(tmp4);
-        }
-        else if constexpr (laneOffsetOut == 2)
-        {
-            tmp0 = tmp3;
-            tmp1 = _mm_movehdup(tmp3);
-            tmp2 = Broadcast<0>(tmp4);
-        }
-        else
-        {
-            tmp0 = _mm_moveldup(tmp3);
-            tmp1 = tmp3;
-            tmp2 = Broadcast<0>(tmp4);
-        }
+        Transpose1x1<2, Lane::OffsetOut>(tmp0, tout[0]);
+        Transpose1x1<3, Lane::OffsetOut>(tmp0, tout[1]);
+        Transpose1x1<0, Lane::OffsetOut>(tmp1, tout[2]);
     }
     else
     {
-        __m256 tmp3, tmp4;
-        if constexpr (laneOut == laneIn)
-        {
-            tmp3 = in0;
-            tmp4 = Permute2F128<1, 0>(in0);
-        }
-        else
-        {
-            tmp3 = Permute2F128<1, 0>(in0);
-            tmp4 = in0;
-        }
+        __m256 tmp0 = SwapLanesIf<Lane::Out == 1>(in0);
+        __m256 tmp1 = SwapLanesIf<Lane::Out == 0>(in0);
 
-        if constexpr (laneOffsetOut == 0)
-        {
-            tmp0 = Broadcast<3>(tmp3);
-            tmp1 = tmp4;
-            tmp2 = _mm_movehdup(tmp4);
-        }
-        else if constexpr (laneOffsetOut == 1)
-        {
-            tmp0 = Broadcast<3>(tmp3);
-            tmp1 = _mm_moveldup(tmp4);
-            tmp2 = tmp4;
-        }
-        else if constexpr (laneOffsetOut == 2)
-        {
-            tmp2 = _mm_unpacklo(tmp4, tmp4);
-            tmp1 = _mm_unpacklo(tmp2, tmp2);
-            tmp0 = _mm_movehdup(tmp3);
-        }
-        else
-        {
-            tmp2 = _mm_unpacklo(tmp4, tmp4);
-            tmp1 = _mm_unpacklo(tmp2, tmp2);
-            tmp0 = tmp3;
-        }
+        Transpose1x1<3, Lane::OffsetOut>(tmp0, tout[0]);
+        Transpose1x1<0, Lane::OffsetOut>(tmp1, tout[1]);
+        Transpose1x1<1, Lane::OffsetOut>(tmp1, tout[2]);
     }
 
-
-
-    // Write to output registers
-    TransposeSetOutput<_firstRowOut, 1, _overwriteUnused, _unusedSetZero>(out0, out1, out2, tmp0, tmp1, tmp2);
+    TransposeSetOutput<_firstRowOut, 1, _overwriteUnused, _unusedSetZero>(out0, out1, out2, tout[0], tout[1], tout[2]);
 }
 
 
