@@ -1828,301 +1828,97 @@ inline void Transpose3x3(__m256 in0, __m256 in1, __m256 in2, __m256& out0, __m25
 template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unusedSetZero>
 inline void Transpose3x4(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256& out0, __m256& out1, __m256& out2)
 {
-    constexpr U32 numLaneVals = numValuesPerLane<__m256>;
-    constexpr U32 laneIn = _firstRowIn / numLaneVals;
-    constexpr U32 laneOut = _firstRowOut / numLaneVals;
-    constexpr U32 laneOffsetIn = _firstRowIn % numLaneVals;
-    constexpr U32 laneOffsetOut = _firstRowOut % numLaneVals;
+    using Lane = TranspositionLaneData<__m256, _firstRowIn, _firstRowOut>;
+    std::array<__m256, 3> tout;
+    std::array<__m256, 4> tin = {{in0, in1, in2, in3}};
 
-    __m256 tmp0, tmp1, tmp2;
 
-    if constexpr (laneOffsetIn == 0)
+    constexpr U32 idx_0 = (4 - Lane::OffsetOut) % 4;
+    constexpr U32 idx_1 = (5 - Lane::OffsetOut) % 4;
+    constexpr U32 idx_2 = (6 - Lane::OffsetOut) % 4;
+    constexpr U32 idx_3 = (7 - Lane::OffsetOut) % 4;
+
+
+    if constexpr (Lane::OffsetIn < 2 && Lane::OffsetOut > 0)
     {
+        // This branch is not necessary, since the else-case also produces the correct results. However, it saves 1-2
+        // Permute2F128.
+        constexpr bool swp_con_0 = Lane::In == Lane::Out;
+        constexpr bool swp_con_1 = (Lane::OffsetOut < 2) ? Lane::In != Lane::Out : Lane::In == Lane::Out;
+        constexpr bool swp_con_2 = (Lane::OffsetOut < 3) ? Lane::In != Lane::Out : Lane::In == Lane::Out;
+        constexpr bool swp_con_3 = Lane::In != Lane::Out;
 
+        __m256 tmp0 = SwapLanesIf<swp_con_0>(tin[idx_0]);
+        __m256 tmp1 = SwapLanesIf<swp_con_1>(tin[idx_1]);
+        __m256 tmp2 = SwapLanesIf<swp_con_2>(tin[idx_2]);
+        __m256 tmp3 = SwapLanesIf<swp_con_3>(tin[idx_3]);
 
-        __m256 tmp4, tmp5, tmp6, tmp7;
-        if constexpr (laneOffsetOut == 0)
+        __m256 tmp4 = _mm_unpacklo(tmp0, tmp1);
+        __m256 tmp5 = _mm_unpackhi(tmp0, tmp1);
+        __m256 tmp6 = _mm_unpacklo(tmp2, tmp3);
+        __m256 tmp7 = _mm_unpackhi(tmp2, tmp3);
+
+        if constexpr (Lane::OffsetIn == 0)
         {
-            if constexpr (laneIn == laneOut)
-            {
-                tmp4 = in0;
-                tmp5 = in1;
-                tmp6 = in2;
-                tmp7 = in3;
-            }
-            else
-            {
-                tmp4 = Permute2F128<1, 0>(in0);
-                tmp5 = Permute2F128<1, 0>(in1);
-                tmp6 = Permute2F128<1, 0>(in2);
-                tmp7 = Permute2F128<1, 0>(in3);
-            }
-        }
-        else if constexpr (laneOffsetOut == 1)
-        {
-            if constexpr (laneIn == 0)
-            {
-                tmp4 = Permute2F128<1, 0>(in3);
-                tmp5 = in0;
-                tmp6 = in1;
-                tmp7 = in2;
-            }
-            else
-            {
-                tmp4 = in3;
-                tmp5 = Permute2F128<1, 0>(in0);
-                tmp6 = Permute2F128<1, 0>(in1);
-                tmp7 = Permute2F128<1, 0>(in2);
-            }
-        }
-        else if constexpr (laneOffsetOut == 2)
-        {
-            if constexpr (laneIn == 0)
-            {
-                tmp4 = Permute2F128<1, 0>(in2);
-                tmp5 = Permute2F128<1, 0>(in3);
-                tmp6 = in0;
-                tmp7 = in1;
-            }
-            else
-            {
-                tmp4 = in2;
-                tmp5 = in3;
-                tmp6 = Permute2F128<1, 0>(in0);
-                tmp7 = Permute2F128<1, 0>(in1);
-            }
+            tout[0] = _mm_movelh(tmp4, tmp6);
+            tout[1] = _mm_movehl(tmp6, tmp4);
+            tout[2] = _mm_movelh(tmp5, tmp7);
         }
         else
         {
-            if constexpr (laneIn == 0)
-            {
-                tmp4 = Permute2F128<1, 0>(in1);
-                tmp5 = Permute2F128<1, 0>(in2);
-                tmp6 = Permute2F128<1, 0>(in3);
-                tmp7 = in0;
-            }
-            else
-            {
-                tmp4 = in1;
-                tmp5 = in2;
-                tmp6 = in3;
-                tmp7 = Permute2F128<1, 0>(in0);
-            }
-        }
-
-        __m256 tmp8 = _mm_unpacklo(tmp4, tmp5);
-        __m256 tmp9 = _mm_unpackhi(tmp4, tmp5);
-        __m256 tmp10 = _mm_unpacklo(tmp6, tmp7);
-        __m256 tmp11 = _mm_unpackhi(tmp6, tmp7);
-
-        tmp0 = _mm_movelh(tmp8, tmp10);
-        tmp1 = _mm_movehl(tmp10, tmp8);
-        tmp2 = _mm_movelh(tmp9, tmp11);
-    }
-    else if constexpr (laneOffsetIn == 1)
-    {
-        __m256 tmp4, tmp5, tmp6, tmp7;
-
-        if constexpr (laneOffsetOut == 0)
-        {
-            if constexpr (laneIn == laneOut)
-            {
-                tmp4 = in0;
-                tmp5 = in1;
-                tmp6 = in2;
-                tmp7 = in3;
-            }
-            else
-            {
-                tmp4 = Permute2F128<1, 0>(in0);
-                tmp5 = Permute2F128<1, 0>(in1);
-                tmp6 = Permute2F128<1, 0>(in2);
-                tmp7 = Permute2F128<1, 0>(in3);
-            }
-        }
-        else if constexpr (laneOffsetOut == 1)
-        {
-            if constexpr (laneIn == 0)
-            {
-                tmp4 = Permute2F128<1, 0>(in3);
-                tmp5 = in0;
-                tmp6 = in1;
-                tmp7 = in2;
-            }
-            else
-            {
-                tmp4 = in3;
-                tmp5 = Permute2F128<1, 0>(in0);
-                tmp6 = Permute2F128<1, 0>(in1);
-                tmp7 = Permute2F128<1, 0>(in2);
-            }
-        }
-        else if constexpr (laneOffsetOut == 2)
-        {
-            if constexpr (laneIn == 0)
-            {
-                tmp4 = Permute2F128<1, 0>(in2);
-                tmp5 = Permute2F128<1, 0>(in3);
-                tmp6 = in0;
-                tmp7 = in1;
-            }
-            else
-            {
-                tmp4 = in2;
-                tmp5 = in3;
-                tmp6 = Permute2F128<1, 0>(in0);
-                tmp7 = Permute2F128<1, 0>(in1);
-            }
-        }
-        else
-        {
-            if constexpr (laneIn == 0)
-            {
-                tmp4 = Permute2F128<1, 0>(in1);
-                tmp5 = Permute2F128<1, 0>(in2);
-                tmp6 = Permute2F128<1, 0>(in3);
-                tmp7 = in0;
-            }
-            else
-            {
-                tmp4 = in1;
-                tmp5 = in2;
-                tmp6 = in3;
-                tmp7 = Permute2F128<1, 0>(in0);
-            }
-        }
-
-        __m256 tmp8 = _mm_unpacklo(tmp4, tmp5);
-        __m256 tmp9 = _mm_unpackhi(tmp4, tmp5);
-        __m256 tmp10 = _mm_unpacklo(tmp6, tmp7);
-        __m256 tmp11 = _mm_unpackhi(tmp6, tmp7);
-
-        tmp0 = _mm_movehl(tmp10, tmp8);
-        tmp1 = _mm_movelh(tmp9, tmp11);
-        tmp2 = _mm_movehl(tmp11, tmp9);
-    }
-    else if constexpr (laneOffsetIn == 2)
-    {
-        __m256 tmp4, tmp5, tmp6, tmp7;
-
-        if constexpr (laneOffsetOut == 0)
-        {
-            tmp4 = in0;
-            tmp5 = in1;
-            tmp6 = in2;
-            tmp7 = in3;
-        }
-        else if constexpr (laneOffsetOut == 1)
-        {
-            tmp4 = Permute2F128<1, 0>(in3);
-            tmp5 = in0;
-            tmp6 = in1;
-            tmp7 = in2;
-        }
-        else if constexpr (laneOffsetOut == 2)
-        {
-            tmp4 = Permute2F128<1, 0>(in2);
-            tmp5 = Permute2F128<1, 0>(in3);
-            tmp6 = in0;
-            tmp7 = in1;
-        }
-        else
-        {
-            tmp4 = in1;
-            tmp5 = in2;
-            tmp6 = in3;
-            tmp7 = Permute2F128<1, 0>(in0);
-        }
-
-        __m256 tmp8 = _mm_unpacklo(tmp4, tmp5);
-        __m256 tmp9 = _mm_unpackhi(tmp4, tmp5);
-        __m256 tmp10 = _mm_unpacklo(tmp6, tmp7);
-        __m256 tmp11 = _mm_unpackhi(tmp6, tmp7);
-
-        tmp0 = _mm_movelh(tmp9, tmp11);
-        tmp1 = _mm_movehl(tmp11, tmp9);
-        tmp2 = _mm_movelh(tmp8, tmp10);
-
-        if constexpr (laneOffsetOut < 3)
-        {
-            if constexpr (laneOut == 0)
-            {
-                tmp2 = Permute2F128<1, 0>(tmp2);
-            }
-            else
-            {
-                tmp0 = Permute2F128<1, 0>(tmp0);
-                tmp1 = Permute2F128<1, 0>(tmp1);
-            }
-        }
-        else
-        {
-            tmp0 = Permute2F128<1, 0>(tmp0);
-            tmp1 = Permute2F128<1, 0>(tmp1);
+            tout[0] = _mm_movehl(tmp6, tmp4);
+            tout[1] = _mm_movelh(tmp5, tmp7);
+            tout[2] = _mm_movehl(tmp7, tmp5);
         }
     }
     else
     {
-        __m256 tmp4, tmp5, tmp6, tmp7;
+        std::array<__m256, 4> tmp;
+        tmp[0] = _mm_unpacklo(tin[idx_0], tin[idx_1]);
+        tmp[1] = _mm_unpacklo(tin[idx_2], tin[idx_3]);
+        tmp[2] = _mm_unpackhi(tin[idx_0], tin[idx_1]);
+        tmp[3] = _mm_unpackhi(tin[idx_2], tin[idx_3]);
 
-        if constexpr (laneOffsetOut == 0)
+
+        constexpr U32 mod = (Lane::OffsetIn / 2) * 2;
+        if constexpr (Lane::OffsetIn == 0 || Lane::OffsetIn == 2)
         {
-            tmp4 = in0;
-            tmp5 = in1;
-            tmp6 = in2;
-            tmp7 = in3;
-        }
-        else if constexpr (laneOffsetOut == 1)
-        {
-            tmp4 = Permute2F128<1, 0>(in3);
-            tmp5 = in0;
-            tmp6 = in1;
-            tmp7 = in2;
-        }
-        else if constexpr (laneOffsetOut == 2)
-        {
-            tmp4 = in2;
-            tmp5 = in3;
-            tmp6 = Permute2F128<1, 0>(in0);
-            tmp7 = Permute2F128<1, 0>(in1);
+            tout[0] = _mm_movelh(tmp[0 + mod], tmp[1 + mod]);
+            tout[1] = _mm_movehl(tmp[1 + mod], tmp[0 + mod]);
+            tout[2] = _mm_movelh(tmp[2 - mod], tmp[3 - mod]);
         }
         else
         {
-            tmp4 = in1;
-            tmp5 = in2;
-            tmp6 = in3;
-            tmp7 = Permute2F128<1, 0>(in0);
+            tout[0] = _mm_movehl(tmp[1 + mod], tmp[0 + mod]);
+            tout[1] = _mm_movelh(tmp[2 - mod], tmp[3 - mod]);
+            tout[2] = _mm_movehl(tmp[3 - mod], tmp[2 - mod]);
         }
 
-        __m256 tmp8 = _mm_unpacklo(tmp4, tmp5);
-        __m256 tmp9 = _mm_unpackhi(tmp4, tmp5);
-        __m256 tmp10 = _mm_unpacklo(tmp6, tmp7);
-        __m256 tmp11 = _mm_unpackhi(tmp6, tmp7);
 
-        tmp0 = _mm_movehl(tmp11, tmp9);
-        tmp1 = _mm_movelh(tmp8, tmp10);
-        tmp2 = _mm_movehl(tmp10, tmp8);
-
-        if constexpr (laneOffsetOut < 2)
+        if constexpr (Lane::OffsetOut == 0)
         {
-            if constexpr (laneOut == 0)
-            {
-                tmp1 = Permute2F128<1, 0>(tmp1);
-                tmp2 = Permute2F128<1, 0>(tmp2);
-            }
-            else
-            {
-                tmp0 = Permute2F128<1, 0>(tmp0);
-            }
+            constexpr bool swp_con_0 = Lane::In != Lane::Out;
+            constexpr bool swp_con_1 = (Lane::OffsetIn < 3) ? Lane::In != Lane::Out : Lane::Out == 0;
+            constexpr bool swp_con_2 = (Lane::OffsetIn < 2) ? Lane::In != Lane::Out : Lane::Out == 0;
+
+            tout[0] = SwapLanesIf<swp_con_0>(tout[0]);
+            tout[1] = SwapLanesIf<swp_con_1>(tout[1]);
+            tout[2] = SwapLanesIf<swp_con_2>(tout[2]);
         }
         else
         {
-            tmp0 = Permute2F128<1, 0>(tmp0);
+            constexpr U32 lane_0 = Lane::In;
+            constexpr U32 lane_1 = (_firstRowIn + 1) / 4;
+            constexpr U32 lane_2 = (_firstRowIn + 2) / 4;
+
+            tout[0] = Permute2F128<lane_0, lane_0>(tout[0]);
+            tout[1] = Permute2F128<lane_1, lane_1>(tout[1]);
+            tout[2] = Permute2F128<lane_2, lane_2>(tout[2]);
         }
     }
 
-    // Write to output registers
-    TransposeSetOutput<_firstRowOut, 4, _overwriteUnused, _unusedSetZero>(out0, out1, out2, tmp0, tmp1, tmp2);
+
+    TransposeSetOutput<_firstRowOut, 4, _overwriteUnused, _unusedSetZero>(out0, out1, out2, tout[0], tout[1], tout[2]);
 }
 
 
