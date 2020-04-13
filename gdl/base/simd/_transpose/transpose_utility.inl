@@ -164,7 +164,7 @@ namespace intern
 
 // --------------------------------------------------------------------------------------------------------------------
 
-template <U32 _idxFirst, U32 _numValues, bool _overwriteUnused, bool _unusedSetZero, bool _initialCall = true,
+template <U32 _idxFirst, U32 _numValues, bool _overwriteUnused, bool _unusedSetZero, bool _initialCall,
           typename _registerType, UST _arraySize, typename... _args>
 inline void TransposeSetOutput(std::array<_registerType, _arraySize> in, _registerType& out, _args&... args)
 {
