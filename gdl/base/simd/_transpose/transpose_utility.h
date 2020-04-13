@@ -4,6 +4,7 @@
 #include "gdl/base/simd/constants.h"
 #include "gdl/base/simd/x86intrin.h"
 
+#include <array>
 
 namespace GDL::simd
 {

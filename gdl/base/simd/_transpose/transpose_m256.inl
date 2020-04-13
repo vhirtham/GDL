@@ -2218,7 +2218,7 @@ inline void Transpose4x3(__m256 in0, __m256 in1, __m256 in2, __m256& out0, __m25
 
                 if constexpr (Lane::OffsetIn < 2)
                 {
-                    __m256 tmp5 = Permute2F128<1, 0>(tmp2);
+                    __m256 tmp5 = SwapLanes(tmp2);
                     tout[idx_1] = Shuffle<2, 3, 0, 1>(tmp5, in0);
                 }
                 else

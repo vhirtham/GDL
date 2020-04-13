@@ -16,17 +16,11 @@ namespace GDL::simd
 
 // check possible optimization of __m128 transpose 2x2 using Insert
 // check optimization of lane permutations for laneoffsetIn >=2 in __m256 version
-// check if 3x4, 3x5 version with Permute2F128 at beginning and end is really faster than just at the beginning
-// (Benchmark it). Original idea was to reduce number of instructions, but since the throughput of Permute2F128 is 1, it
-// should be faster to handle all Permutes at once as long as there are less than 2 additional instructions
 
 // test all brancehes of the general transpose function
-// use "out" parameters already for intermediate results -> before the set zero etc. lines
-// Try to reuse as much code as possible -> setzero etc parts in extra function
-// add SwapLanes function to replace Permute2F128<1,0>
-// move SwapLanesIf to swizzle header and write a test
+// replace Permute2F128<1,0> with SwapLanes
+// move SwapLanes(If) to swizzle header and write a test
 // add Permute2F128If -> like SwapLanesIf --- just let Permute2F128<0,1> return the input
-// optimize TransposeSetOutput with an array for tout / in
 // Add header entries and docstrings of internal functions
 // Move internal functions to the end of the files
 

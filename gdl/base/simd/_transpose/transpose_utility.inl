@@ -5,7 +5,7 @@
 #include "gdl/base/simd/swizzle.h"
 #include "gdl/base/simd/intrinsics.h"
 
-#include <array>
+
 
 namespace GDL::simd
 {
