@@ -227,6 +227,7 @@ BOOST_AUTO_TEST_CASE(Transpose3x8_256)
 }
 
 
+
 // Transpose 4x1 ------------------------------------------------------------------------------------------------------
 
 BOOST_AUTO_TEST_CASE(Test_transpose4x1)

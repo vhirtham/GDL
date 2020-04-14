@@ -5,6 +5,8 @@
 #include "gdl/base/fundamentalTypes.h"
 #include "gdl/base/simd/x86intrin.h"
 
+#include <array>
+
 
 
 #ifdef __AVX2__
@@ -829,6 +831,78 @@ template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = tru
 inline void Transpose8x8(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 in4, __m256 in5, __m256 in6, __m256 in7,
                          __m256& out0, __m256& out1, __m256& out2, __m256& out3, __m256& out4, __m256& out5,
                          __m256& out6, __m256& out7);
+
+
+// internal functions -------------------------------------------------------------------------------------------------
+
+namespace intern
+{
+
+//! @brief Perform in-lane permutations after permutations across lane boundaries have been applied for 2xN sized
+//! matrices. After this step, no more permutations are requiered.
+//! @tparam _firstRowIn: Index of the matrix's first row in each register
+//! @tparam _arraySizeIn: Size of the input array
+//! @param in: Array of input registers
+//! @return: Array of output registers
+template <U32 _firstRowIn, UST _arraySizeIn>
+inline std::array<__m256, 2> IntraLaneTransposeAfterPermute2xN(std::array<__m256, _arraySizeIn> in);
+
+
+
+//! @brief Perform in-lane permutations after permutations across lane boundaries have been applied for 3xN sized
+//! matrices. After this step, no more permutations are requiered.
+//! @tparam _firstRowIn: Index of the matrix's first row in each register
+//! @tparam _arraySizeIn: Size of the input array
+//! @param in: Array of input registers
+//! @return: Array of output registers
+template <U32 _firstRowIn, UST _arraySizeIn>
+inline std::array<__m256, 3> IntraLaneTransposeAfterPermute3xN(std::array<__m256, _arraySizeIn> in);
+
+
+
+//! @brief Perform in-lane permutations after permutations across lane boundaries have been applied for 4xN sized
+//! matrices. After this step, no more permutations are requiered.
+//! @tparam _firstRowIn: Index of the matrix's first row in each register
+//! @tparam _arraySizeIn: Size of the input array
+//! @param in: Array of input registers
+//! @return: Array of output registers
+template <U32 _firstRowIn, UST _arraySizeIn>
+inline std::array<__m256, 4> IntraLaneTransposeAfterPermute4xN(std::array<__m256, _arraySizeIn> in);
+
+
+
+//! @brief Perform in-lane permutations after permutations across lane boundaries have been applied for 5xN sized
+//! matrices. After this step, no more permutations are requiered.
+//! @tparam _firstRowIn: Index of the matrix's first row in each register
+//! @tparam _arraySizeIn: Size of the input array
+//! @param in: Array of input registers
+//! @return: Array of output registers
+template <U32 _firstRowIn>
+inline std::array<__m256, 5> IntraLaneTransposeAfterPermute5xN(std::array<__m256, 8> in);
+
+
+
+//! @brief Perform in-lane permutations after permutations across lane boundaries have been applied for 6xN sized
+//! matrices. After this step, no more permutations are requiered.
+//! @tparam _firstRowIn: Index of the matrix's first row in each register
+//! @tparam _arraySizeIn: Size of the input array
+//! @param in: Array of input registers
+//! @return: Array of output registers
+template <U32 _firstRowIn>
+inline std::array<__m256, 6> IntraLaneTransposeAfterPermute6xN(std::array<__m256, 8> in);
+
+
+
+//! @brief Perform in-lane permutations after permutations across lane boundaries have been applied for 7xN sized
+//! matrices. After this step, no more permutations are requiered.
+//! @tparam _firstRowIn: Index of the matrix's first row in each register
+//! @tparam _arraySizeIn: Size of the input array
+//! @param in: Array of input registers
+//! @return: Array of output registers
+template <U32 _firstRowIn>
+inline std::array<__m256, 7> IntraLaneTransposeAfterPermute7xN(std::array<__m256, 8> in);
+
+} // namespace intern
 
 } // namespace GDL::simd
 
