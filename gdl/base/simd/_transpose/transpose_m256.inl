@@ -2563,56 +2563,36 @@ inline std::array<__m256, 6> PermuteAfterIntraLaneTranspose6xN(std::array<__m256
     using Lane = TranspositionLaneData<__m256, _firstRowIn, _firstRowOut>;
     static_assert(_arraySizeIn == 4 || _arraySizeIn == 8, "Only arrays of size 4 and 8 accepted");
 
+    constexpr U32 idx_0 = (0 + _firstRowIn);
+    constexpr U32 idx_1 = (1 + _firstRowIn);
+    constexpr U32 idx_2 = (2 + _firstRowIn) % numValuesPerLane<__m256>;
+    constexpr U32 idx_3 = (3 + _firstRowIn) % numValuesPerLane<__m256>;
+
     std::array<__m256, 6> out;
     if constexpr (_arraySizeIn == 4)
     {
-        constexpr U32 idx_in0 = (0 + _firstRowIn);
-        constexpr U32 idx_in1 = (1 + _firstRowIn);
-        constexpr U32 idx_in2 = (2 + _firstRowIn) % numValuesPerLane<__m256>;
-        constexpr U32 idx_in3 = (3 + _firstRowIn) % numValuesPerLane<__m256>;
 
         constexpr U32 cmp_2 = (_firstRowIn > 1) ? 0 : 1;
         constexpr U32 cmp_3 = (_firstRowIn > 0) ? 0 : 1;
 
-        out[0] = SwapLanesIf<Lane::Out == 1>(in[idx_in0]);
-        out[1] = SwapLanesIf<Lane::Out == 1>(in[idx_in1]);
-        out[2] = SwapLanesIf<Lane::Out == cmp_2>(in[idx_in2]);
-        out[3] = SwapLanesIf<Lane::Out == cmp_3>(in[idx_in3]);
-        out[4] = SwapLanesIf<Lane::Out == 0>(in[idx_in0]);
-        out[5] = SwapLanesIf<Lane::Out == 0>(in[idx_in1]);
+        out[0] = SwapLanesIf<Lane::Out == 1>(in[idx_0]);
+        out[1] = SwapLanesIf<Lane::Out == 1>(in[idx_1]);
+        out[2] = SwapLanesIf<Lane::Out == cmp_2>(in[idx_2]);
+        out[3] = SwapLanesIf<Lane::Out == cmp_3>(in[idx_3]);
+        out[4] = SwapLanesIf<Lane::Out == 0>(in[idx_0]);
+        out[5] = SwapLanesIf<Lane::Out == 0>(in[idx_1]);
     }
     else
     {
-        if constexpr (_firstRowIn == 0)
-        {
-            out[0] = Permute2F128<0, 0, 1, 0>(in[0], in[4]);
-            out[1] = Permute2F128<0, 0, 1, 0>(in[1], in[5]);
-            out[2] = Permute2F128<0, 0, 1, 0>(in[2], in[6]);
-            out[3] = Permute2F128<0, 0, 1, 0>(in[3], in[7]);
+        constexpr U32 lane_2 = (_firstRowIn < 2) ? 0 : 1;
+        constexpr U32 lane_3 = (_firstRowIn < 1) ? 0 : 1;
 
-            out[4] = Permute2F128<0, 1, 1, 1>(in[0], in[4]);
-            out[5] = Permute2F128<0, 1, 1, 1>(in[1], in[5]);
-        }
-        else if constexpr (_firstRowIn == 1)
-        {
-            out[0] = Permute2F128<0, 0, 1, 0>(in[1], in[5]);
-            out[1] = Permute2F128<0, 0, 1, 0>(in[2], in[6]);
-            out[2] = Permute2F128<0, 0, 1, 0>(in[3], in[7]);
-
-            out[3] = Permute2F128<0, 1, 1, 1>(in[0], in[4]);
-            out[4] = Permute2F128<0, 1, 1, 1>(in[1], in[5]);
-            out[5] = Permute2F128<0, 1, 1, 1>(in[2], in[6]);
-        }
-        else
-        {
-            out[0] = Permute2F128<0, 0, 1, 0>(in[2], in[6]);
-            out[1] = Permute2F128<0, 0, 1, 0>(in[3], in[7]);
-
-            out[2] = Permute2F128<0, 1, 1, 1>(in[0], in[4]);
-            out[3] = Permute2F128<0, 1, 1, 1>(in[1], in[5]);
-            out[4] = Permute2F128<0, 1, 1, 1>(in[2], in[6]);
-            out[5] = Permute2F128<0, 1, 1, 1>(in[3], in[7]);
-        }
+        out[0] = Permute2F128<0, 0, 1, 0>(in[idx_0], in[idx_0 + 4]);
+        out[1] = Permute2F128<0, 0, 1, 0>(in[idx_1], in[idx_1 + 4]);
+        out[2] = Permute2F128<0, lane_2, 1, lane_2>(in[idx_2], in[idx_2 + 4]);
+        out[3] = Permute2F128<0, lane_3, 1, lane_3>(in[idx_3], in[idx_3 + 4]);
+        out[4] = Permute2F128<0, 1, 1, 1>(in[idx_0], in[idx_0 + 4]);
+        out[5] = Permute2F128<0, 1, 1, 1>(in[idx_1], in[idx_1 + 4]);
     }
     return out;
 }
