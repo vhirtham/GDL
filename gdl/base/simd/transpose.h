@@ -21,8 +21,8 @@ namespace GDL::simd
 // replace Permute2F128<1,0> with SwapLanes
 // move SwapLanes(If) to swizzle header and write a test
 // add Permute2F128If -> like SwapLanesIf --- just let Permute2F128<0,1> return the input
-// Add header entries and docstrings of internal functions
-// Move internal functions to the end of the files
+
+
 
 //! @brief Transposes a matrix represented by an column major register array. The maximal supported matrix size is NxN
 //! where N is the number of values in a register. The returned array has the minimal size required to store the result.

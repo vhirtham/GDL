@@ -833,6 +833,7 @@ inline void Transpose8x8(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 
                          __m256& out6, __m256& out7);
 
 
+
 // internal functions -------------------------------------------------------------------------------------------------
 
 namespace intern
@@ -840,7 +841,7 @@ namespace intern
 
 //! @brief Perform in-lane permutations after permutations across lane boundaries have been applied for 2xN sized
 //! matrices. After this step, no more permutations are requiered.
-//! @tparam _firstRowIn: Index of the matrix's first row in each register
+//! @tparam _firstRowIn: Index of the matrix's first row in each input register
 //! @tparam _arraySizeIn: Size of the input array
 //! @param in: Array of input registers
 //! @return: Array of output registers
@@ -851,7 +852,7 @@ inline std::array<__m256, 2> IntraLaneTransposeAfterPermute2xN(std::array<__m256
 
 //! @brief Perform in-lane permutations after permutations across lane boundaries have been applied for 3xN sized
 //! matrices. After this step, no more permutations are requiered.
-//! @tparam _firstRowIn: Index of the matrix's first row in each register
+//! @tparam _firstRowIn: Index of the matrix's first row in each input register
 //! @tparam _arraySizeIn: Size of the input array
 //! @param in: Array of input registers
 //! @return: Array of output registers
@@ -862,7 +863,7 @@ inline std::array<__m256, 3> IntraLaneTransposeAfterPermute3xN(std::array<__m256
 
 //! @brief Perform in-lane permutations after permutations across lane boundaries have been applied for 4xN sized
 //! matrices. After this step, no more permutations are requiered.
-//! @tparam _firstRowIn: Index of the matrix's first row in each register
+//! @tparam _firstRowIn: Index of the matrix's first row in each input register
 //! @tparam _arraySizeIn: Size of the input array
 //! @param in: Array of input registers
 //! @return: Array of output registers
@@ -873,7 +874,7 @@ inline std::array<__m256, 4> IntraLaneTransposeAfterPermute4xN(std::array<__m256
 
 //! @brief Perform in-lane permutations after permutations across lane boundaries have been applied for 5xN sized
 //! matrices. After this step, no more permutations are requiered.
-//! @tparam _firstRowIn: Index of the matrix's first row in each register
+//! @tparam _firstRowIn: Index of the matrix's first row in each input register
 //! @tparam _arraySizeIn: Size of the input array
 //! @param in: Array of input registers
 //! @return: Array of output registers
@@ -884,7 +885,7 @@ inline std::array<__m256, 5> IntraLaneTransposeAfterPermute5xN(std::array<__m256
 
 //! @brief Perform in-lane permutations after permutations across lane boundaries have been applied for 6xN sized
 //! matrices. After this step, no more permutations are requiered.
-//! @tparam _firstRowIn: Index of the matrix's first row in each register
+//! @tparam _firstRowIn: Index of the matrix's first row in each input register
 //! @tparam _arraySizeIn: Size of the input array
 //! @param in: Array of input registers
 //! @return: Array of output registers
@@ -895,12 +896,210 @@ inline std::array<__m256, 6> IntraLaneTransposeAfterPermute6xN(std::array<__m256
 
 //! @brief Perform in-lane permutations after permutations across lane boundaries have been applied for 7xN sized
 //! matrices. After this step, no more permutations are requiered.
-//! @tparam _firstRowIn: Index of the matrix's first row in each register
+//! @tparam _firstRowIn: Index of the matrix's first row in each input register
 //! @tparam _arraySizeIn: Size of the input array
 //! @param in: Array of input registers
 //! @return: Array of output registers
 template <U32 _firstRowIn>
 inline std::array<__m256, 7> IntraLaneTransposeAfterPermute7xN(std::array<__m256, 8> in);
+
+
+
+//! @brief Perform in-lane permutations before permutations across lane boundaries are applied for Nx1 sized
+//! matrices. After this step, the register lanes need to be permuted.
+//! @tparam _firstRowOut: Index of the transposed matrix's first row elements in their corresponding registers.
+//! @param in0: Input register
+//! @return Array of output registers
+template <U32 _firstRowOut>
+inline std::array<__m256, 4> IntraLaneTransposeBeforePermuteNx1(__m256 in0);
+
+
+
+//! @brief Perform in-lane permutations before permutations across lane boundaries are applied for Nx2 sized
+//! matrices. After this step, the register lanes need to be permuted.
+//! @tparam _firstRowOut: Index of the transposed matrix's first row elements in their corresponding registers.
+//! @param in: Input registers
+//! @return Array of output registers
+template <U32 _firstRowOut>
+inline auto IntraLaneTransposeBeforePermuteNx2(__m256 in0, __m256 in1);
+
+
+
+//! @brief Perform in-lane permutations before permutations across lane boundaries are applied for Nx3 sized
+//! matrices. After this step, the register lanes need to be permuted.
+//! @tparam _firstRowOut: Index of the transposed matrix's first row elements in their corresponding registers.
+//! @param in: Input registers
+//! @return Array of output registers
+template <U32 _firstRowOut>
+inline auto IntraLaneTransposeBeforePermuteNx3(__m256 in0, __m256 in1, __m256 in2);
+
+
+
+//! @brief Perform in-lane permutations before permutations across lane boundaries are applied for Nx4 sized
+//! matrices. After this step, the register lanes need to be permuted.
+//! @tparam _firstRowIn: Index of the source matrix's first row elements in their corresponding registers.
+//! @tparam _firstRowOut: Index of the transposed matrix's first row elements in their corresponding registers.
+//! @param in: Input registers
+//! @return Array of output registers
+template <U32 _firstRowIn, U32 _firstRowOut>
+inline std::array<__m256, 4> IntraLaneTransposeBeforePermuteNx4(__m256 in0, __m256 in1, __m256 in2, __m256 in3);
+
+
+
+//! @brief Perform in-lane permutations before permutations across lane boundaries are applied for Nx5 sized
+//! matrices. After this step, the register lanes need to be permuted.
+//! @tparam _firstRowOut: Index of the transposed matrix's first row elements in their corresponding registers.
+//! @param in: Input registers
+//! @return Array of output registers
+template <U32 _firstRowOut>
+inline std::array<__m256, 8> IntraLaneTransposeBeforePermuteNx5(__m256 in0, __m256 in1, __m256 in2, __m256 in3,
+                                                                __m256 in4);
+
+
+
+//! @brief Perform in-lane permutations before permutations across lane boundaries are applied for Nx6 sized
+//! matrices. After this step, the register lanes need to be permuted.
+//! @tparam _firstRowOut: Index of the transposed matrix's first row elements in their corresponding registers.
+//! @param in: Input registers
+//! @return Array of output registers
+template <U32 _firstRowOut>
+inline std::array<__m256, 8> IntraLaneTransposeBeforePermuteNx6(__m256 in0, __m256 in1, __m256 in2, __m256 in3,
+                                                                __m256 in4, __m256 in5);
+
+
+
+//! @brief Perform in-lane permutations before permutations across lane boundaries are applied for Nx7 sized
+//! matrices. After this step, the register lanes need to be permuted.
+//! @tparam _firstRowOut: Index of the transposed matrix's first row elements in their corresponding registers.
+//! @param in: Input registers
+//! @return Array of output registers
+template <U32 _firstRowOut>
+inline std::array<__m256, 8> IntraLaneTransposeBeforePermuteNx7(__m256 in0, __m256 in1, __m256 in2, __m256 in3,
+                                                                __m256 in4, __m256 in5, __m256 in6);
+
+
+
+//! @brief Perform in-lane permutations before permutations across lane boundaries are applied for Nx8 sized
+//! matrices. After this step, the register lanes need to be permuted.
+//! @tparam _firstRowOut: Index of the transposed matrix's first row elements in their corresponding registers.
+//! @param in: Input registers
+//! @return Array of output registers
+template <U32 _firstRowOut>
+inline std::array<__m256, 8> IntraLaneTransposeBeforePermuteNx8(__m256 in0, __m256 in1, __m256 in2, __m256 in3,
+                                                                __m256 in4, __m256 in5, __m256 in6, __m256 in7);
+
+
+
+//! @brief Permute lanes after permutations inside lane boundaries are applied for Nx4 sized
+//! matrices. After this step, no more permutations are requiered.
+//! @tparam _firstRowIn: Index of the source matrix's first row elements in their corresponding registers.
+//! @tparam _firstRowOut: Index of the transposed matrix's first row elements in their corresponding registers.
+//! @tparam _rows: Number of rows of the source matrix.
+//! @param in: Array of input registers
+//! @return Array of output registers
+template <U32 _firstRowIn, U32 _firstRowOut, U32 _rows>
+inline std::array<__m256, _rows> PermuteAfterIntraLaneTransposeNx4(std::array<__m256, 4> in);
+
+
+
+//! @brief Permute lanes after permutations inside lane boundaries are applied for Nx5 sized
+//! matrices. After this step, no more permutations are requiered.
+//! @tparam _firstRowIn: Index of the source matrix's first row elements in their corresponding registers.
+//! @tparam _firstRowOut: Index of the transposed matrix's first row elements in their corresponding registers.
+//! @tparam _arraySizeIn: Size of the input array
+//! @param in: Array of input registers
+//! @return Array of output registers
+template <U32 _firstRowIn, U32 _firstRowOut, UST _arraySizeIn>
+inline std::array<__m256, 5> PermuteAfterIntraLaneTranspose5xN(std::array<__m256, _arraySizeIn> in);
+
+
+
+//! @brief Permute lanes after permutations inside lane boundaries are applied for Nx6 sized
+//! matrices. After this step, no more permutations are requiered.
+//! @tparam _firstRowIn: Index of the source matrix's first row elements in their corresponding registers.
+//! @tparam _firstRowOut: Index of the transposed matrix's first row elements in their corresponding registers.
+//! @tparam _arraySizeIn: Size of the input array
+//! @param in: Array of input registers
+//! @return Array of output registers
+template <U32 _firstRowIn, U32 _firstRowOut, UST _arraySizeIn>
+inline std::array<__m256, 6> PermuteAfterIntraLaneTranspose6xN(std::array<__m256, _arraySizeIn> in);
+
+
+
+//! @brief Permute lanes after permutations inside lane boundaries are applied for Nx7 sized
+//! matrices. After this step, no more permutations are requiered.
+//! @tparam _firstRowIn: Index of the source matrix's first row elements in their corresponding registers.
+//! @tparam _firstRowOut: Index of the transposed matrix's first row elements in their corresponding registers.
+//! @tparam _arraySizeIn: Size of the input array
+//! @param in: Array of input registers
+//! @return Array of output registers
+template <U32 _firstRowIn, U32 _firstRowOut, UST _arraySizeIn>
+inline std::array<__m256, 7> PermuteAfterIntraLaneTranspose7xN(std::array<__m256, _arraySizeIn> in);
+
+
+
+//! @brief Permute lanes after permutations inside lane boundaries are applied for Nx8 sized
+//! matrices. After this step, no more permutations are requiered.
+//! @tparam _firstRowIn: Index of the source matrix's first row elements in their corresponding registers.
+//! @tparam _firstRowOut: Index of the transposed matrix's first row elements in their corresponding registers.
+//! @tparam _arraySizeIn: Size of the input array
+//! @param in: Array of input registers
+//! @return Array of output registers
+template <U32 _firstRowIn, U32 _firstRowOut, UST _arraySizeIn>
+inline std::array<__m256, 8> PermuteAfterIntraLaneTranspose8xN(std::array<__m256, _arraySizeIn> in);
+
+
+
+//! @brief Permute lanes before permutations inside lane boundaries are applied for Nx5 sized
+//! matrices. After this step, intra lane permutations must be performed.
+//! @tparam _firstRowIn: Index of the source matrix's first row elements in their corresponding registers.
+//! @tparam _firstRowOut: Index of the transposed matrix's first row elements in their corresponding registers.
+//! @tparam _arraySizeOut: Size of the output array
+//! @param in: Input registers
+//! @return Array of output registers
+template <U32 _firstRowIn, U32 _firstRowOut, UST _arraySizeOut>
+inline std::array<__m256, _arraySizeOut> PermuteBeforeIntraLaneTransposeNx5(__m256 in0, __m256 in1, __m256 in2,
+                                                                            __m256 in3, __m256 in4);
+
+
+
+//! @brief Permute lanes before permutations inside lane boundaries are applied for Nx6 sized
+//! matrices. After this step, intra lane permutations must be performed.
+//! @tparam _firstRowIn: Index of the source matrix's first row elements in their corresponding registers.
+//! @tparam _firstRowOut: Index of the transposed matrix's first row elements in their corresponding registers.
+//! @tparam _arraySizeOut: Size of the output array
+//! @param in: Input registers
+//! @return Array of output registers
+template <U32 _firstRowIn, U32 _firstRowOut, UST _arraySizeOut>
+inline std::array<__m256, _arraySizeOut> PermuteBeforeIntraLaneTransposeNx6(__m256 in0, __m256 in1, __m256 in2,
+                                                                            __m256 in3, __m256 in4, __m256 in5);
+
+
+
+//! @brief Permute lanes before permutations inside lane boundaries are applied for Nx7 sized
+//! matrices. After this step, intra lane permutations must be performed.
+//! @tparam _firstRowIn: Index of the source matrix's first row elements in their corresponding registers.
+//! @tparam _firstRowOut: Index of the transposed matrix's first row elements in their corresponding registers.
+//! @tparam _arraySizeOut: Size of the output array
+//! @param in: Input registers
+//! @return Array of output registers
+template <U32 _firstRowIn, U32 _firstRowOut, UST _arraySizeOut>
+inline std::array<__m256, _arraySizeOut>
+PermuteBeforeIntraLaneTransposeNx7(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 in4, __m256 in5, __m256 in6);
+
+
+
+//! @brief Permute lanes before permutations inside lane boundaries are applied for Nx8 sized
+//! matrices. After this step, intra lane permutations must be performed.
+//! @tparam _firstRowIn: Index of the source matrix's first row elements in their corresponding registers.
+//! @tparam _firstRowOut: Index of the transposed matrix's first row elements in their corresponding registers.
+//! @tparam _arraySizeOut: Size of the output array
+//! @param in: Input registers
+//! @return Array of output registers
+template <U32 _firstRowIn, U32 _firstRowOut, UST _arraySizeOut>
+inline std::array<__m256, _arraySizeOut> PermuteBeforeIntraLaneTransposeNx8(__m256 in0, __m256 in1, __m256 in2,
+                                                                            __m256 in3, __m256 in4, __m256 in5,
+                                                                            __m256 in6, __m256 in7);
 
 } // namespace intern
 
