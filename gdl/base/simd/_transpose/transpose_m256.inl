@@ -2466,35 +2466,26 @@ template <U32 _firstRowIn, U32 _firstRowOut, U32 _rows>
 inline std::array<__m256, _rows> PermuteAfterIntraLaneTransposeNx4(std::array<__m256, 4> in)
 {
     std::array<__m256, _rows> out;
-    if constexpr (_firstRowOut == 0)
+    if constexpr (_firstRowOut % 4 == 0)
     {
-        out[0] = SwapLanesIf<(_firstRowIn > 3)>(in[0]);
-        out[1] = SwapLanesIf<(_firstRowIn > 2)>(in[1]);
-        out[2] = SwapLanesIf<(_firstRowIn > 1)>(in[2]);
-        out[3] = SwapLanesIf<(_firstRowIn > 0)>(in[3]);
+        constexpr bool swp_con_0 = (_firstRowOut == 0) ? _firstRowIn > 3 : _firstRowIn <= 3;
+        constexpr bool swp_con_1 = (_firstRowOut == 0) ? _firstRowIn > 2 : _firstRowIn <= 2;
+        constexpr bool swp_con_2 = (_firstRowOut == 0) ? _firstRowIn > 1 : _firstRowIn <= 1;
+        constexpr bool swp_con_3 = (_firstRowOut == 0) ? _firstRowIn > 0 : _firstRowIn <= 0;
+
+        out[0] = SwapLanesIf<swp_con_0>(in[0]);
+        out[1] = SwapLanesIf<swp_con_1>(in[1]);
+        out[2] = SwapLanesIf<swp_con_2>(in[2]);
+        out[3] = SwapLanesIf<swp_con_3>(in[3]);
+
         if constexpr (_rows > 4)
-            out[4] = Permute2F128<1, 0>(in[0]);
+            out[4] = SwapLanesIf<_firstRowOut == 0>(in[0]);
         if constexpr (_rows > 5)
-            out[5] = Permute2F128<1, 0>(in[1]);
+            out[5] = SwapLanesIf<_firstRowOut == 0>(in[1]);
         if constexpr (_rows > 6)
-            out[6] = Permute2F128<1, 0>(in[2]);
+            out[6] = SwapLanesIf<_firstRowOut == 0>(in[2]);
         if constexpr (_rows > 7)
-            out[7] = Permute2F128<1, 0>(in[3]);
-    }
-    else if constexpr (_firstRowOut == 4)
-    {
-        out[0] = SwapLanesIf<_firstRowIn <= 3>(in[0]);
-        out[1] = SwapLanesIf<_firstRowIn <= 2>(in[1]);
-        out[2] = SwapLanesIf<_firstRowIn <= 1>(in[2]);
-        out[3] = SwapLanesIf<_firstRowIn <= 0>(in[3]);
-        if constexpr (_rows > 4)
-            out[4] = in[0];
-        if constexpr (_rows > 5)
-            out[5] = in[1];
-        if constexpr (_rows > 6)
-            out[6] = in[2];
-        if constexpr (_rows > 7)
-            out[7] = in[3];
+            out[7] = SwapLanesIf<_firstRowOut == 0>(in[3]);
     }
     else
     {
