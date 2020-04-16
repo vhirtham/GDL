@@ -1108,3 +1108,50 @@ BOOST_AUTO_TEST_CASE(Test_Swap)
     TestSwap<__m256d>();
 #endif // __AVX2__
 }
+
+
+
+// SwapLanes and SwapLanesIf ------------------------------------------------------------------------------------------
+
+#ifdef __AVX2__
+
+template <typename _registerType>
+void TestSwapLanes()
+{
+    using namespace simd;
+
+    _registerType a = _mm_setzero<_registerType>();
+    for (U32 i = 0; i < numRegisterValues<_registerType>; ++i)
+        SetValue(a, i, i + 1);
+
+    _registerType b = SwapLanes(a);
+    _registerType c = SwapLanesIf<true>(a);
+    _registerType d = SwapLanesIf<false>(a);
+
+    constexpr U32 numLaneVals = numValuesPerLane<_registerType>;
+
+    for (U32 i = 0; i < numLaneVals; ++i)
+    {
+        BOOST_CHECK_MESSAGE(GetValue(b, i) == Approx(GetValue(a, i + numLaneVals)), "SwapLanes didn't swap lanes");
+        BOOST_CHECK_MESSAGE(GetValue(b, i + numLaneVals) == Approx(GetValue(a, i)), "SwapLanes didn't swap lanes");
+
+        BOOST_CHECK_MESSAGE(GetValue(c, i) == Approx(GetValue(a, i + numLaneVals)),
+                            "SwapLanesIf<true> didn't swap lanes");
+        BOOST_CHECK_MESSAGE(GetValue(c, i + numLaneVals) == Approx(GetValue(a, i)),
+                            "SwapLanesIf<true> didn't swap lanes");
+
+        BOOST_CHECK_MESSAGE(GetValue(d, i) == Approx(GetValue(a, i)), "SwapLanesIf<false> swapped lanes");
+        BOOST_CHECK_MESSAGE(GetValue(d, i + numLaneVals) == Approx(GetValue(a, i + numLaneVals)),
+                            "SwapLanesIf<false> swapped lanes");
+    }
+}
+
+
+BOOST_AUTO_TEST_CASE(Test_Swap_Lanes)
+{
+    TestSwapLanes<__m256d>();
+    TestSwapLanes<__m256>();
+}
+
+
+#endif // __AVX2__

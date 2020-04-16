@@ -418,6 +418,28 @@ inline __m256d Swap(__m256d source);
 
 #endif // __AVX2__
 
+
+
+//! @brief Swap the lanes of a register with 2 lanes.
+//! @tparam _registerType: Register type
+//! @param in: Input register
+//! @return Register with swappend lanes
+template <typename _registerType>
+[[nodiscard]] inline _registerType SwapLanes(_registerType in) noexcept;
+
+
+
+//! @brief Swap the lanes of a register with 2 lanes if corresponding template parameter is set to 'true'. Otherwise the
+//! input is returned unmodified.
+//! @tparam _swapLanes: If 'true', a copy of the input register with swapped lanes is returned. Otherwise the unmodified
+//! register is returned.
+//! @tparam _registerType: Register type
+//! @param in: Input register
+//! @return Register with swappend lanes or unmodified input register
+template <bool _swapLanes, typename _registerType>
+[[nodiscard]] inline _registerType SwapLanesIf(_registerType in) noexcept;
+
+
 } // namespace GDL::simd
 
 

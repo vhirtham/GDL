@@ -6,7 +6,7 @@
 
 #include <array>
 
-namespace GDL::simd
+namespace GDL::simd::intern
 {
 
 //! @brief Helper struct for transposition of multi lane registers. It contains only static values.
@@ -31,8 +31,6 @@ struct TranspositionLaneData
 
 
 
-namespace intern
-{
 //! @brief Copies values recursively from the input register array to the passed output registers.
 //! @tparam _idxFirst: Index of the first element in each register that should be copied.
 //! @tparam _numValues: Number of consecutive values that should be copied.
@@ -51,9 +49,8 @@ template <U32 _idxFirst, U32 _numValues, bool _overwriteUnused, bool _unusedSetZ
           typename _registerType, UST _arraySize, typename... _args>
 inline void TransposeSetOutput(std::array<_registerType, _arraySize> in, _registerType& out, _args&... args);
 
-} // namespace intern
 
 
-} // namespace GDL::simd
+} // namespace GDL::simd::intern
 
 #include "gdl/base/simd/_transpose/transpose_utility.inl"

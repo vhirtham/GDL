@@ -19,7 +19,6 @@ namespace GDL::simd
 
 // test all brancehes of the general transpose function
 // replace Permute2F128<1,0> with SwapLanes
-// move SwapLanes(If) to swizzle header and write a test
 // add Permute2F128If -> like SwapLanesIf --- just let Permute2F128<0,1> return the input
 
 

@@ -998,4 +998,30 @@ inline __m256d Swap(__m256d source)
 
 #endif // __AVX2__
 
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+template <typename _registerType>
+[[nodiscard]] inline _registerType SwapLanes(_registerType in) noexcept
+{
+    static_assert(numLanes<_registerType> == 2, "Only registers with 2 lanes supported.");
+    return Permute2F128<1, 0>(in);
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+template <bool _swapLanes, typename _registerType>
+[[nodiscard]] inline _registerType SwapLanesIf(_registerType in) noexcept
+{
+    static_assert(numLanes<_registerType> == 2, "Only registers with 2 lanes supported.");
+    if constexpr (_swapLanes)
+        return SwapLanes(in);
+    else
+        return in;
+}
+
+
 } // namespace GDL::simd
