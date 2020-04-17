@@ -20,7 +20,7 @@ namespace GDL::simd
 // test all brancehes of the general transpose function
 // replace Permute2F128<1,0> with SwapLanes
 // add Permute2F128If -> like SwapLanesIf --- just let Permute2F128<0,1> return the input
-
+// add noexcept keyword to all functions
 
 
 //! @brief Transposes a matrix represented by an column major register array. The maximal supported matrix size is NxN

@@ -24,7 +24,7 @@ namespace GDL::simd
 //! @param in: Input registers
 //! @param out: Output registers
 template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
-inline void Transpose1x1(__m256 in0, __m256& out0);
+inline void Transpose1x1(__m256 in0, __m256& out0) noexcept;
 
 
 
@@ -37,7 +37,7 @@ inline void Transpose1x1(__m256 in0, __m256& out0);
 //! @param in: Input registers
 //! @param out: Output registers
 template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
-inline void Transpose1x2(__m256 in0, __m256 in1, __m256& out0);
+inline void Transpose1x2(__m256 in0, __m256 in1, __m256& out0) noexcept;
 
 
 
@@ -49,7 +49,7 @@ inline void Transpose1x2(__m256 in0, __m256 in1, __m256& out0);
 //! @param in: Input registers
 //! @param out: Output registers
 template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
-inline void Transpose1x3(__m256 in0, __m256 in1, __m256 in2, __m256& out0);
+inline void Transpose1x3(__m256 in0, __m256 in1, __m256 in2, __m256& out0) noexcept;
 
 
 
@@ -61,7 +61,7 @@ inline void Transpose1x3(__m256 in0, __m256 in1, __m256 in2, __m256& out0);
 //! @param in: Input registers
 //! @param out: Output registers
 template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
-inline void Transpose1x4(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256& out0);
+inline void Transpose1x4(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256& out0) noexcept;
 
 
 
@@ -73,7 +73,7 @@ inline void Transpose1x4(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256&
 //! @param in: Input registers
 //! @param out: Output registers
 template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
-inline void Transpose1x5(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 in4, __m256& out0);
+inline void Transpose1x5(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 in4, __m256& out0) noexcept;
 
 
 
@@ -85,7 +85,7 @@ inline void Transpose1x5(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 
 //! @param in: Input registers
 //! @param out: Output registers
 template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
-inline void Transpose1x6(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 in4, __m256 in5, __m256& out0);
+inline void Transpose1x6(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 in4, __m256 in5, __m256& out0) noexcept;
 
 
 
@@ -98,7 +98,7 @@ inline void Transpose1x6(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 
 //! @param out: Output registers
 template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
 inline void Transpose1x7(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 in4, __m256 in5, __m256 in6,
-                         __m256& out0);
+                         __m256& out0) noexcept;
 
 
 
@@ -111,7 +111,7 @@ inline void Transpose1x7(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 
 //! @param out: Output registers
 template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
 inline void Transpose1x8(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 in4, __m256 in5, __m256 in6, __m256 in7,
-                         __m256& out0);
+                         __m256& out0) noexcept;
 
 
 
@@ -123,7 +123,7 @@ inline void Transpose1x8(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 
 //! @param in: Input registers
 //! @param out: Output registers
 template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
-inline void Transpose2x1(__m256 in0, __m256& out0, __m256& out1);
+inline void Transpose2x1(__m256 in0, __m256& out0, __m256& out1) noexcept;
 
 
 
@@ -135,7 +135,7 @@ inline void Transpose2x1(__m256 in0, __m256& out0, __m256& out1);
 //! @param in: Input registers
 //! @param out: Output registers
 template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
-inline void Transpose2x2(__m256 in0, __m256 in1, __m256& out0, __m256& out1);
+inline void Transpose2x2(__m256 in0, __m256 in1, __m256& out0, __m256& out1) noexcept;
 
 
 
@@ -147,7 +147,7 @@ inline void Transpose2x2(__m256 in0, __m256 in1, __m256& out0, __m256& out1);
 //! @param in: Input registers
 //! @param out: Output registers
 template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
-inline void Transpose2x3(__m256 in0, __m256 in1, __m256 in2, __m256& out0, __m256& out1);
+inline void Transpose2x3(__m256 in0, __m256 in1, __m256 in2, __m256& out0, __m256& out1) noexcept;
 
 
 
@@ -159,7 +159,7 @@ inline void Transpose2x3(__m256 in0, __m256 in1, __m256 in2, __m256& out0, __m25
 //! @param in: Input registers
 //! @param out: Output registers
 template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
-inline void Transpose2x4(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256& out0, __m256& out1);
+inline void Transpose2x4(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256& out0, __m256& out1) noexcept;
 
 
 
@@ -171,7 +171,8 @@ inline void Transpose2x4(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256&
 //! @param in: Input registers
 //! @param out: Output registers
 template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
-inline void Transpose2x5(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 in4, __m256& out0, __m256& out1);
+inline void Transpose2x5(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 in4, __m256& out0,
+                         __m256& out1) noexcept;
 
 
 
@@ -184,7 +185,7 @@ inline void Transpose2x5(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 
 //! @param out: Output registers
 template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
 inline void Transpose2x6(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 in4, __m256 in5, __m256& out0,
-                         __m256& out1);
+                         __m256& out1) noexcept;
 
 
 
@@ -197,7 +198,7 @@ inline void Transpose2x6(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 
 //! @param out: Output registers
 template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
 inline void Transpose2x7(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 in4, __m256 in5, __m256 in6,
-                         __m256& out0, __m256& out1);
+                         __m256& out0, __m256& out1) noexcept;
 
 
 
@@ -210,7 +211,7 @@ inline void Transpose2x7(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 
 //! @param out: Output registers
 template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
 inline void Transpose2x8(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 in4, __m256 in5, __m256 in6, __m256 in7,
-                         __m256& out0, __m256& out1);
+                         __m256& out0, __m256& out1) noexcept;
 
 
 
@@ -222,7 +223,7 @@ inline void Transpose2x8(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 
 //! @param in: Input registers
 //! @param out: Output registers
 template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
-inline void Transpose3x1(__m256 in0, __m256& out0, __m256& out1, __m256& out2);
+inline void Transpose3x1(__m256 in0, __m256& out0, __m256& out1, __m256& out2) noexcept;
 
 
 
@@ -234,7 +235,7 @@ inline void Transpose3x1(__m256 in0, __m256& out0, __m256& out1, __m256& out2);
 //! @param in: Input registers
 //! @param out: Output registers
 template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
-inline void Transpose3x2(__m256 in0, __m256 in1, __m256& out0, __m256& out1, __m256& out2);
+inline void Transpose3x2(__m256 in0, __m256 in1, __m256& out0, __m256& out1, __m256& out2) noexcept;
 
 
 
@@ -246,7 +247,7 @@ inline void Transpose3x2(__m256 in0, __m256 in1, __m256& out0, __m256& out1, __m
 //! @param in: Input registers
 //! @param out: Output registers
 template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
-inline void Transpose3x3(__m256 in0, __m256 in1, __m256 in2, __m256& out0, __m256& out1, __m256& out2);
+inline void Transpose3x3(__m256 in0, __m256 in1, __m256 in2, __m256& out0, __m256& out1, __m256& out2) noexcept;
 
 
 
@@ -258,7 +259,8 @@ inline void Transpose3x3(__m256 in0, __m256 in1, __m256 in2, __m256& out0, __m25
 //! @param in: Input registers
 //! @param out: Output registers
 template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
-inline void Transpose3x4(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256& out0, __m256& out1, __m256& out2);
+inline void Transpose3x4(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256& out0, __m256& out1,
+                         __m256& out2) noexcept;
 
 
 
@@ -271,7 +273,7 @@ inline void Transpose3x4(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256&
 //! @param out: Output registers
 template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
 inline void Transpose3x5(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 in4, __m256& out0, __m256& out1,
-                         __m256& out2);
+                         __m256& out2) noexcept;
 
 
 
@@ -284,7 +286,7 @@ inline void Transpose3x5(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 
 //! @param out: Output registers
 template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
 inline void Transpose3x6(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 in4, __m256 in5, __m256& out0,
-                         __m256& out1, __m256& out2);
+                         __m256& out1, __m256& out2) noexcept;
 
 
 
@@ -297,7 +299,7 @@ inline void Transpose3x6(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 
 //! @param out: Output registers
 template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
 inline void Transpose3x7(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 in4, __m256 in5, __m256 in6,
-                         __m256& out0, __m256& out1, __m256& out2);
+                         __m256& out0, __m256& out1, __m256& out2) noexcept;
 
 
 
@@ -310,7 +312,7 @@ inline void Transpose3x7(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 
 //! @param out: Output registers
 template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
 inline void Transpose3x8(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 in4, __m256 in5, __m256 in6, __m256 in7,
-                         __m256& out0, __m256& out1, __m256& out2);
+                         __m256& out0, __m256& out1, __m256& out2) noexcept;
 
 
 
@@ -322,7 +324,7 @@ inline void Transpose3x8(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 
 //! @param in: Input registers
 //! @param out: Output registers
 template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
-inline void Transpose4x1(__m256 in0, __m256& out0, __m256& out1, __m256& out2, __m256& out3);
+inline void Transpose4x1(__m256 in0, __m256& out0, __m256& out1, __m256& out2, __m256& out3) noexcept;
 
 
 
@@ -334,7 +336,7 @@ inline void Transpose4x1(__m256 in0, __m256& out0, __m256& out1, __m256& out2, _
 //! @param in: Input registers
 //! @param out: Output registers
 template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
-inline void Transpose4x2(__m256 in0, __m256 in1, __m256& out0, __m256& out1, __m256& out2, __m256& out3);
+inline void Transpose4x2(__m256 in0, __m256 in1, __m256& out0, __m256& out1, __m256& out2, __m256& out3) noexcept;
 
 
 
@@ -346,7 +348,8 @@ inline void Transpose4x2(__m256 in0, __m256 in1, __m256& out0, __m256& out1, __m
 //! @param in: Input registers
 //! @param out: Output registers
 template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
-inline void Transpose4x3(__m256 in0, __m256 in1, __m256 in2, __m256& out0, __m256& out1, __m256& out2, __m256& out3);
+inline void Transpose4x3(__m256 in0, __m256 in1, __m256 in2, __m256& out0, __m256& out1, __m256& out2,
+                         __m256& out3) noexcept;
 
 
 
@@ -359,7 +362,7 @@ inline void Transpose4x3(__m256 in0, __m256 in1, __m256 in2, __m256& out0, __m25
 //! @param out: Output registers
 template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
 inline void Transpose4x4(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256& out0, __m256& out1, __m256& out2,
-                         __m256& out3);
+                         __m256& out3) noexcept;
 
 
 
@@ -372,7 +375,7 @@ inline void Transpose4x4(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256&
 //! @param out: Output registers
 template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
 inline void Transpose4x5(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 in4, __m256& out0, __m256& out1,
-                         __m256& out2, __m256& out3);
+                         __m256& out2, __m256& out3) noexcept;
 
 
 
@@ -385,7 +388,7 @@ inline void Transpose4x5(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 
 //! @param out: Output registers
 template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
 inline void Transpose4x6(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 in4, __m256 in5, __m256& out0,
-                         __m256& out1, __m256& out2, __m256& out3);
+                         __m256& out1, __m256& out2, __m256& out3) noexcept;
 
 
 
@@ -398,7 +401,7 @@ inline void Transpose4x6(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 
 //! @param out: Output registers
 template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
 inline void Transpose4x7(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 in4, __m256 in5, __m256 in6,
-                         __m256& out0, __m256& out1, __m256& out2, __m256& out3);
+                         __m256& out0, __m256& out1, __m256& out2, __m256& out3) noexcept;
 
 
 
@@ -411,7 +414,7 @@ inline void Transpose4x7(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 
 //! @param out: Output registers
 template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
 inline void Transpose4x8(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 in4, __m256 in5, __m256 in6, __m256 in7,
-                         __m256& out0, __m256& out1, __m256& out2, __m256& out3);
+                         __m256& out0, __m256& out1, __m256& out2, __m256& out3) noexcept;
 
 
 
@@ -423,7 +426,7 @@ inline void Transpose4x8(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 
 //! @param in: Input registers
 //! @param out: Output registers
 template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
-inline void Transpose5x1(__m256 in0, __m256& out0, __m256& out1, __m256& out2, __m256& out3, __m256& out4);
+inline void Transpose5x1(__m256 in0, __m256& out0, __m256& out1, __m256& out2, __m256& out3, __m256& out4) noexcept;
 
 
 
@@ -435,7 +438,8 @@ inline void Transpose5x1(__m256 in0, __m256& out0, __m256& out1, __m256& out2, _
 //! @param in: Input registers
 //! @param out: Output registers
 template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
-inline void Transpose5x2(__m256 in0, __m256 in1, __m256& out0, __m256& out1, __m256& out2, __m256& out3, __m256& out4);
+inline void Transpose5x2(__m256 in0, __m256 in1, __m256& out0, __m256& out1, __m256& out2, __m256& out3,
+                         __m256& out4) noexcept;
 
 
 
@@ -448,7 +452,7 @@ inline void Transpose5x2(__m256 in0, __m256 in1, __m256& out0, __m256& out1, __m
 //! @param out: Output registers
 template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
 inline void Transpose5x3(__m256 in0, __m256 in1, __m256 in2, __m256& out0, __m256& out1, __m256& out2, __m256& out3,
-                         __m256& out4);
+                         __m256& out4) noexcept;
 
 
 
@@ -461,7 +465,7 @@ inline void Transpose5x3(__m256 in0, __m256 in1, __m256 in2, __m256& out0, __m25
 //! @param out: Output registers
 template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
 inline void Transpose5x4(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256& out0, __m256& out1, __m256& out2,
-                         __m256& out3, __m256& out4);
+                         __m256& out3, __m256& out4) noexcept;
 
 
 
@@ -474,7 +478,7 @@ inline void Transpose5x4(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256&
 //! @param out: Output registers
 template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
 inline void Transpose5x5(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 in4, __m256& out0, __m256& out1,
-                         __m256& out2, __m256& out3, __m256& out4);
+                         __m256& out2, __m256& out3, __m256& out4) noexcept;
 
 
 
@@ -487,7 +491,7 @@ inline void Transpose5x5(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 
 //! @param out: Output registers
 template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
 inline void Transpose5x6(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 in4, __m256 in5, __m256& out0,
-                         __m256& out1, __m256& out2, __m256& out3, __m256& out4);
+                         __m256& out1, __m256& out2, __m256& out3, __m256& out4) noexcept;
 
 
 
@@ -500,7 +504,7 @@ inline void Transpose5x6(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 
 //! @param out: Output registers
 template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
 inline void Transpose5x7(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 in4, __m256 in5, __m256 in6,
-                         __m256& out0, __m256& out1, __m256& out2, __m256& out3, __m256& out4);
+                         __m256& out0, __m256& out1, __m256& out2, __m256& out3, __m256& out4) noexcept;
 
 
 
@@ -513,7 +517,7 @@ inline void Transpose5x7(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 
 //! @param out: Output registers
 template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
 inline void Transpose5x8(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 in4, __m256 in5, __m256 in6, __m256 in7,
-                         __m256& out0, __m256& out1, __m256& out2, __m256& out3, __m256& out4);
+                         __m256& out0, __m256& out1, __m256& out2, __m256& out3, __m256& out4) noexcept;
 
 
 
@@ -526,7 +530,7 @@ inline void Transpose5x8(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 
 //! @param out: Output registers
 template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
 inline void Transpose6x1(__m256 in0, __m256& out0, __m256& out1, __m256& out2, __m256& out3, __m256& out4,
-                         __m256& out5);
+                         __m256& out5) noexcept;
 
 
 
@@ -539,7 +543,7 @@ inline void Transpose6x1(__m256 in0, __m256& out0, __m256& out1, __m256& out2, _
 //! @param out: Output registers
 template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
 inline void Transpose6x2(__m256 in0, __m256 in1, __m256& out0, __m256& out1, __m256& out2, __m256& out3, __m256& out4,
-                         __m256& out5);
+                         __m256& out5) noexcept;
 
 
 
@@ -552,7 +556,7 @@ inline void Transpose6x2(__m256 in0, __m256 in1, __m256& out0, __m256& out1, __m
 //! @param out: Output registers
 template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
 inline void Transpose6x3(__m256 in0, __m256 in1, __m256 in2, __m256& out0, __m256& out1, __m256& out2, __m256& out3,
-                         __m256& out4, __m256& out5);
+                         __m256& out4, __m256& out5) noexcept;
 
 
 
@@ -565,7 +569,7 @@ inline void Transpose6x3(__m256 in0, __m256 in1, __m256 in2, __m256& out0, __m25
 //! @param out: Output registers
 template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
 inline void Transpose6x4(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256& out0, __m256& out1, __m256& out2,
-                         __m256& out3, __m256& out4, __m256& out5);
+                         __m256& out3, __m256& out4, __m256& out5) noexcept;
 
 
 
@@ -578,7 +582,7 @@ inline void Transpose6x4(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256&
 //! @param out: Output registers
 template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
 inline void Transpose6x5(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 in4, __m256& out0, __m256& out1,
-                         __m256& out2, __m256& out3, __m256& out4, __m256& out5);
+                         __m256& out2, __m256& out3, __m256& out4, __m256& out5) noexcept;
 
 
 
@@ -591,7 +595,7 @@ inline void Transpose6x5(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 
 //! @param out: Output registers
 template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
 inline void Transpose6x6(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 in4, __m256 in5, __m256& out0,
-                         __m256& out1, __m256& out2, __m256& out3, __m256& out4, __m256& out5);
+                         __m256& out1, __m256& out2, __m256& out3, __m256& out4, __m256& out5) noexcept;
 
 
 
@@ -604,7 +608,7 @@ inline void Transpose6x6(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 
 //! @param out: Output registers
 template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
 inline void Transpose6x7(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 in4, __m256 in5, __m256 in6,
-                         __m256& out0, __m256& out1, __m256& out2, __m256& out3, __m256& out4, __m256& out5);
+                         __m256& out0, __m256& out1, __m256& out2, __m256& out3, __m256& out4, __m256& out5) noexcept;
 
 
 
@@ -617,7 +621,7 @@ inline void Transpose6x7(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 
 //! @param out: Output registers
 template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
 inline void Transpose6x8(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 in4, __m256 in5, __m256 in6, __m256 in7,
-                         __m256& out0, __m256& out1, __m256& out2, __m256& out3, __m256& out4, __m256& out5);
+                         __m256& out0, __m256& out1, __m256& out2, __m256& out3, __m256& out4, __m256& out5) noexcept;
 
 
 
@@ -630,7 +634,7 @@ inline void Transpose6x8(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 
 //! @param out: Output registers
 template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
 inline void Transpose7x1(__m256 in0, __m256& out0, __m256& out1, __m256& out2, __m256& out3, __m256& out4, __m256& out5,
-                         __m256& out6);
+                         __m256& out6) noexcept;
 
 
 
@@ -643,7 +647,7 @@ inline void Transpose7x1(__m256 in0, __m256& out0, __m256& out1, __m256& out2, _
 //! @param out: Output registers
 template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
 inline void Transpose7x2(__m256 in0, __m256 in1, __m256& out0, __m256& out1, __m256& out2, __m256& out3, __m256& out4,
-                         __m256& out5, __m256& out6);
+                         __m256& out5, __m256& out6) noexcept;
 
 
 
@@ -656,7 +660,7 @@ inline void Transpose7x2(__m256 in0, __m256 in1, __m256& out0, __m256& out1, __m
 //! @param out: Output registers
 template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
 inline void Transpose7x3(__m256 in0, __m256 in1, __m256 in2, __m256& out0, __m256& out1, __m256& out2, __m256& out3,
-                         __m256& out4, __m256& out5, __m256& out6);
+                         __m256& out4, __m256& out5, __m256& out6) noexcept;
 
 
 
@@ -669,7 +673,7 @@ inline void Transpose7x3(__m256 in0, __m256 in1, __m256 in2, __m256& out0, __m25
 //! @param out: Output registers
 template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
 inline void Transpose7x4(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256& out0, __m256& out1, __m256& out2,
-                         __m256& out3, __m256& out4, __m256& out5, __m256& out6);
+                         __m256& out3, __m256& out4, __m256& out5, __m256& out6) noexcept;
 
 
 
@@ -682,7 +686,7 @@ inline void Transpose7x4(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256&
 //! @param out: Output registers
 template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
 inline void Transpose7x5(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 in4, __m256& out0, __m256& out1,
-                         __m256& out2, __m256& out3, __m256& out4, __m256& out5, __m256& out6);
+                         __m256& out2, __m256& out3, __m256& out4, __m256& out5, __m256& out6) noexcept;
 
 
 
@@ -695,7 +699,7 @@ inline void Transpose7x5(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 
 //! @param out: Output registers
 template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
 inline void Transpose7x6(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 in4, __m256 in5, __m256& out0,
-                         __m256& out1, __m256& out2, __m256& out3, __m256& out4, __m256& out5, __m256& out6);
+                         __m256& out1, __m256& out2, __m256& out3, __m256& out4, __m256& out5, __m256& out6) noexcept;
 
 
 
@@ -709,7 +713,7 @@ inline void Transpose7x6(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 
 template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
 inline void Transpose7x7(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 in4, __m256 in5, __m256 in6,
                          __m256& out0, __m256& out1, __m256& out2, __m256& out3, __m256& out4, __m256& out5,
-                         __m256& out6);
+                         __m256& out6) noexcept;
 
 
 
@@ -723,7 +727,7 @@ inline void Transpose7x7(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 
 template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
 inline void Transpose7x8(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 in4, __m256 in5, __m256 in6, __m256 in7,
                          __m256& out0, __m256& out1, __m256& out2, __m256& out3, __m256& out4, __m256& out5,
-                         __m256& out6);
+                         __m256& out6) noexcept;
 
 
 
@@ -736,7 +740,7 @@ inline void Transpose7x8(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 
 //! @param out: Output registers
 template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
 inline void Transpose8x1(__m256 in0, __m256& out0, __m256& out1, __m256& out2, __m256& out3, __m256& out4, __m256& out5,
-                         __m256& out6, __m256& out7);
+                         __m256& out6, __m256& out7) noexcept;
 
 
 
@@ -749,7 +753,7 @@ inline void Transpose8x1(__m256 in0, __m256& out0, __m256& out1, __m256& out2, _
 //! @param out: Output registers
 template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
 inline void Transpose8x2(__m256 in0, __m256 in1, __m256& out0, __m256& out1, __m256& out2, __m256& out3, __m256& out4,
-                         __m256& out5, __m256& out6, __m256& out7);
+                         __m256& out5, __m256& out6, __m256& out7) noexcept;
 
 
 
@@ -762,7 +766,7 @@ inline void Transpose8x2(__m256 in0, __m256 in1, __m256& out0, __m256& out1, __m
 //! @param out: Output registers
 template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
 inline void Transpose8x3(__m256 in0, __m256 in1, __m256 in2, __m256& out0, __m256& out1, __m256& out2, __m256& out3,
-                         __m256& out4, __m256& out5, __m256& out6, __m256& out7);
+                         __m256& out4, __m256& out5, __m256& out6, __m256& out7) noexcept;
 
 
 
@@ -775,7 +779,7 @@ inline void Transpose8x3(__m256 in0, __m256 in1, __m256 in2, __m256& out0, __m25
 //! @param out: Output registers
 template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
 inline void Transpose8x4(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256& out0, __m256& out1, __m256& out2,
-                         __m256& out3, __m256& out4, __m256& out5, __m256& out6, __m256& out7);
+                         __m256& out3, __m256& out4, __m256& out5, __m256& out6, __m256& out7) noexcept;
 
 
 
@@ -788,7 +792,7 @@ inline void Transpose8x4(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256&
 //! @param out: Output registers
 template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
 inline void Transpose8x5(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 in4, __m256& out0, __m256& out1,
-                         __m256& out2, __m256& out3, __m256& out4, __m256& out5, __m256& out6, __m256& out7);
+                         __m256& out2, __m256& out3, __m256& out4, __m256& out5, __m256& out6, __m256& out7) noexcept;
 
 
 
@@ -802,7 +806,7 @@ inline void Transpose8x5(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 
 template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
 inline void Transpose8x6(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 in4, __m256 in5, __m256& out0,
                          __m256& out1, __m256& out2, __m256& out3, __m256& out4, __m256& out5, __m256& out6,
-                         __m256& out7);
+                         __m256& out7) noexcept;
 
 
 
@@ -816,7 +820,7 @@ inline void Transpose8x6(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 
 template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
 inline void Transpose8x7(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 in4, __m256 in5, __m256 in6,
                          __m256& out0, __m256& out1, __m256& out2, __m256& out3, __m256& out4, __m256& out5,
-                         __m256& out6, __m256& out7);
+                         __m256& out6, __m256& out7) noexcept;
 
 
 
@@ -830,7 +834,7 @@ inline void Transpose8x7(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 
 template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
 inline void Transpose8x8(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 in4, __m256 in5, __m256 in6, __m256 in7,
                          __m256& out0, __m256& out1, __m256& out2, __m256& out3, __m256& out4, __m256& out5,
-                         __m256& out6, __m256& out7);
+                         __m256& out6, __m256& out7) noexcept;
 
 
 
@@ -846,7 +850,8 @@ namespace intern
 //! @param in: Array of input registers
 //! @return: Array of output registers
 template <U32 _firstRowIn, UST _arraySizeIn>
-inline std::array<__m256, 2> IntraLaneTransposeAfterPermute2xN(std::array<__m256, _arraySizeIn> in);
+[[nodiscard]] inline std::array<__m256, 2>
+IntraLaneTransposeAfterPermute2xN(std::array<__m256, _arraySizeIn> in) noexcept;
 
 
 
@@ -857,7 +862,8 @@ inline std::array<__m256, 2> IntraLaneTransposeAfterPermute2xN(std::array<__m256
 //! @param in: Array of input registers
 //! @return: Array of output registers
 template <U32 _firstRowIn, UST _arraySizeIn>
-inline std::array<__m256, 3> IntraLaneTransposeAfterPermute3xN(std::array<__m256, _arraySizeIn> in);
+[[nodiscard]] inline std::array<__m256, 3>
+IntraLaneTransposeAfterPermute3xN(std::array<__m256, _arraySizeIn> in) noexcept;
 
 
 
@@ -868,7 +874,8 @@ inline std::array<__m256, 3> IntraLaneTransposeAfterPermute3xN(std::array<__m256
 //! @param in: Array of input registers
 //! @return: Array of output registers
 template <U32 _firstRowIn, UST _arraySizeIn>
-inline std::array<__m256, 4> IntraLaneTransposeAfterPermute4xN(std::array<__m256, _arraySizeIn> in);
+[[nodiscard]] inline std::array<__m256, 4>
+IntraLaneTransposeAfterPermute4xN(std::array<__m256, _arraySizeIn> in) noexcept;
 
 
 
@@ -879,7 +886,7 @@ inline std::array<__m256, 4> IntraLaneTransposeAfterPermute4xN(std::array<__m256
 //! @param in: Array of input registers
 //! @return: Array of output registers
 template <U32 _firstRowIn>
-inline std::array<__m256, 5> IntraLaneTransposeAfterPermute5xN(std::array<__m256, 8> in);
+[[nodiscard]] inline std::array<__m256, 5> IntraLaneTransposeAfterPermute5xN(std::array<__m256, 8> in) noexcept;
 
 
 
@@ -890,7 +897,7 @@ inline std::array<__m256, 5> IntraLaneTransposeAfterPermute5xN(std::array<__m256
 //! @param in: Array of input registers
 //! @return: Array of output registers
 template <U32 _firstRowIn>
-inline std::array<__m256, 6> IntraLaneTransposeAfterPermute6xN(std::array<__m256, 8> in);
+[[nodiscard]] inline std::array<__m256, 6> IntraLaneTransposeAfterPermute6xN(std::array<__m256, 8> in) noexcept;
 
 
 
@@ -901,7 +908,7 @@ inline std::array<__m256, 6> IntraLaneTransposeAfterPermute6xN(std::array<__m256
 //! @param in: Array of input registers
 //! @return: Array of output registers
 template <U32 _firstRowIn>
-inline std::array<__m256, 7> IntraLaneTransposeAfterPermute7xN(std::array<__m256, 8> in);
+[[nodiscard]] inline std::array<__m256, 7> IntraLaneTransposeAfterPermute7xN(std::array<__m256, 8> in) noexcept;
 
 
 
@@ -911,7 +918,7 @@ inline std::array<__m256, 7> IntraLaneTransposeAfterPermute7xN(std::array<__m256
 //! @param in0: Input register
 //! @return Array of output registers
 template <U32 _firstRowOut>
-inline std::array<__m256, 4> IntraLaneTransposeBeforePermuteNx1(__m256 in0);
+[[nodiscard]] inline std::array<__m256, 4> IntraLaneTransposeBeforePermuteNx1(__m256 in0) noexcept;
 
 
 
@@ -921,7 +928,7 @@ inline std::array<__m256, 4> IntraLaneTransposeBeforePermuteNx1(__m256 in0);
 //! @param in: Input registers
 //! @return Array of output registers
 template <U32 _firstRowOut>
-inline auto IntraLaneTransposeBeforePermuteNx2(__m256 in0, __m256 in1);
+[[nodiscard]] inline auto IntraLaneTransposeBeforePermuteNx2(__m256 in0, __m256 in1) noexcept;
 
 
 
@@ -931,7 +938,7 @@ inline auto IntraLaneTransposeBeforePermuteNx2(__m256 in0, __m256 in1);
 //! @param in: Input registers
 //! @return Array of output registers
 template <U32 _firstRowOut>
-inline auto IntraLaneTransposeBeforePermuteNx3(__m256 in0, __m256 in1, __m256 in2);
+[[nodiscard]] inline auto IntraLaneTransposeBeforePermuteNx3(__m256 in0, __m256 in1, __m256 in2) noexcept;
 
 
 
@@ -942,7 +949,8 @@ inline auto IntraLaneTransposeBeforePermuteNx3(__m256 in0, __m256 in1, __m256 in
 //! @param in: Input registers
 //! @return Array of output registers
 template <U32 _firstRowIn, U32 _firstRowOut>
-inline std::array<__m256, 4> IntraLaneTransposeBeforePermuteNx4(__m256 in0, __m256 in1, __m256 in2, __m256 in3);
+[[nodiscard]] inline std::array<__m256, 4> IntraLaneTransposeBeforePermuteNx4(__m256 in0, __m256 in1, __m256 in2,
+                                                                              __m256 in3) noexcept;
 
 
 
@@ -952,8 +960,8 @@ inline std::array<__m256, 4> IntraLaneTransposeBeforePermuteNx4(__m256 in0, __m2
 //! @param in: Input registers
 //! @return Array of output registers
 template <U32 _firstRowOut>
-inline std::array<__m256, 8> IntraLaneTransposeBeforePermuteNx5(__m256 in0, __m256 in1, __m256 in2, __m256 in3,
-                                                                __m256 in4);
+[[nodiscard]] inline std::array<__m256, 8> IntraLaneTransposeBeforePermuteNx5(__m256 in0, __m256 in1, __m256 in2,
+                                                                              __m256 in3, __m256 in4) noexcept;
 
 
 
@@ -963,8 +971,8 @@ inline std::array<__m256, 8> IntraLaneTransposeBeforePermuteNx5(__m256 in0, __m2
 //! @param in: Input registers
 //! @return Array of output registers
 template <U32 _firstRowOut>
-inline std::array<__m256, 8> IntraLaneTransposeBeforePermuteNx6(__m256 in0, __m256 in1, __m256 in2, __m256 in3,
-                                                                __m256 in4, __m256 in5);
+[[nodiscard]] inline std::array<__m256, 8>
+IntraLaneTransposeBeforePermuteNx6(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 in4, __m256 in5) noexcept;
 
 
 
@@ -974,8 +982,9 @@ inline std::array<__m256, 8> IntraLaneTransposeBeforePermuteNx6(__m256 in0, __m2
 //! @param in: Input registers
 //! @return Array of output registers
 template <U32 _firstRowOut>
-inline std::array<__m256, 8> IntraLaneTransposeBeforePermuteNx7(__m256 in0, __m256 in1, __m256 in2, __m256 in3,
-                                                                __m256 in4, __m256 in5, __m256 in6);
+[[nodiscard]] inline std::array<__m256, 8> IntraLaneTransposeBeforePermuteNx7(__m256 in0, __m256 in1, __m256 in2,
+                                                                              __m256 in3, __m256 in4, __m256 in5,
+                                                                              __m256 in6) noexcept;
 
 
 
@@ -985,8 +994,9 @@ inline std::array<__m256, 8> IntraLaneTransposeBeforePermuteNx7(__m256 in0, __m2
 //! @param in: Input registers
 //! @return Array of output registers
 template <U32 _firstRowOut>
-inline std::array<__m256, 8> IntraLaneTransposeBeforePermuteNx8(__m256 in0, __m256 in1, __m256 in2, __m256 in3,
-                                                                __m256 in4, __m256 in5, __m256 in6, __m256 in7);
+[[nodiscard]] inline std::array<__m256, 8> IntraLaneTransposeBeforePermuteNx8(__m256 in0, __m256 in1, __m256 in2,
+                                                                              __m256 in3, __m256 in4, __m256 in5,
+                                                                              __m256 in6, __m256 in7) noexcept;
 
 
 
@@ -998,7 +1008,7 @@ inline std::array<__m256, 8> IntraLaneTransposeBeforePermuteNx8(__m256 in0, __m2
 //! @param in: Array of input registers
 //! @return Array of output registers
 template <U32 _firstRowIn, U32 _firstRowOut, U32 _rows>
-inline std::array<__m256, _rows> PermuteAfterIntraLaneTransposeNx4(std::array<__m256, 4> in);
+[[nodiscard]] inline std::array<__m256, _rows> PermuteAfterIntraLaneTransposeNx4(std::array<__m256, 4> in) noexcept;
 
 
 
@@ -1011,7 +1021,8 @@ inline std::array<__m256, _rows> PermuteAfterIntraLaneTransposeNx4(std::array<__
 //! @param in: Array of input registers
 //! @return Array of output registers
 template <U32 _firstRowIn, U32 _firstRowOut, U32 _rows, UST _arraySizeIn>
-inline std::array<__m256, _rows> PermuteAfterIntraLaneTranspose(std::array<__m256, _arraySizeIn> in);
+[[nodiscard]] inline std::array<__m256, _rows>
+PermuteAfterIntraLaneTranspose(std::array<__m256, _arraySizeIn> in) noexcept;
 
 
 
@@ -1023,7 +1034,8 @@ inline std::array<__m256, _rows> PermuteAfterIntraLaneTranspose(std::array<__m25
 //! @param in: Array of input registers
 //! @return Array of output registers
 template <U32 _firstRowIn, U32 _firstRowOut, UST _arraySizeIn>
-inline std::array<__m256, 8> PermuteAfterIntraLaneTranspose8xN(std::array<__m256, _arraySizeIn> in);
+[[nodiscard]] inline std::array<__m256, 8>
+PermuteAfterIntraLaneTranspose8xN(std::array<__m256, _arraySizeIn> in) noexcept;
 
 
 
@@ -1035,8 +1047,8 @@ inline std::array<__m256, 8> PermuteAfterIntraLaneTranspose8xN(std::array<__m256
 //! @param in: Input registers
 //! @return Array of output registers
 template <U32 _firstRowIn, U32 _firstRowOut, UST _arraySizeOut>
-inline std::array<__m256, _arraySizeOut> PermuteBeforeIntraLaneTransposeNx5(__m256 in0, __m256 in1, __m256 in2,
-                                                                            __m256 in3, __m256 in4);
+[[nodiscard]] inline std::array<__m256, _arraySizeOut>
+PermuteBeforeIntraLaneTransposeNx5(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 in4) noexcept;
 
 
 
@@ -1048,8 +1060,8 @@ inline std::array<__m256, _arraySizeOut> PermuteBeforeIntraLaneTransposeNx5(__m2
 //! @param in: Input registers
 //! @return Array of output registers
 template <U32 _firstRowIn, U32 _firstRowOut, UST _arraySizeOut>
-inline std::array<__m256, _arraySizeOut> PermuteBeforeIntraLaneTransposeNx6(__m256 in0, __m256 in1, __m256 in2,
-                                                                            __m256 in3, __m256 in4, __m256 in5);
+[[nodiscard]] inline std::array<__m256, _arraySizeOut>
+PermuteBeforeIntraLaneTransposeNx6(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 in4, __m256 in5) noexcept;
 
 
 
@@ -1061,8 +1073,9 @@ inline std::array<__m256, _arraySizeOut> PermuteBeforeIntraLaneTransposeNx6(__m2
 //! @param in: Input registers
 //! @return Array of output registers
 template <U32 _firstRowIn, U32 _firstRowOut, UST _arraySizeOut>
-inline std::array<__m256, _arraySizeOut>
-PermuteBeforeIntraLaneTransposeNx7(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 in4, __m256 in5, __m256 in6);
+[[nodiscard]] inline std::array<__m256, _arraySizeOut>
+PermuteBeforeIntraLaneTransposeNx7(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 in4, __m256 in5,
+                                   __m256 in6) noexcept;
 
 
 
@@ -1074,9 +1087,9 @@ PermuteBeforeIntraLaneTransposeNx7(__m256 in0, __m256 in1, __m256 in2, __m256 in
 //! @param in: Input registers
 //! @return Array of output registers
 template <U32 _firstRowIn, U32 _firstRowOut, UST _arraySizeOut>
-inline std::array<__m256, _arraySizeOut> PermuteBeforeIntraLaneTransposeNx8(__m256 in0, __m256 in1, __m256 in2,
-                                                                            __m256 in3, __m256 in4, __m256 in5,
-                                                                            __m256 in6, __m256 in7);
+[[nodiscard]] inline std::array<__m256, _arraySizeOut>
+PermuteBeforeIntraLaneTransposeNx8(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 in4, __m256 in5, __m256 in6,
+                                   __m256 in7) noexcept;
 
 } // namespace intern
 
