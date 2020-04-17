@@ -14,53 +14,24 @@ namespace GDL::simd
 template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unusedSetZero>
 inline void Transpose1x1(__m128 in, __m128& out)
 {
-    static_assert(not(_overwriteUnused == false && _unusedSetZero == true), "Option _unusedSetZero has no effect.");
-
-    __m128 tmp;
+    __m128 tout;
 
     if constexpr (_firstRowIn == _firstRowOut)
-        tmp = in;
-    else
+        tout = in;
+    else if (_overwriteUnused && _unusedSetZero)
     {
-        if constexpr (_firstRowIn == 0)
-        {
-            if constexpr (_firstRowOut == 1)
-                tmp = _mm_moveldup(in);
-            else
-                tmp = Broadcast<0>(in);
-        }
-        else if constexpr (_firstRowIn == 1)
-        {
-            if constexpr (_firstRowOut == 0)
-                tmp = _mm_movehdup(in);
-            else
-                tmp = _mm_unpacklo(in, in);
-        }
-        else if constexpr (_firstRowIn == 2)
-        {
-            if constexpr (_firstRowOut == 3)
-                tmp = _mm_moveldup(in);
-            else
-                tmp = _mm_unpackhi(in, in);
-        }
-        else
-        {
-            if constexpr (_firstRowOut == 2)
-                tmp = _mm_movehdup(in);
-            else
-                tmp = Broadcast<3>(in);
-        }
+        constexpr bool z0 = (_firstRowOut == 0) ? false : true;
+        constexpr bool z1 = (_firstRowOut == 1) ? false : true;
+        constexpr bool z2 = (_firstRowOut == 2) ? false : true;
+        constexpr bool z3 = (_firstRowOut == 3) ? false : true;
+
+        out = Insert<_firstRowIn, _firstRowOut, z0, z1, z2, z3>(in, in);
+        return;
     }
-
-
-    // Write to output registers
-    if constexpr (_overwriteUnused)
-        if constexpr (_unusedSetZero)
-            out = BlendIndex<_firstRowOut>(_mm_setzero<__m128>(), tmp);
-        else
-            out = tmp;
     else
-        out = BlendIndex<_firstRowOut>(out, tmp);
+        tout = Broadcast<_firstRowIn>(in);
+
+    intern::TransposeSetOutput<_firstRowOut, 1, _overwriteUnused, _unusedSetZero>(tout, out);
 }
 
 
@@ -70,128 +41,73 @@ inline void Transpose1x1(__m128 in, __m128& out)
 template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unusedSetZero>
 inline void Transpose1x2(__m128 in0, __m128 in1, __m128& out0)
 {
-    [[maybe_unused]] constexpr bool setZero = _overwriteUnused && _unusedSetZero;
+    __m128 tout;
 
-    __m128 tmp0;
-
-
-    if constexpr (_firstRowIn == 0)
+    constexpr bool setZero = _overwriteUnused && _unusedSetZero;
+    if constexpr (setZero && not(_firstRowOut && (_firstRowIn == 0 || _firstRowIn == 3)))
     {
-        if constexpr (_firstRowOut == 0)
+        if constexpr (_firstRowOut % 2 == 0)
         {
-            if constexpr (setZero)
-            {
-                out0 = Insert<0, 1, false, false, true, true>(in1, in0);
-                return;
-            }
+            constexpr bool b0 = _firstRowIn > 1;
+            constexpr bool b1 = !b0;
+
+            if constexpr (_firstRowIn % 2 == 0)
+                out0 = Insert<_firstRowIn, _firstRowIn + 1, b0, b0, b1, b1>(in1, in0);
             else
-                tmp0 = _mm_unpacklo(in0, in1);
-        }
-        else if constexpr (_firstRowOut == 1)
-        {
-            tmp0 = Shuffle<0, 0, 0, 0>(in0, in1);
-        }
-        else
-        {
-            if constexpr (setZero)
-            {
-                __m128 tmp1 = Insert<0, 1, false, false, true, true>(in1, in0);
-                out0 = Permute<2, 3, 0, 1>(tmp1);
-                return;
-            }
-            else
-            {
-                __m128 tmp1 = _mm_unpacklo(in0, in1);
-                tmp0 = _mm_movelh_ps(tmp1, tmp1);
-            }
-        }
-    }
+                out0 = Insert<_firstRowIn, _firstRowIn - 1, b0, b0, b1, b1>(in0, in1);
 
-    else if constexpr (_firstRowIn == 1)
-    {
-        if constexpr (_firstRowOut == 0)
-        {
-            tmp0 = Insert<1, 0, false, false, true, true>(in0, in1);
-            if constexpr (setZero)
-            {
-                out0 = tmp0;
-                return;
-            }
-        }
-        else if constexpr (_firstRowOut == 1)
-        {
-            tmp0 = Insert<1, 2, true, false, false, true>(in1, in0);
-            if constexpr (setZero)
-            {
-                out0 = tmp0;
-                return;
-            }
+            constexpr bool perm_con = (_firstRowOut == 0) ? _firstRowIn > 1 : _firstRowIn < 2;
+            if constexpr (perm_con)
+                out0 = Permute<2, 3, 0, 1>(out0);
         }
         else
         {
-            tmp0 = _mm_unpacklo(in0, in1);
+            if constexpr (_firstRowIn == 1)
+                out0 = Insert<1, 2, true, false, false, true>(in1, in0);
+            else
+                out0 = Insert<2, 1, true, false, false, true>(in0, in1);
         }
-    }
-    else if constexpr (_firstRowIn == 2)
-    {
-        if constexpr (_firstRowOut == 0)
-        {
-            tmp0 = _mm_unpackhi(in0, in1);
-        }
-        else if constexpr (_firstRowOut == 1)
-        {
-            tmp0 = Insert<2, 1, true, false, false, true>(in0, in1);
-            if constexpr (setZero)
-            {
-                out0 = tmp0;
-                return;
-            }
-        }
-        else
-        {
-            tmp0 = Insert<2, 3, true, true, false, false>(in1, in0);
-            if constexpr (setZero)
-            {
-                out0 = tmp0;
-                return;
-            }
-        }
+        return;
     }
     else
     {
         if constexpr (_firstRowOut == 0)
         {
-            if constexpr (setZero)
-            {
-                __m128 tmp1 = Insert<3, 2, true, true, false, false>(in0, in1);
-                out0 = Permute<2, 3, 0, 1>(tmp1);
-                return;
-            }
+
+            if constexpr (_firstRowIn == 0)
+                tout = _mm_unpacklo(in0, in1);
+            else if constexpr (_firstRowIn == 1)
+                tout = Insert<1, 0>(in0, in1);
+            else if constexpr (_firstRowIn == 2)
+                tout = _mm_unpackhi(in0, in1);
             else
             {
                 __m128 tmp1 = _mm_unpackhi(in0, in1);
-                tmp0 = _mm_movehl_ps(tmp1, tmp1);
+                tout = _mm_movehl_ps(tmp1, tmp1);
             }
         }
         else if constexpr (_firstRowOut == 1)
         {
-            tmp0 = Shuffle<3, 3, 3, 3>(in0, in1);
+            tout = Shuffle<_firstRowIn, _firstRowIn, _firstRowIn, _firstRowIn>(in0, in1);
         }
         else
         {
-            if constexpr (setZero)
+            if constexpr (_firstRowIn == 0)
             {
-                out0 = Insert<3, 2, true, true, false, false>(in0, in1);
-                return;
+                __m128 tmp1 = _mm_unpacklo(in0, in1);
+                tout = _mm_movelh_ps(tmp1, tmp1);
             }
+            else if constexpr (_firstRowIn == 1)
+                tout = _mm_unpacklo(in0, in1);
+            else if constexpr (_firstRowIn == 2)
+                tout = Insert<2, 3>(in1, in0);
             else
-                tmp0 = _mm_unpackhi(in0, in1);
+                tout = _mm_unpackhi(in0, in1);
         }
     }
 
 
-    // Write to output registers
-    TransposeSetOutput<_firstRowOut, 2, _overwriteUnused, _unusedSetZero>(out0, tmp0);
+    intern::TransposeSetOutput<_firstRowOut, 2, _overwriteUnused, _unusedSetZero>(tout, out0);
 }
 
 

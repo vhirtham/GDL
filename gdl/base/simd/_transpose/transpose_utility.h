@@ -31,7 +31,23 @@ struct TranspositionLaneData
 
 
 
-//! @brief Copies values recursively from the input register array to the passed output registers.
+//! @brief Copies values from the input register to the output register with the option to specify how output register
+//! values should be treated that do not receive values from the input register.
+//! @tparam _idxFirst: Index of the first register element that should be copied.
+//! @tparam _numValues: Number of consecutive values that should be copied.
+//! @tparam _overwriteUnused: If true, register values that don't lie in the specified index range can be overwritten.
+//! @tparam _unusedSetZero: If true, register values that don't lie in the specified index range are set to zero.
+//! Requires _overwriteUnused to be true.
+//! @tparam _registerType: Register type
+//! @param in: Input registers
+//! @param out: Reference to output register, that is written to.
+template <U32 _idxFirst, U32 _numValues, bool _overwriteUnused, bool _unusedSetZero, typename _registerType>
+inline void TransposeSetOutput(_registerType in0, _registerType& out0) noexcept;
+
+
+
+//! @brief Copies values recursively from the input register array to the passed output registers with the option to
+//! specify how output register values should be treated that do not receive values from the input register.
 //! @tparam _idxFirst: Index of the first element in each register that should be copied.
 //! @tparam _numValues: Number of consecutive values that should be copied.
 //! @tparam _overwriteUnused: If true, register values that don't lie in the specified index range can be overwritten.
@@ -47,7 +63,7 @@ struct TranspositionLaneData
 //! calls.
 template <U32 _idxFirst, U32 _numValues, bool _overwriteUnused, bool _unusedSetZero, bool _initialCall = true,
           typename _registerType, UST _arraySize, typename... _args>
-inline void TransposeSetOutput(std::array<_registerType, _arraySize> in, _registerType& out, _args&... args);
+inline void TransposeSetOutput(std::array<_registerType, _arraySize> in, _registerType& out, _args&... args) noexcept;
 
 
 

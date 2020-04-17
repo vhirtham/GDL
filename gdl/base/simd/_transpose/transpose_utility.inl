@@ -136,13 +136,33 @@ inline void TransposeSetOutput(_registerType& out0, _registerType& out1, _regist
 namespace intern
 {
 
+// --------------------------------------------------------------------------------------------------------------------
+
+template <U32 _idxFirst, U32 _numValues, bool _overwriteUnused, bool _unusedSetZero, typename _registerType>
+inline void TransposeSetOutput(_registerType in0, _registerType& out0) noexcept
+{
+    constexpr U32 lastRowOut = _idxFirst + _numValues - 1;
+    static_assert(lastRowOut < simd::numRegisterValues<_registerType>,
+                  "Index of last modified element exceeds register size.");
+
+    if constexpr (_overwriteUnused)
+    {
+        if constexpr (_unusedSetZero)
+            out0 = BlendInRange<_idxFirst, lastRowOut>(_mm_setzero<_registerType>(), in0);
+        else
+            out0 = in0;
+    }
+    else
+        out0 = BlendInRange<_idxFirst, lastRowOut>(out0, in0);
+}
+
 
 
 // --------------------------------------------------------------------------------------------------------------------
 
 template <U32 _idxFirst, U32 _numValues, bool _overwriteUnused, bool _unusedSetZero, bool _initialCall,
           typename _registerType, UST _arraySize, typename... _args>
-inline void TransposeSetOutput(std::array<_registerType, _arraySize> in, _registerType& out, _args&... args)
+inline void TransposeSetOutput(std::array<_registerType, _arraySize> in, _registerType& out, _args&... args) noexcept
 {
     constexpr UST packSize = sizeof...(_args);
 
