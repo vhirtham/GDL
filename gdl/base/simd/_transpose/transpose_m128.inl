@@ -82,8 +82,8 @@ inline void Transpose1x2(__m128 in0, __m128 in1, __m128& out0)
                 tout = _mm_unpackhi(in0, in1);
             else
             {
-                __m128 tmp1 = _mm_unpackhi(in0, in1);
-                tout = _mm_movehl_ps(tmp1, tmp1);
+                __m128 tmp0 = _mm_unpackhi(in0, in1);
+                tout = _mm_movehl_ps(tmp0, tmp0);
             }
         }
         else if constexpr (_firstRowOut == 1)
@@ -94,8 +94,8 @@ inline void Transpose1x2(__m128 in0, __m128 in1, __m128& out0)
         {
             if constexpr (_firstRowIn == 0)
             {
-                __m128 tmp1 = _mm_unpacklo(in0, in1);
-                tout = _mm_movelh_ps(tmp1, tmp1);
+                __m128 tmp0 = _mm_unpacklo(in0, in1);
+                tout = _mm_movelh_ps(tmp0, tmp0);
             }
             else if constexpr (_firstRowIn == 1)
                 tout = _mm_unpacklo(in0, in1);

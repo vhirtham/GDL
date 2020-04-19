@@ -26,8 +26,8 @@ void ExampleCamera::MoveCamera(F32 deltaTime)
 {
     std::array<F32, 2> mouseDelta = GetMouseDelta();
 
-    mYaw += mouseDelta[0] * mMouseSensitivity;
-    mPitch += mouseDelta[1] * mMouseSensitivity;
+    mYaw -= mouseDelta[0] * mMouseSensitivity;
+    mPitch -= mouseDelta[1] * mMouseSensitivity;
     if (mPitch > PI<F32> / 2.f)
         mPitch = PI<F32> / 2.f;
     if (mPitch < -PI<F32> / 2.f)
@@ -35,7 +35,7 @@ void ExampleCamera::MoveCamera(F32 deltaTime)
 
 
 
-    mPosition += Transformations4::RotationZ(-mYaw) * GetMovementDirection() * mMovementSpeed * deltaTime;
+    mPosition += Transformations4::RotationZ(mYaw) * GetMovementDirection() * mMovementSpeed * deltaTime;
 }
 
 
@@ -50,8 +50,8 @@ void ExampleCamera::SetMovementSpeed(F32 movementSpeed)
 Mat4f ExampleCamera::GetWorldToCamMatrix() const
 {
     std::array<F32, 4> translation = mPosition.Data();
-    return Transformations4::RotationX(mPitch) * Transformations4::RotationY(mYaw) *
-           Transformations4::RotationX(-PI<F32> / 2.f) *
+    return Transformations4::RotationX(-PI<F32> / 2.f) * Transformations4::RotationX(-mPitch) *
+           Transformations4::RotationZ(-mYaw) *
            Transformations4::Translation(-translation[0], -translation[1], -translation[2]);
 }
 
@@ -64,7 +64,7 @@ const Vec4f& ExampleCamera::GetCameraPosition() const
 
 Vec4f ExampleCamera::GetCameraDirection() const
 {
-    return Transformations4::RotationZ(-mYaw) * Transformations4::RotationX(-mPitch) * Vec4f(0, 1, 0, 0);
+    return Transformations4::RotationZ(mYaw) * Transformations4::RotationX(mPitch) * Vec4f(0, 1, 0, 0);
 }
 
 

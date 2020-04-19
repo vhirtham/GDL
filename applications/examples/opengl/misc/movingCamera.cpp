@@ -138,8 +138,8 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
         prevMouseX = static_cast<F32>(InputState::GetMousePositionX());
         prevMouseY = static_cast<F32>(InputState::GetMousePositionY());
 
-        yaw += (mouseDeltaX * mouseSensitivity);
-        pitch += (mouseDeltaY * mouseSensitivity);
+        yaw -= (mouseDeltaX * mouseSensitivity);
+        pitch -= (mouseDeltaY * mouseSensitivity);
         if (pitch > static_cast<F32>(M_PI) / 2.f)
             pitch = static_cast<F32>(M_PI) / 2.f;
         if (pitch < static_cast<F32>(-M_PI) / 2.f)
@@ -169,14 +169,13 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
         F32 cosYaw = std::cos(yaw);
         F32 moveLength = std::sqrt(moveCamX * moveCamX + moveCamY * moveCamY);
         F32 normalizeFactor = (moveLength != ApproxZero<F32>()) ? 1.f / moveLength : 1.f;
-        camX += (moveCamY * sinYaw + moveCamX * cosYaw) * normalizeFactor * deltaTime;
-        camY += (moveCamY * cosYaw + moveCamX * -sinYaw) * normalizeFactor * deltaTime;
+        camX += (moveCamY * -sinYaw + moveCamX * cosYaw) * normalizeFactor * deltaTime;
+        camY += (moveCamY * cosYaw + moveCamX * sinYaw) * normalizeFactor * deltaTime;
 
 
         // Update worldCam matrix ---------------
-        program.SetUniform(worldCameraLocation, RotationX(pitch) * RotationY(yaw) *
-                                                        RotationX(static_cast<F32>(-M_PI) / 2.f) *
-                                                        Translation(-camX, -camY, -camZ));
+        program.SetUniform(worldCameraLocation, RotationX(static_cast<F32>(-M_PI) / 2.f) * RotationX(-pitch) *
+                                                        RotationZ(-yaw) * Translation(-camX, -camY, -camZ));
 
 
         scene.UpdateProjection(
