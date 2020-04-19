@@ -117,90 +117,24 @@ inline void Transpose1x2(__m128 in0, __m128 in1, __m128& out0)
 template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unusedSetZero>
 inline void Transpose1x3(__m128 in0, __m128 in1, __m128 in2, __m128& out0)
 {
-    [[maybe_unused]] constexpr bool setZero = _overwriteUnused && _unusedSetZero;
+    __m128 tout;
 
-    __m128 tmp0;
-
-
-    if constexpr (_firstRowIn == 0)
+    if constexpr (_firstRowOut == 0)
     {
-        if constexpr (_firstRowOut == 0)
-        {
-            __m128 tmp1 = _mm_unpacklo(in0, in1);
-
-            tmp0 = Insert<0, 2, false, false, false, true>(in2, tmp1);
-        }
-        else
-        {
-            __m128 tmp1 = Shuffle<0, 0, 0, 0>(in0, in1);
-
-            tmp0 = Insert<0, 3, true, false, false, false>(in2, tmp1);
-        }
+        __m128 tmp1 = Shuffle<_firstRowIn, _firstRowIn, _firstRowIn, _firstRowIn>(in1, in2);
+        tout = Insert<_firstRowIn, 0, false, false, false, true>(in0, tmp1);
     }
 
-    else if constexpr (_firstRowIn == 1)
-    {
-        if constexpr (_firstRowOut == 0)
-        {
-            __m128 tmp1 = Shuffle<1, 1, 1, 1>(in0, in2);
-
-            if constexpr (setZero)
-                tmp0 = Insert<1, 1, false, false, false, true>(in1, tmp1);
-            else
-                tmp0 = BlendIndex<1>(tmp1, in1);
-        }
-        else
-        {
-            __m128 tmp1 = _mm_unpacklo(in1, in2);
-
-            if constexpr (setZero)
-                tmp0 = Insert<1, 1, true, false, false, false>(in0, tmp1);
-            else
-                tmp0 = BlendIndex<1>(tmp1, in0);
-        }
-    }
-    else if constexpr (_firstRowIn == 2)
-    {
-        if constexpr (_firstRowOut == 0)
-        {
-            __m128 tmp1 = _mm_unpackhi(in0, in1);
-
-            if constexpr (setZero)
-                tmp0 = Insert<2, 2, false, false, false, true>(in2, tmp1);
-            else
-                tmp0 = BlendIndex<2>(tmp1, in2);
-        }
-        else
-        {
-            __m128 tmp1 = Shuffle<2, 2, 2, 2>(in0, in2);
-
-            if constexpr (setZero)
-                tmp0 = Insert<2, 2, true, false, false, false>(in1, tmp1);
-            else
-                tmp0 = BlendIndex<2>(tmp1, in1);
-        }
-    }
     else
     {
-        if constexpr (_firstRowOut == 0)
-        {
-            __m128 tmp1 = Shuffle<3, 3, 3, 3>(in1, in2);
-
-            tmp0 = Insert<3, 0, false, false, false, true>(in0, tmp1);
-        }
-        else
-        {
-            __m128 tmp1 = _mm_unpackhi(in1, in2);
-
-            tmp0 = Insert<3, 1, true, false, false, false>(in0, tmp1);
-        }
+        __m128 tmp1 = Shuffle<_firstRowIn, _firstRowIn, _firstRowIn, _firstRowIn>(in0, in1);
+        tout = Insert<_firstRowIn, 3, true, false, false, false>(in2, tmp1);
     }
 
-    // Write to output registers
     if constexpr (_overwriteUnused)
-        out0 = tmp0;
+        out0 = tout;
     else
-        out0 = BlendInRange<_firstRowOut, _firstRowOut + 2>(out0, tmp0);
+        out0 = BlendInRange<_firstRowOut, _firstRowOut + 2>(out0, tout);
 }
 
 
