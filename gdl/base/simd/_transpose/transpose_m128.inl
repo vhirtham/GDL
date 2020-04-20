@@ -166,66 +166,61 @@ inline void Transpose2x1(__m128 in0, __m128& out0, __m128& out1)
 template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unusedSetZero>
 inline void Transpose2x2(__m128 in0, __m128 in1, __m128& out0, __m128& out1)
 {
-    __m128 tmp0, tmp1;
+    std::array<__m128, 2> tout;
 
-    if constexpr (_firstRowIn == 0)
+    if constexpr (_firstRowIn == _firstRowOut)
     {
-        if constexpr (_firstRowOut == 0)
+        constexpr bool b0 = _firstRowIn > 0;
+        constexpr bool b1 = _firstRowIn > 1;
+        constexpr bool b2 = _firstRowIn < 1;
+        constexpr bool b3 = _firstRowIn < 2;
+
+        tout[0] = Insert<_firstRowIn, _firstRowIn + 1, b0, b1, b2, b3>(in1, in0);
+        tout[1] = Insert<_firstRowIn + 1, _firstRowIn, b0, b1, b2, b3>(in0, in1);
+
+        if constexpr (_overwriteUnused && _unusedSetZero)
         {
-            tmp0 = _mm_unpacklo(in0, in1);
-            tmp1 = _mm_movehl_ps(tmp0, tmp0);
-        }
-        else if constexpr (_firstRowOut == 1)
-        {
-            tmp0 = Shuffle<1, 0, 0, 1>(in0, in1);
-            tmp1 = _mm_unpacklo(in1, tmp0);
-        }
-        else
-        {
-            tmp1 = _mm_unpacklo(in0, in1);
-            tmp0 = _mm_movelh_ps(tmp1, tmp1);
+            out0 = tout[0];
+            out1 = tout[1];
+            return;
         }
     }
-    else if constexpr (_firstRowIn == 1)
+    else if constexpr (_firstRowOut == 0)
     {
-        if constexpr (_firstRowOut == 0)
+        if constexpr (_firstRowIn == 1)
         {
-            tmp0 = Insert<1, 0, false, false, true, true>(in0, in1);
-            tmp1 = _mm_unpackhi(in0, in1);
-        }
-        else if constexpr (_firstRowOut == 1)
-        {
-            tmp0 = Shuffle<1, 1, 1, 1>(in0, in1);
-            tmp1 = Shuffle<2, 2, 2, 2>(in0, in1);
+            tout[0] = Insert<1, 0, false, false, true, true>(in0, in1);
+            tout[1] = _mm_unpackhi(in0, in1);
         }
         else
         {
-            tmp0 = _mm_unpacklo(in0, in1);
-            tmp1 = Insert<2, 3, true, true, false, false>(in1, in0);
+            tout[0] = _mm_unpackhi(in0, in1);
+            tout[1] = _mm_movehl_ps(tout[0], tout[0]);
         }
+    }
+    else if constexpr (_firstRowOut == 1)
+    {
+        constexpr U32 s0 = _firstRowIn;
+        constexpr U32 s1 = _firstRowIn + 1;
+
+        tout[0] = Shuffle<s0, s0, s0, s0>(in0, in1);
+        tout[1] = Shuffle<s1, s1, s1, s1>(in0, in1);
     }
     else
     {
-        if constexpr (_firstRowOut == 0)
+        if constexpr (_firstRowIn == 0)
         {
-            tmp0 = _mm_unpackhi(in0, in1);
-            tmp1 = _mm_movehl_ps(tmp0, tmp0);
-        }
-        else if constexpr (_firstRowOut == 1)
-        {
-            tmp1 = Shuffle<2, 3, 3, 2>(in0, in1);
-            tmp0 = _mm_unpackhi(tmp1, in0);
+            tout[1] = _mm_unpacklo(in0, in1);
+            tout[0] = _mm_movelh_ps(tout[1], tout[1]);
         }
         else
         {
-            tmp1 = _mm_unpackhi(in0, in1);
-            tmp0 = _mm_movelh_ps(tmp1, tmp1);
+            tout[0] = _mm_unpacklo(in0, in1);
+            tout[1] = Insert<2, 3, true, true, false, false>(in1, in0);
         }
     }
 
-
-    // Write to output registers
-    TransposeSetOutput<_firstRowOut, 2, _overwriteUnused, _unusedSetZero>(out0, out1, tmp0, tmp1);
+    intern::TransposeSetOutput<_firstRowOut, 2, _overwriteUnused, _unusedSetZero>(tout, out0, out1);
 }
 
 
