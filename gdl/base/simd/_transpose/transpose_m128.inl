@@ -118,14 +118,14 @@ inline void Transpose1x3(__m128 in0, __m128 in1, __m128 in2, __m128& out0)
 
     if constexpr (_firstRowOut == 0)
     {
-        __m128 tmp1 = Shuffle<_firstRowIn, _firstRowIn, _firstRowIn, _firstRowIn>(in1, in2);
-        tout = Insert<_firstRowIn, 0, false, false, false, true>(in0, tmp1);
+        __m128 tmp0 = Shuffle<_firstRowIn, _firstRowIn, _firstRowIn, _firstRowIn>(in1, in2);
+        tout = Insert<_firstRowIn, 0, false, false, false, true>(in0, tmp0);
     }
 
     else
     {
-        __m128 tmp1 = Shuffle<_firstRowIn, _firstRowIn, _firstRowIn, _firstRowIn>(in0, in1);
-        tout = Insert<_firstRowIn, 3, true, false, false, false>(in2, tmp1);
+        __m128 tmp0 = Shuffle<_firstRowIn, _firstRowIn, _firstRowIn, _firstRowIn>(in0, in1);
+        tout = Insert<_firstRowIn, 3, true, false, false, false>(in2, tmp0);
     }
 
     intern::TransposeSetOutput<_firstRowOut, 3, _overwriteUnused, false>(tout, out0);
@@ -234,13 +234,13 @@ inline void Transpose2x3(__m128 in0, __m128 in1, __m128 in2, __m128& out0, __m12
     constexpr U32 idx_1 = _firstRowOut + 1;
     std::array<__m128, 3> tin = {{in0, in1, in2}};
 
-    __m128 tmp2;
+    __m128 tmp0;
     if constexpr (_firstRowIn == 0)
-        tmp2 = _mm_unpacklo(tin[idx_0], tin[idx_1]);
+        tmp0 = _mm_unpacklo(tin[idx_0], tin[idx_1]);
     else if constexpr (_firstRowIn == 1)
-        tmp2 = Shuffle<1, 2, 1, 2>(tin[idx_0], tin[idx_1]);
+        tmp0 = Shuffle<1, 2, 1, 2>(tin[idx_0], tin[idx_1]);
     else
-        tmp2 = _mm_unpackhi(tin[idx_0], tin[idx_1]);
+        tmp0 = _mm_unpackhi(tin[idx_0], tin[idx_1]);
 
 
     constexpr U32 s0 = (_firstRowIn % 2 == 0) ? 1 : 2;
@@ -251,13 +251,13 @@ inline void Transpose2x3(__m128 in0, __m128 in1, __m128 in2, __m128& out0, __m12
     std::array<__m128, 2> tout;
     if constexpr (_firstRowOut == 0)
     {
-        tout[0] = Shuffle<0, s0, s2, 0>(tmp2, in2);
-        tout[1] = Shuffle<s1, 3, s3, 0>(tmp2, in2);
+        tout[0] = Shuffle<0, s0, s2, 0>(tmp0, in2);
+        tout[1] = Shuffle<s1, 3, s3, 0>(tmp0, in2);
     }
     else
     {
-        tout[0] = Shuffle<0, s2, 0, s0>(in0, tmp2);
-        tout[1] = Shuffle<0, s3, s1, 3>(in0, tmp2);
+        tout[0] = Shuffle<0, s2, 0, s0>(in0, tmp0);
+        tout[1] = Shuffle<0, s3, s1, 3>(in0, tmp0);
     }
 
     intern::TransposeSetOutput<_firstRowOut, 3, _overwriteUnused, _unusedSetZero>(tout, out0, out1);
@@ -351,55 +351,46 @@ inline void Transpose3x2(__m128 in0, __m128 in1, __m128& out0, __m128& out1, __m
 template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unusedSetZero>
 inline void Transpose3x3(__m128 in0, __m128 in1, __m128 in2, __m128& out0, __m128& out1, __m128& out2)
 {
-    __m128 tmp0, tmp1, tmp2;
+    std::array<__m128, 3> tout;
 
-    if constexpr (_firstRowIn == 0)
+    constexpr U32 idx_0 = (_firstRowIn == 0) ? 0 : 2;
+    constexpr U32 idx_1 = 1 - _firstRowIn;
+    constexpr U32 idx_2 = 2 - _firstRowIn;
+
+    if constexpr (_firstRowOut == 0)
     {
-        if constexpr (_firstRowOut == 0)
-        {
-            __m128 tmp3 = Shuffle<0, 0, 0, 0>(in1, in2);
-            __m128 tmp4 = Shuffle<1, 1, 1, 1>(in0, in2);
-            __m128 tmp5 = _mm_unpackhi(in0, in1);
+        __m128 tmp0 = _mm_unpackhi(in0, in1);
+        __m128 tmp1 = Shuffle<1, 1, 1, 1>(in0, in2);
 
-            tmp0 = BlendIndex<0>(tmp3, in0);
-            tmp1 = BlendIndex<1>(tmp4, in1);
-            tmp2 = BlendIndex<2>(tmp5, in2);
+        if constexpr (_firstRowIn == 0)
+        {
+            __m128 tmp2 = Shuffle<0, 0, 0, 0>(in1, in2);
+            tout[idx_0] = BlendIndex<0>(tmp2, in0);
         }
         else
-        {
-            __m128 tmp3 = _mm_unpacklo(in1, in2);
-            __m128 tmp4 = Shuffle<2, 2, 2, 2>(in0, in2);
+            tout[idx_0] = Shuffle<2, 3, 3, 2>(tmp0, in2);
 
-            tmp0 = Shuffle<1, 0, 0, 1>(in0, tmp3);
-            tmp1 = BlendIndex<1>(tmp3, in0);
-            tmp2 = BlendIndex<2>(tmp4, in1);
-        }
+        tout[idx_1] = BlendIndex<1>(tmp1, in1);
+        tout[idx_2] = BlendIndex<2>(tmp0, in2);
     }
     else
     {
-        if constexpr (_firstRowOut == 0)
-        {
-            __m128 tmp3 = _mm_unpackhi(in0, in1);
-            __m128 tmp4 = Shuffle<1, 1, 1, 1>(in0, in2);
+        __m128 tmp0 = _mm_unpacklo(in1, in2);
+        __m128 tmp1 = Shuffle<2, 2, 2, 2>(in0, in2);
 
-            tmp2 = Shuffle<2, 3, 3, 2>(tmp3, in2);
-            tmp1 = BlendIndex<2>(tmp3, in2);
-            tmp0 = BlendIndex<1>(tmp4, in1);
-        }
+        if constexpr (_firstRowIn == 0)
+            tout[idx_0] = Shuffle<1, 0, 0, 1>(in0, tmp0);
         else
         {
-            __m128 tmp3 = _mm_unpacklo(in1, in2);
-            __m128 tmp4 = Shuffle<2, 2, 2, 2>(in0, in2);
-            __m128 tmp5 = Shuffle<3, 3, 3, 3>(in0, in1);
-
-            tmp0 = BlendIndex<1>(tmp3, in0);
-            tmp1 = BlendIndex<2>(tmp4, in1);
-            tmp2 = BlendIndex<3>(tmp5, in2);
+            __m128 tmp2 = Shuffle<3, 3, 3, 3>(in0, in1);
+            tout[idx_0] = BlendIndex<3>(tmp2, in2);
         }
+
+        tout[idx_1] = BlendIndex<1>(tmp0, in0);
+        tout[idx_2] = BlendIndex<2>(tmp1, in1);
     }
 
-    // Write to output registers
-    TransposeSetOutput<_firstRowOut, 3, _overwriteUnused, _unusedSetZero>(out0, out1, out2, tmp0, tmp1, tmp2);
+    intern::TransposeSetOutput<_firstRowOut, 3, _overwriteUnused, _unusedSetZero>(tout, out0, out1, out2);
 }
 
 
