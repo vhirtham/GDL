@@ -270,30 +270,11 @@ inline void Transpose2x3(__m128 in0, __m128 in1, __m128 in2, __m128& out0, __m12
 template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unusedSetZero>
 inline void Transpose2x4(__m128 in0, __m128 in1, __m128 in2, __m128 in3, __m128& out0, __m128& out1)
 {
-    if constexpr (_firstRowIn == 0)
-    {
-        __m128 tmp0 = _mm_unpacklo(in0, in1);
-        __m128 tmp1 = _mm_unpacklo(in2, in3);
+    __m128 tmp0 = Shuffle<_firstRowIn, _firstRowIn + 1, _firstRowIn, _firstRowIn + 1>(in0, in1);
+    __m128 tmp1 = Shuffle<_firstRowIn, _firstRowIn + 1, _firstRowIn, _firstRowIn + 1>(in2, in3);
 
-        out0 = _mm_movelh(tmp0, tmp1);
-        out1 = _mm_movehl(tmp1, tmp0);
-    }
-    else if constexpr (_firstRowIn == 1)
-    {
-        __m128 tmp0 = Shuffle<1, 2, 1, 2>(in0, in1);
-        __m128 tmp1 = Shuffle<1, 2, 1, 2>(in2, in3);
-
-        out0 = Shuffle<0, 2, 0, 2>(tmp0, tmp1);
-        out1 = Shuffle<1, 3, 1, 3>(tmp0, tmp1);
-    }
-    else
-    {
-        __m128 tmp0 = _mm_unpackhi(in0, in1);
-        __m128 tmp1 = _mm_unpackhi(in2, in3);
-
-        out0 = _mm_movelh(tmp0, tmp1);
-        out1 = _mm_movehl(tmp1, tmp0);
-    }
+    out0 = Shuffle<0, 2, 0, 2>(tmp0, tmp1);
+    out1 = Shuffle<1, 3, 1, 3>(tmp0, tmp1);
 }
 
 
