@@ -284,61 +284,13 @@ inline void Transpose2x4(__m128 in0, __m128 in1, __m128 in2, __m128 in3, __m128&
 template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unusedSetZero>
 inline void Transpose3x1(__m128 in0, __m128& out0, __m128& out1, __m128& out2)
 {
-    [[maybe_unused]] constexpr bool setZero = _overwriteUnused && _unusedSetZero;
+    std::array<__m128, 3> tout;
 
-    constexpr bool z0 = (_firstRowOut == 0) ? false : true;
-    constexpr bool z1 = (_firstRowOut == 1) ? false : true;
-    constexpr bool z2 = (_firstRowOut == 2) ? false : true;
-    constexpr bool z3 = (_firstRowOut == 3) ? false : true;
+    Transpose1x1<_firstRowIn, _firstRowOut, true, _unusedSetZero>(in0, tout[0]);
+    Transpose1x1<_firstRowIn + 1, _firstRowOut, true, _unusedSetZero>(in0, tout[1]);
+    Transpose1x1<_firstRowIn + 2, _firstRowOut, true, _unusedSetZero>(in0, tout[2]);
 
-    __m128 tmp0, tmp1, tmp2;
-
-    if constexpr (_firstRowIn == _firstRowOut)
-    {
-        if constexpr (setZero)
-            tmp0 = BlendIndex<_firstRowOut>(_mm_setzero<__m128>(), in0);
-        else
-            tmp0 = in0;
-        tmp1 = Insert<_firstRowIn + 1, _firstRowOut, z0, z1, z2, z3>(in0, in0);
-        tmp2 = Insert<_firstRowIn + 2, _firstRowOut, z0, z1, z2, z3>(in0, in0);
-    }
-    else if constexpr (_firstRowIn + 1 == _firstRowOut)
-    {
-        if constexpr (setZero)
-            tmp1 = BlendIndex<_firstRowOut>(_mm_setzero<__m128>(), in0);
-        else
-            tmp1 = in0;
-        tmp0 = Insert<_firstRowIn, _firstRowOut, z0, z1, z2, z3>(in0, in0);
-        tmp2 = Insert<_firstRowIn + 2, _firstRowOut, z0, z1, z2, z3>(in0, in0);
-    }
-    else if constexpr (_firstRowIn + 2 == _firstRowOut)
-    {
-        if constexpr (setZero)
-            tmp2 = BlendIndex<_firstRowOut>(_mm_setzero<__m128>(), in0);
-        else
-            tmp2 = in0;
-        tmp0 = Insert<_firstRowIn, _firstRowOut, z0, z1, z2, z3>(in0, in0);
-        tmp1 = Insert<_firstRowIn + 1, _firstRowOut, z0, z1, z2, z3>(in0, in0);
-    }
-    else
-    {
-        tmp0 = Insert<_firstRowIn, _firstRowOut, z0, z1, z2, z3>(in0, in0);
-        tmp1 = Insert<_firstRowIn + 1, _firstRowOut, z0, z1, z2, z3>(in0, in0);
-        tmp2 = Insert<_firstRowIn + 2, _firstRowOut, z0, z1, z2, z3>(in0, in0);
-    }
-
-    if constexpr (not _overwriteUnused)
-    {
-        out0 = BlendIndex<_firstRowOut>(out0, tmp0);
-        out1 = BlendIndex<_firstRowOut>(out1, tmp1);
-        out2 = BlendIndex<_firstRowOut>(out2, tmp2);
-    }
-    else
-    {
-        out0 = tmp0;
-        out1 = tmp1;
-        out2 = tmp2;
-    }
+    intern::TransposeSetOutput<_firstRowOut, 1, _overwriteUnused, false>(tout, out0, out1, out2);
 }
 
 

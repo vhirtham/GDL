@@ -14,9 +14,6 @@ namespace GDL::simd
 // add static asserts to all transpose functions, -> own function, including:
 //  static_assert(not(_overwriteUnused == false && _unusedSetZero == true), "Option _unusedSetZero has no effect.");
 
-// check possible optimization of __m128 transpose 2x2 using Insert
-// check optimization of lane permutations for laneoffsetIn >=2 in __m256 version
-
 // test all brancehes of the general transpose function
 // replace Permute2F128<1,0> with SwapLanes
 // add Permute2F128If -> like SwapLanesIf --- just let Permute2F128<0,1> return the input
