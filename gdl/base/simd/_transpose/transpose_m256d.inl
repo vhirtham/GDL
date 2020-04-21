@@ -116,35 +116,21 @@ inline void Transpose1x3(__m256d in0, __m256d in1, __m256d in2, __m256d& out0)
 template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unusedSetZero>
 inline void Transpose1x4(__m256d in0, __m256d in1, __m256d in2, __m256d in3, __m256d& out0)
 {
+    using Lane = intern::TranspositionLaneData<__m256d, _firstRowIn, _firstRowOut>;
 
-    if constexpr (_firstRowIn == 0)
+    __m256d tmp0, tmp1;
+    if constexpr (_firstRowIn % 2 == 0)
     {
-        __m256d tmp0 = _mm_unpacklo(in0, in1);
-        __m256d tmp1 = _mm_unpacklo(in2, in3);
-
-        out0 = Permute2F128<0, 0, 1, 0>(tmp0, tmp1);
-    }
-    else if constexpr (_firstRowIn == 1)
-    {
-        __m256d tmp0 = _mm_unpackhi(in0, in1);
-        __m256d tmp1 = _mm_unpackhi(in2, in3);
-
-        out0 = Permute2F128<0, 0, 1, 0>(tmp0, tmp1);
-    }
-    else if constexpr (_firstRowIn == 2)
-    {
-        __m256d tmp0 = _mm_unpacklo(in0, in1);
-        __m256d tmp1 = _mm_unpacklo(in2, in3);
-
-        out0 = Permute2F128<0, 1, 1, 1>(tmp0, tmp1);
+        tmp0 = _mm_unpacklo(in0, in1);
+        tmp1 = _mm_unpacklo(in2, in3);
     }
     else
     {
-        __m256d tmp0 = _mm_unpackhi(in0, in1);
-        __m256d tmp1 = _mm_unpackhi(in2, in3);
-
-        out0 = Permute2F128<0, 1, 1, 1>(tmp0, tmp1);
+        tmp0 = _mm_unpackhi(in0, in1);
+        tmp1 = _mm_unpackhi(in2, in3);
     }
+
+    out0 = Permute2F128<0, Lane::In, 1, Lane::In>(tmp0, tmp1);
 }
 
 
