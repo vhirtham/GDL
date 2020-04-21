@@ -140,61 +140,26 @@ inline void Transpose1x4(__m256d in0, __m256d in1, __m256d in2, __m256d in3, __m
 template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unusedSetZero>
 inline void Transpose2x1(__m256d in0, __m256d& out0, __m256d& out1)
 {
-    constexpr U32 numLaneVals = numValuesPerLane<__m256d>;
-    constexpr U32 laneIn = _firstRowIn / numLaneVals;
-    constexpr U32 laneOut = _firstRowOut / numLaneVals;
-    constexpr U32 laneOffsetIn = _firstRowIn % numLaneVals;
-    constexpr U32 laneOffsetOut = _firstRowOut % numLaneVals;
+    using Lane = intern::TranspositionLaneData<__m256d, _firstRowIn, _firstRowOut>;
 
-    __m256d tmp0, tmp1;
+    std::array<__m256d, 2> tout;
 
-    if constexpr (laneOffsetIn == 0)
+    if constexpr (Lane::OffsetIn == 0)
     {
-        __m256d tmp2;
-        if constexpr (laneIn == laneOut)
-            tmp2 = in0;
-        else
-            tmp2 = Permute2F128<1, 0>(in0);
-
-        if constexpr (laneOffsetOut == 0)
-        {
-            tmp0 = tmp2;
-            tmp1 = _mm_unpackhi(tmp2, tmp2);
-        }
-        else
-        {
-            tmp0 = _mm_moveldup(tmp2);
-            tmp1 = tmp2;
-        }
+        __m256d tmp0 = SwapLanesIf<Lane::In != Lane::Out>(in0);
+        Transpose1x1<Lane::OffsetIn, Lane::OffsetOut>(tmp0, tout[0]);
+        Transpose1x1<Lane::OffsetIn + 1, Lane::OffsetOut>(tmp0, tout[1]);
     }
     else
     {
-        if constexpr (_firstRowOut == 0)
-        {
-            tmp0 = _mm_unpackhi(in0, in0);
-            tmp1 = Permute2F128<1, 0>(in0);
-        }
-        else if constexpr (_firstRowOut == 1)
-        {
-            __m256d tmp2 = Permute2F128<1, 0>(in0);
-            tmp0 = in0;
-            tmp1 = _mm_moveldup(tmp2);
-        }
-        else if constexpr (_firstRowOut == 2)
-        {
-            __m256d tmp2 = Permute2F128<1, 0>(in0);
-            tmp0 = _mm_unpackhi(tmp2, tmp2);
-            tmp1 = in0;
-        }
-        else
-        {
-            tmp0 = Permute2F128<1, 0>(in0);
-            tmp1 = _mm_moveldup(in0);
-        }
+        __m256d tmp0 = SwapLanesIf<Lane::Out == 1>(in0);
+        __m256d tmp1 = SwapLanesIf<Lane::Out == 0>(in0);
+
+        Transpose1x1<Lane::OffsetIn, Lane::OffsetOut>(tmp0, tout[0]);
+        Transpose1x1<0, Lane::OffsetOut>(tmp1, tout[1]);
     }
 
-    // Write to output registers
-    TransposeSetOutput<_firstRowOut, 1, _overwriteUnused, _unusedSetZero>(out0, out1, tmp0, tmp1);
+    intern::TransposeSetOutput<_firstRowOut, 1, _overwriteUnused, _unusedSetZero>(tout, out0, out1);
 }
 
 
