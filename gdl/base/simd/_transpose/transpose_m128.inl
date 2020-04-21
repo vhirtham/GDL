@@ -487,34 +487,30 @@ inline void Transpose4x2(__m128 in0, __m128 in1, __m128& out0, __m128& out1, __m
 template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unusedSetZero>
 inline void Transpose4x3(__m128 in0, __m128 in1, __m128 in2, __m128& out0, __m128& out1, __m128& out2, __m128& out3)
 {
-    __m128 tmp0, tmp1, tmp2, tmp3;
-
+    std::array<__m128, 4> tout;
 
     if constexpr (_firstRowOut == 0)
     {
-        __m128 tmp4 = _mm_unpacklo(in0, in1);
-        __m128 tmp5 = _mm_unpackhi(in0, in1);
+        __m128 tmp0 = _mm_unpacklo(in0, in1);
+        __m128 tmp1 = _mm_unpackhi(in0, in1);
 
-        tmp0 = _mm_movelh(tmp4, in2);
-        tmp1 = Shuffle<2, 3, 1, 0>(tmp4, in2);
-        tmp2 = BlendIndex<2>(tmp5, in2);
-        tmp3 = Shuffle<2, 3, 3, 2>(tmp5, in2);
+        tout[0] = _mm_movelh(tmp0, in2);
+        tout[1] = Shuffle<2, 3, 1, 0>(tmp0, in2);
+        tout[2] = BlendIndex<2>(tmp1, in2);
+        tout[3] = Shuffle<2, 3, 3, 2>(tmp1, in2);
     }
     else
     {
-        __m128 tmp4 = _mm_unpacklo(in1, in2);
-        __m128 tmp5 = _mm_unpackhi(in1, in2);
+        __m128 tmp0 = _mm_unpacklo(in1, in2);
+        __m128 tmp1 = _mm_unpackhi(in1, in2);
 
-        tmp0 = Shuffle<1, 0, 0, 1>(in0, tmp4);
-        tmp1 = BlendIndex<1>(tmp4, in0);
-        tmp2 = Shuffle<3, 2, 0, 1>(in0, tmp5);
-        tmp3 = _mm_movehl(tmp5, in0);
+        tout[0] = Shuffle<1, 0, 0, 1>(in0, tmp0);
+        tout[1] = BlendIndex<1>(tmp0, in0);
+        tout[2] = Shuffle<3, 2, 0, 1>(in0, tmp1);
+        tout[3] = _mm_movehl(tmp1, in0);
     }
 
-
-    // Write to output registers
-    TransposeSetOutput<_firstRowOut, 3, _overwriteUnused, _unusedSetZero>(out0, out1, out2, out3, tmp0, tmp1, tmp2,
-                                                                          tmp3);
+    intern::TransposeSetOutput<_firstRowOut, 3, _overwriteUnused, _unusedSetZero>(tout, out0, out1, out2, out3);
 }
 
 
@@ -535,7 +531,5 @@ inline void Transpose4x4(__m128 in0, __m128 in1, __m128 in2, __m128 in3, __m128&
     out2 = _mm_movelh(tmp1, tmp3);
     out3 = _mm_movehl(tmp3, tmp1);
 }
-
-
 
 } // namespace GDL::simd
