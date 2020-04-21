@@ -74,47 +74,39 @@ inline void Transpose1x2(__m256d in0, __m256d in1, __m256d& out0)
 template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unusedSetZero>
 inline void Transpose1x3(__m256d in0, __m256d in1, __m256d in2, __m256d& out0)
 {
-    constexpr U32 numLaneVals = numValuesPerLane<__m256d>;
-    constexpr U32 laneIn = _firstRowIn / numLaneVals;
-    constexpr U32 laneOffsetIn = _firstRowIn % numLaneVals;
+    using Lane = intern::TranspositionLaneData<__m256d, _firstRowIn, _firstRowOut>;
 
-    __m256d tmp0;
-
-    if constexpr (laneOffsetIn == 0)
+    __m256d tmp0, tmp1;
+    if constexpr (_firstRowOut == 0)
     {
-        if constexpr (_firstRowOut == 0)
+        if constexpr (Lane::OffsetIn == 0)
         {
-            __m256d tmp1 = _mm_unpacklo(in0, in1);
-
-            tmp0 = Permute2F128<0, laneIn, 1, laneIn>(tmp1, in2);
+            tmp0 = _mm_unpacklo(in0, in1);
+            tmp1 = in2;
         }
         else
         {
-            __m256d tmp1 = _mm_unpacklo(in1, in2);
-            __m256d tmp2 = _mm_moveldup(in0);
-
-            tmp0 = Permute2F128<0, laneIn, 1, laneIn>(tmp2, tmp1);
+            tmp0 = _mm_unpackhi(in0, in1);
+            tmp1 = _mm_unpackhi(in2, in2);
         }
     }
-    else if constexpr (laneOffsetIn == 1)
+    else
     {
-        if constexpr (_firstRowOut == 0)
+        if constexpr (Lane::OffsetIn == 0)
         {
-            __m256d tmp1 = _mm_unpackhi(in0, in1);
-            __m256d tmp2 = _mm_unpackhi(in2, in2);
-
-            tmp0 = Permute2F128<0, laneIn, 1, laneIn>(tmp1, tmp2);
+            tmp0 = _mm_moveldup(in0);
+            tmp1 = _mm_unpacklo(in1, in2);
         }
         else
         {
-            __m256d tmp1 = _mm_unpackhi(in1, in2);
-
-            tmp0 = Permute2F128<0, laneIn, 1, laneIn>(in0, tmp1);
+            tmp0 = in0;
+            tmp1 = _mm_unpackhi(in1, in2);
         }
     }
 
-    // Write to output registers
-    TransposeSetOutput<_firstRowOut, 3, _overwriteUnused, _unusedSetZero>(out0, tmp0);
+    __m256d tout = Permute2F128<0, Lane::In, 1, Lane::In>(tmp0, tmp1);
+
+    intern::TransposeSetOutput<_firstRowOut, 3, _overwriteUnused, _unusedSetZero>(tout, out0);
 }
 
 
