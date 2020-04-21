@@ -443,58 +443,41 @@ inline void Transpose4x1(__m128 in0, __m128& out0, __m128& out1, __m128& out2, _
 template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unusedSetZero>
 inline void Transpose4x2(__m128 in0, __m128 in1, __m128& out0, __m128& out1, __m128& out2, __m128& out3)
 {
-    constexpr bool setZero = _overwriteUnused && _unusedSetZero;
-
-    __m128 tmp0, tmp1, tmp2, tmp3;
-
+    std::array<__m128, 4> tout;
 
     if constexpr (_firstRowOut == 0)
     {
-        tmp0 = Insert<0, 1, false, false, true, true>(in1, in0);
-        tmp1 = Insert<1, 0, false, false, true, true>(in0, in1);
-        tmp2 = _mm_unpackhi(in0, in1);
-        tmp3 = Permute<2, 3, 0, 1>(tmp2);
-
-        if constexpr (setZero)
-        {
-            const __m128 zero = _mm_setzero<__m128>();
-            tmp2 = BlendInRange<_firstRowOut, _firstRowOut + 1>(zero, tmp2);
-            tmp3 = BlendInRange<_firstRowOut, _firstRowOut + 1>(zero, tmp3);
-        }
+        tout[0] = Insert<0, 1, false, false, true, true>(in1, in0);
+        tout[1] = Insert<1, 0, false, false, true, true>(in0, in1);
+        tout[2] = _mm_unpackhi(in0, in1);
+        tout[3] = Permute<2, 3, 0, 1>(tout[2]);
     }
     else if constexpr (_firstRowOut == 1)
     {
-        tmp0 = Shuffle<0, 0, 0, 0>(in0, in1);
-        tmp1 = Insert<1, 2, true, false, false, true>(in1, in0);
-        tmp2 = Insert<2, 1, true, false, false, true>(in0, in1);
-        tmp3 = Shuffle<3, 3, 3, 3>(in0, in1);
-
-        if constexpr (setZero)
-        {
-            const __m128 zero = _mm_setzero<__m128>();
-            tmp0 = BlendInRange<_firstRowOut, _firstRowOut + 1>(zero, tmp0);
-            tmp3 = BlendInRange<_firstRowOut, _firstRowOut + 1>(zero, tmp3);
-        }
+        tout[0] = Shuffle<0, 0, 0, 0>(in0, in1);
+        tout[1] = Insert<1, 2, true, false, false, true>(in1, in0);
+        tout[2] = Insert<2, 1, true, false, false, true>(in0, in1);
+        tout[3] = Shuffle<3, 3, 3, 3>(in0, in1);
     }
     else
     {
-        tmp3 = Insert<3, 2, true, true, false, false>(in0, in1);
-        tmp2 = Insert<2, 3, true, true, false, false>(in1, in0);
-        tmp1 = _mm_unpacklo(in0, in1);
-        tmp0 = Permute<2, 3, 0, 1>(tmp1);
-
-        if constexpr (setZero)
-        {
-            const __m128 zero = _mm_setzero<__m128>();
-            tmp0 = BlendInRange<_firstRowOut, _firstRowOut + 1>(zero, tmp0);
-            tmp1 = BlendInRange<_firstRowOut, _firstRowOut + 1>(zero, tmp1);
-        }
+        tout[3] = Insert<3, 2, true, true, false, false>(in0, in1);
+        tout[2] = Insert<2, 3, true, true, false, false>(in1, in0);
+        tout[1] = _mm_unpacklo(in0, in1);
+        tout[0] = Permute<2, 3, 0, 1>(tout[1]);
     }
 
+    if constexpr (_overwriteUnused && _unusedSetZero)
+    {
+        constexpr U32 idx_0 = (_firstRowOut < 1) ? 2 : 0;
+        constexpr U32 idx_1 = (_firstRowOut > 1) ? 1 : 3;
 
-    // Write to output registers
-    TransposeSetOutput<_firstRowOut, 2, _overwriteUnused, _unusedSetZero>(out0, out1, out2, out3, tmp0, tmp1, tmp2,
-                                                                          tmp3);
+        const __m128 zero = _mm_setzero<__m128>();
+        tout[idx_0] = BlendInRange<_firstRowOut, _firstRowOut + 1>(zero, tout[idx_0]);
+        tout[idx_1] = BlendInRange<_firstRowOut, _firstRowOut + 1>(zero, tout[idx_1]);
+    }
+
+    intern::TransposeSetOutput<_firstRowOut, 2, _overwriteUnused, false>(tout, out0, out1, out2, out3);
 }
 
 
