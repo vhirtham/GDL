@@ -17,44 +17,20 @@ namespace GDL::simd
 template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unusedSetZero>
 inline void Transpose1x1(__m256d in, __m256d& out)
 {
-    static_assert(not(_overwriteUnused == false && _unusedSetZero == true), "Option _unusedSetZero has no effect.");
-
-    __m256d tmp;
+    using Lane = intern::TranspositionLaneData<__m256d, _firstRowIn, _firstRowOut>;
+    __m256d tout;
 
     if constexpr (_firstRowIn == _firstRowOut)
-    {
-        tmp = in;
-    }
+        tout = in;
     else
     {
-        constexpr U32 numLaneVals = numValuesPerLane<__m256d>;
-        constexpr U32 laneIn = _firstRowIn / numLaneVals;
-        constexpr U32 laneOut = _firstRowOut / numLaneVals;
-        constexpr U32 laneOffsetIn = _firstRowIn % numLaneVals;
-        constexpr U32 laneOffsetOut = _firstRowOut % numLaneVals;
-
-
-        if constexpr (laneIn == laneOut)
-        {
-            if constexpr (laneOffsetIn == 0)
-                tmp = _mm_moveldup(in);
-            else
-                tmp = _mm_unpackhi(in, in);
-        }
+        if constexpr (Lane::In == Lane::Out)
+            tout = Broadcast<Lane::OffsetIn>(in);
         else
-        {
-            __m256d perm = Permute2F128<1, 0>(in);
-            if constexpr (laneOffsetIn == laneOffsetOut)
-                tmp = perm;
-            else if constexpr (laneOffsetIn == 0)
-                tmp = _mm_moveldup(perm);
-            else
-                tmp = _mm_unpackhi(perm, perm);
-        }
+            tout = BroadcastAcrossLanes<_firstRowIn>(in);
     }
 
-    // Write to output registers
-    TransposeSetOutput<_firstRowOut, 1, _overwriteUnused, _unusedSetZero>(out, tmp);
+    intern::TransposeSetOutput<_firstRowOut, 1, _overwriteUnused, _unusedSetZero>(tout, out);
 }
 
 
@@ -64,45 +40,31 @@ inline void Transpose1x1(__m256d in, __m256d& out)
 template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unusedSetZero>
 inline void Transpose1x2(__m256d in0, __m256d in1, __m256d& out0)
 {
-    constexpr U32 numLaneVals = numValuesPerLane<__m256d>;
-    constexpr U32 laneIn = _firstRowIn / numLaneVals;
-    constexpr U32 laneOut = _firstRowOut / numLaneVals;
-    constexpr U32 laneOffsetIn = _firstRowIn % numLaneVals;
-    constexpr U32 laneOffsetOut = _firstRowOut % numLaneVals;
+    using Lane = intern::TranspositionLaneData<__m256d, _firstRowIn, _firstRowOut>;
 
-    __m256d tmp0;
+    __m256d tout;
 
-    if constexpr (laneOffsetIn == 0)
+    if constexpr (Lane::OffsetOut == 0)
     {
-        if constexpr (laneOffsetOut == 0)
-        {
-            tmp0 = _mm_unpacklo(in0, in1);
-            if constexpr (laneIn != laneOut)
-                tmp0 = Permute2F128<1, 0>(tmp0);
-        }
+        if constexpr (Lane::OffsetIn == 0)
+            tout = _mm_unpacklo(in0, in1);
         else
-        {
-            __m256d tmp1 = _mm_unpacklo(in1, in0);
-            tmp0 = Permute2F128<laneIn, laneIn>(tmp1);
-        }
+            tout = _mm_unpackhi(in0, in1);
+
+        if constexpr (Lane::In != Lane::Out)
+            tout = Permute2F128<1, 0>(tout);
     }
     else
     {
-        if constexpr (laneOffsetOut == 0)
-        {
-            tmp0 = _mm_unpackhi(in0, in1);
-            if constexpr (laneIn != laneOut)
-                tmp0 = Permute2F128<1, 0>(tmp0);
-        }
+        if constexpr (Lane::OffsetIn == 0)
+            tout = _mm_unpacklo(in1, in0);
         else
-        {
-            __m256d tmp1 = _mm_unpackhi(in1, in0);
-            tmp0 = Permute2F128<laneIn, laneIn>(tmp1);
-        }
+            tout = _mm_unpackhi(in1, in0);
+
+        tout = Permute2F128<Lane::In, Lane::In>(tout);
     }
 
-    // Write to output registers
-    TransposeSetOutput<_firstRowOut, 2, _overwriteUnused, _unusedSetZero>(out0, tmp0);
+    intern::TransposeSetOutput<_firstRowOut, 2, _overwriteUnused, _unusedSetZero>(tout, out0);
 }
 
 
