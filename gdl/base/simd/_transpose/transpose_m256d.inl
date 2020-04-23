@@ -79,29 +79,13 @@ inline void Transpose1x3(__m256d in0, __m256d in1, __m256d in2, __m256d& out0)
     __m256d tmp0, tmp1;
     if constexpr (_firstRowOut == 0)
     {
-        if constexpr (Lane::OffsetIn == 0)
-        {
-            tmp0 = _mm_unpacklo(in0, in1);
-            tmp1 = in2;
-        }
-        else
-        {
-            tmp0 = _mm_unpackhi(in0, in1);
-            tmp1 = _mm_unpackhi(in2, in2);
-        }
+        Transpose1x2<Lane::OffsetIn, 0>(in0, in1, tmp0);
+        Transpose1x1<Lane::OffsetIn, 0>(in2, tmp1);
     }
     else
     {
-        if constexpr (Lane::OffsetIn == 0)
-        {
-            tmp0 = _mm_moveldup(in0);
-            tmp1 = _mm_unpacklo(in1, in2);
-        }
-        else
-        {
-            tmp0 = in0;
-            tmp1 = _mm_unpackhi(in1, in2);
-        }
+        Transpose1x1<Lane::OffsetIn, 1>(in0, tmp0);
+        Transpose1x2<Lane::OffsetIn, 0>(in1, in2, tmp1);
     }
 
     __m256d tout = Permute2F128<0, Lane::In, 1, Lane::In>(tmp0, tmp1);
