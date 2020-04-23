@@ -287,69 +287,18 @@ inline void Transpose2x4(__m256d in0, __m256d in1, __m256d in2, __m256d in3, __m
 template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unusedSetZero>
 inline void Transpose3x1(__m256d in0, __m256d& out0, __m256d& out1, __m256d& out2)
 {
+    using Lane = intern::TranspositionLaneData<__m256d, _firstRowIn, _firstRowOut>;
+    std::array<__m256d, 3> tout;
 
-    __m256d tmp0, tmp1, tmp2;
+    std::array<__m256d, 2> tmp;
+    tmp[0] = SwapLanesIf<Lane::Out == 1>(in0);
+    tmp[1] = SwapLanesIf<Lane::Out == 0>(in0);
 
-    __m256d tmp3 = Permute2F128<1, 0>(in0);
+    Transpose1x1<Lane::OffsetIn, Lane::OffsetOut>(tmp[0], tout[0]);
+    Transpose1x1<1 - Lane::OffsetIn, Lane::OffsetOut>(tmp[Lane::OffsetIn], tout[1]);
+    Transpose1x1<Lane::OffsetIn, Lane::OffsetOut>(tmp[1], tout[2]);
 
-    if constexpr (_firstRowIn == 0)
-    {
-        if constexpr (_firstRowOut == 0)
-        {
-            tmp0 = in0;
-            tmp1 = _mm_unpackhi(in0, in0);
-            tmp2 = tmp3;
-        }
-        else if constexpr (_firstRowOut == 1)
-        {
-            tmp0 = _mm_moveldup(in0);
-            tmp1 = in0;
-            tmp2 = _mm_moveldup(tmp3);
-        }
-        else if constexpr (_firstRowOut == 2)
-        {
-            tmp0 = tmp3;
-            tmp1 = _mm_unpackhi(tmp3, tmp3);
-            tmp2 = in0;
-        }
-        else
-        {
-            tmp0 = _mm_moveldup(tmp3);
-            tmp1 = tmp3;
-            tmp2 = _mm_moveldup(in0);
-        }
-    }
-    else
-    {
-        if constexpr (_firstRowOut == 0)
-        {
-            tmp0 = _mm_unpackhi(in0, in0);
-            tmp1 = tmp3;
-            tmp2 = _mm_unpackhi(tmp3, tmp3);
-        }
-        else if constexpr (_firstRowOut == 1)
-        {
-            tmp0 = in0;
-            tmp1 = _mm_moveldup(tmp3);
-            tmp2 = tmp3;
-        }
-        else if constexpr (_firstRowOut == 2)
-        {
-            tmp0 = _mm_unpackhi(tmp3, tmp3);
-            tmp1 = in0;
-            tmp2 = _mm_unpackhi(in0, in0);
-        }
-        else
-        {
-            tmp0 = tmp3;
-            tmp1 = _mm_moveldup(in0);
-            tmp2 = in0;
-        }
-    }
-
-
-    // Write to output registers
-    TransposeSetOutput<_firstRowOut, 1, _overwriteUnused, _unusedSetZero>(out0, out1, out2, tmp0, tmp1, tmp2);
+    intern::TransposeSetOutput<_firstRowOut, 1, _overwriteUnused, _unusedSetZero>(tout, out0, out1, out2);
 }
 
 
