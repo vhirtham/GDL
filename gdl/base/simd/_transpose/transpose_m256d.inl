@@ -243,11 +243,11 @@ inline void Transpose2x3(__m256d in0, __m256d in1, __m256d in2, __m256d& out0, _
         constexpr U32 idx_1 = idx_0 + 1;
         constexpr U32 idx_2 = (idx_0 + 2) % 3;
 
-        __m256d tmp2 = Shuffle<1, 1, 0, 0>(tin[idx_0], tin[idx_1]);
-        __m256d tmp3 = Broadcast<1, 0>(tin[idx_2]);
+        __m256d tmp_0 = Shuffle<1, 1, 0, 0>(tin[idx_0], tin[idx_1]);
+        __m256d tmp_1 = Broadcast<1, 0>(tin[idx_2]);
 
-        tout[0] = Permute2F128<idx_0, 0, 1 - idx_0, 0>(tmp2, tmp3);
-        tout[1] = Permute2F128<idx_0, 1, 1 - idx_0, 1>(tmp2, tmp3);
+        tout[0] = Permute2F128<idx_0, 0, 1 - idx_0, 0>(tmp_0, tmp_1);
+        tout[1] = Permute2F128<idx_0, 1, 1 - idx_0, 1>(tmp_0, tmp_1);
     }
 
     intern::TransposeSetOutput<_firstRowOut, 3, _overwriteUnused, _unusedSetZero>(tout, out0, out1);
@@ -260,29 +260,23 @@ inline void Transpose2x3(__m256d in0, __m256d in1, __m256d in2, __m256d& out0, _
 template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unusedSetZero>
 inline void Transpose2x4(__m256d in0, __m256d in1, __m256d in2, __m256d in3, __m256d& out0, __m256d& out1)
 {
-    if constexpr (_firstRowIn == 0)
-    {
-        __m256d tmp0 = Permute2F128<0, 0, 1, 0>(in0, in2);
-        __m256d tmp1 = Permute2F128<0, 0, 1, 0>(in1, in3);
+    using Lane = intern::TranspositionLaneData<__m256d, _firstRowIn, _firstRowOut>;
 
-        out0 = _mm_unpacklo(tmp0, tmp1);
-        out1 = _mm_unpackhi(tmp0, tmp1);
-    }
-    else if constexpr (_firstRowIn == 1)
+    if constexpr (Lane::OffsetIn == 0)
     {
-        __m256d tmp0 = Shuffle<1, 1, 0, 0>(in0, in1);
-        __m256d tmp1 = Shuffle<1, 1, 0, 0>(in2, in3);
+        __m256d tmp_0 = Permute2F128<0, Lane::In, 1, Lane::In>(in0, in2);
+        __m256d tmp_1 = Permute2F128<0, Lane::In, 1, Lane::In>(in1, in3);
 
-        out0 = Permute2F128<0, 0, 1, 0>(tmp0, tmp1);
-        out1 = Permute2F128<0, 1, 1, 1>(tmp0, tmp1);
+        out0 = _mm_unpacklo(tmp_0, tmp_1);
+        out1 = _mm_unpackhi(tmp_0, tmp_1);
     }
     else
     {
-        __m256d tmp0 = Permute2F128<0, 1, 1, 1>(in0, in2);
-        __m256d tmp1 = Permute2F128<0, 1, 1, 1>(in1, in3);
+        __m256d tmp_0 = Shuffle<1, 1, 0, 0>(in0, in1);
+        __m256d tmp_1 = Shuffle<1, 1, 0, 0>(in2, in3);
 
-        out0 = _mm_unpacklo(tmp0, tmp1);
-        out1 = _mm_unpackhi(tmp0, tmp1);
+        out0 = Permute2F128<0, 0, 1, 0>(tmp_0, tmp_1);
+        out1 = Permute2F128<0, 1, 1, 1>(tmp_0, tmp_1);
     }
 }
 
