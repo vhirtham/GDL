@@ -385,25 +385,25 @@ template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unused
 inline void Transpose3x4(__m256d in0, __m256d in1, __m256d in2, __m256d in3, __m256d& out0, __m256d& out1,
                          __m256d& out2)
 {
-    __m256d perm0 = Permute2F128<0, 1, 1, 0>(in0, in2);
-    __m256d perm1 = Permute2F128<0, 1, 1, 0>(in1, in3);
+    __m256d tmp_0 = Permute2F128<0, 1, 1, 0>(in0, in2);
+    __m256d tmp_1 = Permute2F128<0, 1, 1, 0>(in1, in3);
 
-    __m256d tmp0 = BlendBelowIndex<1>(in0, perm0);
-    __m256d tmp1 = BlendBelowIndex<1>(in1, perm1);
-    __m256d tmp2 = BlendBelowIndex<1>(perm0, in2);
-    __m256d tmp3 = BlendBelowIndex<1>(perm1, in3);
+    __m256d tmp_2 = BlendBelowIndex<1>(in0, tmp_0);
+    __m256d tmp_3 = BlendBelowIndex<1>(in1, tmp_1);
+    __m256d tmp_4 = BlendBelowIndex<1>(tmp_0, in2);
+    __m256d tmp_5 = BlendBelowIndex<1>(tmp_1, in3);
 
     if constexpr (_firstRowIn == 0)
     {
-        out0 = _mm_unpacklo(tmp0, tmp1);
-        out1 = _mm_unpackhi(tmp0, tmp1);
-        out2 = _mm_unpacklo(tmp2, tmp3);
+        out0 = _mm_unpacklo(tmp_2, tmp_3);
+        out1 = _mm_unpackhi(tmp_2, tmp_3);
+        out2 = _mm_unpacklo(tmp_4, tmp_5);
     }
     else
     {
-        out0 = _mm_unpackhi(tmp0, tmp1);
-        out1 = _mm_unpacklo(tmp2, tmp3);
-        out2 = _mm_unpackhi(tmp2, tmp3);
+        out0 = _mm_unpackhi(tmp_2, tmp_3);
+        out1 = _mm_unpacklo(tmp_4, tmp_5);
+        out2 = _mm_unpackhi(tmp_4, tmp_5);
     }
 }
 
