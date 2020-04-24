@@ -285,62 +285,37 @@ inline void Transpose3x1(__m256d in0, __m256d& out0, __m256d& out1, __m256d& out
 template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unusedSetZero>
 inline void Transpose3x2(__m256d in0, __m256d in1, __m256d& out0, __m256d& out1, __m256d& out2)
 {
-    __m256d tmp0, tmp1, tmp2;
+    std::array<__m256d, 3> tout;
 
-
-    if constexpr (_firstRowIn == 0)
+    if constexpr (_firstRowOut == 0)
     {
-        if constexpr (_firstRowOut == 0)
-        {
-            tmp0 = _mm_unpacklo(in0, in1);
-            tmp1 = _mm_unpackhi(in0, in1);
-            tmp2 = Permute2F128<1, 0>(tmp0);
-        }
-        else if constexpr (_firstRowOut == 1)
-        {
-            __m256d tmp3 = Permute2F128<0, 1, 1, 0>(in0, in1);
+        __m256d tmp_0 = _mm_unpacklo(in0, in1);
 
-            tmp0 = _mm_unpacklo(tmp3, in0);
-            tmp1 = _mm_unpackhi(tmp3, in0);
-            tmp2 = _mm_unpacklo(in1, tmp3);
-        }
+        tout[_firstRowIn] = SwapLanesIf<_firstRowIn == 1>(tmp_0);
+        tout[1 - _firstRowIn] = _mm_unpackhi(in0, in1);
+        tout[2] = Permute2F128<1, 0>(tout[0]);
+    }
+    else if constexpr (_firstRowOut == 1)
+    {
+        __m256d tmp_0 = Permute2F128<0, 1, 1, 0>(in0, in1);
+
+        if constexpr (_firstRowIn == 0)
+            tout[0] = _mm_unpacklo(tmp_0, in0);
         else
-        {
-            __m256d tmp3 = tmp1 = _mm_unpackhi(in0, in1);
-
-            tmp2 = _mm_unpacklo(in0, in1);
-            tmp1 = Permute2F128<1, 0>(tmp3);
-            tmp0 = Permute2F128<1, 0>(tmp2);
-        }
+            tout[2] = _mm_unpackhi(in1, tmp_0);
+        tout[1 - _firstRowIn] = _mm_unpackhi(tmp_0, in0);
+        tout[2 - _firstRowIn] = _mm_unpacklo(in1, tmp_0);
     }
     else
     {
-        if constexpr (_firstRowOut == 0)
-        {
-            __m256d tmp3 = _mm_unpacklo(in0, in1);
+        __m256d tmp_0 = _mm_unpackhi(in0, in1);
 
-            tmp0 = _mm_unpackhi(in0, in1);
-            tmp1 = Permute2F128<1, 0>(tmp3);
-            tmp2 = Permute2F128<1, 0>(tmp0);
-        }
-        else if constexpr (_firstRowOut == 1)
-        {
-            __m256d tmp3 = Permute2F128<0, 1, 1, 0>(in0, in1);
-
-            tmp0 = _mm_unpackhi(tmp3, in0);
-            tmp1 = _mm_unpacklo(in1, tmp3);
-            tmp2 = _mm_unpackhi(in1, tmp3);
-        }
-        else
-        {
-            tmp2 = _mm_unpackhi(in0, in1);
-            tmp1 = _mm_unpacklo(in0, in1);
-            tmp0 = Permute2F128<1, 0>(tmp2);
-        }
+        tout[1 + _firstRowIn] = SwapLanesIf<_firstRowIn == 0>(tmp_0);
+        tout[2 - _firstRowIn] = _mm_unpacklo(in0, in1);
+        tout[0] = Permute2F128<1, 0>(tout[2]);
     }
 
-    // Write to output registers
-    TransposeSetOutput<_firstRowOut, 2, _overwriteUnused, _unusedSetZero>(out0, out1, out2, tmp0, tmp1, tmp2);
+    intern::TransposeSetOutput<_firstRowOut, 2, _overwriteUnused, _unusedSetZero>(tout, out0, out1, out2);
 }
 
 
