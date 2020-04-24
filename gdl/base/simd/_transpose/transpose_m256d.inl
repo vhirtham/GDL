@@ -414,43 +414,19 @@ inline void Transpose3x4(__m256d in0, __m256d in1, __m256d in2, __m256d in3, __m
 template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unusedSetZero>
 inline void Transpose4x1(__m256d in0, __m256d& out0, __m256d& out1, __m256d& out2, __m256d& out3)
 {
-    __m256d tmp0, tmp1, tmp2, tmp3;
+    using Lane = intern::TranspositionLaneData<__m256d, _firstRowIn, _firstRowOut>;
+    std::array<__m256d, 4> tout;
 
-    __m256d tmp4 = Permute2F128<1, 0>(in0);
+    std::array<__m256d, 2> tmp;
+    tmp[0] = SwapLanesIf<Lane::Out == 1>(in0);
+    tmp[1] = SwapLanesIf<Lane::Out == 0>(in0);
 
-    if constexpr (_firstRowOut == 0)
-    {
-        tmp0 = in0;
-        tmp1 = _mm_unpackhi(in0, in0);
-        tmp2 = tmp4;
-        tmp3 = _mm_unpackhi(tmp4, tmp4);
-    }
-    else if constexpr (_firstRowOut == 1)
-    {
-        tmp0 = _mm_moveldup(in0);
-        tmp1 = in0;
-        tmp2 = _mm_moveldup(tmp4);
-        tmp3 = tmp4;
-    }
-    else if constexpr (_firstRowOut == 2)
-    {
-        tmp0 = tmp4;
-        tmp1 = _mm_unpackhi(tmp4, tmp4);
-        tmp2 = in0;
-        tmp3 = _mm_unpackhi(in0, in0);
-    }
-    else
-    {
-        tmp0 = _mm_moveldup(tmp4);
-        tmp1 = tmp4;
-        tmp2 = _mm_moveldup(in0);
-        tmp3 = in0;
-    }
+    Transpose1x1<0, Lane::OffsetOut>(tmp[0], tout[0]);
+    Transpose1x1<1, Lane::OffsetOut>(tmp[0], tout[1]);
+    Transpose1x1<0, Lane::OffsetOut>(tmp[1], tout[2]);
+    Transpose1x1<1, Lane::OffsetOut>(tmp[1], tout[3]);
 
-
-    // Write to output registers
-    TransposeSetOutput<_firstRowOut, 1, _overwriteUnused, _unusedSetZero>(out0, out1, out2, out3, tmp0, tmp1, tmp2,
-                                                                          tmp3);
+    intern::TransposeSetOutput<_firstRowOut, 1, _overwriteUnused, _unusedSetZero>(tout, out0, out1, out2, out3);
 }
 
 
