@@ -52,7 +52,7 @@ inline void Transpose1x2(__m256d in0, __m256d in1, __m256d& out0)
             tout = _mm_unpackhi(in0, in1);
 
         if constexpr (Lane::In != Lane::Out)
-            tout = Permute2F128<1, 0>(tout);
+            tout = SwapLanes(tout);
     }
     else
     {
@@ -293,7 +293,7 @@ inline void Transpose3x2(__m256d in0, __m256d in1, __m256d& out0, __m256d& out1,
 
         tout[_firstRowIn] = SwapLanesIf<_firstRowIn == 1>(tmp_0);
         tout[1 - _firstRowIn] = _mm_unpackhi(in0, in1);
-        tout[2] = Permute2F128<1, 0>(tout[0]);
+        tout[2] = SwapLanes(tout[0]);
     }
     else if constexpr (_firstRowOut == 1)
     {
@@ -312,7 +312,7 @@ inline void Transpose3x2(__m256d in0, __m256d in1, __m256d& out0, __m256d& out1,
 
         tout[1 + _firstRowIn] = SwapLanesIf<_firstRowIn == 0>(tmp_0);
         tout[2 - _firstRowIn] = _mm_unpacklo(in0, in1);
-        tout[0] = Permute2F128<1, 0>(tout[2]);
+        tout[0] = SwapLanes(tout[2]);
     }
 
     intern::TransposeSetOutput<_firstRowOut, 2, _overwriteUnused, _unusedSetZero>(tout, out0, out1, out2);
