@@ -33,7 +33,7 @@ inline void Transpose1x1(__m256 in, __m256& out) noexcept
             tout = BroadcastAcrossLanes<_firstRowIn>(in);
     }
 
-    TransposeSetOutput<_firstRowOut, 1, _overwriteUnused, _unusedSetZero>(out, tout);
+    intern::TransposeSetOutput<_firstRowOut, 1, _overwriteUnused, _unusedSetZero>(tout, out);
 }
 
 
@@ -72,7 +72,7 @@ inline void Transpose1x2(__m256 in0, __m256 in1, __m256& out0) noexcept
         tout = SwapLanesIf<Lane::In != Lane::Out>(tmp0);
     }
 
-    TransposeSetOutput<_firstRowOut, 2, _overwriteUnused, _unusedSetZero>(out0, tout);
+    intern::TransposeSetOutput<_firstRowOut, 2, _overwriteUnused, _unusedSetZero>(tout, out0);
 }
 
 
@@ -123,7 +123,7 @@ inline void Transpose1x3(__m256 in0, __m256 in1, __m256 in2, __m256& out0) noexc
         tout = Permute2F128<Lane::In, Lane::In>(tmp1);
 
 
-    TransposeSetOutput<_firstRowOut, 3, _overwriteUnused, _unusedSetZero>(out0, tout);
+    intern::TransposeSetOutput<_firstRowOut, 3, _overwriteUnused, _unusedSetZero>(tout, out0);
 }
 
 
@@ -165,7 +165,7 @@ inline void Transpose1x4(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256&
         tout = Permute2F128<Lane::In, Lane::In>(tout);
 
 
-    TransposeSetOutput<_firstRowOut, 4, _overwriteUnused, _unusedSetZero>(out0, tout);
+    intern::TransposeSetOutput<_firstRowOut, 4, _overwriteUnused, _unusedSetZero>(tout, out0);
 }
 
 
@@ -202,7 +202,7 @@ inline void Transpose1x5(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 
 
     __m256 tout = Permute2F128<0, Lane::In, 1, Lane::In>(tmp0, tmp1);
 
-    TransposeSetOutput<_firstRowOut, 5, _overwriteUnused, _unusedSetZero>(out0, tout);
+    intern::TransposeSetOutput<_firstRowOut, 5, _overwriteUnused, _unusedSetZero>(tout, out0);
 }
 
 
@@ -234,7 +234,7 @@ inline void Transpose1x6(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 
 
     __m256 tout = Permute2F128<0, Lane::In, 1, Lane::In>(tmp0, tmp1);
 
-    TransposeSetOutput<_firstRowOut, 6, _overwriteUnused, _unusedSetZero>(out0, tout);
+    intern::TransposeSetOutput<_firstRowOut, 6, _overwriteUnused, _unusedSetZero>(tout, out0);
 }
 
 
@@ -262,7 +262,7 @@ inline void Transpose1x7(__m256 in0, __m256 in1, __m256 in2, __m256 in3, __m256 
 
     __m256 tout = Permute2F128<0, Lane::In, 1, Lane::In>(tmp0, tmp1);
 
-    TransposeSetOutput<_firstRowOut, 7, _overwriteUnused, _unusedSetZero>(out0, tout);
+    intern::TransposeSetOutput<_firstRowOut, 7, _overwriteUnused, _unusedSetZero>(tout, out0);
 }
 
 

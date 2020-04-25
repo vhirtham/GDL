@@ -7,134 +7,10 @@
 
 
 
-namespace GDL::simd
+namespace GDL::simd::intern
 {
 
 
-
-// --------------------------------------------------------------------------------------------------------------------
-
-template <U32 _firstRowOut, U32 _numValues, bool _overwriteUnused, bool _unusedSetZero, typename _registerType>
-inline void TransposeSetOutput(_registerType& out0, _registerType in0)
-{
-    [[maybe_unused]] constexpr U32 lastRowOut = _firstRowOut + _numValues - 1;
-
-    if constexpr (_overwriteUnused)
-    {
-        if constexpr (_unusedSetZero)
-            out0 = BlendInRange<_firstRowOut, lastRowOut>(_mm_setzero<_registerType>(), in0);
-        else
-            out0 = in0;
-    }
-    else
-        out0 = BlendInRange<_firstRowOut, lastRowOut>(out0, in0);
-}
-
-
-
-// --------------------------------------------------------------------------------------------------------------------
-
-template <U32 _firstRowOut, U32 _numValues, bool _overwriteUnused, bool _unusedSetZero, typename _registerType>
-inline void TransposeSetOutput(_registerType& out0, _registerType& out1, _registerType in0, _registerType in1)
-{
-    [[maybe_unused]] constexpr U32 lastRowOut = _firstRowOut + _numValues - 1;
-
-    if constexpr (_overwriteUnused)
-    {
-        if constexpr (_unusedSetZero)
-        {
-            _registerType zero = _mm_setzero<_registerType>();
-            out0 = BlendInRange<_firstRowOut, lastRowOut>(zero, in0);
-            out1 = BlendInRange<_firstRowOut, lastRowOut>(zero, in1);
-        }
-        else
-        {
-            out0 = in0;
-            out1 = in1;
-        }
-    }
-    else
-    {
-        out0 = BlendInRange<_firstRowOut, lastRowOut>(out0, in0);
-        out1 = BlendInRange<_firstRowOut, lastRowOut>(out1, in1);
-    }
-}
-
-
-
-// --------------------------------------------------------------------------------------------------------------------
-
-template <U32 _firstRowOut, U32 _numValues, bool _overwriteUnused, bool _unusedSetZero, typename _registerType>
-inline void TransposeSetOutput(_registerType& out0, _registerType& out1, _registerType& out2, _registerType in0,
-                               _registerType in1, _registerType in2)
-{
-    [[maybe_unused]] constexpr U32 lastRowOut = _firstRowOut + _numValues - 1;
-
-    if constexpr (_overwriteUnused)
-    {
-        if constexpr (_unusedSetZero)
-        {
-            _registerType zero = _mm_setzero<_registerType>();
-            out0 = BlendInRange<_firstRowOut, lastRowOut>(zero, in0);
-            out1 = BlendInRange<_firstRowOut, lastRowOut>(zero, in1);
-            out2 = BlendInRange<_firstRowOut, lastRowOut>(zero, in2);
-        }
-        else
-        {
-            out0 = in0;
-            out1 = in1;
-            out2 = in2;
-        }
-    }
-    else
-    {
-        out0 = BlendInRange<_firstRowOut, lastRowOut>(out0, in0);
-        out1 = BlendInRange<_firstRowOut, lastRowOut>(out1, in1);
-        out2 = BlendInRange<_firstRowOut, lastRowOut>(out2, in2);
-    }
-}
-
-
-
-// --------------------------------------------------------------------------------------------------------------------
-
-template <U32 _firstRowOut, U32 _numValues, bool _overwriteUnused, bool _unusedSetZero, typename _registerType>
-inline void TransposeSetOutput(_registerType& out0, _registerType& out1, _registerType& out2, _registerType& out3,
-                               _registerType in0, _registerType in1, _registerType in2, _registerType in3)
-{
-    [[maybe_unused]] constexpr U32 lastRowOut = _firstRowOut + _numValues - 1;
-
-    if constexpr (_overwriteUnused)
-    {
-        if constexpr (_unusedSetZero)
-        {
-            _registerType zero = _mm_setzero<_registerType>();
-            out0 = BlendInRange<_firstRowOut, lastRowOut>(zero, in0);
-            out1 = BlendInRange<_firstRowOut, lastRowOut>(zero, in1);
-            out2 = BlendInRange<_firstRowOut, lastRowOut>(zero, in2);
-            out3 = BlendInRange<_firstRowOut, lastRowOut>(zero, in3);
-        }
-        else
-        {
-            out0 = in0;
-            out1 = in1;
-            out2 = in2;
-            out3 = in3;
-        }
-    }
-    else
-    {
-        out0 = BlendInRange<_firstRowOut, lastRowOut>(out0, in0);
-        out1 = BlendInRange<_firstRowOut, lastRowOut>(out1, in1);
-        out2 = BlendInRange<_firstRowOut, lastRowOut>(out2, in2);
-        out3 = BlendInRange<_firstRowOut, lastRowOut>(out3, in3);
-    }
-}
-
-
-
-namespace intern
-{
 
 // --------------------------------------------------------------------------------------------------------------------
 
@@ -189,6 +65,6 @@ inline void TransposeSetOutput(std::array<_registerType, _arraySize> in, _regist
         TransposeSetOutput<_idxFirst, _numValues, _overwriteUnused, _unusedSetZero, false>(in, args...);
 }
 
-} // namespace intern
 
-} // namespace GDL::simd
+
+} // namespace GDL::simd::intern
