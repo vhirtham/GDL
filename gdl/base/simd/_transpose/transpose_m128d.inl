@@ -63,48 +63,8 @@ inline void Transpose1x2(__m128d in0, __m128d in1, __m128d& out0)
 template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unusedSetZero>
 inline void Transpose2x1(__m128d in0, __m128d& out0, __m128d& out1)
 {
-
-    if constexpr (_overwriteUnused)
-        if constexpr (_unusedSetZero)
-        {
-            __m128d zero = _mm_setzero<__m128d>();
-            if constexpr (_firstRowOut == 0)
-            {
-                out0 = BlendIndex<_firstRowOut>(zero, in0);
-                out1 = _mm_unpackhi(in0, zero);
-            }
-            else
-            {
-                out0 = _mm_unpacklo(zero, in0);
-                out1 = BlendIndex<_firstRowOut>(zero, in0);
-            }
-        }
-        else
-        {
-            if constexpr (_firstRowOut == 0)
-            {
-                out0 = in0;
-                out1 = _mm_unpackhi(in0, in0);
-            }
-            else
-            {
-                out0 = _mm_unpacklo(in0, in0);
-                out1 = in0;
-            }
-        }
-    else
-    {
-        if constexpr (_firstRowOut == 0)
-        {
-            out0 = BlendIndex<_firstRowOut>(out0, in0);
-            out1 = _mm_unpackhi(in0, out1);
-        }
-        else
-        {
-            out0 = _mm_unpacklo(out0, in0);
-            out1 = BlendIndex<_firstRowOut>(out1, in0);
-        }
-    }
+    Transpose1x1<0, _firstRowOut, _overwriteUnused, _unusedSetZero>(in0, out0);
+    Transpose1x1<1, _firstRowOut, _overwriteUnused, _unusedSetZero>(in0, out1);
 }
 
 
