@@ -470,36 +470,32 @@ template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unused
 inline void Transpose4x3(__m256d in0, __m256d in1, __m256d in2, __m256d& out0, __m256d& out1, __m256d& out2,
                          __m256d& out3)
 {
-    __m256d tmp0, tmp1, tmp2, tmp3;
-
+    std::array<__m256d, 4> tout;
 
     if constexpr (_firstRowOut == 0)
     {
-        __m256d tmp4 = _mm_unpacklo(in0, in1);
-        __m256d tmp5 = _mm_unpackhi(in0, in1);
-        __m256d tmp6 = _mm_unpackhi(in2, in2);
+        __m256d tmp_0 = _mm_unpacklo(in0, in1);
+        __m256d tmp_1 = _mm_unpackhi(in0, in1);
+        __m256d tmp_2 = _mm_unpackhi(in2, in2);
 
-        tmp0 = Permute2F128<0, 0, 1, 0>(tmp4, in2);
-        tmp1 = Permute2F128<0, 0, 1, 0>(tmp5, tmp6);
-        tmp2 = Permute2F128<0, 1, 1, 1>(tmp4, in2);
-        tmp3 = Permute2F128<0, 1, 1, 1>(tmp5, tmp6);
+        tout[0] = Permute2F128<0, 0, 1, 0>(tmp_0, in2);
+        tout[1] = Permute2F128<0, 0, 1, 0>(tmp_1, tmp_2);
+        tout[2] = Permute2F128<0, 1, 1, 1>(tmp_0, in2);
+        tout[3] = Permute2F128<0, 1, 1, 1>(tmp_1, tmp_2);
     }
     else
     {
-        __m256d tmp4 = _mm_unpacklo(in1, in2);
-        __m256d tmp5 = _mm_unpackhi(in1, in2);
-        __m256d tmp6 = _mm_unpacklo(in0, in0);
+        __m256d tmp_0 = _mm_unpacklo(in1, in2);
+        __m256d tmp_1 = _mm_unpackhi(in1, in2);
+        __m256d tmp_2 = _mm_unpacklo(in0, in0);
 
-        tmp0 = Permute2F128<0, 0, 1, 0>(tmp6, tmp4);
-        tmp1 = Permute2F128<0, 0, 1, 0>(in0, tmp5);
-        tmp2 = Permute2F128<0, 1, 1, 1>(tmp6, tmp4);
-        tmp3 = Permute2F128<0, 1, 1, 1>(in0, tmp5);
+        tout[0] = Permute2F128<0, 0, 1, 0>(tmp_2, tmp_0);
+        tout[1] = Permute2F128<0, 0, 1, 0>(in0, tmp_1);
+        tout[2] = Permute2F128<0, 1, 1, 1>(tmp_2, tmp_0);
+        tout[3] = Permute2F128<0, 1, 1, 1>(in0, tmp_1);
     }
 
-
-    // Write to output registers
-    TransposeSetOutput<_firstRowOut, 3, _overwriteUnused, _unusedSetZero>(out0, out1, out2, out3, tmp0, tmp1, tmp2,
-                                                                          tmp3);
+    intern::TransposeSetOutput<_firstRowOut, 3, _overwriteUnused, _unusedSetZero>(tout, out0, out1, out2, out3);
 }
 
 
