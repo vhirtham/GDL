@@ -4,6 +4,9 @@
 
 #include "gdl/base/simd/swizzle.h"
 #include "gdl/base/simd/intrinsics.h"
+#include "gdl/base/simd/_transpose/transpose_utility.h"
+
+
 
 namespace GDL::simd
 {
@@ -13,29 +16,31 @@ namespace GDL::simd
 template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unusedSetZero>
 inline void Transpose1x1(__m128d in, __m128d& out)
 {
-    static_assert(not(_overwriteUnused == false && _unusedSetZero == true), "Option _unusedSetZero has no effect.");
-
-    __m128d tmp;
+    __m128d tout;
 
     if constexpr (_firstRowIn == _firstRowOut)
-        tmp = in;
+        tout = in;
     else
     {
-        if constexpr (_firstRowIn == 0)
-            tmp = _mm_moveldup(in);
+        if constexpr (_overwriteUnused == true && _unusedSetZero == true)
+        {
+            __m128d zero = _mm_setzero<__m128d>();
+            if constexpr (_firstRowIn == 0)
+                out = _mm_unpacklo_pd(zero, in);
+            else
+                out = _mm_unpackhi(in, zero);
+            return;
+        }
         else
-            tmp = _mm_unpackhi(in, in);
+        {
+            if constexpr (_firstRowIn == 0)
+                tout = _mm_moveldup(in);
+            else
+                tout = _mm_unpackhi(in, in);
+        }
     }
 
-
-    // Write to output registers
-    if constexpr (_overwriteUnused)
-        if constexpr (_unusedSetZero)
-            out = BlendIndex<_firstRowOut>(_mm_setzero<__m128d>(), tmp);
-        else
-            out = tmp;
-    else
-        out = BlendIndex<_firstRowOut>(out, tmp);
+    intern::TransposeSetOutput<_firstRowOut, 1, _overwriteUnused, _unusedSetZero>(tout, out);
 }
 
 
