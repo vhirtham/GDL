@@ -436,38 +436,30 @@ inline void Transpose4x1(__m256d in0, __m256d& out0, __m256d& out1, __m256d& out
 template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unusedSetZero>
 inline void Transpose4x2(__m256d in0, __m256d in1, __m256d& out0, __m256d& out1, __m256d& out2, __m256d& out3)
 {
+    using Lane = intern::TranspositionLaneData<__m256d, _firstRowIn, _firstRowOut>;
+    std::array<__m256d, 4> tout;
 
-    __m256d tmp0, tmp1, tmp2, tmp3;
-
-
-    if constexpr (_firstRowOut == 0)
+    if constexpr (Lane::OffsetOut == 0)
     {
-        tmp0 = _mm_unpacklo(in0, in1);
-        tmp1 = _mm_unpackhi(in0, in1);
-        tmp2 = Permute2F128<1, 0>(tmp0);
-        tmp3 = Permute2F128<1, 0>(tmp1);
-    }
-    else if constexpr (_firstRowOut == 1)
-    {
-        __m256d tmp4 = Permute2F128<0, 1, 1, 0>(in0, in1);
+        __m256d tmp_0 = _mm_unpacklo(in0, in1);
+        __m256d tmp_1 = _mm_unpackhi(in0, in1);
 
-        tmp0 = _mm_unpacklo(tmp4, in0);
-        tmp1 = _mm_unpackhi(tmp4, in0);
-        tmp2 = _mm_unpacklo(in1, tmp4);
-        tmp3 = _mm_unpackhi(in1, tmp4);
+        tout[0] = SwapLanesIf<Lane::Out == 1>(tmp_0);
+        tout[1] = SwapLanesIf<Lane::Out == 1>(tmp_1);
+        tout[2] = SwapLanesIf<Lane::Out == 0>(tmp_0);
+        tout[3] = SwapLanesIf<Lane::Out == 0>(tmp_1);
     }
     else
     {
-        tmp3 = _mm_unpackhi(in0, in1);
-        tmp2 = _mm_unpacklo(in0, in1);
-        tmp1 = Permute2F128<1, 0>(tmp3);
-        tmp0 = Permute2F128<1, 0>(tmp2);
+        __m256d tmp_0 = Permute2F128<0, 1, 1, 0>(in0, in1);
+
+        tout[0] = _mm_unpacklo(tmp_0, in0);
+        tout[1] = _mm_unpackhi(tmp_0, in0);
+        tout[2] = _mm_unpacklo(in1, tmp_0);
+        tout[3] = _mm_unpackhi(in1, tmp_0);
     }
 
-
-    // Write to output registers
-    TransposeSetOutput<_firstRowOut, 2, _overwriteUnused, _unusedSetZero>(out0, out1, out2, out3, tmp0, tmp1, tmp2,
-                                                                          tmp3);
+    intern::TransposeSetOutput<_firstRowOut, 2, _overwriteUnused, _unusedSetZero>(tout, out0, out1, out2, out3);
 }
 
 
