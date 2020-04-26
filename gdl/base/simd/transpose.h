@@ -15,7 +15,6 @@ namespace GDL::simd
 //  static_assert(not(_overwriteUnused == false && _unusedSetZero == true), "Option _unusedSetZero has no effect.");
 
 // test all brancehes of the general transpose function
-// replace Permute2F128<1,0> with SwapLanes
 // add Permute2F128If -> like SwapLanesIf --- just let Permute2F128<0,1> return the input
 // add noexcept keyword to all functions
 // update TransposeSetOutput for __m256 1xN functions

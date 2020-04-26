@@ -18,81 +18,81 @@ namespace GDL::simd
 
 
 template <U32, U32, bool, bool>
-void Transpose1x1(__m128d, __m128d&);
+void Transpose1x1(__m128d, __m128d&) noexcept;
 template <U32, U32, bool, bool>
-void Transpose1x2(__m128d, __m128d, __m128d&);
+void Transpose1x2(__m128d, __m128d, __m128d&) noexcept;
 template <U32, U32, bool, bool>
-void Transpose2x1(__m128d, __m128d&, __m128d&);
+void Transpose2x1(__m128d, __m128d&, __m128d&) noexcept;
 template <U32, U32, bool, bool>
-void Transpose2x2(__m128d, __m128d, __m128d&, __m128d&);
+void Transpose2x2(__m128d, __m128d, __m128d&, __m128d&) noexcept;
 
 template <U32, U32, bool, bool>
-void Transpose1x1(__m128, __m128&);
+void Transpose1x1(__m128, __m128&) noexcept;
 template <U32, U32, bool, bool>
-void Transpose1x2(__m128, __m128, __m128&);
+void Transpose1x2(__m128, __m128, __m128&) noexcept;
 template <U32, U32, bool, bool>
-void Transpose1x3(__m128, __m128, __m128, __m128&);
+void Transpose1x3(__m128, __m128, __m128, __m128&) noexcept;
 template <U32, U32, bool, bool>
-void Transpose1x4(__m128, __m128, __m128, __m128, __m128&);
+void Transpose1x4(__m128, __m128, __m128, __m128, __m128&) noexcept;
 template <U32, U32, bool, bool>
-void Transpose2x1(__m128, __m128&, __m128&);
+void Transpose2x1(__m128, __m128&, __m128&) noexcept;
 template <U32, U32, bool, bool>
-void Transpose2x2(__m128, __m128, __m128&, __m128&);
+void Transpose2x2(__m128, __m128, __m128&, __m128&) noexcept;
 template <U32, U32, bool, bool>
-void Transpose2x3(__m128, __m128, __m128, __m128&, __m128&);
+void Transpose2x3(__m128, __m128, __m128, __m128&, __m128&) noexcept;
 template <U32, U32, bool, bool>
-void Transpose2x4(__m128, __m128, __m128, __m128, __m128&, __m128&);
+void Transpose2x4(__m128, __m128, __m128, __m128, __m128&, __m128&) noexcept;
 template <U32, U32, bool, bool>
-void Transpose3x1(__m128, __m128&, __m128&, __m128&);
+void Transpose3x1(__m128, __m128&, __m128&, __m128&) noexcept;
 template <U32, U32, bool, bool>
-void Transpose3x2(__m128, __m128, __m128&, __m128&, __m128&);
+void Transpose3x2(__m128, __m128, __m128&, __m128&, __m128&) noexcept;
 template <U32, U32, bool, bool>
-void Transpose3x3(__m128, __m128, __m128, __m128&, __m128&, __m128&);
+void Transpose3x3(__m128, __m128, __m128, __m128&, __m128&, __m128&) noexcept;
 template <U32, U32, bool, bool>
-void Transpose3x4(__m128, __m128, __m128, __m128, __m128&, __m128&, __m128&);
+void Transpose3x4(__m128, __m128, __m128, __m128, __m128&, __m128&, __m128&) noexcept;
 template <U32, U32, bool, bool>
-void Transpose4x1(__m128, __m128&, __m128&, __m128&, __m128&);
+void Transpose4x1(__m128, __m128&, __m128&, __m128&, __m128&) noexcept;
 template <U32, U32, bool, bool>
-void Transpose4x2(__m128, __m128, __m128&, __m128&, __m128&, __m128&);
+void Transpose4x2(__m128, __m128, __m128&, __m128&, __m128&, __m128&) noexcept;
 template <U32, U32, bool, bool>
-void Transpose4x3(__m128, __m128, __m128, __m128&, __m128&, __m128&, __m128&);
+void Transpose4x3(__m128, __m128, __m128, __m128&, __m128&, __m128&, __m128&) noexcept;
 template <U32, U32, bool, bool>
-void Transpose4x4(__m128, __m128, __m128, __m128, __m128&, __m128&, __m128&, __m128&);
+void Transpose4x4(__m128, __m128, __m128, __m128, __m128&, __m128&, __m128&, __m128&) noexcept;
 
 #ifdef __AVX2__
 
 template <U32, U32, bool, bool>
-void Transpose1x1(__m256d, __m256d&);
+void Transpose1x1(__m256d, __m256d&) noexcept;
 template <U32, U32, bool, bool>
-void Transpose1x2(__m256d, __m256d, __m256d&);
+void Transpose1x2(__m256d, __m256d, __m256d&) noexcept;
 template <U32, U32, bool, bool>
-void Transpose1x3(__m256d, __m256d, __m256d, __m256d&);
+void Transpose1x3(__m256d, __m256d, __m256d, __m256d&) noexcept;
 template <U32, U32, bool, bool>
-void Transpose1x4(__m256d, __m256d, __m256d, __m256d, __m256d&);
+void Transpose1x4(__m256d, __m256d, __m256d, __m256d, __m256d&) noexcept;
 template <U32, U32, bool, bool>
-void Transpose2x1(__m256d, __m256d&, __m256d&);
+void Transpose2x1(__m256d, __m256d&, __m256d&) noexcept;
 template <U32, U32, bool, bool>
-void Transpose2x2(__m256d, __m256d, __m256d&, __m256d&);
+void Transpose2x2(__m256d, __m256d, __m256d&, __m256d&) noexcept;
 template <U32, U32, bool, bool>
-void Transpose2x3(__m256d, __m256d, __m256d, __m256d&, __m256d&);
+void Transpose2x3(__m256d, __m256d, __m256d, __m256d&, __m256d&) noexcept;
 template <U32, U32, bool, bool>
-void Transpose2x4(__m256d, __m256d, __m256d, __m256d, __m256d&, __m256d&);
+void Transpose2x4(__m256d, __m256d, __m256d, __m256d, __m256d&, __m256d&) noexcept;
 template <U32, U32, bool, bool>
-void Transpose3x1(__m256d, __m256d&, __m256d&, __m256d&);
+void Transpose3x1(__m256d, __m256d&, __m256d&, __m256d&) noexcept;
 template <U32, U32, bool, bool>
-void Transpose3x2(__m256d, __m256d, __m256d&, __m256d&, __m256d&);
+void Transpose3x2(__m256d, __m256d, __m256d&, __m256d&, __m256d&) noexcept;
 template <U32, U32, bool, bool>
-void Transpose3x3(__m256d, __m256d, __m256d, __m256d&, __m256d&, __m256d&);
+void Transpose3x3(__m256d, __m256d, __m256d, __m256d&, __m256d&, __m256d&) noexcept;
 template <U32, U32, bool, bool>
-void Transpose3x4(__m256d, __m256d, __m256d, __m256d, __m256d&, __m256d&, __m256d&);
+void Transpose3x4(__m256d, __m256d, __m256d, __m256d, __m256d&, __m256d&, __m256d&) noexcept;
 template <U32, U32, bool, bool>
-void Transpose4x1(__m256d, __m256d&, __m256d&, __m256d&, __m256d&);
+void Transpose4x1(__m256d, __m256d&, __m256d&, __m256d&, __m256d&) noexcept;
 template <U32, U32, bool, bool>
-void Transpose4x2(__m256d, __m256d, __m256d&, __m256d&, __m256d&, __m256d&);
+void Transpose4x2(__m256d, __m256d, __m256d&, __m256d&, __m256d&, __m256d&) noexcept;
 template <U32, U32, bool, bool>
-void Transpose4x3(__m256d, __m256d, __m256d, __m256d&, __m256d&, __m256d&, __m256d&);
+void Transpose4x3(__m256d, __m256d, __m256d, __m256d&, __m256d&, __m256d&, __m256d&) noexcept;
 template <U32, U32, bool, bool>
-void Transpose4x4(__m256d, __m256d, __m256d, __m256d, __m256d&, __m256d&, __m256d&, __m256d&);
+void Transpose4x4(__m256d, __m256d, __m256d, __m256d, __m256d&, __m256d&, __m256d&, __m256d&) noexcept;
 
 
 template <U32, U32, bool, bool>

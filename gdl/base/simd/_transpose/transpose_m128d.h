@@ -18,7 +18,7 @@ namespace GDL::simd
 //! @param in: Input registers
 //! @param out: Output registers
 template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
-inline void Transpose1x1(__m128d in, __m128d& out);
+inline void Transpose1x1(__m128d in, __m128d& out) noexcept;
 
 
 
@@ -30,7 +30,7 @@ inline void Transpose1x1(__m128d in, __m128d& out);
 //! @param in: Input registers
 //! @param out: Output registers
 template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
-inline void Transpose1x2(__m128d in0, __m128d in1, __m128d& out0);
+inline void Transpose1x2(__m128d in0, __m128d in1, __m128d& out0) noexcept;
 
 
 
@@ -42,7 +42,7 @@ inline void Transpose1x2(__m128d in0, __m128d in1, __m128d& out0);
 //! @param in: Input registers
 //! @param out: Output registers
 template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
-inline void Transpose2x1(__m128d in0, __m128d& out0, __m128d& out1);
+inline void Transpose2x1(__m128d in0, __m128d& out0, __m128d& out1) noexcept;
 
 
 
@@ -54,7 +54,7 @@ inline void Transpose2x1(__m128d in0, __m128d& out0, __m128d& out1);
 //! @param in: Input registers
 //! @param out: Output registers
 template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
-inline void Transpose2x2(__m128d in0, __m128d in1, __m128d& out0, __m128d& out1);
+inline void Transpose2x2(__m128d in0, __m128d in1, __m128d& out0, __m128d& out1) noexcept;
 
 
 

@@ -12,7 +12,7 @@ namespace GDL::simd
 // --------------------------------------------------------------------------------------------------------------------
 
 template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unusedSetZero>
-inline void Transpose1x1(__m128 in, __m128& out)
+inline void Transpose1x1(__m128 in, __m128& out) noexcept
 {
     __m128 tout;
 
@@ -36,7 +36,7 @@ inline void Transpose1x1(__m128 in, __m128& out)
 // --------------------------------------------------------------------------------------------------------------------
 
 template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unusedSetZero>
-inline void Transpose1x2(__m128 in0, __m128 in1, __m128& out0)
+inline void Transpose1x2(__m128 in0, __m128 in1, __m128& out0) noexcept
 {
     __m128 tout;
 
@@ -112,7 +112,7 @@ inline void Transpose1x2(__m128 in0, __m128 in1, __m128& out0)
 // --------------------------------------------------------------------------------------------------------------------
 
 template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unusedSetZero>
-inline void Transpose1x3(__m128 in0, __m128 in1, __m128 in2, __m128& out0)
+inline void Transpose1x3(__m128 in0, __m128 in1, __m128 in2, __m128& out0) noexcept
 {
     __m128 tout;
 
@@ -136,7 +136,7 @@ inline void Transpose1x3(__m128 in0, __m128 in1, __m128 in2, __m128& out0)
 // --------------------------------------------------------------------------------------------------------------------
 
 template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unusedSetZero>
-inline void Transpose1x4(__m128 in0, __m128 in1, __m128 in2, __m128 in3, __m128& out0)
+inline void Transpose1x4(__m128 in0, __m128 in1, __m128 in2, __m128 in3, __m128& out0) noexcept
 {
     __m128 tmp0 = Shuffle<_firstRowIn, _firstRowIn, _firstRowIn, _firstRowIn>(in0, in1);
     __m128 tmp1 = Shuffle<_firstRowIn, _firstRowIn, _firstRowIn, _firstRowIn>(in2, in3);
@@ -149,7 +149,7 @@ inline void Transpose1x4(__m128 in0, __m128 in1, __m128 in2, __m128 in3, __m128&
 // --------------------------------------------------------------------------------------------------------------------
 
 template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unusedSetZero>
-inline void Transpose2x1(__m128 in0, __m128& out0, __m128& out1)
+inline void Transpose2x1(__m128 in0, __m128& out0, __m128& out1) noexcept
 {
     std::array<__m128, 2> tout;
 
@@ -164,7 +164,7 @@ inline void Transpose2x1(__m128 in0, __m128& out0, __m128& out1)
 // --------------------------------------------------------------------------------------------------------------------
 
 template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unusedSetZero>
-inline void Transpose2x2(__m128 in0, __m128 in1, __m128& out0, __m128& out1)
+inline void Transpose2x2(__m128 in0, __m128 in1, __m128& out0, __m128& out1) noexcept
 {
     std::array<__m128, 2> tout;
 
@@ -228,7 +228,7 @@ inline void Transpose2x2(__m128 in0, __m128 in1, __m128& out0, __m128& out1)
 // --------------------------------------------------------------------------------------------------------------------
 
 template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unusedSetZero>
-inline void Transpose2x3(__m128 in0, __m128 in1, __m128 in2, __m128& out0, __m128& out1)
+inline void Transpose2x3(__m128 in0, __m128 in1, __m128 in2, __m128& out0, __m128& out1) noexcept
 {
     constexpr U32 idx_0 = _firstRowOut;
     constexpr U32 idx_1 = _firstRowOut + 1;
@@ -268,7 +268,7 @@ inline void Transpose2x3(__m128 in0, __m128 in1, __m128 in2, __m128& out0, __m12
 // --------------------------------------------------------------------------------------------------------------------
 
 template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unusedSetZero>
-inline void Transpose2x4(__m128 in0, __m128 in1, __m128 in2, __m128 in3, __m128& out0, __m128& out1)
+inline void Transpose2x4(__m128 in0, __m128 in1, __m128 in2, __m128 in3, __m128& out0, __m128& out1) noexcept
 {
     __m128 tmp0 = Shuffle<_firstRowIn, _firstRowIn + 1, _firstRowIn, _firstRowIn + 1>(in0, in1);
     __m128 tmp1 = Shuffle<_firstRowIn, _firstRowIn + 1, _firstRowIn, _firstRowIn + 1>(in2, in3);
@@ -282,7 +282,7 @@ inline void Transpose2x4(__m128 in0, __m128 in1, __m128 in2, __m128 in3, __m128&
 // --------------------------------------------------------------------------------------------------------------------
 
 template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unusedSetZero>
-inline void Transpose3x1(__m128 in0, __m128& out0, __m128& out1, __m128& out2)
+inline void Transpose3x1(__m128 in0, __m128& out0, __m128& out1, __m128& out2) noexcept
 {
     std::array<__m128, 3> tout;
 
@@ -298,7 +298,7 @@ inline void Transpose3x1(__m128 in0, __m128& out0, __m128& out1, __m128& out2)
 // --------------------------------------------------------------------------------------------------------------------
 
 template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unusedSetZero>
-inline void Transpose3x2(__m128 in0, __m128 in1, __m128& out0, __m128& out1, __m128& out2)
+inline void Transpose3x2(__m128 in0, __m128 in1, __m128& out0, __m128& out1, __m128& out2) noexcept
 {
     std::array<__m128, 3> tout;
     if constexpr (_firstRowOut == 0)
@@ -349,7 +349,7 @@ inline void Transpose3x2(__m128 in0, __m128 in1, __m128& out0, __m128& out1, __m
 // --------------------------------------------------------------------------------------------------------------------
 
 template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unusedSetZero>
-inline void Transpose3x3(__m128 in0, __m128 in1, __m128 in2, __m128& out0, __m128& out1, __m128& out2)
+inline void Transpose3x3(__m128 in0, __m128 in1, __m128 in2, __m128& out0, __m128& out1, __m128& out2) noexcept
 {
     std::array<__m128, 3> tout;
 
@@ -398,7 +398,8 @@ inline void Transpose3x3(__m128 in0, __m128 in1, __m128 in2, __m128& out0, __m12
 // --------------------------------------------------------------------------------------------------------------------
 
 template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unusedSetZero>
-inline void Transpose3x4(__m128 in0, __m128 in1, __m128 in2, __m128 in3, __m128& out0, __m128& out1, __m128& out2)
+inline void Transpose3x4(__m128 in0, __m128 in1, __m128 in2, __m128 in3, __m128& out0, __m128& out1,
+                         __m128& out2) noexcept
 {
     __m128 tmp0 = _mm_unpacklo(in0, in1);
     __m128 tmp1 = _mm_unpackhi(in0, in1);
@@ -424,7 +425,7 @@ inline void Transpose3x4(__m128 in0, __m128 in1, __m128 in2, __m128 in3, __m128&
 // --------------------------------------------------------------------------------------------------------------------
 
 template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unusedSetZero>
-inline void Transpose4x1(__m128 in0, __m128& out0, __m128& out1, __m128& out2, __m128& out3)
+inline void Transpose4x1(__m128 in0, __m128& out0, __m128& out1, __m128& out2, __m128& out3) noexcept
 {
     std::array<__m128, 4> tout;
 
@@ -441,7 +442,7 @@ inline void Transpose4x1(__m128 in0, __m128& out0, __m128& out1, __m128& out2, _
 // --------------------------------------------------------------------------------------------------------------------
 
 template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unusedSetZero>
-inline void Transpose4x2(__m128 in0, __m128 in1, __m128& out0, __m128& out1, __m128& out2, __m128& out3)
+inline void Transpose4x2(__m128 in0, __m128 in1, __m128& out0, __m128& out1, __m128& out2, __m128& out3) noexcept
 {
     std::array<__m128, 4> tout;
 
@@ -485,7 +486,8 @@ inline void Transpose4x2(__m128 in0, __m128 in1, __m128& out0, __m128& out1, __m
 // --------------------------------------------------------------------------------------------------------------------
 
 template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unusedSetZero>
-inline void Transpose4x3(__m128 in0, __m128 in1, __m128 in2, __m128& out0, __m128& out1, __m128& out2, __m128& out3)
+inline void Transpose4x3(__m128 in0, __m128 in1, __m128 in2, __m128& out0, __m128& out1, __m128& out2,
+                         __m128& out3) noexcept
 {
     std::array<__m128, 4> tout;
 
@@ -519,7 +521,7 @@ inline void Transpose4x3(__m128 in0, __m128 in1, __m128 in2, __m128& out0, __m12
 
 template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unusedSetZero>
 inline void Transpose4x4(__m128 in0, __m128 in1, __m128 in2, __m128 in3, __m128& out0, __m128& out1, __m128& out2,
-                         __m128& out3)
+                         __m128& out3) noexcept
 {
     __m128 tmp0 = _mm_unpacklo(in0, in1);
     __m128 tmp1 = _mm_unpackhi(in0, in1);
