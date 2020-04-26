@@ -7,7 +7,7 @@
 
 
 
-namespace GDL::simd::intern
+namespace GDL::simd::intern::transpose
 {
 
 
@@ -15,7 +15,7 @@ namespace GDL::simd::intern
 // --------------------------------------------------------------------------------------------------------------------
 
 template <U32 _idxFirst, U32 _numValues, bool _overwriteUnused, bool _unusedSetZero, typename _registerType>
-inline void TransposeSetOutput(_registerType in0, _registerType& out0) noexcept
+inline void SetOutput(_registerType in0, _registerType& out0) noexcept
 {
     constexpr U32 lastRowOut = _idxFirst + _numValues - 1;
     static_assert(lastRowOut < simd::numRegisterValues<_registerType>,
@@ -38,7 +38,7 @@ inline void TransposeSetOutput(_registerType in0, _registerType& out0) noexcept
 
 template <U32 _idxFirst, U32 _numValues, bool _overwriteUnused, bool _unusedSetZero, bool _initialCall,
           typename _registerType, UST _arraySize, typename... _args>
-inline void TransposeSetOutput(std::array<_registerType, _arraySize> in, _registerType& out, _args&... args) noexcept
+inline void SetOutput(std::array<_registerType, _arraySize> in, _registerType& out, _args&... args) noexcept
 {
     constexpr UST packSize = sizeof...(_args);
 
@@ -62,9 +62,9 @@ inline void TransposeSetOutput(std::array<_registerType, _arraySize> in, _regist
         out = BlendInRange<_idxFirst, lastRowOut>(out, in[idx]);
 
     if constexpr (packSize > 0)
-        TransposeSetOutput<_idxFirst, _numValues, _overwriteUnused, _unusedSetZero, false>(in, args...);
+        SetOutput<_idxFirst, _numValues, _overwriteUnused, _unusedSetZero, false>(in, args...);
 }
 
 
 
-} // namespace GDL::simd::intern
+} // namespace GDL::simd::intern::transpose

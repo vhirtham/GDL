@@ -6,7 +6,7 @@
 
 #include <array>
 
-namespace GDL::simd::intern
+namespace GDL::simd::intern::transpose
 {
 
 //! @brief Helper struct for transposition of multi lane registers. It contains only static values.
@@ -14,7 +14,7 @@ namespace GDL::simd::intern
 //! @tparam _firstRowIn: Index of the register element that is part of the input matrix's first row
 //! @tparam _firstRowOut: Index of the register element that is part of the output matrix's first row
 template <typename _registerType, U32 _firstRowIn, U32 _firstRowOut>
-struct TranspositionLaneData
+struct LaneData
 {
     //! @brief Register lane that contains the first row of the input matrix
     static constexpr U32 In = _firstRowIn / numValuesPerLane<_registerType>;
@@ -42,7 +42,7 @@ struct TranspositionLaneData
 //! @param in: Input registers
 //! @param out: Reference to output register, that is written to.
 template <U32 _idxFirst, U32 _numValues, bool _overwriteUnused, bool _unusedSetZero, typename _registerType>
-inline void TransposeSetOutput(_registerType in0, _registerType& out0) noexcept;
+inline void SetOutput(_registerType in0, _registerType& out0) noexcept;
 
 
 
@@ -63,10 +63,10 @@ inline void TransposeSetOutput(_registerType in0, _registerType& out0) noexcept;
 //! calls.
 template <U32 _idxFirst, U32 _numValues, bool _overwriteUnused, bool _unusedSetZero, bool _initialCall = true,
           typename _registerType, UST _arraySize, typename... _args>
-inline void TransposeSetOutput(std::array<_registerType, _arraySize> in, _registerType& out, _args&... args) noexcept;
+inline void SetOutput(std::array<_registerType, _arraySize> in, _registerType& out, _args&... args) noexcept;
 
 
 
-} // namespace GDL::simd::intern
+} // namespace GDL::simd::intern::transpose
 
 #include "gdl/base/simd/_transpose/transpose_utility.inl"

@@ -40,7 +40,7 @@ inline void Transpose1x1(__m128d in, __m128d& out) noexcept
         }
     }
 
-    intern::TransposeSetOutput<_firstRowOut, 1, _overwriteUnused, _unusedSetZero>(tout, out);
+    intern::transpose::SetOutput<_firstRowOut, 1, _overwriteUnused, _unusedSetZero>(tout, out);
 }
 
 

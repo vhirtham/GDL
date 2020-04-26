@@ -848,7 +848,7 @@ inline void Transpose8x8(__m256 in_0, __m256 in_1, __m256 in_2, __m256 in_3, __m
 
 // internal functions -------------------------------------------------------------------------------------------------
 
-namespace intern
+namespace intern::transpose
 {
 
 //! @brief Perform in-lane permutations after permutations across lane boundaries have been applied for 2xN sized
@@ -1101,7 +1101,7 @@ template <U32 _firstRowIn, U32 _firstRowOut, UST _arraySizeOut>
 PermuteBeforeIntraLaneTransposeNx8(__m256 in_0, __m256 in_1, __m256 in_2, __m256 in_3, __m256 in_4, __m256 in_5,
                                    __m256 in_6, __m256 in_7) noexcept;
 
-} // namespace intern
+} // namespace intern::transpose
 
 } // namespace GDL::simd
 

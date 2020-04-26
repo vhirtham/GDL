@@ -20,7 +20,7 @@ namespace GDL::simd
 template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unusedSetZero>
 inline void Transpose1x1(__m256 in, __m256& out) noexcept
 {
-    using Lane = intern::TranspositionLaneData<__m256, _firstRowIn, _firstRowOut>;
+    using Lane = intern::transpose::LaneData<__m256, _firstRowIn, _firstRowOut>;
     __m256 tout;
 
     if constexpr (_firstRowIn == _firstRowOut)
@@ -33,7 +33,7 @@ inline void Transpose1x1(__m256 in, __m256& out) noexcept
             tout = BroadcastAcrossLanes<_firstRowIn>(in);
     }
 
-    intern::TransposeSetOutput<_firstRowOut, 1, _overwriteUnused, _unusedSetZero>(tout, out);
+    intern::transpose::SetOutput<_firstRowOut, 1, _overwriteUnused, _unusedSetZero>(tout, out);
 }
 
 
@@ -43,7 +43,7 @@ inline void Transpose1x1(__m256 in, __m256& out) noexcept
 template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unusedSetZero>
 inline void Transpose1x2(__m256 in_0, __m256 in_1, __m256& out_0) noexcept
 {
-    using Lane = intern::TranspositionLaneData<__m256, _firstRowIn, _firstRowOut>;
+    using Lane = intern::transpose::LaneData<__m256, _firstRowIn, _firstRowOut>;
 
     __m256 tout;
 
@@ -72,7 +72,7 @@ inline void Transpose1x2(__m256 in_0, __m256 in_1, __m256& out_0) noexcept
         tout = SwapLanesIf<Lane::In != Lane::Out>(tmp_0);
     }
 
-    intern::TransposeSetOutput<_firstRowOut, 2, _overwriteUnused, _unusedSetZero>(tout, out_0);
+    intern::transpose::SetOutput<_firstRowOut, 2, _overwriteUnused, _unusedSetZero>(tout, out_0);
 }
 
 
@@ -82,7 +82,7 @@ inline void Transpose1x2(__m256 in_0, __m256 in_1, __m256& out_0) noexcept
 template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unusedSetZero>
 inline void Transpose1x3(__m256 in_0, __m256 in_1, __m256 in_2, __m256& out_0) noexcept
 {
-    using Lane = intern::TranspositionLaneData<__m256, _firstRowIn, _firstRowOut>;
+    using Lane = intern::transpose::LaneData<__m256, _firstRowIn, _firstRowOut>;
 
     std::array<__m256, 3> tin = {{in_0, in_1, in_2}};
 
@@ -103,27 +103,27 @@ inline void Transpose1x3(__m256 in_0, __m256 in_1, __m256 in_2, __m256& out_0) n
     constexpr U32 idx_1 = idx_0 + 1;
     constexpr U32 idx_2 = Lane::OffsetIn;
 
-    __m256 tmp1;
+    __m256 tmp_1;
     if constexpr (Lane::OffsetOut == 0)
-        tmp1 = Shuffle<idx_0, idx_1, idx_2, 0>(tmp_0, tin[idx_in_2]);
+        tmp_1 = Shuffle<idx_0, idx_1, idx_2, 0>(tmp_0, tin[idx_in_2]);
     else if constexpr (Lane::OffsetOut == 1)
-        tmp1 = Shuffle<0, idx_2, idx_0, idx_1>(tin[idx_in_2], tmp_0);
+        tmp_1 = Shuffle<0, idx_2, idx_0, idx_1>(tin[idx_in_2], tmp_0);
     else if constexpr (Lane::OffsetOut == 2)
-        tmp1 = Shuffle<idx_2, 0, idx_0, idx_1>(tin[idx_in_2], tmp_0);
+        tmp_1 = Shuffle<idx_2, 0, idx_0, idx_1>(tin[idx_in_2], tmp_0);
     else
-        tmp1 = Shuffle<idx_0, idx_1, 0, idx_2>(tmp_0, tin[idx_in_2]);
+        tmp_1 = Shuffle<idx_0, idx_1, 0, idx_2>(tmp_0, tin[idx_in_2]);
 
 
 
     __m256 tout;
 
     if constexpr (Lane::OffsetOut < 2)
-        tout = SwapLanesIf<Lane::In != Lane::Out>(tmp1);
+        tout = SwapLanesIf<Lane::In != Lane::Out>(tmp_1);
     else
-        tout = Permute2F128<Lane::In, Lane::In>(tmp1);
+        tout = Permute2F128<Lane::In, Lane::In>(tmp_1);
 
 
-    intern::TransposeSetOutput<_firstRowOut, 3, _overwriteUnused, _unusedSetZero>(tout, out_0);
+    intern::transpose::SetOutput<_firstRowOut, 3, _overwriteUnused, _unusedSetZero>(tout, out_0);
 }
 
 
@@ -133,7 +133,7 @@ inline void Transpose1x3(__m256 in_0, __m256 in_1, __m256 in_2, __m256& out_0) n
 template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unusedSetZero>
 inline void Transpose1x4(__m256 in_0, __m256 in_1, __m256 in_2, __m256 in_3, __m256& out_0) noexcept
 {
-    using Lane = intern::TranspositionLaneData<__m256, _firstRowIn, _firstRowOut>;
+    using Lane = intern::transpose::LaneData<__m256, _firstRowIn, _firstRowOut>;
 
     std::array<__m256, 4> tin = {{in_0, in_1, in_2, in_3}};
 
@@ -142,30 +142,30 @@ inline void Transpose1x4(__m256 in_0, __m256 in_1, __m256 in_2, __m256 in_3, __m
     constexpr U32 idx_in_2 = (6 - Lane::OffsetOut) % 4;
     constexpr U32 idx_in_3 = (7 - Lane::OffsetOut) % 4;
 
-    __m256 tmp_0, tmp1;
+    __m256 tmp_0, tmp_1;
     if constexpr (Lane::OffsetIn < 2)
     {
         tmp_0 = _mm_unpacklo(tin[idx_in_0], tin[idx_in_1]);
-        tmp1 = _mm_unpacklo(tin[idx_in_2], tin[idx_in_3]);
+        tmp_1 = _mm_unpacklo(tin[idx_in_2], tin[idx_in_3]);
     }
     else
     {
         tmp_0 = _mm_unpackhi(tin[idx_in_0], tin[idx_in_1]);
-        tmp1 = _mm_unpackhi(tin[idx_in_2], tin[idx_in_3]);
+        tmp_1 = _mm_unpackhi(tin[idx_in_2], tin[idx_in_3]);
     }
 
     __m256 tout;
     if constexpr (Lane::OffsetIn % 2 == 0)
-        tout = _mm_movelh(tmp_0, tmp1);
+        tout = _mm_movelh(tmp_0, tmp_1);
     else
-        tout = _mm_movehl(tmp1, tmp_0);
+        tout = _mm_movehl(tmp_1, tmp_0);
 
 
     if constexpr (Lane::In != Lane::Out || Lane::OffsetOut > 0)
         tout = Permute2F128<Lane::In, Lane::In>(tout);
 
 
-    intern::TransposeSetOutput<_firstRowOut, 4, _overwriteUnused, _unusedSetZero>(tout, out_0);
+    intern::transpose::SetOutput<_firstRowOut, 4, _overwriteUnused, _unusedSetZero>(tout, out_0);
 }
 
 
@@ -175,34 +175,34 @@ inline void Transpose1x4(__m256 in_0, __m256 in_1, __m256 in_2, __m256 in_3, __m
 template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unusedSetZero>
 inline void Transpose1x5(__m256 in_0, __m256 in_1, __m256 in_2, __m256 in_3, __m256 in_4, __m256& out_0) noexcept
 {
-    using Lane = intern::TranspositionLaneData<__m256, _firstRowIn, _firstRowOut>;
+    using Lane = intern::transpose::LaneData<__m256, _firstRowIn, _firstRowOut>;
 
 
-    __m256 tmp_0, tmp1;
+    __m256 tmp_0, tmp_1;
     if constexpr (Lane::OffsetOut == 0)
     {
         Transpose1x4<Lane::OffsetIn, 0>(in_0, in_1, in_2, in_3, tmp_0);
-        Transpose1x1<Lane::OffsetIn, 0>(in_4, tmp1);
+        Transpose1x1<Lane::OffsetIn, 0>(in_4, tmp_1);
     }
     else if constexpr (Lane::OffsetOut == 1)
     {
         Transpose1x3<Lane::OffsetIn, 1>(in_0, in_1, in_2, tmp_0);
-        Transpose1x2<Lane::OffsetIn, 0>(in_3, in_4, tmp1);
+        Transpose1x2<Lane::OffsetIn, 0>(in_3, in_4, tmp_1);
     }
     else if constexpr (Lane::OffsetOut == 2)
     {
         Transpose1x2<Lane::OffsetIn, 2>(in_0, in_1, tmp_0);
-        Transpose1x3<Lane::OffsetIn, 0>(in_2, in_3, in_4, tmp1);
+        Transpose1x3<Lane::OffsetIn, 0>(in_2, in_3, in_4, tmp_1);
     }
     else
     {
         Transpose1x1<Lane::OffsetIn, 3>(in_0, tmp_0);
-        Transpose1x4<Lane::OffsetIn, 0>(in_1, in_2, in_3, in_4, tmp1);
+        Transpose1x4<Lane::OffsetIn, 0>(in_1, in_2, in_3, in_4, tmp_1);
     }
 
-    __m256 tout = Permute2F128<0, Lane::In, 1, Lane::In>(tmp_0, tmp1);
+    __m256 tout = Permute2F128<0, Lane::In, 1, Lane::In>(tmp_0, tmp_1);
 
-    intern::TransposeSetOutput<_firstRowOut, 5, _overwriteUnused, _unusedSetZero>(tout, out_0);
+    intern::transpose::SetOutput<_firstRowOut, 5, _overwriteUnused, _unusedSetZero>(tout, out_0);
 }
 
 
@@ -213,29 +213,29 @@ template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unused
 inline void Transpose1x6(__m256 in_0, __m256 in_1, __m256 in_2, __m256 in_3, __m256 in_4, __m256 in_5,
                          __m256& out_0) noexcept
 {
-    using Lane = intern::TranspositionLaneData<__m256, _firstRowIn, _firstRowOut>;
+    using Lane = intern::transpose::LaneData<__m256, _firstRowIn, _firstRowOut>;
 
 
-    __m256 tmp_0, tmp1;
+    __m256 tmp_0, tmp_1;
     if constexpr (Lane::OffsetOut == 0)
     {
         Transpose1x4<Lane::OffsetIn, 0>(in_0, in_1, in_2, in_3, tmp_0);
-        Transpose1x2<Lane::OffsetIn, 0>(in_4, in_5, tmp1);
+        Transpose1x2<Lane::OffsetIn, 0>(in_4, in_5, tmp_1);
     }
     else if constexpr (Lane::OffsetOut == 1)
     {
         Transpose1x3<Lane::OffsetIn, 1>(in_0, in_1, in_2, tmp_0);
-        Transpose1x3<Lane::OffsetIn, 0>(in_3, in_4, in_5, tmp1);
+        Transpose1x3<Lane::OffsetIn, 0>(in_3, in_4, in_5, tmp_1);
     }
     else
     {
         Transpose1x2<Lane::OffsetIn, 2>(in_0, in_1, tmp_0);
-        Transpose1x4<Lane::OffsetIn, 0>(in_2, in_3, in_4, in_5, tmp1);
+        Transpose1x4<Lane::OffsetIn, 0>(in_2, in_3, in_4, in_5, tmp_1);
     }
 
-    __m256 tout = Permute2F128<0, Lane::In, 1, Lane::In>(tmp_0, tmp1);
+    __m256 tout = Permute2F128<0, Lane::In, 1, Lane::In>(tmp_0, tmp_1);
 
-    intern::TransposeSetOutput<_firstRowOut, 6, _overwriteUnused, _unusedSetZero>(tout, out_0);
+    intern::transpose::SetOutput<_firstRowOut, 6, _overwriteUnused, _unusedSetZero>(tout, out_0);
 }
 
 
@@ -246,24 +246,24 @@ template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unused
 inline void Transpose1x7(__m256 in_0, __m256 in_1, __m256 in_2, __m256 in_3, __m256 in_4, __m256 in_5, __m256 in_6,
                          __m256& out_0) noexcept
 {
-    using Lane = intern::TranspositionLaneData<__m256, _firstRowIn, _firstRowOut>;
+    using Lane = intern::transpose::LaneData<__m256, _firstRowIn, _firstRowOut>;
 
 
-    __m256 tmp_0, tmp1;
+    __m256 tmp_0, tmp_1;
     if constexpr (Lane::OffsetOut == 0)
     {
         Transpose1x4<Lane::OffsetIn, 0>(in_0, in_1, in_2, in_3, tmp_0);
-        Transpose1x3<Lane::OffsetIn, 0>(in_4, in_5, in_6, tmp1);
+        Transpose1x3<Lane::OffsetIn, 0>(in_4, in_5, in_6, tmp_1);
     }
     else
     {
         Transpose1x3<Lane::OffsetIn, 1>(in_0, in_1, in_2, tmp_0);
-        Transpose1x4<Lane::OffsetIn, 0>(in_3, in_4, in_5, in_6, tmp1);
+        Transpose1x4<Lane::OffsetIn, 0>(in_3, in_4, in_5, in_6, tmp_1);
     }
 
-    __m256 tout = Permute2F128<0, Lane::In, 1, Lane::In>(tmp_0, tmp1);
+    __m256 tout = Permute2F128<0, Lane::In, 1, Lane::In>(tmp_0, tmp_1);
 
-    intern::TransposeSetOutput<_firstRowOut, 7, _overwriteUnused, _unusedSetZero>(tout, out_0);
+    intern::transpose::SetOutput<_firstRowOut, 7, _overwriteUnused, _unusedSetZero>(tout, out_0);
 }
 
 
@@ -274,14 +274,14 @@ template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unused
 inline void Transpose1x8(__m256 in_0, __m256 in_1, __m256 in_2, __m256 in_3, __m256 in_4, __m256 in_5, __m256 in_6,
                          __m256 in_7, __m256& out_0) noexcept
 {
-    using Lane = intern::TranspositionLaneData<__m256, _firstRowIn, _firstRowOut>;
+    using Lane = intern::transpose::LaneData<__m256, _firstRowIn, _firstRowOut>;
 
-    __m256 tmp_0, tmp1;
+    __m256 tmp_0, tmp_1;
 
     Transpose1x4<Lane::OffsetIn, 0>(in_0, in_1, in_2, in_3, tmp_0);
-    Transpose1x4<Lane::OffsetIn, 0>(in_4, in_5, in_6, in_7, tmp1);
+    Transpose1x4<Lane::OffsetIn, 0>(in_4, in_5, in_6, in_7, tmp_1);
 
-    __m256 tout = Permute2F128<0, Lane::In, 1, Lane::In>(tmp_0, tmp1);
+    __m256 tout = Permute2F128<0, Lane::In, 1, Lane::In>(tmp_0, tmp_1);
 
     out_0 = tout;
 }
@@ -293,7 +293,7 @@ inline void Transpose1x8(__m256 in_0, __m256 in_1, __m256 in_2, __m256 in_3, __m
 template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unusedSetZero>
 inline void Transpose2x1(__m256 in_0, __m256& out_0, __m256& out_1) noexcept
 {
-    using Lane = intern::TranspositionLaneData<__m256, _firstRowIn, _firstRowOut>;
+    using Lane = intern::transpose::LaneData<__m256, _firstRowIn, _firstRowOut>;
 
     std::array<__m256, 2> tout;
 
@@ -306,13 +306,13 @@ inline void Transpose2x1(__m256 in_0, __m256& out_0, __m256& out_1) noexcept
     else
     {
         __m256 tmp_0 = SwapLanesIf<Lane::Out == 1>(in_0);
-        __m256 tmp1 = SwapLanesIf<Lane::Out == 0>(in_0);
+        __m256 tmp_1 = SwapLanesIf<Lane::Out == 0>(in_0);
 
         Transpose1x1<Lane::OffsetIn, Lane::OffsetOut>(tmp_0, tout[0]);
-        Transpose1x1<0, Lane::OffsetOut>(tmp1, tout[1]);
+        Transpose1x1<0, Lane::OffsetOut>(tmp_1, tout[1]);
     }
 
-    intern::TransposeSetOutput<_firstRowOut, 1, _overwriteUnused, _unusedSetZero>(tout, out_0, out_1);
+    intern::transpose::SetOutput<_firstRowOut, 1, _overwriteUnused, _unusedSetZero>(tout, out_0, out_1);
 }
 
 
@@ -322,7 +322,7 @@ inline void Transpose2x1(__m256 in_0, __m256& out_0, __m256& out_1) noexcept
 template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unusedSetZero>
 inline void Transpose2x2(__m256 in_0, __m256 in_1, __m256& out_0, __m256& out_1) noexcept
 {
-    using Lane = intern::TranspositionLaneData<__m256, _firstRowIn, _firstRowOut>;
+    using Lane = intern::transpose::LaneData<__m256, _firstRowIn, _firstRowOut>;
 
     std::array<__m256, 2> tout;
 
@@ -345,27 +345,27 @@ inline void Transpose2x2(__m256 in_0, __m256 in_1, __m256& out_0, __m256& out_1)
         else if constexpr (Lane::OffsetIn == 1)
         {
             __m256 tmp_0 = Shuffle<1, 2, 1, 2>(in_0, in_1);
-            __m256 tmp1 = SwapLanesIf<Lane::In != Lane::Out>(tmp_0);
-            tout[idx_out_0] = Permute<0, 2, 1, 3>(tmp1);
-            tout[idx_out_1] = Permute<1, 3, 0, 2>(tmp1);
+            __m256 tmp_1 = SwapLanesIf<Lane::In != Lane::Out>(tmp_0);
+            tout[idx_out_0] = Permute<0, 2, 1, 3>(tmp_1);
+            tout[idx_out_1] = Permute<1, 3, 0, 2>(tmp_1);
         }
         else
         {
-            __m256 tmp_0, tmp1;
+            __m256 tmp_0, tmp_1;
             if constexpr (Lane::OffsetOut == 0)
             {
                 tmp_0 = _mm_unpackhi(in_0, in_1);
-                tmp1 = _mm_unpacklo(in_0, in_1);
+                tmp_1 = _mm_unpacklo(in_0, in_1);
             }
             else
             {
                 tmp_0 = _mm_unpacklo(in_0, in_1);
-                tmp1 = _mm_unpackhi(in_0, in_1);
+                tmp_1 = _mm_unpackhi(in_0, in_1);
             }
 
-            __m256 tmp2 = Permute<2, 3, 0, 1>(tmp_0);
-            tout[idx_out_0] = SwapLanesIf<Lane::Out != idx_out_0>(tmp2);
-            tout[idx_out_1] = SwapLanesIf<Lane::Out != idx_out_1>(tmp1);
+            __m256 tmp_2 = Permute<2, 3, 0, 1>(tmp_0);
+            tout[idx_out_0] = SwapLanesIf<Lane::Out != idx_out_0>(tmp_2);
+            tout[idx_out_1] = SwapLanesIf<Lane::Out != idx_out_1>(tmp_1);
         }
     }
     else if constexpr (Lane::OffsetOut == 1)
@@ -380,18 +380,18 @@ inline void Transpose2x2(__m256 in_0, __m256 in_1, __m256& out_0, __m256& out_1)
             }
             else
             {
-                __m256 tmp2 =
+                __m256 tmp_2 =
                         Shuffle<Lane::OffsetIn + 1, Lane::OffsetIn, Lane::OffsetIn, Lane::OffsetIn + 1>(in_0, in_1);
-                tout[0] = SwapLanes(tmp2);
+                tout[0] = SwapLanes(tmp_2);
                 tout[1] = Permute<0, 0, 3, 3>(tout[0]);
             }
         }
         else
         {
-            __m256 tmp2 = Shuffle<0, 3, 3, 0>(in_0, in_1);
-            __m256 tmp3 = Shuffle<3, 0, 0, 3>(in_0, in_1);
-            tout[0] = SwapLanesIf<Lane::Out == 1>(tmp2);
-            tout[1] = SwapLanesIf<Lane::Out == 0>(tmp3);
+            __m256 tmp_2 = Shuffle<0, 3, 3, 0>(in_0, in_1);
+            __m256 tmp_3 = Shuffle<3, 0, 0, 3>(in_0, in_1);
+            tout[0] = SwapLanesIf<Lane::Out == 1>(tmp_2);
+            tout[1] = SwapLanesIf<Lane::Out == 0>(tmp_3);
         }
     }
     else
@@ -399,9 +399,9 @@ inline void Transpose2x2(__m256 in_0, __m256 in_1, __m256& out_0, __m256& out_1)
         if constexpr (Lane::OffsetIn < 3)
         {
             __m256 tmp_0 = SwapLanesIf<Lane::In != Lane::Out>(in_0);
-            __m256 tmp1 = SwapLanesIf<Lane::In == Lane::Out>(in_1);
-            tout[0] = Shuffle<Lane::OffsetIn, Lane::OffsetIn, Lane::OffsetIn, Lane::OffsetIn>(tmp1, tmp_0);
-            tout[1] = Shuffle<Lane::OffsetIn + 1, Lane::OffsetIn + 1, Lane::OffsetIn + 1, Lane::OffsetIn + 1>(tmp1,
+            __m256 tmp_1 = SwapLanesIf<Lane::In == Lane::Out>(in_1);
+            tout[0] = Shuffle<Lane::OffsetIn, Lane::OffsetIn, Lane::OffsetIn, Lane::OffsetIn>(tmp_1, tmp_0);
+            tout[1] = Shuffle<Lane::OffsetIn + 1, Lane::OffsetIn + 1, Lane::OffsetIn + 1, Lane::OffsetIn + 1>(tmp_1,
                                                                                                               tmp_0);
         }
         else
@@ -412,7 +412,7 @@ inline void Transpose2x2(__m256 in_0, __m256 in_1, __m256& out_0, __m256& out_1)
         }
     }
 
-    intern::TransposeSetOutput<_firstRowOut, 2, _overwriteUnused, _unusedSetZero>(tout, out_0, out_1);
+    intern::transpose::SetOutput<_firstRowOut, 2, _overwriteUnused, _unusedSetZero>(tout, out_0, out_1);
 }
 
 
@@ -422,7 +422,7 @@ inline void Transpose2x2(__m256 in_0, __m256 in_1, __m256& out_0, __m256& out_1)
 template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unusedSetZero>
 inline void Transpose2x3(__m256 in_0, __m256 in_1, __m256 in_2, __m256& out_0, __m256& out_1) noexcept
 {
-    using Lane = intern::TranspositionLaneData<__m256, _firstRowIn, _firstRowOut>;
+    using Lane = intern::transpose::LaneData<__m256, _firstRowIn, _firstRowOut>;
 
     constexpr U32 s0 = Lane::OffsetIn;
     constexpr U32 s1 = (Lane::OffsetIn + 1) % numValuesPerLane<__m256>;
@@ -479,7 +479,7 @@ inline void Transpose2x3(__m256 in_0, __m256 in_1, __m256 in_2, __m256& out_0, _
         constexpr U32 pl0 = (Lane::OffsetIn == 3) ? 1 : (Lane::In == Lane::Out) ? 0 : 1;
         constexpr U32 pl1 = (Lane::OffsetIn == 3) ? 0 : pl0;
 
-        __m256 tmp1 = Permute2F128<pr0, pl0, pr1, pl1>(tmp_0, tin[idx2]);
+        __m256 tmp_1 = Permute2F128<pr0, pl0, pr1, pl1>(tmp_0, tin[idx2]);
 
         if constexpr (Lane::OffsetIn < 3)
         {
@@ -488,31 +488,31 @@ inline void Transpose2x3(__m256 in_0, __m256 in_1, __m256 in_2, __m256& out_0, _
 
             if constexpr (Lane::OffsetOut == 2)
             {
-                tout[0] = Permute<s0, 0, 0, s2>(tmp1);
-                tout[1] = Permute<s1, 0, s3, 3>(tmp1);
+                tout[0] = Permute<s0, 0, 0, s2>(tmp_1);
+                tout[1] = Permute<s1, 0, s3, 3>(tmp_1);
             }
             else
             {
-                tout[0] = Permute<0, s2, 0, s0>(tmp1);
-                tout[1] = Permute<s3, 3, 0, s1>(tmp1);
+                tout[0] = Permute<0, s2, 0, s0>(tmp_1);
+                tout[1] = Permute<s3, 3, 0, s1>(tmp_1);
             }
         }
         else
         {
             if constexpr (Lane::OffsetOut == 2)
             {
-                tout[0] = Shuffle<s0, 0, 1, 3>(tmp1, tmp_0);
-                tout[1] = Shuffle<s1, 0, 0, 2>(tin[idx2], tmp1);
+                tout[0] = Shuffle<s0, 0, 1, 3>(tmp_1, tmp_0);
+                tout[1] = Shuffle<s1, 0, 0, 2>(tin[idx2], tmp_1);
             }
             else
             {
-                tout[0] = Shuffle<1, 3, 0, s0>(tmp1, tin[idx2]);
-                tout[1] = Shuffle<0, 2, 0, s1>(tmp_0, tmp1);
+                tout[0] = Shuffle<1, 3, 0, s0>(tmp_1, tin[idx2]);
+                tout[1] = Shuffle<0, 2, 0, s1>(tmp_0, tmp_1);
             }
         }
     }
 
-    intern::TransposeSetOutput<_firstRowOut, 3, _overwriteUnused, _unusedSetZero>(tout, out_0, out_1);
+    intern::transpose::SetOutput<_firstRowOut, 3, _overwriteUnused, _unusedSetZero>(tout, out_0, out_1);
 }
 
 
@@ -522,7 +522,7 @@ inline void Transpose2x3(__m256 in_0, __m256 in_1, __m256 in_2, __m256& out_0, _
 template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unusedSetZero>
 inline void Transpose2x4(__m256 in_0, __m256 in_1, __m256 in_2, __m256 in_3, __m256& out_0, __m256& out_1) noexcept
 {
-    using Lane = intern::TranspositionLaneData<__m256, _firstRowIn, _firstRowOut>;
+    using Lane = intern::transpose::LaneData<__m256, _firstRowIn, _firstRowOut>;
 
     std::array<__m256, 2> tout;
 
@@ -534,17 +534,17 @@ inline void Transpose2x4(__m256 in_0, __m256 in_1, __m256 in_2, __m256 in_3, __m
         constexpr U32 p0 = Lane::OffsetOut / 2;
 
         __m256 tmp_0 = Permute2F128<0, p0, 1, p0>(in_0, in_3);
-        __m256 tmp1 = Shuffle<s0, s1, s0, s1>(in_1, in_2);
+        __m256 tmp_1 = Shuffle<s0, s1, s0, s1>(in_1, in_2);
 
         if constexpr (Lane::OffsetOut == 1)
         {
-            tout[0] = Shuffle<s0, s0, 0, 2>(tmp_0, tmp1);
-            tout[1] = Shuffle<s1, s1, 1, 3>(tmp_0, tmp1);
+            tout[0] = Shuffle<s0, s0, 0, 2>(tmp_0, tmp_1);
+            tout[1] = Shuffle<s1, s1, 1, 3>(tmp_0, tmp_1);
         }
         else
         {
-            tout[0] = Shuffle<0, 2, s0, s0>(tmp1, tmp_0);
-            tout[1] = Shuffle<1, 3, s1, s1>(tmp1, tmp_0);
+            tout[0] = Shuffle<0, 2, s0, s0>(tmp_1, tmp_0);
+            tout[1] = Shuffle<1, 3, s1, s1>(tmp_1, tmp_0);
         }
     }
     else
@@ -555,53 +555,53 @@ inline void Transpose2x4(__m256 in_0, __m256 in_1, __m256 in_2, __m256 in_3, __m
         constexpr U32 idx3 = (idx0 + 3) % 4;
         std::array<__m256, 4> tin = {{in_0, in_1, in_2, in_3}};
 
-        __m256 tmp_0, tmp1;
+        __m256 tmp_0, tmp_1;
         if constexpr (Lane::OffsetIn == 0)
         {
             tmp_0 = _mm_unpacklo(tin[idx0], tin[idx1]);
-            tmp1 = _mm_unpacklo(tin[idx2], tin[idx3]);
+            tmp_1 = _mm_unpacklo(tin[idx2], tin[idx3]);
         }
         else if constexpr (Lane::OffsetIn == 1)
         {
             tmp_0 = Shuffle<1, 2, 1, 2>(tin[idx0], tin[idx1]);
-            tmp1 = Shuffle<1, 2, 1, 2>(tin[idx2], tin[idx3]);
+            tmp_1 = Shuffle<1, 2, 1, 2>(tin[idx2], tin[idx3]);
         }
         else if constexpr (Lane::OffsetIn == 2)
         {
             tmp_0 = _mm_unpackhi(tin[idx0], tin[idx1]);
-            tmp1 = _mm_unpackhi(tin[idx2], tin[idx3]);
+            tmp_1 = _mm_unpackhi(tin[idx2], tin[idx3]);
         }
         else
         {
             tmp_0 = Shuffle<3, 0, 3, 0>(tin[idx0], tin[idx1]);
-            tmp1 = Shuffle<3, 0, 3, 0>(tin[idx2], tin[idx3]);
+            tmp_1 = Shuffle<3, 0, 3, 0>(tin[idx2], tin[idx3]);
         }
 
 
         if constexpr (Lane::OffsetOut == 2 && Lane::OffsetIn == 3)
         {
-            __m256 tmp2 = Permute2F128<0, 1, 1, 0>(tmp1, tmp_0);
+            __m256 tmp_2 = Permute2F128<0, 1, 1, 0>(tmp_1, tmp_0);
 
-            tout[0] = Shuffle<0, 2, 0, 2>(tmp2, tmp1);
-            tout[1] = Shuffle<1, 3, 1, 3>(tmp_0, tmp2);
+            tout[0] = Shuffle<0, 2, 0, 2>(tmp_2, tmp_1);
+            tout[1] = Shuffle<1, 3, 1, 3>(tmp_0, tmp_2);
         }
         else if constexpr (Lane::OffsetOut == 0 || Lane::OffsetOut == 2)
         {
             if constexpr (Lane::OffsetOut == 2)
             {
                 tmp_0 = SwapLanesIf<Lane::In == 0>(tmp_0);
-                tmp1 = SwapLanesIf<Lane::In == 1>(tmp1);
+                tmp_1 = SwapLanesIf<Lane::In == 1>(tmp_1);
             }
 
             if constexpr (Lane::OffsetIn == 0 || Lane::OffsetIn == 2)
             {
-                tout[0] = _mm_movelh(tmp_0, tmp1);
-                tout[1] = _mm_movehl(tmp1, tmp_0);
+                tout[0] = _mm_movelh(tmp_0, tmp_1);
+                tout[1] = _mm_movehl(tmp_1, tmp_0);
             }
             else
             {
-                tout[0] = Shuffle<0, 2, 0, 2>(tmp_0, tmp1);
-                tout[1] = Shuffle<1, 3, 1, 3>(tmp_0, tmp1);
+                tout[0] = Shuffle<0, 2, 0, 2>(tmp_0, tmp_1);
+                tout[1] = Shuffle<1, 3, 1, 3>(tmp_0, tmp_1);
             }
 
             constexpr bool swp0 = (Lane::In != Lane::Out && Lane::OffsetOut == 0);
@@ -612,27 +612,27 @@ inline void Transpose2x4(__m256 in_0, __m256 in_1, __m256 in_2, __m256 in_3, __m
         }
         else if constexpr (Lane::OffsetOut == 1 || Lane::OffsetOut == 3)
         {
-            __m256 tmp2, tmp3;
+            __m256 tmp_2, tmp_3;
             if constexpr (Lane::OffsetIn == 0 || Lane::OffsetIn == 2)
             {
-                tmp2 = _mm_movelh(tmp1, tmp_0);
-                tmp3 = _mm_movehl(tmp_0, tmp1);
+                tmp_2 = _mm_movelh(tmp_1, tmp_0);
+                tmp_3 = _mm_movehl(tmp_0, tmp_1);
             }
             else
             {
-                tmp2 = Shuffle<0, 2, 0, 2>(tmp1, tmp_0);
-                tmp3 = Shuffle<1, 3, 1, 3>(tmp1, tmp_0);
+                tmp_2 = Shuffle<0, 2, 0, 2>(tmp_1, tmp_0);
+                tmp_3 = Shuffle<1, 3, 1, 3>(tmp_1, tmp_0);
             }
 
             constexpr U32 l0 = (Lane::OffsetIn == 3 || Lane::OffsetOut == 3) ? 0 : 1;
             constexpr U32 l1 = (Lane::OffsetIn == 3 || Lane::OffsetOut == 1) ? 1 : 0;
-            tout[0] = Permute2F128<l0, l0>(tmp2);
-            tout[1] = Permute2F128<l1, l1>(tmp3);
+            tout[0] = Permute2F128<l0, l0>(tmp_2);
+            tout[1] = Permute2F128<l1, l1>(tmp_3);
         }
     }
 
 
-    intern::TransposeSetOutput<_firstRowOut, 4, _overwriteUnused, _unusedSetZero>(tout, out_0, out_1);
+    intern::transpose::SetOutput<_firstRowOut, 4, _overwriteUnused, _unusedSetZero>(tout, out_0, out_1);
 }
 
 
@@ -643,16 +643,16 @@ template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unused
 inline void Transpose2x5(__m256 in_0, __m256 in_1, __m256 in_2, __m256 in_3, __m256 in_4, __m256& out_0,
                          __m256& out_1) noexcept
 {
-    using Lane = intern::TranspositionLaneData<__m256, _firstRowIn, _firstRowOut>;
+    using Lane = intern::transpose::LaneData<__m256, _firstRowIn, _firstRowOut>;
     constexpr UST arraySize = (Lane::OffsetIn < 3) ? 4 : 8;
 
     std::array<__m256, arraySize> tmp =
-            intern::PermuteBeforeIntraLaneTransposeNx5<_firstRowIn, _firstRowOut, arraySize>(in_0, in_1, in_2, in_3,
-                                                                                             in_4);
+            intern::transpose::PermuteBeforeIntraLaneTransposeNx5<_firstRowIn, _firstRowOut, arraySize>(
+                    in_0, in_1, in_2, in_3, in_4);
 
-    std::array<__m256, 2> tout = intern::IntraLaneTransposeAfterPermute2xN<_firstRowIn>(tmp);
+    std::array<__m256, 2> tout = intern::transpose::IntraLaneTransposeAfterPermute2xN<_firstRowIn>(tmp);
 
-    intern::TransposeSetOutput<_firstRowOut, 5, _overwriteUnused, _unusedSetZero>(tout, out_0, out_1);
+    intern::transpose::SetOutput<_firstRowOut, 5, _overwriteUnused, _unusedSetZero>(tout, out_0, out_1);
 }
 
 
@@ -663,16 +663,16 @@ template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unused
 inline void Transpose2x6(__m256 in_0, __m256 in_1, __m256 in_2, __m256 in_3, __m256 in_4, __m256 in_5, __m256& out_0,
                          __m256& out_1) noexcept
 {
-    using Lane = intern::TranspositionLaneData<__m256, _firstRowIn, _firstRowOut>;
+    using Lane = intern::transpose::LaneData<__m256, _firstRowIn, _firstRowOut>;
     constexpr UST arraySize = (Lane::OffsetIn < 3) ? 4 : 8;
 
     std::array<__m256, arraySize> tmp =
-            intern::PermuteBeforeIntraLaneTransposeNx6<_firstRowIn, _firstRowOut, arraySize>(in_0, in_1, in_2, in_3,
-                                                                                             in_4, in_5);
+            intern::transpose::PermuteBeforeIntraLaneTransposeNx6<_firstRowIn, _firstRowOut, arraySize>(
+                    in_0, in_1, in_2, in_3, in_4, in_5);
 
-    std::array<__m256, 2> tout = intern::IntraLaneTransposeAfterPermute2xN<_firstRowIn>(tmp);
+    std::array<__m256, 2> tout = intern::transpose::IntraLaneTransposeAfterPermute2xN<_firstRowIn>(tmp);
 
-    intern::TransposeSetOutput<_firstRowOut, 6, _overwriteUnused, _unusedSetZero>(tout, out_0, out_1);
+    intern::transpose::SetOutput<_firstRowOut, 6, _overwriteUnused, _unusedSetZero>(tout, out_0, out_1);
 }
 
 
@@ -683,16 +683,16 @@ template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unused
 inline void Transpose2x7(__m256 in_0, __m256 in_1, __m256 in_2, __m256 in_3, __m256 in_4, __m256 in_5, __m256 in_6,
                          __m256& out_0, __m256& out_1) noexcept
 {
-    using Lane = intern::TranspositionLaneData<__m256, _firstRowIn, _firstRowOut>;
+    using Lane = intern::transpose::LaneData<__m256, _firstRowIn, _firstRowOut>;
     constexpr UST arraySize = (Lane::OffsetIn < 3) ? 4 : 8;
 
     std::array<__m256, arraySize> tmp =
-            intern::PermuteBeforeIntraLaneTransposeNx7<_firstRowIn, _firstRowOut, arraySize>(in_0, in_1, in_2, in_3,
-                                                                                             in_4, in_5, in_6);
+            intern::transpose::PermuteBeforeIntraLaneTransposeNx7<_firstRowIn, _firstRowOut, arraySize>(
+                    in_0, in_1, in_2, in_3, in_4, in_5, in_6);
 
-    std::array<__m256, 2> tout = intern::IntraLaneTransposeAfterPermute2xN<_firstRowIn>(tmp);
+    std::array<__m256, 2> tout = intern::transpose::IntraLaneTransposeAfterPermute2xN<_firstRowIn>(tmp);
 
-    intern::TransposeSetOutput<_firstRowOut, 7, _overwriteUnused, _unusedSetZero>(tout, out_0, out_1);
+    intern::transpose::SetOutput<_firstRowOut, 7, _overwriteUnused, _unusedSetZero>(tout, out_0, out_1);
 }
 
 
@@ -703,17 +703,17 @@ template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unused
 inline void Transpose2x8(__m256 in_0, __m256 in_1, __m256 in_2, __m256 in_3, __m256 in_4, __m256 in_5, __m256 in_6,
                          __m256 in_7, __m256& out_0, __m256& out_1) noexcept
 {
-    using Lane = intern::TranspositionLaneData<__m256, _firstRowIn, _firstRowOut>;
+    using Lane = intern::transpose::LaneData<__m256, _firstRowIn, _firstRowOut>;
     constexpr UST arraySize = (Lane::OffsetIn < 3) ? 4 : 8;
 
     std::array<__m256, arraySize> tmp =
-            intern::PermuteBeforeIntraLaneTransposeNx8<_firstRowIn, _firstRowOut, arraySize>(in_0, in_1, in_2, in_3,
-                                                                                             in_4, in_5, in_6, in_7);
+            intern::transpose::PermuteBeforeIntraLaneTransposeNx8<_firstRowIn, _firstRowOut, arraySize>(
+                    in_0, in_1, in_2, in_3, in_4, in_5, in_6, in_7);
 
-    std::array<__m256, 2> tout = intern::IntraLaneTransposeAfterPermute2xN<_firstRowIn>(tmp);
+    std::array<__m256, 2> tout = intern::transpose::IntraLaneTransposeAfterPermute2xN<_firstRowIn>(tmp);
 
 
-    intern::TransposeSetOutput<_firstRowOut, 8, _overwriteUnused, _unusedSetZero>(tout, out_0, out_1);
+    intern::transpose::SetOutput<_firstRowOut, 8, _overwriteUnused, _unusedSetZero>(tout, out_0, out_1);
 }
 
 
@@ -723,7 +723,7 @@ inline void Transpose2x8(__m256 in_0, __m256 in_1, __m256 in_2, __m256 in_3, __m
 template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unusedSetZero>
 inline void Transpose3x1(__m256 in_0, __m256& out_0, __m256& out_1, __m256& out_2) noexcept
 {
-    using Lane = intern::TranspositionLaneData<__m256, _firstRowIn, _firstRowOut>;
+    using Lane = intern::transpose::LaneData<__m256, _firstRowIn, _firstRowOut>;
 
     std::array<__m256, 3> tout;
 
@@ -751,7 +751,7 @@ inline void Transpose3x1(__m256 in_0, __m256& out_0, __m256& out_1, __m256& out_
         Transpose1x1<row_2, Lane::OffsetOut>(tmp[1], tout[2]);
     }
 
-    intern::TransposeSetOutput<_firstRowOut, 1, _overwriteUnused, _unusedSetZero>(tout, out_0, out_1, out_2);
+    intern::transpose::SetOutput<_firstRowOut, 1, _overwriteUnused, _unusedSetZero>(tout, out_0, out_1, out_2);
 }
 
 
@@ -761,7 +761,7 @@ inline void Transpose3x1(__m256 in_0, __m256& out_0, __m256& out_1, __m256& out_
 template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unusedSetZero>
 inline void Transpose3x2(__m256 in_0, __m256 in_1, __m256& out_0, __m256& out_1, __m256& out_2) noexcept
 {
-    using Lane = intern::TranspositionLaneData<__m256, _firstRowIn, _firstRowOut>;
+    using Lane = intern::transpose::LaneData<__m256, _firstRowIn, _firstRowOut>;
     std::array<__m256, 3> tout;
 
     if constexpr (Lane::OffsetOut == 0 || Lane::OffsetOut == 2)
@@ -771,16 +771,16 @@ inline void Transpose3x2(__m256 in_0, __m256 in_1, __m256& out_0, __m256& out_1,
         if constexpr (Lane::OffsetIn < 2)
         {
             __m256 tmp_0 = SwapLanesIf<Lane::In != Lane::Out>(in_0);
-            __m256 tmp1 = SwapLanesIf<Lane::In != Lane::Out>(in_1);
-            tmp[0] = _mm_unpacklo(tmp_0, tmp1);
-            tmp[1] = _mm_unpackhi(tmp_0, tmp1);
+            __m256 tmp_1 = SwapLanesIf<Lane::In != Lane::Out>(in_1);
+            tmp[0] = _mm_unpacklo(tmp_0, tmp_1);
+            tmp[1] = _mm_unpackhi(tmp_0, tmp_1);
         }
         else
         {
             __m256 tmp_0 = _mm_unpackhi(in_0, in_1);
-            __m256 tmp1 = _mm_unpacklo(in_0, in_1);
+            __m256 tmp_1 = _mm_unpacklo(in_0, in_1);
             tmp[0] = SwapLanesIf<Lane::Out == 1>(tmp_0);
-            tmp[1] = SwapLanesIf<Lane::Out == 0>(tmp1);
+            tmp[1] = SwapLanesIf<Lane::Out == 0>(tmp_1);
         }
 
         constexpr U32 mod = Lane::OffsetOut / 2;
@@ -835,22 +835,22 @@ inline void Transpose3x2(__m256 in_0, __m256 in_1, __m256& out_0, __m256& out_1,
             }
             else
             {
-                __m256 tmp_0, tmp1;
+                __m256 tmp_0, tmp_1;
 
                 if constexpr (Lane::OffsetOut == 3)
                 {
                     tmp_0 = SwapLanesIf<Lane::In == 0>(in_1);
-                    tmp1 = SwapLanesIf<Lane::In == 1>(in_0);
+                    tmp_1 = SwapLanesIf<Lane::In == 1>(in_0);
                 }
                 else
                 {
                     tmp_0 = SwapLanesIf<(Lane::In != Lane::Out && Lane::OffsetIn < 2)>(in_0);
-                    tmp1 = SwapLanesIf<(Lane::In != Lane::Out && Lane::OffsetIn < 2)>(in_1);
+                    tmp_1 = SwapLanesIf<(Lane::In != Lane::Out && Lane::OffsetIn < 2)>(in_1);
                 }
 
-                tout[0] = Shuffle<s0, s0, s0, s0>(tmp_0, tmp1);
-                tout[1] = Shuffle<s1, s1, s1, s1>(tmp_0, tmp1);
-                tout[2] = Shuffle<s2, s2, s2, s2>(tmp_0, tmp1);
+                tout[0] = Shuffle<s0, s0, s0, s0>(tmp_0, tmp_1);
+                tout[1] = Shuffle<s1, s1, s1, s1>(tmp_0, tmp_1);
+                tout[2] = Shuffle<s2, s2, s2, s2>(tmp_0, tmp_1);
 
                 tout[0] = SwapLanesIf<Lane::OffsetIn == 3>(tout[0]);
                 tout[2] = SwapLanesIf<Lane::OffsetIn == 2>(tout[2]);
@@ -858,7 +858,7 @@ inline void Transpose3x2(__m256 in_0, __m256 in_1, __m256& out_0, __m256& out_1,
         }
     }
 
-    intern::TransposeSetOutput<_firstRowOut, 2, _overwriteUnused, _unusedSetZero>(tout, out_0, out_1, out_2);
+    intern::transpose::SetOutput<_firstRowOut, 2, _overwriteUnused, _unusedSetZero>(tout, out_0, out_1, out_2);
 }
 
 
@@ -868,7 +868,7 @@ inline void Transpose3x2(__m256 in_0, __m256 in_1, __m256& out_0, __m256& out_1,
 template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unusedSetZero>
 inline void Transpose3x3(__m256 in_0, __m256 in_1, __m256 in_2, __m256& out_0, __m256& out_1, __m256& out_2) noexcept
 {
-    using Lane = intern::TranspositionLaneData<__m256, _firstRowIn, _firstRowOut>;
+    using Lane = intern::transpose::LaneData<__m256, _firstRowIn, _firstRowOut>;
     std::array<__m256, 3> tin = {{in_0, in_1, in_2}};
     std::array<__m256, 3> tout;
 
@@ -893,23 +893,23 @@ inline void Transpose3x3(__m256 in_0, __m256 in_1, __m256 in_2, __m256& out_0, _
 
         if constexpr (Lane::OffsetIn != 1 - mod)
         {
-            __m256 tmp1;
+            __m256 tmp_1;
             if constexpr (Lane::OffsetOut == 0)
-                tmp1 = Shuffle<0, 0, 0, 0>(tin[1], tin[2]);
+                tmp_1 = Shuffle<0, 0, 0, 0>(tin[1], tin[2]);
             else
-                tmp1 = Shuffle<3, 3, 3, 3>(tin[0], tin[1]);
+                tmp_1 = Shuffle<3, 3, 3, 3>(tin[0], tin[1]);
 
             constexpr U32 idx = (8 - mod - Lane::OffsetIn) % 4;
-            tout[idx] = BlendIndex<_firstRowIn + idx>(tmp1, tin[Lane::OffsetOut * 2]);
+            tout[idx] = BlendIndex<_firstRowIn + idx>(tmp_1, tin[Lane::OffsetOut * 2]);
         }
 
         if constexpr (Lane::OffsetIn != 2 + mod)
         {
             constexpr U32 s = mod + 1;
-            __m256 tmp1 = Shuffle<s, s, s, s>(tin[0], tin[2]);
+            __m256 tmp_1 = Shuffle<s, s, s, s>(tin[0], tin[2]);
 
             constexpr U32 idx = (5 + mod - Lane::OffsetIn) % 4;
-            tout[idx] = BlendIndex<_firstRowIn + idx>(tmp1, tin[1]);
+            tout[idx] = BlendIndex<_firstRowIn + idx>(tmp_1, tin[1]);
         }
 
         if constexpr (Lane::OffsetIn != 3 - mod)
@@ -941,26 +941,26 @@ inline void Transpose3x3(__m256 in_0, __m256 in_1, __m256 in_2, __m256& out_0, _
 
             tmp[idx0] = Permute2F128<0, Lane::In, 1, Lane::In>(tin[0], tin[2]);
 
-            __m256 tmp2 = _mm_unpacklo(tmp[0], tmp[1]);
-            __m256 tmp3 = _mm_unpackhi(tmp[0], tmp[1]);
+            __m256 tmp_2 = _mm_unpacklo(tmp[0], tmp[1]);
+            __m256 tmp_3 = _mm_unpackhi(tmp[0], tmp[1]);
 
             if constexpr (Lane::OffsetIn == 0)
-                tout[0] = Permute<0, 1, 0, 1>(tmp2);
+                tout[0] = Permute<0, 1, 0, 1>(tmp_2);
             else
-                tout[2] = Permute<2, 3, 2, 3>(tmp3);
+                tout[2] = Permute<2, 3, 2, 3>(tmp_3);
 
-            tout[1 - Lane::OffsetIn] = Permute<2, 3, 2, 3>(tmp2);
-            tout[2 - Lane::OffsetIn] = Permute<0, 1, 0, 1>(tmp3);
+            tout[1 - Lane::OffsetIn] = Permute<2, 3, 2, 3>(tmp_2);
+            tout[2 - Lane::OffsetIn] = Permute<0, 1, 0, 1>(tmp_3);
         }
         else
         {
             constexpr U32 mod = Lane::OffsetOut % 2;
             std::array<__m256, 4> tmp;
 
-            constexpr U32 idx_tmp2 = (Lane::OffsetOut == 3) ? 0 : 2;
+            constexpr U32 idx_tmp_2 = (Lane::OffsetOut == 3) ? 0 : 2;
             tmp[0] = _mm_unpacklo(tin[mod], tin[mod + 1]);
             tmp[1] = _mm_unpackhi(tin[mod], tin[mod + 1]);
-            tmp[2] = tin[idx_tmp2];
+            tmp[2] = tin[idx_tmp_2];
             if constexpr (Lane::OffsetOut == 2)
                 tmp[3] = Permute2F128<0, 1, 1, 0>(tmp[0], tin[2]);
             else
@@ -979,7 +979,7 @@ inline void Transpose3x3(__m256 in_0, __m256 in_1, __m256 in_2, __m256& out_0, _
         }
     }
 
-    intern::TransposeSetOutput<_firstRowOut, 3, _overwriteUnused, _unusedSetZero>(tout, out_0, out_1, out_2);
+    intern::transpose::SetOutput<_firstRowOut, 3, _overwriteUnused, _unusedSetZero>(tout, out_0, out_1, out_2);
 }
 
 
@@ -990,7 +990,7 @@ template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unused
 inline void Transpose3x4(__m256 in_0, __m256 in_1, __m256 in_2, __m256 in_3, __m256& out_0, __m256& out_1,
                          __m256& out_2) noexcept
 {
-    using Lane = intern::TranspositionLaneData<__m256, _firstRowIn, _firstRowOut>;
+    using Lane = intern::transpose::LaneData<__m256, _firstRowIn, _firstRowOut>;
     std::array<__m256, 3> tout;
     std::array<__m256, 4> tin = {{in_0, in_1, in_2, in_3}};
 
@@ -1011,26 +1011,26 @@ inline void Transpose3x4(__m256 in_0, __m256 in_1, __m256 in_2, __m256 in_3, __m
         constexpr bool swp_con_3 = Lane::In != Lane::Out;
 
         __m256 tmp_0 = SwapLanesIf<swp_con_0>(tin[idx_0]);
-        __m256 tmp1 = SwapLanesIf<swp_con_1>(tin[idx_1]);
-        __m256 tmp2 = SwapLanesIf<swp_con_2>(tin[idx_2]);
-        __m256 tmp3 = SwapLanesIf<swp_con_3>(tin[idx_3]);
+        __m256 tmp_1 = SwapLanesIf<swp_con_1>(tin[idx_1]);
+        __m256 tmp_2 = SwapLanesIf<swp_con_2>(tin[idx_2]);
+        __m256 tmp_3 = SwapLanesIf<swp_con_3>(tin[idx_3]);
 
-        __m256 tmp4 = _mm_unpacklo(tmp_0, tmp1);
-        __m256 tmp5 = _mm_unpackhi(tmp_0, tmp1);
-        __m256 tmp6 = _mm_unpacklo(tmp2, tmp3);
-        __m256 tmp7 = _mm_unpackhi(tmp2, tmp3);
+        __m256 tmp_4 = _mm_unpacklo(tmp_0, tmp_1);
+        __m256 tmp_5 = _mm_unpackhi(tmp_0, tmp_1);
+        __m256 tmp_6 = _mm_unpacklo(tmp_2, tmp_3);
+        __m256 tmp_7 = _mm_unpackhi(tmp_2, tmp_3);
 
         if constexpr (Lane::OffsetIn == 0)
         {
-            tout[0] = _mm_movelh(tmp4, tmp6);
-            tout[1] = _mm_movehl(tmp6, tmp4);
-            tout[2] = _mm_movelh(tmp5, tmp7);
+            tout[0] = _mm_movelh(tmp_4, tmp_6);
+            tout[1] = _mm_movehl(tmp_6, tmp_4);
+            tout[2] = _mm_movelh(tmp_5, tmp_7);
         }
         else
         {
-            tout[0] = _mm_movehl(tmp6, tmp4);
-            tout[1] = _mm_movelh(tmp5, tmp7);
-            tout[2] = _mm_movehl(tmp7, tmp5);
+            tout[0] = _mm_movehl(tmp_6, tmp_4);
+            tout[1] = _mm_movelh(tmp_5, tmp_7);
+            tout[2] = _mm_movehl(tmp_7, tmp_5);
         }
     }
     else
@@ -1080,7 +1080,7 @@ inline void Transpose3x4(__m256 in_0, __m256 in_1, __m256 in_2, __m256 in_3, __m
     }
 
 
-    intern::TransposeSetOutput<_firstRowOut, 4, _overwriteUnused, _unusedSetZero>(tout, out_0, out_1, out_2);
+    intern::transpose::SetOutput<_firstRowOut, 4, _overwriteUnused, _unusedSetZero>(tout, out_0, out_1, out_2);
 }
 
 
@@ -1091,16 +1091,16 @@ template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unused
 inline void Transpose3x5(__m256 in_0, __m256 in_1, __m256 in_2, __m256 in_3, __m256 in_4, __m256& out_0, __m256& out_1,
                          __m256& out_2) noexcept
 {
-    using Lane = intern::TranspositionLaneData<__m256, _firstRowIn, _firstRowOut>;
+    using Lane = intern::transpose::LaneData<__m256, _firstRowIn, _firstRowOut>;
     constexpr UST arraySize = (Lane::OffsetIn < 2) ? 4 : 8;
 
     std::array<__m256, arraySize> tmp =
-            intern::PermuteBeforeIntraLaneTransposeNx5<_firstRowIn, _firstRowOut, arraySize>(in_0, in_1, in_2, in_3,
-                                                                                             in_4);
+            intern::transpose::PermuteBeforeIntraLaneTransposeNx5<_firstRowIn, _firstRowOut, arraySize>(
+                    in_0, in_1, in_2, in_3, in_4);
 
-    std::array<__m256, 3> tout = intern::IntraLaneTransposeAfterPermute3xN<_firstRowIn>(tmp);
+    std::array<__m256, 3> tout = intern::transpose::IntraLaneTransposeAfterPermute3xN<_firstRowIn>(tmp);
 
-    intern::TransposeSetOutput<_firstRowOut, 5, _overwriteUnused, _unusedSetZero>(tout, out_0, out_1, out_2);
+    intern::transpose::SetOutput<_firstRowOut, 5, _overwriteUnused, _unusedSetZero>(tout, out_0, out_1, out_2);
 }
 
 
@@ -1111,16 +1111,16 @@ template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unused
 inline void Transpose3x6(__m256 in_0, __m256 in_1, __m256 in_2, __m256 in_3, __m256 in_4, __m256 in_5, __m256& out_0,
                          __m256& out_1, __m256& out_2) noexcept
 {
-    using Lane = intern::TranspositionLaneData<__m256, _firstRowIn, _firstRowOut>;
+    using Lane = intern::transpose::LaneData<__m256, _firstRowIn, _firstRowOut>;
     constexpr UST arraySize = (Lane::OffsetIn < 2) ? 4 : 8;
 
     std::array<__m256, arraySize> tmp =
-            intern::PermuteBeforeIntraLaneTransposeNx6<_firstRowIn, _firstRowOut, arraySize>(in_0, in_1, in_2, in_3,
-                                                                                             in_4, in_5);
+            intern::transpose::PermuteBeforeIntraLaneTransposeNx6<_firstRowIn, _firstRowOut, arraySize>(
+                    in_0, in_1, in_2, in_3, in_4, in_5);
 
-    std::array<__m256, 3> tout = intern::IntraLaneTransposeAfterPermute3xN<_firstRowIn>(tmp);
+    std::array<__m256, 3> tout = intern::transpose::IntraLaneTransposeAfterPermute3xN<_firstRowIn>(tmp);
 
-    intern::TransposeSetOutput<_firstRowOut, 6, _overwriteUnused, _unusedSetZero>(tout, out_0, out_1, out_2);
+    intern::transpose::SetOutput<_firstRowOut, 6, _overwriteUnused, _unusedSetZero>(tout, out_0, out_1, out_2);
 }
 
 
@@ -1131,16 +1131,16 @@ template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unused
 inline void Transpose3x7(__m256 in_0, __m256 in_1, __m256 in_2, __m256 in_3, __m256 in_4, __m256 in_5, __m256 in_6,
                          __m256& out_0, __m256& out_1, __m256& out_2) noexcept
 {
-    using Lane = intern::TranspositionLaneData<__m256, _firstRowIn, _firstRowOut>;
+    using Lane = intern::transpose::LaneData<__m256, _firstRowIn, _firstRowOut>;
     constexpr UST arraySize = (Lane::OffsetIn < 2) ? 4 : 8;
 
     std::array<__m256, arraySize> tmp =
-            intern::PermuteBeforeIntraLaneTransposeNx7<_firstRowIn, _firstRowOut, arraySize>(in_0, in_1, in_2, in_3,
-                                                                                             in_4, in_5, in_6);
+            intern::transpose::PermuteBeforeIntraLaneTransposeNx7<_firstRowIn, _firstRowOut, arraySize>(
+                    in_0, in_1, in_2, in_3, in_4, in_5, in_6);
 
-    std::array<__m256, 3> tout = intern::IntraLaneTransposeAfterPermute3xN<_firstRowIn>(tmp);
+    std::array<__m256, 3> tout = intern::transpose::IntraLaneTransposeAfterPermute3xN<_firstRowIn>(tmp);
 
-    intern::TransposeSetOutput<_firstRowOut, 7, _overwriteUnused, _unusedSetZero>(tout, out_0, out_1, out_2);
+    intern::transpose::SetOutput<_firstRowOut, 7, _overwriteUnused, _unusedSetZero>(tout, out_0, out_1, out_2);
 }
 
 
@@ -1151,17 +1151,17 @@ template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unused
 inline void Transpose3x8(__m256 in_0, __m256 in_1, __m256 in_2, __m256 in_3, __m256 in_4, __m256 in_5, __m256 in_6,
                          __m256 in_7, __m256& out_0, __m256& out_1, __m256& out_2) noexcept
 {
-    using Lane = intern::TranspositionLaneData<__m256, _firstRowIn, _firstRowOut>;
+    using Lane = intern::transpose::LaneData<__m256, _firstRowIn, _firstRowOut>;
     constexpr UST arraySize = (Lane::OffsetIn < 2) ? 4 : 8;
 
     std::array<__m256, arraySize> tmp =
-            intern::PermuteBeforeIntraLaneTransposeNx8<_firstRowIn, _firstRowOut, arraySize>(in_0, in_1, in_2, in_3,
-                                                                                             in_4, in_5, in_6, in_7);
+            intern::transpose::PermuteBeforeIntraLaneTransposeNx8<_firstRowIn, _firstRowOut, arraySize>(
+                    in_0, in_1, in_2, in_3, in_4, in_5, in_6, in_7);
 
-    std::array<__m256, 3> tout = intern::IntraLaneTransposeAfterPermute3xN<_firstRowIn>(tmp);
+    std::array<__m256, 3> tout = intern::transpose::IntraLaneTransposeAfterPermute3xN<_firstRowIn>(tmp);
 
 
-    intern::TransposeSetOutput<_firstRowOut, 8, _overwriteUnused, _unusedSetZero>(tout, out_0, out_1, out_2);
+    intern::transpose::SetOutput<_firstRowOut, 8, _overwriteUnused, _unusedSetZero>(tout, out_0, out_1, out_2);
 }
 
 
@@ -1171,7 +1171,7 @@ inline void Transpose3x8(__m256 in_0, __m256 in_1, __m256 in_2, __m256 in_3, __m
 template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unusedSetZero>
 inline void Transpose4x1(__m256 in_0, __m256& out_0, __m256& out_1, __m256& out_2, __m256& out_3) noexcept
 {
-    using Lane = intern::TranspositionLaneData<__m256, _firstRowIn, _firstRowOut>;
+    using Lane = intern::transpose::LaneData<__m256, _firstRowIn, _firstRowOut>;
 
     std::array<__m256, 4> tout;
 
@@ -1203,7 +1203,7 @@ inline void Transpose4x1(__m256 in_0, __m256& out_0, __m256& out_1, __m256& out_
         Transpose1x1<row_3, Lane::OffsetOut>(tmp[1], tout[3]);
     }
 
-    intern::TransposeSetOutput<_firstRowOut, 1, _overwriteUnused, _unusedSetZero>(tout, out_0, out_1, out_2, out_3);
+    intern::transpose::SetOutput<_firstRowOut, 1, _overwriteUnused, _unusedSetZero>(tout, out_0, out_1, out_2, out_3);
 }
 
 
@@ -1213,7 +1213,7 @@ inline void Transpose4x1(__m256 in_0, __m256& out_0, __m256& out_1, __m256& out_
 template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unusedSetZero>
 inline void Transpose4x2(__m256 in_0, __m256 in_1, __m256& out_0, __m256& out_1, __m256& out_2, __m256& out_3) noexcept
 {
-    using Lane = intern::TranspositionLaneData<__m256, _firstRowIn, _firstRowOut>;
+    using Lane = intern::transpose::LaneData<__m256, _firstRowIn, _firstRowOut>;
     std::array<__m256, 4> tout;
 
     constexpr U32 idx_0 = (4 - Lane::OffsetIn) % 4;
@@ -1224,35 +1224,35 @@ inline void Transpose4x2(__m256 in_0, __m256 in_1, __m256& out_0, __m256& out_1,
     if constexpr (Lane::OffsetOut < 3)
     {
         __m256 tmp_0 = SwapLanesIf<(Lane::OffsetIn == 0 && Lane::In != Lane::Out)>(in_0);
-        __m256 tmp1 = SwapLanesIf<(Lane::OffsetIn == 0 && Lane::In != Lane::Out)>(in_1);
+        __m256 tmp_1 = SwapLanesIf<(Lane::OffsetIn == 0 && Lane::In != Lane::Out)>(in_1);
 
 
         if constexpr (Lane::OffsetOut == 0)
         {
-            __m256 tmp2 = _mm_unpacklo(tmp_0, tmp1);
-            __m256 tmp3 = _mm_unpackhi(tmp_0, tmp1);
+            __m256 tmp_2 = _mm_unpacklo(tmp_0, tmp_1);
+            __m256 tmp_3 = _mm_unpackhi(tmp_0, tmp_1);
 
-            tout[idx_0] = tmp2;
-            tout[idx_1] = Permute<2, 3, 0, 1>(tmp2);
-            tout[idx_2] = tmp3;
-            tout[idx_3] = Permute<2, 3, 0, 1>(tmp3);
+            tout[idx_0] = tmp_2;
+            tout[idx_1] = Permute<2, 3, 0, 1>(tmp_2);
+            tout[idx_2] = tmp_3;
+            tout[idx_3] = Permute<2, 3, 0, 1>(tmp_3);
         }
         else if constexpr (Lane::OffsetOut == 1)
         {
-            tout[idx_0] = Shuffle<0, 0, 0, 0>(tmp_0, tmp1);
-            tout[idx_1] = Shuffle<1, 1, 1, 1>(tmp_0, tmp1);
-            tout[idx_2] = Shuffle<2, 2, 2, 2>(tmp_0, tmp1);
-            tout[idx_3] = Shuffle<3, 3, 3, 3>(tmp_0, tmp1);
+            tout[idx_0] = Shuffle<0, 0, 0, 0>(tmp_0, tmp_1);
+            tout[idx_1] = Shuffle<1, 1, 1, 1>(tmp_0, tmp_1);
+            tout[idx_2] = Shuffle<2, 2, 2, 2>(tmp_0, tmp_1);
+            tout[idx_3] = Shuffle<3, 3, 3, 3>(tmp_0, tmp_1);
         }
         else
         {
-            __m256 tmp2 = _mm_unpacklo(tmp_0, tmp1);
-            __m256 tmp3 = _mm_unpackhi(tmp_0, tmp1);
+            __m256 tmp_2 = _mm_unpacklo(tmp_0, tmp_1);
+            __m256 tmp_3 = _mm_unpackhi(tmp_0, tmp_1);
 
-            tout[idx_0] = Permute<2, 3, 0, 1>(tmp2);
-            tout[idx_1] = tmp2;
-            tout[idx_2] = Permute<2, 3, 0, 1>(tmp3);
-            tout[idx_3] = tmp3;
+            tout[idx_0] = Permute<2, 3, 0, 1>(tmp_2);
+            tout[idx_1] = tmp_2;
+            tout[idx_2] = Permute<2, 3, 0, 1>(tmp_3);
+            tout[idx_3] = tmp_3;
         }
 
 
@@ -1301,7 +1301,7 @@ inline void Transpose4x2(__m256 in_0, __m256 in_1, __m256& out_0, __m256& out_1,
         }
     }
 
-    intern::TransposeSetOutput<_firstRowOut, 2, _overwriteUnused, _unusedSetZero>(tout, out_0, out_1, out_2, out_3);
+    intern::transpose::SetOutput<_firstRowOut, 2, _overwriteUnused, _unusedSetZero>(tout, out_0, out_1, out_2, out_3);
 } // namespace GDL::simd
 
 
@@ -1312,7 +1312,7 @@ template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unused
 inline void Transpose4x3(__m256 in_0, __m256 in_1, __m256 in_2, __m256& out_0, __m256& out_1, __m256& out_2,
                          __m256& out_3) noexcept
 {
-    using Lane = intern::TranspositionLaneData<__m256, _firstRowIn, _firstRowOut>;
+    using Lane = intern::transpose::LaneData<__m256, _firstRowIn, _firstRowOut>;
     std::array<__m256, 4> tout;
 
     constexpr U32 idx_0 = (4 - Lane::OffsetIn) % 4;
@@ -1323,29 +1323,29 @@ inline void Transpose4x3(__m256 in_0, __m256 in_1, __m256 in_2, __m256& out_0, _
     if constexpr (Lane::OffsetOut < 2)
     {
         __m256 tmp_0 = SwapLanesIf<(Lane::OffsetIn == 0 && Lane::In != Lane::Out)>(in_0);
-        __m256 tmp1 = SwapLanesIf<(Lane::OffsetIn == 0 && Lane::In != Lane::Out)>(in_1);
-        __m256 tmp2 = SwapLanesIf<(Lane::OffsetIn == 0 && Lane::In != Lane::Out)>(in_2);
+        __m256 tmp_1 = SwapLanesIf<(Lane::OffsetIn == 0 && Lane::In != Lane::Out)>(in_1);
+        __m256 tmp_2 = SwapLanesIf<(Lane::OffsetIn == 0 && Lane::In != Lane::Out)>(in_2);
 
 
         if constexpr (Lane::OffsetOut == 0)
         {
-            __m256 tmp3 = _mm_unpacklo(tmp_0, tmp1);
-            __m256 tmp4 = _mm_unpackhi(tmp_0, tmp1);
+            __m256 tmp_3 = _mm_unpacklo(tmp_0, tmp_1);
+            __m256 tmp_4 = _mm_unpackhi(tmp_0, tmp_1);
 
-            tout[idx_0] = _mm_movelh(tmp3, tmp2);
-            tout[idx_1] = Shuffle<2, 3, 1, 0>(tmp3, tmp2);
-            tout[idx_2] = Blend<0, 0, 1, 0, 0, 0, 1, 0>(tmp4, tmp2);
-            tout[idx_3] = Shuffle<2, 3, 3, 2>(tmp4, tmp2);
+            tout[idx_0] = _mm_movelh(tmp_3, tmp_2);
+            tout[idx_1] = Shuffle<2, 3, 1, 0>(tmp_3, tmp_2);
+            tout[idx_2] = Blend<0, 0, 1, 0, 0, 0, 1, 0>(tmp_4, tmp_2);
+            tout[idx_3] = Shuffle<2, 3, 3, 2>(tmp_4, tmp_2);
         }
         else
         {
-            __m256 tmp3 = _mm_unpacklo(tmp1, tmp2);
-            __m256 tmp4 = _mm_unpackhi(tmp1, tmp2);
+            __m256 tmp_3 = _mm_unpacklo(tmp_1, tmp_2);
+            __m256 tmp_4 = _mm_unpackhi(tmp_1, tmp_2);
 
-            tout[idx_0] = Shuffle<1, 0, 0, 1>(tmp_0, tmp3);
-            tout[idx_1] = Blend<0, 1, 0, 0, 0, 1, 0, 0>(tmp3, tmp_0);
-            tout[idx_2] = Shuffle<3, 2, 0, 1>(tmp_0, tmp4);
-            tout[idx_3] = _mm_movehl(tmp4, tmp_0);
+            tout[idx_0] = Shuffle<1, 0, 0, 1>(tmp_0, tmp_3);
+            tout[idx_1] = Blend<0, 1, 0, 0, 0, 1, 0, 0>(tmp_3, tmp_0);
+            tout[idx_2] = Shuffle<3, 2, 0, 1>(tmp_0, tmp_4);
+            tout[idx_3] = _mm_movehl(tmp_4, tmp_0);
         }
 
 
@@ -1372,68 +1372,68 @@ inline void Transpose4x3(__m256 in_0, __m256 in_1, __m256 in_2, __m256& out_0, _
             tmp[0 + mod] = Permute2F128<0, Lane::In, 1, Lane::In>(in_0, in_2);
             tmp[1 - mod] = SwapLanesIf<Lane::In != mod>(in_1);
 
-            __m256 tmp2 = _mm_unpacklo(tmp[0], tmp[1]);
-            __m256 tmp3 = _mm_unpackhi(tmp[0], tmp[1]);
+            __m256 tmp_2 = _mm_unpacklo(tmp[0], tmp[1]);
+            __m256 tmp_3 = _mm_unpackhi(tmp[0], tmp[1]);
 
-            tout[idx_0] = Permute<0, 1, 0, 1>(tmp2);
-            tout[idx_1] = Permute<2, 3, 2, 3>(tmp2);
-            tout[idx_2] = Permute<0, 1, 0, 1>(tmp3);
-            tout[idx_3] = Permute<2, 3, 2, 3>(tmp3);
+            tout[idx_0] = Permute<0, 1, 0, 1>(tmp_2);
+            tout[idx_1] = Permute<2, 3, 2, 3>(tmp_2);
+            tout[idx_2] = Permute<0, 1, 0, 1>(tmp_3);
+            tout[idx_3] = Permute<2, 3, 2, 3>(tmp_3);
         }
         else
         {
             std::array<__m256, 3> tin = {{in_0, in_1, in_2}};
 
-            __m256 tmp2 = _mm_unpacklo(tin[0 + mod], tin[1 + mod]);
-            __m256 tmp3 = _mm_unpackhi(tin[0 + mod], tin[1 + mod]);
+            __m256 tmp_2 = _mm_unpacklo(tin[0 + mod], tin[1 + mod]);
+            __m256 tmp_3 = _mm_unpackhi(tin[0 + mod], tin[1 + mod]);
 
 
             if constexpr (Lane::OffsetOut == 2)
             {
-                __m256 tmp4 = Permute2F128<0, 1, 1, 0>(tmp2, in_2);
+                __m256 tmp_4 = Permute2F128<0, 1, 1, 0>(tmp_2, in_2);
 
-                tout[idx_0] = _mm_movelh(in_2, tmp4);
+                tout[idx_0] = _mm_movelh(in_2, tmp_4);
 
                 if constexpr (Lane::OffsetIn < 2)
-                    tout[idx_1] = Shuffle<1, 0, 2, 3>(tmp4, tmp2);
+                    tout[idx_1] = Shuffle<1, 0, 2, 3>(tmp_4, tmp_2);
                 else
-                    tout[idx_1] = Shuffle<1, 0, 2, 3>(in_2, tmp4);
+                    tout[idx_1] = Shuffle<1, 0, 2, 3>(in_2, tmp_4);
 
                 if constexpr (Lane::OffsetIn < 3)
-                    tout[idx_2] = Shuffle<2, 0, 0, 1>(tmp4, tmp3);
+                    tout[idx_2] = Shuffle<2, 0, 0, 1>(tmp_4, tmp_3);
                 else
                 {
-                    __m256 tmp5 = SwapLanes(tmp3);
-                    tout[idx_2] = Shuffle<2, 0, 0, 1>(in_2, tmp5);
+                    __m256 tmp_5 = SwapLanes(tmp_3);
+                    tout[idx_2] = Shuffle<2, 0, 0, 1>(in_2, tmp_5);
                 }
 
-                tout[idx_3] = Shuffle<3, 0, 2, 3>(tmp4, tmp3);
+                tout[idx_3] = Shuffle<3, 0, 2, 3>(tmp_4, tmp_3);
             }
             else
             {
-                __m256 tmp4 = Permute2F128<0, 1, 1, 0>(in_0, tmp3);
+                __m256 tmp_4 = Permute2F128<0, 1, 1, 0>(in_0, tmp_3);
 
-                tout[idx_0] = Shuffle<0, 1, 0, 0>(tmp2, tmp4);
+                tout[idx_0] = Shuffle<0, 1, 0, 0>(tmp_2, tmp_4);
 
                 if constexpr (Lane::OffsetIn < 2)
                 {
-                    __m256 tmp5 = SwapLanes(tmp2);
-                    tout[idx_1] = Shuffle<2, 3, 0, 1>(tmp5, in_0);
+                    __m256 tmp_5 = SwapLanes(tmp_2);
+                    tout[idx_1] = Shuffle<2, 3, 0, 1>(tmp_5, in_0);
                 }
                 else
-                    tout[idx_1] = Shuffle<2, 3, 0, 1>(tmp2, tmp4);
+                    tout[idx_1] = Shuffle<2, 3, 0, 1>(tmp_2, tmp_4);
 
                 if constexpr (Lane::OffsetIn < 3)
-                    tout[idx_2] = Shuffle<0, 1, 0, 2>(tmp4, in_0);
+                    tout[idx_2] = Shuffle<0, 1, 0, 2>(tmp_4, in_0);
                 else
-                    tout[idx_2] = Shuffle<0, 1, 3, 2>(tmp3, tmp4);
+                    tout[idx_2] = Shuffle<0, 1, 3, 2>(tmp_3, tmp_4);
 
-                tout[idx_3] = _mm_movehl(in_0, tmp4);
+                tout[idx_3] = _mm_movehl(in_0, tmp_4);
             }
         }
     }
 
-    intern::TransposeSetOutput<_firstRowOut, 3, _overwriteUnused, _unusedSetZero>(tout, out_0, out_1, out_2, out_3);
+    intern::transpose::SetOutput<_firstRowOut, 3, _overwriteUnused, _unusedSetZero>(tout, out_0, out_1, out_2, out_3);
 }
 
 
@@ -1444,27 +1444,28 @@ template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unused
 inline void Transpose4x4(__m256 in_0, __m256 in_1, __m256 in_2, __m256 in_3, __m256& out_0, __m256& out_1,
                          __m256& out_2, __m256& out_3) noexcept
 {
-    using Lane = intern::TranspositionLaneData<__m256, _firstRowIn, _firstRowOut>;
+    using Lane = intern::transpose::LaneData<__m256, _firstRowIn, _firstRowOut>;
 
     std::array<__m256, 4> tmp;
     if constexpr (Lane::OffsetIn == 0 && Lane::OffsetOut == 0)
     {
-        __m256 tmp8 = _mm_unpacklo(in_0, in_1);
-        __m256 tmp9 = _mm_unpackhi(in_0, in_1);
-        __m256 tmp10 = _mm_unpacklo(in_2, in_3);
-        __m256 tmp11 = _mm_unpackhi(in_2, in_3);
+        __m256 tmp_0 = _mm_unpacklo(in_0, in_1);
+        __m256 tmp_1 = _mm_unpackhi(in_0, in_1);
+        __m256 tmp_2 = _mm_unpacklo(in_2, in_3);
+        __m256 tmp_3 = _mm_unpackhi(in_2, in_3);
 
-        tmp[0] = _mm_movelh(tmp8, tmp10);
-        tmp[1] = _mm_movehl(tmp10, tmp8);
-        tmp[2] = _mm_movelh(tmp9, tmp11);
-        tmp[3] = _mm_movehl(tmp11, tmp9);
+        tmp[0] = _mm_movelh(tmp_0, tmp_2);
+        tmp[1] = _mm_movehl(tmp_2, tmp_0);
+        tmp[2] = _mm_movelh(tmp_1, tmp_3);
+        tmp[3] = _mm_movehl(tmp_3, tmp_1);
     }
     else
-        tmp = intern::IntraLaneTransposeBeforePermuteNx4<_firstRowIn, _firstRowOut>(in_0, in_1, in_2, in_3);
+        tmp = intern::transpose::IntraLaneTransposeBeforePermuteNx4<_firstRowIn, _firstRowOut>(in_0, in_1, in_2, in_3);
 
-    std::array<__m256, 4> tout = intern::PermuteAfterIntraLaneTransposeNx4<_firstRowIn, _firstRowOut, 4>(tmp);
+    std::array<__m256, 4> tout =
+            intern::transpose::PermuteAfterIntraLaneTransposeNx4<_firstRowIn, _firstRowOut, 4>(tmp);
 
-    intern::TransposeSetOutput<_firstRowOut, 4, _overwriteUnused, _unusedSetZero>(tout, out_0, out_1, out_2, out_3);
+    intern::transpose::SetOutput<_firstRowOut, 4, _overwriteUnused, _unusedSetZero>(tout, out_0, out_1, out_2, out_3);
 }
 
 
@@ -1475,16 +1476,16 @@ template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unused
 inline void Transpose4x5(__m256 in_0, __m256 in_1, __m256 in_2, __m256 in_3, __m256 in_4, __m256& out_0, __m256& out_1,
                          __m256& out_2, __m256& out_3) noexcept
 {
-    using Lane = intern::TranspositionLaneData<__m256, _firstRowIn, _firstRowOut>;
+    using Lane = intern::transpose::LaneData<__m256, _firstRowIn, _firstRowOut>;
     constexpr UST arraySize = (Lane::OffsetIn < 1) ? 4 : 8;
 
     std::array<__m256, arraySize> tmp =
-            intern::PermuteBeforeIntraLaneTransposeNx5<_firstRowIn, _firstRowOut, arraySize>(in_0, in_1, in_2, in_3,
-                                                                                             in_4);
+            intern::transpose::PermuteBeforeIntraLaneTransposeNx5<_firstRowIn, _firstRowOut, arraySize>(
+                    in_0, in_1, in_2, in_3, in_4);
 
-    std::array<__m256, 4> tout = intern::IntraLaneTransposeAfterPermute4xN<_firstRowIn>(tmp);
+    std::array<__m256, 4> tout = intern::transpose::IntraLaneTransposeAfterPermute4xN<_firstRowIn>(tmp);
 
-    intern::TransposeSetOutput<_firstRowOut, 5, _overwriteUnused, _unusedSetZero>(tout, out_0, out_1, out_2, out_3);
+    intern::transpose::SetOutput<_firstRowOut, 5, _overwriteUnused, _unusedSetZero>(tout, out_0, out_1, out_2, out_3);
 }
 
 
@@ -1495,16 +1496,16 @@ template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unused
 inline void Transpose4x6(__m256 in_0, __m256 in_1, __m256 in_2, __m256 in_3, __m256 in_4, __m256 in_5, __m256& out_0,
                          __m256& out_1, __m256& out_2, __m256& out_3) noexcept
 {
-    using Lane = intern::TranspositionLaneData<__m256, _firstRowIn, _firstRowOut>;
+    using Lane = intern::transpose::LaneData<__m256, _firstRowIn, _firstRowOut>;
     constexpr UST arraySize = (Lane::OffsetIn < 1) ? 4 : 8;
 
     std::array<__m256, arraySize> tmp =
-            intern::PermuteBeforeIntraLaneTransposeNx6<_firstRowIn, _firstRowOut, arraySize>(in_0, in_1, in_2, in_3,
-                                                                                             in_4, in_5);
+            intern::transpose::PermuteBeforeIntraLaneTransposeNx6<_firstRowIn, _firstRowOut, arraySize>(
+                    in_0, in_1, in_2, in_3, in_4, in_5);
 
-    std::array<__m256, 4> tout = intern::IntraLaneTransposeAfterPermute4xN<_firstRowIn>(tmp);
+    std::array<__m256, 4> tout = intern::transpose::IntraLaneTransposeAfterPermute4xN<_firstRowIn>(tmp);
 
-    intern::TransposeSetOutput<_firstRowOut, 6, _overwriteUnused, _unusedSetZero>(tout, out_0, out_1, out_2, out_3);
+    intern::transpose::SetOutput<_firstRowOut, 6, _overwriteUnused, _unusedSetZero>(tout, out_0, out_1, out_2, out_3);
 }
 
 
@@ -1515,16 +1516,16 @@ template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unused
 inline void Transpose4x7(__m256 in_0, __m256 in_1, __m256 in_2, __m256 in_3, __m256 in_4, __m256 in_5, __m256 in_6,
                          __m256& out_0, __m256& out_1, __m256& out_2, __m256& out_3) noexcept
 {
-    using Lane = intern::TranspositionLaneData<__m256, _firstRowIn, _firstRowOut>;
+    using Lane = intern::transpose::LaneData<__m256, _firstRowIn, _firstRowOut>;
     constexpr UST arraySize = (Lane::OffsetIn < 1) ? 4 : 8;
 
     std::array<__m256, arraySize> tmp =
-            intern::PermuteBeforeIntraLaneTransposeNx7<_firstRowIn, _firstRowOut, arraySize>(in_0, in_1, in_2, in_3,
-                                                                                             in_4, in_5, in_6);
+            intern::transpose::PermuteBeforeIntraLaneTransposeNx7<_firstRowIn, _firstRowOut, arraySize>(
+                    in_0, in_1, in_2, in_3, in_4, in_5, in_6);
 
-    std::array<__m256, 4> tout = intern::IntraLaneTransposeAfterPermute4xN<_firstRowIn>(tmp);
+    std::array<__m256, 4> tout = intern::transpose::IntraLaneTransposeAfterPermute4xN<_firstRowIn>(tmp);
 
-    intern::TransposeSetOutput<_firstRowOut, 7, _overwriteUnused, _unusedSetZero>(tout, out_0, out_1, out_2, out_3);
+    intern::transpose::SetOutput<_firstRowOut, 7, _overwriteUnused, _unusedSetZero>(tout, out_0, out_1, out_2, out_3);
 }
 
 
@@ -1535,16 +1536,16 @@ template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unused
 inline void Transpose4x8(__m256 in_0, __m256 in_1, __m256 in_2, __m256 in_3, __m256 in_4, __m256 in_5, __m256 in_6,
                          __m256 in_7, __m256& out_0, __m256& out_1, __m256& out_2, __m256& out_3) noexcept
 {
-    using Lane = intern::TranspositionLaneData<__m256, _firstRowIn, _firstRowOut>;
+    using Lane = intern::transpose::LaneData<__m256, _firstRowIn, _firstRowOut>;
     constexpr UST arraySize = (Lane::OffsetIn < 1) ? 4 : 8;
 
     std::array<__m256, arraySize> tmp =
-            intern::PermuteBeforeIntraLaneTransposeNx8<_firstRowIn, _firstRowOut, arraySize>(in_0, in_1, in_2, in_3,
-                                                                                             in_4, in_5, in_6, in_7);
+            intern::transpose::PermuteBeforeIntraLaneTransposeNx8<_firstRowIn, _firstRowOut, arraySize>(
+                    in_0, in_1, in_2, in_3, in_4, in_5, in_6, in_7);
 
-    std::array<__m256, 4> tout = intern::IntraLaneTransposeAfterPermute4xN<_firstRowIn>(tmp);
+    std::array<__m256, 4> tout = intern::transpose::IntraLaneTransposeAfterPermute4xN<_firstRowIn>(tmp);
 
-    intern::TransposeSetOutput<_firstRowOut, 8, _overwriteUnused, _unusedSetZero>(tout, out_0, out_1, out_2, out_3);
+    intern::transpose::SetOutput<_firstRowOut, 8, _overwriteUnused, _unusedSetZero>(tout, out_0, out_1, out_2, out_3);
 }
 
 
@@ -1555,12 +1556,12 @@ template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unused
 inline void Transpose5x1(__m256 in_0, __m256& out_0, __m256& out_1, __m256& out_2, __m256& out_3,
                          __m256& out_4) noexcept
 {
-    auto tmp = intern::IntraLaneTransposeBeforePermuteNx1<_firstRowOut>(in_0);
+    auto tmp = intern::transpose::IntraLaneTransposeBeforePermuteNx1<_firstRowOut>(in_0);
 
-    std::array<__m256, 5> tout = intern::PermuteAfterIntraLaneTranspose<_firstRowIn, _firstRowOut, 5>(tmp);
+    std::array<__m256, 5> tout = intern::transpose::PermuteAfterIntraLaneTranspose<_firstRowIn, _firstRowOut, 5>(tmp);
 
-    intern::TransposeSetOutput<_firstRowOut, 1, _overwriteUnused, _unusedSetZero>(tout, out_0, out_1, out_2, out_3,
-                                                                                  out_4);
+    intern::transpose::SetOutput<_firstRowOut, 1, _overwriteUnused, _unusedSetZero>(tout, out_0, out_1, out_2, out_3,
+                                                                                    out_4);
 }
 
 
@@ -1571,12 +1572,12 @@ template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unused
 inline void Transpose5x2(__m256 in_0, __m256 in_1, __m256& out_0, __m256& out_1, __m256& out_2, __m256& out_3,
                          __m256& out_4) noexcept
 {
-    auto tmp = intern::IntraLaneTransposeBeforePermuteNx2<_firstRowOut>(in_0, in_1);
+    auto tmp = intern::transpose::IntraLaneTransposeBeforePermuteNx2<_firstRowOut>(in_0, in_1);
 
-    std::array<__m256, 5> tout = intern::PermuteAfterIntraLaneTranspose<_firstRowIn, _firstRowOut, 5>(tmp);
+    std::array<__m256, 5> tout = intern::transpose::PermuteAfterIntraLaneTranspose<_firstRowIn, _firstRowOut, 5>(tmp);
 
-    intern::TransposeSetOutput<_firstRowOut, 2, _overwriteUnused, _unusedSetZero>(tout, out_0, out_1, out_2, out_3,
-                                                                                  out_4);
+    intern::transpose::SetOutput<_firstRowOut, 2, _overwriteUnused, _unusedSetZero>(tout, out_0, out_1, out_2, out_3,
+                                                                                    out_4);
 }
 
 
@@ -1587,12 +1588,12 @@ template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unused
 inline void Transpose5x3(__m256 in_0, __m256 in_1, __m256 in_2, __m256& out_0, __m256& out_1, __m256& out_2,
                          __m256& out_3, __m256& out_4) noexcept
 {
-    auto tmp = intern::IntraLaneTransposeBeforePermuteNx3<_firstRowOut>(in_0, in_1, in_2);
+    auto tmp = intern::transpose::IntraLaneTransposeBeforePermuteNx3<_firstRowOut>(in_0, in_1, in_2);
 
-    std::array<__m256, 5> tout = intern::PermuteAfterIntraLaneTranspose<_firstRowIn, _firstRowOut, 5>(tmp);
+    std::array<__m256, 5> tout = intern::transpose::PermuteAfterIntraLaneTranspose<_firstRowIn, _firstRowOut, 5>(tmp);
 
-    intern::TransposeSetOutput<_firstRowOut, 3, _overwriteUnused, _unusedSetZero>(tout, out_0, out_1, out_2, out_3,
-                                                                                  out_4);
+    intern::transpose::SetOutput<_firstRowOut, 3, _overwriteUnused, _unusedSetZero>(tout, out_0, out_1, out_2, out_3,
+                                                                                    out_4);
 }
 
 
@@ -1604,12 +1605,13 @@ inline void Transpose5x4(__m256 in_0, __m256 in_1, __m256 in_2, __m256 in_3, __m
                          __m256& out_2, __m256& out_3, __m256& out_4) noexcept
 {
     std::array<__m256, 4> tmp =
-            intern::IntraLaneTransposeBeforePermuteNx4<_firstRowIn, _firstRowOut>(in_0, in_1, in_2, in_3);
+            intern::transpose::IntraLaneTransposeBeforePermuteNx4<_firstRowIn, _firstRowOut>(in_0, in_1, in_2, in_3);
 
-    std::array<__m256, 5> tout = intern::PermuteAfterIntraLaneTransposeNx4<_firstRowIn, _firstRowOut, 5>(tmp);
+    std::array<__m256, 5> tout =
+            intern::transpose::PermuteAfterIntraLaneTransposeNx4<_firstRowIn, _firstRowOut, 5>(tmp);
 
-    intern::TransposeSetOutput<_firstRowOut, 4, _overwriteUnused, _unusedSetZero>(tout, out_0, out_1, out_2, out_3,
-                                                                                  out_4);
+    intern::transpose::SetOutput<_firstRowOut, 4, _overwriteUnused, _unusedSetZero>(tout, out_0, out_1, out_2, out_3,
+                                                                                    out_4);
 }
 
 
@@ -1620,12 +1622,13 @@ template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unused
 inline void Transpose5x5(__m256 in_0, __m256 in_1, __m256 in_2, __m256 in_3, __m256 in_4, __m256& out_0, __m256& out_1,
                          __m256& out_2, __m256& out_3, __m256& out_4) noexcept
 {
-    std::array<__m256, 8> tmp = intern::IntraLaneTransposeBeforePermuteNx5<_firstRowOut>(in_0, in_1, in_2, in_3, in_4);
+    std::array<__m256, 8> tmp =
+            intern::transpose::IntraLaneTransposeBeforePermuteNx5<_firstRowOut>(in_0, in_1, in_2, in_3, in_4);
 
-    std::array<__m256, 5> tout = intern::PermuteAfterIntraLaneTranspose<_firstRowIn, _firstRowOut, 5>(tmp);
+    std::array<__m256, 5> tout = intern::transpose::PermuteAfterIntraLaneTranspose<_firstRowIn, _firstRowOut, 5>(tmp);
 
-    intern::TransposeSetOutput<_firstRowOut, 5, _overwriteUnused, _unusedSetZero>(tout, out_0, out_1, out_2, out_3,
-                                                                                  out_4);
+    intern::transpose::SetOutput<_firstRowOut, 5, _overwriteUnused, _unusedSetZero>(tout, out_0, out_1, out_2, out_3,
+                                                                                    out_4);
 }
 
 
@@ -1636,13 +1639,13 @@ template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unused
 inline void Transpose5x6(__m256 in_0, __m256 in_1, __m256 in_2, __m256 in_3, __m256 in_4, __m256 in_5, __m256& out_0,
                          __m256& out_1, __m256& out_2, __m256& out_3, __m256& out_4) noexcept
 {
-    std::array<__m256, 8> tmp = intern::PermuteBeforeIntraLaneTransposeNx6<_firstRowIn, _firstRowOut, 8>(
+    std::array<__m256, 8> tmp = intern::transpose::PermuteBeforeIntraLaneTransposeNx6<_firstRowIn, _firstRowOut, 8>(
             in_0, in_1, in_2, in_3, in_4, in_5);
 
-    std::array<__m256, 5> tout = intern::IntraLaneTransposeAfterPermute5xN<_firstRowIn>(tmp);
+    std::array<__m256, 5> tout = intern::transpose::IntraLaneTransposeAfterPermute5xN<_firstRowIn>(tmp);
 
-    intern::TransposeSetOutput<_firstRowOut, 6, _overwriteUnused, _unusedSetZero>(tout, out_0, out_1, out_2, out_3,
-                                                                                  out_4);
+    intern::transpose::SetOutput<_firstRowOut, 6, _overwriteUnused, _unusedSetZero>(tout, out_0, out_1, out_2, out_3,
+                                                                                    out_4);
 }
 
 
@@ -1653,13 +1656,13 @@ template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unused
 inline void Transpose5x7(__m256 in_0, __m256 in_1, __m256 in_2, __m256 in_3, __m256 in_4, __m256 in_5, __m256 in_6,
                          __m256& out_0, __m256& out_1, __m256& out_2, __m256& out_3, __m256& out_4) noexcept
 {
-    std::array<__m256, 8> tmp = intern::PermuteBeforeIntraLaneTransposeNx7<_firstRowIn, _firstRowOut, 8>(
+    std::array<__m256, 8> tmp = intern::transpose::PermuteBeforeIntraLaneTransposeNx7<_firstRowIn, _firstRowOut, 8>(
             in_0, in_1, in_2, in_3, in_4, in_5, in_6);
 
-    std::array<__m256, 5> tout = intern::IntraLaneTransposeAfterPermute5xN<_firstRowIn>(tmp);
+    std::array<__m256, 5> tout = intern::transpose::IntraLaneTransposeAfterPermute5xN<_firstRowIn>(tmp);
 
-    intern::TransposeSetOutput<_firstRowOut, 7, _overwriteUnused, _unusedSetZero>(tout, out_0, out_1, out_2, out_3,
-                                                                                  out_4);
+    intern::transpose::SetOutput<_firstRowOut, 7, _overwriteUnused, _unusedSetZero>(tout, out_0, out_1, out_2, out_3,
+                                                                                    out_4);
 }
 
 
@@ -1671,13 +1674,13 @@ inline void Transpose5x8(__m256 in_0, __m256 in_1, __m256 in_2, __m256 in_3, __m
                          __m256 in_7, __m256& out_0, __m256& out_1, __m256& out_2, __m256& out_3,
                          __m256& out_4) noexcept
 {
-    std::array<__m256, 8> tmp = intern::PermuteBeforeIntraLaneTransposeNx8<_firstRowIn, _firstRowOut, 8>(
+    std::array<__m256, 8> tmp = intern::transpose::PermuteBeforeIntraLaneTransposeNx8<_firstRowIn, _firstRowOut, 8>(
             in_0, in_1, in_2, in_3, in_4, in_5, in_6, in_7);
 
-    std::array<__m256, 5> tout = intern::IntraLaneTransposeAfterPermute5xN<_firstRowIn>(tmp);
+    std::array<__m256, 5> tout = intern::transpose::IntraLaneTransposeAfterPermute5xN<_firstRowIn>(tmp);
 
-    intern::TransposeSetOutput<_firstRowOut, 8, _overwriteUnused, _unusedSetZero>(tout, out_0, out_1, out_2, out_3,
-                                                                                  out_4);
+    intern::transpose::SetOutput<_firstRowOut, 8, _overwriteUnused, _unusedSetZero>(tout, out_0, out_1, out_2, out_3,
+                                                                                    out_4);
 }
 
 
@@ -1688,12 +1691,12 @@ template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unused
 inline void Transpose6x1(__m256 in_0, __m256& out_0, __m256& out_1, __m256& out_2, __m256& out_3, __m256& out_4,
                          __m256& out_5) noexcept
 {
-    auto tmp = intern::IntraLaneTransposeBeforePermuteNx1<_firstRowOut>(in_0);
+    auto tmp = intern::transpose::IntraLaneTransposeBeforePermuteNx1<_firstRowOut>(in_0);
 
-    std::array<__m256, 6> tout = intern::PermuteAfterIntraLaneTranspose<_firstRowIn, _firstRowOut, 6>(tmp);
+    std::array<__m256, 6> tout = intern::transpose::PermuteAfterIntraLaneTranspose<_firstRowIn, _firstRowOut, 6>(tmp);
 
-    intern::TransposeSetOutput<_firstRowOut, 1, _overwriteUnused, _unusedSetZero>(tout, out_0, out_1, out_2, out_3,
-                                                                                  out_4, out_5);
+    intern::transpose::SetOutput<_firstRowOut, 1, _overwriteUnused, _unusedSetZero>(tout, out_0, out_1, out_2, out_3,
+                                                                                    out_4, out_5);
 }
 
 
@@ -1704,12 +1707,12 @@ template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unused
 inline void Transpose6x2(__m256 in_0, __m256 in_1, __m256& out_0, __m256& out_1, __m256& out_2, __m256& out_3,
                          __m256& out_4, __m256& out_5) noexcept
 {
-    auto tmp = intern::IntraLaneTransposeBeforePermuteNx2<_firstRowOut>(in_0, in_1);
+    auto tmp = intern::transpose::IntraLaneTransposeBeforePermuteNx2<_firstRowOut>(in_0, in_1);
 
-    std::array<__m256, 6> tout = intern::PermuteAfterIntraLaneTranspose<_firstRowIn, _firstRowOut, 6>(tmp);
+    std::array<__m256, 6> tout = intern::transpose::PermuteAfterIntraLaneTranspose<_firstRowIn, _firstRowOut, 6>(tmp);
 
-    intern::TransposeSetOutput<_firstRowOut, 2, _overwriteUnused, _unusedSetZero>(tout, out_0, out_1, out_2, out_3,
-                                                                                  out_4, out_5);
+    intern::transpose::SetOutput<_firstRowOut, 2, _overwriteUnused, _unusedSetZero>(tout, out_0, out_1, out_2, out_3,
+                                                                                    out_4, out_5);
 }
 
 
@@ -1720,12 +1723,12 @@ template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unused
 inline void Transpose6x3(__m256 in_0, __m256 in_1, __m256 in_2, __m256& out_0, __m256& out_1, __m256& out_2,
                          __m256& out_3, __m256& out_4, __m256& out_5) noexcept
 {
-    auto tmp = intern::IntraLaneTransposeBeforePermuteNx3<_firstRowOut>(in_0, in_1, in_2);
+    auto tmp = intern::transpose::IntraLaneTransposeBeforePermuteNx3<_firstRowOut>(in_0, in_1, in_2);
 
-    std::array<__m256, 6> tout = intern::PermuteAfterIntraLaneTranspose<_firstRowIn, _firstRowOut, 6>(tmp);
+    std::array<__m256, 6> tout = intern::transpose::PermuteAfterIntraLaneTranspose<_firstRowIn, _firstRowOut, 6>(tmp);
 
-    intern::TransposeSetOutput<_firstRowOut, 3, _overwriteUnused, _unusedSetZero>(tout, out_0, out_1, out_2, out_3,
-                                                                                  out_4, out_5);
+    intern::transpose::SetOutput<_firstRowOut, 3, _overwriteUnused, _unusedSetZero>(tout, out_0, out_1, out_2, out_3,
+                                                                                    out_4, out_5);
 }
 
 
@@ -1737,12 +1740,13 @@ inline void Transpose6x4(__m256 in_0, __m256 in_1, __m256 in_2, __m256 in_3, __m
                          __m256& out_2, __m256& out_3, __m256& out_4, __m256& out_5) noexcept
 {
     std::array<__m256, 4> tmp =
-            intern::IntraLaneTransposeBeforePermuteNx4<_firstRowIn, _firstRowOut>(in_0, in_1, in_2, in_3);
+            intern::transpose::IntraLaneTransposeBeforePermuteNx4<_firstRowIn, _firstRowOut>(in_0, in_1, in_2, in_3);
 
-    std::array<__m256, 6> tout = intern::PermuteAfterIntraLaneTransposeNx4<_firstRowIn, _firstRowOut, 6>(tmp);
+    std::array<__m256, 6> tout =
+            intern::transpose::PermuteAfterIntraLaneTransposeNx4<_firstRowIn, _firstRowOut, 6>(tmp);
 
-    intern::TransposeSetOutput<_firstRowOut, 4, _overwriteUnused, _unusedSetZero>(tout, out_0, out_1, out_2, out_3,
-                                                                                  out_4, out_5);
+    intern::transpose::SetOutput<_firstRowOut, 4, _overwriteUnused, _unusedSetZero>(tout, out_0, out_1, out_2, out_3,
+                                                                                    out_4, out_5);
 }
 
 
@@ -1753,12 +1757,13 @@ template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unused
 inline void Transpose6x5(__m256 in_0, __m256 in_1, __m256 in_2, __m256 in_3, __m256 in_4, __m256& out_0, __m256& out_1,
                          __m256& out_2, __m256& out_3, __m256& out_4, __m256& out_5) noexcept
 {
-    std::array<__m256, 8> tmp = intern::IntraLaneTransposeBeforePermuteNx5<_firstRowOut>(in_0, in_1, in_2, in_3, in_4);
+    std::array<__m256, 8> tmp =
+            intern::transpose::IntraLaneTransposeBeforePermuteNx5<_firstRowOut>(in_0, in_1, in_2, in_3, in_4);
 
-    std::array<__m256, 6> tout = intern::PermuteAfterIntraLaneTranspose<_firstRowIn, _firstRowOut, 6>(tmp);
+    std::array<__m256, 6> tout = intern::transpose::PermuteAfterIntraLaneTranspose<_firstRowIn, _firstRowOut, 6>(tmp);
 
-    intern::TransposeSetOutput<_firstRowOut, 5, _overwriteUnused, _unusedSetZero>(tout, out_0, out_1, out_2, out_3,
-                                                                                  out_4, out_5);
+    intern::transpose::SetOutput<_firstRowOut, 5, _overwriteUnused, _unusedSetZero>(tout, out_0, out_1, out_2, out_3,
+                                                                                    out_4, out_5);
 }
 
 
@@ -1769,13 +1774,13 @@ template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unused
 inline void Transpose6x6(__m256 in_0, __m256 in_1, __m256 in_2, __m256 in_3, __m256 in_4, __m256 in_5, __m256& out_0,
                          __m256& out_1, __m256& out_2, __m256& out_3, __m256& out_4, __m256& out_5) noexcept
 {
-    std::array<__m256, 8> tmp = intern::PermuteBeforeIntraLaneTransposeNx6<_firstRowIn, _firstRowOut, 8>(
+    std::array<__m256, 8> tmp = intern::transpose::PermuteBeforeIntraLaneTransposeNx6<_firstRowIn, _firstRowOut, 8>(
             in_0, in_1, in_2, in_3, in_4, in_5);
 
-    std::array<__m256, 6> tout = intern::IntraLaneTransposeAfterPermute6xN<_firstRowIn>(tmp);
+    std::array<__m256, 6> tout = intern::transpose::IntraLaneTransposeAfterPermute6xN<_firstRowIn>(tmp);
 
-    intern::TransposeSetOutput<_firstRowOut, 6, _overwriteUnused, _unusedSetZero>(tout, out_0, out_1, out_2, out_3,
-                                                                                  out_4, out_5);
+    intern::transpose::SetOutput<_firstRowOut, 6, _overwriteUnused, _unusedSetZero>(tout, out_0, out_1, out_2, out_3,
+                                                                                    out_4, out_5);
 }
 
 
@@ -1787,13 +1792,13 @@ inline void Transpose6x7(__m256 in_0, __m256 in_1, __m256 in_2, __m256 in_3, __m
                          __m256& out_0, __m256& out_1, __m256& out_2, __m256& out_3, __m256& out_4,
                          __m256& out_5) noexcept
 {
-    std::array<__m256, 8> tmp = intern::PermuteBeforeIntraLaneTransposeNx7<_firstRowIn, _firstRowOut, 8>(
+    std::array<__m256, 8> tmp = intern::transpose::PermuteBeforeIntraLaneTransposeNx7<_firstRowIn, _firstRowOut, 8>(
             in_0, in_1, in_2, in_3, in_4, in_5, in_6);
 
-    std::array<__m256, 6> tout = intern::IntraLaneTransposeAfterPermute6xN<_firstRowIn>(tmp);
+    std::array<__m256, 6> tout = intern::transpose::IntraLaneTransposeAfterPermute6xN<_firstRowIn>(tmp);
 
-    intern::TransposeSetOutput<_firstRowOut, 7, _overwriteUnused, _unusedSetZero>(tout, out_0, out_1, out_2, out_3,
-                                                                                  out_4, out_5);
+    intern::transpose::SetOutput<_firstRowOut, 7, _overwriteUnused, _unusedSetZero>(tout, out_0, out_1, out_2, out_3,
+                                                                                    out_4, out_5);
 }
 
 
@@ -1805,13 +1810,13 @@ inline void Transpose6x8(__m256 in_0, __m256 in_1, __m256 in_2, __m256 in_3, __m
                          __m256 in_7, __m256& out_0, __m256& out_1, __m256& out_2, __m256& out_3, __m256& out_4,
                          __m256& out_5) noexcept
 {
-    std::array<__m256, 8> tmp = intern::PermuteBeforeIntraLaneTransposeNx8<_firstRowIn, _firstRowOut, 8>(
+    std::array<__m256, 8> tmp = intern::transpose::PermuteBeforeIntraLaneTransposeNx8<_firstRowIn, _firstRowOut, 8>(
             in_0, in_1, in_2, in_3, in_4, in_5, in_6, in_7);
 
-    std::array<__m256, 6> tout = intern::IntraLaneTransposeAfterPermute6xN<_firstRowIn>(tmp);
+    std::array<__m256, 6> tout = intern::transpose::IntraLaneTransposeAfterPermute6xN<_firstRowIn>(tmp);
 
-    intern::TransposeSetOutput<_firstRowOut, 8, _overwriteUnused, _unusedSetZero>(tout, out_0, out_1, out_2, out_3,
-                                                                                  out_4, out_5);
+    intern::transpose::SetOutput<_firstRowOut, 8, _overwriteUnused, _unusedSetZero>(tout, out_0, out_1, out_2, out_3,
+                                                                                    out_4, out_5);
 }
 
 
@@ -1822,12 +1827,12 @@ template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unused
 inline void Transpose7x1(__m256 in_0, __m256& out_0, __m256& out_1, __m256& out_2, __m256& out_3, __m256& out_4,
                          __m256& out_5, __m256& out_6) noexcept
 {
-    auto tmp = intern::IntraLaneTransposeBeforePermuteNx1<_firstRowOut>(in_0);
+    auto tmp = intern::transpose::IntraLaneTransposeBeforePermuteNx1<_firstRowOut>(in_0);
 
-    std::array<__m256, 7> tout = intern::PermuteAfterIntraLaneTranspose<_firstRowIn, _firstRowOut, 7>(tmp);
+    std::array<__m256, 7> tout = intern::transpose::PermuteAfterIntraLaneTranspose<_firstRowIn, _firstRowOut, 7>(tmp);
 
-    intern::TransposeSetOutput<_firstRowOut, 1, _overwriteUnused, _unusedSetZero>(tout, out_0, out_1, out_2, out_3,
-                                                                                  out_4, out_5, out_6);
+    intern::transpose::SetOutput<_firstRowOut, 1, _overwriteUnused, _unusedSetZero>(tout, out_0, out_1, out_2, out_3,
+                                                                                    out_4, out_5, out_6);
 }
 
 
@@ -1838,12 +1843,12 @@ template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unused
 inline void Transpose7x2(__m256 in_0, __m256 in_1, __m256& out_0, __m256& out_1, __m256& out_2, __m256& out_3,
                          __m256& out_4, __m256& out_5, __m256& out_6) noexcept
 {
-    auto tmp = intern::IntraLaneTransposeBeforePermuteNx2<_firstRowOut>(in_0, in_1);
+    auto tmp = intern::transpose::IntraLaneTransposeBeforePermuteNx2<_firstRowOut>(in_0, in_1);
 
-    std::array<__m256, 7> tout = intern::PermuteAfterIntraLaneTranspose<_firstRowIn, _firstRowOut, 7>(tmp);
+    std::array<__m256, 7> tout = intern::transpose::PermuteAfterIntraLaneTranspose<_firstRowIn, _firstRowOut, 7>(tmp);
 
-    intern::TransposeSetOutput<_firstRowOut, 2, _overwriteUnused, _unusedSetZero>(tout, out_0, out_1, out_2, out_3,
-                                                                                  out_4, out_5, out_6);
+    intern::transpose::SetOutput<_firstRowOut, 2, _overwriteUnused, _unusedSetZero>(tout, out_0, out_1, out_2, out_3,
+                                                                                    out_4, out_5, out_6);
 }
 
 
@@ -1854,12 +1859,12 @@ template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unused
 inline void Transpose7x3(__m256 in_0, __m256 in_1, __m256 in_2, __m256& out_0, __m256& out_1, __m256& out_2,
                          __m256& out_3, __m256& out_4, __m256& out_5, __m256& out_6) noexcept
 {
-    auto tmp = intern::IntraLaneTransposeBeforePermuteNx3<_firstRowOut>(in_0, in_1, in_2);
+    auto tmp = intern::transpose::IntraLaneTransposeBeforePermuteNx3<_firstRowOut>(in_0, in_1, in_2);
 
-    std::array<__m256, 7> tout = intern::PermuteAfterIntraLaneTranspose<_firstRowIn, _firstRowOut, 7>(tmp);
+    std::array<__m256, 7> tout = intern::transpose::PermuteAfterIntraLaneTranspose<_firstRowIn, _firstRowOut, 7>(tmp);
 
-    intern::TransposeSetOutput<_firstRowOut, 3, _overwriteUnused, _unusedSetZero>(tout, out_0, out_1, out_2, out_3,
-                                                                                  out_4, out_5, out_6);
+    intern::transpose::SetOutput<_firstRowOut, 3, _overwriteUnused, _unusedSetZero>(tout, out_0, out_1, out_2, out_3,
+                                                                                    out_4, out_5, out_6);
 }
 
 
@@ -1871,12 +1876,13 @@ inline void Transpose7x4(__m256 in_0, __m256 in_1, __m256 in_2, __m256 in_3, __m
                          __m256& out_2, __m256& out_3, __m256& out_4, __m256& out_5, __m256& out_6) noexcept
 {
     std::array<__m256, 4> tmp =
-            intern::IntraLaneTransposeBeforePermuteNx4<_firstRowIn, _firstRowOut>(in_0, in_1, in_2, in_3);
+            intern::transpose::IntraLaneTransposeBeforePermuteNx4<_firstRowIn, _firstRowOut>(in_0, in_1, in_2, in_3);
 
-    std::array<__m256, 7> tout = intern::PermuteAfterIntraLaneTransposeNx4<_firstRowIn, _firstRowOut, 7>(tmp);
+    std::array<__m256, 7> tout =
+            intern::transpose::PermuteAfterIntraLaneTransposeNx4<_firstRowIn, _firstRowOut, 7>(tmp);
 
-    intern::TransposeSetOutput<_firstRowOut, 4, _overwriteUnused, _unusedSetZero>(tout, out_0, out_1, out_2, out_3,
-                                                                                  out_4, out_5, out_6);
+    intern::transpose::SetOutput<_firstRowOut, 4, _overwriteUnused, _unusedSetZero>(tout, out_0, out_1, out_2, out_3,
+                                                                                    out_4, out_5, out_6);
 }
 
 
@@ -1887,12 +1893,13 @@ template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unused
 inline void Transpose7x5(__m256 in_0, __m256 in_1, __m256 in_2, __m256 in_3, __m256 in_4, __m256& out_0, __m256& out_1,
                          __m256& out_2, __m256& out_3, __m256& out_4, __m256& out_5, __m256& out_6) noexcept
 {
-    std::array<__m256, 8> tmp = intern::IntraLaneTransposeBeforePermuteNx5<_firstRowOut>(in_0, in_1, in_2, in_3, in_4);
+    std::array<__m256, 8> tmp =
+            intern::transpose::IntraLaneTransposeBeforePermuteNx5<_firstRowOut>(in_0, in_1, in_2, in_3, in_4);
 
-    std::array<__m256, 7> tout = intern::PermuteAfterIntraLaneTranspose<_firstRowIn, _firstRowOut, 7>(tmp);
+    std::array<__m256, 7> tout = intern::transpose::PermuteAfterIntraLaneTranspose<_firstRowIn, _firstRowOut, 7>(tmp);
 
-    intern::TransposeSetOutput<_firstRowOut, 5, _overwriteUnused, _unusedSetZero>(tout, out_0, out_1, out_2, out_3,
-                                                                                  out_4, out_5, out_6);
+    intern::transpose::SetOutput<_firstRowOut, 5, _overwriteUnused, _unusedSetZero>(tout, out_0, out_1, out_2, out_3,
+                                                                                    out_4, out_5, out_6);
 }
 
 
@@ -1905,12 +1912,12 @@ inline void Transpose7x6(__m256 in_0, __m256 in_1, __m256 in_2, __m256 in_3, __m
                          __m256& out_6) noexcept
 {
     std::array<__m256, 8> tmp =
-            intern::IntraLaneTransposeBeforePermuteNx6<_firstRowOut>(in_0, in_1, in_2, in_3, in_4, in_5);
+            intern::transpose::IntraLaneTransposeBeforePermuteNx6<_firstRowOut>(in_0, in_1, in_2, in_3, in_4, in_5);
 
-    std::array<__m256, 7> tout = intern::PermuteAfterIntraLaneTranspose<_firstRowIn, _firstRowOut, 7>(tmp);
+    std::array<__m256, 7> tout = intern::transpose::PermuteAfterIntraLaneTranspose<_firstRowIn, _firstRowOut, 7>(tmp);
 
-    intern::TransposeSetOutput<_firstRowOut, 6, _overwriteUnused, _unusedSetZero>(tout, out_0, out_1, out_2, out_3,
-                                                                                  out_4, out_5, out_6);
+    intern::transpose::SetOutput<_firstRowOut, 6, _overwriteUnused, _unusedSetZero>(tout, out_0, out_1, out_2, out_3,
+                                                                                    out_4, out_5, out_6);
 }
 
 
@@ -1922,13 +1929,13 @@ inline void Transpose7x7(__m256 in_0, __m256 in_1, __m256 in_2, __m256 in_3, __m
                          __m256& out_0, __m256& out_1, __m256& out_2, __m256& out_3, __m256& out_4, __m256& out_5,
                          __m256& out_6) noexcept
 {
-    std::array<__m256, 8> tmp =
-            intern::IntraLaneTransposeBeforePermuteNx7<_firstRowOut>(in_0, in_1, in_2, in_3, in_4, in_5, in_6);
+    std::array<__m256, 8> tmp = intern::transpose::IntraLaneTransposeBeforePermuteNx7<_firstRowOut>(
+            in_0, in_1, in_2, in_3, in_4, in_5, in_6);
 
-    std::array<__m256, 7> tout = intern::PermuteAfterIntraLaneTranspose<_firstRowIn, _firstRowOut, 7>(tmp);
+    std::array<__m256, 7> tout = intern::transpose::PermuteAfterIntraLaneTranspose<_firstRowIn, _firstRowOut, 7>(tmp);
 
-    intern::TransposeSetOutput<_firstRowOut, 7, _overwriteUnused, _unusedSetZero>(tout, out_0, out_1, out_2, out_3,
-                                                                                  out_4, out_5, out_6);
+    intern::transpose::SetOutput<_firstRowOut, 7, _overwriteUnused, _unusedSetZero>(tout, out_0, out_1, out_2, out_3,
+                                                                                    out_4, out_5, out_6);
 }
 
 
@@ -1940,13 +1947,13 @@ inline void Transpose7x8(__m256 in_0, __m256 in_1, __m256 in_2, __m256 in_3, __m
                          __m256 in_7, __m256& out_0, __m256& out_1, __m256& out_2, __m256& out_3, __m256& out_4,
                          __m256& out_5, __m256& out_6) noexcept
 {
-    std::array<__m256, 8> tmp = intern::PermuteBeforeIntraLaneTransposeNx8<_firstRowIn, _firstRowOut, 8>(
+    std::array<__m256, 8> tmp = intern::transpose::PermuteBeforeIntraLaneTransposeNx8<_firstRowIn, _firstRowOut, 8>(
             in_0, in_1, in_2, in_3, in_4, in_5, in_6, in_7);
 
-    std::array<__m256, 7> tout = intern::IntraLaneTransposeAfterPermute7xN<_firstRowIn>(tmp);
+    std::array<__m256, 7> tout = intern::transpose::IntraLaneTransposeAfterPermute7xN<_firstRowIn>(tmp);
 
-    intern::TransposeSetOutput<_firstRowOut, 8, _overwriteUnused, _unusedSetZero>(tout, out_0, out_1, out_2, out_3,
-                                                                                  out_4, out_5, out_6);
+    intern::transpose::SetOutput<_firstRowOut, 8, _overwriteUnused, _unusedSetZero>(tout, out_0, out_1, out_2, out_3,
+                                                                                    out_4, out_5, out_6);
 }
 
 
@@ -1957,12 +1964,12 @@ template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unused
 inline void Transpose8x1(__m256 in_0, __m256& out_0, __m256& out_1, __m256& out_2, __m256& out_3, __m256& out_4,
                          __m256& out_5, __m256& out_6, __m256& out_7) noexcept
 {
-    std::array<__m256, 4> tmp = intern::IntraLaneTransposeBeforePermuteNx1<_firstRowOut>(in_0);
+    std::array<__m256, 4> tmp = intern::transpose::IntraLaneTransposeBeforePermuteNx1<_firstRowOut>(in_0);
 
-    std::array<__m256, 8> tout = intern::PermuteAfterIntraLaneTranspose<_firstRowIn, _firstRowOut, 8>(tmp);
+    std::array<__m256, 8> tout = intern::transpose::PermuteAfterIntraLaneTranspose<_firstRowIn, _firstRowOut, 8>(tmp);
 
-    intern::TransposeSetOutput<_firstRowOut, 1, _overwriteUnused, _unusedSetZero>(tout, out_0, out_1, out_2, out_3,
-                                                                                  out_4, out_5, out_6, out_7);
+    intern::transpose::SetOutput<_firstRowOut, 1, _overwriteUnused, _unusedSetZero>(tout, out_0, out_1, out_2, out_3,
+                                                                                    out_4, out_5, out_6, out_7);
 }
 
 
@@ -1973,12 +1980,12 @@ template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unused
 inline void Transpose8x2(__m256 in_0, __m256 in_1, __m256& out_0, __m256& out_1, __m256& out_2, __m256& out_3,
                          __m256& out_4, __m256& out_5, __m256& out_6, __m256& out_7) noexcept
 {
-    auto tmp = intern::IntraLaneTransposeBeforePermuteNx2<_firstRowOut>(in_0, in_1);
+    auto tmp = intern::transpose::IntraLaneTransposeBeforePermuteNx2<_firstRowOut>(in_0, in_1);
 
-    std::array<__m256, 8> tout = intern::PermuteAfterIntraLaneTranspose<_firstRowIn, _firstRowOut, 8>(tmp);
+    std::array<__m256, 8> tout = intern::transpose::PermuteAfterIntraLaneTranspose<_firstRowIn, _firstRowOut, 8>(tmp);
 
-    intern::TransposeSetOutput<_firstRowOut, 2, _overwriteUnused, _unusedSetZero>(tout, out_0, out_1, out_2, out_3,
-                                                                                  out_4, out_5, out_6, out_7);
+    intern::transpose::SetOutput<_firstRowOut, 2, _overwriteUnused, _unusedSetZero>(tout, out_0, out_1, out_2, out_3,
+                                                                                    out_4, out_5, out_6, out_7);
 }
 
 
@@ -1989,12 +1996,12 @@ template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unused
 inline void Transpose8x3(__m256 in_0, __m256 in_1, __m256 in_2, __m256& out_0, __m256& out_1, __m256& out_2,
                          __m256& out_3, __m256& out_4, __m256& out_5, __m256& out_6, __m256& out_7) noexcept
 {
-    auto tmp = intern::IntraLaneTransposeBeforePermuteNx3<_firstRowOut>(in_0, in_1, in_2);
+    auto tmp = intern::transpose::IntraLaneTransposeBeforePermuteNx3<_firstRowOut>(in_0, in_1, in_2);
 
-    std::array<__m256, 8> tout = intern::PermuteAfterIntraLaneTranspose<_firstRowIn, _firstRowOut, 8>(tmp);
+    std::array<__m256, 8> tout = intern::transpose::PermuteAfterIntraLaneTranspose<_firstRowIn, _firstRowOut, 8>(tmp);
 
-    intern::TransposeSetOutput<_firstRowOut, 3, _overwriteUnused, _unusedSetZero>(tout, out_0, out_1, out_2, out_3,
-                                                                                  out_4, out_5, out_6, out_7);
+    intern::transpose::SetOutput<_firstRowOut, 3, _overwriteUnused, _unusedSetZero>(tout, out_0, out_1, out_2, out_3,
+                                                                                    out_4, out_5, out_6, out_7);
 }
 
 
@@ -2007,12 +2014,13 @@ inline void Transpose8x4(__m256 in_0, __m256 in_1, __m256 in_2, __m256 in_3, __m
                          __m256& out_7) noexcept
 {
     std::array<__m256, 4> tmp =
-            intern::IntraLaneTransposeBeforePermuteNx4<_firstRowIn, _firstRowOut>(in_0, in_1, in_2, in_3);
+            intern::transpose::IntraLaneTransposeBeforePermuteNx4<_firstRowIn, _firstRowOut>(in_0, in_1, in_2, in_3);
 
-    std::array<__m256, 8> tout = intern::PermuteAfterIntraLaneTransposeNx4<_firstRowIn, _firstRowOut, 8>(tmp);
+    std::array<__m256, 8> tout =
+            intern::transpose::PermuteAfterIntraLaneTransposeNx4<_firstRowIn, _firstRowOut, 8>(tmp);
 
-    intern::TransposeSetOutput<_firstRowOut, 4, _overwriteUnused, _unusedSetZero>(tout, out_0, out_1, out_2, out_3,
-                                                                                  out_4, out_5, out_6, out_7);
+    intern::transpose::SetOutput<_firstRowOut, 4, _overwriteUnused, _unusedSetZero>(tout, out_0, out_1, out_2, out_3,
+                                                                                    out_4, out_5, out_6, out_7);
 }
 
 
@@ -2024,12 +2032,13 @@ inline void Transpose8x5(__m256 in_0, __m256 in_1, __m256 in_2, __m256 in_3, __m
                          __m256& out_2, __m256& out_3, __m256& out_4, __m256& out_5, __m256& out_6,
                          __m256& out_7) noexcept
 {
-    std::array<__m256, 8> tmp = intern::IntraLaneTransposeBeforePermuteNx5<_firstRowOut>(in_0, in_1, in_2, in_3, in_4);
+    std::array<__m256, 8> tmp =
+            intern::transpose::IntraLaneTransposeBeforePermuteNx5<_firstRowOut>(in_0, in_1, in_2, in_3, in_4);
 
-    std::array<__m256, 8> tout = intern::PermuteAfterIntraLaneTranspose<_firstRowIn, _firstRowOut, 8>(tmp);
+    std::array<__m256, 8> tout = intern::transpose::PermuteAfterIntraLaneTranspose<_firstRowIn, _firstRowOut, 8>(tmp);
 
-    intern::TransposeSetOutput<_firstRowOut, 5, _overwriteUnused, _unusedSetZero>(tout, out_0, out_1, out_2, out_3,
-                                                                                  out_4, out_5, out_6, out_7);
+    intern::transpose::SetOutput<_firstRowOut, 5, _overwriteUnused, _unusedSetZero>(tout, out_0, out_1, out_2, out_3,
+                                                                                    out_4, out_5, out_6, out_7);
 }
 
 
@@ -2042,12 +2051,12 @@ inline void Transpose8x6(__m256 in_0, __m256 in_1, __m256 in_2, __m256 in_3, __m
                          __m256& out_7) noexcept
 {
     std::array<__m256, 8> tmp =
-            intern::IntraLaneTransposeBeforePermuteNx6<_firstRowOut>(in_0, in_1, in_2, in_3, in_4, in_5);
+            intern::transpose::IntraLaneTransposeBeforePermuteNx6<_firstRowOut>(in_0, in_1, in_2, in_3, in_4, in_5);
 
-    std::array<__m256, 8> tout = intern::PermuteAfterIntraLaneTranspose<_firstRowIn, _firstRowOut, 8>(tmp);
+    std::array<__m256, 8> tout = intern::transpose::PermuteAfterIntraLaneTranspose<_firstRowIn, _firstRowOut, 8>(tmp);
 
-    intern::TransposeSetOutput<_firstRowOut, 6, _overwriteUnused, _unusedSetZero>(tout, out_0, out_1, out_2, out_3,
-                                                                                  out_4, out_5, out_6, out_7);
+    intern::transpose::SetOutput<_firstRowOut, 6, _overwriteUnused, _unusedSetZero>(tout, out_0, out_1, out_2, out_3,
+                                                                                    out_4, out_5, out_6, out_7);
 }
 
 
@@ -2059,13 +2068,13 @@ inline void Transpose8x7(__m256 in_0, __m256 in_1, __m256 in_2, __m256 in_3, __m
                          __m256& out_0, __m256& out_1, __m256& out_2, __m256& out_3, __m256& out_4, __m256& out_5,
                          __m256& out_6, __m256& out_7) noexcept
 {
-    std::array<__m256, 8> tmp =
-            intern::IntraLaneTransposeBeforePermuteNx7<_firstRowOut>(in_0, in_1, in_2, in_3, in_4, in_5, in_6);
+    std::array<__m256, 8> tmp = intern::transpose::IntraLaneTransposeBeforePermuteNx7<_firstRowOut>(
+            in_0, in_1, in_2, in_3, in_4, in_5, in_6);
 
-    std::array<__m256, 8> tout = intern::PermuteAfterIntraLaneTranspose<_firstRowIn, _firstRowOut, 8>(tmp);
+    std::array<__m256, 8> tout = intern::transpose::PermuteAfterIntraLaneTranspose<_firstRowIn, _firstRowOut, 8>(tmp);
 
-    intern::TransposeSetOutput<_firstRowOut, 7, _overwriteUnused, _unusedSetZero>(tout, out_0, out_1, out_2, out_3,
-                                                                                  out_4, out_5, out_6, out_7);
+    intern::transpose::SetOutput<_firstRowOut, 7, _overwriteUnused, _unusedSetZero>(tout, out_0, out_1, out_2, out_3,
+                                                                                    out_4, out_5, out_6, out_7);
 }
 
 
@@ -2077,7 +2086,7 @@ inline void Transpose8x8(__m256 in_0, __m256 in_1, __m256 in_2, __m256 in_3, __m
                          __m256 in_7, __m256& out_0, __m256& out_1, __m256& out_2, __m256& out_3, __m256& out_4,
                          __m256& out_5, __m256& out_6, __m256& out_7) noexcept
 {
-    __m256 tmp_0, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7;
+    __m256 tmp_0, tmp_1, tmp_2, tmp_3, tmp_4, tmp_5, tmp_6, tmp_7;
 
     out_0 = _mm256_unpacklo_ps(in_0, in_1);
     out_1 = _mm256_unpackhi_ps(in_0, in_1);
@@ -2097,36 +2106,36 @@ inline void Transpose8x8(__m256 in_0, __m256 in_1, __m256 in_2, __m256 in_3, __m
     __m256 tmpBlend3 = Shuffle<2, 3, 0, 1>(out_5, out_7);
 
     tmp_0 = Blend<0, 0, 1, 1, 0, 0, 1, 1>(out_0, tmpBlend0);
-    tmp1 = Blend<1, 1, 0, 0, 1, 1, 0, 0>(out_2, tmpBlend0);
-    tmp2 = Blend<0, 0, 1, 1, 0, 0, 1, 1>(out_1, tmpBlend1);
-    tmp3 = Blend<1, 1, 0, 0, 1, 1, 0, 0>(out_3, tmpBlend1);
-    tmp4 = Blend<0, 0, 1, 1, 0, 0, 1, 1>(out_4, tmpBlend2);
-    tmp5 = Blend<1, 1, 0, 0, 1, 1, 0, 0>(out_6, tmpBlend2);
-    tmp6 = Blend<0, 0, 1, 1, 0, 0, 1, 1>(out_5, tmpBlend3);
-    tmp7 = Blend<1, 1, 0, 0, 1, 1, 0, 0>(out_7, tmpBlend3);
+    tmp_1 = Blend<1, 1, 0, 0, 1, 1, 0, 0>(out_2, tmpBlend0);
+    tmp_2 = Blend<0, 0, 1, 1, 0, 0, 1, 1>(out_1, tmpBlend1);
+    tmp_3 = Blend<1, 1, 0, 0, 1, 1, 0, 0>(out_3, tmpBlend1);
+    tmp_4 = Blend<0, 0, 1, 1, 0, 0, 1, 1>(out_4, tmpBlend2);
+    tmp_5 = Blend<1, 1, 0, 0, 1, 1, 0, 0>(out_6, tmpBlend2);
+    tmp_6 = Blend<0, 0, 1, 1, 0, 0, 1, 1>(out_5, tmpBlend3);
+    tmp_7 = Blend<1, 1, 0, 0, 1, 1, 0, 0>(out_7, tmpBlend3);
 
-    out_0 = Permute2F128<0, 0, 1, 0>(tmp_0, tmp4);
-    out_1 = Permute2F128<0, 0, 1, 0>(tmp1, tmp5);
-    out_2 = Permute2F128<0, 0, 1, 0>(tmp2, tmp6);
-    out_3 = Permute2F128<0, 0, 1, 0>(tmp3, tmp7);
-    out_4 = Permute2F128<0, 1, 1, 1>(tmp_0, tmp4);
-    out_5 = Permute2F128<0, 1, 1, 1>(tmp1, tmp5);
-    out_6 = Permute2F128<0, 1, 1, 1>(tmp2, tmp6);
-    out_7 = Permute2F128<0, 1, 1, 1>(tmp3, tmp7);
+    out_0 = Permute2F128<0, 0, 1, 0>(tmp_0, tmp_4);
+    out_1 = Permute2F128<0, 0, 1, 0>(tmp_1, tmp_5);
+    out_2 = Permute2F128<0, 0, 1, 0>(tmp_2, tmp_6);
+    out_3 = Permute2F128<0, 0, 1, 0>(tmp_3, tmp_7);
+    out_4 = Permute2F128<0, 1, 1, 1>(tmp_0, tmp_4);
+    out_5 = Permute2F128<0, 1, 1, 1>(tmp_1, tmp_5);
+    out_6 = Permute2F128<0, 1, 1, 1>(tmp_2, tmp_6);
+    out_7 = Permute2F128<0, 1, 1, 1>(tmp_3, tmp_7);
 }
 
 
 
 // --------------------------------------------------------------------------------------------------------------------
 
-namespace intern
+namespace intern::transpose
 {
 
 template <U32 _firstRowIn, UST _arraySizeIn>
 [[nodiscard]] inline std::array<__m256, 2>
 IntraLaneTransposeAfterPermute2xN(std::array<__m256, _arraySizeIn> in) noexcept
 {
-    using Lane = intern::TranspositionLaneData<__m256, _firstRowIn, 0>;
+    using Lane = intern::transpose::LaneData<__m256, _firstRowIn, 0>;
     static_assert(_arraySizeIn == 4 || _arraySizeIn == 8, "Only arrays of size 4 and 8 accepted");
 
     std::array<__m256, 2> out;
@@ -2151,7 +2160,7 @@ template <U32 _firstRowIn, UST _arraySizeIn>
 [[nodiscard]] inline std::array<__m256, 3>
 IntraLaneTransposeAfterPermute3xN(std::array<__m256, _arraySizeIn> in) noexcept
 {
-    using Lane = intern::TranspositionLaneData<__m256, _firstRowIn, 0>;
+    using Lane = intern::transpose::LaneData<__m256, _firstRowIn, 0>;
     static_assert(_arraySizeIn == 4 || _arraySizeIn == 8, "Only arrays of size 4 and 8 accepted");
 
 
@@ -2182,7 +2191,7 @@ template <U32 _firstRowIn, UST _arraySizeIn>
 [[nodiscard]] inline std::array<__m256, 4>
 IntraLaneTransposeAfterPermute4xN(std::array<__m256, _arraySizeIn> in) noexcept
 {
-    using Lane = intern::TranspositionLaneData<__m256, _firstRowIn, 0>;
+    using Lane = intern::transpose::LaneData<__m256, _firstRowIn, 0>;
     static_assert(_arraySizeIn == 4 || _arraySizeIn == 8, "Only arrays of size 4 and 8 accepted");
 
 
@@ -2297,7 +2306,7 @@ template <U32 _firstRowIn>
 template <U32 _firstRowOut>
 [[nodiscard]] inline std::array<__m256, 4> IntraLaneTransposeBeforePermuteNx1(__m256 in_0) noexcept
 {
-    using Lane = intern::TranspositionLaneData<__m256, 0, _firstRowOut>;
+    using Lane = intern::transpose::LaneData<__m256, 0, _firstRowOut>;
 
     std::array<__m256, 4> out;
     Transpose4x1<0, Lane::OffsetOut>(in_0, out[0], out[1], out[2], out[3]);
@@ -2312,7 +2321,7 @@ template <U32 _firstRowOut>
 template <U32 _firstRowOut>
 [[nodiscard]] inline auto IntraLaneTransposeBeforePermuteNx2(__m256 in_0, __m256 in_1) noexcept
 {
-    using Lane = intern::TranspositionLaneData<__m256, 0, _firstRowOut>;
+    using Lane = intern::transpose::LaneData<__m256, 0, _firstRowOut>;
 
     constexpr std::size_t _array_size = (Lane::OffsetOut <= 2) ? 4 : 8;
 
@@ -2337,7 +2346,7 @@ template <U32 _firstRowOut>
 template <U32 _firstRowOut>
 [[nodiscard]] inline auto IntraLaneTransposeBeforePermuteNx3(__m256 in_0, __m256 in_1, __m256 in_2) noexcept
 {
-    using Lane = intern::TranspositionLaneData<__m256, 0, _firstRowOut>;
+    using Lane = intern::transpose::LaneData<__m256, 0, _firstRowOut>;
 
     constexpr std::size_t _array_size = (Lane::OffsetOut <= 1) ? 4 : 8;
 
@@ -2552,7 +2561,7 @@ template <U32 _firstRowIn, U32 _firstRowOut, U32 _rows, UST _arraySizeIn>
 [[nodiscard]] inline std::array<__m256, _rows>
 PermuteAfterIntraLaneTranspose(std::array<__m256, _arraySizeIn> in) noexcept
 {
-    using Lane = intern::TranspositionLaneData<__m256, _firstRowIn, _firstRowOut>;
+    using Lane = intern::transpose::LaneData<__m256, _firstRowIn, _firstRowOut>;
     static_assert(_arraySizeIn == 4 || _arraySizeIn == 8, "Only arrays of size 4 and 8 accepted");
 
     constexpr U32 idx_0 = (0 + _firstRowIn);
@@ -2608,7 +2617,7 @@ template <U32 _firstRowIn, U32 _firstRowOut, UST _arraySizeOut>
 [[nodiscard]] inline std::array<__m256, _arraySizeOut>
 PermuteBeforeIntraLaneTransposeNx5(__m256 in_0, __m256 in_1, __m256 in_2, __m256 in_3, __m256 in_4) noexcept
 {
-    using Lane = intern::TranspositionLaneData<__m256, _firstRowIn, _firstRowOut>;
+    using Lane = intern::transpose::LaneData<__m256, _firstRowIn, _firstRowOut>;
     static_assert(_arraySizeOut == 4 || _arraySizeOut == 8, "Array size must be 4 or 8");
 
     constexpr U32 idx_0 = (0 + _firstRowOut) % 4;
@@ -2655,7 +2664,7 @@ template <U32 _firstRowIn, U32 _firstRowOut, UST _arraySizeOut>
 PermuteBeforeIntraLaneTransposeNx6(__m256 in_0, __m256 in_1, __m256 in_2, __m256 in_3, __m256 in_4,
                                    __m256 in_5) noexcept
 {
-    using Lane = intern::TranspositionLaneData<__m256, _firstRowIn, _firstRowOut>;
+    using Lane = intern::transpose::LaneData<__m256, _firstRowIn, _firstRowOut>;
     static_assert(_arraySizeOut == 4 || _arraySizeOut == 8, "Array size must be 4 or 8");
 
     constexpr U32 idx_0 = (0 + _firstRowOut) % 4;
@@ -2701,7 +2710,7 @@ template <U32 _firstRowIn, U32 _firstRowOut, UST _arraySizeOut>
 PermuteBeforeIntraLaneTransposeNx7(__m256 in_0, __m256 in_1, __m256 in_2, __m256 in_3, __m256 in_4, __m256 in_5,
                                    __m256 in_6) noexcept
 {
-    using Lane = intern::TranspositionLaneData<__m256, _firstRowIn, _firstRowOut>;
+    using Lane = intern::transpose::LaneData<__m256, _firstRowIn, _firstRowOut>;
     static_assert(_arraySizeOut == 4 || _arraySizeOut == 8, "Array size must be 4 or 8");
 
     constexpr U32 idx_0 = (0 + _firstRowOut) % 4;
@@ -2741,7 +2750,7 @@ template <U32 _firstRowIn, U32 _firstRowOut, UST _arraySizeOut>
 PermuteBeforeIntraLaneTransposeNx8(__m256 in_0, __m256 in_1, __m256 in_2, __m256 in_3, __m256 in_4, __m256 in_5,
                                    __m256 in_6, __m256 in_7) noexcept
 {
-    using Lane = intern::TranspositionLaneData<__m256, _firstRowIn, _firstRowOut>;
+    using Lane = intern::transpose::LaneData<__m256, _firstRowIn, _firstRowOut>;
     static_assert(_arraySizeOut == 4 || _arraySizeOut == 8, "Array size must be 4 or 8");
 
     std::array<__m256, _arraySizeOut> out;
@@ -2765,7 +2774,7 @@ PermuteBeforeIntraLaneTransposeNx8(__m256 in_0, __m256 in_1, __m256 in_2, __m256
 }
 
 
-} // namespace intern
+} // namespace intern::transpose
 
 
 } // namespace GDL::simd
