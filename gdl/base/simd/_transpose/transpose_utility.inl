@@ -67,4 +67,19 @@ inline void SetOutput(std::array<_registerType, _arraySize> in, _registerType& o
 
 
 
+// --------------------------------------------------------------------------------------------------------------------
+
+template <U32 _rows, U32 _cols, U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unusedSetZero,
+          typename _registerType>
+inline void StaticAssertions() noexcept
+{
+    static_assert(not(_overwriteUnused == false && _unusedSetZero == true), "Option _unusedSetZero has no effect.");
+
+    constexpr U32 numRegVals = numRegisterValues<_registerType>;
+    static_assert(_firstRowIn + _rows <= numRegVals, "Input submatrix exceeds register size.");
+    static_assert(_firstRowOut + _cols <= numRegVals, "Output submatrix exceeds register size.");
+}
+
+
+
 } // namespace GDL::simd::intern::transpose

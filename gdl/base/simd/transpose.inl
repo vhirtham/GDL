@@ -87,10 +87,6 @@ template <typename _registerType, U32 _rows, U32 _cols, U32 _firstRowIn, U32 _fi
 inline void Transpose(const std::array<_registerType, _arrSizeIn>& matDataI,
                       std::array<_registerType, _arrSizeOut>& matDataO)
 {
-    constexpr U32 numRegVals = numRegisterValues<_registerType>;
-
-    static_assert(_firstRowIn + _rows <= numRegVals, "Input submatrix exceeds register size.");
-    static_assert(_firstRowOut + _cols <= numRegVals, "Output submatrix exceeds register size.");
     static_assert(_firstColIn + _colStrideIn * (_cols - 1) + 1 <= _arrSizeIn, "Input submatrix exceeds array size.");
     static_assert(_firstColOut + _colStrideOut * (_rows - 1) + 1 <= _arrSizeOut,
                   "Output submatrix exceeds array size.");

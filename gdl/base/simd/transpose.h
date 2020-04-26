@@ -8,14 +8,8 @@
 namespace GDL::simd
 {
 
-// TODO
-// add static assert for _firstCol + _rows < regVals
-// add static asserts to all transpose functions, -> own function, including:
-//  static_assert(not(_overwriteUnused == false && _unusedSetZero == true), "Option _unusedSetZero has no effect.");
-
-// rename parameters an variacles: in0 -> in_0; out0 -> out_0; tmp0 -> tmp_0
-
 // TODOs for functions of this file
+// - reorder template parameters in
 // - add noexcept and [[nodiscard]]
 // - documentation of test
 // - test all brancehes of the general transpose function
