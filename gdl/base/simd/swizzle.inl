@@ -707,7 +707,10 @@ constexpr U32 Permute256dMask()
 template <U32 _lane0SrcLane, U32 _lane1SrcLane, typename _registerType>
 inline _registerType Permute2F128(_registerType source)
 {
-    return Permute2F128<0, _lane0SrcLane, 0, _lane1SrcLane>(source, source);
+    if constexpr (_lane0SrcLane == 0 && _lane1SrcLane == 1)
+        return source;
+    else
+        return Permute2F128<0, _lane0SrcLane, 0, _lane1SrcLane>(source, source);
 }
 
 
