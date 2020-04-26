@@ -19,7 +19,7 @@ namespace GDL::simd
 //! @param in: Input registers
 //! @param out: Output registers
 template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
-inline void Transpose1x1(__m256d in0, __m256d& out0) noexcept;
+inline void Transpose1x1(__m256d in_0, __m256d& out_0) noexcept;
 
 
 
@@ -31,7 +31,7 @@ inline void Transpose1x1(__m256d in0, __m256d& out0) noexcept;
 //! @param in: Input registers
 //! @param out: Output registers
 template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
-inline void Transpose1x2(__m256d in0, __m256d in1, __m256d& out0) noexcept;
+inline void Transpose1x2(__m256d in_0, __m256d in_1, __m256d& out_0) noexcept;
 
 
 
@@ -43,7 +43,7 @@ inline void Transpose1x2(__m256d in0, __m256d in1, __m256d& out0) noexcept;
 //! @param in: Input registers
 //! @param out: Output registers
 template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
-inline void Transpose1x3(__m256d in0, __m256d in1, __m256d in2, __m256d& out0) noexcept;
+inline void Transpose1x3(__m256d in_0, __m256d in_1, __m256d in_2, __m256d& out_0) noexcept;
 
 
 
@@ -55,7 +55,7 @@ inline void Transpose1x3(__m256d in0, __m256d in1, __m256d in2, __m256d& out0) n
 //! @param in: Input registers
 //! @param out: Output registers
 template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
-inline void Transpose1x4(__m256d in0, __m256d in1, __m256d in2, __m256d in3, __m256d& out0) noexcept;
+inline void Transpose1x4(__m256d in_0, __m256d in_1, __m256d in_2, __m256d in_3, __m256d& out_0) noexcept;
 
 
 
@@ -67,7 +67,7 @@ inline void Transpose1x4(__m256d in0, __m256d in1, __m256d in2, __m256d in3, __m
 //! @param in: Input registers
 //! @param out: Output registers
 template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
-inline void Transpose2x1(__m256d in0, __m256d& out0, __m256d& out1) noexcept;
+inline void Transpose2x1(__m256d in_0, __m256d& out_0, __m256d& out_1) noexcept;
 
 
 
@@ -79,7 +79,7 @@ inline void Transpose2x1(__m256d in0, __m256d& out0, __m256d& out1) noexcept;
 //! @param in: Input registers
 //! @param out: Output registers
 template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
-inline void Transpose2x2(__m256d in0, __m256d in1, __m256d& out0, __m256d& out1) noexcept;
+inline void Transpose2x2(__m256d in_0, __m256d in_1, __m256d& out_0, __m256d& out_1) noexcept;
 
 
 
@@ -91,7 +91,7 @@ inline void Transpose2x2(__m256d in0, __m256d in1, __m256d& out0, __m256d& out1)
 //! @param in: Input registers
 //! @param out: Output registers
 template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
-inline void Transpose2x3(__m256d in0, __m256d in1, __m256d in2, __m256d& out0, __m256d& out1) noexcept;
+inline void Transpose2x3(__m256d in_0, __m256d in_1, __m256d in_2, __m256d& out_0, __m256d& out_1) noexcept;
 
 
 
@@ -103,7 +103,8 @@ inline void Transpose2x3(__m256d in0, __m256d in1, __m256d in2, __m256d& out0, _
 //! @param in: Input registers
 //! @param out: Output registers
 template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
-inline void Transpose2x4(__m256d in0, __m256d in1, __m256d in2, __m256d in3, __m256d& out0, __m256d& out1) noexcept;
+inline void Transpose2x4(__m256d in_0, __m256d in_1, __m256d in_2, __m256d in_3, __m256d& out_0,
+                         __m256d& out_1) noexcept;
 
 
 
@@ -115,7 +116,7 @@ inline void Transpose2x4(__m256d in0, __m256d in1, __m256d in2, __m256d in3, __m
 //! @param in: Input registers
 //! @param out: Output registers
 template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
-inline void Transpose3x1(__m256d in0, __m256d& out0, __m256d& out1, __m256d& out2) noexcept;
+inline void Transpose3x1(__m256d in_0, __m256d& out_0, __m256d& out_1, __m256d& out_2) noexcept;
 
 
 
@@ -127,7 +128,7 @@ inline void Transpose3x1(__m256d in0, __m256d& out0, __m256d& out1, __m256d& out
 //! @param in: Input registers
 //! @param out: Output registers
 template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
-inline void Transpose3x2(__m256d in0, __m256d in1, __m256d& out0, __m256d& out1, __m256d& out2) noexcept;
+inline void Transpose3x2(__m256d in_0, __m256d in_1, __m256d& out_0, __m256d& out_1, __m256d& out_2) noexcept;
 
 
 
@@ -139,7 +140,8 @@ inline void Transpose3x2(__m256d in0, __m256d in1, __m256d& out0, __m256d& out1,
 //! @param in: Input registers
 //! @param out: Output registers
 template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
-inline void Transpose3x3(__m256d in0, __m256d in1, __m256d in2, __m256d& out0, __m256d& out1, __m256d& out2) noexcept;
+inline void Transpose3x3(__m256d in_0, __m256d in_1, __m256d in_2, __m256d& out_0, __m256d& out_1,
+                         __m256d& out_2) noexcept;
 
 
 
@@ -151,8 +153,8 @@ inline void Transpose3x3(__m256d in0, __m256d in1, __m256d in2, __m256d& out0, _
 //! @param in: Input registers
 //! @param out: Output registers
 template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
-inline void Transpose3x4(__m256d in0, __m256d in1, __m256d in2, __m256d in3, __m256d& out0, __m256d& out1,
-                         __m256d& out2) noexcept;
+inline void Transpose3x4(__m256d in_0, __m256d in_1, __m256d in_2, __m256d in_3, __m256d& out_0, __m256d& out_1,
+                         __m256d& out_2) noexcept;
 
 
 
@@ -164,7 +166,7 @@ inline void Transpose3x4(__m256d in0, __m256d in1, __m256d in2, __m256d in3, __m
 //! @param in: Input registers
 //! @param out: Output registers
 template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
-inline void Transpose4x1(__m256d in0, __m256d& out0, __m256d& out1, __m256d& out2, __m256d& out3) noexcept;
+inline void Transpose4x1(__m256d in_0, __m256d& out_0, __m256d& out_1, __m256d& out_2, __m256d& out_3) noexcept;
 
 
 
@@ -176,7 +178,8 @@ inline void Transpose4x1(__m256d in0, __m256d& out0, __m256d& out1, __m256d& out
 //! @param in: Input registers
 //! @param out: Output registers
 template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
-inline void Transpose4x2(__m256d in0, __m256d in1, __m256d& out0, __m256d& out1, __m256d& out2, __m256d& out3) noexcept;
+inline void Transpose4x2(__m256d in_0, __m256d in_1, __m256d& out_0, __m256d& out_1, __m256d& out_2,
+                         __m256d& out_3) noexcept;
 
 
 
@@ -188,8 +191,8 @@ inline void Transpose4x2(__m256d in0, __m256d in1, __m256d& out0, __m256d& out1,
 //! @param in: Input registers
 //! @param out: Output registers
 template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
-inline void Transpose4x3(__m256d in0, __m256d in1, __m256d in2, __m256d& out0, __m256d& out1, __m256d& out2,
-                         __m256d& out3) noexcept;
+inline void Transpose4x3(__m256d in_0, __m256d in_1, __m256d in_2, __m256d& out_0, __m256d& out_1, __m256d& out_2,
+                         __m256d& out_3) noexcept;
 
 
 
@@ -201,8 +204,8 @@ inline void Transpose4x3(__m256d in0, __m256d in1, __m256d in2, __m256d& out0, _
 //! @param in: Input registers
 //! @param out: Output registers
 template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
-inline void Transpose4x4(__m256d in0, __m256d in1, __m256d in2, __m256d in3, __m256d& out0, __m256d& out1,
-                         __m256d& out2, __m256d& out3) noexcept;
+inline void Transpose4x4(__m256d in_0, __m256d in_1, __m256d in_2, __m256d in_3, __m256d& out_0, __m256d& out_1,
+                         __m256d& out_2, __m256d& out_3) noexcept;
 
 } // namespace GDL::simd
 

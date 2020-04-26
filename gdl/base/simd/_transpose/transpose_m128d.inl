@@ -48,12 +48,12 @@ inline void Transpose1x1(__m128d in, __m128d& out) noexcept
 // --------------------------------------------------------------------------------------------------------------------
 
 template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unusedSetZero>
-inline void Transpose1x2(__m128d in0, __m128d in1, __m128d& out0) noexcept
+inline void Transpose1x2(__m128d in_0, __m128d in_1, __m128d& out_0) noexcept
 {
     if constexpr (_firstRowIn == 0)
-        out0 = _mm_unpacklo(in0, in1);
+        out_0 = _mm_unpacklo(in_0, in_1);
     else
-        out0 = _mm_unpackhi(in0, in1);
+        out_0 = _mm_unpackhi(in_0, in_1);
 }
 
 
@@ -61,10 +61,10 @@ inline void Transpose1x2(__m128d in0, __m128d in1, __m128d& out0) noexcept
 // --------------------------------------------------------------------------------------------------------------------
 
 template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unusedSetZero>
-inline void Transpose2x1(__m128d in0, __m128d& out0, __m128d& out1) noexcept
+inline void Transpose2x1(__m128d in_0, __m128d& out_0, __m128d& out_1) noexcept
 {
-    Transpose1x1<0, _firstRowOut, _overwriteUnused, _unusedSetZero>(in0, out0);
-    Transpose1x1<1, _firstRowOut, _overwriteUnused, _unusedSetZero>(in0, out1);
+    Transpose1x1<0, _firstRowOut, _overwriteUnused, _unusedSetZero>(in_0, out_0);
+    Transpose1x1<1, _firstRowOut, _overwriteUnused, _unusedSetZero>(in_0, out_1);
 }
 
 
@@ -72,10 +72,10 @@ inline void Transpose2x1(__m128d in0, __m128d& out0, __m128d& out1) noexcept
 // --------------------------------------------------------------------------------------------------------------------
 
 template <U32 _firstRowIn, U32 _firstRowOut, bool _overwriteUnused, bool _unusedSetZero>
-inline void Transpose2x2(__m128d in0, __m128d in1, __m128d& out0, __m128d& out1) noexcept
+inline void Transpose2x2(__m128d in_0, __m128d in_1, __m128d& out_0, __m128d& out_1) noexcept
 {
-    out0 = _mm_unpacklo(in0, in1);
-    out1 = _mm_unpackhi(in0, in1);
+    out_0 = _mm_unpacklo(in_0, in_1);
+    out_1 = _mm_unpackhi(in_0, in_1);
 }
 
 

@@ -30,7 +30,7 @@ inline void Transpose1x1(__m128d in, __m128d& out) noexcept;
 //! @param in: Input registers
 //! @param out: Output registers
 template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
-inline void Transpose1x2(__m128d in0, __m128d in1, __m128d& out0) noexcept;
+inline void Transpose1x2(__m128d in_0, __m128d in_1, __m128d& out_0) noexcept;
 
 
 
@@ -42,7 +42,7 @@ inline void Transpose1x2(__m128d in0, __m128d in1, __m128d& out0) noexcept;
 //! @param in: Input registers
 //! @param out: Output registers
 template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
-inline void Transpose2x1(__m128d in0, __m128d& out0, __m128d& out1) noexcept;
+inline void Transpose2x1(__m128d in_0, __m128d& out_0, __m128d& out_1) noexcept;
 
 
 
@@ -54,7 +54,7 @@ inline void Transpose2x1(__m128d in0, __m128d& out0, __m128d& out1) noexcept;
 //! @param in: Input registers
 //! @param out: Output registers
 template <U32 _firstRowIn = 0, U32 _firstRowOut = 0, bool _overwriteUnused = true, bool _unusedSetZero = false>
-inline void Transpose2x2(__m128d in0, __m128d in1, __m128d& out0, __m128d& out1) noexcept;
+inline void Transpose2x2(__m128d in_0, __m128d in_1, __m128d& out_0, __m128d& out_1) noexcept;
 
 
 

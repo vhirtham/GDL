@@ -13,7 +13,6 @@ namespace GDL::simd
 // add static asserts to all transpose functions, -> own function, including:
 //  static_assert(not(_overwriteUnused == false && _unusedSetZero == true), "Option _unusedSetZero has no effect.");
 
-// add Permute2F128If -> like SwapLanesIf --- just let Permute2F128<0,1> return the input
 // rename parameters an variacles: in0 -> in_0; out0 -> out_0; tmp0 -> tmp_0
 
 // TODOs for functions of this file
