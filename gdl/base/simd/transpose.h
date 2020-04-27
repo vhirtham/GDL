@@ -9,7 +9,6 @@ namespace GDL::simd
 {
 
 // TODOs for functions of this file
-// - reorder template parameters in
 // - add noexcept and [[nodiscard]]
 // - documentation of test
 // - test all branches of the general transpose function

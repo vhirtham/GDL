@@ -17,43 +17,42 @@ using namespace GDL::simd;
 
 // --------------------------------------------------------------------------------------------------------------------
 
-template <typename _registerType, U32 _rows, U32 _cols, U32 _numOffsets>
+template <typename _registerType, U32 _rows, U32 _cols, U32 _maxOffset>
 inline void TestArrayOffset()
 {
-    constexpr UST input_array_size = _cols + _numOffsets;
+    constexpr UST input_size = _cols + _maxOffset;
 
-    std::array<_registerType, input_array_size> input_array = GetDefaultInputArray<_registerType, input_array_size>();
+    std::array<_registerType, input_size> input = GetDefaultInputArray<_registerType, input_size>();
 
-    TestArrayOffsetIterateInputOffset<_rows, _cols, _numOffsets>(input_array);
+    TestArrayOffsetIterateInputOffset<_rows, _cols, _maxOffset>(input);
 }
 
 
 
 // --------------------------------------------------------------------------------------------------------------------
 
-template <U32 _rows, U32 _cols, U32 _numOffsets, U32 _columnOffsetIn, typename _registerType, UST _inputArraySize>
-inline void TestArrayOffsetIterateInputOffset(std::array<_registerType, _inputArraySize> input_array)
+template <U32 _rows, U32 _cols, U32 _maxOffset, U32 _columnOffsetIn, typename _registerType, UST _inputArraySize>
+inline void TestArrayOffsetIterateInputOffset(std::array<_registerType, _inputArraySize> input)
 {
-    TestArrayOffsetIterateOutputOffset<_rows, _cols, _numOffsets, _columnOffsetIn>(input_array);
+    TestArrayOffsetIterateOutputOffset<_rows, _cols, _maxOffset, _columnOffsetIn>(input);
 
-    if constexpr (_columnOffsetIn < _numOffsets)
-        TestArrayOffsetIterateInputOffset<_rows, _cols, _numOffsets, _columnOffsetIn + 1>(input_array);
+    if constexpr (_columnOffsetIn < _maxOffset)
+        TestArrayOffsetIterateInputOffset<_rows, _cols, _maxOffset, _columnOffsetIn + 1>(input);
 }
 
 
 
 // --------------------------------------------------------------------------------------------------------------------
 
-template <U32 _rows, U32 _cols, U32 _numOffsets, U32 _columnOffsetIn, U32 _columnOffsetOut, typename _registerType,
+template <U32 _rows, U32 _cols, U32 _maxOffset, U32 _columnOffsetIn, U32 _columnOffsetOut, typename _registerType,
           UST _inputArraySize>
-inline void TestArrayOffsetIterateOutputOffset(std::array<_registerType, _inputArraySize> input_array)
+inline void TestArrayOffsetIterateOutputOffset(std::array<_registerType, _inputArraySize> input)
 {
 
-    TestArrayOffsetTestCase<_rows, _cols, _columnOffsetIn, _columnOffsetOut>(input_array);
+    TestArrayOffsetTestCase<_rows, _cols, _columnOffsetIn, _columnOffsetOut>(input);
 
-    if constexpr (_columnOffsetOut < _numOffsets)
-        TestArrayOffsetIterateOutputOffset<_rows, _cols, _numOffsets, _columnOffsetIn, _columnOffsetOut + 1>(
-                input_array);
+    if constexpr (_columnOffsetOut < _maxOffset)
+        TestArrayOffsetIterateOutputOffset<_rows, _cols, _maxOffset, _columnOffsetIn, _columnOffsetOut + 1>(input);
 }
 
 
@@ -78,12 +77,72 @@ inline void TestArrayOffsetTestCase(std::array<_registerType, _inputArraySize> i
 
 // --------------------------------------------------------------------------------------------------------------------
 
+template <typename _registerType, U32 _rows, U32 _cols, U32 _numStrides>
+inline void TestArrayStride()
+{
+    constexpr UST input_size = _cols * _numStrides;
+
+    std::array<_registerType, input_size> input = GetDefaultInputArray<_registerType, input_size>();
+
+    TestArrayStrideIterateInputStride<_rows, _cols, _numStrides>(input);
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+template <U32 _rows, U32 _cols, U32 _numStrides, U32 _columnStrideIn, typename _registerType, UST _inputArraySize>
+inline void TestArrayStrideIterateInputStride(std::array<_registerType, _inputArraySize> input)
+{
+    TestArrayStrideIterateOutputStride<_rows, _cols, _numStrides, _columnStrideIn>(input);
+
+    if constexpr (_columnStrideIn < _numStrides)
+        TestArrayStrideIterateInputStride<_rows, _cols, _numStrides, _columnStrideIn + 1>(input);
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+template <U32 _rows, U32 _cols, U32 _numStrides, U32 _columnStrideIn, U32 _columnStrideOut, typename _registerType,
+          UST _inputArraySize>
+inline void TestArrayStrideIterateOutputStride(std::array<_registerType, _inputArraySize> input)
+{
+
+    TestArrayStrideTestCase<_rows, _cols, _columnStrideIn, _columnStrideOut>(input);
+
+    if constexpr (_columnStrideOut < _numStrides)
+        TestArrayStrideIterateOutputStride<_rows, _cols, _numStrides, _columnStrideIn, _columnStrideOut + 1>(input);
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+template <U32 _rows, U32 _cols, U32 _columnStrideIn, U32 _columnStrideOut, typename _registerType, UST _inputArraySize>
+inline void TestArrayStrideTestCase(std::array<_registerType, _inputArraySize> input)
+{
+    constexpr UST output_array_size = _inputArraySize / _cols * _rows;
+
+    std::array<_registerType, output_array_size> reference =
+            GetDefaultReferenceArray<_registerType, output_array_size>();
+    std::array<_registerType, output_array_size> output = reference;
+
+    Transpose<_rows, _cols, 0, 0, 0, 0, _columnStrideIn, _columnStrideOut>(input, output);
+
+    CheckResults<_rows, _cols, 0, 0, 0, 0, _columnStrideIn, _columnStrideOut, true, false>(input, output, reference);
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
 template <U32 _rows, U32 _cols, U32 _firstRowIn, U32 _firstRowOut, U32 _colStartIn, U32 _colStartOut, U32 _colStrideIn,
-          U32 _colStrideOut, bool _overwriteUnused, bool _unusedSetZero, bool _checkUnusedCols, UST _arraySizeIn,
-          UST _arraySizeOut, typename _registerType>
-inline void CheckResults(const std::array<_registerType, _arraySizeIn>& in,
-                         const std::array<_registerType, _arraySizeOut>& out,
-                         const std::array<_registerType, _arraySizeOut>& ref)
+          U32 _colStrideOut, bool _overwriteUnused, bool _unusedSetZero, bool _checkUnusedCols, UST _inputArraySize,
+          UST _outputArraySize, typename _registerType>
+inline void CheckResults(const std::array<_registerType, _inputArraySize>& in,
+                         const std::array<_registerType, _outputArraySize>& out,
+                         const std::array<_registerType, _outputArraySize>& ref)
 {
     using Type = decltype(GetDataType<_registerType>());
     constexpr U32 numRegVals = numRegisterValues<_registerType>;
@@ -100,7 +159,7 @@ inline void CheckResults(const std::array<_registerType, _arraySizeIn>& in,
 
     // std::cout << setupString << std::endl;
 
-    for (U32 i = 0; i < _arraySizeOut; ++i)
+    for (U32 i = 0; i < _outputArraySize; ++i)
         if (i >= _colStartOut && i <= _colStartOut + _rows * _colStrideOut - 1 &&
             (i - _colStartOut) % _colStrideOut == 0)
         {
