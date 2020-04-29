@@ -25,12 +25,13 @@ template <U32 _rows, U32 _cols, U32 _firstRowIn, U32 _firstRowOut, U32 _firstCol
           U32 _colStrideOut, bool _overwriteUnused, bool _unusedSetZero, typename _registerType, UST _arrSizeIn,
           UST _arrSizeOut>
 inline void Transpose(const std::array<_registerType, _arrSizeIn>& matDataI,
-                      std::array<_registerType, _arrSizeOut>& matDataO)
+                      std::array<_registerType, _arrSizeOut>& matDataO) noexcept
 {
     static_assert(_firstColIn + _colStrideIn * (_cols - 1) + 1 <= _arrSizeIn, "Input submatrix exceeds array size.");
     static_assert(_firstColOut + _colStrideOut * (_rows - 1) + 1 <= _arrSizeOut,
                   "Output submatrix exceeds array size.");
-    static_assert(_colStrideIn > 0 && _colStrideOut > 0, "Column strides must be larger than 0.");
+    static_assert(_colStrideIn > 0 && _colStrideOut > 0, "Column stride template parameters must be larger than 0.");
+    static_assert(_rows > 0 && _cols > 0, "Columns and rows must be larger than 0.");
 
 
     // Create index arrays

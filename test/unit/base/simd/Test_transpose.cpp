@@ -5,13 +5,6 @@
 
 
 
-// Necessary tests:
-// - all branches - correct function selected -> test always 3 sizes with differen settings of the bool template
-// parameters
-// - strides and offsets together -> just single test without iteration, for example: offset 2, stride 2
-
-
-
 // array offsets ------------------------------------------------------------------------------------------------------
 
 BOOST_AUTO_TEST_CASE(ArrayOffsets_128d)
@@ -74,6 +67,74 @@ BOOST_AUTO_TEST_CASE(ArrayStrides_256d)
 BOOST_AUTO_TEST_CASE(ArrayStrides_256)
 {
     TestArrayStride<__m256, 5, 7>();
+}
+
+#endif //__AVX2__
+
+
+
+// array strides ------------------------------------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(CombinedArrayStrideAndOffset_128d)
+{
+    TestCombinedArrayStrideAndOffset<__m128d, 2, 2>();
+}
+
+
+
+BOOST_AUTO_TEST_CASE(CombinedArrayStrideAndOffset_128)
+{
+    TestCombinedArrayStrideAndOffset<__m128, 3, 4>();
+}
+
+
+
+#ifdef __AVX2__
+
+BOOST_AUTO_TEST_CASE(CombinedArrayStrideAndOffset_256d)
+{
+    TestArrayStride<__m256d, 3, 4>();
+}
+
+
+
+BOOST_AUTO_TEST_CASE(CombinedArrayStrideAndOffset_256)
+{
+    TestArrayStride<__m256, 5, 7>();
+}
+
+#endif //__AVX2__
+
+
+
+// Matix sizes --------------------------------------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(MatrixSizes_128d)
+{
+    TestAllMatrixSizes<__m128d>();
+}
+
+
+
+BOOST_AUTO_TEST_CASE(MatrixSizes_128)
+{
+    TestAllMatrixSizes<__m128>();
+}
+
+
+
+#ifdef __AVX2__
+
+BOOST_AUTO_TEST_CASE(MatrixSizes_256d)
+{
+    TestAllMatrixSizes<__m256d>();
+}
+
+
+
+BOOST_AUTO_TEST_CASE(MatrixSizes_256)
+{
+    TestAllMatrixSizes<__m256>();
 }
 
 #endif //__AVX2__

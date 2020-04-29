@@ -9,9 +9,6 @@ namespace GDL::simd
 {
 
 // TODOs for functions of this file
-// - add noexcept and [[nodiscard]]
-// - documentation of test
-// - test all branches of the general transpose function
 // - check docstring
 
 
@@ -36,7 +33,7 @@ template <U32 _rows, U32 _cols, U32 _firstRowIn = 0, U32 _firstRowOut = 0, U32 _
           U32 _colStrideIn = 1, U32 _colStrideOut = 1, bool _overwriteUnused = true, bool _unusedSetZero = false,
           typename _registerType, UST _arrSizeIn, UST _arrSizeOut>
 inline void Transpose(const std::array<_registerType, _arrSizeIn>& matDataI,
-                      std::array<_registerType, _arrSizeOut>& matDataO);
+                      std::array<_registerType, _arrSizeOut>& matDataO) noexcept;
 
 
 

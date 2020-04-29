@@ -113,8 +113,54 @@ inline void TestArrayStrideIterateOutputStride(std::array<_registerType, _inputA
 template <U32 _rows, U32 _cols, U32 _columnStrideIn, U32 _columnStrideOut, typename _registerType, UST _inputArraySize>
 inline void TestArrayStrideTestCase(std::array<_registerType, _inputArraySize> input);
 
-// helpers
-// ------------------------------------------------------------------------------------------------------------
+
+
+//! @brief Test if the transposition is performed correctly when the stride and offset parameters are both larger than
+//! their default values.
+//! @tparam _registerType: Register type
+//! @tparam rows: Number of rows of the matrix
+//! @tparam cols: Number of columns of the matrix
+template <typename _registerType, U32 _rows, U32 _cols>
+inline void TestCombinedArrayStrideAndOffset();
+
+
+
+//! @brief Test if all matrix sizes are supported and that template parameters are passed correctly to the corresponding
+//! register specific transpose functions.
+//! @tparam _registerType: Register type
+template <typename _registerType>
+inline void TestAllMatrixSizes();
+
+
+
+//! @brief Subfunction of the matrix size test. Increases the number of rows recursively.
+//! @tparam _registerType: Register type
+//! @tparam _rows: Current number of rows
+template <typename _registerType, U32 _rows = 1>
+inline void TestAllMatrixSizesIterateRows();
+
+
+
+//! @brief Subfunction of the matrix size test. Increases the number of columns recursively.
+//! @tparam _registerType: Register type
+//! @tparam _rows: Number of rows
+//! @tparam _colss: Current number of columns
+template <typename _registerType, U32 _rows, U32 _cols = 1>
+inline void TestAllMatrixSizesIterateColumns();
+
+
+
+//! @brief Subfunction of the matrix size test. Performs the actual test for fixed matrix size. For each size 3
+//! different sets of template parameter combinations are tested.
+//! @tparam _registerType: Register type
+//! @tparam _rows: Number of rows
+//! @tparam _colss: Number of columns
+template <typename _registerType, U32 _rows, U32 _cols>
+inline void TestAllMatrixSizesTestcasse();
+
+
+
+// helpers  ------------------------------------------------------------------------------------------------------------
 
 //! @brief Check the results of the transposition
 //! @tparam rows: Number of rows of the matrix

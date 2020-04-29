@@ -137,6 +137,87 @@ inline void TestArrayStrideTestCase(std::array<_registerType, _inputArraySize> i
 
 // --------------------------------------------------------------------------------------------------------------------
 
+template <typename _registerType, U32 _rows, U32 _cols>
+inline void TestCombinedArrayStrideAndOffset()
+{
+    constexpr UST input_size = _cols * 2 + 3;
+    constexpr UST output_array_size = _rows * 3 + 1;
+
+    std::array<_registerType, input_size> input = GetDefaultInputArray<_registerType, input_size>();
+    std::array<_registerType, output_array_size> reference =
+            GetDefaultReferenceArray<_registerType, output_array_size>();
+    std::array<_registerType, output_array_size> output = reference;
+
+    Transpose<_rows, _cols, 0, 0, 3, 1, 2, 3>(input, output);
+
+    CheckResults<_rows, _cols, 0, 0, 3, 1, 2, 3, true, false>(input, output, reference);
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+template <typename _registerType>
+inline void TestAllMatrixSizes()
+{
+    TestAllMatrixSizesIterateRows<_registerType>();
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+template <typename _registerType, U32 _rows>
+inline void TestAllMatrixSizesIterateRows()
+{
+    TestAllMatrixSizesIterateColumns<_registerType, _rows>();
+
+    if constexpr (_rows < numRegisterValues<_registerType>)
+        TestAllMatrixSizesIterateRows<_registerType, _rows + 1>();
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+template <typename _registerType, U32 _rows, U32 _cols>
+inline void TestAllMatrixSizesIterateColumns()
+{
+    TestAllMatrixSizesTestcasse<_registerType, _rows, _cols>();
+
+    if constexpr (_cols < numRegisterValues<_registerType>)
+        TestAllMatrixSizesIterateColumns<_registerType, _rows, _cols + 1>();
+}
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+template <typename _registerType, U32 _rows, U32 _cols>
+inline void TestAllMatrixSizesTestcasse()
+{
+
+    constexpr U32 firstRowInMax = numRegisterValues<_registerType> - _rows;
+    constexpr U32 firstRowOutMax = numRegisterValues<_registerType> - _cols;
+
+    std::array<_registerType, _cols> input = GetDefaultInputArray<_registerType, _cols>();
+    std::array<_registerType, _rows> reference = GetDefaultReferenceArray<_registerType, _rows>();
+
+    std::array<_registerType, _rows> output = reference;
+    Transpose<_rows, _cols, firstRowInMax, firstRowOutMax, 0, 0, 1, 1, true, false>(input, output);
+    CheckResults<_rows, _cols, firstRowInMax, firstRowOutMax, 0, 0, 1, 1, true, false>(input, output, reference);
+
+    Transpose<_rows, _cols, firstRowInMax / 3, firstRowOutMax / 2, 0, 0, 1, 1, true, true>(input, output);
+    CheckResults<_rows, _cols, firstRowInMax / 3, firstRowOutMax / 2, 0, 0, 1, 1, true, true>(input, output, reference);
+
+    output = reference;
+    Transpose<_rows, _cols, firstRowInMax / 2, firstRowOutMax, 0, 0, 1, 1, false, false>(input, output);
+    CheckResults<_rows, _cols, firstRowInMax / 2, firstRowOutMax, 0, 0, 1, 1, false, false>(input, output, reference);
+}
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
 template <U32 _rows, U32 _cols, U32 _firstRowIn, U32 _firstRowOut, U32 _colStartIn, U32 _colStartOut, U32 _colStrideIn,
           U32 _colStrideOut, bool _overwriteUnused, bool _unusedSetZero, bool _checkUnusedCols, UST _inputArraySize,
           UST _outputArraySize, typename _registerType>
