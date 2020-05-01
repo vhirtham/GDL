@@ -1,0 +1,68 @@
+\section{Swizzle functions}
+
+
+\subsection{Blending}
+\subsubsection{Blend}
+\begin{tikzpicture}[>=stealth,thick,baseline, every node/.style={text height=2ex,text width=1em}]
+\matrix [matrix of math nodes,
+	left delimiter={[},
+	right delimiter={]},
+	column 1/.style = {nodes={fill=red!50}},
+	](A) at (0,0){ 
+	\mathbf{a_{1}}\\
+	\mathbf{a_{2}}\\  
+	\mathbf{a_{3}}\\
+	\mathbf{a_{4}}\\
+	|[fill=white]|\textbf{---}\\
+	\mathbf{a_{5}}\\
+	\mathbf{a_{6}}\\
+	\mathbf{a_{7}}\\
+	\mathbf{a_{8}}\\
+};
+
+\matrix [matrix of math nodes,
+	left delimiter={[},
+	right delimiter={]},
+	column 1/.style = {nodes={fill=blue!50}},
+	](B) at (10,0){ 
+	\mathbf{b_{1}}\\
+	\mathbf{b_{2}}\\  
+	\mathbf{b_{3}}\\
+	\mathbf{b_{4}}\\
+	|[fill=white]|\textbf{---}\\
+	\mathbf{b_{5}}\\
+	\mathbf{b_{6}}\\
+	\mathbf{b_{7}}\\
+	\mathbf{b_{8}}\\
+};
+
+
+\matrix [matrix of math nodes,left delimiter={[},right delimiter={]}](C) at (5,0){ 
+	|[fill=red!50]|\mathbf{c_{1}}\\
+	|[fill=blue!50]|\mathbf{c_{2}}\\  
+	|[fill=blue!50]|\mathbf{c_{3}}\\
+	|[fill=red!50]|\mathbf{c_{4}}\\
+	|[fill=white]|\textbf{---}\\
+	|[fill=blue!50]|\mathbf{c_{5}}\\
+	|[fill=red!50]|\mathbf{c_{6}}\\
+	|[fill=red!50]|\mathbf{c_{7}}\\
+	|[fill=red!50]|\mathbf{c_{8}}\\
+};
+
+\draw[->,color=red ]([xshift= 12pt]A-1-1.east)-- ([xshift=-12pt]C-1-1.west);
+\draw[->,color=blue]([xshift=-12pt]B-2-1.west)-- ([xshift= 12pt]C-2-1.east);
+\draw[->,color=blue]([xshift=-12pt]B-3-1.west)-- ([xshift= 12pt]C-3-1.east);
+\draw[->,color=red ]([xshift= 12pt]A-4-1.east)-- ([xshift=-12pt]C-4-1.west);
+\draw[->,color=blue]([xshift=-12pt]B-6-1.west)-- ([xshift= 12pt]C-6-1.east);
+\draw[->,color=red ]([xshift= 12pt]A-7-1.east)-- ([xshift=-12pt]C-7-1.west);
+\draw[->,color=red ]([xshift= 12pt]A-8-1.east)-- ([xshift=-12pt]C-8-1.west);
+\draw[->,color=red ]([xshift= 12pt]A-9-1.east)-- ([xshift=-12pt]C-9-1.west);
+\end{tikzpicture}
+
+
+\subsection{Broadcast}
+\subsection{Unpack}
+\subsection{Permute}
+\subsection{Shuffle}
+\subsection{Insert}
+\subsection{Lane Permutations}

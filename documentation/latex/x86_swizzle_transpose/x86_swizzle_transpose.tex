@@ -1,0 +1,39 @@
+\documentclass[]{scrartcl}
+
+\usepackage{minted}
+\usepackage{mdframed}  
+\usepackage{xcolor}
+\usepackage{tikz}
+\usepackage{tikz-3dplot}
+\usetikzlibrary{matrix,decorations.pathreplacing, calc, positioning,fit}
+
+
+\newcommand{\draftNote}[1]
+{
+	\begin{mdframed}[linewidth=0pt, backgroundcolor=red!10]
+		#1
+	\end{mdframed}
+}
+
+
+\newcommand{\draftNoteInline}[1]
+{
+	\textcolor{red}{(#1)}
+}
+
+
+%opening
+\title{Documentation of swizzle and transpose functions for x86 vector registers}
+\author{vhirtham}
+
+\begin{document}		
+\maketitle
+\section*{About this document}
+The purpose of this document is to give a short overview over the available swizzle instructions for x86 register types and the \mintinline{cpp}{Transpose} functions for matrices based on x86 vector registers.
+
+
+\input{sections/swizzle_functions}
+\input{sections/transpose_functions}
+
+
+\end{document}
