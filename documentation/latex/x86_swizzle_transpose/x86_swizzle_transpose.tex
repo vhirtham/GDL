@@ -21,6 +21,59 @@
 	\textcolor{red}{(#1)}
 }
 
+\newcommand{\cppInline}[1]
+{
+	\mintinline{cpp}{#1}
+}
+
+
+\newcommand{\plotSwizzleThreeRegisters}[8]
+{
+	\matrix [matrix of math nodes,
+	left delimiter={[},
+	right delimiter={]},
+	column 1/.style = {nodes={fill=red!50}},
+	](A) at (0,0){ 
+		\mathbf{a_{0}}\\
+		\mathbf{a_{1}}\\  
+		\mathbf{a_{2}}\\
+		\mathbf{a_{3}}\\
+		|[fill=white]|\textbf{---}\\
+		\mathbf{a_{4}}\\
+		\mathbf{a_{5}}\\
+		\mathbf{a_{6}}\\
+		\mathbf{a_{7}}\\
+	};
+
+	\matrix [matrix of math nodes,
+	left delimiter={[},
+	right delimiter={]},
+	column 1/.style = {nodes={fill=blue!50}},
+	](B) at (10,0){ 
+		\mathbf{b_{0}}\\
+		\mathbf{b_{1}}\\  
+		\mathbf{b_{2}}\\
+		\mathbf{b_{3}}\\
+		|[fill=white]|\textbf{---}\\
+		\mathbf{b_{4}}\\
+		\mathbf{b_{5}}\\
+		\mathbf{b_{6}}\\
+		\mathbf{b_{7}}\\
+	};
+
+	\matrix [matrix of math nodes,left delimiter={[},right delimiter={]}](C) at (5,0){ 
+		|[fill=#1!50]|\mathbf{c_{0}}\\
+		|[fill=#2!50]|\mathbf{c_{1}}\\  
+		|[fill=#3!50]|\mathbf{c_{2}}\\
+		|[fill=#4!50]|\mathbf{c_{3}}\\
+		|[fill=white]|\textbf{---}\\
+		|[fill=#5!50]|\mathbf{c_{4}}\\
+		|[fill=#6!50]|\mathbf{c_{5}}\\
+		|[fill=#7!50]|\mathbf{c_{6}}\\
+		|[fill=#8!50]|\mathbf{c_{7}}\\
+	};
+}
+
 
 %opening
 \title{Documentation of swizzle and transpose functions for x86 vector registers}

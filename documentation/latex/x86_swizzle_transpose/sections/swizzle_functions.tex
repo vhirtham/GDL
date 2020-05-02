@@ -2,52 +2,28 @@
 
 
 \subsection{Blending}
+
+A blend operation conditionally copies the data elements from either the first or second input registers to the same position inside the target register. 
+The underlying x86 intrinsic function are \cppInline{_mm_blend_ps}, \cppInline{_mm_blend_pd}, \cppInline{_mm256_blend_ps} and \cppInline{_mm256_blend_pd}.
+These functions need an integer as parameter that controls the value selection.
+Several functions that calculate the control integer value based on chosen template parameters are implemented.
+So it is not necessary to determine the correct integer value yourself.
+
+On current x86 CPU architectures, blending is the most efficient swizzle operation, since multiple blends can be performed during a single CPU cycle.
+
 \subsubsection{Blend}
+
+The \cppInline{Blend} function has as many template parameters as data elements.
+Each value van either be 0 or 1.
+If a template parameter is set to 0, the corresponding data element receives its value from the first source register.
+If it is 1, the value is taken from the second input register.
+
+\begin{minted}{cpp}
+__m256 c = Blend<0, 1, 1, 0, 1, 0, 0, 0>(a, b)
+\end{minted}
+
 \begin{tikzpicture}[>=stealth,thick,baseline, every node/.style={text height=2ex,text width=1em}]
-\matrix [matrix of math nodes,
-	left delimiter={[},
-	right delimiter={]},
-	column 1/.style = {nodes={fill=red!50}},
-	](A) at (0,0){ 
-	\mathbf{a_{1}}\\
-	\mathbf{a_{2}}\\  
-	\mathbf{a_{3}}\\
-	\mathbf{a_{4}}\\
-	|[fill=white]|\textbf{---}\\
-	\mathbf{a_{5}}\\
-	\mathbf{a_{6}}\\
-	\mathbf{a_{7}}\\
-	\mathbf{a_{8}}\\
-};
-
-\matrix [matrix of math nodes,
-	left delimiter={[},
-	right delimiter={]},
-	column 1/.style = {nodes={fill=blue!50}},
-	](B) at (10,0){ 
-	\mathbf{b_{1}}\\
-	\mathbf{b_{2}}\\  
-	\mathbf{b_{3}}\\
-	\mathbf{b_{4}}\\
-	|[fill=white]|\textbf{---}\\
-	\mathbf{b_{5}}\\
-	\mathbf{b_{6}}\\
-	\mathbf{b_{7}}\\
-	\mathbf{b_{8}}\\
-};
-
-
-\matrix [matrix of math nodes,left delimiter={[},right delimiter={]}](C) at (5,0){ 
-	|[fill=red!50]|\mathbf{c_{1}}\\
-	|[fill=blue!50]|\mathbf{c_{2}}\\  
-	|[fill=blue!50]|\mathbf{c_{3}}\\
-	|[fill=red!50]|\mathbf{c_{4}}\\
-	|[fill=white]|\textbf{---}\\
-	|[fill=blue!50]|\mathbf{c_{5}}\\
-	|[fill=red!50]|\mathbf{c_{6}}\\
-	|[fill=red!50]|\mathbf{c_{7}}\\
-	|[fill=red!50]|\mathbf{c_{8}}\\
-};
+\plotSwizzleThreeRegisters{red}{blue}{blue}{red}{blue}{red}{red}{red}
 
 \draw[->,color=red ]([xshift= 12pt]A-1-1.east)-- ([xshift=-12pt]C-1-1.west);
 \draw[->,color=blue]([xshift=-12pt]B-2-1.west)-- ([xshift= 12pt]C-2-1.east);
@@ -58,6 +34,108 @@
 \draw[->,color=red ]([xshift= 12pt]A-8-1.east)-- ([xshift=-12pt]C-8-1.west);
 \draw[->,color=red ]([xshift= 12pt]A-9-1.east)-- ([xshift=-12pt]C-9-1.west);
 \end{tikzpicture}
+
+
+\subsubsection{BlendIndex}
+
+The \cppInline{BlendIndex} function has only a single template parameter independent of the used register types' size.
+It specifies the index of a single data element that is taken from the second source register. 
+All other values are taken from the first one.
+
+\begin{minted}{cpp}
+__m256 c = BlendIndex<5>(a, b)
+\end{minted}
+
+
+\begin{tikzpicture}[>=stealth,thick,baseline, every node/.style={text height=2ex,text width=1em}]
+\plotSwizzleThreeRegisters{red}{red}{red}{red}{red}{blue}{red}{red}
+
+\draw[->,color=red ]([xshift= 12pt]A-1-1.east)-- ([xshift=-12pt]C-1-1.west);
+\draw[->,color=red ]([xshift= 12pt]A-2-1.east)-- ([xshift=-12pt]C-2-1.west);
+\draw[->,color=red ]([xshift= 12pt]A-3-1.east)-- ([xshift=-12pt]C-3-1.west);
+\draw[->,color=red ]([xshift= 12pt]A-4-1.east)-- ([xshift=-12pt]C-4-1.west);
+\draw[->,color=red ]([xshift= 12pt]A-6-1.east)-- ([xshift=-12pt]C-6-1.west);
+\draw[->,color=blue]([xshift=-12pt]B-7-1.west)-- ([xshift= 12pt]C-7-1.east);
+\draw[->,color=red ]([xshift= 12pt]A-8-1.east)-- ([xshift=-12pt]C-8-1.west);
+\draw[->,color=red ]([xshift= 12pt]A-9-1.east)-- ([xshift=-12pt]C-9-1.west);
+\end{tikzpicture}
+
+
+\subsubsection{BlendAboveIndex}
+
+The \cppInline{BlendIndex} function has only a single template parameter independent of the used register types' size.
+Data elements with a higher index than the specified value are taken from the second source register. 
+All other values are taken from the first one.
+
+\begin{minted}{cpp}
+__m256 c = BlendAboveIndex<5>(a, b)
+\end{minted}
+
+\begin{tikzpicture}[>=stealth,thick,baseline, every node/.style={text height=2ex,text width=1em}]
+\plotSwizzleThreeRegisters{red}{red}{red}{red}{red}{red}{blue}{blue}
+
+\draw[->,color=red ]([xshift= 12pt]A-1-1.east)-- ([xshift=-12pt]C-1-1.west);
+\draw[->,color=red ]([xshift= 12pt]A-2-1.east)-- ([xshift=-12pt]C-2-1.west);
+\draw[->,color=red ]([xshift= 12pt]A-3-1.east)-- ([xshift=-12pt]C-3-1.west);
+\draw[->,color=red ]([xshift= 12pt]A-4-1.east)-- ([xshift=-12pt]C-4-1.west);
+\draw[->,color=red ]([xshift= 12pt]A-6-1.east)-- ([xshift=-12pt]C-6-1.west);
+\draw[->,color=red ]([xshift= 12pt]A-7-1.east)-- ([xshift=-12pt]C-7-1.west);
+\draw[->,color=blue]([xshift=-12pt]B-8-1.west)-- ([xshift= 12pt]C-8-1.east);
+\draw[->,color=blue]([xshift=-12pt]B-9-1.west)-- ([xshift= 12pt]C-9-1.east);
+\end{tikzpicture}
+
+
+
+
+\subsubsection{BlendBelowIndex}
+
+The \cppInline{BlendIndex} function has only a single template parameter independent of the used register types' size.
+Data elements with a lower index than the specified value are taken from the second source register. 
+All other values are taken from the first one.
+
+\begin{minted}{cpp}
+__m256 c = BlendBelowIndex<5>(a, b)
+\end{minted}
+
+\begin{tikzpicture}[>=stealth,thick,baseline, every node/.style={text height=2ex,text width=1em}]
+\plotSwizzleThreeRegisters{blue}{blue}{blue}{blue}{blue}{red}{red}{red}
+
+\draw[->,color=blue]([xshift=-12pt]B-1-1.west)-- ([xshift= 12pt]C-1-1.east);
+\draw[->,color=blue]([xshift=-12pt]B-2-1.west)-- ([xshift= 12pt]C-2-1.east);
+\draw[->,color=blue]([xshift=-12pt]B-3-1.west)-- ([xshift= 12pt]C-3-1.east);
+\draw[->,color=blue]([xshift=-12pt]B-4-1.west)-- ([xshift= 12pt]C-4-1.east);
+\draw[->,color=blue]([xshift=-12pt]B-6-1.west)-- ([xshift= 12pt]C-6-1.east);
+\draw[->,color=red ]([xshift= 12pt]A-7-1.east)-- ([xshift=-12pt]C-7-1.west);
+\draw[->,color=red ]([xshift= 12pt]A-8-1.east)-- ([xshift=-12pt]C-8-1.west);
+\draw[->,color=red ]([xshift= 12pt]A-9-1.east)-- ([xshift=-12pt]C-9-1.west);
+\end{tikzpicture}
+
+
+
+
+\subsubsection{BlendInRange}
+
+The \cppInline{BlendIndex} function has two template parameters independent of the used register types' size.
+Data elements with indices equal or between those 2 values are taken from the second source register. 
+All other are taken from the first one.
+
+\begin{minted}{cpp}
+__m256 c = BlendInRange<3, 5>(a, b)
+\end{minted}
+
+\begin{tikzpicture}[>=stealth,thick,baseline, every node/.style={text height=2ex,text width=1em}]
+\plotSwizzleThreeRegisters{red}{red}{red}{blue}{blue}{blue}{red}{red}
+
+\draw[->,color=red ]([xshift= 12pt]A-1-1.east)-- ([xshift=-12pt]C-1-1.west);
+\draw[->,color=red ]([xshift= 12pt]A-2-1.east)-- ([xshift=-12pt]C-2-1.west);
+\draw[->,color=red ]([xshift= 12pt]A-3-1.east)-- ([xshift=-12pt]C-3-1.west);
+\draw[->,color=blue]([xshift=-12pt]B-4-1.west)-- ([xshift= 12pt]C-4-1.east);
+\draw[->,color=blue]([xshift=-12pt]B-6-1.west)-- ([xshift= 12pt]C-6-1.east);
+\draw[->,color=blue]([xshift=-12pt]B-7-1.west)-- ([xshift= 12pt]C-7-1.east);
+\draw[->,color=red ]([xshift= 12pt]A-8-1.east)-- ([xshift=-12pt]C-8-1.west);
+\draw[->,color=red ]([xshift= 12pt]A-9-1.east)-- ([xshift=-12pt]C-9-1.west);
+\end{tikzpicture}
+
 
 
 \subsection{Broadcast}
