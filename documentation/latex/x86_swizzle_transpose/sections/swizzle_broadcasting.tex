@@ -1,0 +1,69 @@
+\subsection{Broadcasting}
+
+Broadcast operations copy a single value (per lane) from a source register to all data elements (per lane) of the result register.  
+
+\subsubsection{Broadcast}
+
+The \cppInline{Broadcast} function broadcast one value per lane.
+The position inside the lane of the data element that should be broadcasted is passed as template parameter.
+For multi-lane registers it is also possible to select different positions per lane by providing as many template parameters as the register has lanes.
+
+\subsubsection*{Example 1:}
+\begin{minted}{cpp}
+__m256 b = Broadcast<2>(a)
+\end{minted}
+
+\begin{tikzpicture}[>=stealth,thick,baseline, every node/.style={text height=2ex,text width=1em}]
+\plotSwizzleTwoRegisters{red!60}{red!60}{red!60}{red!60}{blue!55}{blue!55}{blue!55}{blue!55}
+\draw[->,color=red ]([xshift= 12pt]A-3-1.east)-- ([xshift=-12pt]C-1-1.west);
+\draw[->,color=red ]([xshift= 12pt]A-3-1.east)-- ([xshift=-12pt]C-2-1.west);
+\draw[->,color=red ]([xshift= 12pt]A-3-1.east)-- ([xshift=-12pt]C-3-1.west);
+\draw[->,color=red ]([xshift= 12pt]A-3-1.east)-- ([xshift=-12pt]C-4-1.west);
+\draw[->,color=blue ]([xshift= 12pt]A-8-1.east)-- ([xshift=-12pt]C-6-1.west);
+\draw[->,color=blue ]([xshift= 12pt]A-8-1.east)-- ([xshift=-12pt]C-7-1.west);
+\draw[->,color=blue ]([xshift= 12pt]A-8-1.east)-- ([xshift=-12pt]C-8-1.west);
+\draw[->,color=blue ]([xshift= 12pt]A-8-1.east)-- ([xshift=-12pt]C-9-1.west);
+\end{tikzpicture}
+
+
+\subsubsection*{Example 2:}
+\begin{minted}{cpp}
+__m256 b = Broadcast<0, 3>(a)
+\end{minted}
+
+\begin{tikzpicture}[>=stealth,thick,baseline, every node/.style={text height=2ex,text width=1em}]
+\plotSwizzleTwoRegisters{red!20}{red!20}{red!20}{red!20}{blue!70}{blue!70}{blue!70}{blue!70}
+\draw[->,color=red ]([xshift= 12pt]A-1-1.east)-- ([xshift=-12pt]C-1-1.west);
+\draw[->,color=red ]([xshift= 12pt]A-1-1.east)-- ([xshift=-12pt]C-2-1.west);
+\draw[->,color=red ]([xshift= 12pt]A-1-1.east)-- ([xshift=-12pt]C-3-1.west);
+\draw[->,color=red ]([xshift= 12pt]A-1-1.east)-- ([xshift=-12pt]C-4-1.west);
+\draw[->,color=blue ]([xshift= 12pt]A-9-1.east)-- ([xshift=-12pt]C-6-1.west);
+\draw[->,color=blue ]([xshift= 12pt]A-9-1.east)-- ([xshift=-12pt]C-7-1.west);
+\draw[->,color=blue ]([xshift= 12pt]A-9-1.east)-- ([xshift=-12pt]C-8-1.west);
+\draw[->,color=blue ]([xshift= 12pt]A-9-1.east)-- ([xshift=-12pt]C-9-1.west);
+\end{tikzpicture}
+
+
+
+\subsubsection{BroadcastAcrossLanes}
+
+For single lane registers, `BroadcastAcrossLanes` behaves the same as `Broadcast`.
+For multi-lane registers, a single value selected by a template parameter is written to all data elements of the result register. 
+Keep in mind, that broadcasting across lane boundaries is a rather expensive operation and should only be used if it is really necessary.
+
+\subsubsection*{Example:}
+\begin{minted}{cpp}
+__m256 b = BroadcastAcrossLanes<5>(a)
+\end{minted}
+
+\begin{tikzpicture}[>=stealth,thick,baseline, every node/.style={text height=2ex,text width=1em}]
+\plotSwizzleTwoRegisters{blue!30}{blue!30}{blue!30}{blue!30}{blue!30}{blue!30}{blue!30}{blue!30}
+\draw[->,color=blue ]([xshift= 12pt]A-7-1.east)-- ([xshift=-12pt]C-1-1.west);
+\draw[->,color=blue ]([xshift= 12pt]A-7-1.east)-- ([xshift=-12pt]C-2-1.west);
+\draw[->,color=blue ]([xshift= 12pt]A-7-1.east)-- ([xshift=-12pt]C-3-1.west);
+\draw[->,color=blue ]([xshift= 12pt]A-7-1.east)-- ([xshift=-12pt]C-4-1.west);
+\draw[->,color=blue ]([xshift= 12pt]A-7-1.east)-- ([xshift=-12pt]C-6-1.west);
+\draw[->,color=blue ]([xshift= 12pt]A-7-1.east)-- ([xshift=-12pt]C-7-1.west);
+\draw[->,color=blue ]([xshift= 12pt]A-7-1.east)-- ([xshift=-12pt]C-8-1.west);
+\draw[->,color=blue ]([xshift= 12pt]A-7-1.east)-- ([xshift=-12pt]C-9-1.west);
+\end{tikzpicture}

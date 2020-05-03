@@ -7,6 +7,7 @@
 \usepackage{tikz-3dplot}
 \usetikzlibrary{matrix,decorations.pathreplacing, calc, positioning,fit}
 
+\surroundwithmdframed[linewidth=0pt, backgroundcolor=black!10]{minted} 
 
 \newcommand{\draftNote}[1]
 {
@@ -25,6 +26,41 @@
 {
 	\mintinline{cpp}{#1}
 }
+
+
+\newcommand{\plotSwizzleTwoRegisters}[8]
+{
+	\matrix [matrix of math nodes,
+	left delimiter={[},
+	right delimiter={]},
+	](A) at (0,0){ 
+		|[fill=red!20]|\mathbf{a_{0}}\\
+		|[fill=red!40]|\mathbf{a_{1}}\\  
+		|[fill=red!60]|\mathbf{a_{2}}\\
+		|[fill=red!80]|\mathbf{a_{3}}\\
+		\textbf{---}\\
+		|[fill=blue!15]|\mathbf{a_{4}}\\
+		|[fill=blue!30]|\mathbf{a_{5}}\\
+		|[fill=blue!55]|\mathbf{a_{6}}\\
+		|[fill=blue!70]|\mathbf{a_{7}}\\
+	};
+	
+	\matrix [matrix of math nodes,
+	left delimiter={[},
+	right delimiter={]},
+	](B) at (5,0){ 
+		|[fill=#1]|\mathbf{b_{0}}\\
+		|[fill=#2]|\mathbf{b_{1}}\\  
+		|[fill=#3]|\mathbf{b_{2}}\\
+		|[fill=#4]|\mathbf{b_{3}}\\
+		|[fill=white]|\textbf{---}\\
+		|[fill=#5]|\mathbf{b_{4}}\\
+		|[fill=#6]|\mathbf{b_{5}}\\
+		|[fill=#7]|\mathbf{b_{6}}\\
+		|[fill=#8]|\mathbf{b_{7}}\\
+	};
+}
+
 
 
 \newcommand{\plotSwizzleThreeRegisters}[8]
