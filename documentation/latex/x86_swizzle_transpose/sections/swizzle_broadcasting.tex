@@ -14,15 +14,15 @@ __m256 b = Broadcast<2>(a)
 \end{minted}
 
 \begin{tikzpicture}[>=stealth,thick,baseline, every node/.style={text height=2ex,text width=1em}]
-\plotSwizzleTwoRegisters{red!60}{red!60}{red!60}{red!60}{blue!55}{blue!55}{blue!55}{blue!55}
-\draw[->,color=red ]([xshift= 12pt]A-3-1.east)-- ([xshift=-12pt]B-1-1.west);
-\draw[->,color=red ]([xshift= 12pt]A-3-1.east)-- ([xshift=-12pt]B-2-1.west);
-\draw[->,color=red ]([xshift= 12pt]A-3-1.east)-- ([xshift=-12pt]B-3-1.west);
-\draw[->,color=red ]([xshift= 12pt]A-3-1.east)-- ([xshift=-12pt]B-4-1.west);
-\draw[->,color=blue ]([xshift= 12pt]A-8-1.east)-- ([xshift=-12pt]B-6-1.west);
-\draw[->,color=blue ]([xshift= 12pt]A-8-1.east)-- ([xshift=-12pt]B-7-1.west);
-\draw[->,color=blue ]([xshift= 12pt]A-8-1.east)-- ([xshift=-12pt]B-8-1.west);
-\draw[->,color=blue ]([xshift= 12pt]A-8-1.east)-- ([xshift=-12pt]B-9-1.west);
+\plotSwizzleTwoRegisters{2}{2}{2}{2}{6}{6}{6}{6}
+\draw[->,color=black ]([xshift= 12pt]A-3-1.east)-- ([xshift=-12pt]B-1-1.west);
+\draw[->,color=black ]([xshift= 12pt]A-3-1.east)-- ([xshift=-12pt]B-2-1.west);
+\draw[->,color=black ]([xshift= 12pt]A-3-1.east)-- ([xshift=-12pt]B-3-1.west);
+\draw[->,color=black ]([xshift= 12pt]A-3-1.east)-- ([xshift=-12pt]B-4-1.west);
+\draw[->,color=black ]([xshift= 12pt]A-8-1.east)-- ([xshift=-12pt]B-6-1.west);
+\draw[->,color=black ]([xshift= 12pt]A-8-1.east)-- ([xshift=-12pt]B-7-1.west);
+\draw[->,color=black ]([xshift= 12pt]A-8-1.east)-- ([xshift=-12pt]B-8-1.west);
+\draw[->,color=black ]([xshift= 12pt]A-8-1.east)-- ([xshift=-12pt]B-9-1.west);
 \end{tikzpicture}
 
 
@@ -32,15 +32,15 @@ __m256 b = Broadcast<0, 3>(a)
 \end{minted}
 
 \begin{tikzpicture}[>=stealth,thick,baseline, every node/.style={text height=2ex,text width=1em}]
-\plotSwizzleTwoRegisters{red!20}{red!20}{red!20}{red!20}{blue!70}{blue!70}{blue!70}{blue!70}
-\draw[->,color=red ]([xshift= 12pt]A-1-1.east)-- ([xshift=-12pt]B-1-1.west);
-\draw[->,color=red ]([xshift= 12pt]A-1-1.east)-- ([xshift=-12pt]B-2-1.west);
-\draw[->,color=red ]([xshift= 12pt]A-1-1.east)-- ([xshift=-12pt]B-3-1.west);
-\draw[->,color=red ]([xshift= 12pt]A-1-1.east)-- ([xshift=-12pt]B-4-1.west);
-\draw[->,color=blue ]([xshift= 12pt]A-9-1.east)-- ([xshift=-12pt]B-6-1.west);
-\draw[->,color=blue ]([xshift= 12pt]A-9-1.east)-- ([xshift=-12pt]B-7-1.west);
-\draw[->,color=blue ]([xshift= 12pt]A-9-1.east)-- ([xshift=-12pt]B-8-1.west);
-\draw[->,color=blue ]([xshift= 12pt]A-9-1.east)-- ([xshift=-12pt]B-9-1.west);
+\plotSwizzleTwoRegisters{0}{0}{0}{0}{7}{7}{7}{7}
+\draw[->,color=black ]([xshift= 12pt]A-1-1.east)-- ([xshift=-12pt]B-1-1.west);
+\draw[->,color=black ]([xshift= 12pt]A-1-1.east)-- ([xshift=-12pt]B-2-1.west);
+\draw[->,color=black ]([xshift= 12pt]A-1-1.east)-- ([xshift=-12pt]B-3-1.west);
+\draw[->,color=black ]([xshift= 12pt]A-1-1.east)-- ([xshift=-12pt]B-4-1.west);
+\draw[->,color=black ]([xshift= 12pt]A-9-1.east)-- ([xshift=-12pt]B-6-1.west);
+\draw[->,color=black ]([xshift= 12pt]A-9-1.east)-- ([xshift=-12pt]B-7-1.west);
+\draw[->,color=black ]([xshift= 12pt]A-9-1.east)-- ([xshift=-12pt]B-8-1.west);
+\draw[->,color=black ]([xshift= 12pt]A-9-1.east)-- ([xshift=-12pt]B-9-1.west);
 \end{tikzpicture}
 
 
@@ -57,13 +57,13 @@ __m256 b = BroadcastAcrossLanes<5>(a)
 \end{minted}
 
 \begin{tikzpicture}[>=stealth,thick,baseline, every node/.style={text height=2ex,text width=1em}]
-\plotSwizzleTwoRegisters{blue!30}{blue!30}{blue!30}{blue!30}{blue!30}{blue!30}{blue!30}{blue!30}
-\draw[->,color=blue ]([xshift= 12pt]A-7-1.east)-- ([xshift=-12pt]B-1-1.west);
-\draw[->,color=blue ]([xshift= 12pt]A-7-1.east)-- ([xshift=-12pt]B-2-1.west);
-\draw[->,color=blue ]([xshift= 12pt]A-7-1.east)-- ([xshift=-12pt]B-3-1.west);
-\draw[->,color=blue ]([xshift= 12pt]A-7-1.east)-- ([xshift=-12pt]B-4-1.west);
-\draw[->,color=blue ]([xshift= 12pt]A-7-1.east)-- ([xshift=-12pt]B-6-1.west);
-\draw[->,color=blue ]([xshift= 12pt]A-7-1.east)-- ([xshift=-12pt]B-7-1.west);
-\draw[->,color=blue ]([xshift= 12pt]A-7-1.east)-- ([xshift=-12pt]B-8-1.west);
-\draw[->,color=blue ]([xshift= 12pt]A-7-1.east)-- ([xshift=-12pt]B-9-1.west);
+\plotSwizzleTwoRegisters{5}{5}{5}{5}{5}{5}{5}{5}
+\draw[->,color=black ]([xshift= 12pt]A-7-1.east)-- ([xshift=-12pt]B-1-1.west);
+\draw[->,color=black ]([xshift= 12pt]A-7-1.east)-- ([xshift=-12pt]B-2-1.west);
+\draw[->,color=black ]([xshift= 12pt]A-7-1.east)-- ([xshift=-12pt]B-3-1.west);
+\draw[->,color=black ]([xshift= 12pt]A-7-1.east)-- ([xshift=-12pt]B-4-1.west);
+\draw[->,color=black ]([xshift= 12pt]A-7-1.east)-- ([xshift=-12pt]B-6-1.west);
+\draw[->,color=black ]([xshift= 12pt]A-7-1.east)-- ([xshift=-12pt]B-7-1.west);
+\draw[->,color=black ]([xshift= 12pt]A-7-1.east)-- ([xshift=-12pt]B-8-1.west);
+\draw[->,color=black ]([xshift= 12pt]A-7-1.east)-- ([xshift=-12pt]B-9-1.west);
 \end{tikzpicture}

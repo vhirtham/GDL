@@ -21,16 +21,16 @@ __m256 c = Blend<0, 1, 1, 0, 1, 0, 0, 0>(a, b)
 \end{minted}
 
 \begin{tikzpicture}[>=stealth,thick,baseline, every node/.style={text height=2ex,text width=1em}]
-\plotSwizzleThreeRegisters{red}{blue}{blue}{red}{blue}{red}{red}{red}
+\plotSwizzleThreeRegisters{\colorA{0}}{\colorB{1}}{\colorB{2}}{\colorA{3}}{\colorB{4}}{\colorA{5}}{\colorA{6}}{\colorA{7}}
 
-\draw[->,color=red ]([xshift= 12pt]A-1-1.east)-- ([xshift=-12pt]C-1-1.west);
-\draw[->,color=blue]([xshift=-12pt]B-2-1.west)-- ([xshift= 12pt]C-2-1.east);
-\draw[->,color=blue]([xshift=-12pt]B-3-1.west)-- ([xshift= 12pt]C-3-1.east);
-\draw[->,color=red ]([xshift= 12pt]A-4-1.east)-- ([xshift=-12pt]C-4-1.west);
-\draw[->,color=blue]([xshift=-12pt]B-6-1.west)-- ([xshift= 12pt]C-6-1.east);
-\draw[->,color=red ]([xshift= 12pt]A-7-1.east)-- ([xshift=-12pt]C-7-1.west);
-\draw[->,color=red ]([xshift= 12pt]A-8-1.east)-- ([xshift=-12pt]C-8-1.west);
-\draw[->,color=red ]([xshift= 12pt]A-9-1.east)-- ([xshift=-12pt]C-9-1.west);
+\draw[->,color=black ]([xshift= 12pt]A-1-1.east)-- ([xshift=-12pt]C-1-1.west);
+\draw[->,color=black]([xshift=-12pt]B-2-1.west)-- ([xshift= 12pt]C-2-1.east);
+\draw[->,color=black]([xshift=-12pt]B-3-1.west)-- ([xshift= 12pt]C-3-1.east);
+\draw[->,color=black ]([xshift= 12pt]A-4-1.east)-- ([xshift=-12pt]C-4-1.west);
+\draw[->,color=black]([xshift=-12pt]B-6-1.west)-- ([xshift= 12pt]C-6-1.east);
+\draw[->,color=black ]([xshift= 12pt]A-7-1.east)-- ([xshift=-12pt]C-7-1.west);
+\draw[->,color=black ]([xshift= 12pt]A-8-1.east)-- ([xshift=-12pt]C-8-1.west);
+\draw[->,color=black ]([xshift= 12pt]A-9-1.east)-- ([xshift=-12pt]C-9-1.west);
 \end{tikzpicture}
 
 
@@ -47,16 +47,16 @@ __m256 c = BlendIndex<5>(a, b)
 
 
 \begin{tikzpicture}[>=stealth,thick,baseline, every node/.style={text height=2ex,text width=1em}]
-\plotSwizzleThreeRegisters{red}{red}{red}{red}{red}{blue}{red}{red}
+\plotSwizzleThreeRegisters{\colorA{0}}{\colorA{1}}{\colorA{2}}{\colorA{3}}{\colorA{4}}{\colorB{5}}{\colorA{6}}{\colorA{7}}
 
-\draw[->,color=red ]([xshift= 12pt]A-1-1.east)-- ([xshift=-12pt]C-1-1.west);
-\draw[->,color=red ]([xshift= 12pt]A-2-1.east)-- ([xshift=-12pt]C-2-1.west);
-\draw[->,color=red ]([xshift= 12pt]A-3-1.east)-- ([xshift=-12pt]C-3-1.west);
-\draw[->,color=red ]([xshift= 12pt]A-4-1.east)-- ([xshift=-12pt]C-4-1.west);
-\draw[->,color=red ]([xshift= 12pt]A-6-1.east)-- ([xshift=-12pt]C-6-1.west);
-\draw[->,color=blue]([xshift=-12pt]B-7-1.west)-- ([xshift= 12pt]C-7-1.east);
-\draw[->,color=red ]([xshift= 12pt]A-8-1.east)-- ([xshift=-12pt]C-8-1.west);
-\draw[->,color=red ]([xshift= 12pt]A-9-1.east)-- ([xshift=-12pt]C-9-1.west);
+\draw[->,color=black ]([xshift= 12pt]A-1-1.east)-- ([xshift=-12pt]C-1-1.west);
+\draw[->,color=black ]([xshift= 12pt]A-2-1.east)-- ([xshift=-12pt]C-2-1.west);
+\draw[->,color=black ]([xshift= 12pt]A-3-1.east)-- ([xshift=-12pt]C-3-1.west);
+\draw[->,color=black ]([xshift= 12pt]A-4-1.east)-- ([xshift=-12pt]C-4-1.west);
+\draw[->,color=black ]([xshift= 12pt]A-6-1.east)-- ([xshift=-12pt]C-6-1.west);
+\draw[->,color=black]([xshift=-12pt]B-7-1.west)-- ([xshift= 12pt]C-7-1.east);
+\draw[->,color=black ]([xshift= 12pt]A-8-1.east)-- ([xshift=-12pt]C-8-1.west);
+\draw[->,color=black ]([xshift= 12pt]A-9-1.east)-- ([xshift=-12pt]C-9-1.west);
 \end{tikzpicture}
 
 
@@ -72,16 +72,16 @@ __m256 c = BlendAboveIndex<5>(a, b)
 \end{minted}
 
 \begin{tikzpicture}[>=stealth,thick,baseline, every node/.style={text height=2ex,text width=1em}]
-\plotSwizzleThreeRegisters{red}{red}{red}{red}{red}{red}{blue}{blue}
+\plotSwizzleThreeRegisters{\colorA{0}}{\colorA{1}}{\colorA{2}}{\colorA{3}}{\colorA{4}}{\colorA{5}}{\colorB{6}}{\colorB{7}}
 
-\draw[->,color=red ]([xshift= 12pt]A-1-1.east)-- ([xshift=-12pt]C-1-1.west);
-\draw[->,color=red ]([xshift= 12pt]A-2-1.east)-- ([xshift=-12pt]C-2-1.west);
-\draw[->,color=red ]([xshift= 12pt]A-3-1.east)-- ([xshift=-12pt]C-3-1.west);
-\draw[->,color=red ]([xshift= 12pt]A-4-1.east)-- ([xshift=-12pt]C-4-1.west);
-\draw[->,color=red ]([xshift= 12pt]A-6-1.east)-- ([xshift=-12pt]C-6-1.west);
-\draw[->,color=red ]([xshift= 12pt]A-7-1.east)-- ([xshift=-12pt]C-7-1.west);
-\draw[->,color=blue]([xshift=-12pt]B-8-1.west)-- ([xshift= 12pt]C-8-1.east);
-\draw[->,color=blue]([xshift=-12pt]B-9-1.west)-- ([xshift= 12pt]C-9-1.east);
+\draw[->,color=black ]([xshift= 12pt]A-1-1.east)-- ([xshift=-12pt]C-1-1.west);
+\draw[->,color=black ]([xshift= 12pt]A-2-1.east)-- ([xshift=-12pt]C-2-1.west);
+\draw[->,color=black ]([xshift= 12pt]A-3-1.east)-- ([xshift=-12pt]C-3-1.west);
+\draw[->,color=black ]([xshift= 12pt]A-4-1.east)-- ([xshift=-12pt]C-4-1.west);
+\draw[->,color=black ]([xshift= 12pt]A-6-1.east)-- ([xshift=-12pt]C-6-1.west);
+\draw[->,color=black ]([xshift= 12pt]A-7-1.east)-- ([xshift=-12pt]C-7-1.west);
+\draw[->,color=black]([xshift=-12pt]B-8-1.west)-- ([xshift= 12pt]C-8-1.east);
+\draw[->,color=black]([xshift=-12pt]B-9-1.west)-- ([xshift= 12pt]C-9-1.east);
 \end{tikzpicture}
 
 
@@ -99,16 +99,16 @@ __m256 c = BlendBelowIndex<5>(a, b)
 \end{minted}
 
 \begin{tikzpicture}[>=stealth,thick,baseline, every node/.style={text height=2ex,text width=1em}]
-\plotSwizzleThreeRegisters{blue}{blue}{blue}{blue}{blue}{red}{red}{red}
+\plotSwizzleThreeRegisters{\colorB{0}}{\colorB{1}}{\colorB{2}}{\colorB{3}}{\colorB{4}}{\colorA{5}}{\colorA{6}}{\colorA{7}}
 
-\draw[->,color=blue]([xshift=-12pt]B-1-1.west)-- ([xshift= 12pt]C-1-1.east);
-\draw[->,color=blue]([xshift=-12pt]B-2-1.west)-- ([xshift= 12pt]C-2-1.east);
-\draw[->,color=blue]([xshift=-12pt]B-3-1.west)-- ([xshift= 12pt]C-3-1.east);
-\draw[->,color=blue]([xshift=-12pt]B-4-1.west)-- ([xshift= 12pt]C-4-1.east);
-\draw[->,color=blue]([xshift=-12pt]B-6-1.west)-- ([xshift= 12pt]C-6-1.east);
-\draw[->,color=red ]([xshift= 12pt]A-7-1.east)-- ([xshift=-12pt]C-7-1.west);
-\draw[->,color=red ]([xshift= 12pt]A-8-1.east)-- ([xshift=-12pt]C-8-1.west);
-\draw[->,color=red ]([xshift= 12pt]A-9-1.east)-- ([xshift=-12pt]C-9-1.west);
+\draw[->,color=black]([xshift=-12pt]B-1-1.west)-- ([xshift= 12pt]C-1-1.east);
+\draw[->,color=black]([xshift=-12pt]B-2-1.west)-- ([xshift= 12pt]C-2-1.east);
+\draw[->,color=black]([xshift=-12pt]B-3-1.west)-- ([xshift= 12pt]C-3-1.east);
+\draw[->,color=black]([xshift=-12pt]B-4-1.west)-- ([xshift= 12pt]C-4-1.east);
+\draw[->,color=black]([xshift=-12pt]B-6-1.west)-- ([xshift= 12pt]C-6-1.east);
+\draw[->,color=black ]([xshift= 12pt]A-7-1.east)-- ([xshift=-12pt]C-7-1.west);
+\draw[->,color=black ]([xshift= 12pt]A-8-1.east)-- ([xshift=-12pt]C-8-1.west);
+\draw[->,color=black ]([xshift= 12pt]A-9-1.east)-- ([xshift=-12pt]C-9-1.west);
 \end{tikzpicture}
 
 
@@ -126,14 +126,14 @@ __m256 c = BlendInRange<3, 5>(a, b)
 \end{minted}
 
 \begin{tikzpicture}[>=stealth,thick,baseline, every node/.style={text height=2ex,text width=1em}]
-\plotSwizzleThreeRegisters{red}{red}{red}{blue}{blue}{blue}{red}{red}
+\plotSwizzleThreeRegisters{\colorA{0}}{\colorA{1}}{\colorA{2}}{\colorB{3}}{\colorB{4}}{\colorB{5}}{\colorA{6}}{\colorA{7}}
 
-\draw[->,color=red ]([xshift= 12pt]A-1-1.east)-- ([xshift=-12pt]C-1-1.west);
-\draw[->,color=red ]([xshift= 12pt]A-2-1.east)-- ([xshift=-12pt]C-2-1.west);
-\draw[->,color=red ]([xshift= 12pt]A-3-1.east)-- ([xshift=-12pt]C-3-1.west);
-\draw[->,color=blue]([xshift=-12pt]B-4-1.west)-- ([xshift= 12pt]C-4-1.east);
-\draw[->,color=blue]([xshift=-12pt]B-6-1.west)-- ([xshift= 12pt]C-6-1.east);
-\draw[->,color=blue]([xshift=-12pt]B-7-1.west)-- ([xshift= 12pt]C-7-1.east);
-\draw[->,color=red ]([xshift= 12pt]A-8-1.east)-- ([xshift=-12pt]C-8-1.west);
-\draw[->,color=red ]([xshift= 12pt]A-9-1.east)-- ([xshift=-12pt]C-9-1.west);
+\draw[->,color=black ]([xshift= 12pt]A-1-1.east)-- ([xshift=-12pt]C-1-1.west);
+\draw[->,color=black ]([xshift= 12pt]A-2-1.east)-- ([xshift=-12pt]C-2-1.west);
+\draw[->,color=black ]([xshift= 12pt]A-3-1.east)-- ([xshift=-12pt]C-3-1.west);
+\draw[->,color=black]([xshift=-12pt]B-4-1.west)-- ([xshift= 12pt]C-4-1.east);
+\draw[->,color=black]([xshift=-12pt]B-6-1.west)-- ([xshift= 12pt]C-6-1.east);
+\draw[->,color=black]([xshift=-12pt]B-7-1.west)-- ([xshift= 12pt]C-7-1.east);
+\draw[->,color=black ]([xshift= 12pt]A-8-1.east)-- ([xshift=-12pt]C-8-1.west);
+\draw[->,color=black ]([xshift= 12pt]A-9-1.east)-- ([xshift=-12pt]C-9-1.west);
 \end{tikzpicture}

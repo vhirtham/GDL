@@ -11,35 +11,9 @@ Exchange<1, 6>(a, b)
 \end{minted}
 
 \begin{tikzpicture}[>=stealth,thick,baseline, every node/.style={text height=2ex,text width=1em}]
-\matrix [matrix of math nodes,
-left delimiter={[},
-right delimiter={]},
-](A) at (0,0){ 
-	|[fill=red!20]|\mathbf{a_{0}}\\
-	|[fill=red!40]|\mathbf{a_{1}}\\  
-	|[fill=red!60]|\mathbf{a_{2}}\\
-	|[fill=red!80]|\mathbf{a_{3}}\\
-	\textbf{---}\\
-	|[fill=blue!15]|\mathbf{a_{4}}\\
-	|[fill=blue!30]|\mathbf{a_{5}}\\
-	|[fill=blue!55]|\mathbf{a_{6}}\\
-	|[fill=blue!70]|\mathbf{a_{7}}\\
-};
+\registerA{0}
 
-\matrix [matrix of math nodes,
-left delimiter={[},
-right delimiter={]},
-](B) at (5,0){ 
-	|[fill=green!20]|\mathbf{b_{0}}\\
-	|[fill=green!40]|\mathbf{b_{1}}\\  
-	|[fill=green!60]|\mathbf{b_{2}}\\
-	|[fill=green!80]|\mathbf{b_{3}}\\
-	\textbf{---}\\
-	|[fill=black!15]|\mathbf{b_{4}}\\
-	|[fill=black!30]|\mathbf{b_{5}}\\
-	|[fill=black!55]|\mathbf{b_{6}}\\
-	|[fill=black!70]|\mathbf{b_{7}}\\
-};
+\registerB{5}
 
 \draw[<->,color=black]([xshift= 12pt]A-2-1.east)-- ([xshift=-12pt]B-8-1.west);
 \end{tikzpicture}
@@ -50,29 +24,29 @@ result:
 left delimiter={[},
 right delimiter={]},
 ](A) at (0,0){ 
-	|[fill=red!20]|\mathbf{a_{0}}\\
-	|[fill=black!55]|\mathbf{a_{1}}\\  
-	|[fill=red!60]|\mathbf{a_{2}}\\
-	|[fill=red!80]|\mathbf{a_{3}}\\
+	|[fill=\colorA{0}]|\mathbf{a_{0}}\\
+	|[fill=\colorB{6}]|\mathbf{a_{1}}\\  
+	|[fill=\colorA{2}]|\mathbf{a_{2}}\\
+	|[fill=\colorA{3}]|\mathbf{a_{3}}\\
 	\textbf{---}\\
-	|[fill=blue!15]|\mathbf{a_{4}}\\
-	|[fill=blue!30]|\mathbf{a_{5}}\\
-	|[fill=blue!55]|\mathbf{a_{6}}\\
-	|[fill=blue!70]|\mathbf{a_{7}}\\
+	|[fill=\colorA{4}]|\mathbf{a_{4}}\\
+	|[fill=\colorA{5}]|\mathbf{a_{5}}\\
+	|[fill=\colorA{6}]|\mathbf{a_{6}}\\
+	|[fill=\colorA{7}]|\mathbf{a_{7}}\\
 };
 
 \matrix [matrix of math nodes,
 left delimiter={[},
 right delimiter={]},
 ](B) at (2,0){ 
-	|[fill=green!20]|\mathbf{b_{0}}\\
-	|[fill=green!40]|\mathbf{b_{1}}\\  
-	|[fill=green!60]|\mathbf{b_{2}}\\
-	|[fill=green!80]|\mathbf{b_{3}}\\
+	|[fill=\colorB{0}]|\mathbf{b_{0}}\\
+	|[fill=\colorB{1}]|\mathbf{b_{1}}\\  
+	|[fill=\colorB{2}]|\mathbf{b_{2}}\\
+	|[fill=\colorB{3}]|\mathbf{b_{3}}\\
 	\textbf{---}\\
-	|[fill=black!15]|\mathbf{b_{4}}\\
-	|[fill=black!30]|\mathbf{b_{5}}\\
-	|[fill=red!40]|\mathbf{b_{6}}\\
-	|[fill=black!70]|\mathbf{b_{7}}\\
+	|[fill=\colorB{4}]|\mathbf{b_{4}}\\
+	|[fill=\colorB{5}]|\mathbf{b_{5}}\\
+	|[fill=\colorA{1}]|\mathbf{b_{6}}\\
+	|[fill=\colorB{7}]|\mathbf{b_{7}}\\
 };
 \end{tikzpicture}
