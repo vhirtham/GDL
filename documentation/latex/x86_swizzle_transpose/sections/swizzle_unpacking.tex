@@ -1,0 +1,46 @@
+\subsection{Unpack functions}
+
+The unpack functions copy values from both source registers interleaved into the result register.
+
+\subsubsection{\_mm\_unpacklo}
+This function takes from each source register lane the values that belong to the half with the low indices and copies them interleaved into the corresponding lane of the result register.
+
+\subsubsection*{Example:}
+\begin{minted}{cpp}
+__m256 c = _mm_unpacklo(a, b)
+\end{minted}
+
+\begin{tikzpicture}[>=stealth,thick,baseline, every node/.style={text height=2ex,text width=1em}]
+\plotSwizzleThreeRegisters{\colorA{0}}{\colorB{0}}{\colorA{1}}{\colorB{1}}{\colorA{4}}{\colorB{4}}{\colorA{5}}{\colorB{5}}
+
+\draw[->,color=black ]([xshift= 12pt]A-1-1.east)-- ([xshift=-12pt]C-1-1.west);
+\draw[->,color=black ]([xshift= 12pt]A-2-1.east)-- ([xshift=-12pt]C-3-1.west);
+\draw[->,color=black ]([xshift=-12pt]B-1-1.west)-- ([xshift=12pt]C-2-1.east);
+\draw[->,color=black]([xshift=-12pt]B-2-1.west)-- ([xshift= 12pt]C-4-1.east);
+\draw[->,color=black ]([xshift= 12pt]A-6-1.east)-- ([xshift=-12pt]C-6-1.west);
+\draw[->,color=black ]([xshift= 12pt]A-7-1.east)-- ([xshift=-12pt]C-8-1.west);
+\draw[->,color=black ]([xshift=-12pt]B-6-1.west)-- ([xshift=12pt]C-7-1.east);
+\draw[->,color=black]([xshift=-12pt]B-7-1.west)-- ([xshift= 12pt]C-9-1.east);
+\end{tikzpicture}
+
+
+\subsubsection{\_mm\_unpackhi}
+This function takes from each source register lane the values that belong to the half with the high indices and copies them interleaved into the corresponding lane of the result register.
+
+\subsubsection*{Example:}
+\begin{minted}{cpp}
+__m256 c = _mm_unpackhi(a, b)
+\end{minted}
+
+\begin{tikzpicture}[>=stealth,thick,baseline, every node/.style={text height=2ex,text width=1em}]
+\plotSwizzleThreeRegisters{\colorA{2}}{\colorB{2}}{\colorA{3}}{\colorB{3}}{\colorA{6}}{\colorB{6}}{\colorA{7}}{\colorB{7}}
+
+\draw[->,color=black ]([xshift= 12pt]A-3-1.east)-- ([xshift=-12pt]C-1-1.west);
+\draw[->,color=black ]([xshift= 12pt]A-4-1.east)-- ([xshift=-12pt]C-3-1.west);
+\draw[->,color=black ]([xshift=-12pt]B-3-1.west)-- ([xshift=12pt]C-2-1.east);
+\draw[->,color=black]([xshift=-12pt]B-4-1.west)-- ([xshift= 12pt]C-4-1.east);
+\draw[->,color=black ]([xshift= 12pt]A-8-1.east)-- ([xshift=-12pt]C-6-1.west);
+\draw[->,color=black ]([xshift= 12pt]A-9-1.east)-- ([xshift=-12pt]C-8-1.west);
+\draw[->,color=black ]([xshift=-12pt]B-8-1.west)-- ([xshift=12pt]C-7-1.east);
+\draw[->,color=black]([xshift=-12pt]B-9-1.west)-- ([xshift= 12pt]C-9-1.east);
+\end{tikzpicture}
