@@ -5,6 +5,8 @@ The unpack functions copy values from both source registers interleaved into the
 \subsubsection{\_mm\_unpacklo}
 This function takes from each source register lane the values that belong to the half with the low indices and copies them interleaved into the corresponding lane of the result register.
 
+\vspace{1cm}
+\begin{minipage}{\linewidth}
 \subsubsection*{Example:}
 \begin{minted}{cpp}
 __m256 c = _mm_unpacklo(a, b)
@@ -22,11 +24,13 @@ __m256 c = _mm_unpacklo(a, b)
 \draw[->,color=black ]([xshift=-12pt]B-6-1.west)-- ([xshift=12pt]C-7-1.east);
 \draw[->,color=black]([xshift=-12pt]B-7-1.west)-- ([xshift= 12pt]C-9-1.east);
 \end{tikzpicture}
-
+\end{minipage}
 
 \subsubsection{\_mm\_unpackhi}
 This function takes from each source register lane the values that belong to the half with the high indices and copies them interleaved into the corresponding lane of the result register.
 
+\vspace{1cm}
+\begin{minipage}{\linewidth}
 \subsubsection*{Example:}
 \begin{minted}{cpp}
 __m256 c = _mm_unpackhi(a, b)
@@ -44,3 +48,4 @@ __m256 c = _mm_unpackhi(a, b)
 \draw[->,color=black ]([xshift=-12pt]B-8-1.west)-- ([xshift=12pt]C-7-1.east);
 \draw[->,color=black]([xshift=-12pt]B-9-1.west)-- ([xshift= 12pt]C-9-1.east);
 \end{tikzpicture}
+\end{minipage}

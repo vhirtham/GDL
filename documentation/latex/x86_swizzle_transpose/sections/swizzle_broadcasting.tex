@@ -8,6 +8,8 @@ The \cppInline{Broadcast} function broadcast one value per lane.
 The position inside the lane of the data element that should be broadcasted is passed as template parameter.
 For multi-lane registers it is also possible to select different positions per lane by providing as many template parameters as the register has lanes.
 
+\vspace{1cm}
+\begin{minipage}{\linewidth}
 \subsubsection*{Example 1:}
 \begin{minted}{cpp}
 __m256 b = Broadcast<2>(a)
@@ -24,8 +26,10 @@ __m256 b = Broadcast<2>(a)
 \draw[->,color=black ]([xshift= 12pt]A-8-1.east)-- ([xshift=-12pt]B-8-1.west);
 \draw[->,color=black ]([xshift= 12pt]A-8-1.east)-- ([xshift=-12pt]B-9-1.west);
 \end{tikzpicture}
+\end{minipage}
 
-
+\vspace{1cm}
+\begin{minipage}{\linewidth}
 \subsubsection*{Example 2:}
 \begin{minted}{cpp}
 __m256 b = Broadcast<0, 3>(a)
@@ -42,7 +46,7 @@ __m256 b = Broadcast<0, 3>(a)
 \draw[->,color=black ]([xshift= 12pt]A-9-1.east)-- ([xshift=-12pt]B-8-1.west);
 \draw[->,color=black ]([xshift= 12pt]A-9-1.east)-- ([xshift=-12pt]B-9-1.west);
 \end{tikzpicture}
-
+\end{minipage}
 
 
 \subsubsection{BroadcastAcrossLanes}
@@ -51,6 +55,8 @@ For single lane registers, `BroadcastAcrossLanes` behaves the same as `Broadcast
 For multi-lane registers, a single value selected by a template parameter is written to all data elements of the result register. 
 Keep in mind, that broadcasting across lane boundaries is a rather expensive operation and should only be used if it is really necessary.
 
+\vspace{1cm}
+\begin{minipage}{\linewidth}
 \subsubsection*{Example:}
 \begin{minted}{cpp}
 __m256 b = BroadcastAcrossLanes<5>(a)
@@ -67,3 +73,4 @@ __m256 b = BroadcastAcrossLanes<5>(a)
 \draw[->,color=black ]([xshift= 12pt]A-7-1.east)-- ([xshift=-12pt]B-8-1.west);
 \draw[->,color=black ]([xshift= 12pt]A-7-1.east)-- ([xshift=-12pt]B-9-1.west);
 \end{tikzpicture}
+\end{minipage}

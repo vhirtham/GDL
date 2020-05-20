@@ -5,6 +5,8 @@ It exchanges two values between both the registers.
 The indices of the corresponding data elements are specified as template parameters.
 Note that the cost of this operation is significantly higher if the exchanged values are not in the same register lane. 
 
+\vspace{1cm}
+\begin{minipage}{\linewidth}
 \subsubsection*{Example:}
 \begin{minted}{cpp}
 Exchange<1, 6>(a, b)
@@ -50,3 +52,4 @@ right delimiter={]},
 	|[fill=\colorB{7}]|\mathbf{b_{7}}\\
 };
 \end{tikzpicture}
+\end{minipage}

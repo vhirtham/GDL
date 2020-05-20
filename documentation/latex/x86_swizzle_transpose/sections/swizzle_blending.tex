@@ -15,6 +15,8 @@ Each value van either be 0 or 1.
 If a template parameter is set to 0, the corresponding data element receives its value from the first source register.
 If it is 1, the value is taken from the second input register.
 
+\vspace{1cm}
+\begin{minipage}{\linewidth}
 \subsubsection*{Example:}
 \begin{minted}{cpp}
 __m256 c = Blend<0, 1, 1, 0, 1, 0, 0, 0>(a, b)
@@ -32,6 +34,7 @@ __m256 c = Blend<0, 1, 1, 0, 1, 0, 0, 0>(a, b)
 \draw[->,color=black ]([xshift= 12pt]A-8-1.east)-- ([xshift=-12pt]C-8-1.west);
 \draw[->,color=black ]([xshift= 12pt]A-9-1.east)-- ([xshift=-12pt]C-9-1.west);
 \end{tikzpicture}
+\end{minipage}
 
 
 \subsubsection{BlendIndex}
@@ -40,6 +43,8 @@ The \cppInline{BlendIndex} function has only a single template parameter indepen
 It specifies the index of a single data element that is taken from the second source register. 
 All other values are taken from the first one.
 
+\vspace{1cm}
+\begin{minipage}{\linewidth}
 \subsubsection*{Example:}
 \begin{minted}{cpp}
 __m256 c = BlendIndex<5>(a, b)
@@ -58,6 +63,7 @@ __m256 c = BlendIndex<5>(a, b)
 \draw[->,color=black ]([xshift= 12pt]A-8-1.east)-- ([xshift=-12pt]C-8-1.west);
 \draw[->,color=black ]([xshift= 12pt]A-9-1.east)-- ([xshift=-12pt]C-9-1.west);
 \end{tikzpicture}
+\end{minipage}
 
 
 \subsubsection{BlendAboveIndex}
@@ -66,6 +72,8 @@ The \cppInline{BlendIndex} function has only a single template parameter indepen
 Data elements with a higher index than the specified value are taken from the second source register. 
 All other values are taken from the first one.
 
+\vspace{1cm}
+\begin{minipage}{\linewidth}
 \subsubsection*{Example:}
 \begin{minted}{cpp}
 __m256 c = BlendAboveIndex<5>(a, b)
@@ -83,7 +91,7 @@ __m256 c = BlendAboveIndex<5>(a, b)
 \draw[->,color=black]([xshift=-12pt]B-8-1.west)-- ([xshift= 12pt]C-8-1.east);
 \draw[->,color=black]([xshift=-12pt]B-9-1.west)-- ([xshift= 12pt]C-9-1.east);
 \end{tikzpicture}
-
+\end{minipage}
 
 
 
@@ -93,6 +101,8 @@ The \cppInline{BlendIndex} function has only a single template parameter indepen
 Data elements with a lower index than the specified value are taken from the second source register. 
 All other values are taken from the first one.
 
+\vspace{1cm}
+\begin{minipage}{\linewidth}
 \subsubsection*{Example:}
 \begin{minted}{cpp}
 __m256 c = BlendBelowIndex<5>(a, b)
@@ -110,6 +120,7 @@ __m256 c = BlendBelowIndex<5>(a, b)
 \draw[->,color=black ]([xshift= 12pt]A-8-1.east)-- ([xshift=-12pt]C-8-1.west);
 \draw[->,color=black ]([xshift= 12pt]A-9-1.east)-- ([xshift=-12pt]C-9-1.west);
 \end{tikzpicture}
+\end{minipage}
 
 
 
@@ -120,6 +131,8 @@ The \cppInline{BlendIndex} function has two template parameters independent of t
 Data elements with indices equal or between those 2 values are taken from the second source register. 
 All other are taken from the first one.
 
+\vspace{1cm}
+\begin{minipage}{\linewidth}
 \subsubsection*{Example:}
 \begin{minted}{cpp}
 __m256 c = BlendInRange<3, 5>(a, b)
@@ -137,3 +150,4 @@ __m256 c = BlendInRange<3, 5>(a, b)
 \draw[->,color=black ]([xshift= 12pt]A-8-1.east)-- ([xshift=-12pt]C-8-1.west);
 \draw[->,color=black ]([xshift= 12pt]A-9-1.east)-- ([xshift=-12pt]C-9-1.west);
 \end{tikzpicture}
+\end{minipage}

@@ -1,0 +1,50 @@
+\subsection{Permute}
+
+This function creates a new register by an arbitrary recombination of the source registers values. 
+The lane value indices of the selected values are passed to the function as template parameters.
+
+For multi-lane registers, values can not be swizzled across lane boundaries. 
+Additionally, 256bit register types can either have a number of template parameters equal to the number of values per lane or equal to the number of values in the whole register.
+In the first case, the permutations are identical for each lane, while in the latter case, the permutations can be chosen individually.
+However, it is advised to avoid using different lane permutations for the  \cppInline{__m256} register type, since its underlying intrinsic function requires to create an additional \cppInline{__m256i} to store the indices which comes with a performance penalty.
+This is not the case for the \cppInline{__m256d} register, where individual permutations have no impact on performance.
+
+\vspace{1cm}
+\begin{minipage}{\linewidth}
+\subsubsection*{Example 1:}
+\begin{minted}{cpp}
+__m256 b = Permute<1, 3, 0, 0>(a)
+\end{minted}
+
+\begin{tikzpicture}[>=stealth,thick,baseline, every node/.style={text height=2ex,text width=1em}]
+\plotSwizzleTwoRegisters{1}{3}{0}{0}{5}{7}{4}{4}
+\draw[->,color=black ]([xshift= 12pt]A-2-1.east)-- ([xshift=-12pt]B-1-1.west);
+\draw[->,color=black ]([xshift= 12pt]A-4-1.east)-- ([xshift=-12pt]B-2-1.west);
+\draw[->,color=black ]([xshift= 12pt]A-1-1.east)-- ([xshift=-12pt]B-3-1.west);
+\draw[->,color=black ]([xshift= 12pt]A-1-1.east)-- ([xshift=-12pt]B-4-1.west);
+\draw[->,color=black ]([xshift= 12pt]A-7-1.east)-- ([xshift=-12pt]B-6-1.west);
+\draw[->,color=black ]([xshift= 12pt]A-9-1.east)-- ([xshift=-12pt]B-7-1.west);
+\draw[->,color=black ]([xshift= 12pt]A-6-1.east)-- ([xshift=-12pt]B-8-1.west);
+\draw[->,color=black ]([xshift= 12pt]A-6-1.east)-- ([xshift=-12pt]B-9-1.west);
+\end{tikzpicture}
+\end{minipage}
+
+\vspace{1cm}
+\begin{minipage}{\linewidth}
+	\subsubsection*{Example 2:}
+	\begin{minted}{cpp}
+__m256 b = Permute<2, 1, 3, 0, 1, 1, 3, 3>(a)
+	\end{minted}
+	
+	\begin{tikzpicture}[>=stealth,thick,baseline, every node/.style={text height=2ex,text width=1em}]
+	\plotSwizzleTwoRegisters{2}{1}{3}{0}{5}{5}{7}{7}
+	\draw[->,color=black ]([xshift= 12pt]A-3-1.east)-- ([xshift=-12pt]B-1-1.west);
+	\draw[->,color=black ]([xshift= 12pt]A-2-1.east)-- ([xshift=-12pt]B-2-1.west);
+	\draw[->,color=black ]([xshift= 12pt]A-4-1.east)-- ([xshift=-12pt]B-3-1.west);
+	\draw[->,color=black ]([xshift= 12pt]A-1-1.east)-- ([xshift=-12pt]B-4-1.west);
+	\draw[->,color=black ]([xshift= 12pt]A-7-1.east)-- ([xshift=-12pt]B-6-1.west);
+	\draw[->,color=black ]([xshift= 12pt]A-7-1.east)-- ([xshift=-12pt]B-7-1.west);
+	\draw[->,color=black ]([xshift= 12pt]A-9-1.east)-- ([xshift=-12pt]B-8-1.west);
+	\draw[->,color=black ]([xshift= 12pt]A-9-1.east)-- ([xshift=-12pt]B-9-1.west);
+	\end{tikzpicture}
+\end{minipage}

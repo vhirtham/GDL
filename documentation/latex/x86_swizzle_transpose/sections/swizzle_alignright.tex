@@ -1,0 +1,47 @@
+\subsection{AlignRight}
+
+The result of this function is equivalent to appending each lane of the second source register by each corresponding lane of the first source register and copying the 4 consecutive values starting at the index passed as template parameter to the corresponding result register lane.
+The term ''right'' in the function name is adapted from the underlying intrinsic function and refers to a horizontal register representation where indices are increasing in the right-hand side direction.
+
+\vspace{1cm}
+\begin{minipage}{\linewidth}
+	\subsubsection*{Example 1:}
+	\begin{minted}{cpp}
+	__m256 c = AlignRight<1>(a, b)
+	\end{minted}
+	
+	\begin{tikzpicture}[>=stealth,thick,baseline, every node/.style={text height=2ex,text width=1em}]
+	\plotSwizzleThreeRegisters{\colorB{1}}{\colorB{2}}{\colorB{3}}{\colorA{0}}{\colorB{5}}{\colorB{6}}{\colorB{7}}{\colorA{4}}
+	
+	\draw[->,color=black ]([xshift=-12pt]B-2-1.west)-- ([xshift=12pt]C-1-1.east);
+	\draw[->,color=black]([xshift=-12pt]B-3-1.west)-- ([xshift= 12pt]C-2-1.east);
+	\draw[->,color=black]([xshift=-12pt]B-4-1.west)-- ([xshift= 12pt]C-3-1.east);
+	\draw[->,color=black ]([xshift= 12pt]A-1-1.east)-- ([xshift=-12pt]C-4-1.west);
+	\draw[->,color=black ]([xshift=-12pt]B-7-1.west)-- ([xshift=12pt]C-6-1.east);
+    \draw[->,color=black]([xshift=-12pt]B-8-1.west)-- ([xshift= 12pt]C-7-1.east);
+    \draw[->,color=black]([xshift=-12pt]B-9-1.west)-- ([xshift= 12pt]C-8-1.east);
+    \draw[->,color=black ]([xshift= 12pt]A-6-1.east)-- ([xshift=-12pt]C-9-1.west);
+	\end{tikzpicture}
+\end{minipage}
+
+
+\vspace{1cm}
+\begin{minipage}{\linewidth}
+	\subsubsection*{Example 2:}
+	\begin{minted}{cpp}
+	__m256 c = AlignRight<2>(a, b)
+	\end{minted}
+	
+	\begin{tikzpicture}[>=stealth,thick,baseline, every node/.style={text height=2ex,text width=1em}]
+	\plotSwizzleThreeRegisters{\colorB{2}}{\colorB{3}}{\colorA{0}}{\colorA{1}}{\colorB{6}}{\colorB{7}}{\colorA{4}}{\colorA{5}}
+	
+	\draw[->,color=black]([xshift=-12pt]B-3-1.west)-- ([xshift= 12pt]C-1-1.east);
+	\draw[->,color=black]([xshift=-12pt]B-4-1.west)-- ([xshift= 12pt]C-2-1.east);
+	\draw[->,color=black ]([xshift= 12pt]A-1-1.east)-- ([xshift=-12pt]C-3-1.west);
+	\draw[->,color=black ]([xshift= 12pt]A-2-1.east)-- ([xshift=-12pt]C-4-1.west);
+	\draw[->,color=black]([xshift=-12pt]B-8-1.west)-- ([xshift= 12pt]C-6-1.east);
+	\draw[->,color=black]([xshift=-12pt]B-9-1.west)-- ([xshift= 12pt]C-7-1.east);
+	\draw[->,color=black ]([xshift= 12pt]A-6-1.east)-- ([xshift=-12pt]C-8-1.west);
+	\draw[->,color=black ]([xshift= 12pt]A-7-1.east)-- ([xshift=-12pt]C-9-1.west);
+	\end{tikzpicture}
+\end{minipage}

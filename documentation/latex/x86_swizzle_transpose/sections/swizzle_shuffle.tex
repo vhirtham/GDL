@@ -1,0 +1,26 @@
+\subsection{Shuffle}
+
+This function fills the lower indexed half of each result register lane with arbitrary values from the first source register.
+The higher indexed half is filled with arbitrary values from the second source register.
+The selected values are passed to the function as template parameters and are identical for each lane.  
+
+\vspace{1cm}
+\begin{minipage}{\linewidth}
+	\subsubsection*{Example:}
+	\begin{minted}{cpp}
+__m256 c = Shuffle<2, 1, 3, 3>(a, b)
+	\end{minted}
+	
+\begin{tikzpicture}[>=stealth,thick,baseline, every node/.style={text height=2ex,text width=1em}]
+\plotSwizzleThreeRegisters{\colorA{2}}{\colorA{1}}{\colorB{3}}{\colorB{3}}{\colorA{6}}{\colorA{5}}{\colorB{7}}{\colorB{7}}
+
+\draw[->,color=black ]([xshift= 12pt]A-3-1.east)-- ([xshift=-12pt]C-1-1.west);
+\draw[->,color=black ]([xshift= 12pt]A-2-1.east)-- ([xshift=-12pt]C-2-1.west);
+\draw[->,color=black ]([xshift=-12pt]B-4-1.west)-- ([xshift=12pt]C-3-1.east);
+\draw[->,color=black]([xshift=-12pt]B-4-1.west)-- ([xshift= 12pt]C-4-1.east);
+\draw[->,color=black ]([xshift= 12pt]A-8-1.east)-- ([xshift=-12pt]C-6-1.west);
+\draw[->,color=black ]([xshift= 12pt]A-7-1.east)-- ([xshift=-12pt]C-7-1.west);
+\draw[->,color=black ]([xshift=-12pt]B-9-1.west)-- ([xshift=12pt]C-8-1.east);
+\draw[->,color=black]([xshift=-12pt]B-9-1.west)-- ([xshift= 12pt]C-9-1.east);
+\end{tikzpicture}
+\end{minipage}
