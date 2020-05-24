@@ -1,0 +1,45 @@
+\subsection{Insert}
+
+The \cppInline{Insert} function is only defined for \cppInline{__m128} registers.
+It copies a single, arbitrary value from the first passed register to an arbitrary position inside the second passed register and returns the result.
+Source and destination indices are passed as template parameters.
+Optionally, arbitrary values of the register can be set to 0.
+This is done by 4 optional Boolean template parameters.
+The Boolean values are associated with the 4 data elements of the register in ascending order.
+For each one that is set to \cppInline{true}, the corresponding data element is set to 0.
+
+
+\vspace{1cm}
+\begin{minipage}{\linewidth}
+	\subsubsection*{Example 1:}
+	\begin{minted}{cpp}
+__m256 c = Insert<1, 3>(a, b)
+	\end{minted}
+	
+	\begin{tikzpicture}[>=stealth,thick,baseline, every node/.style={text height=2ex,text width=1em}]
+	\plotSwizzleThreeRegistersSingleLane{\colorB{0}}{\colorB{1}}{\colorB{2}}{\colorA{1}}
+	
+	\draw[->,color=black ]([xshift=-12pt]B-1-1.west)-- ([xshift=12pt]C-1-1.east);
+	\draw[->,color=black]([xshift=-12pt]B-2-1.west)-- ([xshift= 12pt]C-2-1.east);
+	\draw[->,color=black]([xshift=-12pt]B-3-1.west)-- ([xshift= 12pt]C-3-1.east);
+	\draw[->,color=black ]([xshift= 12pt]A-2-1.east)-- ([xshift=-12pt]C-4-1.west);
+	\end{tikzpicture}
+\end{minipage}
+
+
+\vspace{1cm}
+\begin{minipage}{\linewidth}
+	\subsubsection*{Example 2:}
+Data elements of the result register with white background have a  value of 0. 
+	\begin{minted}{cpp}
+__m256 c = Insert<2, 0, false, true, false, true>(a, b)
+	\end{minted}
+	
+	\begin{tikzpicture}[>=stealth,thick,baseline, every node/.style={text height=2ex,text width=1em}]
+	\plotSwizzleThreeRegistersSingleLane{\colorA{2}}{white}{\colorB{2}}{white}
+	
+
+	\draw[->,color=black]([xshift=-12pt]B-3-1.west)-- ([xshift= 12pt]C-3-1.east);
+	\draw[->,color=black ]([xshift= 12pt]A-3-1.east)-- ([xshift=-12pt]C-1-1.west);
+	\end{tikzpicture}
+\end{minipage}

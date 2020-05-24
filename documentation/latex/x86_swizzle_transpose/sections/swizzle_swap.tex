@@ -1,0 +1,26 @@
+\subsection{Swap}
+
+This function takes a single source register, swaps 2 arbitrary values and returns the result as new register. 
+The values that should be swapped are passed as template parameters.
+Note that the operation is significantly more expensive if the values are swapped across lane boundaries.
+
+
+\vspace{1cm}
+\begin{minipage}{\linewidth}
+	\subsubsection*{Example:}
+	\begin{minted}{cpp}
+__m256 b = Swap<1, 7>(a)
+	\end{minted}
+	
+	\begin{tikzpicture}[>=stealth,thick,baseline, every node/.style={text height=2ex,text width=1em}]
+	\plotSwizzleTwoRegisters{0}{7}{2}{3}{4}{5}{6}{1}
+	\draw[->,color=black ]([xshift= 12pt]A-1-1.east)-- ([xshift=-12pt]B-1-1.west);
+	\draw[->,color=black ]([xshift= 12pt]A-9-1.east)-- ([xshift=-12pt]B-2-1.west);
+	\draw[->,color=black ]([xshift= 12pt]A-3-1.east)-- ([xshift=-12pt]B-3-1.west);
+	\draw[->,color=black ]([xshift= 12pt]A-4-1.east)-- ([xshift=-12pt]B-4-1.west);
+	\draw[->,color=black ]([xshift= 12pt]A-6-1.east)-- ([xshift=-12pt]B-6-1.west);
+	\draw[->,color=black ]([xshift= 12pt]A-7-1.east)-- ([xshift=-12pt]B-7-1.west);
+	\draw[->,color=black ]([xshift= 12pt]A-8-1.east)-- ([xshift=-12pt]B-8-1.west);
+	\draw[->,color=black ]([xshift= 12pt]A-2-1.east)-- ([xshift=-12pt]B-9-1.west);
+	\end{tikzpicture}
+\end{minipage}

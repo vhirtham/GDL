@@ -75,6 +75,19 @@
 	};
 }
 
+\newcommand{\registerASingleLane}[1]
+{
+	\matrix [matrix of math nodes,
+	left delimiter={[},
+	right delimiter={]},
+	](A) at (#1,0){ 
+		|[fill=\colorA{0}]|\mathbf{a_{0}}\\
+		|[fill=\colorA{1}]|\mathbf{a_{1}}\\  
+		|[fill=\colorA{2}]|\mathbf{a_{2}}\\
+		|[fill=\colorA{3}]|\mathbf{a_{3}}\\
+	};
+}
+
 
 
 \newcommand{\registerB}[1]
@@ -92,6 +105,20 @@
 		|[fill=\colorB{5}]|\mathbf{b_{5}}\\
 		|[fill=\colorB{6}]|\mathbf{b_{6}}\\
 		|[fill=\colorB{7}]|\mathbf{b_{7}}\\
+	};
+}
+
+
+\newcommand{\registerBSingleLane}[1]
+{
+	\matrix [matrix of math nodes,
+	left delimiter={[},
+	right delimiter={]},
+	](B) at (#1,0){ 
+		|[fill=\colorB{0}]|\mathbf{b_{0}}\\
+		|[fill=\colorB{1}]|\mathbf{b_{1}}\\  
+		|[fill=\colorB{2}]|\mathbf{b_{2}}\\
+		|[fill=\colorB{3}]|\mathbf{b_{3}}\\
 	};
 }
 
@@ -153,6 +180,22 @@
 		|[fill=#6]|\mathbf{c_{5}}\\
 		|[fill=#7]|\mathbf{c_{6}}\\
 		|[fill=#8]|\mathbf{c_{7}}\\
+	};
+}
+
+
+
+\newcommand{\plotSwizzleThreeRegistersSingleLane}[4]
+{
+	\registerASingleLane{0}
+	
+	\registerBSingleLane{10}
+	
+	\matrix [matrix of math nodes,left delimiter={[},right delimiter={]}](C) at (5,0){ 
+		|[fill=#1]|\mathbf{c_{0}}\\
+		|[fill=#2]|\mathbf{c_{1}}\\  
+		|[fill=#3]|\mathbf{c_{2}}\\
+		|[fill=#4]|\mathbf{c_{3}}\\
 	};
 }
 

@@ -1,0 +1,145 @@
+\subsection{Lane Permutations}
+
+Except for \cppInline{BroadcastAcrossLanes}, \cppInline{Exchange} and \cppInline{Swap}  all functions discussed so far did not support swizzling across lane boundaries.
+The functions of this section provide a way to permute register lanes.
+They are also used internally by \cppInline{BroadcastAcrossLanes}, \cppInline{Exchange} and \cppInline{Swap} to transfer values between different lanes.
+The high latency of lane permutations (see intel intrinsics guide) are responsible for the increased computational effort of those 3 functions and why they should be used with care.
+
+\subsubsection{Permute2F128} 
+
+This function has 2 overloads and creates a new register by recombining the lanes of 1 or 2 source registers.
+It can only be used with 256 bit registers.
+
+The first overload is called with 2 source registers and requires 4 template parameters.
+The first and second template parameter determine the source register and which of its lanes should be copied to the first lane of the result register.
+The remaining 2 template parameters specify source register and lane for the second lane of the result register.
+
+The second overload takes a single source register and 2 template parameters that define which lanes of the source register are copied to the first and second lane of the result register.   
+
+ \vspace{1cm}
+ \begin{minipage}{\linewidth}
+ 	\subsubsection*{Example 1:}
+ 	\begin{minted}{cpp}
+__m256 c = Permute2F128<0, 1, 1, 1>(a, b)
+ 	\end{minted}
+ 	
+ 	\begin{tikzpicture}[>=stealth,thick,baseline, every node/.style={text height=2ex,text width=1em}]
+ 	\plotSwizzleThreeRegisters{\colorA{4}}{\colorA{5}}{\colorA{6}}{\colorA{7}}{\colorB{4}}{\colorB{5}}{\colorB{6}}{\colorB{7}}
+ 	
+ 	\draw[->,color=black]([xshift= 12pt]A-6-1.east)-- ([xshift= -12pt]C-1-1.west);
+ 	\draw[->,color=black]([xshift= 12pt]A-7-1.east)-- ([xshift= -12pt]C-2-1.west);
+ 	\draw[->,color=black ]([xshift= 12pt]A-8-1.east)-- ([xshift=-12pt]C-3-1.west);
+ 	\draw[->,color=black ]([xshift= 12pt]A-9-1.east)-- ([xshift=-12pt]C-4-1.west);
+ 	\draw[->,color=black]([xshift=-12pt]B-6-1.west)-- ([xshift= 12pt]C-6-1.east);
+ 	\draw[->,color=black]([xshift=-12pt]B-7-1.west)-- ([xshift= 12pt]C-7-1.east);
+ 	\draw[->,color=black ]([xshift= -12pt]B-8-1.west)-- ([xshift= 12pt]C-8-1.east);
+ 	\draw[->,color=black ]([xshift= -12pt]B-9-1.west)-- ([xshift= 12pt]C-9-1.east);
+ 	\end{tikzpicture}
+ \end{minipage}
+
+\vspace{1cm}
+\begin{minipage}{\linewidth}
+	\subsubsection*{Example 2:}
+	\begin{minted}{cpp}
+__m256 b = Permute2F128<0, 0>(a)
+	\end{minted}
+	
+	\begin{tikzpicture}[>=stealth,thick,baseline, every node/.style={text height=2ex,text width=1em}]
+	\plotSwizzleTwoRegisters{0}{1}{2}{3}{0}{1}{2}{3}
+	\draw[->,color=black ]([xshift= 12pt]A-1-1.east)-- ([xshift=-12pt]B-1-1.west);
+	\draw[->,color=black ]([xshift= 12pt]A-2-1.east)-- ([xshift=-12pt]B-2-1.west);
+	\draw[->,color=black ]([xshift= 12pt]A-3-1.east)-- ([xshift=-12pt]B-3-1.west);
+	\draw[->,color=black ]([xshift= 12pt]A-4-1.east)-- ([xshift=-12pt]B-4-1.west);
+	\draw[->,color=black ]([xshift= 12pt]A-1-1.east)-- ([xshift=-12pt]B-6-1.west);
+	\draw[->,color=black ]([xshift= 12pt]A-2-1.east)-- ([xshift=-12pt]B-7-1.west);
+	\draw[->,color=black ]([xshift= 12pt]A-3-1.east)-- ([xshift=-12pt]B-8-1.west);
+	\draw[->,color=black ]([xshift= 12pt]A-4-1.east)-- ([xshift=-12pt]B-9-1.west);
+	\end{tikzpicture}
+\end{minipage}
+
+
+
+\subsection{Permute4F64 and Permute8F32}
+
+These two functions can be used to create a new register with arbitrary value recombination of the source register.
+Values can also be copied across lane boundaries.
+\cppInline{Permute4F64} only works with \cppInline{__m256d} registers and needs 4 template parameters that specify the selected values.
+\cppInline{Permute8F32} is for \cppInline{__m256} registers and needs 8 template parameters.
+Note that \cppInline{Permute8F32} has extra computational costs, since it requires the creation of an additional \cppInline{__m256i} register for the indices while this is not the case for \cppInline{Permute4F64}.
+
+ 
+\vspace{1cm}
+\begin{minipage}{\linewidth}
+	\subsubsection*{Example:}
+	\begin{minted}{cpp}
+__m256 b = Permute8F32<1, 5, 6, 1, 7, 0, 2, 2>(a)
+	\end{minted}
+	
+	\begin{tikzpicture}[>=stealth,thick,baseline, every node/.style={text height=2ex,text width=1em}]
+	\plotSwizzleTwoRegisters{1}{5}{6}{1}{7}{0}{2}{2}
+	\draw[->,color=black ]([xshift= 12pt]A-2-1.east)-- ([xshift=-12pt]B-1-1.west);
+	\draw[->,color=black ]([xshift= 12pt]A-7-1.east)-- ([xshift=-12pt]B-2-1.west);
+	\draw[->,color=black ]([xshift= 12pt]A-8-1.east)-- ([xshift=-12pt]B-3-1.west);
+	\draw[->,color=black ]([xshift= 12pt]A-2-1.east)-- ([xshift=-12pt]B-4-1.west);
+	\draw[->,color=black ]([xshift= 12pt]A-9-1.east)-- ([xshift=-12pt]B-6-1.west);
+	\draw[->,color=black ]([xshift= 12pt]A-1-1.east)-- ([xshift=-12pt]B-7-1.west);
+	\draw[->,color=black ]([xshift= 12pt]A-3-1.east)-- ([xshift=-12pt]B-8-1.west);
+	\draw[->,color=black ]([xshift= 12pt]A-3-1.east)-- ([xshift=-12pt]B-9-1.west);
+	\end{tikzpicture}
+\end{minipage}
+
+
+
+\subsubsection{SwapLanes and SwapLanesIf}
+
+The \cppInline{SwapLanes} function takes a single 256 bit register and returns a new one with swapped lanes.
+
+\cppInline{SwapLanesIF} is a conditional version of the \cppInline{SwapLanes} function.
+If the required template parameter is \cppInline{true} the function calls \cppInline{SwapLanes} and returns the result.
+If it is \cppInline{false}, a copy of the unmodified source register is returned.
+
+
+
+\vspace{1cm}
+\begin{minipage}{\linewidth}
+	\subsubsection*{Example 1:}
+	\begin{minted}{cpp}
+__m256 b = SwapLanes(a)
+	\end{minted}
+	and
+	\begin{minted}{cpp}
+__m256 b = SwapLanesIf<true>(a)
+	\end{minted}
+	\begin{tikzpicture}[>=stealth,thick,baseline, every node/.style={text height=2ex,text width=1em}]
+	\plotSwizzleTwoRegisters{4}{5}{6}{7}{0}{1}{2}{3}
+	\draw[->,color=black ]([xshift= 12pt]A-6-1.east)-- ([xshift=-12pt]B-1-1.west);
+	\draw[->,color=black ]([xshift= 12pt]A-7-1.east)-- ([xshift=-12pt]B-2-1.west);
+	\draw[->,color=black ]([xshift= 12pt]A-8-1.east)-- ([xshift=-12pt]B-3-1.west);
+	\draw[->,color=black ]([xshift= 12pt]A-9-1.east)-- ([xshift=-12pt]B-4-1.west);
+	\draw[->,color=black ]([xshift= 12pt]A-1-1.east)-- ([xshift=-12pt]B-6-1.west);
+	\draw[->,color=black ]([xshift= 12pt]A-2-1.east)-- ([xshift=-12pt]B-7-1.west);
+	\draw[->,color=black ]([xshift= 12pt]A-3-1.east)-- ([xshift=-12pt]B-8-1.west);
+	\draw[->,color=black ]([xshift= 12pt]A-4-1.east)-- ([xshift=-12pt]B-9-1.west);
+	\end{tikzpicture}
+\end{minipage}
+
+
+\vspace{1cm}
+\begin{minipage}{\linewidth}
+	\subsubsection*{Example 2:}
+	\begin{minted}{cpp}
+__m256 b = SwapLanesIf<false>(a)
+	\end{minted}
+	
+	\begin{tikzpicture}[>=stealth,thick,baseline, every node/.style={text height=2ex,text width=1em}]
+	\plotSwizzleTwoRegisters{0}{1}{2}{3}{4}{5}{6}{7}
+	\draw[->,color=black ]([xshift= 12pt]A-1-1.east)-- ([xshift=-12pt]B-1-1.west);
+	\draw[->,color=black ]([xshift= 12pt]A-2-1.east)-- ([xshift=-12pt]B-2-1.west);
+	\draw[->,color=black ]([xshift= 12pt]A-3-1.east)-- ([xshift=-12pt]B-3-1.west);
+	\draw[->,color=black ]([xshift= 12pt]A-4-1.east)-- ([xshift=-12pt]B-4-1.west);
+	\draw[->,color=black ]([xshift= 12pt]A-6-1.east)-- ([xshift=-12pt]B-6-1.west);
+	\draw[->,color=black ]([xshift= 12pt]A-7-1.east)-- ([xshift=-12pt]B-7-1.west);
+	\draw[->,color=black ]([xshift= 12pt]A-8-1.east)-- ([xshift=-12pt]B-8-1.west);
+	\draw[->,color=black ]([xshift= 12pt]A-9-1.east)-- ([xshift=-12pt]B-9-1.west);
+	\end{tikzpicture}
+\end{minipage}
