@@ -1,13 +1,17 @@
 \documentclass[]{scrartcl}
 
+\usepackage{amsmath}
 \usepackage{minted}
 \usepackage{mdframed}  
 \usepackage{xcolor}
 \usepackage{tikz}
 \usepackage{tikz-3dplot}
 \usetikzlibrary{matrix,decorations.pathreplacing, calc, positioning,fit}
+\usepackage{cleveref}
 
 \surroundwithmdframed[linewidth=0pt, backgroundcolor=black!10]{minted} 
+
+\newcommand{\numRegisterElements}{R}
 
 \newcommand{\colorA}[1]
 {

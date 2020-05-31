@@ -1,1 +1,100 @@
 \section{Transpose functions}
+
+\subsection{Introduction}
+Transposing a matrix that uses an array of fundamental scalar types (\cppInline{int}, \cppInline{float}, \cppInline{double}, etc.) as underlying data structure is rather easy to implement.
+For an arbitrary $M \times N$ matrix the implementation could look like the following piece of code:
+
+\begin{minted}{cpp}
+for (U32 i = 0; i < N; ++i)
+    for (U32 j = 0; j < M; ++j)
+        transposed[j + i * cols] = original[i + j * rows];
+\end{minted}
+
+If an array of vector register types (\cppInline{__m128},\cppInline{__m128d}, \cppInline{__m256}, etc.) is utilized to store the matrix's data, it gets more complicated.
+This section describes the special transpose functions for x86 registers and how they can be used.
+Additionally, some details of the implementation are discussed.
+
+\subsection{Matrix format}
+\label{sec:transpose_matrix_format}
+In this section, we consider only matrices that are stored in column-major format and with a maximum size of $\numRegisterElements \times \numRegisterElements$, where $\numRegisterElements$ is the number of elements of the underlying register type.
+By using $\numRegisterElements \times \numRegisterElements$ matrices as basic building blocks, any larger $M \times N$ matrix can be transposed by using the following rule:
+
+\begin{align}
+M =
+\begin{bmatrix}
+A_{11} & A_{12} & \cdots & A_{1j}\\
+A_{21} & A_{22} & \cdots & A_{2j}\\
+\vdots & \vdots & \ddots &\vdots \\
+A_{i1} & A_{i2} & \cdots & A_{ij}\\
+\end{bmatrix} && 
+M^T =
+\begin{bmatrix}
+A_{11}^T & A_{21}^T & \cdots & A_{i1}^T\\
+A_{12}^T & A_{22}^T & \cdots & A_{i2}^T\\
+\vdots   & \vdots   & \ddots &\vdots \\
+A_{1j}^T & A_{2j}^T & \cdots & A_{ij}^T\\
+\end{bmatrix}  
+\end{align}
+
+\noindent Here all $A$ are $\numRegisterElements \times \numRegisterElements$ sub-matrices.
+
+
+Each column of a matrix is stored in its own register.
+This does not change, even if that means that some memory is wasted in case a matrix has less than $\numRegisterElements$ rows.
+So an $2 \times 2$ matrix that is stored in an array of \cppInline{__m128} registers (4 elements per register) will still use 2 registers (one for each column), even though the data fits into a single one.
+
+Additionally, the first row of a matrix with less than $\numRegisterElements$ rows mustn't necessarily be stored inside the first elements of the column registers. 
+The only condition is that each column of the matrix is stored contiguously in ascending order and the offset is identical in each register of the matrix.
+While one should usually avoid storing individual matrices with offsets, this gets important if only a sub-matrix of a $\numRegisterElements \times \numRegisterElements$ matrix should be transposed.
+ 
+
+\subsection{Available functions}
+
+\subsubsection{Specific transpose functions}
+
+Each register type has its own set of transpose functions available in a corresponding header.
+For example, for \cppInline{__m128} registers, you have to use
+\begin{minted}{cpp}
+#include "gdl/base/simd/_transpose/transpose_m128.h"
+\end{minted}
+
+The headers contain one function for each matrix size up to $\numRegisterElements \times \numRegisterElements$.
+They are named ''Transpose'' plus the matrix size.
+So for a $2 \times 4$ matrix, the function \cppInline{Transpose2x4} has to be used.
+
+The functions only take registers of the utilized type as parameters.
+Their number depends on the matrix size and is equal to the number of columns plus the number of rows.
+The first $N$ parameters are the columns register of the $M \times N$ source matrix in ascending order.
+The last $M$ parameters are references to the columns register of the $N \times M$ target matrix in ascending order.
+Results of the transposition will be written directly to the passed registers of the target matrix.
+Therefore, the functions do not return anything.
+
+Furthermore, each function takes 4 optional template parameters.
+The first parameter must be an integer that specifies the offset of the source matrix's first row inside its column registers (see \cref{sec:transpose_matrix_format}).
+Default value is 0.
+The second template parameter is also an integer and specifies the register offset of the target matrix's first row (default is 0).
+Using these 2 parameters lets you read a sub-matrix at an arbitrary position of the source matrix and write the transposed result to an arbitrary location of a target matrix.
+
+The third template parameter is a \cppInline{bool}.
+Setting it to \cppInline{false} prevents the function from modifying any memory of the target matrix registers that is not needed to store the result of the transposition.
+However, it is faster to use \cppInline{true} (default) since the limited set of swizzle operations requires additional blending instructions to keep values that shouldn't be modified in place.
+In this case, the memory outside the result matrix's memory range usually contains meaningless garbage.
+Make sure to only select \cppInline{false} as third template parameter if it is really necessary to get the best performance.
+
+The fourth and last parameter is also a \cppInline{bool}.
+It has only a meaning if the third parameter is set to \cppInline{true}.
+By setting it to \cppInline{true}, all unused memory of the result registers is overwritten with 0.
+In most cases, this requires additional instruction. 
+Only the \cppInline{__m128} register has some functions where this is not the case due to the utilization of the \cppInline{Insert} function.
+So this should always be set to \cppInline{false} (default) if it is not needed.
+
+\draftNoteInline{Continue with some examples}
+
+
+\subsubsection{General transpose function}
+
+
+\subsection{Implementation details}
+The challenge is to find the most effective combination of swizzle instructions (see previous section) to perform the transposition.
+Unfortunately, the optimal combination depends on the matrix size.
+
