@@ -88,8 +88,169 @@ In most cases, this requires additional instruction.
 Only the \cppInline{__m128} register has some functions where this is not the case due to the utilization of the \cppInline{Insert} function.
 So this should always be set to \cppInline{false} (default) if it is not needed.
 
-\draftNoteInline{Continue with some examples}
+\subsubsection*{Examples}
 
+The following examples show the Transposition of $3 \times 2$ matrix $\textrm{A}$ using different template parameter combinations. 
+Its underlying data is the \cppInline{std::array<__m256, 2> a}.
+The $2 \times 3$ result matrix $\textrm{B}$ has the \cppInline{std::array<__m256, 3> b} as underlying data structure.
+Each register of the arrays contains a single matrix column as defined in \cref{sec:transpose_matrix_format}.
+
+Since a single \cppInline{__m256} register contains 8 values, the matrix $\textrm{A}$ is actually visualized as an $8 \times 2$ matrix.
+The relevant $3 \times 2$ block is marked in blue.
+
+Similarly, the matrix $\textrm{B}$ is visualized twice as a $8 \times 3$ matrix.
+Once before and once after the transposition.
+The target area that receives the result values is marked green.
+In case that values of $\textrm{B}$ are overwritten, even though they are not part of the result matrix, they are marked in red.
+An $\times$ in $\textrm{B}$ after the transposition means that the corresponding value is undefined/random.
+
+
+\vspace{1cm}
+\begin{minipage}{\linewidth}
+\begin{minted}{cpp}
+Transpose3x2(a[0], a[1], b[0], b[1], b[2]);
+\end{minted}
+or 
+\begin{minted}{cpp}
+Transpose3x2<0 ,0 , true, false>(a[0], a[1], b[0], b[1], b[2]);
+\end{minted}
+yields:
+
+\begin{align*}
+\begin{matrix}
+\textrm{Matrix A} & \textrm{Matrix B}  & & \textrm{Matrix B}\\
+&\textrm{(before transposition)}&&\textrm{(after transposition)}\\
+\\
+\left(\begin{array}{cc}
+\colSrc 0 & \colSrc 8\\
+\colSrc 1 & \colSrc 9\\
+\colSrc 2 & \colSrc 10\\
+3 & 11\\
+4 & 12\\
+5 & 13\\
+6 & 14\\
+7 & 15
+\end{array}\right) 
+&
+\left(\begin{array}{ccc}
+\colTgt 100 & \colTgt 108 & \colTgt 116\\
+\colTgt 101 & \colTgt 109 & \colTgt 117\\
+\colOwr 102 & \colOwr 110 & \colOwr 118\\
+\colOwr 103 & \colOwr 111 & \colOwr 119\\
+\colOwr 104 & \colOwr 112 & \colOwr 120\\
+\colOwr 105 & \colOwr 113 & \colOwr 121\\
+\colOwr 106 & \colOwr 114 & \colOwr 122\\
+\colOwr 107 & \colOwr 115 & \colOwr 123
+\end{array}\right) 
+&&
+\left(\begin{array}{ccc}
+0 & 1 & 2\\
+8 & 9 & 10\\
+\times & \times & \times\\
+\times & \times & \times\\
+\times & \times & \times\\
+\times & \times & \times\\
+\times & \times & \times\\
+\times & \times & \times\\
+\end{array}\right) 
+\end{matrix}
+\end{align*}
+\end{minipage}
+
+
+\vspace{2cm}
+\begin{minipage}{\linewidth}
+	\begin{minted}{cpp}
+Transpose3x2<4 ,2 , true, true>(a[0], a[1], b[0], b[1], b[2]);
+	\end{minted}
+	yields:
+	\begin{align*}
+	\begin{matrix}
+	\textrm{Matrix A} & \textrm{Matrix B}  & & \textrm{Matrix B}\\
+	&\textrm{(before transposition)}&&\textrm{(after transposition)}\\
+	\\
+	\left(\begin{array}{cc}
+	0 & 8\\
+	1 & 9\\
+	2 & 10\\
+	3 & 11\\
+	\colSrc 4 & \colSrc 12\\
+	\colSrc 5 & \colSrc 13\\
+	\colSrc 6 & \colSrc 14\\
+	7 & 15
+	\end{array}\right) 
+	&
+	\left(\begin{array}{ccc}
+	\colOwr 100 & \colOwr 108 & \colOwr 116\\
+	\colOwr 101 & \colOwr 109 & \colOwr 117\\
+	\colTgt 102 & \colTgt 110 & \colTgt 118\\
+	\colTgt 103 & \colTgt 111 & \colTgt 119\\
+	\colOwr 104 & \colOwr 112 & \colOwr 120\\
+	\colOwr 105 & \colOwr 113 & \colOwr 121\\
+	\colOwr 106 & \colOwr 114 & \colOwr 122\\
+	\colOwr 107 & \colOwr 115 & \colOwr 123
+	\end{array}\right) 
+	&&
+	\left(\begin{array}{ccc}
+	0 & 0 & 0\\
+	0 & 0 & 0\\
+	4 & 5 & 6\\
+	12 & 13 & 14\\
+	0 & 0 & 0\\
+	0 & 0 & 0\\
+	0 & 0 & 0\\
+	0 & 0 & 0	
+	\end{array}\right) 
+	\end{matrix}
+	\end{align*}
+\end{minipage}
+
+\vspace{2cm}
+\begin{minipage}{\linewidth}
+	\begin{minted}{cpp}
+Transpose3x2<1 ,6 , false, false>(a[0], a[1], b[0], b[1], b[2]);
+	\end{minted}
+	yields:
+	\begin{align*}
+	\begin{matrix}
+	\textrm{Matrix A} & \textrm{Matrix B}  & & \textrm{Matrix B}\\
+	&\textrm{(before transposition)}&&\textrm{(after transposition)}\\
+	\\
+	\left(\begin{array}{cc}
+	0 & 8\\
+	\colSrc 1 & \colSrc 9\\
+	\colSrc 2 & \colSrc 10\\
+	\colSrc 3 & \colSrc 11\\
+	4 & 12\\
+    5 & 13\\
+	6 & 14\\
+	7 & 15
+	\end{array}\right) 
+	&
+	\left(\begin{array}{ccc}
+	100 & 108 & 116\\
+	101 & 109 & 117\\
+	102 & 110 & 118\\
+	103 & 111 & 119\\
+	104 & 112 & 120\\
+	105 & 113 & 121\\
+	\colTgt 106 & \colTgt 114 & \colTgt 122\\
+	\colTgt 107 & \colTgt 115 & \colTgt 123
+	\end{array}\right) 
+	&&
+	\left(\begin{array}{ccc}
+    100 & 108 & 116\\
+    101 & 109 & 117\\
+    102 & 110 & 118\\
+    103 & 111 & 119\\
+    104 & 112 & 120\\
+    105 & 113 & 121\\
+    1 & 2 & 3\\
+    9 & 10 & 11
+\end{array}\right) 
+	\end{matrix}
+	\end{align*}
+\end{minipage}
 
 \subsubsection{General transpose function}
 
