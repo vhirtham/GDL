@@ -20,6 +20,7 @@ In this section, we consider only matrices that are stored in column-major forma
 By using $\numRegisterElements \times \numRegisterElements$ matrices as basic building blocks, any larger $M \times N$ matrix can be transposed by using the following rule:
 
 \begin{align}
+\label{eq:block_matrix_transpose}
 M =
 \begin{bmatrix}
 A_{11} & A_{12} & \cdots & A_{1j}\\
@@ -50,7 +51,7 @@ While one should usually avoid storing individual matrices with offsets, this ge
 
 \subsection{Available functions}
 
-\subsubsection{Specific transpose functions}
+\subsubsection{Size specific functions}
 
 Each register type has its own set of transpose functions available in a corresponding header.
 For example, for \cppInline{__m128} registers, you have to use
@@ -110,7 +111,7 @@ An $\times$ in $\textrm{B}$ after the transposition means that the corresponding
 \begin{minted}{cpp}
 Transpose3x2(a[0], a[1], b[0], b[1], b[2]);
 \end{minted}
-or 
+equivalent to: 
 \begin{minted}{cpp}
 Transpose3x2<0 ,0 , true, false>(a[0], a[1], b[0], b[1], b[2]);
 \end{minted}
@@ -252,7 +253,33 @@ Transpose3x2<1 ,6 , false, false>(a[0], a[1], b[0], b[1], b[2]);
 	\end{align*}
 \end{minipage}
 
-\subsubsection{General transpose function}
+\subsubsection{General purpose function}
+
+Having a separate transpose function for each matrix size limits flexibility.
+The general purpose function wraps all size and register specific transpose functions into a large compile time switch that can be controlled by the functions template parameters.
+It can be included with:
+
+\begin{minted}{cpp}
+#include "gdl/base/simd/transpose.h"
+\end{minted}
+
+Instead of passing each of the matrices' underlying registers separately, the source matrix data and the target matrix data are both passed as a \cppInline{std::array} of the corresponding register type.
+The minimal size of the array must fulfill the storage requirements of the matrix format defined in \cref{sec:transpose_matrix_format}, but it might also be larger.
+Special offset and stride template parameters can be used to select the registers that belong to the source and target matrix inside arbitrary over-sized arrays.
+This functionality can be used to transpose matrices of any size that are stored inside a continuous register array by using \cref{eq:block_matrix_transpose}.
+
+The function has 10 template parameter options to modify its behavior.
+The matrix size is selected with the first 2 parameters, with the number of rows being the first parameter.
+If the selected size exceeds the register specific limitations, a corresponding static assertion will fail.
+Parameter 3 and 4 define the offsets of the source and target matrix's first row inside their corresponding registers (see \cref{sec:transpose_matrix_format}).
+They are internally past as the first two template parameters to the corresponding size specific function.
+The default value is 0.
+The parameters 5 and 6 specify the index of the matrices first column registers inside their corresponding data array (default 0).
+Parameter 7 and 8 are the stride between to matrix registers inside the data arrays (default 1).
+The last 2 parameters are Boolean switches that specify how register memory of the target matrix is handled, that is not needed to store the result.
+Their order, default values and functionality are identical to the third and fourth template parameter of the size specific functions described in the previous section.
+
+
 
 
 \subsection{Implementation details}
