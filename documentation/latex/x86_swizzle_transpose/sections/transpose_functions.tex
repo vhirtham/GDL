@@ -103,7 +103,7 @@ Similarly, the matrix $\textrm{B}$ is visualized twice as a $8 \times 3$ matrix.
 Once before and once after the transposition.
 The target area that receives the result values is marked green.
 In case that values of $\textrm{B}$ are overwritten, even though they are not part of the result matrix, they are marked in red.
-An $\times$ in $\textrm{B}$ after the transposition means that the corresponding value is undefined/random.
+An ''$\times$'' in $\textrm{B}$ after the transposition means that the corresponding value is undefined/random.
 
 
 \vspace{1cm}
@@ -145,8 +145,8 @@ yields:
 \end{array}\right) 
 &&
 \left(\begin{array}{ccc}
-0 & 1 & 2\\
-8 & 9 & 10\\
+0      & 1      & 2\\
+8      & 9      & 10\\
 \times & \times & \times\\
 \times & \times & \times\\
 \times & \times & \times\\
@@ -279,6 +279,169 @@ Parameter 7 and 8 are the stride between to matrix registers inside the data arr
 The last 2 parameters are Boolean switches that specify how register memory of the target matrix is handled, that is not needed to store the result.
 Their order, default values and functionality are identical to the third and fourth template parameter of the size specific functions described in the previous section.
 
+
+\subsubsection*{Examples}
+
+The following examples show different applications of the general purpose \cppInline{Transpose} function.
+The arrays \cppInline{std::array<__m256, 6> a} and \cppInline{std::array<__m256, 5> b} will be used as input parameters. 
+They are visualized as a matrix, where each column represents a single register.
+As in the previous section, the array \cppInline{b} will be shown before and after the operation.
+Areas colored in blue mark the source values in the array \cppInline{a}.
+Entries of the array \cppInline{b}, that will be overwritten by the result matrix, are colored green.
+Red areas mark values that are not part of the result matrix but will be overwritten by the function.
+An $\times$ in the representation of \cppInline{b} after the transposition represents an undefined value (random value from the source matrix).
+
+\vspace{1cm}
+\begin{minipage}{\linewidth}
+	\begin{minted}{cpp}
+Transpose<3, 2>(a, b);
+	\end{minted}
+	equivalent to: 
+	\begin{minted}{cpp}
+Transpose<3, 2, 0, 0, 0, 0, 1, 1, true, false>(a, b);
+	\end{minted}
+	yields:
+	
+	\begin{align*}
+	\begin{matrix}
+	\textrm{array a} & \textrm{array b}  & & \textrm{array b}\\
+	&\textrm{(before transposition)}&&\textrm{(after transposition)}\\
+	\\
+	\left(\begin{array}{cccccc}
+	\colSrc 0 & \colSrc 8  & 16 & 24 & 32 & 40\\
+	\colSrc 1 & \colSrc 9  & 17 & 25 & 33 & 41\\
+	\colSrc 2 & \colSrc 10 & 18 & 26 & 34 & 42\\
+	3 & 11 & 19 & 27 & 35 & 43\\
+    4 & 12 & 20 & 28 & 36 & 44\\
+    5 & 13 & 21 & 29 & 37 & 45\\
+    6 & 14 & 22 & 30 & 38 & 46\\
+    7 & 15 & 23 & 31 & 39 & 47
+	\end{array}\right) 
+	&
+	\left(\begin{array}{ccccc}
+	\colTgt 60 & \colTgt 68 & \colTgt 76 & 84 & 92\\
+	\colTgt 61 & \colTgt 69 & \colTgt 77 & 85 & 93\\
+	\colOwr 62 & \colOwr 70 & \colOwr 78 & 86 & 94\\
+	\colOwr 63 & \colOwr 71 & \colOwr 79 & 87 & 95\\
+	\colOwr 64 & \colOwr 72 & \colOwr 80 & 88 & 96\\
+	\colOwr 65 & \colOwr 73 & \colOwr 81 & 89 & 97\\
+	\colOwr 66 & \colOwr 74 & \colOwr 82 & 90 & 98\\
+	\colOwr 67 & \colOwr 75 & \colOwr 83 & 91 & 99
+	\end{array}\right) 
+	&&
+	\left(\begin{array}{ccccc}
+	0      & 1      & 2      & 84 & 92\\
+	8      & 9      & 10     & 85 & 93\\
+	\times & \times & \times & 86 & 94\\
+	\times & \times & \times & 87 & 95\\
+	\times & \times & \times & 88 & 96\\
+	\times & \times & \times & 89 & 97\\
+	\times & \times & \times & 90 & 98\\
+	\times & \times & \times & 91 & 99
+	\end{array}\right)
+	\end{matrix}
+	\end{align*}
+\end{minipage}
+
+
+
+\vspace{1cm}
+\begin{minipage}{\linewidth}
+	\begin{minted}{cpp}
+Transpose<2, 2, 6, 3, 2, 1, 1, 1, true, true>(a, b);
+	\end{minted}
+	yields:
+	
+	\begin{align*}
+	\begin{matrix}
+	\textrm{array a} & \textrm{array b}  & & \textrm{array b}\\
+	&\textrm{(before transposition)}&&\textrm{(after transposition)}\\
+	\\
+	\left(\begin{array}{cccccc}
+	0 & 8  & 16         & 24         & 32 & 40\\
+	1 & 9  & 17         & 25         & 33 & 41\\
+	2 & 10 & 18         & 26         & 34 & 42\\
+	3 & 11 & 19         & 27         & 35 & 43\\
+	4 & 12 & 20         & 28         & 36 & 44\\
+	5 & 13 & 21         & 29         & 37 & 45\\
+	6 & 14 & \colSrc 22 & \colSrc 30 & 38 & 46\\
+	7 & 15 & \colSrc 23 & \colSrc 31 & 39 & 47
+	\end{array}\right) 
+	&
+	\left(\begin{array}{ccccc}
+	60 & \colOwr 68 & \colOwr 76 & 84 & 92\\
+	61 & \colOwr 69 & \colOwr 77 & 85 & 93\\
+	62 & \colOwr 70 & \colOwr 78 & 86 & 94\\
+	63 & \colTgt 71 & \colTgt 79 & 87 & 95\\
+	64 & \colTgt 72 & \colTgt 80 & 88 & 96\\
+	65 & \colOwr 73 & \colOwr 81 & 89 & 97\\
+	66 & \colOwr 74 & \colOwr 82 & 90 & 98\\
+	67 & \colOwr 75 & \colOwr 83 & 91 & 99
+	\end{array}\right) 
+	&&
+	\left(\begin{array}{ccccc}
+	60 & 0  & 0  & 84 & 92\\
+	61 & 0  & 0  & 85 & 93\\
+	62 & 0  & 0  & 86 & 94\\
+	63 & 22 & 23 & 87 & 95\\
+	64 & 30 & 31 & 88 & 96\\
+	65 & 0  & 0  & 89 & 97\\
+	66 & 0  & 0  & 90 & 98\\
+	67 & 0  & 0  & 91 & 99
+	\end{array}\right)
+	\end{matrix}
+	\end{align*}
+\end{minipage}
+
+
+
+\vspace{1cm}
+\begin{minipage}{\linewidth}
+	\begin{minted}{cpp}
+	Transpose<2, 3, 1, 3, 0, 1, 2, 3, false, false>(a, b);
+	\end{minted}
+	yields:
+	
+	\begin{align*}
+	\begin{matrix}
+	\textrm{array a} & \textrm{array b}  & & \textrm{array b}\\
+	&\textrm{(before transposition)}&&\textrm{(after transposition)}\\
+	\\
+	\left(\begin{array}{cccccc}
+	0         & 8  & 16         & 24 & 32         & 40\\
+	\colSrc 1 & 9  & \colSrc 17 & 25 & \colSrc 33 & 41\\
+	\colSrc 2 & 10 & \colSrc 18 & 26 & \colSrc 34 & 42\\
+	3         & 11 & 19         & 27 & 35         & 43\\
+	4         & 12 & 20         & 28 & 36         & 44\\
+	5         & 13 & 21         & 29 & 37         & 45\\
+	6         & 14 & 22         & 30 & 38         & 46\\
+	7         & 15 & 23         & 31 & 39         & 47
+	\end{array}\right) 
+	&
+	\left(\begin{array}{ccccc}
+	60 & 68         & 76 & 84 & 92\\
+	61 & 69         & 77 & 85 & 93\\
+	62 & 70         & 78 & 86 & 94\\
+	63 & \colTgt 71 & 79 & 87 & \colTgt 95\\
+	64 & \colTgt 72 & 80 & 88 & \colTgt 96\\
+	65 & \colTgt 73 & 81 & 89 & \colTgt 97\\
+	66 & 74         & 82 & 90 & 98\\
+	67 & 75         & 83 & 91 & 99
+	\end{array}\right) 
+	&&
+	\left(\begin{array}{ccccc}
+	60 & 68 & 76 & 84 & 92\\
+	61 & 69 & 77 & 85 & 93\\
+	62 & 70 & 78 & 86 & 94\\
+	63 & 1  & 79 & 87 & 2\\
+	64 & 17 & 80 & 88 & 18\\
+	65 & 33 & 81 & 89 & 34\\
+	66 & 74 & 82 & 90 & 98\\
+	67 & 75 & 83 & 91 & 99
+	\end{array}\right)
+	\end{matrix}
+	\end{align*}
+\end{minipage}
 
 
 
