@@ -52,6 +52,8 @@ While one should usually avoid storing individual matrices with offsets, this ge
 \subsection{Available functions}
 
 \subsubsection{Size specific functions}
+\label{sec:size_specific_transpose_function}
+
 
 Each register type has its own set of transpose functions available in a corresponding header.
 For example, for \cppInline{__m128} registers, you have to use
@@ -254,6 +256,7 @@ Transpose3x2<1 ,6 , false, false>(a[0], a[1], b[0], b[1], b[2]);
 \end{minipage}
 
 \subsubsection{General purpose function}
+\label{sec:general_transpose_function}
 
 Having a separate transpose function for each matrix size limits flexibility.
 The general purpose function wraps all size and register specific transpose functions into a large compile time switch that can be controlled by the functions template parameters.
@@ -445,7 +448,390 @@ Transpose<2, 2, 6, 3, 2, 1, 1, 1, true, true>(a, b);
 
 
 
-\subsection{Implementation details}
-The challenge is to find the most effective combination of swizzle instructions (see previous section) to perform the transposition.
-Unfortunately, the optimal combination depends on the matrix size.
+\subsection{Implementation details for multi-lane registers}
+
+The provided option to select where the first input and output matrix row is located inside the underlying registers requires a significant amount of extra code. 
+The reason for this is that the correct set of swizzle instructions is more or less unique for each parameter combination.
+The correct instruction set is selected at compile time using \cppInline{if constexpr}.
+There are some patterns that can be shared between multiple parameter sets, but usually they are hard to figure out before every case has been written down.
+
+To the author's knowledge, there are no general rules or patterns that can be used to simplify and speedup the implementation of matrices based on single lane register types.
+However, for multi-lane registers \cref{eq:block_matrix_transpose} can be used to heavily reuse code in larger matrices as will be shown in the following sections.
+
+
+\subsubsection{Swizzling across lane boundaries}
+
+Transposing matrices composed of multi lane registers requires to swizzle values across lane boundaries in most cases.
+It was already mentioned in previous sections that such operations are somewhat more expensive than in-lane swizzling.
+
+
+The reason for this is the comparatively high latency of the \cppInline{_mm256_permute2f128_ps} and \cppInline{_mm256_permute2f128_pd} instructions.
+On a Skylake architecture, it takes 3 processor cycles to calculate the result while most inter-lane operations can be processed in a single cycle.
+However, the throughput is 1 (Skylake), which is equivalent to most of the other swizzle operations. 
+This means that a single operation can be started per cycle as long as there are no dependencies on results of currently running operations.
+In conclusion, the overhead of inter lane permutations can be reduced to just 2 extra cycles if they are all processed successively and without depending on each other.
+The techniques described in \cref{sec:Implementation_4x4_matrices,sec:Implementation_general_multi_lane_matrices} show possible approaches to accomplish this.
+
+
+
+\subsubsection{4x4 single precision matrices}
+\label{sec:Implementation_4x4_matrices}
+
+The techniques described in this section focus on the \cppInline{__m256} register type and $4 \times 4$ matrices.
+Even though the text might be very specific, the introduced approaches can be easily transferred to multi lane registers of different size (\cppInline{__m512}) and base type (\cppInline{__m256d}, \cppInline{__m512d} - using $2 \times 2$ matrices).
+
+The transposition of a $4 \times 4$ matrix based on the \cppInline{__m256} register type marks a special case for the representation described in \cref{sec:transpose_matrix_format} since its number of rows and columns equals the size of a register lane.
+As consequence, it is the largest matrix that has certain parameter combinations that do not require permutations across lane boundaries.
+This is the case if the row offset of input and output matrix is identical and all data is stored in the same lane.
+For the functions described in \cref{sec:size_specific_transpose_function,sec:general_transpose_function} this happens for the offset combinations $0/0$ and $4/4$.
+Here is a visualization using the general purpose transposition function:
+
+\vspace{1cm}
+\begin{minipage}{\linewidth}
+	\begin{minted}{cpp}
+	Transpose<4, 4, 0, 0>(a, b);
+	\end{minted}
+	yields:
+	
+	\begin{align*}
+	\begin{matrix}
+	\textrm{array a} &&& \textrm{array b}\\
+    &&&\textrm{(after transposition)}\\
+	\\
+	\left(\begin{array}{cccc}
+	\col{0} 0 & \col{2} 8  & \col{4} 16 & \col{6} 24 \\
+	\col{0} 1 & \col{2} 9  & \col{4} 17 & \col{6} 25 \\
+	\col{0} 2 & \col{2} 10 & \col{4} 18 & \col{6} 26 \\
+	\col{0} 3 & \col{2} 11 & \col{4} 19 & \col{6} 27 \\
+	\hline
+	4 & 12 & 20 & 28 \\	
+	5 & 13 & 21 & 29 \\
+	6 & 14 & 22 & 30 \\
+	7 & 15 & 23 & 31 
+	\end{array}\right) 
+	&&&
+	\left(\begin{array}{cccc}
+	\col{0} 0  & \col{0}  1 & \col{0}  2 & \col{0}  3 \\
+	\col{2} 8  & \col{2}  9 & \col{2} 10 & \col{2} 11 \\
+	\col{4} 16 & \col{4} 17 & \col{4} 18 & \col{4} 19 \\
+	\col{6} 24 & \col{6} 25 & \col{6} 26 & \col{6} 27 \\
+	\hline
+	4  &  5 &  6 &  7 \\
+	12 & 13 & 14 & 15 \\
+	20 & 21 & 22 & 23 \\
+	28 & 29 & 30 & 31 \\
+	\end{array}\right)
+	\end{matrix}
+	\end{align*}
+\end{minipage}
+\vspace{1cm}
+
+The content of the array \cppInline{b} before the transposition is not relevant here since we chose to overwrite them.
+If the implementation of this specific case only relies on swizzle operations that affect each lane in the same way (which is the true for the implementation we chose), \cppInline{Transpose<4, 4, 0, 0>(a, b);} and \cppInline{Transpose<4, 4, 4, 4>(a, b);} will write the exact same values to \cppInline{b}.
+As you can see in the example above, the second lane of \cppInline{b} contains the transposed matrix of the second lane of \cppInline{a}.
+Therefore, we can cover both cases with a single set of instructions.
+Additionally, we can also cover the cases where the whole data of source and target matrix is contained inside a single register lane, but those lanes aren't the same both matrices.
+To do so, one just needs to swap the lanes before or after the transposition.
+For example:
+
+\vspace{1cm}
+\begin{minipage}{\linewidth}
+	\begin{minted}{cpp}
+	Transpose<4, 4, 0, 4>(a, b);
+	\end{minted}
+	yields:
+	
+	\begin{align*}
+	\begin{matrix}
+	\textrm{array a} &&& \textrm{array a}  &&& \textrm{array b}\\
+	&&&\textrm{(swapped lanes)}&&&\textrm{(after transposition)}\\
+	\\
+	\left(\begin{array}{cccc}
+	\col{0} 0 & \col{2} 8  & \col{4} 16 & \col{6} 24 \\
+	\col{0} 1 & \col{2} 9  & \col{4} 17 & \col{6} 25 \\
+	\col{0} 2 & \col{2} 10 & \col{4} 18 & \col{6} 26 \\
+	\col{0} 3 & \col{2} 11 & \col{4} 19 & \col{6} 27 \\
+	\hline
+	4 & 12 & 20 & 28 \\	
+	5 & 13 & 21 & 29 \\
+	6 & 14 & 22 & 30 \\
+	7 & 15 & 23 & 31 
+	\end{array}\right) 
+	&&&
+	\left(\begin{array}{cccc}
+	4 & 12 & 20 & 28 \\	
+	5 & 13 & 21 & 29 \\
+	6 & 14 & 22 & 30 \\
+	7 & 15 & 23 & 31 \\
+	\hline		
+	\col{0} 0 & \col{2} 8  & \col{4} 16 & \col{6} 24 \\
+	\col{0} 1 & \col{2} 9  & \col{4} 17 & \col{6} 25 \\
+	\col{0} 2 & \col{2} 10 & \col{4} 18 & \col{6} 26 \\
+	\col{0} 3 & \col{2} 11 & \col{4} 19 & \col{6} 27
+	\end{array}\right) 
+	&&&
+	\left(\begin{array}{cccc}
+	4  &  5 &  6 &  7 \\
+	12 & 13 & 14 & 15 \\
+	20 & 21 & 22 & 23 \\
+	28 & 29 & 30 & 31 \\
+	\hline
+	\col{0} 0  & \col{0}  1 & \col{0}  2 & \col{0}  3 \\
+	\col{2} 8  & \col{2}  9 & \col{2} 10 & \col{2} 11 \\
+	\col{4} 16 & \col{4} 17 & \col{4} 18 & \col{4} 19 \\
+	\col{6} 24 & \col{6} 25 & \col{6} 26 & \col{6} 27 \\
+	\end{array}\right)
+	\end{matrix}
+	\end{align*}
+\end{minipage}
+\vspace{1cm}
+
+Until now, we have covered all possible permutations where the data of the input and output matrix is stored in a single lane with a common in-lane transposition instruction set.
+We will now show step-by-step that this can be further reused for any combinations of input and output register offsets.
+
+First, we consider the case where the input matrix's data is contained in a single register lane but the offset inside the result registers can be arbitrary.
+All that needs to be done is to change the order of the input matrix registers.
+One simply moves the last register to the front and repeats this a number of times equal to the chosen offset.
+Afterwards there are two variants how to proceed.
+The first one is to swap all the lanes of the registers that contain data which will end up in a different lane and perform a ''no offset'' $4 \times 4$ transposition subsequently.
+The second approach performs the ''no offset'' transposition first and then duplicates the relevant lanes.
+Both variations, are visualized in the two examples below even though performing the inter-lane permutations before the transposition is beneficial since it requires less additional instructions (lane swaps/copies), saving some CPU cycles.
+Notice that we used the size specific \cppInline{Transpose4x4} function so that we do not need to reorder the array \cppInline{a} itself.
+Instead, we just varied the order of the input registers.
+
+\vspace{1cm}
+\begin{minipage}{\linewidth}
+	\begin{minted}{cpp}
+Transpose4x4<0, 1>(a[3], a[0], a[1], a[2], b[0], b[1], b[2], b[3]);
+	\end{minted}
+	yields:
+	
+	\begin{align*}
+	\begin{matrix}
+	\textrm{array a}\\
+	\\
+	\left(\begin{array}{cccc}
+	\col{0} 0 & \col{2} 8  & \col{4} 16 & \col{6} 24 \\
+	\col{0} 1 & \col{2} 9  & \col{4} 17 & \col{6} 25 \\
+	\col{0} 2 & \col{2} 10 & \col{4} 18 & \col{6} 26 \\
+	\col{0} 3 & \col{2} 11 & \col{4} 19 & \col{6} 27 \\
+	\hline
+	4 & 12 & 20 & 28 \\	
+	5 & 13 & 21 & 29 \\
+	6 & 14 & 22 & 30 \\
+	7 & 15 & 23 & 31 
+	\end{array}\right) 
+	\\
+	\\
+	\\
+	\textbf{Approach 1}\\
+	\\
+	\textrm{function input} &&& \textrm{function input}  &&& \textrm{array b}\\
+	\textrm{(reordered array a)}&&&\textrm{(swapped lanes)}&&&\textrm{(after transposition)}\\
+	\left(\begin{array}{cccc}
+	\col{6} 24 & \col{0} 0 & \col{2} 8  & \col{4} 16 \\
+	\col{6} 25 & \col{0} 1 & \col{2} 9  & \col{4} 17 \\
+	\col{6} 26 & \col{0} 2 & \col{2} 10 & \col{4} 18 \\
+	\col{6} 27 & \col{0} 3 & \col{2} 11 & \col{4} 19 \\
+	\hline
+	28 & 4 & 12 & 20 \\	
+	29 & 5 & 13 & 21 \\
+	30 & 6 & 14 & 22 \\
+	31 & 7 & 15 & 23  
+	\end{array}\right) 
+	&&&
+	\left(\begin{array}{cccc}
+	28 & \col{0} 0 & \col{2} 8  & \col{4} 16 \\
+	29 & \col{0} 1 & \col{2} 9  & \col{4} 17 \\
+	30 & \col{0} 2 & \col{2} 10 & \col{4} 18 \\
+	31 & \col{0} 3 & \col{2} 11 & \col{4} 19 \\
+	\hline
+	\col{6} 24 & 4 & 12 & 20 \\	
+	\col{6} 25 & 5 & 13 & 21 \\
+	\col{6} 26 & 6 & 14 & 22 \\
+	\col{6} 27 & 7 & 15 & 23  
+	\end{array}\right) 
+	&&&	
+	\left(\begin{array}{cccc}	
+	28 & 29 & 30 & 31 \\
+	\col{0} 0  & \col{0}  1 & \col{0}  2 & \col{0}  3 \\
+	\col{2} 8  & \col{2}  9 & \col{2} 10 & \col{2} 11 \\
+	\col{4} 16 & \col{4} 17 & \col{4} 18 & \col{4} 19 \\	
+	\hline
+	\col{6} 24 & \col{6} 25 & \col{6} 26 & \col{6} 27 \\
+	4  &  5 &  6 &  7 \\
+	12 & 13 & 14 & 15 \\
+	20 & 21 & 22 & 23 \\
+	\end{array}\right)
+	\\
+	\\
+	\\
+	\textbf{Approach 2}\\
+	\\
+	\textrm{function input} &&& \textrm{tenporary data}  &&& \textrm{array b}\\
+	\textrm{(reordered array a)}&&&\textrm{(after transposition)}&&&\textrm{(copied lanes)}\\
+	\left(\begin{array}{cccc}
+	\col{6} 24 & \col{0} 0 & \col{2} 8  & \col{4} 16 \\
+	\col{6} 25 & \col{0} 1 & \col{2} 9  & \col{4} 17 \\
+	\col{6} 26 & \col{0} 2 & \col{2} 10 & \col{4} 18 \\
+	\col{6} 27 & \col{0} 3 & \col{2} 11 & \col{4} 19 \\
+	\hline
+	28 & 4 & 12 & 20 \\	
+	29 & 5 & 13 & 21 \\
+	30 & 6 & 14 & 22 \\
+	31 & 7 & 15 & 23  
+	\end{array}\right) 
+	&&&	
+	\left(\begin{array}{cccc}
+	\col{6} 24 & \col{6} 25 & \col{6} 26 & \col{6} 27 \\
+	\col{0} 0  & \col{0}  1 & \col{0}  2 & \col{0}  3 \\
+	\col{2} 8  & \col{2}  9 & \col{2} 10 & \col{2} 11 \\
+	\col{4} 16 & \col{4} 17 & \col{4} 18 & \col{4} 19 \\	
+	\hline	
+	28 & 29 & 30 & 31 \\
+	4  &  5 &  6 &  7 \\
+	12 & 13 & 14 & 15 \\
+	20 & 21 & 22 & 23 \\
+	\end{array}\right)
+	&&&	
+	\left(\begin{array}{cccc}
+	\col{6} 24 & \col{6} 25 & \col{6} 26 & \col{6} 27 \\
+	\col{0} 0  & \col{0}  1 & \col{0}  2 & \col{0}  3 \\
+	\col{2} 8  & \col{2}  9 & \col{2} 10 & \col{2} 11 \\
+	\col{4} 16 & \col{4} 17 & \col{4} 18 & \col{4} 19 \\	
+	\hline
+	\col{6} 24 & \col{6} 25 & \col{6} 26 & \col{6} 27 \\
+	\col{0} 0  & \col{0}  1 & \col{0}  2 & \col{0}  3 \\
+	\col{2} 8  & \col{2}  9 & \col{2} 10 & \col{2} 11 \\
+	\col{4} 16 & \col{4} 17 & \col{4} 18 & \col{4} 19 \\
+	\end{array}\right)
+	\end{matrix}
+	\end{align*}
+\end{minipage}
+\vspace{1cm}
+
+
+\begin{minipage}{\linewidth}
+	\begin{minted}{cpp}
+Transpose4x4<4, 2>(a[2], a[3], a[0], a[1], b[0], b[1], b[2], b[3]);
+	\end{minted}
+	
+	\begin{align*}
+	\begin{matrix}
+	\textrm{array a}\\
+	\\
+	\left(\begin{array}{cccc}
+	0 & 8  & 16 & 24 \\
+	1 & 9  & 17 & 25 \\
+	2 & 10 & 18 & 26 \\
+	3 & 11 & 19 & 27 \\
+	\hline
+	\col{0} 4 & \col{2} 12 & \col{4} 20 & \col{6} 28 \\	
+	\col{0} 5 & \col{2} 13 & \col{4} 21 & \col{6} 29 \\
+	\col{0} 6 & \col{2} 14 & \col{4} 22 & \col{6} 30 \\
+	\col{0} 7 & \col{2} 15 & \col{4} 23 & \col{6} 31 
+	\end{array}\right) 
+	\\
+	\\
+	\\
+	\textbf{Approach 1}\\
+	\\
+	\textrm{function input} &&& \textrm{function input}  &&& \textrm{array b}\\
+	\textrm{(reordered array a)}&&&\textrm{(swapped lanes)}&&&\textrm{(after transposition)}\\
+	\left(\begin{array}{cccc}
+	16 & 24 & 0 & 8  \\
+	17 & 25 & 1 & 9  \\
+	18 & 26 & 2 & 10 \\
+	19 & 27 & 3 & 11 \\
+	\hline
+	\col{4} 20 & \col{6} 28 & \col{0} 4 & \col{2} 12 \\	
+	\col{4} 21 & \col{6} 29 & \col{0} 5 & \col{2} 13 \\
+	\col{4} 22 & \col{6} 30 & \col{0} 6 & \col{2} 14 \\
+	\col{4} 23 & \col{6} 31 & \col{0} 7 & \col{2} 15 
+	\end{array}\right) 
+	&&&
+	\left(\begin{array}{cccc}
+	16 & 24 & \col{0} 4 & \col{2} 12  \\
+	17 & 25 & \col{0} 5 & \col{2} 13  \\
+	18 & 26 & \col{0} 6 & \col{2} 14  \\
+	19 & 27 & \col{0} 7 & \col{2} 15  \\
+	\hline
+	\col{4} 20 & \col{6} 28 & 0 & 8  \\	
+	\col{4} 21 & \col{6} 29 & 1 & 9  \\
+	\col{4} 22 & \col{6} 30 & 2 & 10 \\
+	\col{4} 23 & \col{6} 31 & 3 & 11 
+	\end{array}\right) 
+	&&&	
+	\left(\begin{array}{cccc}	
+	16 & 17 & 18 & 19 \\	
+	24 & 25 & 26 & 27 \\
+	\col{0} 4  & \col{0}  5 & \col{0}  6 & \col{0}  7 \\
+	\col{2} 12 & \col{2} 13 & \col{2} 14 & \col{2} 15 \\
+	\hline
+	\col{4} 20 & \col{4} 21 & \col{4} 22 & \col{4} 23 \\
+	\col{6} 28 & \col{6} 29 & \col{6} 30 & \col{6} 31 \\
+	0  &  1 &  2 &  3 \\
+	8  &  9 & 10 & 11 \\
+	\end{array}\right)
+	\\
+	\\
+	\\
+	\textbf{Approach 2}\\
+	\\
+	\textrm{function input} &&& \textrm{tenporary data}  &&& \textrm{array b}\\
+	\textrm{(reordered array a)}&&&\textrm{(after transposition)}&&&\textrm{(copied lanes)}\\
+	\left(\begin{array}{cccc}
+	16 & 24 & 0 & 8  \\
+	17 & 25 & 1 & 9  \\
+	18 & 26 & 2 & 10 \\
+	19 & 27 & 3 & 11 \\
+	\hline
+	\col{4} 20 & \col{6} 28 & \col{0} 4 & \col{2} 12 \\	
+	\col{4} 21 & \col{6} 29 & \col{0} 5 & \col{2} 13 \\
+	\col{4} 22 & \col{6} 30 & \col{0} 6 & \col{2} 14 \\
+	\col{4} 23 & \col{6} 31 & \col{0} 7 & \col{2} 15 
+	\end{array}\right) 
+	&&&	
+	\left(\begin{array}{cccc}
+	16 & 17 & 18 & 19 \\
+	24 & 25 & 26 & 27 \\
+	 0 &  1 &  2 &  3 \\
+	 8 &  9 & 10 & 11 \\	
+	\hline
+	\col{4} 20 & \col{4} 21 & \col{4} 22 & \col{4} 23 \\
+	\col{6} 28 & \col{6} 29 & \col{6} 30 & \col{6} 31 \\
+	\col{0} 4  & \col{0}  5 & \col{0}  6 & \col{0}  7 \\
+	\col{2} 12 & \col{2} 13 & \col{2} 14 & \col{2} 15 \\
+	\end{array}\right)
+	&&&	
+	\left(\begin{array}{cccc}
+	\col{4} 20 & \col{4} 21 & \col{4} 22 & \col{4} 23 \\
+	\col{6} 28 & \col{6} 29 & \col{6} 30 & \col{6} 31 \\
+	\col{0} 4  & \col{0}  5 & \col{0}  6 & \col{0}  7 \\
+	\col{2} 12 & \col{2} 13 & \col{2} 14 & \col{2} 15 \\
+	\hline
+	\col{4} 20 & \col{4} 21 & \col{4} 22 & \col{4} 23 \\
+	\col{6} 28 & \col{6} 29 & \col{6} 30 & \col{6} 31 \\
+	\col{0} 4  & \col{0}  5 & \col{0}  6 & \col{0}  7 \\
+	\col{2} 12 & \col{2} 13 & \col{2} 14 & \col{2} 15 \\
+	\end{array}\right)
+	\end{matrix}
+	\end{align*}
+\end{minipage}
+\vspace{1cm}
+
+The first depicted approach can also be imagined as the transposition of a $4 \times 8$ matrix if the values inside the second lane are moved to the right of the first lane. 
+In this imaginary model, moving the last column in front of the first shifts every row in the transposed $8 \times 4$ result matrix one row down, except for the last one, which is now the first row.
+So repeating this step multiple times enables us to move the transposed matrix to arbitrary offsets inside the result array.
+
+Next, we will investigate the case where a $4 \times 4$ matrix with arbitrary offset is stored inside a single lane of the result array. 
+
+\draftNote{
+\begin{itemize}
+	\item Add code for $4 \time 4$ transposition
+\end{itemize}
+}
+\subsubsection{Matrices with more then 4 rows and/or columns}
+\label{sec:Implementation_general_multi_lane_matrices} 
+df
 

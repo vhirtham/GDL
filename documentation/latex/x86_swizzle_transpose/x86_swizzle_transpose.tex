@@ -208,6 +208,27 @@
 \newcommand{\colTgt}{\cellcolor{green!20}}
 \newcommand{\colOwr}{\cellcolor{red!20}}
 
+\newcommand{\col}[1]
+{
+	\ifnum#1=0
+		\cellcolor{orange!25}
+	\else \ifnum#1=1
+		\cellcolor{orange!75}
+	\else \ifnum#1=2
+		\cellcolor{red!25}
+	\else \ifnum#1=3
+		\cellcolor{red!75}		
+	\else \ifnum#1=4
+		\cellcolor{green!25}
+	\else \ifnum#1=5
+		\cellcolor{green!75}
+	\else \ifnum#1=6
+		\cellcolor{blue!25}
+	\else
+		\cellcolor{blue!75}		
+	\fi\fi\fi\fi\fi\fi\fi		
+}
+
 
 %opening
 \title{Documentation of swizzle and transpose functions for x86 vector registers}
