@@ -1230,7 +1230,7 @@ In the following image the fields are separated from each other:
 
 The matrix is now divided into multiple sub-matrices of size $4\times 4$, $4\times 2$, $2\times 4$ and $2\times 2$.
 If our in lane transposition functions for small matrices are implemented in a way that all operations are exactly the same for both lanes, we can perform two sub-matrix transpositions at the same time.
-However, there a now two possible ways, how to proceed.
+However, there are now two possible ways, how to proceed.
 We can perform a $4 \times 4$ transposition on the first 4 registers of the source matrix and a $4 \times 2$ transposition on the remaining 2.
 Subsequent recombination of the lanes will yield the target matrix.
 Alternatively, one can perform the lane permutations first and transpose afterwards.
@@ -1261,7 +1261,7 @@ The following image visualizes the sub steps of both approaches:
 	\textbf{\large Approach 1:}
 	\\
 	\\
-	\textrm{temporary matrix}&&&\textrm{target matrix}\\
+	\textrm{temporary data}&&&\textrm{target matrix}\\
 	\textrm{(after }4\times 4 \textrm{ and }4\times 2\textrm{ transposition)}&&&\textrm{(after lane permutations)}\\
 	\left(\begin{array}{ccccccccc}
 	\col{1}   0 & \col{1}   1 & \col{1}   2 & \col{1}   3 && \col{17} 32 & \col{17} 33 & \col{17} 34 & \col{17} 35 \\
@@ -1293,7 +1293,7 @@ The following image visualizes the sub steps of both approaches:
 	\textbf{\large Approach 2:}
 	\\
 	\\
-	\textrm{temporary matrix}&&&\textrm{target matrix}\\
+	\textrm{temporary data}&&&\textrm{target matrix}\\
 	\textrm{(after lane permutations)}&&&\textrm{(after }4\times 4 \textrm{ and }2\times 4\textrm{ transposition)}\\
 	\left(\begin{array}{ccccccccc}
 	\col{1} 0   & \col{5} 8   & \col{9}  16 & \col{13} 24 && \col{3} 4  & \col{7} 12   & \col{11} 20 & \col{15} 28 \\
@@ -1334,7 +1334,7 @@ Now we will have a look into the situation, were the source matrix does not have
 As an example, we will use a $6 \times 5$ matrix and a target offset of $2$.
 Here is the visualization of this example:
 
-
+\vspace{1cm}
 \begin{minipage}{\linewidth}
 	\begin{align*}
 	\begin{matrix}
@@ -1371,6 +1371,7 @@ Here is the visualization of this example:
 Since the matrix isn't symmetric anymore and due to the offset, it is not as easy anymore to see in the image where to subdivide the matrix.
 However, if you compare which lanes need to be permuted and which don't you will get to the following result:
 
+\vspace{1cm}
 \begin{minipage}{\linewidth}
 	\begin{align*}
 	\begin{matrix}
@@ -1405,4 +1406,114 @@ However, if you compare which lanes need to be permuted and which don't you will
 \vspace{1cm}
 
 In general, the subdivision depends on the lane boundaries of source and target matrix.
-So by imagining the lane boundaries as additional columns and rows in the matrix that need to be transposed too, finding the subdivisions shouldn't be a problem anymore.
+By imagining the lane boundaries as additional columns and rows in the matrix that need to be transposed too, finding the subdivisions shouldn't be a problem anymore.
+
+As in the previous case we can choose to perform the sub-matrix transposition before the lane permutations or the other way around.
+Depending on the choice, there are some things to consider.
+If we perform the sub-matrix transpositions first, we need a $4 \times 2$ transposition for the first 2 registers and a $4 \times 3$ transposition for the remaining 3.
+Note that we need a result matrix offset of 2 for the $4 \times 2$ transposition to get all values to the correct position.
+Afterwards 6 lane permutations are required to recombine the lanes as needed.
+
+If we instead choose to perform the lane permutations first, we have to recombine the lanes in a way that the subsequent sub-matrix transpositions directly yield the desired result matrix.
+This requires us to introduce additional temporary registers, so that we have 4 registers per sub-matrix.
+Now the values inside the upper lanes have to be aligned at the right boundary so that they and up at the bottom after the transposition.
+The values in the lower lanes need to be aligned at the left boundary to get them into the top rows after the transposition.
+Have a look into the second approach of the visualization below to get a better understanding of the previous description.
+Performing a $4 \times 4$ and a $2 \times 4$ without offsets yield the target matrix.
+
+
+
+\vspace{1cm}
+\begin{minipage}{\linewidth}
+	\begin{align*}
+	\begin{matrix}
+	\textrm{source matrix}\\
+	\\
+	\left(\begin{array}{cccccc}
+	\col{1} 0 & \col{5} 8  && \col{9}  16 & \col{13} 24 & \col{17} 32 \\
+	\col{1} 1 & \col{5} 9  && \col{9}  17 & \col{13} 25 & \col{17} 33 \\
+	\col{1} 2 & \col{5} 10 && \col{9}  18 & \col{13} 26 & \col{17} 34 \\
+	\col{1} 3 & \col{5} 11 && \col{9}  19 & \col{13} 27 & \col{17} 35 \\
+	\\
+	\col{3} 4 & \col{7} 12 && \col{11} 20 & \col{15} 28 & \col{19} 36 \\	
+	\col{3} 5 & \col{7} 13 && \col{11} 21 & \col{15} 29 & \col{19} 37 \\
+	6 &         14 &&          22 &          30 &          38 \\
+	7 &         15 &&          23 &          31 &          39 
+	\end{array}\right) 
+	\\
+	\\
+	\\
+	\\
+	\textbf{\large Approach 1:}
+	\\
+	\\
+	\textrm{temporary data}&&&\textrm{target matrix}\\
+	\textrm{(after 4}\times\textrm{2 and 4}\times\textrm{3 transposition)}&&&\textrm{(after lane permutations)}\\
+	\left(\begin{array}{ccccccccc}
+	     \times &      \times &      \times &      \times && \col{9}  16 & \col{9}  17 & \col{9}  18 & \col{9}  19 \\
+	     \times &      \times &      \times &      \times && \col{13} 24 & \col{13} 25 & \col{13} 26 & \col{13} 27 \\
+	\col{1}   0 & \col{1}   1 & \col{1}   2 & \col{1}   3 && \col{17} 32 & \col{17} 33 & \col{17} 34 & \col{17} 35 \\
+	\col{5}   8 & \col{5}   9 & \col{5}  10 & \col{5}  11 &&      \times &      \times &      \times &      \times \\
+	\\
+	     \times &      \times &      \times &      \times && \col{11} 20 & \col{11} 21 &          22 &          23 \\	
+	     \times &      \times &      \times &      \times && \col{15} 28 & \col{15} 29 &          30 &          31 \\
+	\col{3}   4 & \col{3}   5 &           6 &           7 && \col{19} 36 & \col{19} 37 &          38 &          39 \\
+	\col{7}  12 & \col{7}  13 &          14 &          15 &&      \times &      \times &      \times &      \times
+	\end{array}\right) 
+	&&&
+	\left(\begin{array}{ccccccc}
+	\times &      \times &      \times &      \times &&      \times &      \times \\
+	\times &      \times &      \times &      \times &&      \times &      \times \\
+	\col{1}   0 & \col{1}   1 & \col{1}   2 & \col{1}   3 && \col{3}   4 & \col{3}   5 \\
+	\col{5}   8 & \col{5}   9 & \col{5}  10 & \col{5}  11 && \col{7}  12 & \col{7}  13 \\
+	\\
+	\col{9}  16 & \col{9}  17 & \col{9}  18 & \col{9}  19 && \col{11} 20 & \col{11} 21 \\
+	\col{13} 24 & \col{13} 25 & \col{13} 26 & \col{13} 27 && \col{15} 28 & \col{15} 29 \\
+	\col{17} 32 & \col{17} 33 & \col{17} 34 & \col{17} 35 && \col{19} 36 & \col{19} 37 \\	
+	\times &      \times &      \times &      \times &&      \times &      \times
+	\end{array}\right) 
+	\\
+	\\
+	\\
+	\\
+	\textbf{\large Approach 2:}
+	\\
+	\\
+	\textrm{temporary data}&&&\textrm{target matrix}\\
+	\textrm{(after lane permutations)}&&&\textrm{(after 4}\times\textrm{4 and 2}\times\textrm{4 transposition)}\\
+	\left(\begin{array}{ccccccccc}
+	         12 &      \times &  \col{1}  0 &  \col{5}  8 &&          16 &          24 & \col{3}  4 & \col{7} 12 \\
+	         13 &      \times &  \col{1}  1 &  \col{5}  9 &&          17 &          25 & \col{3}  5 & \col{7} 13 \\
+	         14 &      \times &  \col{1}  2 &  \col{5} 10 &&          18 &          26 &          6 &         14 \\
+	         15 &      \times &  \col{1}  3 &  \col{5} 11 &&          19 &          27 &          7 &         15 \\
+	\\
+	\col{9}  16 & \col{13} 24 & \col{17} 32 &          12 && \col{11} 20 & \col{15} 28 & \col{19} 36 &        16 \\	
+ 	\col{9}  17 & \col{13} 25 & \col{17} 33 &          13 && \col{11} 21 & \col{15} 29 & \col{19} 37 &        17 \\
+	\col{9}  18 & \col{13} 26 & \col{17} 34 &          14 &&          22 &          30 &          38 &        18 \\
+	\col{9}  19 & \col{13} 27 & \col{17} 35 &          15 &&          23 &          31 &          39 &        19 
+	\end{array}\right) 
+	&&&
+	\left(\begin{array}{ccccccc}
+	         12 &          13 &          14 &          15 &&      \times &      \times \\
+	     \times &      \times &      \times &      \times &&      \times &      \times \\
+	\col{1}   0 & \col{1}   1 & \col{1}   2 & \col{1}   3 && \col{3}   4 & \col{3}   5 \\
+	\col{5}   8 & \col{5}   9 & \col{5}  10 & \col{5}  11 && \col{7}  12 & \col{7}  13 \\
+	\\
+	\col{9}  16 & \col{9}  17 & \col{9}  18 & \col{9}  19 && \col{11} 20 & \col{11} 21 \\
+	\col{13} 24 & \col{13} 25 & \col{13} 26 & \col{13} 27 && \col{15} 28 & \col{15} 29 \\
+	\col{17} 32 & \col{17} 33 & \col{17} 34 & \col{17} 35 && \col{19} 36 & \col{19} 37 \\	
+	     \times &      \times &      \times &      \times &&          16 &          17
+	\end{array}\right) 
+	\end{matrix}
+	\end{align*}
+\end{minipage}
+\vspace{1cm}
+
+It might seem, that the second approach is more costly, since it performs a $4 \times 4$ transposition while the first one only needs a $4 \times 3$ transposition.
+However, if you look closely at the data in the first step of the second approach, you will see, that it only needs 4 lane permutations instead of 6.
+In the first register only the second lane is relevant to the first transposition and in the last register only the first lane is relevant for the second transposition.
+Therefore, we can perform a single lane recombination and the same register in both sub-matrix transpositions, saving us 1 permutation.
+Then there are only 3 registers left, that need to be transferred to another lane.
+
+To be sure, which approach is the better choice one has to benchmark it.
+Another option is to look at the individual instructions and calculate an expected number of CPU cycles, which is quite accurate most of the times, but during the implementation derivations of 1 to 2 cycles between benchmark and expected cycle number were observed in some cases.
