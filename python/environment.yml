@@ -1,0 +1,14 @@
+name: gdl
+channels:
+  - defaults
+  - anaconda
+  - conda-forge
+dependencies:
+  - conda-build
+  - python=3.8
+  - numpy>=1.18
+  - black
+  - flake8=3.7
+  - isort>=5.1
+  - pydocstyle=5
+  - matplotlib

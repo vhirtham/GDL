@@ -122,7 +122,7 @@ def ReadBenchmarkResult(solverName, color):
 
     with open(fileName) as json_file:
         fileData = json.load(json_file)
-        for bm in fileData['benchmarks']:
+        for bm in fileData['cpp_benchmarks']:
             [simd, typeString, vectorizationString, pivotingString, size] = ExtractBenchmarkSetupFromName(bm['name'])
             if simd:
                 solverBenchmarkData.SetVectorizationName(vectorizationString)
