@@ -1,7 +1,7 @@
 #include <boost/test/unit_test.hpp>
 
 
-#include "test/unit/base/simd/transposeTest.h"
+#include "test/unit/base/simd/transpose_test_template_general.h"
 
 
 

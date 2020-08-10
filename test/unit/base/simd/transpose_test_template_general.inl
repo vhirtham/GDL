@@ -1,6 +1,6 @@
 #pragma once
 
-#include "test/unit/base/simd/transposeTest.h"
+#include "test/unit/base/simd/transpose_test_template_general.h"
 
 
 #include "gdl/base/approx.h"

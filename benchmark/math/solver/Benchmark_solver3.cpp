@@ -1,7 +1,10 @@
 #include <benchmark/benchmark.h>
 
 #include "gdl/math/solver/solver3.h"
+
+#ifdef EIGEN3_FOUND
 #include "eigen3/Eigen/Dense"
+#endif
 
 using namespace GDL;
 

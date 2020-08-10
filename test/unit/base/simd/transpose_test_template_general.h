@@ -209,4 +209,4 @@ template <typename _registerType, UST _arraySize>
 
 
 
-#include "test/unit/base/simd/transposeTest.inl"
+#include "test/unit/base/simd/transpose_test_template_general.inl"
