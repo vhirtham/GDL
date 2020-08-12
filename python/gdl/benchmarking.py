@@ -27,6 +27,7 @@ def run_benchmark(
     result_file_name=None,
     result_directory="",
     additional_definitions_dict={},
+    verbose=True,
 ):
     if result_file_name is None:
         result_file_name = benchmark_name
@@ -59,4 +60,9 @@ def run_benchmark(
         )
 
         # Execute command string
-        subprocess.run(cmds, shell=True)
+        if verbose:
+            subprocess.run(cmds, shell=True)
+        else:
+            print(f"running {result_file_name}")
+            FNULL = open(os.devnull, "w")
+            subprocess.run(cmds, stdout=FNULL, stderr=FNULL, shell=True)
