@@ -2,10 +2,16 @@ import os
 import subprocess
 import sys
 import tempfile
+from datetime import datetime
 
 
 def get_script_path():
     return os.path.dirname(os.path.realpath(sys.argv[0]))
+
+
+def get_datetime_string():
+    time = datetime.now()
+    return time.strftime("%Y%m%d_%H%M%S")
 
 
 def _create_definition_string(additional_definitions_dict):

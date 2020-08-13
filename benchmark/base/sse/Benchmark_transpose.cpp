@@ -37,11 +37,33 @@ struct FixtureTemplate : public benchmark::Fixture
 
 
 
-BENCHMARK_F(FixtureTemplate, Transpose)(benchmark::State& state)
+BENCHMARK_F(FixtureTemplate, Transpose_keep_unused)(benchmark::State& state)
 {
     for (auto _ : state)
     {
-        Transpose<ROWS, COLS, OFFSET_IN, OFFSET_OUT>(matrix_in, matrix_out);
+        Transpose<ROWS, COLS, OFFSET_IN, OFFSET_OUT, 0, 0, 1, 1, false>(matrix_in, matrix_out);
+        benchmark::ClobberMemory();
+    }
+}
+
+
+
+BENCHMARK_F(FixtureTemplate, Transpose_set_zero)(benchmark::State& state)
+{
+    for (auto _ : state)
+    {
+        Transpose<ROWS, COLS, OFFSET_IN, OFFSET_OUT, 0, 0, 1, 1, true, true>(matrix_in, matrix_out);
+        benchmark::ClobberMemory();
+    }
+}
+
+
+
+BENCHMARK_F(FixtureTemplate, Transpose_overwrite)(benchmark::State& state)
+{
+    for (auto _ : state)
+    {
+        Transpose<ROWS, COLS, OFFSET_IN, OFFSET_OUT, 0, 0, 1, 1, true, false>(matrix_in, matrix_out);
         benchmark::ClobberMemory();
     }
 }
