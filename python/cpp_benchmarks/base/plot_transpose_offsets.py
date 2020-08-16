@@ -7,8 +7,8 @@ from matplotlib import cm
 from gdl.benchmarks.base.transpose import get_max_matrix_offsets, load_register_data
 
 register = "__m256"
-rows = 2
-cols = 2
+rows = 3
+cols = 3
 benchmark = "overwrite"
 timing = "real time"
 

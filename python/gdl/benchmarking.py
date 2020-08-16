@@ -1,20 +1,54 @@
+"""Functions to run c++ benchmarks using python"""
+
 import os
 import subprocess
 import sys
 import tempfile
 from datetime import datetime
+from typing import Dict, Union
 
 
-def get_script_path():
+def get_script_path() -> str:
+    """Get the path of the current script file.
+
+    Returns
+    -------
+    str:
+        Path of the current script file
+    """
     return os.path.dirname(os.path.realpath(sys.argv[0]))
 
 
-def get_datetime_string():
+def get_datetime_string() -> str:
+    """Get the current datetime as compact string.
+
+    Returns
+    -------
+    str:
+        Datetime string
+    """
     time = datetime.now()
     return time.strftime("%Y%m%d_%H%M%S")
 
 
-def _create_definition_string(additional_definitions_dict):
+def _create_definition_string(additional_definitions_dict: Dict) -> str:
+    """Create a additional compile definitions string that can be passed to CMake.
+
+    Note that this only works with the GDL CMake script.
+
+    Parameters
+    ----------
+    additional_definitions_dict:
+        Dictionary with additional definitions. Each key must be a string and will be
+        capitalized. The value of the definition is equal to the dictionaries value.
+        If the dictionaries value is 'None', only the name without a value will be
+        passed as additional compile time definition.
+
+    Returns
+    -------
+    str:
+        String with additional definitions that can be passed to the GDL CMake script.
+    """
     definitions = ""
     for key, value in additional_definitions_dict.items():
         if value is None:
@@ -28,13 +62,34 @@ def _create_definition_string(additional_definitions_dict):
 
 
 def run_benchmark(
-    benchmark_name,
-    application_directory="",
-    result_file_name=None,
-    result_directory="",
+    benchmark_name: str,
+    source_directory: str = "",
+    result_file_name: Union[str, None] = None,
+    result_directory: str = "",
     additional_definitions_dict={},
     verbose=True,
 ):
+    """Compile and run a GDL benchmark.
+
+    Parameters
+    ----------
+    benchmark_name:
+        Name of the benchmark without the "Benchmark_" prefix.
+    source_directory:
+        Subdirectory of the benchmarks source files.
+    result_file_name:
+        Name of the result file. If 'None' is passed, it is equal to the benchmark name.
+    result_directory:
+        Name of the result directory
+    additional_definitions_dict:
+        Dictionary with additional definitions. Each key must be a string and will be
+        capitalized. The value of the definition is equal to the dictionaries value.
+        If the dictionaries value is 'None', only the name without a value will be
+        passed as additional compile time definition.
+    verbose:
+        If 'True', the output of the subprocess shell is printed.
+
+    """
     if result_file_name is None:
         result_file_name = benchmark_name
 
@@ -60,7 +115,7 @@ def run_benchmark(
         cmds += f"make -j8 Benchmark_{benchmark_name};"
 
         cmds += (
-            f"./benchmark/{application_directory}/Benchmark_{benchmark_name} "
+            f"./benchmark/{source_directory}/Benchmark_{benchmark_name} "
             f"--benchmark_out_format=json --benchmark_out={result_directory}/"
             f"{result_file_name}.json;"
         )
