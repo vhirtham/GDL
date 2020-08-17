@@ -1,8 +1,8 @@
 import time
 
-from gdl.benchmarking import get_datetime_string
 from gdl.benchmarks.base.transpose import (benchmark_all_registers,
                                            convert_json_data_to_pickle)
+from gdl.utility import get_datetime_string
 
 result_dir_extension = f"everything_{get_datetime_string()}"
 # result_dir_extension = f"everything_20200813_215212"

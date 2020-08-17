@@ -2,33 +2,10 @@
 
 import os
 import subprocess
-import sys
 import tempfile
-from datetime import datetime
 from typing import Dict, Union
 
-
-def get_script_path() -> str:
-    """Get the path of the current script file.
-
-    Returns
-    -------
-    str:
-        Path of the current script file
-    """
-    return os.path.dirname(os.path.realpath(sys.argv[0]))
-
-
-def get_datetime_string() -> str:
-    """Get the current datetime as compact string.
-
-    Returns
-    -------
-    str:
-        Datetime string
-    """
-    time = datetime.now()
-    return time.strftime("%Y%m%d_%H%M%S")
+from gdl.utility import get_script_path
 
 
 def _create_definition_string(additional_definitions_dict: Dict) -> str:
