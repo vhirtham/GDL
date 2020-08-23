@@ -190,24 +190,29 @@ inline void QRDenseSIMD<_registerType, _rows, _cols, _pivot>::FactorizationStep(
 
 
     V[actRowRegIdx] = BlendAboveIndex<_regValueIdx>(_mm_div(wPiv, wNorm), V[actRowRegIdx]);
-
-    return;
-    //    const _registerType one = _mm_set1<_registerType>(1);
-    //    const _registerType div = _mm_div(one, BroadcastAcrossLanes<_regValueIdx>(qr[actRowRegIdx]));
+    R[actRowRegIdx] = BlendAboveIndex<_regValueIdx>(colSignedNorm, R[actRowRegIdx]);
 
 
+    // ---------------------
 
-    //    qr[actRowRegIdx] = BlendBelowIndex<_regValueIdx>(qr[actRowRegIdx], _mm_mul(div, qr[actRowRegIdx]));
-    //    for (U32 i = regRowIdx + 1; i < numRegistersPerCol; ++i)
-    //        qr[colStartIdx + i] = _mm_mul(div, qr[colStartIdx + i]);
+    _registerType zero = _mm_setzero<_registerType>();
 
-    //    for (U32 i = actRowRegIdx + numRegistersPerCol; i < _rows * numRegistersPerCol; i += numRegistersPerCol)
-    //    {
-    //        _registerType pivValue = BroadcastAcrossLanes<_regValueIdx>(qr[i]);
-    //        qr[i] = BlendBelowIndex<_regValueIdx>(qr[i], _mm_fnmadd(qr[actRowRegIdx], pivValue, qr[i]));
-    //        for (U32 j = 1; j < numRegistersPerCol - regRowIdx; ++j)
-    //            qr[i + j] = _mm_fnmadd(qr[actRowRegIdx + j], pivValue, qr[i + j]);
-    //    }
+    std::array<_registerType, _cols> tmp = {{0}};
+    for (UST c = iteration + 1; c < _cols; ++c)
+        tmp[c] = BlendAboveIndex<_regValueIdx>(_mm_mul(V[actRowRegIdx], R[c]), zero);
+
+
+    _registerType dot_products = RegisterMultiSum(tmp);
+
+    // tmp[0] = _mm_mul(V[0], BroadcastAcrossLanes<0>(dot_products));
+    tmp[1] = _mm_mul(V[actRowRegIdx], BroadcastAcrossLanes<1>(dot_products));
+    tmp[2] = _mm_mul(V[actRowRegIdx], BroadcastAcrossLanes<2>(dot_products));
+    tmp[3] = _mm_mul(V[actRowRegIdx], BroadcastAcrossLanes<3>(dot_products));
+
+    _registerType mtwo = _mm_set1<_registerType>(-2);
+    // R[0] = _mm_fmadd(mtwo, tmp[0], R[0]);
+    for (UST c = iteration + 1; c < _cols; ++c)
+        R[c] = BlendAboveIndex<_regValueIdx>(_mm_fmadd(mtwo, tmp[c], R[c]), R[c]);
 }
 
 

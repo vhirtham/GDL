@@ -66,17 +66,17 @@ void TestQR()
 
 // Test 2x2 -----------------------------------------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(Test_QR_NoPivot_2x2_F32_Serial)
-{
-    TestQR<F32, 2, 2, Pivot::NONE, SolverType::SERIAL>();
-}
+// BOOST_AUTO_TEST_CASE(Test_QR_NoPivot_2x2_F32_Serial)
+//{
+//    TestQR<F32, 2, 2, Pivot::NONE, SolverType::SERIAL>();
+//}
 
 
 
-BOOST_AUTO_TEST_CASE(Test_QR_NoPivot_2x2_F64_Serial)
-{
-    TestQR<F64, 2, 2, Pivot::NONE, SolverType::SERIAL>();
-}
+// BOOST_AUTO_TEST_CASE(Test_QR_NoPivot_2x2_F64_Serial)
+//{
+//    TestQR<F64, 2, 2, Pivot::NONE, SolverType::SERIAL>();
+//}
 
 
 
@@ -96,17 +96,17 @@ BOOST_AUTO_TEST_CASE(Test_QR_NoPivot_2x2_F64_Serial)
 
 // Test 3x3 -----------------------------------------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(Test_QR_NoPivot_3x3_F32_Serial)
-{
-    TestQR<F32, 3, 3, Pivot::NONE, SolverType::SERIAL>();
-}
+// BOOST_AUTO_TEST_CASE(Test_QR_NoPivot_3x3_F32_Serial)
+//{
+//    TestQR<F32, 3, 3, Pivot::NONE, SolverType::SERIAL>();
+//}
 
 
 
-BOOST_AUTO_TEST_CASE(Test_QR_NoPivot_3x3_F64_Serial)
-{
-    TestQR<F64, 3, 3, Pivot::NONE, SolverType::SERIAL>();
-}
+// BOOST_AUTO_TEST_CASE(Test_QR_NoPivot_3x3_F64_Serial)
+//{
+//    TestQR<F64, 3, 3, Pivot::NONE, SolverType::SERIAL>();
+//}
 
 
 
@@ -149,7 +149,7 @@ BOOST_AUTO_TEST_CASE(Test_QR_NoPivot_4x4_F64_Serial)
 
 // BOOST_AUTO_TEST_CASE(Test_QR_NoPivot_4x4_F64_SIMD)
 //{
-//    TestQR<F64, 4, Pivot::NONE, SolverType::SIMD>();
+//    TestQR<F64, 4, 4, Pivot::NONE, SolverType::SIMD>();
 //}
 
 

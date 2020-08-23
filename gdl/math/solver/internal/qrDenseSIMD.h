@@ -56,7 +56,8 @@ public:
         using VRDataArray = std::array<_registerType, numRegistersPerCol*(_cols + 1)>;
 
         //! Union that stores the data of Q and R as compact as possible
-        union alignas(alignment) VRData {
+        union alignas(alignment) VRData
+        {
             VData mVData;
             RData mRData;
             VRDataArray mVR;
