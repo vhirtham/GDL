@@ -154,9 +154,9 @@ QRDenseSIMD<_registerType, _rows, _cols, _pivot>::CalculateSquareSum(U32 regRowI
     const VectorDataArray& col = reinterpret_cast<const VectorDataArray&>(R[colStartIdx]);
 
     if constexpr (_regValueIdx + 1 < numRegisterValues)
-        return SquareSum<_regValueIdx + 1>(col, regRowIdx);
+        return RegisterArraySquareSum<_regValueIdx + 1>(col, regRowIdx);
     else
-        return SquareSum<0>(col, regRowIdx + 1);
+        return RegisterArraySquareSum<0>(col, regRowIdx + 1);
 }
 
 

@@ -1,5 +1,6 @@
 #include <benchmark/benchmark.h>
 
+#include "gdl/base/simd/constants.h"
 #include "gdl/base/simd/transpose.h"
 
 #include <array>
@@ -31,8 +32,8 @@ using namespace GDL::simd;
 
 struct FixtureTemplate : public benchmark::Fixture
 {
-    std::array<REGISTER, 8> matrix_in;
-    std::array<REGISTER, 8> matrix_out;
+    std::array<REGISTER, numRegisterValues<REGISTER>> matrix_in;
+    std::array<REGISTER, numRegisterValues<REGISTER>> matrix_out;
 };
 
 

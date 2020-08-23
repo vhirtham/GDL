@@ -27,7 +27,7 @@ void TestRegisterSum()
         SetValue(a, i, static_cast<Type>(i + 1));
     }
 
-    _registerType b = Sum(a);
+    _registerType b = RegisterSum(a);
 
     for (U32 i = 0; i < numRegVals; ++i)
         BOOST_CHECK(GetValue(b, i) == Approx(sum));
@@ -85,7 +85,7 @@ void TestRegisterArraySumTestcase(const std::array<_registerType, _numRegistersI
     for (U32 i = firstIdx; i < numArrayVals; ++i)
         sum += static_cast<Type>(i + 1);
 
-    _registerType b = Sum<_regStartIdx>(arr, idxStart);
+    _registerType b = RegisterArraySum<_regStartIdx>(arr, idxStart);
 
     for (U32 i = 0; i < numRegVals; ++i)
         BOOST_CHECK(GetValue(b, i) == Approx(sum));
@@ -170,7 +170,7 @@ void TestRegisterArraySquareSumTestcase(const std::array<_registerType, _numRegi
     for (U32 i = firstIdx; i < numArrayVals; ++i)
         sum += static_cast<Type>((i + 1) * (i + 1));
 
-    _registerType b = SquareSum<_regStartIdx>(arr, idxStart);
+    _registerType b = RegisterArraySquareSum<_regStartIdx>(arr, idxStart);
 
     for (U32 i = 0; i < numRegVals; ++i)
         BOOST_CHECK(GetValue(b, i) == Approx(sum));
@@ -236,37 +236,57 @@ BOOST_AUTO_TEST_CASE(Register_Array_SquareSum_m256d)
 
 
 
-// Test multi register sum --------------------------------------------------------------------------------------------
-
-
-// template <typename _registerType, U32 _start = 0, U32 _end = numRegisterValues<_registerType> - 1>
-// inline void TestMultiRegisterSumTestCase(const std::array<_registerType, numRegisterValues<_registerType>>& a)
-//{
-//    //    using Type = decltype(GetDataType<_registerType>());
-//    //    constexpr U32 numRegVals = numRegisterValues<_registerType>;
-
-//    //    _registerType r = MultiSum<_start, _end>(a);
-
-//    //    int g = 0;
-//}
-
+// Test register multi sum --------------------------------------------------------------------------------------------
 
 template <typename _registerType>
-void TestMultiRegisterSum()
+void TestRegisterMultiSum()
 {
     using Type = decltype(GetDataType<_registerType>());
     constexpr U32 numRegVals = numRegisterValues<_registerType>;
 
+    std::array<Type, numRegVals> exp = {{0}};
+
     std::array<_registerType, numRegVals> a;
     for (U32 i = 0; i < numRegVals; ++i)
         for (U32 j = 0; j < numRegVals; ++j)
+        {
             SetValue(a[i], j, static_cast<Type>(j * numRegVals + i + 1));
+            exp[i] += static_cast<Type>(j * numRegVals + i + 1);
+        }
 
-    // TestMultiRegisterSumTestCase(a);
+    _registerType result = RegisterMultiSum(a);
+    for (U32 i = 0; i < numRegVals; ++i)
+        BOOST_CHECK(GetValue(result, i) == Approx(exp[i]));
 }
+
+
+
+BOOST_AUTO_TEST_CASE(Register_Multi_Sum_m128d)
+{
+    TestRegisterMultiSum<__m128d>();
+}
+
 
 
 BOOST_AUTO_TEST_CASE(Register_Multi_Sum_m128)
 {
-    TestMultiRegisterSum<__m128d>();
+    TestRegisterMultiSum<__m128>();
 }
+
+
+
+#ifdef __AVX2__
+
+BOOST_AUTO_TEST_CASE(Register_Multi_Sum_m256d)
+{
+    TestRegisterMultiSum<__m256d>();
+}
+
+
+
+BOOST_AUTO_TEST_CASE(Register_Multi_Sum_m256)
+{
+    TestRegisterMultiSum<__m256>();
+}
+
+#endif
