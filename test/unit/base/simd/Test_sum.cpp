@@ -2,7 +2,7 @@
 
 #include "gdl/base/approx.h"
 #include "gdl/base/simd/directAccess.h"
-#include "gdl/base/simd/sum.h"
+#include "gdl/base/simd/registerSum.h"
 #include "gdl/base/simd/utility.h"
 
 using namespace GDL;

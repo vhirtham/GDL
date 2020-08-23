@@ -2,7 +2,7 @@
 
 #include "gdl/base/simd/directAccess.h"
 #include "gdl/base/simd/constants.h"
-#include "gdl/base/simd/sum.h"
+#include "gdl/base/simd/registerSum.h"
 
 #include <array>
 

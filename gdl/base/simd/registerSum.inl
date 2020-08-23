@@ -1,6 +1,6 @@
 #pragma once
 
-#include "gdl/base/simd/sum.h"
+#include "gdl/base/simd/registerSum.h"
 
 #include "gdl/base/simd/transpose.h"
 #include "gdl/base/simd/swizzle.h"

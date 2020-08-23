@@ -6,7 +6,7 @@
 #include "gdl/base/simd/copySign.h"
 #include "gdl/base/simd/directAccess.h"
 #include "gdl/base/simd/negate.h"
-#include "gdl/base/simd/sum.h"
+#include "gdl/base/simd/registerSum.h"
 #include "gdl/base/simd/swizzle.h"
 #include "gdl/math/solver/internal/backwardSubstitutionDenseSIMD.h"
 #include "gdl/math/solver/internal/forwardSubstitutionDenseSIMD.h"

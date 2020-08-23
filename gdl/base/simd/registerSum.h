@@ -110,4 +110,4 @@ template <U32 _regIdxFirst = 0, typename _registerType, std::size_t _size>
 
 } // namespace GDL::simd
 
-#include "gdl/base/simd/sum.inl"
+#include "gdl/base/simd/registerSum.inl"
