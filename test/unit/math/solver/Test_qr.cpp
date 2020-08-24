@@ -147,10 +147,10 @@ BOOST_AUTO_TEST_CASE(Test_QR_NoPivot_4x4_F64_Serial)
 
 
 
-// BOOST_AUTO_TEST_CASE(Test_QR_NoPivot_4x4_F64_SIMD)
-//{
-//    TestQR<F64, 4, 4, Pivot::NONE, SolverType::SIMD>();
-//}
+BOOST_AUTO_TEST_CASE(Test_QR_NoPivot_4x4_F64_SIMD)
+{
+    TestQR<F64, 4, 4, Pivot::NONE, SolverType::SIMD>();
+}
 
 
 

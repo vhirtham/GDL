@@ -135,7 +135,8 @@ QRDenseSIMD<_registerType, _rows, _cols, _pivot>::Solve(const Factorization& fac
     //        PivotDenseSSE<_registerType, _rows>::PermuteVector(vectorData, factorization.mPermutationData);
 
     //    ForwardSubstitutionDenseSIMD<_registerType, _rows, true>::SolveInPlace(factorization.mVR, vectorData);
-    //    BackwardSubstitutionDenseSIMD<_registerType, _rows, false>::SolveInPlace(factorization.mVR, vectorData);
+    MultiplyWithTransposedQ(factorization.GetV(), vectorData);
+    BackwardSubstitutionDenseSIMD<_registerType, _rows, false>::SolveInPlace(factorization.GetR(), vectorData);
 
     return vectorData;
 }
@@ -252,6 +253,30 @@ inline void QRDenseSIMD<_registerType, _rows, _cols, _pivot>::FactorizationSteps
         FactorizationSteps<_regValueIdx + 1, _maxRecursionDepth>(regRowIdx, V, R);
 }
 
+
+
+template <typename _registerType, U32 _rows, U32 _cols, Pivot _pivot>
+inline void QRDenseSIMD<_registerType, _rows, _cols, _pivot>::MultiplyWithTransposedQ(const MatrixDataArray& V,
+                                                                                      VectorDataArray& vectorData)
+{
+    using namespace GDL::simd;
+
+    _registerType zero = _mm_setzero<_registerType>();
+    _registerType mtwo = _mm_set1<_registerType>(-2);
+
+    MatrixDataArray tmp_v;
+    tmp_v[0] = V[0];
+    tmp_v[1] = BlendAboveIndex<1>(V[1], zero);
+    tmp_v[2] = BlendAboveIndex<2>(V[2], zero);
+
+    for (UST i = 0; i < _cols - 1; ++i)
+    {
+        _registerType two_v = _mm_mul(mtwo, tmp_v[i]);
+        _registerType v_times_vec = _mm_mul(tmp_v[i], vectorData[0]);
+        _registerType dot_v_vec = RegisterSum(v_times_vec);
+        vectorData[0] = _mm_fmadd(dot_v_vec, two_v, vectorData[0]);
+    }
+}
 
 
 } // namespace GDL::Solver

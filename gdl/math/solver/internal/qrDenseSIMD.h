@@ -130,6 +130,8 @@ private:
     //! @param factorization: Matrix factorization
     template <U32 _regValueIdx = 0, U32 _maxRecursionDepth = numRegisterValues>
     static inline void FactorizationSteps(U32 regRowIdx, MatrixDataArray& V, MatrixDataArray& R);
+
+    static inline void MultiplyWithTransposedQ(const MatrixDataArray& V, VectorDataArray& vectorData);
 };
 
 
