@@ -175,6 +175,8 @@ inline void QRDenseSIMD<_registerType, _rows, _cols, _pivot>::FactorizationStep(
             iteration * numRegistersPerCol; // check if it might be passed directly if iteration is not needed
     const U32 actRowRegIdx = colStartIdx + regRowIdx;
 
+    constexpr U32 test = _regValueIdx;
+
     DEV_EXCEPTION(GetValue<_regValueIdx>(R[actRowRegIdx]) == ApproxZero<ValueType>(1, 100),
                   "Can't solve system - Singular matrix or inappropriate pivoting strategy.");
 
@@ -196,27 +198,46 @@ inline void QRDenseSIMD<_registerType, _rows, _cols, _pivot>::FactorizationStep(
 
     // ---------------------
 
-    _registerType zero = _mm_setzero<_registerType>();
+    const _registerType zero = _mm_setzero<_registerType>();
+    const _registerType mtwo = _mm_set1<_registerType>(-2);
 
-    std::array<_registerType, _cols> tmp = {{0}};
+    std::array<_registerType, _cols> tmp = {{{0}}};
     for (UST c = iteration + 1; c < _cols; ++c)
         tmp[c] = BlendAboveIndex<_regValueIdx>(_mm_mul(V[actRowRegIdx], R[c]), zero);
 
 
+    // TODO: warnings appears because the recursion depth is one level to deep. Fix that
     _registerType dot_products = RegisterMultiSum(tmp);
 
-    // tmp[0] = _mm_mul(V[0], BroadcastAcrossLanes<0>(dot_products));
-    tmp[1] = _mm_mul(V[actRowRegIdx], BroadcastAcrossLanes<1>(dot_products));
-    tmp[2] = _mm_mul(V[actRowRegIdx], BroadcastAcrossLanes<2>(dot_products));
-    tmp[3] = _mm_mul(V[actRowRegIdx], BroadcastAcrossLanes<3>(dot_products));
 
-    _registerType mtwo = _mm_set1<_registerType>(-2);
-    // R[0] = _mm_fmadd(mtwo, tmp[0], R[0]);
+    // needs to be changed if column has more than 1 register
+    std::array<_registerType, numRegisterValues> broadcasted_dot_products;
+    if constexpr (_regValueIdx + 1 < numRegisterValues)
+        BroadcastValues<_regValueIdx + 1, numRegisterValues>(dot_products, broadcasted_dot_products);
+
+
+    for (UST i = _regValueIdx + 1; i < numRegisterValues; ++i)
+        tmp[i] = _mm_mul(V[actRowRegIdx], broadcasted_dot_products[i]);
+
+
     for (UST c = iteration + 1; c < _cols; ++c)
         R[c] = BlendAboveIndex<_regValueIdx>(_mm_fmadd(mtwo, tmp[c], R[c]), R[c]);
 }
 
+// --------------------------------------------------------------------------------------------------------------------
 
+template <typename _registerType, U32 _rows, U32 _cols, Pivot _pivot>
+template <UST _start, UST _end>
+inline void QRDenseSIMD<_registerType, _rows, _cols, _pivot>::BroadcastValues(
+        _registerType values, std::array<_registerType, numRegisterValues>& broadcasted)
+{
+    static_assert(_end <= numRegisterValues && _end >= 0);
+    static_assert(_start < _end && _start >= 0);
+
+    broadcasted[_start] = simd::BroadcastAcrossLanes<_start>(values);
+    if constexpr (_start + 1 < _end)
+        BroadcastValues<_start + 1, _end>(values, broadcasted);
+}
 
 // --------------------------------------------------------------------------------------------------------------------
 
@@ -254,6 +275,18 @@ inline void QRDenseSIMD<_registerType, _rows, _cols, _pivot>::FactorizationSteps
 }
 
 
+template <typename _registerType, U32 _rows, U32 _cols, Pivot _pivot>
+template <UST _start, UST _end>
+inline void QRDenseSIMD<_registerType, _rows, _cols, _pivot>::SetZeroAboveMainDiagonal(
+        std::array<_registerType, numRegisterValues>& V)
+{
+    _registerType zero = _mm_setzero<_registerType>();
+
+    V[_start] = simd::BlendAboveIndex<_start>(V[_start], zero);
+    if constexpr (_start + 1 < _end)
+        SetZeroAboveMainDiagonal<_start + 1, _end>(V);
+}
+
 
 template <typename _registerType, U32 _rows, U32 _cols, Pivot _pivot>
 inline void QRDenseSIMD<_registerType, _rows, _cols, _pivot>::MultiplyWithTransposedQ(const MatrixDataArray& V,
@@ -261,13 +294,12 @@ inline void QRDenseSIMD<_registerType, _rows, _cols, _pivot>::MultiplyWithTransp
 {
     using namespace GDL::simd;
 
-    _registerType zero = _mm_setzero<_registerType>();
+
     _registerType mtwo = _mm_set1<_registerType>(-2);
 
-    MatrixDataArray tmp_v;
-    tmp_v[0] = V[0];
-    tmp_v[1] = BlendAboveIndex<1>(V[1], zero);
-    tmp_v[2] = BlendAboveIndex<2>(V[2], zero);
+    MatrixDataArray tmp_v = V;
+    SetZeroAboveMainDiagonal<1, numRegisterValues - 1>(tmp_v);
+
 
     for (UST i = 0; i < _cols - 1; ++i)
     {

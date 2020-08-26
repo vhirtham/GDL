@@ -123,6 +123,12 @@ private:
     template <U32 _regValueIdx>
     static inline void FactorizationStep(U32 iteration, U32 regRowIdx, MatrixDataArray& V, MatrixDataArray& R);
 
+    template <UST _start, UST _end>
+    static inline void BroadcastValues(_registerType values, std::array<_registerType, numRegisterValues>& broadcasted);
+
+    template <UST _start, UST _end>
+    static inline void SetZeroAboveMainDiagonal(std::array<_registerType, numRegisterValues>& V);
+
     //! @brief Performs multiple factorization steps using template recursion
     //! @tparam _regValueIdx: Specifies the current active rows position inside of its corresponding register
     //! @tparam _maxRecursionDepth: Maximum number of template recursions
